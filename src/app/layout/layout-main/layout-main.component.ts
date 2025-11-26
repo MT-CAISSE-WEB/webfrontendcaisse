@@ -6,7 +6,7 @@ import { LayoutMenuComponent } from "../composant/layout-menu/layout-menu.compon
 
 @Component({
   selector: 'app-layout-main',
-  imports: [RouterOutlet, LayoutCustomeComponent, LayoutHeaderComponent, LayoutMenuComponent],
+  imports: [RouterOutlet, LayoutHeaderComponent, LayoutMenuComponent],
   templateUrl: './layout-main.component.html',
   styleUrl: './layout-main.component.css'
 })

@@ -96,19 +96,33 @@
                     <div class="collapse menu-dropdown" id="sidebarDb">
                         <ul class="nav nav-sm flex-column">
                             <li class="nav-item">
-                                <a href="#" class="nav-link" data-key="t-calendar"> Centre analytique </a>
+                                <a href="#sidebarProfile" class="nav-link" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarProfile" data-key="t-profile"> Devise
+                                </a>
+                                <div class="collapse menu-dropdown" id="sidebarProfile">
+                                    <ul class="nav nav-sm flex-column">
+                                        <li class="nav-item">
+                                            <a href="javascript:void(0)" class="nav-link" data-key="t-simple-page">Devise</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a [routerLink]="root_taux" class="nav-link" data-key="t-settings">Taux de devise</a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link" data-key="t-chat"> Plan comptable </a>
+                                <a [routerLink]="root_centre_analytique" class="nav-link" data-key="t-settings"> Centre analytique </a>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link" data-key="t-calendar"> Nature opération </a>
+                                <a [routerLink]="root_plan_comptable" class="nav-link" data-key="t-chat"> Plan comptable </a>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link" data-key="t-chat"> Affectation analytique </a>
+                                <a [routerLink]="root_nature_operation" class="nav-link" data-key="t-calendar"> Nature opération </a>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link" data-key="t-chat"> Tiers </a>
+                                <a href="javascript:void(0)" class="nav-link" data-key="t-chat"> Affectation analytique </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="javascript:void(0)" class="nav-link" data-key="t-chat"> Tiers </a>
                             </li>
                         </ul>
                     </div>
@@ -122,13 +136,13 @@
                     <div class="collapse menu-dropdown" id="sidebarApps">
                         <ul class="nav nav-sm flex-column">
                             <li class="nav-item">
-                                <a href="#" class="nav-link" data-key="t-calendar"> Journal </a>
+                                <a href="javascript:void(0)" class="nav-link" data-key="t-calendar"> Journal </a>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link" data-key="t-chat"> Caisse </a>
+                                <a href="javascript:void(0)" class="nav-link" data-key="t-chat"> Caisse </a>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link" data-key="t-calendar">Affectation caissier </a>
+                                <a href="javascript:void(0)" class="nav-link" data-key="t-calendar">Affectation caissier </a>
                             </li>
                         </ul>
                     </div>
@@ -143,10 +157,10 @@
                     <div class="collapse menu-dropdown" id="sidebarLayouts">
                         <ul class="nav nav-sm flex-column">
                             <li class="nav-item">
-                                <a href="#" target="_blank" class="nav-link" data-key="t-horizontal">Demande de caisse</a>
+                                <a href="javascript:void(0)" target="_blank" class="nav-link" data-key="t-horizontal">Demande de caisse</a>
                             </li>
                             <li class="nav-item">
-                                <a href="#" target="_blank" class="nav-link" data-key="t-detached">Opération caisse </a>
+                                <a href="javascript:void(0)" target="_blank" class="nav-link" data-key="t-detached">Opération caisse </a>
                             </li>
                         </ul>
                     </div>
