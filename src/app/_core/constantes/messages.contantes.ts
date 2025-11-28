@@ -39,5 +39,5 @@ export const DAY_LIST = [];
 
 // Message dialog confirmation suppression
 export function MESSAGE_SUPPRESSION_DESCRIPTION(entite: string) {
-    return 'Êtes-vous sûr de vouloir supprimer définitivement ' + entite + '?';
+    return 'Êtes-vous sûr de vouloir supprimer définitivement ' + entite + ' ?';
 }

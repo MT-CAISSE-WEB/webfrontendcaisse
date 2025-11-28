@@ -136,13 +136,13 @@
                     <div class="collapse menu-dropdown" id="sidebarApps">
                         <ul class="nav nav-sm flex-column">
                             <li class="nav-item">
-                                <a href="javascript:void(0)" class="nav-link" data-key="t-calendar"> Journal </a>
+                                <a [routerLink]="root_journal" class="nav-link" data-key="t-calendar"> Journal </a>
                             </li>
                             <li class="nav-item">
-                                <a href="javascript:void(0)" class="nav-link" data-key="t-chat"> Caisse </a>
+                                <a [routerLink]="root_caisse" class="nav-link" data-key="t-chat"> Caisse </a>
                             </li>
                             <li class="nav-item">
-                                <a href="javascript:void(0)" class="nav-link" data-key="t-calendar">Affectation caissier </a>
+                                <a [routerLink]="root_affectation_caissier" class="nav-link" data-key="t-calendar">Affectation caissier </a>
                             </li>
                         </ul>
                     </div>
@@ -160,7 +160,7 @@
                                 <a href="javascript:void(0)" target="_blank" class="nav-link" data-key="t-horizontal">Demande de caisse</a>
                             </li>
                             <li class="nav-item">
-                                <a href="javascript:void(0)" target="_blank" class="nav-link" data-key="t-detached">Opération caisse </a>
+                                <a [routerLink]="root_operation" target="_blank" class="nav-link" data-key="t-detached">Opération caisse </a>
                             </li>
                         </ul>
                     </div>
