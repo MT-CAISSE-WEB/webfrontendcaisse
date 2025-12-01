@@ -5,7 +5,6 @@ import { JournalService } from '../services/journal.service';
 import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
-import { APP_JOURNAL_CAISSE_JOURNAL } from '../../../_core/routes/frontend.root';
 
 @Component({
   selector: 'app-journal',

@@ -52,6 +52,7 @@
                 </li>
 
                 <li class="menu-title"><span data-key="t-menu">Paramétrages</span></li>
+
                 <li class="nav-item">
                     <a class="nav-link menu-link" href="#sidebarDashboards" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
                         <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Structure</span>
@@ -148,23 +149,24 @@
                     </div>
                 </li>
 
-                <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Opérations</span></li>
+                <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-menu">Opérations</span></li>
 
+                <!-- end Générales -->
                 <li class="nav-item">
-                    <a class="nav-link menu-link" href="#sidebarLayouts" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarLayouts">
-                        <i class="ri-layout-3-line"></i> <span data-key="t-layouts">Générales</span> <span class="badge badge-pill bg-success" data-key="t-hot">new</span>
+                    <a class="nav-link menu-link" href="#sidebarOPS" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarOPS">
+                        <i class="ri-stack-line"></i> <span data-key="t-apps">Générales</span>
                     </a>
-                    <div class="collapse menu-dropdown" id="sidebarLayouts">
+                    <div class="collapse menu-dropdown" id="sidebarOPS">
                         <ul class="nav nav-sm flex-column">
                             <li class="nav-item">
-                                <a href="javascript:void(0)" target="_blank" class="nav-link" data-key="t-horizontal">Demande de caisse</a>
+                                <a [routerLink]="root" class="nav-link" data-key="t-calendar">Demande de caisse</a>
                             </li>
                             <li class="nav-item">
-                                <a [routerLink]="root_operation" target="_blank" class="nav-link" data-key="t-detached">Opération caisse </a>
+                                <a [routerLink]="root_operation" class="nav-link" data-key="t-calendar">Opération caisse </a>
                             </li>
                         </ul>
                     </div>
-                </li> <!-- end Dashboard Menu -->
+                </li>
 
                 <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Restitutions</span></li>
             </ul>

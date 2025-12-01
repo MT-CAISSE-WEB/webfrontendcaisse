@@ -47,7 +47,7 @@ export const routes: Routes = [
             {
                 path : APP_OPERATION_GENERAL,
                 component: OperationCaisseComponent,
-            },
+            }
         ]
     },
     {
