@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
   templateUrl: './journal.component.html',
   styleUrl: './journal.component.css'
 })
+
 export class JournalComponent implements OnInit{
   title = "Journal comptable";
   params : any = {};

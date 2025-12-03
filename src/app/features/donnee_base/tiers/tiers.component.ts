@@ -1,28 +1,28 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { natureoperationModel } from '../models/natureoperation.model';
-import { NatureoperationService } from '../services/natureoperation.service';
+import { tiersModel } from '../models/tiers.model';
+import { TiersService } from '../services/tiers.service';
 import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-natureoperation',
+  selector: 'app-tiers',
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './natureoperation.component.html',
-  styleUrl: './natureoperation.component.css' 
+  templateUrl: './tiers.component.html',
+  styleUrl: './tiers.component.css' 
 })
 
-export class NatureoperationComponent implements OnInit{
-  title = "Gestion des natures d'operations";
+export class TiersComponent implements OnInit{
+  title = "Gestion des Tiers";
   params : any = {};
   breadCrumbs : any = {};
   fb: FormBuilder = new FormBuilder();
-  natureoperations : natureoperationModel[] = [];
-  natureoperation : natureoperationModel = new natureoperationModel();
+  tiers : tiersModel[] = [];
+  tier : tiersModel = new tiersModel();
   msgErros : string = "";
   loading: Boolean = false;
-  natureoperationForm : FormGroup = this.fb.group({})
+  tiersForm : FormGroup = this.fb.group({})
 
   // Définissez des propriétés de pagination
   currentPage: number = 1;
@@ -31,7 +31,7 @@ export class NatureoperationComponent implements OnInit{
   limit: number = 10;
 
   //Faire le check selection **********
-  objectsSelected : natureoperationModel[] = [];
+  objectsSelected : tiersModel[] = [];
   selectedItems : any[] = [];
   // Détermine si toutes les lignes sont selectionnées
   checkAllRow : any;
@@ -45,31 +45,30 @@ export class NatureoperationComponent implements OnInit{
   titleMsg: string ="";
 
   //Element à supprimer 
-  deleteNatureoperation : any = null;
-  viewNatureoperation : any = null;
+  deleteTiers: any = null;
 
 
-  constructor(private natureoperationservice: NatureoperationService,
+  constructor(private tiersservice: TiersService,
               private router: Router){}
 
   ngOnInit(): void {
-      //Afficher tous les natureoperations
-      this.getAllNatureoperations();
+      //Afficher tous les tiers
+      this.getAllTiers();
       //Initialisation du formulaire
       this.initForm();
-      this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("cette nature d'operation");
+      this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("ce tiers");
       this.titleMsg = TITLE_DELETE;
   }
 
-  getAllNatureoperations(){
+  getAllTiers(){
     this.params = {
       page: this.currentPage,
       limit: this.limit
     };
-    this.natureoperationservice.getAll(this.params).subscribe({
+    this.tiersservice.getAll(this.params).subscribe({
       next : (res) => {
         if(res.success){
-          this.natureoperations = res.data.data;
+          this.tiers = res.data.data;
           this.totalPages = res.data.totalPages;
         }
       }
@@ -78,32 +77,26 @@ export class NatureoperationComponent implements OnInit{
 
   //création du formulaire
   initForm(): void{
-    this.natureoperationForm = this.fb.group({
-      codenature : ["", [Validators.required]],
-      libelle : ["", [Validators.required]],
-      avanceajustifier : [false],
-      imputationtiers : [false],
-      demandedecaissement : [false],
+    this.tiersForm = this.fb.group({
+      codetiers : ["", [Validators.required]],
+      designation : ["", [Validators.required]],
+      typetiers : ["", [Validators.required]],
       idsociete : ["", [Validators.required]],
-      idcompte : ["", [Validators.required]],
       actif : [true],
     })
   }
 
   get form() {
-    return this.natureoperationForm.controls;
+    return this.tiersForm.controls;
   }
 
-  dispatchNatureoperations(_object: natureoperationModel){
+  dispatchTiers(_object: tiersModel){
     const status = _object.actif === 1;
-    this.natureoperationForm.patchValue({
-      codenature : _object.codenature,
-      libelle : _object.libelle,
-      avanceajustifier : _object.avanceajustifier,
-      imputationtiers : _object.imputationtiers,
-      demandedecaissement : _object.demandedecaissement,
+    this.tiersForm.patchValue({
+      codetiers : _object.codetiers,
+      designation : _object.designation,
+      typetiers : _object.typetiers,
       idsociete: _object.idsociete,
-      idcompte : _object.idcompte,
       actif : status
     })
   }
@@ -118,72 +111,70 @@ export class NatureoperationComponent implements OnInit{
 
   //vérifie si _id est inclus dans un tableau d'IDs stocké
   isChecked(_id: string) {
-    const ids: string[] = this.objectsSelected.map((el) => el.idnature);
+    const ids: string[] = this.objectsSelected.map((el) => el.idtiers);
     return ids.includes(_id);
   }
 
   //selectionner une instance dans une liste
-  handleSelectOne(natureoperation: natureoperationModel, actif: any) {
+  handleSelectOne(tier: tiersModel, actif: any) {
     const index = this.objectsSelected.findIndex(
-      (el) => el.idnature == natureoperation.idnature
+      (el) => el.idtiers == tier.idtiers
     );
-    if (index == -1 && actif) this.objectsSelected.push(natureoperation);
+    if (index == -1 && actif) this.objectsSelected.push(tier);
     if (index != -1 && !actif) this.objectsSelected.splice(index, 1);
-    this.checkAllRow = this.objectsSelected?.length == this.natureoperations?.length;
+    this.checkAllRow = this.objectsSelected?.length == this.tiers?.length;
   }
 
   //Sélection/ Désélection de tous les éléments
   handleSelectAll($event: any) {
     this.checkAllRow = $event;
-    if (this.checkAllRow) this.objectsSelected = this.natureoperations.slice();
+    if (this.checkAllRow) this.objectsSelected = this.tiers.slice();
     else this.objectsSelected = [];
   }
 
   //Recharger la page
   changePage(page: number) {
     this.currentPage = page;
-    this.getAllNatureoperations(); // recharge les données
+    this.getAllTiers(); // recharge les données
   }
 
   //Soumission du formulaire
   onSubmit(){
     /** Check formulaire */
     this.msgErros = '';
-    const controls = this.natureoperationForm.controls;
-    if (this.natureoperationForm.invalid) {
+    const controls = this.tiersForm.controls;
+    if (this.tiersForm.invalid) {
       Object.keys(controls).forEach(controlName => controls[controlName].markAsTouched());
       this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
       return;
     }
 
     /** 2. prepare data */
-    const formValue = this.natureoperationForm.value;
+    const formValue = this.tiersForm.value;
 
-    const _natureoperations: natureoperationModel = {
-      ...this.natureoperation,
+    const _tiers: tiersModel = {
+      ...this.tier,
       ...formValue,
       actif: formValue.actif ? 1 : 0,
-      avanceajustifier : formValue.avanceajustifier ? 1 : 0,
-      imputationtiers : formValue.imputationtiers ? 1 : 0,
-      demandedecaissement : formValue.demandedecaissement ? 1 : 0,
+       
     };
 
     /** 3. choices action */
-    if(this.actionModal == "create")this.create(_natureoperations);
-    else this.update(_natureoperations);
-    // if (!_natureoperations.idnatureoperations) this.create(_natureoperations);
-    // else this.update(_natureoperations);
+    if(this.actionModal == "create")this.create(_tiers);
+    else this.update(_tiers);
+    // if (!_tiers.idtiers) this.create(_tiers);
+    // else this.update(_tiers);
   }
 
   //Enregistrement de données
-  create(_natureoperations: natureoperationModel) {
-    const {idnature, ...dataToSend} = _natureoperations;
+  create(_tiers: tiersModel) {
+    const {idtiers, ...dataToSend} = _tiers;
     this.loading = true;
-    this.natureoperationservice.create(dataToSend).subscribe({
+    this.tiersservice.create(dataToSend).subscribe({
       next: (res) => {
         if (res.success) {
           this.closeModal('showModal');
-          this.getAllNatureoperations();
+          this.getAllTiers();
         } else {
           this.error = "Erreur de création";
         }
@@ -197,12 +188,12 @@ export class NatureoperationComponent implements OnInit{
   }
 
   //Modification de données
-  update(_natureoperations: natureoperationModel){
-    this.natureoperationservice.update(_natureoperations).subscribe({
+  update(_tiers: tiersModel){
+    this.tiersservice.update(_tiers).subscribe({
       next: (res) => {
         if (res.success) {
           this.closeModal('showModal');
-          this.getAllNatureoperations();
+          this.getAllTiers();
         } else {
           this.error = "Erreur de modification";
         }
@@ -227,25 +218,24 @@ export class NatureoperationComponent implements OnInit{
     this.initForm();
   }
 
-  modalUpdate(_object: natureoperationModel){
-    this.natureoperation = _object;
+  modalUpdate(_object: tiersModel){
+    this.tier = _object;
     this.actionModal = "update";
-    this.natureoperationForm.reset();
-    this.dispatchNatureoperations(_object);
+    this.tiersForm.reset();
+    this.dispatchTiers(_object);
   }
- 
 
-  modalDelete(item: natureoperationModel){
-    this.deleteNatureoperation = item;
+  modalDelete(item: tiersModel){
+    this.deleteTiers = item;
   }
 
   deleteConfirmed(){
-    if(!this.deleteNatureoperation) return ;
-    this.natureoperationservice.delete(this.deleteNatureoperation.idnature).subscribe({
+    if(!this.deleteTiers) return ;
+    this.tiersservice.delete(this.deleteTiers.idtiers).subscribe({
       next: (res) => {
         if (res.success) {
           this.closeModal('delete');
-          this.getAllNatureoperations();
+          this.getAllTiers();
         } else {
           this.error = "Erreur de Suppression";
         }

@@ -5,7 +5,7 @@
             <h4 class="mb-sm-0">{{title}}</h4>
             <div class="page-title-right">
                 <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Données de base</a></li>
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Centre analytique</a></li>
                     <li class="breadcrumb-item active">{{title}}</li>
                 </ol>
             </div>
@@ -21,56 +21,63 @@
                 <div class="row align-items-center gy-3">
                     <div class="col-sm-auto">
                         <div class="d-flex gap-1 flex-wrap">
-                            <button type="button" class="btn btn-sm btn-soft-info" data-bs-toggle="modal" id="create-btn" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1"></i>créer</button>
-                            <button type="button" class="btn btn-sm btn-info"><i class="ri-file-download-line align-bottom me-1"></i> import</button>
-                            <button class="btn btn-sm btn-soft-danger" id="remove-actions" onClick="deleteMultiple()"><i class="ri-delete-bin-2-line"></i></button>
+                            <button type="button" class="btn btn-sm btn-soft-success" data-bs-toggle="modal" (click)="modalCreate()" id="create-btn" data-bs-target="#showModal">
+                                <i class="ri-add-line align-bottom me-1"></i>Créer
+                            </button>
+                            <button type="button" class="btn btn-sm btn-soft-info"><i class="ri-file-download-line align-bottom me-1"></i> Import</button>
+                            <button class="btn btn-sm btn-soft-danger" [disabled]="!checkAllRow" onClick="deleteMultiple()"><i class="ri-delete-bin-2-line"></i></button>
+                            <button type="button" class="btn btn-sm btn-info"> <i class="ri-refresh-fill align-bottom me-1"></i>Actualiser</button>
                         </div>
                     </div>
                 </div>
             </div>
+
             <div class="card-body border border-dashed border-end-0 border-start-0">
                 <form>
                     <div class="row g-3">
                         <div class="col-xxl-5 col-sm-6">
                             <div class="search-box">
-                                <input type="text" class="form-control form-control-sm search" placeholder="rechercher par code, libelle...">
+                                <input type="text" class="form-control form-control-sm search" placeholder="rechercher par code...">
                                 <i class="ri-search-line search-icon"></i>
                             </div>
                         </div>
                         <!--end col-->
     
                         <!--end col-->
-                        <div class="col-xxl-2 col-sm-4">
+                        <!-- <div class="col-xxl-2 col-sm-4">
                             <div>
                                 <select class="form-control form-control-sm" data-choices data-choices-search-false name="choices-single-default" id="idStatus">
                                     <option value="">Status</option>
-                                    <option value="all" selected>tous</option>
-                                    <option value="Pending">Actif</option>
-                                    <option value="Pending">Inactif</option>
+                                    <option value="all" selected>Tous</option>
+                                    <option value="Actif">Actif</option>
+                                    <option value="Inactif">Inactif</option>
                                 </select>
                             </div>
-                        </div>
+                        </div> -->
                         <!--end col-->
                         
                         <!--end col-->
-                        <div class="col-xxl-1 col-sm-2">
+                        <!-- <div class="col-xxl-1 col-sm-2">
                             <div>
                                 <button type="button" class="btn btn-sm btn-primary w-100" onclick="SearchData();"> <i class="ri-equalizer-fill me-1 align-bottom"></i>
                                     Filtrer
                                 </button>
                             </div>
-                        </div>
+                        </div> -->
                         <!--end col-->
                     </div>
                     <!--end row-->
                 </form>
             </div>
+
             <div class="card-body pt-0">
                 <div>
+                    <!--  
                     <ul class="nav nav-tabs nav-tabs-custom nav-success mb-3" role="tablist">
                         <li class="nav-item">
                             <a class="nav-link active All py-3" data-bs-toggle="tab" id="All" href="#home1" role="tab" aria-selected="true">
-                                <i class="ri-store-2-fill me-1 align-bottom"></i> Tous
+                                <i class="ri-store-2-fill me-1 align-bottom"></i>  
+                                 Tous
                             </a>
                         </li>
                         <li class="nav-item">
@@ -80,104 +87,139 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link py-3 Pickups" data-bs-toggle="tab" id="Pickups" href="#pickups" role="tab" aria-selected="false">
-                                <i class="ri-truck-line me-1 align-bottom"></i> Inactif <span class="badge bg-danger align-middle ms-1">2</span>
+                                <i class="ri-truck-line me-1 align-bottom"></i> Inactif 
+                                <span class="badge bg-danger align-middle ms-1">2</span>
                             </a>
                         </li>
-                    </ul>
+                    </ul>-->
 
                     <div class="table-responsive table-card mb-1">
                         <table class="table table-nowrap align-middle" id="orderTable">
+
+                            <!-- Entete de la liste -->
                             <thead class="text-muted table-light">
                                 <tr class="text-uppercase">
                                     <th scope="col" style="width: 25px;">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="checkAll" value="option">
+                                            <input class="form-check-input" type="checkbox" [(ngModel)]="checkAllRow" id="checkAll" (ngModelChange)="handleSelectAll($event)">
                                         </div>
                                     </th>
                                     <th class="sort" data-sort="id">Code</th>
-                                    <th class="sort" data-sort="customer_name">Libelle</th>
-                                    <th class="sort" data-sort="status">Status</th>
+                                    <th class="sort" data-sort="libelle">Libelle</th>
+                                    <th class="sort" data-sort="status">Statut</th>
                                     <th class="sort" data-sort="city">Action</th>
                                 </tr>
                             </thead>
+
                             <tbody class="list form-check-all">
+                                @for (item of centres; track $index) {
                                 <tr>
                                     <th scope="row">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="checkAll" value="option1">
+                                            <input class="form-check-input" [checked]="isChecked(item.idcentreanalytique)" [(ngModel)]="selectedItems[$index]" (ngModelChange)="handleSelectOne(item, $event)" type="checkbox" name="itemGroup_{{ $index }}">
                                         </div>
                                     </th>
-                                    <td class="id"><a href="#" class="fw-medium link-primary">#VZ2101</a></td>
-                                    <td class="customer_name">Frank Hook</td>
-                                    <td class="status"><span class="badge bg-warning-subtle text-warning text-uppercase">Pending</span>
+                                    <td class="code"><a href="#" class="fw-medium link-primary">{{item.codecentreanalytique}}</a></td>
+                                    <td class="libelle">{{item.libelle}}</td>
+                                    <td class="status">
+                                        <span *ngIf="item.actif == 1" class="badge bg-success-subtle text-success text-uppercase"> Actif </span>
+                                        <span *ngIf="item.actif == 0" class="badge bg-danger-subtle text-danger text-uppercase"> Inactif </span>
                                     </td>
+
+                                    <!-- Actions -->
                                     <td>
                                         <ul class="list-inline hstack gap-2 mb-0">
                                             <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="View">
-                                                <a href="#" class="text-primary d-inline-block">
+                                                <a href="#showModal" data-bs-toggle="modal" class="text-primary d-inline-block">
                                                     <i class="ri-eye-fill fs-16"></i>
                                                 </a>
                                             </li>
                                             <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                <a href="#showModal" data-bs-toggle="modal" class="text-primary d-inline-block edit-item-btn">
+                                                <a href="#showModal" data-bs-toggle="modal" (click)="modalUpdate(item)" class="text-primary d-inline-block edit-item-btn">
                                                     <i class="ri-pencil-fill fs-16"></i>
                                                 </a>
                                             </li>
                                             <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
-                                                <a class="text-danger d-inline-block remove-item-btn" data-bs-toggle="modal" href="#deleteOrder">
+                                                <a href="#delete" data-bs-toggle="modal" (click)="modalDelete(item)" class="text-danger d-inline-block remove-item-btn">
                                                     <i class="ri-delete-bin-5-fill fs-16"></i>
                                                 </a>
                                             </li>
                                         </ul>
                                     </td>
                                 </tr>
+                                }
                             </tbody>
                         </table>
+
+                        <!-- Si aucun resultat dans la recherche -->
                         <div class="noresult" style="display: none">
                             <div class="text-center">
                                 <h5 class="mt-2">Désole! Aucun resultat trouvé</h5>
-                                <p class="text-muted">We've searched more than 150+ Orders We did not find any orders for you search.</p>
+                                <!-- <p class="text-muted">We've searched more than 150+ Orders We did not find any orders for you search.</p> -->
                             </div>
                         </div>
                     </div>
+
+                    <!-- Pagination OK -->
                     <div class="d-flex justify-content-end">
                         <div class="pagination-wrap hstack gap-2">
-                            <a class="page-item pagination-prev disabled" href="#">
-                                Previous
-                            </a>
+                            <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
+                                Précédent
+                            </button>
                             <ul class="pagination listjs-pagination mb-0"></ul>
-                            <a class="page-item pagination-next" href="#">
-                                Next
-                            </a>
+                            <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)" class="btn btn-sm btn-soft-primary pagination-next">
+                                Suivant
+                            </button>
                         </div>
                     </div>
+
                 </div>
 
+                <!-- Création d'un nouveau tiers OK -->
                 <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header bg-light p-3">
-                                <h5 class="modal-title" id="exampleModalLabel">&nbsp;</h5>
+                                <h5 class="modal-title" id="exampleModalLabel">{{ actionModal === "create" ? 'Créer' : 'Modifier'}} un compte</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
                             </div>
-                            <form class="tablelist-form" autocomplete="off">
+                            
+                            <!-- Formulaire de création de compte -->
+                            <form [formGroup]="centreanalytiqueForm">
                                 <div class="modal-body">
-                                    <input type="hidden" id="id-field" />
+                                    <input type="hidden" id="id-field"/>
 
                                     <div class="mb-3" id="modal-id">
-                                        <label for="orderId" class="form-label">ID</label>
-                                        <input type="text" id="orderId" class="form-control" placeholder="ID" readonly />
+                                        <label for="orderId" class="form-label form-label-sm">Code</label>
+                                        <input type="text" id="orderId" class="form-control form-control-sm {{ isValidField('codecentreanalytique')}}" formControlName="codecentreanalytique" placeholder="" required maxlength="10"/>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="customername-field" class="form-label">Customer Name</label>
-                                        <input type="text" id="customername-field" class="form-control" placeholder="Enter name" required />
+                                        <label for="customername-field" class="form-label form-label-sm">Libellé</label>
+                                        <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('libelle')}}" formControlName="libelle" placeholder="Libellé compte"/>
+                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="customername-field" class="form-label form-label-sm">Societe</label>
+                                        <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('idsociete')}}" formControlName="idsociete" placeholder="Societe"/>
+                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" value="1" formControlName="actif" id="flexSwitchCheckChecked" checked>
+                                            <label class="form-check-label" for="flexSwitchCheckChecked">Actif</label>
+                                        </div>
                                     </div>
                                 </div>
+
                                 <div class="modal-footer">
                                     <div class="hstack gap-2 justify-content-end">
-                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                                        <button type="submit" class="btn btn-success" id="add-btn">Add Order</button>
+                                        <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Annuler</button>
+                                        <button type="submit" class="btn btn-sm btn-success" id="add-btn" (click)="onSubmit()">
+                                            {{ actionModal === "create" ? 'Enregistrer' : 'Modifier'}}
+                                        </button>
                                         <!-- <button type="button" class="btn btn-success" id="edit-btn">Update</button> -->
                                     </div>
                                 </div>
@@ -186,17 +228,19 @@
                     </div>
                 </div>
 
-                <!-- Modal -->
-                <div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
+                <!-- Modal Suppression OK -->
+                <div class="modal fade flip" id="delete" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-body p-5 text-center">
                                 <div class="mt-4 text-center">
-                                    <h4>You are about to delete a order ?</h4>
-                                    <p class="text-muted fs-15 mb-4">Suppression de ce centre analytique supprimera d'autres informations.</p>
+                                    <h4>{{titleMsg}} de {{deletecentre?.codecentreanalytique}} : {{deletecentre?.libelle}}</h4>
+                                    <p class="text-muted fs-15 mb-4">{{msgSup}}</p>
                                     <div class="hstack gap-2 justify-content-center remove">
-                                        <button class="btn btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> annuler</button>
-                                        <button class="btn btn-danger" id="delete-record">Oui, le supprimer</button>
+                                        <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal">
+                                            <i class="ri-close-line me-1 align-middle"></i> Annuler
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" (click)="deleteConfirmed()" id="delete-record">Oui, supprimer</button>
                                     </div>
                                 </div>
                             </div>

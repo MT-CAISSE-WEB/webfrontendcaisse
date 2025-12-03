@@ -111,19 +111,19 @@
                                 </div>
                             </li>
                             <li class="nav-item">
-                                <a [routerLink]="root_centre_analytique" class="nav-link" data-key="t-settings"> Centre analytique </a>
-                            </li>
-                            <li class="nav-item">
                                 <a [routerLink]="root_plan_comptable" class="nav-link" data-key="t-chat"> Plan comptable </a>
                             </li>
                             <li class="nav-item">
                                 <a [routerLink]="root_nature_operation" class="nav-link" data-key="t-calendar"> Nature opération </a>
                             </li>
                             <li class="nav-item">
-                                <a href="javascript:void(0)" class="nav-link" data-key="t-chat"> Affectation analytique </a>
+                                <a [routerLink]="root_centre_analytique" class="nav-link" data-key="t-settings"> Centre analytique </a>
                             </li>
                             <li class="nav-item">
-                                <a href="javascript:void(0)" class="nav-link" data-key="t-chat"> Tiers </a>
+                                <a [routerLink]="root_affectation_analytique" class="nav-link" data-key="t-chat"> Affectation analytique </a>
+                            </li>
+                            <li class="nav-item">
+                                <a [routerLink]="root_tiers" class="nav-link" data-key="t-chat"> Tiers </a>
                             </li>
                         </ul>
                     </div>
