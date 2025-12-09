@@ -6,6 +6,11 @@ import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
 
+import { CentreAnalytiqueService } from '../services/centreanalytique.service';
+import { centreanalytiqueModel } from '../models/centreanalytique.model';
+import { NatureoperationService } from '../services/natureoperation.service';
+import { natureoperationModel } from '../models/natureoperation.model';
+
 @Component({
   selector: 'app-affectationanalytique',
 
@@ -29,7 +34,7 @@ export class AffectationanalytiqueComponent implements OnInit{
   currentPage: number = 1;
   // Nombre d'éléments par page
   totalPages: number = 0;
-  limit: number = 10;
+  limit: number = 5;
 
   //Faire le check selection **********
   objectsSelected : affectationanalytiqueModel[] = [];
@@ -48,13 +53,19 @@ export class AffectationanalytiqueComponent implements OnInit{
   //Element à supprimer 
   deleteaffectation: any = null;
 
+  centres : centreanalytiqueModel[] = [];
+  natureoperations : natureoperationModel[] = [];
 
   constructor(private affectationanalytiqueservice: AffectationAnalytiqueService,
+              private centreanalytiqueservice: CentreAnalytiqueService,
+              private natureoperationservice: NatureoperationService,
               private router: Router){}
 
   ngOnInit(): void {
       //Afficher tous les affectations
       this.getAllaffectations();
+      this.getAllNatureoperations();
+      this.getAllcentres();
       //Initialisation du formulaire
       this.initForm();
       this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("cette affectation");
@@ -76,11 +87,43 @@ export class AffectationanalytiqueComponent implements OnInit{
     });
   }
 
+  // centre analytique
+  getAllcentres(){
+    this.params = {
+      page: this.currentPage,
+      limit: this.limit
+    };
+    this.centreanalytiqueservice.getAll(this.params).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.centres = res.data.data;
+          this.totalPages = res.data.totalPages;
+        }
+      }
+    });
+  }
+
+
+  getAllNatureoperations(){
+    this.params = {
+      page: this.currentPage,
+      limit: this.limit
+    };
+    this.natureoperationservice.getAll(this.params).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.natureoperations = res.data.data;
+          this.totalPages = res.data.totalPages;
+        }
+      }
+    });
+  }
+
   //Création du formulaire
   initForm(): void{
     this.affectationanalytiqueForm = this.fb.group({
       codeaffectation : ["", [Validators.required]],
-      idsociete : ["", [Validators.required]],
+      idsociete : ["9153CAA9-30E1-4760-9DF3-E982EAA1FDC0", [Validators.required]],
       idsite : ["", [Validators.required]],
       iddepartement : ["", [Validators.required]],
       idcentreanalytique : ["", [Validators.required]],

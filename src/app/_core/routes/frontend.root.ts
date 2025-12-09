@@ -11,6 +11,9 @@ export const APP_ROOT_GENERAL = APP_ROOT + "/" + APP_GENERAL;
 export const APP_SITE = "site";
 export const APP_SITE_ROOT = APP_ROOT + "/" + APP_SITE;
 
+export const APP_SOCIETE = "Societe";
+export const APP_SOCIETE_ROOT = APP_ROOT + "/" + APP_SOCIETE;
+
 //Route taux de devise
 export const APP_TAUX = 'taux_devise';
 export const APP_TAUX_DONNEE_BASE = APP_DONNEE_BASE + "/" + APP_TAUX;

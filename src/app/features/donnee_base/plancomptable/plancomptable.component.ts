@@ -1,10 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { plancomptableModel } from '../models/plancomptable.model';
+import { societeModel } from '../models/societe.model';
 import { PlancomptableService } from '../services/plancomptable.service';
 import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
+
+// import { AutreService } from '../services/plancomptable.service';
 
 @Component({
   selector: 'app-plancomptable',
@@ -19,6 +22,7 @@ export class PlancomptableComponent implements OnInit{
   breadCrumbs : any = {};
   fb: FormBuilder = new FormBuilder();
   comptes : plancomptableModel[] = [];
+  societes : societeModel[] = [];
   compte : plancomptableModel = new plancomptableModel();
   msgErros : string = "";
   loading: Boolean = false;
@@ -48,7 +52,8 @@ export class PlancomptableComponent implements OnInit{
   deleteCompte: any = null;
 
 
-  constructor(private plancomptableservice: PlancomptableService,
+  constructor(private plancomptableservice: PlancomptableService, 
+    // private autreservice: AutreService,
               private router: Router){}
 
   ngOnInit(): void {
@@ -58,6 +63,9 @@ export class PlancomptableComponent implements OnInit{
       this.initForm();
       this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("ce compte");
       this.titleMsg = TITLE_DELETE;
+    //   this.autreService.chargerSocietes().subscribe(res => {
+    //   console.log(res);
+    // });
   }
 
   getAllComptes(){
@@ -75,6 +83,16 @@ export class PlancomptableComponent implements OnInit{
     });
   }
 
+
+  // getSocietes(){
+  //   this.autreservice.chargerSocietes().subscribe({
+  //     next : (res) => {
+  //       this.societes = res.data.data;
+  //     }
+  //   });
+  // }
+
+
   //Création du formulaire
   initForm(): void{
     this.plancomptableForm = this.fb.group({
@@ -84,7 +102,7 @@ export class PlancomptableComponent implements OnInit{
       auxiliaire: [false],
       suivibudgetaire: [false],
       suivibudgetairemensuel: [false],
-      idsociete : ["", [Validators.required]],
+      idsociete : ["58B53CD2-686A-4CED-9E64-3BA2A5A6D664", [Validators.required]],
       actif : [true],
     })
   }
@@ -103,6 +121,8 @@ export class PlancomptableComponent implements OnInit{
       suivibudgetaire : _object.suivibudgetaire,
       suivibudgetairemensuel : _object.suivibudgetairemensuel,
       idsociete: _object.idsociete,
+      codesociete : _object.societe.societe_codesociete,
+      raisonsociale : _object.societe.societe_raisonsociale,
       actif : status
     })
   }

@@ -125,10 +125,22 @@
                                     </th>
                                     <td class="code"><a href="#" class="fw-medium link-primary">{{item.numcompte}}</a></td>
                                     <td class="libelle">{{item.libelle}}</td>
-                                    <td class="ventillable">{{item.ventillable}}</td>
-                                    <td class="auxiliaire">{{item.auxiliaire}}</td>
-                                    <td class="suivibudget">{{item.suivibudgetaire}}</td>
-                                    <td class="suivibudgetmensuel">{{item.suivibudgetairemensuel}}</td>
+                                    <td class="ventillable">
+                                        <span *ngIf="item.ventillable == 1"> Oui </span>
+                                        <span *ngIf="item.ventillable == 0"> Non </span>
+                                    </td>
+                                    <td class="auxiliaire">
+                                        <span *ngIf="item.auxiliaire == 1"> Oui </span>
+                                        <span *ngIf="item.auxiliaire == 0"> Non </span>
+                                    </td>
+                                    <td class="suivibudget">
+                                        <span *ngIf="item.suivibudgetaire == 1"> Oui </span>
+                                        <span *ngIf="item.suivibudgetaire == 0"> Non </span>
+                                    </td>
+                                    <td class="suivibudgetairemensuel">
+                                        <span *ngIf="item.suivibudgetairemensuel == 1"> Oui </span>
+                                        <span *ngIf="item.suivibudgetairemensuel == 0"> Non </span>
+                                    </td>
                                     <td class="status">
                                         <span *ngIf="item.actif == 1" class="badge bg-success-subtle text-success text-uppercase"> Actif </span>
                                         <span *ngIf="item.actif == 0" class="badge bg-danger-subtle text-danger text-uppercase"> Inactif </span>
@@ -184,7 +196,7 @@
 
                 </div>
 
-                <!-- Création d'un nouveau tiers OK -->
+                <!-- Création d'un nouveau compte OK -->
                 <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
@@ -193,7 +205,6 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
                             </div>
                             
-                            <!-- Formulaire de création de compte -->
                             <form [formGroup]="plancomptableForm">
                                 <div class="modal-body">
                                     <input type="hidden" id="id-field"/>
@@ -234,8 +245,8 @@
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="customername-field" class="form-label form-label-sm">Societe</label>
-                                        <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('idsociete')}}" formControlName="idsociete" placeholder="Societe"/>
+                                        <!-- <label for="customername-field" class="form-label form-label-sm">Societe</label> -->
+                                        <input type="hidden" id="customername-field" class="form-control form-control-sm {{ isValidField('idsociete')}}" formControlName="idsociete" placeholder="Societe"/>
                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                     </div>
 

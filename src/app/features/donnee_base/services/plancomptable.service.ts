@@ -5,9 +5,26 @@ import { QueryResultModel } from "../../../_core/models/query-result.model";
 import { URL_LOCAL } from "../../../_core/routes/backend.root";
 import { Injectable } from "@angular/core";
 
+
+// import { SocieteService } from './societe.service'; // 🟦 importe le service
+
+// @Injectable({
+//   providedIn: 'root'
+// })
+// export class AutreService {
+
+//   constructor(private societeService: SocieteService) {}   // 🟦 injection
+
+//   chargerSocietes() {
+//     return this.societeService.getAll();                   // 🟦 appel direct
+//   }
+// }
+
+
 @Injectable({
   providedIn: 'root'
 })
+
 export class PlancomptableService {
     url : string = 'plancomptable' ;
 

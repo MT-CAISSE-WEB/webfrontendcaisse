@@ -107,7 +107,7 @@
                                     </th>
                                     <th class="sort" data-sort="id">Code</th>
                                     <th class="sort" data-sort="libelle">Libelle</th>
-                                    <th class="sort" data-sort="avanceajustifier">Av.A Justifier</th>
+                                    <th class="sort" data-sort="decajustifier">Av.A Justifier</th>
                                     <th class="sort" data-sort="imputationtiers">Imputation tiers</th>
                                     <th class="sort" data-sort="demandec">Aut. demande</th>
                                     <th class="sort" data-sort="compte">Compte</th>
@@ -127,9 +127,9 @@
                                     </th>
                                     <td class="code"><a href="#" class="fw-medium link-primary">{{item.codenature}}</a></td>
                                     <td class="libelle">{{item.libelle}}</td>
-                                    <td class="avanceajustifier">
-                                        <span *ngIf="item.avanceajustifier == 1"> Oui </span>
-                                        <span *ngIf="item.avanceajustifier == 0"> Non </span>
+                                    <td class="decajustifier">
+                                        <span *ngIf="item.decajustifier == 1"> Oui </span>
+                                        <span *ngIf="item.decajustifier == 0"> Non </span>
                                     </td>
                                     <td class="imputationtiers">
                                         <span *ngIf="item.imputationtiers == 1"> Oui </span>
@@ -139,7 +139,9 @@
                                         <span *ngIf="item.demandedecaissement == 1"> Oui </span>
                                         <span *ngIf="item.demandedecaissement == 0"> Non </span>
                                     </td>
-                                    <td class="compte">{{item.idcompte}}</td>
+                                    <!-- <td class="compte">{{item.idcompte}}</td> -->
+                                    <td class="compte">{{item.compte?.numcompte}}</td>
+
                                     <td class="status">
                                         <span *ngIf="item.actif == 1" class="badge bg-success-subtle text-success text-uppercase"> Actif </span>
                                         <span *ngIf="item.actif == 0" class="badge bg-danger-subtle text-danger text-uppercase"> Inactif </span>
@@ -195,7 +197,7 @@
 
                 </div>
 
-                <!-- Création d'un nouveau tiers OK -->
+                <!-- Création d'une nouvelle nature d'opération OK -->
                 <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
@@ -204,7 +206,6 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
                             </div>
                             
-                            <!-- Formulaire de création de compte -->
                             <form [formGroup]="natureoperationForm">
                                 <div class="modal-body">
                                     <input type="hidden" id="id-field"/>
@@ -221,8 +222,8 @@
                                     </div>
 
                                     <div class="mb-3 form-check">
-                                        <input type="checkbox" id="avanceajustifier" class="form-check-input {{ isValidField('avanceajustifier') }}" formControlName="avanceajustifier">
-                                        <label for="avanceajustifier" class="form-check-label form-label-sm">Avance A Justifier</label>
+                                        <input type="checkbox" id="decajustifier" class="form-check-input {{ isValidField('decajustifier') }}" formControlName="decajustifier">
+                                        <label for="decajustifier" class="form-check-label form-label-sm">Avance A Justifier</label>
                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                     </div>
 
@@ -239,14 +240,21 @@
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="customername-field" class="form-label form-label-sm">Societe</label>
-                                        <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('idsociete')}}" formControlName="idsociete" placeholder="Societe"/>
+                                        <!-- <label for="customername-field" class="form-label form-label-sm">Societe</label> -->
+                                        <input type="hidden" id="customername-field" class="form-control form-control-sm {{ isValidField('idsociete')}}" formControlName="idsociete" placeholder="Societe"/>
                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                     </div>
 
                                     <div class="mb-3">
                                         <label for="customername-field" class="form-label form-label-sm">Compte</label>
-                                        <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('idcompte')}}" formControlName="idcompte" placeholder="Compte"/>
+                                        <div class="input-light">
+                                            <select id="customername-field" class="form-control form-control-sm" formControlName="idcompte">
+                                                <option value="">-- Sélectionner --</option>
+                                                @for ( item of comptes; track $index ) {
+                                                    <option [value]="item.idcompte">{{ item.numcompte }} - {{ item.libelle }}</option>
+                                                }
+                                            </select>
+                                        </div>
                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                     </div>
 

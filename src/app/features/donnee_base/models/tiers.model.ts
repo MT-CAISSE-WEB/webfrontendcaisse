@@ -7,4 +7,5 @@ export class tiersModel extends MainModel{
     designation : string = "";
     actif : Number = 0;
     idsociete : string = "";
+    societe : any;
 }

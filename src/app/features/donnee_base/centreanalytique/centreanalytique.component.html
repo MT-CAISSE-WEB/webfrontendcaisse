@@ -180,11 +180,11 @@
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header bg-light p-3">
-                                <h5 class="modal-title" id="exampleModalLabel">{{ actionModal === "create" ? 'Créer' : 'Modifier'}} un compte</h5>
+                                <h5 class="modal-title" id="exampleModalLabel">{{ actionModal === "create" ? 'Créer' : 'Modifier'}} un centre analytique</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
                             </div>
                             
-                            <!-- Formulaire de création de compte -->
+                            <!-- Formulaire de création de centre analytique -->
                             <form [formGroup]="centreanalytiqueForm">
                                 <div class="modal-body">
                                     <input type="hidden" id="id-field"/>
@@ -196,13 +196,13 @@
 
                                     <div class="mb-3">
                                         <label for="customername-field" class="form-label form-label-sm">Libellé</label>
-                                        <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('libelle')}}" formControlName="libelle" placeholder="Libellé compte"/>
+                                        <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('libelle')}}" formControlName="libelle" placeholder="Libellé centre analytique"/>
                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="customername-field" class="form-label form-label-sm">Societe</label>
-                                        <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('idsociete')}}" formControlName="idsociete" placeholder="Societe"/>
+                                        <!-- <label for="customername-field" class="form-label form-label-sm">Societe</label> -->
+                                        <input type="hidden" id="customername-field" class="form-control form-control-sm {{ isValidField('idsociete')}}" formControlName="idsociete" placeholder="Societe"/>
                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                     </div>
 

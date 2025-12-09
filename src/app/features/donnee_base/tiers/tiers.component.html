@@ -107,6 +107,7 @@
                                     <th class="sort" data-sort="id">Code</th>
                                     <th class="sort" data-sort="designation">Designation</th>
                                     <th class="sort" data-sort="typetiers">Type</th>
+                                    <th class="sort" data-sort="societe">Societe</th>
                                     <th class="sort" data-sort="status">Statut</th>
                                     <th class="sort" data-sort="city">Action</th>
                                 </tr>
@@ -123,6 +124,7 @@
                                     <td class="code"><a href="#" class="fw-medium link-primary">{{item.codetiers}}</a></td>
                                     <td class="designation">{{item.designation}}</td>
                                     <td class="typetiers">{{item.typetiers}}</td>
+                                    <td class="societe">{{item.societe?.codesociete}}</td>
                                     <td class="status">
                                         <span *ngIf="item.actif == 1" class="badge bg-success-subtle text-success text-uppercase"> Actif </span>
                                         <span *ngIf="item.actif == 0" class="badge bg-danger-subtle text-danger text-uppercase"> Inactif </span>
@@ -184,6 +186,7 @@
                                 <h5 class="modal-title" id="exampleModalLabel">{{ actionModal === "create" ? 'Créer' : 'Modifier'}} un Tiers</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
                             </div>
+                            
                             <form [formGroup]="tiersForm">
                                 <div class="modal-body">
                                     <input type="hidden" id="id-field"/>
@@ -209,7 +212,7 @@
                                         <label for="customername-field" class="form-label form-label-sm">Type</label>
                                         
                                         <select id="customername-field" class="form-control form-control-sm {{ isValidField('typetiers') }}" formControlName="typetiers">
-                                            <option value="">-- Sélectionner --</option>
+                                            <!-- <option value="">-- Sélectionner --</option> -->
                                             <option value="Client">Client</option>
                                             <option value="Divers">Divers</option>
                                             <option value="Fournisseur">Fournisseur</option>
@@ -220,8 +223,9 @@
 
 
                                     <div class="mb-3">
-                                        <label for="customername-field" class="form-label form-label-sm">Societe</label>
-                                        <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('idsociete')}}" formControlName="idsociete" placeholder="Societe"/>
+                                        <!-- <label for="customername-field" class="form-label form-label-sm">Societe</label> -->
+                                        <!-- <select id="customername-field" class="form-control form-control-sm {{ isValidField('typetiers') }}" formControlName="typetiers"> -->
+                                        <input type="hidden" id="customername-field" class="form-control form-control-sm {{ isValidField('idsociete')}}" formControlName="idsociete" placeholder="Societe"/>
                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                     </div>
 

@@ -6,6 +6,9 @@ import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
 
+import { PlancomptableService } from '../services/plancomptable.service';
+import { plancomptableModel } from '../models/plancomptable.model';
+
 @Component({
   selector: 'app-natureoperation',
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
@@ -46,15 +49,18 @@ export class NatureoperationComponent implements OnInit{
 
   //Element à supprimer 
   deleteNatureoperation : any = null;
-  viewNatureoperation : any = null;
+
+  comptes : plancomptableModel[] = [];
 
 
-  constructor(private natureoperationservice: NatureoperationService,
+  constructor(private natureoperationservice: NatureoperationService, 
+    private plancomptableservice: PlancomptableService,
               private router: Router){}
 
   ngOnInit(): void {
       //Afficher tous les natureoperations
       this.getAllNatureoperations();
+      this.getAllComptes();
       //Initialisation du formulaire
       this.initForm();
       this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("cette nature d'operation");
@@ -76,15 +82,30 @@ export class NatureoperationComponent implements OnInit{
     });
   }
 
+    getAllComptes(){
+    this.params = {
+      page: this.currentPage,
+      limit: this.limit
+    };
+    this.plancomptableservice.getAll(this.params).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.comptes = res.data.data;
+          this.totalPages = res.data.totalPages;
+        }
+      }
+    });
+  }
+
   //création du formulaire
   initForm(): void{
     this.natureoperationForm = this.fb.group({
       codenature : ["", [Validators.required]],
       libelle : ["", [Validators.required]],
-      avanceajustifier : [false],
+      decajustifier : [false],
       imputationtiers : [false],
-      demandedecaissement : [false],
-      idsociete : ["", [Validators.required]],
+      demandedecaissement : [true],
+      idsociete : ["58B53CD2-686A-4CED-9E64-3BA2A5A6D664", [Validators.required]],
       idcompte : ["", [Validators.required]],
       actif : [true],
     })
@@ -99,11 +120,13 @@ export class NatureoperationComponent implements OnInit{
     this.natureoperationForm.patchValue({
       codenature : _object.codenature,
       libelle : _object.libelle,
-      avanceajustifier : _object.avanceajustifier,
+      decajustifier : _object.decajustifier,
       imputationtiers : _object.imputationtiers,
       demandedecaissement : _object.demandedecaissement,
       idsociete: _object.idsociete,
       idcompte : _object.idcompte,
+      numcompte : _object.compte.compte_numcompte,
+      libellecompte : _object.compte.compte_libelle,
       actif : status
     })
   }
@@ -163,7 +186,7 @@ export class NatureoperationComponent implements OnInit{
       ...this.natureoperation,
       ...formValue,
       actif: formValue.actif ? 1 : 0,
-      avanceajustifier : formValue.avanceajustifier ? 1 : 0,
+      decajustifier : formValue.decajustifier ? 1 : 0,
       imputationtiers : formValue.imputationtiers ? 1 : 0,
       demandedecaissement : formValue.demandedecaissement ? 1 : 0,
     };

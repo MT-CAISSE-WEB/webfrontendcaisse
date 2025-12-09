@@ -81,7 +81,7 @@ export class TiersComponent implements OnInit{
       codetiers : ["", [Validators.required]],
       designation : ["", [Validators.required]],
       typetiers : ["", [Validators.required]],
-      idsociete : ["", [Validators.required]],
+      idsociete : ["58B53CD2-686A-4CED-9E64-3BA2A5A6D664", [Validators.required]],
       actif : [true],
     })
   }
@@ -96,7 +96,9 @@ export class TiersComponent implements OnInit{
       codetiers : _object.codetiers,
       designation : _object.designation,
       typetiers : _object.typetiers,
-      idsociete: _object.idsociete,
+      idsociete : _object.idsociete,
+      codesociete : _object.societe.societe_codesociete,
+      raisonsociale : _object.societe.societe_raisonsociale,
       actif : status
     })
   }

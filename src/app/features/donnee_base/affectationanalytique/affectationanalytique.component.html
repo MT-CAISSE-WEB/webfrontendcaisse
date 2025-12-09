@@ -106,9 +106,9 @@
                                     </th>
                                     <th class="sort" data-sort="id">Code</th>
                                     <th class="sort" data-sort="idsite">Site</th>
-                                    <th class="sort" data-sort="iddept">Département</th>
+                                    <th class="sort" data-sort="iddepartement">Département</th>
                                     <th class="sort" data-sort="idnature">Nature</th>
-                                    <th class="sort" data-sort="centre">Centre analytique</th>
+                                    <th class="sort" data-sort="idcentre">Centre analytique</th>
                                     <th class="sort" data-sort="status">Statut</th>
                                     <th class="sort" data-sort="city">Action</th>
                                 </tr>
@@ -123,10 +123,10 @@
                                         </div>
                                     </th>
                                     <td class="code"><a href="#" class="fw-medium link-primary">{{item.codeaffectation}}</a></td>
-                                    <td class="idsite">{{item.idsite}}</td>
-                                    <td class="iddept">{{item.iddepartement}}</td>
-                                    <td class="idnature">{{item.idnature}}</td>
-                                    <td class="centre">{{item.idcentreanalytique}}</td>
+                                    <td class="idsite">{{item.site?.codesite}}</td>
+                                    <td class="iddepartement">{{item.departement?.codedept}}</td>
+                                    <td class="idnature">{{item.nature.codenature}}</td>
+                                    <td class="idcentreanalytique">{{item.centre.codecentreanalytique}}</td>
                                     <td class="status">
                                         <span *ngIf="item.actif == 1" class="badge bg-success-subtle text-success text-uppercase"> Actif </span>
                                         <span *ngIf="item.actif == 0" class="badge bg-danger-subtle text-danger text-uppercase"> Inactif </span>
@@ -215,19 +215,45 @@
 
                                     <div class="mb-3">
                                         <label for="customername-field" class="form-label form-label-sm">Nature d'opération</label>
-                                        <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('idnature')}}" formControlName="idnature" placeholder="Code nature opération"/>
+                                        <div class="input-light">
+                                            <select id="customername-field" class="form-control form-control-sm" formControlName="idnature">
+                                                <option value="">-- Sélectionner --</option>
+                                                @for ( item of natureoperations; track $index ) {
+                                                    <option [value]="item.idnature">{{ item.codenature }} - {{ item.libelle }}</option>
+                                                }
+                                            </select>
+                                        </div>
                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                     </div>
 
                                     <div class="mb-3">
                                         <label for="customername-field" class="form-label form-label-sm">Centre analytique</label>
-                                        <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('idcentreanalytique')}}" formControlName="idcentreanalytique" placeholder="Code centre analytique"/>
+                                        <div class="input-light">
+                                            <select id="customername-field" class="form-control form-control-sm" formControlName="idcentreanalytique">
+                                                <option value="">-- Sélectionner --</option>
+                                                @for ( item of centres; track $index ) {
+                                                    <option [value]="item.idcentreanalytique">{{ item.codecentreanalytique }} - {{ item.libelle }}</option>
+                                                }
+                                            </select>
+                                        </div>
                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                     </div>
 
+                                    <!-- <div class="mb-3">
+                                        <label for="customername-field" class="form-label form-label-sm">Nature d'opération</label>
+                                        <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('idnature')}}" formControlName="idnature" placeholder="Code nature opération"/>
+                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                    </div> -->
+
+                                    <!-- <div class="mb-3">
+                                        <label for="customername-field" class="form-label form-label-sm">Centre analytique</label>
+                                        <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('idcentreanalytique')}}" formControlName="idcentreanalytique" placeholder="Code centre analytique"/>
+                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                    </div> -->
+
                                     <div class="mb-3">
-                                        <label for="customername-field" class="form-label form-label-sm">Societe</label>
-                                        <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('idsociete')}}" formControlName="idsociete" placeholder="Societe"/>
+                                        <!-- <label for="customername-field" class="form-label form-label-sm">Societe</label> -->
+                                        <input type="hidden" id="customername-field" class="form-control form-control-sm {{ isValidField('idsociete')}}" formControlName="idsociete" placeholder="Societe"/>
                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                     </div>
 

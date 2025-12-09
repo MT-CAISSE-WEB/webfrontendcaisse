@@ -81,7 +81,7 @@ export class CentreanalytiqueComponent implements OnInit{
     this.centreanalytiqueForm = this.fb.group({
       codecentreanalytique : ["", [Validators.required]],
       libelle : ["", [Validators.required]],
-      idsociete : ["", [Validators.required]],
+      idsociete : ["58B53CD2-686A-4CED-9E64-3BA2A5A6D664", [Validators.required]],
       actif : [true],
     })
   }

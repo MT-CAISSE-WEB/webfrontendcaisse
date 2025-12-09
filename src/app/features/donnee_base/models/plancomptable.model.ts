@@ -10,4 +10,5 @@ export class plancomptableModel extends MainModel{
     suivibudgetaire : Number = 0;
     suivibudgetairemensuel : Number = 0;
     idsociete : string = "";
+    societe : any;
 }
