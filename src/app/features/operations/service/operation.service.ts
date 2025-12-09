@@ -7,8 +7,8 @@ import { Injectable } from "@angular/core";
 @Injectable({
   providedIn: 'root'
 })
-export class CaisseService {
-    url : string = 'caisse' ;
+export class OperationService {
+    url : string = 'operation' ;
 
     constructor(private http: HttpClient) {}
 
@@ -40,7 +40,7 @@ export class CaisseService {
    */
   update(_object: any): Observable<any> {
     return this.http.put<any>(
-      URL_LOCAL.baseUrl + this.url + "/update/" + _object.idcaisse,
+      URL_LOCAL.baseUrl + this.url + "/update/" + _object.idoperation,
       _object
     );
   }
@@ -51,7 +51,7 @@ export class CaisseService {
    */
   delete(id: string): Observable<any> {
     return this.http.delete<any>(
-      URL_LOCAL.baseUrl + this.url + "/delete/" + id
+      URL_LOCAL.baseUrl + "entete_operation" + "/delete/" + id
     );
   }
 
@@ -65,48 +65,5 @@ export class CaisseService {
       URL_LOCAL.baseUrl + this.url + "/" + id
     );
   }
-
-  /**
-   * get one
-   * @param id
-   */
-  getRecentCaisse(id: string): Observable<any> {
-    return this.http.get<any>(
-      URL_LOCAL.baseUrl + this.url + "/periode/" + id
-    );
-  }
-
-  /**
-   * get close caisse
-   * @param id
-   */
-  getCloseCaisse(id: string): Observable<any> {
-    return this.http.get<any>(
-      URL_LOCAL.baseUrl + this.url + "/close/" + id
-    );
-  }
-
-  /**
-   * open caisse
-   * @param _object
-   */
-  open(_object: any): Observable<any> {
-    return this.http.put<any>(
-      URL_LOCAL.baseUrl + this.url + "/open/" + _object.idperiode,
-      _object
-    );
-  }
-
-  /**
-   * open caisse
-   * @param _object
-   */
-  close(_object: any): Observable<any> {
-    return this.http.put<any>(
-      URL_LOCAL.baseUrl + this.url + "/close/" + _object.idperiode,
-      _object
-    );
-  }
-
 
 }

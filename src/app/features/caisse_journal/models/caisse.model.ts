@@ -11,4 +11,7 @@ export class caisseModel extends MainModel{
     compte : any;
     societe :  any;
     actif : Number = 0;
+    dateinitialisation : string = "";
+    soldeinitialisation : Number = 0;
+    seuilminimal : Number = 0;
 }

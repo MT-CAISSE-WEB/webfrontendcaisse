@@ -74,6 +74,7 @@ export class CaisseComponent implements OnInit{
       next : (res) => {
         if(res.success){
           this.caisses = res.data.data;
+          console.log(this.caisses);
           this.totalPages = res.data.totalPages;
         }
       }
@@ -106,6 +107,9 @@ export class CaisseComponent implements OnInit{
       journal : ["", [Validators.required]],
       devise : ["", [Validators.required]],
       compte : ["", [Validators.required]],
+      dateinitialisation : ["", [Validators.required]],
+      soldeinitialisation : [0],
+      seuilminimal : [0],
       site : ["197D7C37-7180-4DD1-80CC-843B9A6C5B52"],
       societe : ["B89B381E-691E-4BA7-979E-1AC4D5B1E018"],
       actif : [true],
@@ -114,6 +118,11 @@ export class CaisseComponent implements OnInit{
 
   get form() {
     return this.caisseForm.controls;
+  }
+
+  formatDate(date: any): string {
+    const d = new Date(date);
+    return d.toISOString().split('T')[0]; // YYYY-MM-DD
   }
 
   dispatchCaisse(_object: caisseModel){
@@ -126,8 +135,23 @@ export class CaisseComponent implements OnInit{
       journal: _object.journal.idjournal,
       site: _object.site,
       compte: _object.compte.idcompte,
+      dateinitialisation: _object.dateinitialisation ? this.formatDate(_object.dateinitialisation) : null,
+      soldeinitialisation: _object.soldeinitialisation,
+      seuilminimal : _object.seuilminimal,
       actif : status
-    })
+    });
+
+    if(_object.dateinitialisation){
+      this.caisseForm.get('dateinitialisation')?.disable({ emitEvent : false});
+    }else{
+      this.caisseForm.get('dateinitialisation')?.enable({ emitEvent : false});
+    }
+
+    if (_object.soldeinitialisation !== null && _object.soldeinitialisation !== undefined) {
+      this.caisseForm.get("soldeinitialisation")?.disable({ emitEvent: false });
+    } else {
+      this.caisseForm.get("soldeinitialisation")?.enable({ emitEvent: false });
+    }
   }
 
   //validation required

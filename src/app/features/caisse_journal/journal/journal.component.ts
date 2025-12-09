@@ -185,7 +185,6 @@ export class JournalComponent implements OnInit{
 
   //Modification de données
   update(_journal: journalModel){
-    console.log(_journal);
     this.journalservice.update(_journal).subscribe({
       next: (res) => {
         if (res.success) {
