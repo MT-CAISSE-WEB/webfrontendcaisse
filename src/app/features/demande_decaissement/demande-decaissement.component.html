@@ -1,0 +1,472 @@
+<!-- start page title -->
+<div class="row">
+  <div class="col-12">
+    <div
+      class="page-title-box d-sm-flex align-items-center justify-content-between"
+    >
+      <h4 class="mb-sm-0">{{ title }}</h4>
+      <div class="page-title-right">
+        <ol class="breadcrumb m-0">
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);">Données de base</a>
+          </li>
+          <li class="breadcrumb-item active">{{ title }}</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end page title -->
+
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card" id="orderList">
+      <div class="card-header border-0">
+        <div class="row align-items-center gy-3">
+          <div class="col-sm-auto">
+            <div class="d-flex gap-1 flex-wrap">
+              <button
+                type="button"
+                class="btn btn-sm btn-soft-success"
+                data-bs-toggle="modal"
+                id="create-btn"
+                data-bs-target="#showModal"
+              >
+                <i class="ri-add-line align-bottom me-1"></i>créer
+              </button>
+              <button type="button" class="btn btn-sm btn-soft-info">
+                <i class="ri-file-download-line align-bottom me-1"></i> import
+              </button>
+              <button
+                class="btn btn-sm btn-soft-danger"
+                [disabled]=""
+                onClick="deleteMultiple()"
+              >
+                <i class="ri-delete-bin-2-line"></i>
+              </button>
+              <button type="button" class="btn btn-sm btn-info">
+                <i class="ri-refresh-fill align-bottom me-1"></i>actualiser
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body border border-dashed border-end-0 border-start-0">
+        <form>
+          <div class="row g-3">
+            <div class="col-xxl-5 col-sm-6">
+              <div class="search-box">
+                <input
+                  type="text"
+                  class="form-control form-control-sm search"
+                  placeholder="rechercher par code, libelle..."
+                />
+                <i class="ri-search-line search-icon"></i>
+              </div>
+            </div>
+            <!--end col-->
+
+            <!--end col-->
+            <div class="col-xxl-2 col-sm-4">
+              <div>
+                <select
+                  class="form-control form-control-sm"
+                  data-choices
+                  data-choices-search-false
+                  name="choices-single-default"
+                  id="idStatus"
+                >
+                  <option value="">Status</option>
+                  <option value="all" selected>tous</option>
+                  <option value="Pending">Actif</option>
+                  <option value="Pending">Inactif</option>
+                </select>
+              </div>
+            </div>
+            <!--end col-->
+
+            <!--end col-->
+            <div class="col-xxl-1 col-sm-2">
+              <div>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-primary w-100"
+                  onclick="SearchData();"
+                >
+                  <i class="ri-equalizer-fill me-1 align-bottom"></i>
+                  Filtrer
+                </button>
+              </div>
+            </div>
+            <!--end col-->
+          </div>
+          <!--end row-->
+        </form>
+      </div>
+      <div class="card-body pt-0">
+        <div>
+          <ul
+            class="nav nav-tabs nav-tabs-custom nav-success mb-3"
+            role="tablist"
+          >
+            <li class="nav-item">
+              <a
+                class="nav-link active All py-3"
+                data-bs-toggle="tab"
+                id="All"
+                href="#home1"
+                role="tab"
+                aria-selected="true"
+              >
+                <i class="ri-store-2-fill me-1 align-bottom"></i> Tous
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link py-3 Delivered"
+                data-bs-toggle="tab"
+                id="Delivered"
+                href="#delivered"
+                role="tab"
+                aria-selected="false"
+              >
+                <i class="ri-checkbox-circle-line me-1 align-bottom"></i> Actif
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link py-3 Pickups"
+                data-bs-toggle="tab"
+                id="Pickups"
+                href="#pickups"
+                role="tab"
+                aria-selected="false"
+              >
+                <i class="ri-truck-line me-1 align-bottom"></i> Inactif
+                <span class="badge bg-danger align-middle ms-1">2</span>
+              </a>
+            </li>
+          </ul>
+
+          <div class="table-responsive table-card mb-1">
+            <table class="table table-nowrap align-middle" id="orderTable">
+              <thead class="text-muted table-light">
+                <tr class="text-uppercase">
+                  <th scope="col" style="width: 25px">
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="checkAll"
+                      />
+                    </div>
+                  </th>
+                  <th class="sort" data-sort="id">Code</th>
+                  <th class="sort" data-sort="customer_name">Type</th>
+                  <th class="sort" data-sort="customer_name">Date début</th>
+                  <th class="sort" data-sort="customer_name">Date fin</th>
+                  <th class="sort" data-sort="status">Status</th>
+                  <th class="sort" data-sort="city">Action</th>
+                </tr>
+              </thead>
+              <tbody class="list form-check-all"></tbody>
+            </table>
+            <div class="noresult" style="display: none">
+              <div class="text-center">
+                <h5 class="mt-2">Désole! Aucun resultat trouvé</h5>
+                <p class="text-muted">
+                  We've searched more than 150+ Orders We did not find any
+                  orders for you search.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex justify-content-end">
+            <div class="pagination-wrap hstack gap-2">
+              <button
+                [disabled]=""
+                class="btn btn-sm btn-soft-primary pagination-prev"
+              >
+                Précédent
+              </button>
+              <ul class="pagination listjs-pagination mb-0"></ul>
+              <button class="btn btn-sm btn-soft-primary pagination-next">
+                Suivant
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal de création / modification -->
+        <div
+          class="modal fade"
+          id="showModal"
+          tabindex="-1"
+          aria-labelledby="exampleModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header bg-light p-3">
+                <h5 class="modal-title">
+                  {{ actionModal === "create" ? "Création" : "Modification" }}
+                  Demande
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+
+              <form [formGroup]="demandeForm">
+                <div class="modal-body">
+                  <!-- ==================== STEP 1 : ENTÊTE ==================== -->
+                  <div *ngIf="currentStep === 1">
+                    <div class="mb-3">
+                      <label class="form-label">Code demande</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        formControlName="codedemande"
+                      />
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Type demande</label>
+                      <select class="form-select" formControlName="typedemande">
+                        <option value="">-- Sélectionner --</option>
+                        <option value="Décaissement">Décaissement</option>
+                        <option value="Approvisionnement">
+                          Approvisionnement
+                        </option>
+                      </select>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Libellé demande</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        formControlName="libelledemande"
+                      />
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Date demande</label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        formControlName="datedemande"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- ==================== STEP 2 : LIGNES ==================== -->
+                  <div *ngIf="currentStep === 2">
+                    <div
+                      formArrayName="lignes"
+                      *ngFor="let ligne of lignes.controls; let i = index"
+                    >
+                      <div [formGroupName]="i" class="border rounded p-2 mb-2">
+                        <div
+                          class="d-flex justify-content-between align-items-center mb-2"
+                        >
+                          <h6>Ligne {{ i + 1 }}</h6>
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-danger"
+                            (click)="removeLigne(i)"
+                          >
+                            Supprimer
+                          </button>
+                        </div>
+
+                        <div class="row g-2">
+                          <div class="col-md-3">
+                            <label>Numéro</label>
+                            <input
+                              type="text"
+                              class="form-control"
+                              formControlName="numligne"
+                            />
+                          </div>
+                          <div class="col-md-4">
+                            <label>Libellé</label>
+                            <input
+                              type="text"
+                              class="form-control"
+                              formControlName="libellelignedemande"
+                            />
+                          </div>
+                          <div class="col-md-3">
+                            <label>Montant</label>
+                            <input
+                              type="number"
+                              class="form-control"
+                              formControlName="montantdemande"
+                            />
+                          </div>
+                          <div class="col-md-2 d-flex align-items-end">
+                            <button
+                              type="button"
+                              class="btn btn-sm btn-success w-100"
+                              (click)="addDetail(i)"
+                            >
+                              Ajouter détail
+                            </button>
+                          </div>
+                        </div>
+
+                        <!-- DETAILS -->
+                        <div formArrayName="details" class="mt-2">
+                          <div
+                            *ngFor="
+                              let detail of getDetailsArray(i).controls;
+                              let j = index
+                            "
+                            [formGroupName]="j"
+                            class="border p-2 mb-1 rounded"
+                          >
+                            <div class="row g-2 align-items-end">
+                              <div class="col-md-4">
+                                <label>Description</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  formControlName="description"
+                                />
+                              </div>
+                              <div class="col-md-2">
+                                <label>Quantité</label>
+                                <input
+                                  type="number"
+                                  class="form-control"
+                                  formControlName="quantite"
+                                />
+                              </div>
+                              <div class="col-md-3">
+                                <label>Montant</label>
+                                <input
+                                  type="number"
+                                  class="form-control"
+                                  formControlName="montant"
+                                />
+                              </div>
+                              <div class="col-md-3">
+                                <button
+                                  type="button"
+                                  class="btn btn-sm btn-danger w-100"
+                                  (click)="removeDetail(i, j)"
+                                >
+                                  Supprimer
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-primary"
+                      (click)="addLigne()"
+                    >
+                      Ajouter une ligne
+                    </button>
+                  </div>
+
+                  <!-- ==================== STEP 3 : FINISH ==================== -->
+                  <div *ngIf="currentStep === 3">
+                    <div class="alert alert-success">
+                      Vérifiez toutes les informations avant de terminer.
+                    </div>
+                    <div><strong>ID Demande :</strong> {{ iddemande }}</div>
+                  </div>
+
+                  <div *ngIf="msgErros" class="alert alert-danger mt-2">
+                    {{ msgErros }}
+                  </div>
+                </div>
+
+                <!-- FOOTER -->
+                <div class="modal-footer">
+                  <button
+                    type="button"
+                    class="btn btn-light"
+                    data-bs-dismiss="modal"
+                  >
+                    Fermer
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    *ngIf="currentStep > 1"
+                    (click)="prevStep()"
+                  >
+                    Précédent
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    *ngIf="currentStep < 3"
+                    (click)="nextStep()"
+                  >
+                    Suivant
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn btn-success"
+                    *ngIf="currentStep === 3"
+                    (click)="finishProcess()"
+                  >
+                    Terminer
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal -->
+        <div
+          class="modal fade flip"
+          id="deleteOrder"
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-body p-5 text-center">
+                <div class="mt-4 text-center">
+                  <h4></h4>
+                  <p class="text-muted fs-15 mb-4"></p>
+                  <div class="hstack gap-2 justify-content-center remove">
+                    <button
+                      class="btn btn-sm btn-link link-success fw-medium text-decoration-none"
+                      id="deleteRecord-close"
+                      data-bs-dismiss="modal"
+                    >
+                      <i class="ri-close-line me-1 align-middle"></i> annuler
+                    </button>
+                    <button class="btn btn-sm btn-danger" id="delete-record">
+                      Oui, supprimer
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!--end modal -->
+      </div>
+    </div>
+  </div>
+  <!--end col-->
+</div>
+<!--end row-->

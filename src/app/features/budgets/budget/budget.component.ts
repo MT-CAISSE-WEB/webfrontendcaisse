@@ -6,8 +6,8 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { journalModel } from '../models/journal.model';
-import { JournalService } from '../services/journal.service';
+import { BudgetModel } from '../models/budget.model';
+import { BudgetService } from '../services/budget.service';
 import { CommonModule } from '@angular/common';
 import {
   MESSAGE_CHAMPS_OBLIGATOIRE,
@@ -15,23 +15,33 @@ import {
   TITLE_DELETE,
 } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
+import { DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-journal',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './journal.component.html',
-  styleUrl: './journal.component.css',
+  selector: 'app-budget',
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, DatePipe],
+  templateUrl: './budget.component.html',
+  styleUrl: './budget.component.css',
 })
-export class JournalComponent implements OnInit {
-  title = 'Journal comptable';
+export class BudgetComponent implements OnInit {
+  title = 'Budget';
   params: any = {};
   breadCrumbs: any = {};
   fb: FormBuilder = new FormBuilder();
-  journaux: journalModel[] = [];
-  journal: journalModel = new journalModel();
+  budgets: BudgetModel[] = [];
+  budget: BudgetModel = new BudgetModel();
   msgErros: string = '';
   loading: Boolean = false;
-  journalForm: FormGroup = this.fb.group({});
+  budgetForm: FormGroup = this.fb.group({});
+
+  // formatage de date
+  formatDateForInput(dateString: string | null): string | null {
+    if (!dateString) return null;
+
+    const date = new Date(dateString);
+    // Décalage fuseau → on corrige avec toISOString()
+    return date.toISOString().split('T')[0];
+  }
 
   // Définissez des propriétés de pagination
   currentPage: number = 1;
@@ -40,7 +50,7 @@ export class JournalComponent implements OnInit {
   limit: number = 5;
 
   //Faire le check selection **********
-  objectsSelected: journalModel[] = [];
+  objectsSelected: BudgetModel[] = [];
   selectedItems: any[] = [];
   // Détermine si toutes les lignes sont selectionnées
   checkAllRow: any;
@@ -54,28 +64,29 @@ export class JournalComponent implements OnInit {
   titleMsg: string = '';
 
   //Element à supprimer
-  deleteJournal: any = null;
+  deleteBudget: any = null;
 
-  constructor(private journalservice: JournalService, private router: Router) {}
+  constructor(private budgetservice: BudgetService, private router: Router) {}
 
   ngOnInit(): void {
     //Afficher tous les journaux
-    this.getAllJournaux();
+    this.getAllBudgets();
     //Initialisation du formulaire
     this.initForm();
-    this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION('ce journal');
+    this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION('Ce budget');
     this.titleMsg = TITLE_DELETE;
   }
 
-  getAllJournaux() {
+  getAllBudgets() {
     this.params = {
       page: this.currentPage,
       limit: this.limit,
     };
-    this.journalservice.getAll(this.params).subscribe({
+    this.budgetservice.getAll(this.params).subscribe({
       next: (res: any) => {
         if (res.success) {
-          this.journaux = res.data.data;
+          this.budgets = res.data;
+          // console.log('Budgets:', this.budgets);
           this.totalPages = res.data.totalPages;
         }
       },
@@ -84,25 +95,30 @@ export class JournalComponent implements OnInit {
 
   //création du formulaire
   initForm(): void {
-    this.journalForm = this.fb.group({
-      codejournal: ['', [Validators.required]],
-      designation: ['', [Validators.required]],
-      idsociete: ['', [Validators.required]],
-      actif: [true],
+    this.budgetForm = this.fb.group({
+      codebudget: ['', [Validators.required]],
+      datedebut: ['', [Validators.required]],
+      typebudget: ['', [Validators.required]],
+      datefin: ['', [Validators.required]],
+      idbudgetparent: [''],
+      // createdby
+      actif: [false],
     });
   }
 
   get form() {
-    return this.journalForm.controls;
+    return this.budgetForm.controls;
   }
 
-  dispatchJournal(_object: journalModel) {
-    const status = _object.actif === 1;
-    this.journalForm.patchValue({
-      codejournal: _object.codejournal,
-      designation: _object.designation,
-      idsociete: _object.idsociete,
-      actif: status,
+  dispatchBudget(_object: BudgetModel) {
+    // const status = _object.actif === 1;
+    this.budgetForm.patchValue({
+      codebudget: _object.codebudget,
+      datedebut: this.formatDateForInput(_object.datedebut),
+      typebudget: _object.typebudget,
+      datefin: this.formatDateForInput(_object.datefin),
+      idbudgetparent: _object.idbudgetparent,
+      actif: _object.actif,
     });
   }
 
@@ -119,39 +135,39 @@ export class JournalComponent implements OnInit {
 
   //vérifie si _id est inclus dans un tableau d'IDs stocké
   isChecked(_id: string) {
-    const ids: string[] = this.objectsSelected.map((el) => el.idjournal);
+    const ids: string[] = this.objectsSelected.map((el) => el.idbudget);
     return ids.includes(_id);
   }
 
   //selectionner une instance dans une liste
-  handleSelectOne(journal: journalModel, actif: any) {
+  handleSelectOne(budget: BudgetModel, actif: any) {
     const index = this.objectsSelected.findIndex(
-      (el) => el.idjournal == journal.idjournal
+      (el) => el.idbudget == budget.idbudget
     );
-    if (index == -1 && actif) this.objectsSelected.push(journal);
+    if (index == -1 && actif) this.objectsSelected.push(budget);
     if (index != -1 && !actif) this.objectsSelected.splice(index, 1);
-    this.checkAllRow = this.objectsSelected?.length == this.journaux?.length;
+    this.checkAllRow = this.objectsSelected?.length == this.budgets?.length;
   }
 
   //Sélection/ Désélection de tous les éléments
   handleSelectAll($event: any) {
     this.checkAllRow = $event;
-    if (this.checkAllRow) this.objectsSelected = this.journaux.slice();
+    if (this.checkAllRow) this.objectsSelected = this.budgets.slice();
     else this.objectsSelected = [];
   }
 
   //Recharger la page
   changePage(page: number) {
     this.currentPage = page;
-    this.getAllJournaux(); // recharge les données
+    this.getAllBudgets(); // recharge les données
   }
 
   //Soumission du formulaire
   onSubmit() {
     /** Check formulaire */
     this.msgErros = '';
-    const controls = this.journalForm.controls;
-    if (this.journalForm.invalid) {
+    const controls = this.budgetForm.controls;
+    if (this.budgetForm.invalid) {
       Object.keys(controls).forEach((controlName) =>
         controls[controlName].markAsTouched()
       );
@@ -160,50 +176,76 @@ export class JournalComponent implements OnInit {
     }
 
     /** 2. prepare data */
-    const formValue = this.journalForm.value;
+    const formValue = this.budgetForm.value;
 
-    const _journal: journalModel = {
-      ...this.journal,
+    this.budget.idcircuitvalidation = null;
+    this.budget.idsite = null;
+    this.budget.idsociete = null;
+    this.budget.datevalidedept = null;
+    this.budget.datevalidesite = null;
+    this.budget.datevalidesociete = null;
+    this.budget.createdby = 'MAF';
+    this.budget.dernierniveau = null;
+    this.budget.niveauactuel = null;
+
+    const _budget: BudgetModel = {
+      ...this.budget,
       ...formValue,
+      idbudgetparent:
+        formValue.idbudgetparent === '' ? null : formValue.idbudgetparent,
+      datedebut: formValue.datedebut,
+      datefin: formValue.datefin,
       actif: formValue.actif ? 1 : 0,
     };
 
     /** 3. choices action */
-    if (this.actionModal == 'create') this.create(_journal);
-    else this.update(_journal);
+    if (this.actionModal == 'create') this.create(_budget);
+    else {
+      this.update({
+        idbudget: _budget.idbudget,
+        datedebut: formValue.datedebut,
+        datefin: formValue.datefin,
+        actif: formValue.actif,
+      });
+    }
     // if (!_journal.idjournal) this.create(_journal);
     // else this.update(_journal);
   }
 
   //Enregistrement de données
-  create(_journal: journalModel) {
-    const { idjournal, ...dataToSend } = _journal;
+  create(_budget: BudgetModel) {
+    const { idbudget, ...dataToSend } = _budget;
+
     this.loading = true;
-    this.journalservice.create(dataToSend).subscribe({
+    this.budgetservice.create(dataToSend).subscribe({
       next: (res: any) => {
+        console.log('Resultat:', res);
         if (res.success) {
           this.closeModal('showModal');
-          this.getAllJournaux();
+          this.getAllBudgets();
         } else {
           this.error = 'Erreur de création';
+          alert(this.error);
         }
         this.loading = false;
       },
+
       error: (err: any) => {
         this.error = 'Création échec';
+        alert(this.error + ': ' + err.message);
         this.loading = false;
       },
     });
   }
 
   //Modification de données
-  update(_journal: journalModel) {
-    console.log(_journal);
-    this.journalservice.update(_journal).subscribe({
+  update(_budget: any) {
+    _budget.updatedby = 'admin';
+    this.budgetservice.update(_budget).subscribe({
       next: (res: any) => {
         if (res.success) {
           this.closeModal('showModal');
-          this.getAllJournaux();
+          this.getAllBudgets();
         } else {
           this.error = 'Erreur de modification';
         }
@@ -228,29 +270,30 @@ export class JournalComponent implements OnInit {
     this.initForm();
   }
 
-  modalUpdate(_object: journalModel) {
-    this.journal = _object;
+  modalUpdate(_object: BudgetModel) {
+    this.budget = _object;
     this.actionModal = 'update';
-    this.journalForm.reset();
-    this.dispatchJournal(_object);
+    this.budgetForm.reset();
+    this.dispatchBudget(_object);
   }
 
   // loader(){
   //   this.router.navigateByUrl(APP_JOURNAL_CAISSE_JOURNAL).then();
   // }
 
-  modalDelete(item: journalModel) {
-    this.deleteJournal = item;
+  modalDelete(item: BudgetModel) {
+    this.deleteBudget = item;
   }
 
   deleteConfirmed() {
-    if (!this.deleteJournal) return;
-    this.journalservice.delete(this.deleteJournal.idjournal).subscribe({
+    if (!this.deleteBudget) return;
+    this.budgetservice.delete(this.deleteBudget.idbudget).subscribe({
       next: (res: any) => {
+        console.log('Res:', res);
         if (res.success) {
-          this.deleteJournal = null;
+          this.deleteBudget = null;
           this.closeModal('deleteOrder');
-          this.getAllJournaux();
+          this.getAllBudgets();
         } else {
           this.error = 'Erreur de Suppression';
         }

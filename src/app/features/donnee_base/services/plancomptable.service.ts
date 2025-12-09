@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { APP_PLANCOMPTABLE_DONNEE_BASE } from "../../../_core/routes/frontend.root";
+import { APP_PLAN_COMPTABLE_DONNEE_BASE } from "../../../_core/routes/frontend.root";
 import { Observable } from "rxjs";
 import { QueryResultModel } from "../../../_core/models/query-result.model";
 import { URL_LOCAL } from "../../../_core/routes/backend.root";

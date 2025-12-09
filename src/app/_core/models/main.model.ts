@@ -1,4 +1,4 @@
 export class MainModel {
-    createdby: String = "" ;
-    updatedby: String = "" 
+  createdby: String = '';
+  updatedby: String = '';
 }
