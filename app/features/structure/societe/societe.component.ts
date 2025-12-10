@@ -260,6 +260,13 @@ onSubmit() {
   this.closeModal('showModal');
 }
 
+refreshpage(){
+  const currentUrl = this.router.url;
+  this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+    this.router.navigate([currentUrl]);
+  });
+}
+
 
 previewLogo: string | ArrayBuffer | null = null;
 selectedLogoFile: File | null = null;
@@ -292,9 +299,11 @@ upsert(formdata: FormData) {
     next: (res: any) => {
       if (res.success) {
         this.loadsociete(true);
+        this.refreshpage();
       }
       this.loading = false;
       this.cdr.detectChanges();
+
     },
     error: err => {
       console.error(err);
@@ -377,6 +386,7 @@ deleteConfirmed(){
         this.deletesociete = null;
         this.closeModal('deleteOrder');
         this.getallsocietes();
+        this.refreshpage();
       } else {
         this.error = "Erreur de Suppression";
       }

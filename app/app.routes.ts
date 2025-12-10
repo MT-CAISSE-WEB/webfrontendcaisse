@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { APP,APP_DONNEE_BASE_DEVISE, APP_TAUX_DONNEE_BASE, APP_TAUX, APP_PLAN_COMPTABLE_DONNEE_BASE, APP_CENTRE_ANALYTIQUE_DONNEE_BASE, APP_NATURE_OPERATION_DONNEE_BASE, APP_JOURNAL_CAISSE_JOURNAL, APP_CAISSE_CAISSE_JOURNAL, APP_AFFECTATION_CAISSIER_CAISSE_JOURNAL, APP_OPERATION, APP_OPERATION_GENERAL,APP_STRUCTURE_SOCIETE, APP_USER, APP_USER_ADMINISTRATION, APP_STRUCTURE_SITE } from './_core/routes/frontend.root';
+import { APP,APP_DONNEE_BASE_DEVISE, APP_TAUX_DONNEE_BASE, APP_TAUX, APP_PLAN_COMPTABLE_DONNEE_BASE, APP_CENTRE_ANALYTIQUE_DONNEE_BASE, APP_NATURE_OPERATION_DONNEE_BASE, APP_JOURNAL_CAISSE_JOURNAL, APP_CAISSE_CAISSE_JOURNAL, APP_AFFECTATION_CAISSIER_CAISSE_JOURNAL, APP_OPERATION, APP_OPERATION_GENERAL,APP_STRUCTURE_SOCIETE, APP_USER, APP_USER_ADMINISTRATION, APP_STRUCTURE_SITE, APP_STRUCTURE_DEPARTEMENT } from './_core/routes/frontend.root';
 import { LayoutMainComponent } from './layout/layout-main/layout-main.component';
 import { LayoutContentComponent } from './layout/composant/layout-content/layout-content.component';
 import { TauxdeviseComponent } from './features/donnee_base/donnee_base/tauxdevise/tauxdevise.component';
@@ -17,6 +17,7 @@ import { LoginComponent  } from './features/administration/login/login.component
 import { AuthGuard } from './features/administration/service/auth.guard';
 import { UserComponent } from './features/administration/user/user.component';
 import { SiteComponent } from './features/structure/site/site.component';
+import { DepartementComponent } from './features/structure/departement/departement.component';
 
 export const routes: Routes = [
     {
@@ -28,6 +29,10 @@ export const routes: Routes = [
         canActivate: [AuthGuard],
         component: LayoutMainComponent,
         children: [ 
+            {
+                 path : APP_STRUCTURE_DEPARTEMENT,
+                component : DepartementComponent
+            },
             {
                 path : APP_STRUCTURE_SITE,
                 component : SiteComponent

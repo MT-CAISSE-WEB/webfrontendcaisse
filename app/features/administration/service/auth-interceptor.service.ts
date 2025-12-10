@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
-import { AuthRedirectService } from './auth-redirect.service';
+import { AuthService } from './auth.service';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-  constructor(private redirectService: AuthRedirectService) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = localStorage.getItem("token");
@@ -20,8 +21,10 @@ export class AuthInterceptor implements HttpInterceptor {
 
     return next.handle(clone).pipe(
       catchError((err: HttpErrorResponse) => {
+        console.log('HTTP Error:', err);
         if (err.status === 401 || err.status === 403) {
-          this.redirectService.redirectToLogin();
+          this.authService.logout();
+          this.router.navigate(['/login']);
         }
         return throwError(() => err);
       })

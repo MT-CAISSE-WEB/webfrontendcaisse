@@ -293,7 +293,16 @@ get acheteurCount(): number {
       
               this.upsert(_user);
               this.closeModal('showModal');
+
+
       
+      }
+
+      rafreshpage(){
+        const currentUrl = this.router.url; 
+        this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+          this.router.navigate([currentUrl]);
+        });
       }
 
       upsert (user : usermodel){
@@ -303,6 +312,7 @@ get acheteurCount(): number {
               if(res.success){
                 this.loadusers(true);
                 this.closeModal('showModal');
+                this.rafreshpage();
               }
             },
             error :(err) => {
@@ -370,6 +380,7 @@ get acheteurCount(): number {
         this.deleteuser = null;
         this.closeModal('deleteOrder');
         this.getallusers();
+        this.rafreshpage();
       } else {
         this.error = "Erreur de Suppression";
       }

@@ -223,8 +223,16 @@ get inactifCount(): number {
       
               this.upsert(_devise);
               this.closeModal('showModal');
-      
+
+          
       }
+
+      refreshpage(){
+        const currentUrl = this.router.url;
+        this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+          this.router.navigate([currentUrl]);
+        });
+      } 
 
       upsert (devise : devisemodel){
           this.ds.upsert(devise).subscribe({
@@ -232,6 +240,7 @@ get inactifCount(): number {
               console.log(res);
               if(res.success){
                 this.getalldevises();
+                this.refreshpage();
                 //this.router.navigate(["/"])
               }
             },
@@ -291,6 +300,7 @@ get inactifCount(): number {
         this.deletedevise = null;
         this.getalldevises();
         this.closeModal('deleteOrder');
+        this.refreshpage();
         
       } else {
         this.error = "Erreur de Suppression";

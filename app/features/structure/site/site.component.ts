@@ -232,8 +232,17 @@ isValidField(field: string): string {
             
                     this.upsert(_site);
                     this.closeModal('showModal');
+
+                     
             
             }
+      
+refreshpage(){
+  const currentUrl = this.router.url;
+  this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+    this.router.navigate([currentUrl]);
+  });
+}
 
  upsert (site : sitemodel){
           this.st.upsert(site).subscribe({
@@ -241,6 +250,7 @@ isValidField(field: string): string {
               console.log(res);
               if(res.success){
                 this.getallsites();
+                this.refreshpage();
                 //this.router.navigate(["/"])
               }
             },
@@ -288,7 +298,7 @@ modalUpdate(_object: sitemodel){
         this.deletesite = item;
       }
 
-         deleteConfirmed(){
+deleteConfirmed(){
   if(!this.deletesite) return ;
   this.st.delete(this.deletesite.idsite).subscribe({
     next: (res) => {
@@ -296,6 +306,7 @@ modalUpdate(_object: sitemodel){
         this.deletesite = null;
         this.getallsites();
         this.closeModal('deleteOrder');
+        this.refreshpage();
         
       } else {
         this.error = "Erreur de Suppression";

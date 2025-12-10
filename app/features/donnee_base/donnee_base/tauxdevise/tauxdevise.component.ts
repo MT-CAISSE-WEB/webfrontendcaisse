@@ -328,7 +328,18 @@ searchtauxdevise() {
       
               this.upsert(_tauxdevise);
               this.modalCreate();
-      
+
+              this.refreshpage();
+
+         
+      }
+
+      refreshpage(){
+        const currentUrl = this.router.url;
+
+        this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+          this.router.navigate([currentUrl]);
+        });
       }
 
       upsert (tauxdevise : tauxdevisemodel){
@@ -337,6 +348,7 @@ searchtauxdevise() {
               console.log(res);
               if(res.success){
                 this.getalltauxdevises();
+                this.refreshpage();
                 //this.router.navigate(["/"])
               }
             },
@@ -390,7 +402,6 @@ searchtauxdevise() {
                   }
 
   deleteConfirmed(){
-    console.log("click");
   if(!this.deletetauxdevise) return ;
   this.ts.delete(this.deletetauxdevise.idtauxdevise).subscribe({
     next: (res) => {
@@ -398,6 +409,7 @@ searchtauxdevise() {
         this.deletetauxdevise = null;
         this.closeModal('deleteOrder');
         this.getalltauxdevises();
+        this.refreshpage();
       } else {
         this.error = "Erreur de Suppression";
       }
@@ -407,6 +419,6 @@ searchtauxdevise() {
       this.error = "Suppression échec";
       this.loading = false;
     }
-  })
+  });
 }
 }
