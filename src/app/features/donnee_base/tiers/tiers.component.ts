@@ -1,32 +1,28 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { plancomptableModel } from '../models/plancomptable.model';
-import { societeModel } from '../models/societe.model';
-import { PlancomptableService } from '../services/plancomptable.service';
+import { tiersModel } from '../models/tiers.model';
+import { TiersService } from '../services/tiers.service';
 import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
 
-// import { AutreService } from '../services/plancomptable.service';
-
 @Component({
-  selector: 'app-plancomptable',
+  selector: 'app-tiers',
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './plancomptable.component.html',
-  styleUrl: './plancomptable.component.css' 
+  templateUrl: './tiers.component.html',
+  styleUrl: './tiers.component.css' 
 })
 
-export class PlancomptableComponent implements OnInit{
-  title = "Plan comptable";
+export class TiersComponent implements OnInit{
+  title = "Gestion des Tiers";
   params : any = {};
   breadCrumbs : any = {};
   fb: FormBuilder = new FormBuilder();
-  comptes : plancomptableModel[] = [];
-  societes : societeModel[] = [];
-  compte : plancomptableModel = new plancomptableModel();
+  tiers : tiersModel[] = [];
+  tier : tiersModel = new tiersModel();
   msgErros : string = "";
   loading: Boolean = false;
-  plancomptableForm : FormGroup = this.fb.group({})
+  tiersForm : FormGroup = this.fb.group({})
 
   // Définissez des propriétés de pagination
   currentPage: number = 1;
@@ -35,7 +31,7 @@ export class PlancomptableComponent implements OnInit{
   limit: number = 10;
 
   //Faire le check selection **********
-  objectsSelected : plancomptableModel[] = [];
+  objectsSelected : tiersModel[] = [];
   selectedItems : any[] = [];
   // Détermine si toutes les lignes sont selectionnées
   checkAllRow : any;
@@ -49,78 +45,58 @@ export class PlancomptableComponent implements OnInit{
   titleMsg: string ="";
 
   //Element à supprimer 
-  deleteCompte: any = null;
+  deleteTiers: any = null;
 
 
-  constructor(private plancomptableservice: PlancomptableService, 
-    // private autreservice: AutreService,
+  constructor(private tiersservice: TiersService,
               private router: Router){}
 
   ngOnInit(): void {
-      //Afficher tous les comptes
-      this.getAllComptes();
+      //Afficher tous les tiers
+      this.getAllTiers();
       //Initialisation du formulaire
       this.initForm();
-      this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("ce compte");
+      this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("ce tiers");
       this.titleMsg = TITLE_DELETE;
-    //   this.autreService.chargerSocietes().subscribe(res => {
-    //   console.log(res);
-    // });
   }
 
-  getAllComptes(){
+  getAllTiers(){
     this.params = {
       page: this.currentPage,
       limit: this.limit
     };
-    this.plancomptableservice.getAll(this.params).subscribe({
+    this.tiersservice.getAll(this.params).subscribe({
       next : (res) => {
         if(res.success){
-          this.comptes = res.data.data;
+          this.tiers = res.data.data;
           this.totalPages = res.data.totalPages;
         }
       }
     });
   }
 
-
-  // getSocietes(){
-  //   this.autreservice.chargerSocietes().subscribe({
-  //     next : (res) => {
-  //       this.societes = res.data.data;
-  //     }
-  //   });
-  // }
-
-
-  //Création du formulaire
+  //création du formulaire
   initForm(): void{
-    this.plancomptableForm = this.fb.group({
-      numcompte : ["", [Validators.required]],
-      libelle : ["", [Validators.required]],
-      ventillable: [false],
-      auxiliaire: [false],
-      suivibudgetaire: [false],
-      suivibudgetairemensuel: [false],
+    this.tiersForm = this.fb.group({
+      codetiers : ["", [Validators.required]],
+      designation : ["", [Validators.required]],
+      typetiers : ["", [Validators.required]],
       idsociete : ["58B53CD2-686A-4CED-9E64-3BA2A5A6D664", [Validators.required]],
       actif : [true],
     })
   }
 
   get form() {
-    return this.plancomptableForm.controls;
+    return this.tiersForm.controls;
   }
 
-  dispatchComptes(_object: plancomptableModel){
+  dispatchTiers(_object: tiersModel){
     const status = _object.actif === 1;
-    this.plancomptableForm.patchValue({
-      numcompte : _object.numcompte,
-      libelle : _object.libelle,
-      ventillable : _object.ventillable,
-      auxiliaire : _object.auxiliaire,
-      suivibudgetaire : _object.suivibudgetaire,
-      suivibudgetairemensuel : _object.suivibudgetairemensuel,
-      idsociete: _object.idsociete,
+    this.tiersForm.patchValue({
+      codetiers : _object.codetiers,
+      designation : _object.designation,
+      typetiers : _object.typetiers,
+      idsociete : _object.idsociete,
       codesociete : _object.societe.societe_codesociete,
       raisonsociale : _object.societe.societe_raisonsociale,
       actif : status
@@ -137,73 +113,70 @@ export class PlancomptableComponent implements OnInit{
 
   //vérifie si _id est inclus dans un tableau d'IDs stocké
   isChecked(_id: string) {
-    const ids: string[] = this.objectsSelected.map((el) => el.idcompte);
+    const ids: string[] = this.objectsSelected.map((el) => el.idtiers);
     return ids.includes(_id);
   }
 
   //selectionner une instance dans une liste
-  handleSelectOne(compte: plancomptableModel, actif: any) {
+  handleSelectOne(tier: tiersModel, actif: any) {
     const index = this.objectsSelected.findIndex(
-      (el) => el.idcompte == compte.idcompte
+      (el) => el.idtiers == tier.idtiers
     );
-    if (index == -1 && actif) this.objectsSelected.push(compte);
+    if (index == -1 && actif) this.objectsSelected.push(tier);
     if (index != -1 && !actif) this.objectsSelected.splice(index, 1);
-    this.checkAllRow = this.objectsSelected?.length == this.comptes?.length;
+    this.checkAllRow = this.objectsSelected?.length == this.tiers?.length;
   }
 
   //Sélection/ Désélection de tous les éléments
   handleSelectAll($event: any) {
     this.checkAllRow = $event;
-    if (this.checkAllRow) this.objectsSelected = this.comptes.slice();
+    if (this.checkAllRow) this.objectsSelected = this.tiers.slice();
     else this.objectsSelected = [];
   }
 
   //Recharger la page
   changePage(page: number) {
     this.currentPage = page;
-    this.getAllComptes(); // recharge les données
+    this.getAllTiers(); // recharge les données
   }
 
   //Soumission du formulaire
   onSubmit(){
     /** Check formulaire */
     this.msgErros = '';
-    const controls = this.plancomptableForm.controls;
-    if (this.plancomptableForm.invalid) {
+    const controls = this.tiersForm.controls;
+    if (this.tiersForm.invalid) {
       Object.keys(controls).forEach(controlName => controls[controlName].markAsTouched());
       this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
       return;
     }
 
     /** 2. prepare data */
-    const formValue = this.plancomptableForm.value;
+    const formValue = this.tiersForm.value;
 
-    const _comptes: plancomptableModel = {
-      ...this.compte,
+    const _tiers: tiersModel = {
+      ...this.tier,
       ...formValue,
       actif: formValue.actif ? 1 : 0,
-      ventillable: formValue.ventillable ? 1 : 0,
-      auxiliaire: formValue.auxiliaire ? 1 : 0,
-      suivibudgetaire: formValue.suivibudgetaire ? 1 : 0,
-      suivibudgetairemensuel: formValue.suivibudgetairemensuel ? 1 : 0,
+       
     };
 
     /** 3. choices action */
-    if(this.actionModal == "create")this.create(_comptes);
-    else this.update(_comptes);
-    // if (!_comptes.idcomptes) this.create(_comptes);
-    // else this.update(_comptes);
+    if(this.actionModal == "create")this.create(_tiers);
+    else this.update(_tiers);
+    // if (!_tiers.idtiers) this.create(_tiers);
+    // else this.update(_tiers);
   }
 
   //Enregistrement de données
-  create(_comptes: plancomptableModel) {
-    const {idcompte, ...dataToSend} = _comptes;
+  create(_tiers: tiersModel) {
+    const {idtiers, ...dataToSend} = _tiers;
     this.loading = true;
-    this.plancomptableservice.create(dataToSend).subscribe({
+    this.tiersservice.create(dataToSend).subscribe({
       next: (res) => {
         if (res.success) {
           this.closeModal('showModal');
-          this.getAllComptes();
+          this.getAllTiers();
         } else {
           this.error = "Erreur de création";
         }
@@ -217,12 +190,12 @@ export class PlancomptableComponent implements OnInit{
   }
 
   //Modification de données
-  update(_comptes: plancomptableModel){
-    this.plancomptableservice.update(_comptes).subscribe({
+  update(_tiers: tiersModel){
+    this.tiersservice.update(_tiers).subscribe({
       next: (res) => {
         if (res.success) {
           this.closeModal('showModal');
-          this.getAllComptes();
+          this.getAllTiers();
         } else {
           this.error = "Erreur de modification";
         }
@@ -247,24 +220,24 @@ export class PlancomptableComponent implements OnInit{
     this.initForm();
   }
 
-  modalUpdate(_object: plancomptableModel){
-    this.compte = _object;
+  modalUpdate(_object: tiersModel){
+    this.tier = _object;
     this.actionModal = "update";
-    this.plancomptableForm.reset();
-    this.dispatchComptes(_object);
+    this.tiersForm.reset();
+    this.dispatchTiers(_object);
   }
 
-  modalDelete(item: plancomptableModel){
-    this.deleteCompte = item;
+  modalDelete(item: tiersModel){
+    this.deleteTiers = item;
   }
 
   deleteConfirmed(){
-    if(!this.deleteCompte) return ;
-    this.plancomptableservice.delete(this.deleteCompte.idcompte).subscribe({
+    if(!this.deleteTiers) return ;
+    this.tiersservice.delete(this.deleteTiers.idtiers).subscribe({
       next: (res) => {
         if (res.success) {
           this.closeModal('delete');
-          this.getAllComptes();
+          this.getAllTiers();
         } else {
           this.error = "Erreur de Suppression";
         }
