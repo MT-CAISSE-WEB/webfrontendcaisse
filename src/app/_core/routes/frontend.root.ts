@@ -27,6 +27,11 @@ export const APP_SOCIETE ="societe";
 export const APP_STRUCTURE_SOCIETE = APP_STRUCTURE +"/"+APP_SOCIETE;
 export const APP_ROOT_STRUCTURE_SOCIETE = APP_ROOT + "/"+APP_STRUCTURE_SOCIETE;
 
+//Route Users
+export const APP_USER ="utilisateur";
+export const APP_ADMINISTRATION_USER = APP_ADMINISTRATION + "/" + APP_USER;
+export const APP_ROOT_ADMINISTRATION_USER = APP_ROOT + "/" + APP_ADMINISTRATION_USER;
+
 //Route de devise
 export const APP_DEVISE = 'devise';
 export const APP_DONNEE_BASE_DEVISE = APP_DONNEE_BASE + "/" + APP_DEVISE;

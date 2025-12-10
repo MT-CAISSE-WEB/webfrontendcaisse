@@ -3,7 +3,12 @@ import { APP, APP_TAUX_DONNEE_BASE, APP_TAUX, APP_PLAN_COMPTABLE_DONNEE_BASE,
   APP_CENTRE_ANALYTIQUE_DONNEE_BASE, APP_NATURE_OPERATION_DONNEE_BASE, 
   APP_JOURNAL_CAISSE_JOURNAL, APP_CAISSE_CAISSE_JOURNAL, APP_AFFECTATION_CAISSIER_CAISSE_JOURNAL, 
   APP_OPERATION, APP_OPERATION_GENERAL, APP_TIERS_DONNEE_BASE, APP_AFFECTATION_ANALYTIQUE_DONNEE_BASE,
-  APP_BUDGETS_LIGNE_BUDGET, APP_BUDGETS_BUDGET, APP_ROOT_DMD_DECAISSEMENT,} from './_core/routes/frontend.root';
+  APP_BUDGETS_LIGNE_BUDGET, APP_BUDGETS_BUDGET, APP_ROOT_DMD_DECAISSEMENT,
+  APP_STRUCTURE_DEPARTEMENT,
+  APP_STRUCTURE_SITE,
+  APP_STRUCTURE_SOCIETE,
+  APP_DONNEE_BASE_DEVISE,
+  APP_ADMINISTRATION_USER,} from './_core/routes/frontend.root';
 
 import { LayoutMainComponent } from './layout/layout-main/layout-main.component';
 import { LayoutContentComponent } from './layout/composant/layout-content/layout-content.component';
@@ -23,7 +28,6 @@ import { TiersComponent } from './features/donnee_base/tiers/tiers.component';
 import { AffectationanalytiqueComponent } from './features/donnee_base/affectationanalytique/affectationanalytique.component';
 import { LoginComponent } from './features/administration/login/login.component';
 import { AuthGuard } from './features/administration/service/auth.guard';
-import { APP_DONNEE_BASE_DEVISE, APP_STRUCTURE_DEPARTEMENT, APP_STRUCTURE_SITE, APP_STRUCTURE_SOCIETE, APP_USER_ADMINISTRATION } from '../../app/_core/routes/frontend.root';
 import { DepartementComponent } from './features/structure/departement/departement.component';
 import { SiteComponent } from './features/structure/site/site.component';
 import { SocieteComponent } from './features/structure/societe/societe.component';
@@ -89,7 +93,7 @@ export const routes: Routes = [
           component : DeviseComponent
       },
       {
-          path: APP_USER_ADMINISTRATION,
+          path: APP_ADMINISTRATION_USER,
           component: UserComponent
       },
       // ferreol
