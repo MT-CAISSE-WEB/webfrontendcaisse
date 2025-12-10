@@ -7,6 +7,7 @@ import { APP_ROOT, APP_ROOT_AFFECTATION_CAISSIER_CAISSE_JOURNAL,
   APP_ROOT_PLAN_COMPTABLE_DONNEE_BASE, APP_ROOT_BUDGETS_BUDGET, APP_ROOT_BUDGETS_LIGNE_BUDGET,
   APP_ROOT_DMD_DECAISSEMENT } from '../../../_core/routes/frontend.root';
 import { RouterLink, RouterModule, RouterOutlet } from '@angular/router';
+import { APP_ROOT_DONNEE_BASE_DEVISE, APP_ROOT_STRUCTURE_DEPARTEMENT, APP_ROOT_STRUCTURE_SITE, APP_ROOT_USER_ADMINISTRATION, APP_STRUCTURE_SOCIETE } from '../../../../../app/_core/routes/frontend.root';
 
 @Component({
   selector: 'app-layout-menu',
@@ -29,4 +30,9 @@ export class LayoutMenuComponent {
   root_budget = APP_ROOT_BUDGETS_BUDGET;
   root_ligne_budget = APP_ROOT_BUDGETS_LIGNE_BUDGET;
   root_demande_decaissement = APP_ROOT_DMD_DECAISSEMENT;
+  root_societe = APP_STRUCTURE_SOCIETE;
+  root_devise = APP_ROOT_DONNEE_BASE_DEVISE;
+  root_utilisateur = APP_ROOT_USER_ADMINISTRATION;
+  root_site = APP_ROOT_STRUCTURE_SITE;
+  root_departement = APP_ROOT_STRUCTURE_DEPARTEMENT;
 }

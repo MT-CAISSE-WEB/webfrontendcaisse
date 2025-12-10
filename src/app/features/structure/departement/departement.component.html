@@ -5,15 +5,13 @@
             <h4 class="mb-sm-0">{{title}}</h4>
             <div class="page-title-right">
                 <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Données de base</a></li>
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Paramétrage dévise</a></li>
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Structure</a></li>
                     <li class="breadcrumb-item active">{{title}}</li>
                 </ol>
             </div>
         </div>
     </div>
 </div>
-<!-- end page title -->
 
 <div class="row">
     <div class="col-lg-12">
@@ -35,14 +33,14 @@
                     <div class="row g-3">
                         <div class="col-xxl-5 col-sm-6">
                             <div class="search-box">
-                                <input type="text" [(ngModel)]="searchtext" [ngModelOptions]="{standalone: true}" (input)="searchdevise()" class="form-control form-control-sm search" placeholder="rechercher par code,code ISO...">
+                                <input type="text" [(ngModel)]="searchtext" [ngModelOptions]="{standalone: true}" (input)="searchdepartement()" class="form-control form-control-sm search" placeholder="rechercher par code, libelle,Site..."> 
                                 <i class="ri-search-line search-icon"></i>
                             </div>
                         </div>
                         <!--end col-->
     
                         <!--end col-->
-                        <!-- <div class="col-xxl-2 col-sm-4">
+                        <div class="col-xxl-2 col-sm-4">
                             <div>
                                 <select class="form-control form-control-sm" data-choices data-choices-search-false name="choices-single-default" id="idStatus">
                                     <option value="">Status</option>
@@ -51,25 +49,27 @@
                                     <option value="Pending">Inactif</option>
                                 </select>
                             </div>
-                        </div> -->
+                        </div>
                         <!--end col-->
                         
                         <!--end col-->
-                        <!-- <div class="col-xxl-1 col-sm-2">
+                        <div class="col-xxl-1 col-sm-2">
                             <div>
                                 <button type="button" class="btn btn-sm btn-primary w-100" onclick="SearchData();"> <i class="ri-equalizer-fill me-1 align-bottom"></i>
                                     Filtrer
                                 </button>
                             </div>
-                        </div> -->
+                        </div>
                         <!--end col-->
                     </div>
                     <!--end row-->
                 </form>
             </div>
-            <div class="card-body pt-0">
+<!-- end page title -->
+
+<div class="card-body pt-0">
                 <div>
-                    <ul class="nav nav-tabs nav-tabs-custom nav-success mb-3" role="tablist" >
+                     <!-- <ul class="nav nav-tabs nav-tabs-custom nav-success mb-3" role="tablist" >
                         <li class="nav-item">
                             <a class="nav-link active All py-3" [class.active]="selectedstatus === ''" (click)="setActiveTab('All')"  data-bs-toggle="tab" id="All" href="#" role="tab" aria-selected="true">
                                 <i class="ri-store-2-fill me-1 align-bottom"></i> Tous 
@@ -77,15 +77,21 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link py-3 Delivered" [class.active]="selectedstatus === '1'" (click)="setActiveTab('Actif')" data-bs-toggle="tab" id="Delivered" href="#" role="tab" aria-selected="false">
-                                <i class="ri-checkbox-circle-line me-1 align-bottom"></i> Actif <span class="badge bg-success align-middle ms-1">{{actifCount}}</span>
+                                <i class="ri-checkbox-circle-line me-1 align-bottom"></i> Suivi analytique <span class="badge bg-success align-middle ms-1">{{actifCount}}</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link py-3 Pickups" [class.active]="selectedstatus === '0'" (click)="setActiveTab('Inactif')" data-bs-toggle="tab" id="Pickups" href="#" role="tab" aria-selected="false">
-                                <i class="ri-truck-line me-1 align-bottom"></i> Inactif <span class="badge bg-danger align-middle ms-1">{{inactifCount}}</span>
+                                <i class="ri-truck-line me-1 align-bottom"></i> Sans suivi analytique <span class="badge bg-danger align-middle ms-1">{{inactifCount}}</span>
                             </a>
                         </li>
                     </ul>
+                     -->
+                    <div *ngIf="loading" class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                    </div>
+
+                    <div *ngIf="!loading">
 
                     <div class="table-responsive table-card mb-1">
                         <table class="table table-nowrap align-middle" id="orderTable">
@@ -96,38 +102,42 @@
                                             <input class="form-check-input" type="checkbox" [(ngModel)]="checkAllRow" id="checkAll" (ngModelChange)="handleSelectOne($event)">
                                         </div> -->
                                     </th>
-                                    <th class="sort" data-sort="id">Code </th>
-                                    <th class="sort" data-sort="customer_name">Code Iso </th>
-                                    <th class="sort" data-sort="status">Intitulé </th>
-                                    <th class="sort" data-sort="status">Status </th>
+                                    <th class="sort" data-sort="id">Code</th>
+                                    <th class="sort" data-sort="customer_name">Libelle </th>
+                                    <th class="sort" data-sort="status">Site</th>
+                                    <th class="sort" data-sort="status">Société</th>
+                                    <th class="sort" data-sort="status">Responsable </th>
                                     <th class="sort" data-sort="city">Actions </th>
                                 </tr>
                             </thead>
                             <tbody class="list form-check-all">
-                                @for (item of pagedDevises; track $index){
+                                @for (item of pagedDepartements; track $index){
                                     <tr>
                                     <th scope="row">
                                         <!-- <div class="form-check">
                                             <input class="form-check-input" [checked]="isChecked(item.idsociete)" [(ngModel)]="selectedItems[$index]" (ngModelChange)="handleSelectOne(item, $event)" type="checkbox" name="itemGroup_{{ $index }}">
                                         </div> -->
                                     </th>
-                                    <td class="code"><a href="#" class="fw-medium link-primary">{{item.codedevise}}</a></td>
-                                    <td class="customer_name">{{item.codeiso}}</td>
-                                    <td class="customer_name">{{item.intitule}}</td>
-                                    <td class="status">
-                                        <span *ngIf="item.actif == 1" class="badge bg-success-subtle text-success text-uppercase"> Actif </span>
-                                        <span *ngIf="item.actif == 0" class="badge bg-danger-subtle text-danger text-uppercase"> Inactif </span>
-                                    </td>
+                                    <td class="code"><a href="#" class="fw-medium link-primary">{{item.codedept}}</a></td>
+                                    <td class="customer_name">{{item.libelle}}</td>
+                                    <td class="customer_name">{{item.site}}</td>
+                                    <td class="customer_name">{{item.raisonsociale}}</td>
+                                    <td class="customer_name">{{item.nom}} {{item.prenom}}</td>
                                     <td>
                                         <ul class="list-inline hstack gap-2 mb-0">
-                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Dupliquer">
-                                               <a href="#" class="text-primary d-inline-block" data-bs-target="#showModal" data-bs-toggle="modal" (click)="modalDuplicate(item)">
-                                                    <i class="ri-file-copy-2-line fs-16"></i>
+                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="View">
+                                                <a href="#showModal" class="text-primary d-inline-block" data-bs-toggle="modal" (click)="modalUpdate(item)">
+                                                    <i class="ri-eye-fill fs-16"></i>
                                                 </a>
                                             </li>
                                             <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
                                                 <a href="#showModal" data-bs-toggle="modal" (click)="modalUpdate(item)" class="text-primary d-inline-block edit-item-btn">
                                                     <i class="ri-pencil-fill fs-16"></i>
+                                                </a>
+                                            </li>
+                                             <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
+                                                <a href="#showModal" data-bs-toggle="modal" (click)="modalDuplicate(item)" class="text-primary d-inline-block edit-item-btn">
+                                                    <i class="ri-file-copy-2-line fs-16"></i>
                                                 </a>
                                             </li>
                                             <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
@@ -154,12 +164,13 @@
                             <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
                                 Précédent
                             </button>
-                            <ul class="pagination listjs-pagination mb-0"> Page {{currentPage}} / {{totalPages}}</ul>
+                             <ul class="pagination listjs-pagination mb-0"> Page {{currentPage}} / {{totalPages}}</ul>
                             <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)" class="btn btn-sm btn-soft-primary pagination-next">
                                 Suivant
                             </button>
                         </div>
                     </div>
+                </div>
                 </div>
 
                 <div class="modal fade modal-lg" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -167,49 +178,89 @@
                         <div class="modal-content">
                             <div class="modal-header bg-light p-3">
                                 <h5 class="modal-title" id="exampleModalLabel">{{actionModal === 'create' ? 'Enregistrer' :
-                                                                                 actionModal === 'update' ? 'Modifier' :
-                                                                                'Dupliquer'
-                                                                                }} Dévise </h5>
+                                             actionModal === 'update' ? 'Modifier' :
+                                             'Dupliquer'
+                                            }} </h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
                             </div>
-                        <form [formGroup]="deviseForm" (ngSubmit)="onsubmit()" class="ng-untouched ng-pristine ng-invalid">
-                             <div class="modal-body">
-                                     <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="codedevise" class="form-label">Code Dévise </label>
-                                <input id="code" formControlName="codedevise" class="form-control" placeholder="Ex: 952">
-                            </div>
+                            <form [formGroup]="departementForm">
+                                <div class="modal-body">
+                                    <input type="hidden" id="id-field"/>
 
-                            <div class="col-md-6 mb-3">
-                                <label for="codeiso" class="form-label">Code ISO</label>
-                                <input id="codeiso" formControlName="codeiso" class="form-control" placeholder="Ex: XOF">
-                            </div>
+                                    <div class="mb-3">
+                                        <label class="form-label form-label-sm">Code</label>
+                                        <input type="text" class="form-control form-control-sm {{ isValidField('codedept')}}" 
+                                            formControlName="codedept" />
+                                    </div>
 
-                            <div class="col-md-12 mb-3">
-                                <label for="intitule" class="form-label">Intitulé</label>
-                                <input id="intitule" formControlName="intitule" class="form-control" placeholder="Ex: Franc CFA">
-                            </div>
-                            
+                                    <div class="mb-3">
+                                        <label class="form-label form-label-sm">libellé</label>
+                                        <input type="text" class="form-control form-control-sm {{ isValidField('libelle')}}" 
+                                            formControlName="libelle" />
+                                    </div>
+  
+                                 <div class="mb-3">
+                                     <label class="form-label form-label-sm">Site</label>
+                                    <select class="form-select form-select-sm" formControlName="idsite">
+                                        <option value="">----Choisir Site-----</option>
+                                         <option *ngFor="let st of sites"  [value]="st.idsite">{{ st.libelle }}</option> 
+                                        </select>
+                                        <!-- <label class="input-group-text">Dévise de référence</label> -->
+                                </div>
 
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label">Statut</label>
-                                <select formControlName="actif" class="form-select">
-                                <option [value]="1">Actif</option>
-                                <option [value]="0">Inactif</option>
-                                </select>
-                            </div>
-                            </div>
-                             </div>
+                                <!-- ID Société (hidden) -->
+                                <input type="hidden" formControlName="idsociete" />
 
-                             <div class="modal-footer">
-                                    <button type="submit" class="btn btn-primary" [disabled]="loading">
-                                                                                {{actionModal === 'create' ? 'Enregistrer' :
-                                                                                 actionModal === 'update' ? 'Modifier' :
-                                                                                'Dupliquer'
-                                                                                }} la Dévise
-                                    </button>
-                             </div>
-                    </form>
+                                 <div class="mb-3">
+                                        <label class="form-label form-label-sm">Société</label>
+                                        <input type="text" class="form-control form-control-sm"
+                                            formControlName="societe" />
+                                </div>
+
+                                  <div class="mb-3">
+                                     <label class="form-label form-label-sm">Responsable</label>
+                                    <select class="form-select form-select-sm" formControlName="responsable">
+                                        <option value="">----Choisir le responsable-----</option>
+                                         <option *ngFor="let u of utilisateurs"  [value]="u.idutilisateur">{{ u.nom }} {{ u.prenom }}</option> 
+                                        </select>
+                                        <!-- <label class="input-group-text">Dévise de référence</label> -->
+                                </div>
+
+                             
+
+                                    <div class="mb-3">
+                                        <label class="form-label form-label-sm">Email</label>
+                                        <input type="text" class="form-control form-control-sm {{ isValidField('email')}}" 
+                                            formControlName="email" />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label form-label-sm">Téléphone</label>
+                                        <input type="text" class="form-control form-control-sm {{ isValidField('telephone')}}" 
+                                            formControlName="telephone" />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label form-label-sm">Adresse</label>
+                                        <input type="text" class="form-control form-control-sm {{ isValidField('adresse')}}" 
+                                            formControlName="adresse" />
+                                    </div>
+
+
+                                </div>
+
+                                <div class="modal-footer">
+                                    <div class="hstack gap-2 justify-content-end">
+                                        <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
+                                        <button type="submit" class="btn btn-sm btn-success" (click)="onsubmit()">
+                                           {{actionModal === 'create' ? 'Enregistrer' :
+                                             actionModal === 'update' ? 'Modifier' :
+                                             'Dupliquer'
+                                            }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
 
                         </div>
                     </div>
@@ -240,3 +291,5 @@
     <!--end col-->
 </div>
 <!--end row-->
+
+

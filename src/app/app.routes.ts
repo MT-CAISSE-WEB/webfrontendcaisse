@@ -21,27 +21,76 @@ import { DemandeDecaissementComponent } from './features/demande_decaissement/de
 
 import { TiersComponent } from './features/donnee_base/tiers/tiers.component';
 import { AffectationanalytiqueComponent } from './features/donnee_base/affectationanalytique/affectationanalytique.component';
+import { LoginComponent } from './features/administration/login/login.component';
+import { AuthGuard } from './features/administration/service/auth.guard';
+import { APP_DONNEE_BASE_DEVISE, APP_STRUCTURE_DEPARTEMENT, APP_STRUCTURE_SITE, APP_STRUCTURE_SOCIETE, APP_USER_ADMINISTRATION } from '../../app/_core/routes/frontend.root';
+import { DepartementComponent } from './features/structure/departement/departement.component';
+import { SiteComponent } from './features/structure/site/site.component';
+import { SocieteComponent } from './features/structure/societe/societe.component';
+import { DeviseComponent } from './features/donnee_base/donnee_base/devise/devise.component';
+import { UserComponent } from './features/administration/user/user.component';
 
 export const routes: Routes = [
   {
+      path :'login',
+      component:LoginComponent
+  },
+  {
     path: APP,
+    canActivate: [AuthGuard],
     component: LayoutMainComponent,
     children: [
       {
-        path: APP_TAUX_DONNEE_BASE,
-        component: TauxdeviseComponent,
+        path : APP_STRUCTURE_DEPARTEMENT,
+        component : DepartementComponent
       },
       {
-        path: APP_CENTRE_ANALYTIQUE_DONNEE_BASE,
-        component: CentreanalytiqueComponent,
+          path : APP_STRUCTURE_SITE,
+          component : SiteComponent
+      } ,
+      {
+          path : APP_TAUX_DONNEE_BASE,
+          component: TauxdeviseComponent,
       },
       {
-        path: APP_PLAN_COMPTABLE_DONNEE_BASE,
-        component: PlancomptableComponent,
+          path : APP_CENTRE_ANALYTIQUE_DONNEE_BASE,
+          component: CentreanalytiqueComponent,
       },
       {
-        path: APP_NATURE_OPERATION_DONNEE_BASE,
-        component: NatureoperationComponent,
+          path : APP_PLAN_COMPTABLE_DONNEE_BASE,
+          component: PlancomptableComponent,
+      },
+      {
+          path : APP_NATURE_OPERATION_DONNEE_BASE,
+          component: NatureoperationComponent,
+      },
+      {
+          path : APP_JOURNAL_CAISSE_JOURNAL,
+          component: JournalComponent,
+      },
+      {
+          path : APP_CAISSE_CAISSE_JOURNAL,
+          component: CaisseComponent,
+      },
+      {
+          path : APP_AFFECTATION_CAISSIER_CAISSE_JOURNAL,
+          component: AffectationCaissierComponent,
+      },
+      {
+          path : APP_OPERATION_GENERAL,
+          component: OperationCaisseComponent,
+      },
+      {
+          path : APP_STRUCTURE_SOCIETE,
+          component : SocieteComponent
+      },
+      {
+          path : APP_DONNEE_BASE_DEVISE,
+          component : DeviseComponent
+      },
+      {
+          path: APP_USER_ADMINISTRATION,
+          component: UserComponent
       },
       // ferreol
       {
@@ -72,7 +121,6 @@ export const routes: Routes = [
         path: APP_OPERATION_GENERAL,
         component: OperationCaisseComponent,
       },
-
       // Début travaux Richard...
       {
           path : APP_TIERS_DONNEE_BASE,
@@ -102,3 +150,4 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
 ];
+

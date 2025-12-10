@@ -4,9 +4,33 @@ export const APP_ROOT = '/app';
 export const APP_DONNEE_BASE = 'donnee_de_base';
 export const APP_CAISSE_JOURNAL = 'caisse_journal';
 export const APP_GENERAL = 'general';
+export const APP_STRUCTURE = "structure";
+export const APP_ADMINISTRATION = "administration";
 export const APP_ROOT_CAISSE_JOURNAL = APP_ROOT + '/' + APP_CAISSE_JOURNAL;
 export const APP_ROOT_DONNEE_BASE = APP_ROOT + '/' + APP_DONNEE_BASE;
 export const APP_ROOT_GENERAL = APP_ROOT + '/' + APP_GENERAL;
+export const APP_ROOT_STRUCTURE = APP_ROOT + "/"+APP_STRUCTURE;
+export const APP_ROOT_ADMINISTRATION = APP_ROOT + "/"+APP_ADMINISTRATION;
+
+// Route departement
+export const APP_DEPARTEMENT = "departement";
+export const APP_STRUCTURE_DEPARTEMENT = APP_STRUCTURE + "/" + APP_DEPARTEMENT;
+export const APP_ROOT_STRUCTURE_DEPARTEMENT = APP_ROOT + "/" + APP_STRUCTURE_DEPARTEMENT;
+
+// Route sites
+export const APP_SITE = "site";
+export const APP_STRUCTURE_SITE = APP_STRUCTURE + "/" + APP_SITE;
+export const APP_ROOT_STRUCTURE_SITE = APP_ROOT + "/" + APP_STRUCTURE_SITE;
+
+//Route Société 
+export const APP_SOCIETE ="societe";
+export const APP_STRUCTURE_SOCIETE = APP_STRUCTURE +"/"+APP_SOCIETE;
+export const APP_ROOT_STRUCTURE_SOCIETE = APP_ROOT + "/"+APP_STRUCTURE_SOCIETE;
+
+//Route de devise
+export const APP_DEVISE = 'devise';
+export const APP_DONNEE_BASE_DEVISE = APP_DONNEE_BASE + "/" + APP_DEVISE;
+export const APP_ROOT_DONNEE_BASE_DEVISE = APP_ROOT + "/" + APP_DONNEE_BASE_DEVISE;
 
 // Route Budget
 export const APP_BUDGET = 'budget';
@@ -23,12 +47,6 @@ export const APP_ROOT_BUDGETS_LIGNE_BUDGET =
 // Route de demande décaissement
 export const APP_ROOT_DMD_DECAISSEMENT = 'demande_decaissement';
 
-export const APP_SITE = 'site';
-export const APP_SITE_ROOT = APP_ROOT + '/' + APP_SITE;
-
-export const APP_SOCIETE = "Societe";
-export const APP_SOCIETE_ROOT = APP_ROOT + "/" + APP_SOCIETE;
-
 //Route taux de devise
 export const APP_TAUX = 'taux_devise';
 export const APP_TAUX_DONNEE_BASE = APP_DONNEE_BASE + '/' + APP_TAUX;
@@ -42,23 +60,18 @@ export const APP_ROOT_PLAN_COMPTABLE_DONNEE_BASE = APP_ROOT + '/' + APP_PLAN_COM
 
 //Route journal
 export const APP_JOURNAL = 'journal';
-export const APP_JOURNAL_CAISSE_JOURNAL =
-  APP_CAISSE_JOURNAL + '/' + APP_JOURNAL;
-export const APP_ROOT_JOURNAL_CAISSE_JOURNAL =
-  APP_ROOT + '/' + APP_JOURNAL_CAISSE_JOURNAL;
+export const APP_JOURNAL_CAISSE_JOURNAL = APP_CAISSE_JOURNAL + '/' + APP_JOURNAL;
+export const APP_ROOT_JOURNAL_CAISSE_JOURNAL = APP_ROOT + '/' + APP_JOURNAL_CAISSE_JOURNAL;
 
 //Route caisse
 export const APP_CAISSE = 'caisse';
 export const APP_CAISSE_CAISSE_JOURNAL = APP_CAISSE_JOURNAL + '/' + APP_CAISSE;
-export const APP_ROOT_CAISSE_CAISSE_JOURNAL =
-  APP_ROOT + '/' + APP_CAISSE_CAISSE_JOURNAL;
+export const APP_ROOT_CAISSE_CAISSE_JOURNAL = APP_ROOT + '/' + APP_CAISSE_CAISSE_JOURNAL;
 
 //Route affectation caissier
 export const APP_AFFECTATION_CAISSIER = 'affectation_caissier';
-export const APP_AFFECTATION_CAISSIER_CAISSE_JOURNAL =
-  APP_CAISSE_JOURNAL + '/' + APP_AFFECTATION_CAISSIER;
-export const APP_ROOT_AFFECTATION_CAISSIER_CAISSE_JOURNAL =
-  APP_ROOT + '/' + APP_AFFECTATION_CAISSIER_CAISSE_JOURNAL;
+export const APP_AFFECTATION_CAISSIER_CAISSE_JOURNAL = APP_CAISSE_JOURNAL + '/' + APP_AFFECTATION_CAISSIER;
+export const APP_ROOT_AFFECTATION_CAISSIER_CAISSE_JOURNAL = APP_ROOT + '/' + APP_AFFECTATION_CAISSIER_CAISSE_JOURNAL;
 
 //Route des operations
 export const APP_OPERATION = "operation";
