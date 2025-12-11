@@ -58,6 +58,14 @@ export class LayoutHeaderComponent implements OnInit {
     return this.caisseStatusService;
   }
 
+  get user(){
+    return JSON.parse(localStorage.getItem('user') || '{}');
+  }
+  
+  logout (){
+    localStorage.clear();
+  }
+
   getCaissesPerdiodes() {
     const requests = this.caissesUser.map(c =>
       this.caisseservice.getRecentCaisse(c.idcaisse)
