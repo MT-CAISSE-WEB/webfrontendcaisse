@@ -54,6 +54,14 @@ export class LayoutHeaderComponent implements OnInit {
     this.initForm();
   }
 
+  get user(){
+    return JSON.parse(localStorage.getItem('user') || '{}');
+  }
+  
+  logout (){
+    localStorage.clear();
+  }
+
   get caisseStatus() {
     return this.caisseStatusService;
   }

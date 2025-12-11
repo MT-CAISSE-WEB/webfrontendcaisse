@@ -30,7 +30,7 @@ export class CaisseComponent implements OnInit{
   currentPage: number = 1;
   // Nombre d'éléments par page
   totalPages: number = 0;
-  limit: number = 5;
+  limit: number = 10;
 
   //Faire le check selection **********
   objectsSelected : caisseModel[] = [];
@@ -74,7 +74,6 @@ export class CaisseComponent implements OnInit{
       next : (res) => {
         if(res.success){
           this.caisses = res.data.data;
-          console.log(this.caisses);
           this.totalPages = res.data.totalPages;
         }
       }
