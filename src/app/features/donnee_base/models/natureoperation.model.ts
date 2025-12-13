@@ -11,4 +11,5 @@ export class natureoperationModel extends MainModel{
     idsociete : string = "";
     idcompte : string = "";
     compte : any;
+    typeoperation: string = ""
 }

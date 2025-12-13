@@ -6,7 +6,12 @@ import { operationModel } from '../model/operation.model';
 import { OperationService } from '../service/operation.service';
 import { caissePeriodeModel } from '../../caisse_journal/models/periodecaisse.model';
 import { CaissePeriodeService } from '../../caisse_journal/services/caisseperiode.service';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, Observable, takeUntil, tap } from 'rxjs';
+import { Router } from '@angular/router';
+import { AffectationCaisseModel } from '../../caisse_journal/models/affectationcaisse.model';
+import { AffectationCaisseService } from '../../caisse_journal/services/affectationcaisse.service';
+import { natureoperationModel } from '../../donnee_base/models/natureoperation.model';
+import { NatureoperationService } from '../../donnee_base/services/natureoperation.service';
 
 @Component({
   selector: 'app-operation-caisse',
@@ -42,6 +47,7 @@ export class OperationCaisseComponent implements OnInit{
   actionModal: string = "create";
 
   //Liste de caisse utilisateur
+  caissesUser: AffectationCaisseModel[] = [];
   caissesAny: any[] = [
     {
       idcaisse : "47FCE466-8123-4DEB-942B-9F0E5BB22FD4",
@@ -99,6 +105,7 @@ export class OperationCaisseComponent implements OnInit{
 
   //Liste des natures filtrées
   naturesFiltrees: any[] = [];
+  natureoperations : natureoperationModel[] = [];
 
   //Message suppression
   msgSup: string = "";
@@ -111,7 +118,7 @@ export class OperationCaisseComponent implements OnInit{
   caisseperiodes: caissePeriodeModel[] = [];
 
   showCaisses = false;
-  caissesLoaded = false;
+  loadingModal = false;
   isAnyOpen: boolean = false;
 
   caisseStatuses: any = {};
@@ -126,7 +133,9 @@ export class OperationCaisseComponent implements OnInit{
     page: 1
   };
 
-  constructor(private caisseService: CaissePeriodeService,private operationservice: OperationService,
+  constructor(private natureoperationservice: NatureoperationService, private caisseuserservice: AffectationCaisseService,
+    private router : Router, private caissePeriodeservice: CaissePeriodeService,
+    private operationservice: OperationService,
     private currencyPipe: CurrencyPipe
   ){}
 
@@ -138,23 +147,20 @@ export class OperationCaisseComponent implements OnInit{
     //Initialisation du formulaire
     this.initForm();
     //Charger mes caisses
-    this.loadCaissesForm();
+    this.getCaisseUser();
 
     // Récupérer les statuts de caisse
-    this.caisseService.statuses$.subscribe(status => {
+    this.caissePeriodeservice.statuses$.subscribe(status => {
       this.caisseStatuses = status;
     });
-
-    //Chzrger la journée
-    this.loadPeriodes();
 
     this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("cette opération");
     this.titleMsg = TITLE_DELETE;
     this.lignes;
 
     this.searchForm.valueChanges
-    .pipe(debounceTime(400),distinctUntilChanged()).subscribe(values => {
-      this.applyFilters(values);});
+      .pipe(debounceTime(400),distinctUntilChanged()).subscribe(values => {
+        this.applyFilters(values);});
   }
 
   //Recuperer toutes les opérations
@@ -185,18 +191,7 @@ export class OperationCaisseComponent implements OnInit{
     });
   }
 
-  // Ecouter le filtre (saisie)
-  // listenFilters() {
-  //   this.searchForm.get('search')?.valueChanges
-  //     .pipe(debounceTime(300))
-  //     .subscribe(() => {
-  //       this.applyFilters();
-  //     });
-  // }
-
   applyFilters(filters: any) {
-    //const filters = this.searchForm.value;
-
     const params = {
       page: this.currentPage,
       limit: this.limit,
@@ -216,6 +211,20 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   //Recuperer les natures opérations
+  getAllNatureoperations(){
+    const params = {
+      page: 1,
+      limit: 100
+    };
+    this.natureoperationservice.getAll(params).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.natureoperations = res.data.data;
+          this.totalPages = res.data.totalPages;
+        }
+      }
+    });
+  }
 
   //Recuperer les devises de la societe
 
@@ -238,6 +247,17 @@ export class OperationCaisseComponent implements OnInit{
     return solde;
   }
 
+  get user(){
+    return JSON.parse(localStorage.getItem('user') || '{}');
+  }
+
+  rafreshpage(){
+    const currentUrl = this.router.url; 
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.router.navigate([currentUrl]);
+    });
+  }
+
   //Initialiser le formulaire
   initForm(){
     this.operationForm = this.fb.group({
@@ -248,7 +268,7 @@ export class OperationCaisseComponent implements OnInit{
       lignes: this.fb.array([]),
       devise : ["", [Validators.required]],
       site : ["197D7C37-7180-4DD1-80CC-843B9A6C5B52"],
-      societe : ["B89B381E-691E-4BA7-979E-1AC4D5B1E018"],
+      societe : [this.user.idsociete ?? null],
       montant: [0],
       caisses : this.fb.array([])
     })
@@ -286,6 +306,62 @@ export class OperationCaisseComponent implements OnInit{
     return this.operationForm.get('lignes') as FormArray<FormGroup>;
   }
 
+  getCaisseUser(){
+    this.loading = true;
+    this.caisseuserservice.getCaisseByUser(this.user.idutilisateur ?? null).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.caissesUser = res.data || [];
+          if (this.caissesUser.length > 0) {
+            this.loadCaissesEtPeriodes();
+          } else {
+            this.caisseperiodes = [];
+          }
+          this.loading = false;
+        }
+      },
+      error: () => {
+        this.loading = false;
+        console.error("Erreur chargement caisses utilisateur");
+      }
+    });
+  }
+
+  loadCaissesEtPeriodes() {
+    this.caissePeriodeservice.getCaissesPeriodes(this.caissesUser).subscribe({
+      next: (responses) => {
+        //périodes = source de vérité
+        this.caisseperiodes = responses.map(res => res.data);
+        //remplir le formulaire depuis les périodes
+        this.loadCaissesFormFromPeriodes(this.caisseperiodes);
+        //logique métier
+        this.updateButtonState();
+      },
+      error: () => {
+        console.error("Erreur chargement caisses / périodes");
+      }
+    });
+  }
+
+  loadCaissesFormFromPeriodes(periodes: any[]) {
+    const caissesArray = this.operationForm.get('caisses') as FormArray;
+    caissesArray.clear();
+    periodes.forEach(p => {
+      caissesArray.push(
+        this.fb.group({
+          idcaisse: [p.idcaisse, Validators.required],
+          caisse: [p.caisse?.codecaisse || null, Validators.required],
+          statut: [p.statut],
+          devisecaisse: [p.caisse?.devise?.codedevise || null],
+          solde: [this.formatNumber(p.solde) ?? 0],
+          montantcaisse: [0],
+          taux: [1],
+          idperiode : [p.idperiode ? p.idperiode : null, Validators.required]
+        })
+      );
+    });
+  }
+
   formatMontant(montant: number, devise: string) {
     if (!montant && montant !== 0) return "";
 
@@ -314,7 +390,7 @@ export class OperationCaisseComponent implements OnInit{
     }
 
     const cleanType = type.toLowerCase().trim();
-    this.naturesFiltrees = this.natureOperations.filter(n => 
+    this.naturesFiltrees = this.natureoperations.filter(n => 
       n.typeoperation.toLowerCase().trim() === cleanType
     );
   }
@@ -323,14 +399,14 @@ export class OperationCaisseComponent implements OnInit{
     return this.operationForm.get("caisses") as FormArray<FormGroup>;
   }
 
-  toggleCaisses() {
-    this.showCaisses = !this.showCaisses;
-    // Charger les caisses UNE SEULE FOIS
-    if (this.showCaisses && !this.caissesLoaded) {
-      this.loadCaissesForm();
-      this.caissesLoaded = true;
-    }
-  }
+  // toggleCaisses() {
+  //   this.showCaisses = !this.showCaisses;
+  //   // Charger les caisses UNE SEULE FOIS
+  //   if (this.showCaisses && !this.caissesLoaded) {
+  //     this.loadCaissesForm();
+  //     this.caissesLoaded = true;
+  //   }
+  // }
 
   //vérifie si _id est inclus dans un tableau d'IDs stocké
   isChecked(_id: string) {
@@ -364,12 +440,12 @@ export class OperationCaisseComponent implements OnInit{
     const periode = this.caisseperiodes.find(p => p.idcaisse === _caisse.idcaisse);
     const caisseFG = this.fb.group({
       idcaisse : [_caisse.idcaisse, Validators.required],
-      caisse: [_caisse.codecaisse, Validators.required],
-      solde: [this.formatNumber(_caisse.solde) ?? 0],
+      caisse: [_caisse.caisse?.codecaisse, Validators.required],
+      solde: [this.formatNumber(_caisse.caisse?.solde) ?? 0],
       montantcaisse: [0],
       taux: [1],
       montantref: [0],
-      devisecaisse: [_caisse.devise],
+      devisecaisse: [_caisse.caisse?.devise],
       idperiode : [periode?.idperiode ? periode.idperiode : null, Validators.required]
     });
 
@@ -379,10 +455,32 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   //Charger les caisses sur le formulaires
-  loadCaissesForm(){
-    if(this.caisses.length === 0){
-      this.caissesAny.forEach(c => {this.addCaisse(c)});
-    }
+  loadCaissesForm(): Observable<void> {
+    return this.caissePeriodeservice.getCaissesPeriodes(this.caissesUser).pipe(
+      tap((responses: any[]) => {
+        const periodes = responses.map(r => r.data);
+        // caisse existante dans l'opération ?
+        //const opCaisse = this.operations.get(p.idcaisse);
+        // remplir tableau métier
+        this.caisseperiodes = periodes;
+        // remplir le formulaire
+        const caissesArray = this.operationForm.get('caisses') as FormArray;
+        caissesArray.clear();
+        periodes.forEach(p => {
+          caissesArray.push(this.fb.group({
+            idcaisse: [p.idcaisse, Validators.required],
+            caisse: [p.caisse?.codecaisse || null, Validators.required],
+            statut: [p.statut],
+            devisecaisse: [p.caisse?.devise?.codedevise || null],
+            solde: [this.formatNumber(p.solde) ?? 0],
+            montantcaisse: [0],
+            taux: [1],
+            idperiode : [p.idperiode ? p.idperiode : null, Validators.required]
+          }));
+        });
+      }),
+      map(() => void 0)
+    );
   }
 
   //Sélection/ Désélection de tous les éléments
@@ -405,16 +503,16 @@ export class OperationCaisseComponent implements OnInit{
     //Construire les caisses en FormGroup[]
     const caisseFG = _object.caisses.map(c => {
       // Trouver la caisse dans caissesAny
-      const caisseSource = this.caissesAny.find(x => x.idcaisse === c.idcaisse);
+      const caisseSource = this.caissesUser?.find(x => x.idcaisse === c.idcaisse);
 
       return this.fb.group({
         idcaisse: [c.idcaisse],
-        caisse : [caisseSource.codecaisse ?? ""],
+        caisse : [c.codecaisse ?? ""],
         montantcaisse : [c.montant ?? 0],
         taux : [c.taux ?? 1],
-        montantref : [c.montantref ?? c.montant * c.taux],
+        montantref : [c.montantref ?? (c.montant ?? 0) * (c.taux ?? 1)],
         solde : [c.solde ?? 0],
-        devisecaisse : [caisseSource.devise ?? ""],
+        devisecaisse : [c.devise ?? null],
         idtypeoperation : [c.idtypeoperation ?? null]
       })
     });
@@ -492,11 +590,6 @@ export class OperationCaisseComponent implements OnInit{
     return true;
   }
 
-  // Utilise ton système de toast / alert
-  // showError(message: string) {
-  //   this.error = message;
-  // }
-
   //validation required
   isValidField(label: string): string {
     let status: string = "";
@@ -555,6 +648,7 @@ export class OperationCaisseComponent implements OnInit{
         if (res.success) {
           this.closeModal('showModal');
           this.getAllOperations();
+          this.rafreshpage();
         } else {
           this.error = "Erreur de création";
         }
@@ -574,6 +668,7 @@ export class OperationCaisseComponent implements OnInit{
         if (res.success) {
           this.closeModal('showModal');
           this.getAllOperations();
+          this.rafreshpage();
         } else {
           this.error = "Erreur de modification";
         }
@@ -604,25 +699,36 @@ export class OperationCaisseComponent implements OnInit{
     updateMontantRef();
   }
 
-  modalCreate(){
-    //this.showCaisses = false;
-    this.actionModal = "create";
-    this.initForm();
-    this.loadCaissesForm();
-
+  finaliserModal(){
     const sameDate = this.checkSameDatePeriodes();
     if (sameDate) {
       this.operationForm.patchValue({
         dateoperation: this.formatDateForInput(sameDate)
       });
-      this.operationForm.get("dateoperation")?.disable();  // griser le champ
-    } else {
-      this.operationForm.get("dateoperation")?.enable();   // champ modifiable
+      this.operationForm.get("dateoperation")?.disable();
     }
 
-    //Filtrer les natures quand typeoperation change
-    this.operationForm.get("typepaiement")?.valueChanges.subscribe(type => {
-      this.filtrerNatures(type);
+    // this.operationForm.get("typepaiement")?.valueChanges
+    //   .pipe(takeUntil(this.destroy$))
+    //   .subscribe(type => this.filtrerNatures(type));
+  }
+
+  modalCreate(){
+    this.actionModal = "create";
+    this.loadingModal = true;
+    this.initForm();
+    this.loadCaissesForm().subscribe({
+      next: () => {
+        this.finaliserModal();
+        this.loadingModal = false;
+        // Filtrer les natures quand typepaiement change
+        this.operationForm.get("typepaiement")?.valueChanges.subscribe(type => {
+          this.filtrerNatures(type);
+        });
+      }, 
+      error: () => {
+        this.loadingModal = false;
+      }
     });
   }
 
@@ -668,6 +774,7 @@ export class OperationCaisseComponent implements OnInit{
           this.deleteOperation = null;
           this.closeModal('deleteOrder');
           this.getAllOperations();
+          this.rafreshpage();
         } else {
           this.error = "Erreur de Suppression";
         }
@@ -681,7 +788,7 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   loadPeriodes() {
-    this.caisseService.getCaissesPeriodes(this.caissesAny).subscribe({
+    this.caissePeriodeservice.getCaissesPeriodes(this.caissesUser).subscribe({
       next: (responses) => {
         this.caisseperiodes = responses.map(res => res.data);
         this.updateButtonState();   // vérifie les statuts

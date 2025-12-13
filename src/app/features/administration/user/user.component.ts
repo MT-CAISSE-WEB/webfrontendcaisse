@@ -17,41 +17,41 @@ import { ChangeDetectorRef } from '@angular/core';
   styleUrl: './user.component.css'
 })
 export class UserComponent {
-      title = "Utilisateurs";
-      params : any = {};
-      breadCrumbs : any = {};
-      fb: FormBuilder = new FormBuilder();
-      users : usermodel[] = [];
-      user : usermodel = new usermodel();
-      msgErros : string = "";
-      loading: Boolean = false;
-      userForm : FormGroup = this.fb.group({});
-      societes : societemodel[] = [];
+    title = "Utilisateurs";
+    params : any = {};
+    breadCrumbs : any = {};
+    fb: FormBuilder = new FormBuilder();
+    users : usermodel[] = [];
+    user : usermodel = new usermodel();
+    msgErros : string = "";
+    loading: Boolean = false;
+    userForm : FormGroup = this.fb.group({});
+    societes : societemodel[] = [];
 
-      //Tri et recherche 
-      filtreusers : usermodel[] = [];
-      searchtext : string ="";
-      sortby: string = "code";
-      sortdirection : 'asc' | 'desc' = 'asc';
-      selectedstatus : string="";
-      activeTab: string = 'all';
+    //Tri et recherche 
+    filtreusers : usermodel[] = [];
+    searchtext : string ="";
+    sortby: string = "code";
+    sortdirection : 'asc' | 'desc' = 'asc';
+    selectedstatus : string="";
+    activeTab: string = 'all';
 
-      //Pagination 
-      pageSize: number = 10;        // éléments par page (à adapter si tu veux)
-      currentPage: number = 1;      // page courante
+    //Pagination 
+    pageSize: number = 10;        // éléments par page (à adapter si tu veux)
+    currentPage: number = 1;      // page courante
 
 
-      // Définissez des propriétés de pagination
-      //currentPage: number = 1;
-      // Nombre d'éléments par page
-      limit: number = 5;
+    // Définissez des propriétés de pagination
+    //currentPage: number = 1;
+    // Nombre d'éléments par page
+    limit: number = 5;
 
-      //Faire le check selection **********
-      objectsSelected : usermodel[] = [];
-      selectedItems : any[] = [];
-      // Détermine si toutes les lignes sont selectionnées
-      checkAllRow : any;
-      error : string = "";
+    //Faire le check selection **********
+    objectsSelected : usermodel[] = [];
+    selectedItems : any[] = [];
+    // Détermine si toutes les lignes sont selectionnées
+    checkAllRow : any;
+    error : string = "";
 
       //Changement titre modal
       actionModal: string = "create";
@@ -197,8 +197,8 @@ get departementCount(): number {
 get acheteurCount(): number {
   return this.users.filter(user => user.acheteur === 1).length;
 }
-  //normaliser le test pour la recherche
-  normalize(value: any): string {
+//normaliser le test pour la recherche
+normalize(value: any): string {
   return (value || "")
     .toString()
     .toLowerCase()
@@ -249,7 +249,7 @@ get acheteurCount(): number {
       });
     }
 
-    isValidField(field: string): string {
+isValidField(field: string): string {
   const control = this.userForm.get(field);
   return control && control.invalid && (control.touched || control.dirty)
     ? 'is-invalid'
@@ -372,7 +372,7 @@ get acheteurCount(): number {
         this.deleteuser = item;
       }
 
-      deleteConfirmed(){
+deleteConfirmed(){
   if(!this.deleteuser) return ;
   this.us.delete(this.deleteuser.idutilisateur).subscribe({
     next: (res) => {

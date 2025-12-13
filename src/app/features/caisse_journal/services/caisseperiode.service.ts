@@ -4,6 +4,8 @@ import { QueryResultModel } from "../../../_core/models/query-result.model";
 import { URL_LOCAL } from "../../../_core/routes/backend.root";
 import { Injectable } from "@angular/core";
 import { CaisseService } from './caisse.service';
+import { caisseModel } from "../models/caisse.model";
+import { AffectationCaisseModel } from "../models/affectationcaisse.model";
 
 @Injectable({
   providedIn: 'root'
@@ -74,7 +76,7 @@ export class CaissePeriodeService {
         return this.periodeSource.value[id] || "chargement...";
     }
 
-    getCaissesPeriodes(caisses: any[]) {
+    getCaissesPeriodes(caisses: AffectationCaisseModel[]) {
         const requests = caisses.map(c =>
             this.caisseService.getRecentCaisse(c.idcaisse)
         );

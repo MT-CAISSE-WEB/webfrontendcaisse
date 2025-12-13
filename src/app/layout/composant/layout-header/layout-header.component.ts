@@ -7,6 +7,8 @@ import { CaissePeriodeService } from '../../../features/caisse_journal/services/
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.contantes';
+import { AffectationCaisseModel } from '../../../features/caisse_journal/models/affectationcaisse.model';
+import { AffectationCaisseService } from '../../../features/caisse_journal/services/affectationcaisse.service';
 
 @Component({
   selector: 'app-layout-header',
@@ -25,33 +27,35 @@ export class LayoutHeaderComponent implements OnInit {
   loading: boolean = false;
 
   //Liste de caisse utilisateur
-  caissesUser: any[] = [
-    {
-      idcaisse : "47FCE466-8123-4DEB-942B-9F0E5BB22FD4",
-      codecaisse : "CA001",
-      libelle : "Caisse principale",
-      devise : "XAF"
-    },
-    {
-      idcaisse : "F1DD7EDE-EB9C-41D2-8EE1-55300B21777C",
-      codecaisse : "CA002",
-      libelle : "Caisse secondaire",
-      devise : "USD"
-    }
-  ];
+  caissesUser: AffectationCaisseModel[] = [];
+  // caissesX :  any[] = [
+  //   {
+  //     idcaisse : "47FCE466-8123-4DEB-942B-9F0E5BB22FD4",
+  //     codecaisse : "CA001",
+  //     libelle : "Caisse principale",
+  //     devise : "XAF"
+  //   },
+  //   {
+  //     idcaisse : "F1DD7EDE-EB9C-41D2-8EE1-55300B21777C",
+  //     codecaisse : "CA002",
+  //     libelle : "Caisse secondaire",
+  //     devise : "USD"
+  //   }
+  // ]
+
+  loadingCaisses = false;
 
   caissesStatuses: { [id: string]: string } = {};
 
-  constructor(private caisseservice: CaisseService,private caisseStatusService: CaissePeriodeService){}
+  constructor(private caisseuserservice: AffectationCaisseService, private caisseservice: CaisseService,private caisseStatusService: CaissePeriodeService){}
 
   ngOnInit(): void {
+    //récuperer les caisses de l'utilisateur
     this.caisseperiodeForm = this.fb.group({
       caisses: this.fb.array([])
     });
-    this.caisseStatusService.loadStatuses(this.caissesUser);
-    this.getCaissesPerdiodes();
-    //initialiser le formulaire
-    this.initForm();
+
+    this.getCaisseUser();
   }
 
   get caisseStatus() {
@@ -64,6 +68,26 @@ export class LayoutHeaderComponent implements OnInit {
   
   logout (){
     localStorage.clear();
+  }
+
+  getCaisseUser(){
+    this.loadingCaisses = true;
+    this.caisseuserservice.getCaisseByUser(this.user.idutilisateur ?? null).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.caissesUser = res.data;
+          if (this.caissesUser.length > 0) {
+            this.getCaissesPerdiodes();
+          }else {
+            this.loadingCaisses = false;
+        }
+        }
+      },
+      error: () => {
+        this.loadingCaisses = false;
+        console.error("Erreur chargement caisses utilisateur");
+      }
+    });
   }
 
   getCaissesPerdiodes() {
@@ -84,8 +108,10 @@ export class LayoutHeaderComponent implements OnInit {
         this.caisseStatusService.updateStatuses(statuses);
         // maintenant que tout est chargé → on initialise le formulaire
         this.initForm();
+        this.loadingCaisses = false;
       },
       error: () => {
+        this.loadingCaisses = false;
         console.log("Erreur de chargement des caisses");
       }
     });
@@ -99,7 +125,8 @@ export class LayoutHeaderComponent implements OnInit {
           idperiode: [c.idperiode],
           idcaisse: [c.idcaisse],
           statut: [c.statut],
-          dateperiode: [c.dateperiode]
+          dateperiode: [c.dateperiode],
+          caisse: [c.caisse]
         }));
       });
   }

@@ -74,7 +74,6 @@ export class CaisseComponent implements OnInit{
       next : (res) => {
         if(res.success){
           this.caisses = res.data.data;
-          console.log(this.caisses);
           this.totalPages = res.data.totalPages;
         }
       }

@@ -183,6 +183,11 @@
             <div class="card-body">
                 <div>
                     <div class="table-responsive table-card">
+                        @if (loading) {
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-info"></div>
+                        </div>
+                        }
                         <table class="table align-middle table-nowrap" id="invoiceTable">
                             <thead class="text-muted">
                                 <tr>
@@ -477,7 +482,7 @@
                                                         <th scope="col"> Montant ref. </th>
                                                     </tr>
                                                 </thead>
-                                                <tbody>
+                                                <tbody *ngIf="!loadingModal; else loader">
                                                     @for(c of caisses.controls; track $index){
                                                     <tr [formGroup]="c">
                                                         <td>
@@ -487,7 +492,7 @@
                                                             <span> {{ c.get('devisecaisse')?.value }} </span>
                                                         </td>
                                                         <td>
-                                                            <input formControlName="solde" type="text" class="form-control form-control-sm bg-success-subtle border-0"  readonly/>
+                                                            <input value="{{ c.get('solde')?.value }}" formControlName="solde" type="text" class="form-control form-control-sm bg-success-subtle border-0"  readonly/>
                                                         </td>
                                                         <td>
                                                             <input type="text" formControlName="montantcaisse" class="form-control form-control-sm bg-light border-0"  placeholder="000.000"/>
@@ -501,6 +506,12 @@
                                                     </tr>
                                                     }
                                                 </tbody>
+                                                <ng-template #loader>
+                                                    <div class="text-center p-4">
+                                                        <div class="spinner-border text-info"></div>
+                                                        <p>Chargement des périodes...</p>
+                                                    </div>
+                                                </ng-template>
                                             </table>
                                         </td>
                                         <td colspan="1" class="p-0">

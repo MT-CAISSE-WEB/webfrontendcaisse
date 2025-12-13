@@ -15,6 +15,7 @@ import {
   TITLE_DELETE,
 } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-journal',
@@ -56,21 +57,33 @@ export class JournalComponent implements OnInit {
   //Element à supprimer
   deleteJournal: any = null;
 
+  //Formulaire de recherche
+  searchForm : FormGroup = this.fb.group({});
+
   constructor(private journalservice: JournalService, private router: Router) {}
 
   ngOnInit(): void {
+    //initialiser le formulaire de recherche
+    this.initSearchForm();
     //Afficher tous les journaux
     this.getAllJournaux();
     //Initialisation du formulaire
     this.initForm();
     this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION('ce journal');
     this.titleMsg = TITLE_DELETE;
+
+    this.searchForm.valueChanges
+      .pipe(debounceTime(400),distinctUntilChanged()).subscribe(values => {
+      this.applyFilters(values);});
   }
 
   getAllJournaux() {
+    const filters = this.searchForm.value;
     this.params = {
       page: this.currentPage,
       limit: this.limit,
+      search:  '',
+      actif: filters.status ?? ''
     };
     this.journalservice.getAll(this.params).subscribe({
       next: (res: any) => {
@@ -82,14 +95,53 @@ export class JournalComponent implements OnInit {
     });
   }
 
+  //Initialiser le formulaire de recherche
+  initSearchForm() {
+    this.searchForm = this.fb.group({
+      search: [''],
+      date: [''],
+      status: ['']
+    });
+  }
+
+  setStatus(value: number | '') {
+    this.searchForm.patchValue(
+      { status: value },
+      { emitEvent: true } // déclenche valueChanges
+    );
+  }
+
+  //application du filtre
+  applyFilters(filters: any) {
+    const params = {
+      page: this.currentPage,
+      limit: this.limit,
+      search: filters.search || '',
+      actif: filters.status || ''
+    };
+
+    this.journalservice.getAll(params).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.journaux = res.data.data;
+          this.totalPages = res.data.totalPages;
+        }
+      }
+    });
+  }
+
   //création du formulaire
   initForm(): void {
     this.journalForm = this.fb.group({
       codejournal: ['', [Validators.required]],
       designation: ['', [Validators.required]],
-      idsociete: ['', [Validators.required]],
+      idsociete: [this.userConnect.idsociete ?? null, [Validators.required]],
       actif: [true],
     });
+  }
+
+  get userConnect(){
+    return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
   get form() {
@@ -101,7 +153,7 @@ export class JournalComponent implements OnInit {
     this.journalForm.patchValue({
       codejournal: _object.codejournal,
       designation: _object.designation,
-      idsociete: _object.idsociete,
+      idsociete: _object.idsociete ?? null,
       actif: status,
     });
   }
@@ -146,6 +198,13 @@ export class JournalComponent implements OnInit {
     this.getAllJournaux(); // recharge les données
   }
 
+  rafreshpage(){
+    const currentUrl = this.router.url; 
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.router.navigate([currentUrl]);
+    });
+  }
+
   //Soumission du formulaire
   onSubmit() {
     /** Check formulaire */
@@ -184,6 +243,7 @@ export class JournalComponent implements OnInit {
         if (res.success) {
           this.closeModal('showModal');
           this.getAllJournaux();
+          this.rafreshpage();
         } else {
           this.error = 'Erreur de création';
         }
@@ -203,6 +263,7 @@ export class JournalComponent implements OnInit {
         if (res.success) {
           this.closeModal('showModal');
           this.getAllJournaux();
+          this.rafreshpage();
         } else {
           this.error = 'Erreur de modification';
         }
@@ -250,6 +311,7 @@ export class JournalComponent implements OnInit {
           this.deleteJournal = null;
           this.closeModal('deleteOrder');
           this.getAllJournaux();
+          this.rafreshpage();
         } else {
           this.error = 'Erreur de Suppression';
         }
