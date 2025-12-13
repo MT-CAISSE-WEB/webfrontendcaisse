@@ -63,9 +63,6 @@ export class PlancomptableComponent implements OnInit{
       this.initForm();
       this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("ce compte");
       this.titleMsg = TITLE_DELETE;
-    //   this.autreService.chargerSocietes().subscribe(res => {
-    //   console.log(res);
-    // });
   }
 
   getAllComptes(){
@@ -84,15 +81,6 @@ export class PlancomptableComponent implements OnInit{
   }
 
 
-  // getSocietes(){
-  //   this.autreservice.chargerSocietes().subscribe({
-  //     next : (res) => {
-  //       this.societes = res.data.data;
-  //     }
-  //   });
-  // }
-
-
   //Création du formulaire
   initForm(): void{
     this.plancomptableForm = this.fb.group({
@@ -100,7 +88,7 @@ export class PlancomptableComponent implements OnInit{
       libelle : ["", [Validators.required]],
       ventillable: [false],
       auxiliaire: [false],
-      suivibudgetaire: [false],
+      suivibudgetaire: [true],
       suivibudgetairemensuel: [false],
       idsociete : ["58B53CD2-686A-4CED-9E64-3BA2A5A6D664", [Validators.required]],
       actif : [true],
@@ -121,11 +109,10 @@ export class PlancomptableComponent implements OnInit{
       suivibudgetaire : _object.suivibudgetaire,
       suivibudgetairemensuel : _object.suivibudgetairemensuel,
       idsociete: _object.idsociete,
-      codesociete : _object.societe.societe_codesociete,
-      raisonsociale : _object.societe.societe_raisonsociale,
       actif : status
     })
   }
+
 
   //validation required
   isValidField(label: string): string {

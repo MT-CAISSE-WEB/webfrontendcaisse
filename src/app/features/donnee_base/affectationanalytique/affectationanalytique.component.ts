@@ -10,6 +10,11 @@ import { CentreAnalytiqueService } from '../services/centreanalytique.service';
 import { centreanalytiqueModel } from '../models/centreanalytique.model';
 import { NatureoperationService } from '../services/natureoperation.service';
 import { natureoperationModel } from '../models/natureoperation.model';
+import { departementservice } from '../../structure/service/departement.service';
+import { departementmodel } from '../../structure/model/departement.model';
+import { siteservice } from '../../structure/service/site.service';
+import { sitemodel } from '../../structure/model/site.model';
+
 
 @Component({
   selector: 'app-affectationanalytique',
@@ -34,7 +39,7 @@ export class AffectationanalytiqueComponent implements OnInit{
   currentPage: number = 1;
   // Nombre d'éléments par page
   totalPages: number = 0;
-  limit: number = 5;
+  limit: number = 10;
 
   //Faire le check selection **********
   objectsSelected : affectationanalytiqueModel[] = [];
@@ -55,17 +60,26 @@ export class AffectationanalytiqueComponent implements OnInit{
 
   centres : centreanalytiqueModel[] = [];
   natureoperations : natureoperationModel[] = [];
+  sites : sitemodel[] = []
+  departements : departementmodel[] = [];
+
+
 
   constructor(private affectationanalytiqueservice: AffectationAnalytiqueService,
               private centreanalytiqueservice: CentreAnalytiqueService,
               private natureoperationservice: NatureoperationService,
+              private siteservice: siteservice,
+              private departementservice: departementservice,
               private router: Router){}
+
 
   ngOnInit(): void {
       //Afficher tous les affectations
       this.getAllaffectations();
       this.getAllNatureoperations();
       this.getAllcentres();
+      this.getAllSites();
+      this.getAllDepartements();
       //Initialisation du formulaire
       this.initForm();
       this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("cette affectation");
@@ -86,6 +100,7 @@ export class AffectationanalytiqueComponent implements OnInit{
       }
     });
   }
+
 
   // centre analytique
   getAllcentres(){
@@ -119,11 +134,35 @@ export class AffectationanalytiqueComponent implements OnInit{
     });
   }
 
+  getAllSites(){
+    this.siteservice.getAll().subscribe({
+      next : (res) => {
+        if(res.success){
+          this.sites = res.data;
+          this.totalPages = res.data.totalPages;
+        }
+      }
+    });
+  }
+
+
+  getAllDepartements(){
+    this.departementservice.getAll().subscribe({
+      next : (res) => {
+        if(res.success){
+          this.departements = res.data;
+          this.totalPages = res.data.totalPages;
+        }
+      }
+    });
+  }
+
+
   //Création du formulaire
   initForm(): void{
     this.affectationanalytiqueForm = this.fb.group({
       codeaffectation : ["", [Validators.required]],
-      idsociete : ["9153CAA9-30E1-4760-9DF3-E982EAA1FDC0", [Validators.required]],
+      idsociete : ["58B53CD2-686A-4CED-9E64-3BA2A5A6D664", [Validators.required]],
       idsite : ["", [Validators.required]],
       iddepartement : ["", [Validators.required]],
       idcentreanalytique : ["", [Validators.required]],
@@ -132,6 +171,7 @@ export class AffectationanalytiqueComponent implements OnInit{
     })
   }
 
+  
   get form() {
     return this.affectationanalytiqueForm.controls;
   }

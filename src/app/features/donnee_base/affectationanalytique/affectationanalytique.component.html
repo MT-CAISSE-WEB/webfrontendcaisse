@@ -123,8 +123,8 @@
                                         </div>
                                     </th>
                                     <td class="code"><a href="#" class="fw-medium link-primary">{{item.codeaffectation}}</a></td>
-                                    <td class="idsite">{{item.site?.codesite}}</td>
-                                    <td class="iddepartement">{{item.departement?.codedept}}</td>
+                                    <td class="idsite">{{item.site.codesite}}</td>
+                                    <td class="iddepartement">{{item.departement.codedept}}</td>
                                     <td class="idnature">{{item.nature.codenature}}</td>
                                     <td class="idcentreanalytique">{{item.centre.codecentreanalytique}}</td>
                                     <td class="status">
@@ -187,11 +187,11 @@
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header bg-light p-3">
-                                <h5 class="modal-title" id="exampleModalLabel">{{ actionModal === "create" ? 'Créer' : 'Modifier'}} un Codeaffectation</h5>
+                                <h5 class="modal-title" id="exampleModalLabel">{{ actionModal === "create" ? 'Créer' : 'Modifier'}} une affectation</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
                             </div>
                             
-                            <!-- Formulaire de création de Codeaffectation -->
+                            <!-- Formulaire de création d'une affectation -->
                             <form [formGroup]="affectationanalytiqueForm">
                                 <div class="modal-body">
                                     <input type="hidden" id="id-field"/>
@@ -203,13 +203,27 @@
 
                                     <div class="mb-3">
                                         <label for="customername-field" class="form-label form-label-sm">Site</label>
-                                        <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('idsite')}}" formControlName="idsite" placeholder="Code site"/>
+                                        <div class="input-light">
+                                            <select id="customername-field" class="form-control form-control-sm" formControlName="idsite">
+                                                <option value="">-- Sélectionner --</option>
+                                                @for ( item of sites; track $index ) {
+                                                    <option [value]="item.idsite">{{ item.codesite }} - {{ item.libelle }}</option>
+                                                }
+                                            </select>
+                                        </div>
                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                     </div>
 
                                     <div class="mb-3">
                                         <label for="customername-field" class="form-label form-label-sm">Département</label>
-                                        <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('iddepartement')}}" formControlName="iddepartement" placeholder="Code département"/>
+                                        <div class="input-light">
+                                            <select id="customername-field" class="form-control form-control-sm" formControlName="iddepartement">
+                                                <option value="">-- Sélectionner --</option>
+                                                @for ( item of departements; track $index ) {
+                                                    <option [value]="item.iddepartement">{{ item.codedept }} - {{ item.libelle }}</option>
+                                                }
+                                            </select>
+                                        </div>
                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                     </div>
 
@@ -286,6 +300,7 @@
                             <div class="modal-body p-5 text-center">
                                 <div class="mt-4 text-center">
                                     <h4>{{titleMsg}} de {{deleteaffectation?.codeaffectation}}</h4>
+                                    <h3>{{deleteaffectation?.codesite}} - {{deleteaffectation?.idsite}} - {{deleteaffectation?.iddepartement}} - {{deleteaffectation?.idcentreanalytique}} - {{deleteaffectation?.idnature}}</h3>
                                     <p class="text-muted fs-15 mb-4">{{msgSup}}</p>
                                     <div class="hstack gap-2 justify-content-center remove">
                                         <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal">
