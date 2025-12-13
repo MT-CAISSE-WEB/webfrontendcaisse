@@ -80,15 +80,14 @@ export class LigneBudgetComponent implements OnInit {
   // Obtenir la liste de tous les budgets
   getAllBudgets() {
     this.params = {
-      page: this.currentPage,
-      limit: this.limit,
+      page: 1,
+      limit: 1000,
     };
     this.budgetservice.getAll(this.params).subscribe({
       next: (res: any) => {
         if (res.success) {
           this.budgets = res.data;
-          // console.log('Budgets:', this.budgets);
-          this.totalPages = res.data.totalPages;
+          // this.totalPages = res.totalPages;
         }
       },
     });
@@ -104,7 +103,7 @@ export class LigneBudgetComponent implements OnInit {
         if (res.success) {
           this.ligneBudgets = res.data;
           // console.log('Budgets:', this.budgets);
-          this.totalPages = res.data.totalPages;
+          this.totalPages = res.totalPages;
         }
       },
     });

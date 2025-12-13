@@ -139,13 +139,6 @@
           </div>
         </li>
 
-        <li class="nav-item">
-          <a class="nav-link" [routerLink]="root_demande_decaissement">
-            <i class="ri-hand-coin-line"></i>
-            <span data-key="t-dashboards">Demande de décaissement</span>
-          </a>
-        </li>
-
         <!-- fin du menu de mande de décaissement -->
 
         <!-- end Menu donnees de base -->
@@ -306,11 +299,10 @@
             <ul class="nav nav-sm flex-column">
               <li class="nav-item">
                 <a
-                  href="javascript:void(0)"
-                  target="_blank"
+                  [routerLink]="root_demande_decaissement"
                   class="nav-link"
                   data-key="t-horizontal"
-                  >Demande de caisse</a
+                  >Demande de décaissement</a
                 >
               </li>
               <li class="nav-item">

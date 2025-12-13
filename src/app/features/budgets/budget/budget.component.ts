@@ -87,7 +87,7 @@ export class BudgetComponent implements OnInit {
         if (res.success) {
           this.budgets = res.data;
           // console.log('Budgets:', this.budgets);
-          this.totalPages = res.data.totalPages;
+          this.totalPages = res.totalPages;
         }
       },
     });
