@@ -5,6 +5,8 @@ import { TiersService } from '../services/tiers.service';
 import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
+
 
 @Component({
   selector: 'app-tiers',
@@ -47,17 +49,33 @@ export class TiersComponent implements OnInit{
   //Element à supprimer 
   deleteTiers: any = null;
 
+  
+  //Formulaire de recherche
+  searchForm : FormGroup = this.fb.group({});
+  //initialiser le filtre
+  filters = {
+    search: '',
+    status: '',
+    page: 1
+  };
+
 
   constructor(private tiersservice: TiersService,
               private router: Router){}
 
   ngOnInit(): void {
+    //initialiser le formulaire de recherche
+     this.initSearchForm();
       //Afficher tous les tiers
       this.getAllTiers();
       //Initialisation du formulaire
       this.initForm();
       this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("ce tiers");
       this.titleMsg = TITLE_DELETE;
+
+      this.searchForm.valueChanges
+      .pipe(debounceTime(400),distinctUntilChanged()).subscribe(values => {
+      this.applyFilters(values);});
   }
 
   getAllTiers(){
@@ -68,6 +86,35 @@ export class TiersComponent implements OnInit{
     this.tiersservice.getAll(this.params).subscribe({
       next : (res) => {
         if(res.success){
+          this.tiers = res.data.data;
+          this.totalPages = res.data.totalPages;
+        }
+      }
+    });
+  }
+
+  //Initialiser le formulaire de recherche
+  initSearchForm() {
+    this.searchForm = this.fb.group({
+      search: [''],
+      date: [''],
+      status: ['']
+    });
+  }
+
+  applyFilters(filters: any) {
+    //const filters = this.searchForm.value;
+
+    const params = {
+      page: this.currentPage,
+      limit: this.limit,
+      search: filters.search || '',
+      status: filters.status || ''
+    };
+
+    this.tiersservice.getAll(params).subscribe({
+      next: (res) => {
+        if (res.success) {
           this.tiers = res.data.data;
           this.totalPages = res.data.totalPages;
         }
