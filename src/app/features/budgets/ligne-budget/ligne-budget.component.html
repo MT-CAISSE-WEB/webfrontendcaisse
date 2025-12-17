@@ -335,10 +335,11 @@
                       aria-label="Default select example"
                       id="idbudget-field"
                       formControlName="idbudget"
+                      (change)="onSelectionChange($event)"
                     >
                       <option selected>-- Sélectionner --</option>
                       @for(item of budgets; track $index) {
-                      <option value="{{ item.idbudget }}">
+                      <option [value]="item.idbudget">
                         {{ item.codebudget }} - Du:
                         {{ item.datedebut | date : "dd-MM-yyyy" }} au
                         {{ item.datefin | date : "dd-MM-yyyy" }}
@@ -347,6 +348,9 @@
                     </select>
                     <div class="invalid-feedback">{{ msgErros }}</div>
                   </div>
+
+                  @if(selectedBudget !== null && selectedBudget?.entite ===
+                  "Département") {
                   <div class="mb-3">
                     <label class="form-label form-label-sm" for="iddepartement"
                       >Département</label
@@ -359,6 +363,7 @@
                       <option selected>-- Sélectionner --</option>
                     </select>
                   </div>
+                  }
 
                   <div class="mb-3">
                     <label class="form-label form-label-sm" for="idnature"
@@ -373,6 +378,8 @@
                     </select>
                   </div>
 
+                  @if(selectedBudget !== null && selectedBudget?.entite ===
+                  "Département") {
                   <div class="mb-3">
                     <div>
                       <label
@@ -391,6 +398,7 @@
                       <div class="invalid-feedback">{{ msgErros }}</div>
                     </div>
                   </div>
+                  }
 
                   <div class="mb-3">
                     <div>

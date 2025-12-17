@@ -8,7 +8,7 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DemandeService } from './services/demande.service';
-import { forkJoin, map, of, switchMap } from 'rxjs';
+import { catchError, finalize, forkJoin, map, of, switchMap } from 'rxjs';
 import { DemandeComplet } from './models/demande-complet.model';
 import { EnteteDemande } from './models/entete-demande.model';
 import { LigneDemande } from './models/ligne-demande.model';
@@ -297,7 +297,7 @@ export class DemandeDecaissementComponent implements OnInit {
 
   newLigne(): FormGroup {
     return this.fb.group({
-      idlignedemande: [''],
+      idlignedemande: [null],
       numligne: ['', Validators.required],
       libellelignedemande: ['', Validators.required],
       montantdemande: ['', Validators.required],
@@ -314,8 +314,31 @@ export class DemandeDecaissementComponent implements OnInit {
     this.lignes.push(this.newLigne());
   }
 
-  removeLigne(i: number) {
-    this.lignes.removeAt(i);
+  removeLigne(ligneIndex: number) {
+    const ligneGroup = this.lignes.at(ligneIndex) as FormGroup;
+    const id = ligneGroup.get('idlignedemande')?.value;
+
+    // Ligne jamais persistée
+    if (!id) {
+      this.lignes.removeAt(ligneIndex);
+      return;
+    }
+
+    this.loading = true;
+
+    this.service
+      .deleteDetailsByLigne(id)
+      .pipe(
+        catchError(() => of(null)), // Pas de détails → on continue
+        switchMap(() => this.service.deleteLigne(id)),
+        finalize(() => (this.loading = false))
+      )
+      .subscribe({
+        next: () => this.lignes.removeAt(ligneIndex),
+        error: (err: any) =>
+          (this.msgErros =
+            err.error.error ?? 'Erreur lors de la suppression de la ligne'),
+      });
   }
 
   // ============================
@@ -327,6 +350,7 @@ export class DemandeDecaissementComponent implements OnInit {
 
   newDetail(): FormGroup {
     return this.fb.group({
+      iddetailsdemande: [null], // ✅ OBLIGATOIRE
       description: ['', Validators.required],
       quantite: [1, [Validators.required, Validators.min(0.000000001)]],
       montant: ['', Validators.required],
@@ -339,7 +363,21 @@ export class DemandeDecaissementComponent implements OnInit {
   }
 
   removeDetail(ligneIndex: number, detailIndex: number) {
-    this.getDetailsArray(ligneIndex).removeAt(detailIndex);
+    const detailsArray = this.getDetailsArray(ligneIndex);
+    const detailGroup = detailsArray.at(detailIndex) as FormGroup;
+    const id = detailGroup.get('iddetailsdemande')?.value;
+
+    // Déjà en base → suppression backend
+    if (id) {
+      this.service.deleteDetail(id).subscribe({
+        next: () => detailsArray.removeAt(detailIndex),
+        error: () =>
+          (this.msgErros = 'Erreur lors de la suppression du détail'),
+      });
+    } else {
+      // Jamais persisté → suppression locale
+      detailsArray.removeAt(detailIndex);
+    }
   }
 
   // ============================
@@ -434,37 +472,56 @@ export class DemandeDecaissementComponent implements OnInit {
   }
 
   private updateLignesThenNext() {
-    const payloads = this.lignes.controls.map((g, idx) => ({
-      idlignedemande: g.get('idlignedemande')?.value,
-      numligne: g.get('numligne')?.value || idx + 1,
-      libellelignedemande: g.get('libellelignedemande')?.value,
-      montantdemande: g.get('montantdemande')?.value,
-      idnature:
-        g.get('idnature')?.value === '' ? null : g.get('idnature')?.value,
-      idbudget: g.get('idbudget')?.value,
-      idcentre:
-        g.get('idcentre')?.value === '' ? null : g.get('idcentre')?.value,
-      idsociete:
-        g.get('idsociete')?.value === '' ? null : g.get('idsociete')?.value,
-      idsite: g.get('idsite')?.value === '' ? null : g.get('idsite')?.value,
-      updatedby: 'MAF',
-    }));
+    if (!this.iddemande) return;
 
     this.loading = true;
 
-    const updates$ = payloads.map((p) => {
-      // ⚠️ On retourne bien l'Observable ici
-      return this.service.updateLigne(p.idlignedemande, p);
+    const operations$ = this.lignes.controls.map((g, idx) => {
+      const idlignedemande = g.get('idlignedemande')?.value;
+
+      const payloadBase = {
+        iddemande: this.iddemande,
+        numligne: g.get('numligne')?.value || idx + 1,
+        libellelignedemande: g.get('libellelignedemande')?.value,
+        montantdemande: g.get('montantdemande')?.value,
+        idnature: g.get('idnature')?.value || null,
+        idbudget: g.get('idbudget')?.value,
+        idcentre: g.get('idcentre')?.value || null,
+        idsociete: g.get('idsociete')?.value || null,
+        idsite: g.get('idsite')?.value || null,
+      };
+
+      return idlignedemande
+        ? this.service.updateLigne(idlignedemande, {
+            ...payloadBase,
+            updatedby: 'MAF',
+          })
+        : this.service
+            .createLigne({
+              ...payloadBase,
+              iddemande: this.iddemande,
+              createdby: 'MAF',
+            })
+            .pipe(
+              map((res: any) => {
+                const ligneCreated = res?.data ?? res;
+                g.patchValue({
+                  idlignedemande:
+                    ligneCreated.idlignedemande || ligneCreated.id,
+                });
+                return ligneCreated;
+              })
+            );
     });
 
-    forkJoin(updates$).subscribe({
+    forkJoin(operations$).subscribe({
       next: () => {
         this.loading = false;
         this.currentStep = 3;
       },
-      error: (err: any) => {
+      error: (err) => {
         this.loading = false;
-        this.msgErros = err.error.error;
+        this.msgErros = err.error?.error ?? 'Erreur mise à jour lignes';
       },
     });
   }
@@ -664,18 +721,22 @@ export class DemandeDecaissementComponent implements OnInit {
         const detailGroup = detailsForms.at(detailIndex) as FormGroup;
         const { iddetailsdemande, ...rawValues } = detailGroup.value;
 
-        const payload = {
+        const payloadBase = {
           ...rawValues,
           iddemande: this.iddemande,
-          idlignedemande,
           idsociete: null,
-          createdby: 'MAF',
-          updatedby: this.actionModal === 'update' ? 'MAF' : null,
+          idlignedemande,
         };
 
         const obs$ = iddetailsdemande
-          ? this.service.updateDetail(iddetailsdemande, payload)
-          : this.service.createDetail(payload);
+          ? this.service.updateDetail(iddetailsdemande, {
+              ...payloadBase,
+              updatedby: 'MAF',
+            })
+          : this.service.createDetail({
+              ...payloadBase,
+              createdby: 'MAF',
+            });
 
         obs$.subscribe({
           next: (res) => {

@@ -166,6 +166,9 @@
                   </th>
                   <th class="sort" data-sort="id">Code</th>
                   <th class="sort" data-sort="customer_name">Type</th>
+
+                  <th class="sort" data-sort="customer_name">Entité</th>
+
                   <th class="sort" data-sort="customer_name">Date début</th>
                   <th class="sort" data-sort="customer_name">Date fin</th>
                   <th class="sort" data-sort="status">Status</th>
@@ -193,6 +196,8 @@
                     }}</a>
                   </td>
                   <td class="customer_name">{{ item.typebudget }}</td>
+
+                  <td class="customer_name">{{ item.entite }}</td>
                   <td class="customer_name">
                     {{ item.datedebut | date : "dd-MM-yyyy" }}
                   </td>
@@ -337,6 +342,7 @@
                       required
                     />
                   </div>
+
                   <div class="mb-3">
                     <label class="form-label form-label-sm" for=""
                       >Type de budget</label
@@ -382,6 +388,25 @@
                     <div class="invalid-feedback">{{ msgErros }}</div>
                   </div>
                   } }
+
+                  <div class="mb-3">
+                    <label class="form-label form-label-sm" for=""
+                      >Entité</label
+                    >
+                    <select
+                      class="form-select form-control form-control-sm {{
+                        isValidField('entite')
+                      }}"
+                      aria-label="Default select example"
+                      id="entite-field"
+                      formControlName="entite"
+                    >
+                      <option selected>-- Sélectionner --</option>
+                      <option value="Département">Département</option>
+                      <option value="Site">Site</option>
+                    </select>
+                    <div class="invalid-feedback">{{ msgErros }}</div>
+                  </div>
 
                   <div class="mb-3">
                     <div>

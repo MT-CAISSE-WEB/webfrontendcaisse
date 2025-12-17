@@ -60,6 +60,8 @@ export class LigneBudgetComponent implements OnInit {
   //Element à supprimer
   deleteLigneBudget: any = null;
 
+  // savoir l'entité du budget
+  selectedBudget?: BudgetModel;
   constructor(
     private lignebudgetservice: LigneBudgetService,
     private budgetservice: BudgetService,
@@ -91,6 +93,12 @@ export class LigneBudgetComponent implements OnInit {
         }
       },
     });
+  }
+
+  onSelectionChange(event: Event) {
+    this.selectedBudget = this.budgets.find(
+      (budget) => budget.idbudget === (event.target as HTMLSelectElement).value
+    );
   }
 
   getAllLigneBudgets() {

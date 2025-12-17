@@ -104,4 +104,11 @@ export class DemandeService {
   deleteDetail(id: string): Observable<any> {
     return this.http.delete<any>(`${this.base}details-demande/delete/${id}`);
   }
+
+  // delete by ligne
+  deleteDetailsByLigne(idlignedemande: string) {
+    return this.http.delete<any>(
+      `${this.base}details-demande/delete-by-ligne/${idlignedemande}`
+    );
+  }
 }

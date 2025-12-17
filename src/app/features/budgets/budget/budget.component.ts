@@ -99,6 +99,7 @@ export class BudgetComponent implements OnInit {
       codebudget: ['', [Validators.required]],
       datedebut: ['', [Validators.required]],
       typebudget: ['', [Validators.required]],
+      entite: ['', [Validators.required]],
       datefin: ['', [Validators.required]],
       idbudgetparent: [''],
       // createdby
@@ -118,6 +119,7 @@ export class BudgetComponent implements OnInit {
       typebudget: _object.typebudget,
       datefin: this.formatDateForInput(_object.datefin),
       idbudgetparent: _object.idbudgetparent,
+      entite: _object.entite,
       actif: _object.actif,
     });
   }
@@ -203,6 +205,7 @@ export class BudgetComponent implements OnInit {
     else {
       this.update({
         idbudget: _budget.idbudget,
+        entite: _budget.entite,
         datedebut: formValue.datedebut,
         datefin: formValue.datefin,
         actif: formValue.actif,
