@@ -6,21 +6,6 @@ import { URL_LOCAL } from "../../../_core/routes/backend.root";
 import { Injectable } from "@angular/core";
 
 
-// import { SocieteService } from './societe.service'; // 🟦 importe le service
-
-// @Injectable({
-//   providedIn: 'root'
-// })
-// export class AutreService {
-
-//   constructor(private societeService: SocieteService) {}   // 🟦 injection
-
-//   chargerSocietes() {
-//     return this.societeService.getAll();                   // 🟦 appel direct
-//   }
-// }
-
-
 @Injectable({
   providedIn: 'root'
 })
@@ -32,11 +17,11 @@ export class PlancomptableService {
 
     /**
    * get All
-   * @param params
    */
-    getAll(params: any = {}): Observable<QueryResultModel> {
-        return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url, {params,});
+    getAll(): Observable<QueryResultModel> {
+        return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url);
     }
+
 
   /**
    * create

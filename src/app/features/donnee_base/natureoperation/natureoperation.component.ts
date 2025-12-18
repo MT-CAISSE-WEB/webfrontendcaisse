@@ -87,11 +87,11 @@ export class NatureoperationComponent implements OnInit{
       page: this.currentPage,
       limit: this.limit
     };
-    this.plancomptableservice.getAll(this.params).subscribe({
+    this.plancomptableservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
           this.comptes = res.data.data;
-          this.totalPages = res.data.totalPages;
+          // this.totalPages = res.data.totalPages;
         }
       }
     });

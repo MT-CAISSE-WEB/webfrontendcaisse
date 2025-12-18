@@ -7,6 +7,10 @@ import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
 
+// ADD-INS
+import { AfterViewInit } from '@angular/core';
+declare var $: any;
+
 // import { AutreService } from '../services/plancomptable.service';
 
 @Component({
@@ -18,7 +22,7 @@ import { Router } from '@angular/router';
 
 export class PlancomptableComponent implements OnInit{
   title = "Plan comptable";
-  params : any = {};
+  // params : any = {};
   breadCrumbs : any = {};
   fb: FormBuilder = new FormBuilder();
   comptes : plancomptableModel[] = [];
@@ -29,10 +33,10 @@ export class PlancomptableComponent implements OnInit{
   plancomptableForm : FormGroup = this.fb.group({})
 
   // Définissez des propriétés de pagination
-  currentPage: number = 1;
+  // currentPage: number = 1;
   // Nombre d'éléments par page
-  totalPages: number = 0;
-  limit: number = 10;
+  // totalPages: number = 0;
+  // limit: number = 10;
 
   //Faire le check selection **********
   objectsSelected : plancomptableModel[] = [];
@@ -65,16 +69,62 @@ export class PlancomptableComponent implements OnInit{
       this.titleMsg = TITLE_DELETE;
   }
 
+
   getAllComptes(){
-    this.params = {
-      page: this.currentPage,
-      limit: this.limit
-    };
-    this.plancomptableservice.getAll(this.params).subscribe({
+   
+    this.plancomptableservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
-          this.comptes = res.data.data;
-          this.totalPages = res.data.totalPages;
+          this.comptes = res.data;
+          this.comptes = res.data;
+
+          const table = $('#dataTable').DataTable();
+          table.destroy();
+
+          setTimeout(() => $('#dataTable').DataTable({
+            language: {
+            search: "Rechercher :",
+            lengthMenu: "Afficher _MENU_ éléments",
+            info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+            infoEmpty: "Affichage de 0 à 0 sur 0 élément",
+            infoFiltered: "(filtré de _MAX_ éléments au total)",
+            loadingRecords: "Chargement...",
+            processing: "Traitement...",
+            zeroRecords: "Aucun élément correspondant trouvé",
+            emptyTable: "Aucune donnée disponible dans le tableau",
+            paginate: {
+              first: "Premier",
+              previous: "Précédent",
+              next: "Suivant",
+              last: "Dernier"
+            },
+            aria: {
+              sortAscending: ": activer pour trier la colonne par ordre croissant",
+              sortDescending: ": activer pour trier la colonne par ordre décroissant"
+            }
+          }
+
+          }), 0);
+        }
+      }
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // Attendre que le DOM soit chargé
+    $('#dataTable').DataTable({
+      paging: true,
+      searching: true,
+      ordering: true,
+      info: true,
+      responsive: true,
+      language: {
+        search: "Rechercher :",
+        lengthMenu: "Afficher _MENU_ lignes",
+        info: "Affichage de _START_ à _END_ sur _TOTAL_ lignes",
+        paginate: {
+          previous: "Précédent",
+          next: "Suivant"
         }
       }
     });
@@ -146,10 +196,10 @@ export class PlancomptableComponent implements OnInit{
   }
 
   //Recharger la page
-  changePage(page: number) {
-    this.currentPage = page;
-    this.getAllComptes(); // recharge les données
-  }
+  // changePage(page: number) {
+  //   this.currentPage = page;
+  //   this.getAllComptes(); // recharge les données
+  // }
 
   //Soumission du formulaire
   onSubmit(){
