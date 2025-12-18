@@ -31,8 +31,8 @@
                 </div>
                 <div class="d-flex align-items-end justify-content-between mt-4">
                     <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value">8000</span>$</h4>
-                        <span class="badge bg-warning me-1">5</span> <span class="text-muted">Décaissement</span>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value">{{ totalDecaissementJour || 0 }}</span></h4>
+                        <span class="badge bg-warning me-1">{{ nbrDecaissementJour || 0 }}</span> <span class="text-muted">Décaissement</span>
                     </div>
                     <div class="avatar-sm flex-shrink-0">
                         <span class="avatar-title bg-light rounded fs-3">
@@ -60,7 +60,7 @@
                 </div>
                 <div class="d-flex align-items-end justify-content-between mt-4">
                     <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="409.66">3400</span>$</h4>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="409.66">{{ maxDecaissementJour.montant || 0 }}</span> {{ maxDecaissementJour.devise?.codedevise }} </h4>
                         <span class="badge bg-warning me-1">2</span> <span class="text-muted">Nature operation</span>
                     </div>
                     <div class="avatar-sm flex-shrink-0">
@@ -89,7 +89,7 @@
                 </div>
                 <div class="d-flex align-items-end justify-content-between mt-4">
                     <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="136.98">5</span>$</h4>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="136.98">{{ minDecaissementJour.montant || 0 }}</span> {{ minDecaissementJour.devise?.codedevise }} </h4>
                         <span class="badge bg-warning me-1">1</span> <span class="text-muted">Nature operation</span>
                     </div>
                     <div class="avatar-sm flex-shrink-0">
@@ -118,7 +118,7 @@
                 </div>
                 <div class="d-flex align-items-end justify-content-between mt-4">
                     <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="84.20">1400</span>$</h4>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="84.20">1400</span></h4>
                         <span class="badge bg-warning me-1">5</span> <span class="text-muted">Départements</span>
                     </div>
                     <div class="avatar-sm flex-shrink-0">
@@ -217,7 +217,7 @@
                                         <td class="typepaiement text-warning" *ngIf="item.caisses[0].codtypeoperation == 'decaissement'"> {{ item.caisses[0].codtypeoperation}} <i class="ri-arrow-right-down-line fs-13 align-middle"></i> </td>
                                         <td class="montant"> {{ formatNumber(item.montant) }} </td>
                                         <td class="devise"> {{ item.devise.codedevise }} </td>
-                                        <td class="date"> {{ formatDatePreview(item.dateoperation) }}</td>
+                                        <td class="date"> {{ formatDateFR(item.dateoperation) }}</td>
                                         <td>
                                             <ul class="list-inline hstack gap-2 mb-0">
                                                 <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="View">
@@ -390,7 +390,7 @@
                                                 <div class="mb-2">
                                                     <div class="input-light">
                                                         <select class="form-control form-control-sm bg-light border-0" formControlName="natureop" required>
-                                                            <option value="">nature operation</option>
+                                                            <option value="" selected>Choisir nature operation</option>
                                                             @for(item of naturesFiltrees; track $index){
                                                                 <option value="{{item.idnature}}"> {{item.libelle}} </option>
                                                             }
@@ -403,9 +403,10 @@
                                                 <div class="mb-2">
                                                     <div class="input-light">
                                                         <select formControlName="centre" (mousedown)="protectionField(ligne, 'centre')" class="form-control form-control-sm bg-light border-0">
-                                                            <option value="">aucun</option>
-                                                            <option value="369A70AB-DC24-4D08-87C5-B7A60227040E">Administration générale</option>
-                                                            <option value="C46CAA0D-41FC-4E1B-87B9-A4800C5E56DB">Informatique</option>
+                                                            <option value="" selected>Choisir centre analytique</option>
+                                                            @for(item of centres; track $index){
+                                                                <option value="{{item.idcentreanalytique}}"> {{item.libelle}} </option>
+                                                            }
                                                         </select>
                                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                                     </div>
@@ -414,9 +415,10 @@
                                             <td>
                                                 <div class="input-light">
                                                     <select formControlName="tiers" (mousedown)="protectionField(ligne, 'tiers')" class="form-control form-control-sm bg-light border-0">
-                                                        <option value="">tiers</option>
-                                                        <option value="5342C8CA-4F7C-44ED-A2BE-3845FC16FB01">Fournisseur Boris</option>
-                                                        <option value="109C2279-649D-4AC9-8701-6861982A5CBB">Fournisseur Charly</option>
+                                                        <option value="" selected>Choisir tiers</option>
+                                                        @for(item of tiers; track $index){
+                                                            <option value="{{item.idtiers}}"> {{item.designation}} </option>
+                                                        }
                                                     </select>
                                                     <div class="invalid-feedback">{{ msgErros }}</div>
                                                 </div>
@@ -492,16 +494,19 @@
                                                             <span> {{ c.get('devisecaisse')?.value }} </span>
                                                         </td>
                                                         <td>
-                                                            <input value="{{ c.get('solde')?.value }}" formControlName="solde" type="text" class="form-control form-control-sm bg-success-subtle border-0"  readonly/>
+                                                            <input formControlName="solde" type="text" class="form-control form-control-sm bg-success-subtle border-0"  readonly/>
                                                         </td>
                                                         <td>
-                                                            <input type="text" formControlName="montantcaisse" class="form-control form-control-sm bg-light border-0"  placeholder="000.000"/>
+                                                            <input type="text" formControlName="montantcaisse" (input)="recalculateCaisse(c)" class="form-control form-control-sm bg-light border-0"  placeholder="000.000"/>
                                                         </td>
                                                         <td>
-                                                            <input type="text" formControlName="taux" class="form-control form-control-sm bg-light border-0"/>
+                                                            <input type="text" formControlName="taux" (input)="recalculateCaisse(c)" class="form-control form-control-sm bg-light border-0"/>
                                                         </td>
                                                         <td>
-                                                            <input type="text" formControlName="montantref" class="form-control form-control-sm bg-light border-0"  readonly/>
+                                                            <input type="text" formControlName="montantref" [ngClass]="{'bg-danger-subtle': c.get('montantcaisse')?.errors?.['depassementMontant']}" class="form-control form-control-sm bg-light border-0"  readonly/>
+                                                            <div *ngIf="c.get('montantcaisse')?.errors?.['depassementMontant']" class="text-danger small">
+                                                                Montant dépassé
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                     }
@@ -512,6 +517,9 @@
                                                         <p>Chargement des périodes...</p>
                                                     </div>
                                                 </ng-template>
+                                                <div *ngIf="operationForm.errors?.['totalCaisseDepasse']" class="text-danger small">
+                                                    Le total des caisses ne doit pas dépasser le montant total de l’opération.
+                                                </div>
                                             </table>
                                         </td>
                                         <td colspan="1" class="p-0">
@@ -530,15 +538,10 @@
                         <!-- <button type="button" class="btn btn-sm btn-warning" (click)="toggleCaisses()"> {{ showCaisses ? 'Masquer caisses' : 'Mes caisses' }} </button> -->
                         <div class="d-flex gap-2">
                             <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
-                            <button type="submit" class="btn btn-sm btn-success" (click)="onSubmit()">
+                            <button type="submit" class="btn btn-sm btn-success" (click)="onSubmit()" [disabled]="operationForm.invalid || operationForm.errors?.['totalCaisseDepasse']">
                                 {{ actionModal === "create" ? 'enregistrer' : 'modifier'}}
                             </button>
                         </div>
-                        <!-- <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
-                        <button type="submit" class="btn btn-sm btn-success" id="add-btn" (click)="onSubmit()">
-                            {{ actionModal === "create" ? 'enregistrer' : 'modifier'}}
-                        </button> -->
-                        <!-- <button type="button" (click)="loadCaissesForm()" class="btn btn-sm btn-warning" id="edit-btn">mes caisses</button> -->
                     </div>
                 </div>
             </form>

@@ -66,4 +66,22 @@ export class OperationService {
     );
   }
 
+  /**
+   * get one
+   */
+  getSoldeCaisse(): Observable<any> {
+    return this.http.get<any>(
+      URL_LOCAL.baseUrl + this.url + "/caisse/solde"
+    );
+  }
+
+  /**
+   * get one
+   */
+  getMaxOperation(): Observable<any> {
+    return this.http.get<any>(
+      URL_LOCAL.baseUrl + this.url + "/paiement/max/"
+    );
+  }
+
 }
