@@ -249,6 +249,23 @@ export class LayoutHeaderComponent implements OnInit {
     }
   }
 
+  formatDateFR(dateInput: string | Date): string {
+    const date = new Date(dateInput);
+
+    const dayShort = new Intl.DateTimeFormat('fr-FR', { weekday: 'short' })
+      .format(date)
+      .replace('.', '');
+
+    const day = date.getDate();
+    const month = new Intl.DateTimeFormat('fr-FR', { month: 'short' })
+      .format(date)
+      .replace('.', '');
+
+    const year = date.getFullYear();
+
+    return `${dayShort} ${day} ${month} ${year}`;
+  }
+
   // actionJournee() {
   //   this.handleCaisseAction();
   // }

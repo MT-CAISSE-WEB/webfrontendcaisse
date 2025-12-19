@@ -16,6 +16,8 @@ import { tiersModel } from '../../donnee_base/models/tiers.model';
 import { TiersService } from '../../donnee_base/services/tiers.service';
 import { centreanalytiqueModel } from '../../donnee_base/models/centreanalytique.model';
 import { CentreAnalytiqueService } from '../../donnee_base/services/centreanalytique.service';
+import { societemodel } from '../../structure/model/societe.model';
+import { societeservice } from '../../structure/service/societe.service';
 
 @Component({
   selector: 'app-operation-caisse',
@@ -64,6 +66,9 @@ export class OperationCaisseComponent implements OnInit{
   //Liste des centres analytiques
   centres : centreanalytiqueModel[] = [];
 
+  //Societé de l'utilisateur connecté
+  societe : societemodel = new societemodel();
+
   //Message suppression
   msgSup: string = "";
   titleMsg: string ="";
@@ -83,15 +88,17 @@ export class OperationCaisseComponent implements OnInit{
 
   showCaisses = false;
   loadingModal = false;
-  isAnyOpen: boolean = true;
+  isAnyOpen: boolean = false;
 
   private periodeDateMap = new Map<string, string>();
   maxDecaissementJour : any = {};
   minDecaissementJour : any = {};
   nbrDecaissementJour = 0;
   totalDecaissementJour = 0;
+  resteARepartir: number = 0;
 
   caisseStatuses: any = {};
+  //caisseStatuses: string[] = [];
 
   //Formulaire de recherche
   searchForm : FormGroup = this.fb.group({});
@@ -105,11 +112,13 @@ export class OperationCaisseComponent implements OnInit{
 
   constructor(private natureoperationservice: NatureoperationService, private caisseuserservice: AffectationCaisseService,
     private router : Router, private caissePeriodeservice: CaissePeriodeService, private centreanalytiqueservice: CentreAnalytiqueService,
-    private operationservice: OperationService, private tiersservice: TiersService,
+    private operationservice: OperationService, private tiersservice: TiersService,private sc: societeservice,
     private currencyPipe: CurrencyPipe
   ){}
 
   ngOnInit(): void {
+    //Recuperer la societe de l'utilisateur connecté
+    //this.getSocieteUserconnected();
     //initialiser le formulaire de recherche
     this.initSearchForm();
     //Afficher toutes les opérations
@@ -128,7 +137,9 @@ export class OperationCaisseComponent implements OnInit{
     // Récupérer les statuts de caisse
     this.caissePeriodeservice.statuses$.subscribe(status => {
       this.caisseStatuses = status;
-      console.log(status);
+      this.isAnyOpen = Object.values(status).some(
+        (s: any) => s?.toLowerCase() === 'ouverte'
+      );
     });
 
     this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("cette opération");
@@ -292,6 +303,16 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   //Recuperer les devises de la societe
+  // getSocieteUserconnected (){
+  //   this.sc.getOne(this.user?.idsociete).subscribe({
+  //     next : (res:any) => {
+  //       console.log(res);
+  //        if(res.success){
+  //           this.societe = res.data;
+  //        }
+  //     }
+  //   });
+  // }
 
   //Recuperer le Max des operations
   getMaxOperations(){
@@ -889,6 +910,8 @@ export class OperationCaisseComponent implements OnInit{
       const taux = parseFloat(tauxCtrl.value) || 1;
 
       const montantRef = montant * taux;
+      //maxMontantRef sera égale au total ligne si la devise de la transaction est égale à la devise de référentiel
+      //Sinon ramener le taux récent de la devise de transaction
       const maxMontantRef = this.totalLignes; 
 
       //contrôle 
@@ -965,6 +988,7 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   finaliserModal(){
+    console.log("finaliser");
     const sameDate = this.checkSameDatePeriodes();
     if (sameDate) {
       this.operationForm.patchValue({
@@ -997,6 +1021,11 @@ export class OperationCaisseComponent implements OnInit{
         // Filtrer les natures quand typepaiement change
         this.operationForm.get("typepaiement")?.valueChanges.subscribe(type => {
           this.onTypePaiementChange(type);
+        });
+
+        // recalcul automatique
+        this.caisses.controls.forEach((caisseFG: any) => {
+          this.applyAutoCalcul(caisseFG);
         });
       }, 
       error: () => {
