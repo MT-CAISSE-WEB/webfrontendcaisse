@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { APP, APP_TAUX_DONNEE_BASE, APP_TAUX, APP_PLAN_COMPTABLE_DONNEE_BASE, 
-  APP_CENTRE_ANALYTIQUE_DONNEE_BASE, APP_NATURE_OPERATION_DONNEE_BASE, 
+  APP_CENTRE_ANALYTIQUE_DONNEE_BASE, APP_NATURE_OPERATION_DONNEE_BASE, APP_AFF_NATURE_CENTRE_DONNEE_BASE,
   APP_JOURNAL_CAISSE_JOURNAL, APP_CAISSE_CAISSE_JOURNAL, APP_AFFECTATION_CAISSIER_CAISSE_JOURNAL, 
   APP_OPERATION, APP_OPERATION_GENERAL, APP_TIERS_DONNEE_BASE, APP_AFFECTATION_ANALYTIQUE_DONNEE_BASE,
   APP_BUDGETS_LIGNE_BUDGET, APP_BUDGETS_BUDGET, APP_ROOT_DMD_DECAISSEMENT,
@@ -25,6 +25,7 @@ import { LigneBudgetComponent } from './features/budgets/ligne-budget/ligne-budg
 import { DemandeDecaissementComponent } from './features/demande_decaissement/demande-decaissement.component';
 
 import { TiersComponent } from './features/donnee_base/tiers/tiers.component';
+import { AffectationNatureCentreComponent } from './features/donnee_base/affectationnaturecentre/affectationnaturecentre.component';
 import { AffectationanalytiqueComponent } from './features/donnee_base/affectationanalytique/affectationanalytique.component';
 import { LoginComponent } from './features/administration/login/login.component';
 import { AuthGuard } from './features/administration/service/auth.guard';
@@ -67,6 +68,10 @@ export const routes: Routes = [
       {
           path : APP_NATURE_OPERATION_DONNEE_BASE,
           component: NatureoperationComponent,
+      },
+      {
+          path : APP_AFF_NATURE_CENTRE_DONNEE_BASE,
+          component: AffectationNatureCentreComponent,
       },
       {
           path : APP_JOURNAL_CAISSE_JOURNAL,

@@ -8,10 +8,7 @@ import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELE
 import { Router } from '@angular/router';
 
 // ADD-INS
-import { AfterViewInit } from '@angular/core';
 declare var $: any;
-
-// import { AutreService } from '../services/plancomptable.service';
 
 @Component({
   selector: 'app-plancomptable',
@@ -31,12 +28,6 @@ export class PlancomptableComponent implements OnInit{
   msgErros : string = "";
   loading: Boolean = false;
   plancomptableForm : FormGroup = this.fb.group({})
-
-  // Définissez des propriétés de pagination
-  // currentPage: number = 1;
-  // Nombre d'éléments par page
-  // totalPages: number = 0;
-  // limit: number = 10;
 
   //Faire le check selection **********
   objectsSelected : plancomptableModel[] = [];
@@ -71,11 +62,9 @@ export class PlancomptableComponent implements OnInit{
 
 
   getAllComptes(){
-   
     this.plancomptableservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
-          this.comptes = res.data;
           this.comptes = res.data;
 
           const table = $('#dataTable').DataTable();
@@ -102,8 +91,13 @@ export class PlancomptableComponent implements OnInit{
               sortAscending: ": activer pour trier la colonne par ordre croissant",
               sortDescending: ": activer pour trier la colonne par ordre décroissant"
             }
-          }
-
+          },
+            responsive: true,
+            ordering: true,
+            lengthMenu: [
+                [10, 25, 50, 100, 250, 500, -1],
+                [10, 25, 50, 100, 250, 500, "Tous"]
+              ]
           }), 0);
         }
       }
@@ -140,7 +134,7 @@ export class PlancomptableComponent implements OnInit{
       auxiliaire: [false],
       suivibudgetaire: [true],
       suivibudgetairemensuel: [false],
-      idsociete : ["58B53CD2-686A-4CED-9E64-3BA2A5A6D664", [Validators.required]],
+      idsociete : ["6591AC47-11AA-4664-838E-B977292814FE", [Validators.required]],
       actif : [true],
     })
   }
@@ -195,12 +189,6 @@ export class PlancomptableComponent implements OnInit{
     else this.objectsSelected = [];
   }
 
-  //Recharger la page
-  // changePage(page: number) {
-  //   this.currentPage = page;
-  //   this.getAllComptes(); // recharge les données
-  // }
-
   //Soumission du formulaire
   onSubmit(){
     /** Check formulaire */
@@ -241,6 +229,7 @@ export class PlancomptableComponent implements OnInit{
         if (res.success) {
           this.closeModal('showModal');
           this.getAllComptes();
+          console.log("Création réussie");
         } else {
           this.error = "Erreur de création";
         }

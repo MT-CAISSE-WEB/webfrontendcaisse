@@ -32,69 +32,10 @@
                 </div>
             </div>
 
-            <div class="card-body border border-dashed border-end-0 border-start-0">
-                <form>
-                    <div class="row g-3">
-                        <div class="col-xxl-5 col-sm-6">
-                            <div class="search-box">
-                                <input type="text" class="form-control form-control-sm search" placeholder="rechercher par code affectation,...">
-                                <i class="ri-search-line search-icon"></i>
-                            </div>
-                        </div>
-                        <!--end col-->
-    
-                        <!--end col-->
-                        <!-- <div class="col-xxl-2 col-sm-4">
-                            <div>
-                                <select class="form-control form-control-sm" data-choices data-choices-search-false name="choices-single-default" id="idStatus">
-                                    <option value="">Status</option>
-                                    <option value="all" selected>Tous</option>
-                                    <option value="Actif">Actif</option>
-                                    <option value="Inactif">Inactif</option>
-                                </select>
-                            </div>
-                        </div> -->
-                        <!--end col-->
-                        
-                        <!--end col-->
-                        <!-- <div class="col-xxl-1 col-sm-2">
-                            <div>
-                                <button type="button" class="btn btn-sm btn-primary w-100" onclick="SearchData();"> <i class="ri-equalizer-fill me-1 align-bottom"></i>
-                                    Filtrer
-                                </button>
-                            </div>
-                        </div> -->
-                        <!--end col-->
-                    </div>
-                    <!--end row-->
-                </form>
-            </div>
-
             <div class="card-body pt-0">
                 <div>
-                    <!--  
-                    <ul class="nav nav-tabs nav-tabs-custom nav-success mb-3" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link active All py-3" data-bs-toggle="tab" id="All" href="#home1" role="tab" aria-selected="true">
-                                <i class="ri-store-2-fill me-1 align-bottom"></i>  
-                                 Tous
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link py-3 Delivered" data-bs-toggle="tab" id="Delivered" href="#delivered" role="tab" aria-selected="false">
-                                <i class="ri-checkbox-circle-line me-1 align-bottom"></i> Actif
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link py-3 Pickups" data-bs-toggle="tab" id="Pickups" href="#pickups" role="tab" aria-selected="false">
-                                <i class="ri-truck-line me-1 align-bottom"></i> Inactif 
-                                <span class="badge bg-danger align-middle ms-1">2</span>
-                            </a>
-                        </li>
-                    </ul>-->
-
                     <div class="table-responsive table-card mb-1">
-                        <table class="table table-nowrap align-middle" id="orderTable">
+                        <table id="dataTable" class="table table-striped table-bordered">
 
                             <!-- Entete de la liste -->
                             <thead class="text-muted table-light">
@@ -157,27 +98,6 @@
 
                             </tbody>
                         </table>
-
-                        <!-- Si aucun resultat dans la recherche -->
-                        <div class="noresult" style="display: none">
-                            <div class="text-center">
-                                <h5 class="mt-2">Désole! Aucun resultat trouvé</h5>
-                                <!-- <p class="text-muted">We've searched more than 150+ Orders We did not find any orders for you search.</p> -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Pagination OK -->
-                    <div class="d-flex justify-content-end">
-                        <div class="pagination-wrap hstack gap-2">
-                            <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
-                                Précédent
-                            </button>
-                            <ul class="pagination listjs-pagination mb-0"></ul>
-                            <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)" class="btn btn-sm btn-soft-primary pagination-next">
-                                Suivant
-                            </button>
-                        </div>
                     </div>
 
                 </div>

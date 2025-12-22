@@ -15,6 +15,9 @@ import { departementmodel } from '../../structure/model/departement.model';
 import { siteservice } from '../../structure/service/site.service';
 import { sitemodel } from '../../structure/model/site.model';
 
+// ADD-INS
+declare var $: any;
+
 
 @Component({
   selector: 'app-affectationanalytique',
@@ -34,12 +37,6 @@ export class AffectationanalytiqueComponent implements OnInit{
   msgErros : string = "";
   loading: Boolean = false; 
   affectationanalytiqueForm : FormGroup = this.fb.group({})
-
-  // Définissez des propriétés de pagination
-  currentPage: number = 1;
-  // Nombre d'éléments par page
-  totalPages: number = 0;
-  limit: number = 10;
 
   //Faire le check selection **********
   objectsSelected : affectationanalytiqueModel[] = [];
@@ -87,15 +84,43 @@ export class AffectationanalytiqueComponent implements OnInit{
   }
 
   getAllaffectations(){
-    this.params = {
-      page: this.currentPage,
-      limit: this.limit
-    };
-    this.affectationanalytiqueservice.getAll(this.params).subscribe({
+    this.affectationanalytiqueservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
-          this.affectations = res.data.data;
-          this.totalPages = res.data.totalPages;
+          this.affectations = res.data;
+
+          const table = $('#dataTable').DataTable();
+          table.destroy();
+
+          setTimeout(() => $('#dataTable').DataTable({
+            language: {
+            search: "Rechercher :",
+            lengthMenu: "Afficher _MENU_ éléments",
+            info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+            infoEmpty: "Affichage de 0 à 0 sur 0 élément",
+            infoFiltered: "(filtré de _MAX_ éléments au total)",
+            loadingRecords: "Chargement...",
+            processing: "Traitement...",
+            zeroRecords: "Aucun élément correspondant trouvé",
+            emptyTable: "Aucune donnée disponible dans le tableau",
+            paginate: {
+              first: "Premier",
+              previous: "Précédent",
+              next: "Suivant",
+              last: "Dernier"
+            },
+            aria: {
+              sortAscending: ": activer pour trier la colonne par ordre croissant",
+              sortDescending: ": activer pour trier la colonne par ordre décroissant"
+            }
+          },
+            responsive: true,
+            ordering: true,
+            lengthMenu: [
+                [10, 25, 50, 100, 250, 500, -1],
+                [10, 25, 50, 100, 250, 500, "Tous"]
+              ]
+          }), 0);
         }
       }
     });
@@ -104,15 +129,10 @@ export class AffectationanalytiqueComponent implements OnInit{
 
   // centre analytique
   getAllcentres(){
-    this.params = {
-      page: this.currentPage,
-      limit: this.limit
-    };
-    this.centreanalytiqueservice.getAll(this.params).subscribe({
+    this.centreanalytiqueservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
-          this.centres = res.data.data;
-          this.totalPages = res.data.totalPages;
+          this.centres = res.data;
         }
       }
     });
@@ -120,15 +140,10 @@ export class AffectationanalytiqueComponent implements OnInit{
 
 
   getAllNatureoperations(){
-    this.params = {
-      page: this.currentPage,
-      limit: this.limit
-    };
-    this.natureoperationservice.getAll(this.params).subscribe({
+    this.natureoperationservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
-          this.natureoperations = res.data.data;
-          this.totalPages = res.data.totalPages;
+          this.natureoperations = res.data;
         }
       }
     });
@@ -139,7 +154,6 @@ export class AffectationanalytiqueComponent implements OnInit{
       next : (res) => {
         if(res.success){
           this.sites = res.data;
-          this.totalPages = res.data.totalPages;
         }
       }
     });
@@ -151,7 +165,26 @@ export class AffectationanalytiqueComponent implements OnInit{
       next : (res) => {
         if(res.success){
           this.departements = res.data;
-          this.totalPages = res.data.totalPages;
+        }
+      }
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // Attendre que le DOM soit chargé
+    $('#dataTable').DataTable({
+      paging: true,
+      searching: true,
+      ordering: true,
+      info: true,
+      responsive: true,
+      language: {
+        search: "Rechercher :",
+        lengthMenu: "Afficher _MENU_ lignes",
+        info: "Affichage de _START_ à _END_ sur _TOTAL_ lignes",
+        paginate: {
+          previous: "Précédent",
+          next: "Suivant"
         }
       }
     });
@@ -220,11 +253,6 @@ export class AffectationanalytiqueComponent implements OnInit{
     else this.objectsSelected = [];
   }
 
-  //Recharger la page
-  changePage(page: number) {
-    this.currentPage = page;
-    this.getAllaffectations(); // recharge les données
-  }
 
   //Soumission du formulaire
   onSubmit(){

@@ -6,6 +6,8 @@ import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
 
+// ADD-INS
+declare var $: any;
 
 @Component({
   selector: 'app-centreanalytique',
@@ -23,13 +25,8 @@ export class CentreanalytiqueComponent implements OnInit{
   centre : centreanalytiqueModel = new centreanalytiqueModel();
   msgErros : string = "";
   loading: Boolean = false;
-  centreanalytiqueForm : FormGroup = this.fb.group({})
+  centreanalytiqueForm : FormGroup = this.fb.group({});
 
-  // Définissez des propriétés de pagination
-  currentPage: number = 1;
-  // Nombre d'éléments par page
-  totalPages: number = 0;
-  limit: number = 10;
 
   //Faire le check selection **********
   objectsSelected : centreanalytiqueModel[] = [];
@@ -62,15 +59,43 @@ export class CentreanalytiqueComponent implements OnInit{
   }
 
   getAllcentres(){
-    this.params = {
-      page: this.currentPage,
-      limit: this.limit
-    };
-    this.centreanalytiqueservice.getAll(this.params).subscribe({
+    this.centreanalytiqueservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
-          this.centres = res.data.data;
-          this.totalPages = res.data.totalPages;
+          this.centres = res.data;
+
+          const table = $('#dataTable').DataTable();
+          table.destroy();
+
+          setTimeout(() => $('#dataTable').DataTable({
+            language: {
+            search: "Rechercher :",
+            lengthMenu: "Afficher _MENU_ éléments",
+            info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+            infoEmpty: "Affichage de 0 à 0 sur 0 élément",
+            infoFiltered: "(filtré de _MAX_ éléments au total)",
+            loadingRecords: "Chargement...",
+            processing: "Traitement...",
+            zeroRecords: "Aucun élément correspondant trouvé",
+            emptyTable: "Aucune donnée disponible dans le tableau",
+            paginate: {
+              first: "Premier",
+              previous: "Précédent",
+              next: "Suivant",
+              last: "Dernier"
+            },
+            aria: {
+              sortAscending: ": activer pour trier la colonne par ordre croissant",
+              sortDescending: ": activer pour trier la colonne par ordre décroissant"
+            }
+            },
+            responsive: true,
+            ordering: true,
+            lengthMenu: [
+                [10, 25, 50, 100, 250, 500, -1],
+                [10, 25, 50, 100, 250, 500, "Tous"]
+              ]
+          }), 0);
         }
       }
     });
@@ -81,9 +106,29 @@ export class CentreanalytiqueComponent implements OnInit{
     this.centreanalytiqueForm = this.fb.group({
       codecentreanalytique : ["", [Validators.required]],
       libelle : ["", [Validators.required]],
-      idsociete : ["58B53CD2-686A-4CED-9E64-3BA2A5A6D664", [Validators.required]],
+      idsociete : ["6591AC47-11AA-4664-838E-B977292814FE", [Validators.required]],
       actif : [true],
     })
+  }
+
+  ngAfterViewInit(): void {
+    // Attendre que le DOM soit chargé
+    $('#dataTable').DataTable({
+      paging: true,
+      searching: true,
+      ordering: true,
+      info: true,
+      responsive: true,
+      language: {
+        search: "Rechercher :",
+        lengthMenu: "Afficher _MENU_ lignes",
+        info: "Affichage de _START_ à _END_ sur _TOTAL_ lignes",
+        paginate: {
+          previous: "Précédent",
+          next: "Suivant"
+        }
+      }
+    });
   }
 
   get form() {
@@ -131,11 +176,6 @@ export class CentreanalytiqueComponent implements OnInit{
     else this.objectsSelected = [];
   }
 
-  //Recharger la page
-  changePage(page: number) {
-    this.currentPage = page;
-    this.getAllcentres(); // recharge les données
-  }
 
   //Soumission du formulaire
   onSubmit(){

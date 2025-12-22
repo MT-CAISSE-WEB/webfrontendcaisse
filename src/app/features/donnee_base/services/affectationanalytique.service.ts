@@ -17,8 +17,8 @@ export class AffectationAnalytiqueService {
    * get All
    * @param params
    */
-    getAll(params: any = {}): Observable<QueryResultModel> {
-        return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url, {params,});
+    getAll(): Observable<QueryResultModel> {
+        return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url);
     }
 
   /**
