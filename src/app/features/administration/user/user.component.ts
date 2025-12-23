@@ -9,6 +9,12 @@ import { CommonModule } from '@angular/common';
 import { societemodel } from '../../structure/model/societe.model';
 import { societeservice } from '../../structure/service/societe.service';
 import { ChangeDetectorRef } from '@angular/core';
+import { rolemodel } from '../model/role.model';
+import { utilisateurroleservice } from '../service/utilisateurrole.service';
+import { roleservice } from '../service/role.service';
+import { utilisateurdepartementservice } from '../service/userdepartement.service';
+import { departementmodel } from '../../structure/model/departement.model';
+import { departementservice } from '../../structure/service/departement.service';
 
 @Component({
   selector: 'app-user',
@@ -63,12 +69,29 @@ export class UserComponent {
       //Element à supprimer 
       deleteuser : any = null;
 
-      constructor(private us:userservice,private cdr: ChangeDetectorRef,private sc:societeservice,private router : Router){}
+      //Gestion des roles de l'utilisateur la tête chauffe dejà
+      roles : rolemodel [] = [];
+      departements : departementmodel [] = [];
+      selectedUser: usermodel | null = null;
+      userRoles: number[] = []; 
+      userdepts : string[] = [];  
+
+      constructor(
+        private us:userservice,
+        private cdr: ChangeDetectorRef,
+        private sc:societeservice,
+        private rol : roleservice,
+        private dp : departementservice,
+        private ud : utilisateurdepartementservice,
+        private ur:utilisateurroleservice,
+        private router : Router){}
       
       ngOnInit(): void {
       //Afficher toutes les users
       this.getallsocietes();
       this.getallusers();
+      this.loadRoles();
+      this.loaddepartements();
       //Initialisation du formulaire
       this.initForm();
       this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("cet utilisateur");
@@ -86,7 +109,6 @@ export class UserComponent {
          if(res.success){
             this.users = res.data;
             this.filtreusers = res.data;
-            console.log(res.data);
          }
       }
     });
@@ -100,6 +122,19 @@ export class UserComponent {
         }
       }
     });
+  }
+
+  loadRoles(): void {
+    this.rol.getAll().subscribe(res => {
+      this.roles = res.data;
+      console.log(res.data);
+    });
+  }
+
+  loaddepartements(): void {
+    this.dp.getAll().subscribe(res => {
+      this.departements = res.data;
+    } );
   }
 
   // Nombre total de pages calculé dynamiquement
@@ -406,4 +441,80 @@ loadusers(applyFilterAfter: boolean = false) {
     }
   });
 }
+
+selectUser(user: usermodel) {
+  this.userRoles = [];
+  this.userdepts = [];
+
+   if (this.selectedUser?.idutilisateur === user.idutilisateur) {
+    this.selectedUser = null;
+    this.userRoles = [];
+    this.userdepts = [];
+  }
+  else {
+    // Sinon on sélectionne le rôle et on recharge ses permissions
+     this.selectedUser = user;
+     this.userRoles = [];
+     this.userdepts = [];
+
+     this.ur.getutilisateurroles(user.idutilisateur)
+    .subscribe(res => {
+      this.userRoles = res.data[0].map((r: any) => r.idrole);
+    });
+
+    this.ud.getutilisateurdepartement(user.idutilisateur)
+    .subscribe(res => {
+       this.userdepts = res.data[0].map((d: any) => d.iddepartement);
+    });
+  } 
+  
+}
+
+toggleRole(idrole: string, event: any) {
+  if (!this.selectedUser) return;
+
+  if (event.target.checked) {
+    // ADD ROLE
+    this.ur.upsert({
+      idutilisateur: this.selectedUser.idutilisateur,
+      idrole: idrole
+    }).subscribe(() => {
+      this.userRoles.push(Number(idrole));
+    });
+  } else {
+    // REMOVE ROLE
+    this.ur.delete(
+      this.selectedUser.idutilisateur,
+      idrole
+    ).subscribe(() => {
+      this.userRoles = this.userRoles.filter(r => r !== Number(idrole));
+    });
+  }
+}
+
+toggledepartement(iddepartement: string, event: any) {
+  if (!this.selectedUser) return;
+
+  if (event.target.checked) {
+    // ADD ROLE
+    this.ud.upsert({
+      idutilisateur: this.selectedUser.idutilisateur,
+      iddepartement: iddepartement
+    }).subscribe(() => {
+      this.userdepts.push(iddepartement);
+    });
+  } else {
+    // REMOVE ROLE
+    this.ud.delete(
+      this.selectedUser.idutilisateur,
+      iddepartement
+    ).subscribe(() => {
+      this.userdepts = this.userdepts.filter(r => r !== iddepartement);
+    });
+  }
+}
+tonumber (idrole:any){
+  return Number(idrole);
+}
+
 }

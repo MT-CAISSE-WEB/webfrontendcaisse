@@ -7,8 +7,8 @@ import { Injectable } from "@angular/core";
 @Injectable({
   providedIn: 'root'
 })
-export class rolepermissionservice {
-    url : string = 'Rolepermission' ;
+export class utilisateurroleservice {
+    url : string = 'Utilisateur_role' ;
 
     constructor(private http: HttpClient) {}
    
@@ -16,8 +16,8 @@ export class rolepermissionservice {
         return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url);
     }
 
-    getPermissionsByRole(idrole:any):Observable<any> {
-       return this.http.get<any>(URL_LOCAL.baseUrl + this.url +"/"+ idrole +"/permissions");
+    getutilisateurroles (idutilisateur:any):Observable<any> {
+       return this.http.get<any>(URL_LOCAL.baseUrl + this.url +"/"+ idutilisateur +"/roles");
     }
 
 
@@ -27,6 +27,7 @@ export class rolepermissionservice {
    * 
    */
   upsert(_object: any): Observable<any> {
+
     console.log(_object);
     return this.http.post<any>(
       URL_LOCAL.baseUrl + this.url,
@@ -38,19 +39,19 @@ export class rolepermissionservice {
    * delete
    * @param id
    */
-  delete(idrole: string,idpermission:string): Observable<any> {
+  delete(idutilisateur:string,idrole:string): Observable<any> {
     return this.http.delete<any>(
-      URL_LOCAL.baseUrl + this.url + "/" + idrole+"/permissions/"+idpermission
+      URL_LOCAL.baseUrl + this.url+"/"+idutilisateur+"/roles/"+idrole
     );
   }
 
-    /**
-   * get one
-   * @param id
-   */
-  getOne(id: string): Observable<any> {
-    return this.http.get<any>(
-      URL_LOCAL.baseUrl + this.url + "/" + id
-    );
-  }
+//     /**
+//    * get one
+//    * @param id
+//    */
+//   getOne(id: string): Observable<any> {
+//     return this.http.get<any>(
+//       URL_LOCAL.baseUrl + this.url + "/" + id
+//     );
+//   }
 }

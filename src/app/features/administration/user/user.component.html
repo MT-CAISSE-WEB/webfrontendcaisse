@@ -16,7 +16,7 @@
 <!-- end page title -->
 
 <div class="row">
-    <div class="col-lg-12">
+    <div class="col-sm-8">
         <div class="card" id="orderList">
             <div class="card-header border-0">
                 <div class="row align-items-center gy-3">
@@ -108,8 +108,8 @@
                                             <input class="form-check-input" type="checkbox" [(ngModel)]="checkAllRow" id="checkAll" (ngModelChange)="handleSelectOne($event)">
                                         </div> -->
                                     </th>
-                                    <th class="sort" data-sort="id">Code </th>
-                                    <th class="sort" data-sort="customer_name">Société </th>
+                                    <!-- <th class="sort" data-sort="id">Code </th> -->
+                                    <!-- <th class="sort" data-sort="customer_name">Société </th> -->
                                     <th class="sort" data-sort="status">Nom </th>
                                     <th class="sort" data-sort="status">Prénom </th>
                                     <th class="sort" data-sort="city">Entité Société </th>
@@ -121,41 +121,43 @@
                             </thead>
                             <tbody class="list form-check-all">
                                 @for (item of pagedusers; track $index){
-                                    <tr>
+                                    <tr
+                                    [class.table-active]="selectedUser?.idutilisateur === item.idutilisateur" 
+                                    class="role-row">
                                     <th scope="row">
                                         <!-- <div class="form-check">
                                             <input class="form-check-input" [checked]="isChecked(item.idsociete)" [(ngModel)]="selectedItems[$index]" (ngModelChange)="handleSelectOne(item, $event)" type="checkbox" name="itemGroup_{{ $index }}">
                                         </div> -->
                                     </th>
-                                    <td class="code"><a href="#" class="fw-medium link-primary">{{item.codeutilisateur}}</a></td>
-                                    <td class="customer_name">{{item.societe}}</td>
-                                    <td class="customer_name">{{item.nom   }}</td>
-                                    <td class="customer_name">{{item.prenom   }}</td>
-                                    <td class="customer_name">
+                                    <!-- <td class="code"><a href="#" class="fw-medium link-primary">{{item.codeutilisateur}}</a></td> -->
+                                    <!-- <td class="customer_name">{{item.societe}}</td> -->
+                                    <td class="customer_name"  (click)="selectUser(item)">{{item.nom   }}</td>
+                                    <td class="customer_name"  (click)="selectUser(item)">{{item.prenom   }}</td>
+                                    <td class="customer_name"  (click)="selectUser(item)">
                                         <span *ngIf="item.typeentitesociete == 1" class="badge bg-success-subtle text-success text-uppercase"> Oui </span>
                                         <span *ngIf="item.typeentitesociete == 0" class="badge bg-danger-subtle text-danger text-uppercase"> Non </span>
                                     </td>
-                                    <td class="customer_name">
+                                    <td class="customer_name"  (click)="selectUser(item)">
                                         <span *ngIf="item.typeentitesite == 1" class="badge bg-success-subtle text-success text-uppercase"> Oui </span>
                                         <span *ngIf="item.typeentitesite == 0" class="badge bg-danger-subtle text-danger text-uppercase"> Non </span>
                                     </td>
-                                     <td class="customer_name">
+                                     <td class="customer_name"  (click)="selectUser(item)">
                                         <span *ngIf="item.typeentitedepartement == 1" class="badge bg-success-subtle text-success text-uppercase"> Oui </span>
                                         <span *ngIf="item.typeentitedepartement == 0" class="badge bg-danger-subtle text-danger text-uppercase"> Non </span>
                                     </td>
-                                    <td class="customer_name">
+                                    <td class="customer_name"  (click)="selectUser(item)">
                                         <span *ngIf="item.acheteur == 1" class="badge bg-success-subtle text-success text-uppercase"> Oui </span>
                                         <span *ngIf="item.acheteur == 0" class="badge bg-danger-subtle text-danger text-uppercase"> Non </span>
                                     </td>
                                     <td>
                                         <ul class="list-inline hstack gap-2 mb-0">
                                              <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Dupliquer">
-                                               <a href="#" class="text-primary d-inline-block" data-bs-target="#showModal" data-bs-toggle="modal" (click)="modalDuplicate(item)">
+                                               <a href="#" class="text-primary d-inline-block" data-bs-target="#showModal" data-bs-toggle="modal" (click)="modalUpdate(item)">
                                                     <i class="ri-eye-fill fs-16"></i>
                                                 </a>
                                             </li>
                                             <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Dupliquer">
-                                               <a href="#" class="text-primary d-inline-block" data-bs-target="#showModal" data-bs-toggle="modal" (click)="modalDuplicate(item)">
+                                               <a href="#" class="text-success d-inline-block" data-bs-target="#showModal" data-bs-toggle="modal" (click)="modalDuplicate(item)">
                                                     <i class="ri-file-copy-2-line fs-16"></i>
                                                 </a>
                                             </li>
@@ -168,6 +170,13 @@
                                                 <a class="text-danger d-inline-block remove-item-btn" (click)="modalDelete(item)" data-bs-toggle="modal" href="#deleteOrder">
                                                     <i class="ri-delete-bin-5-fill fs-16"></i>
                                                 </a>
+                                            </li>
+                                              <li class="list-incline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
+                                                <a  class ="text-primary d-inline-block" 
+                                                    title="Gérer rôle"
+                                                    (click)="selectUser(item)">
+                                                <i class="ri-shield-user-fill fs-16"></i>
+                                                 </a>
                                             </li>
                                         </ul>
                                     </td>
@@ -211,13 +220,13 @@
                                      <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="codedevise" class="form-label">Code Utilisateur </label>
-                                <input id="code" formControlName="codeutilisateur" class="form-control" placeholder="Ex:1234">
+                                <input id="code" formControlName="codeutilisateur" class="form-control form-control-sm" placeholder="Ex:1234">
                             </div>
 
                             <div class="col-md-6 mb-3">
                                <div class="mb-3">
                                 <label for="codedevise" class="form-label">Société </label>
-                                <select class="form-control" formControlName="idsociete">
+                                <select class="form-control form-control-sm" formControlName="idsociete">
                                     <option value="">----Choisir la société-----</option>
                                     <option *ngFor="let s of societes"  [value]="s.idsociete">{{ s.raisonsociale }}</option>
                                     </select>
@@ -227,27 +236,27 @@
 
                             <div class="col-md-12 mb-3">
                                 <label for="nom" class="form-label">Nom</label>
-                                <input id="nom" formControlName="nom" class="form-control" placeholder="Ex: MAYOUMA">
+                                <input id="nom" formControlName="nom" class="form-control form-control-sm" placeholder="Ex: MAYOUMA">
                             </div>
 
                              <div class="col-md-12 mb-3">
                                 <label for="prenom" class="form-label">Prénom</label>
-                                <input id="prenom" formControlName="prenom" class="form-control" placeholder="Ex: MAYOUMA">
+                                <input id="prenom" formControlName="prenom" class="form-control form-control-sm" placeholder="Ex: MAYOUMA">
                             </div>
 
                               <div class="col-md-12 mb-3">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="email" id="email" formControlName="email" class="form-control" placeholder="Ex: example@example.com">
+                                <input type="email" id="email" formControlName="email" class="form-control form-control-sm" placeholder="Ex: example@example.com">
                               </div>
 
                               <div class="col-md-12 mb-3">
                                 <label for="login" class="form-label">login</label>
-                                <input type="email" id="login" formControlName="login" class="form-control" value="email">
+                                <input type="email" id="login" formControlName="login" class="form-control form-control-sm" value="email">
                               </div>
 
                              <div class="col-md-12 mb-3">
                                 <label for="password" class="form-label">Mot de passe </label>
-                                <input type="password" id="password" formControlName="password" class="form-control" placeholder="Mot de passe">
+                                <input type="password" id="password" formControlName="password" class="form-control form-control-sm" placeholder="Mot de passe">
                               </div>
 
                               <!-- <div class="col-md-12 mb-3">
@@ -310,13 +319,13 @@
 
                               <div class="col-md-12 mb-3">
                                 <label for="adresse" class="form-label">Adresse</label>
-                                <input id="adresse" formControlName="adresse" class="form-control" placeholder="Ex: 09 Rue Ngouendi">
+                                <input id="adresse" formControlName="adresse" class="form-control form-control-sm" placeholder="Ex: 09 Rue Ngouendi">
                              </div>
 
                              
                               <div class="col-md-12 mb-3">
                                 <label for="telephone" class="form-label">Téléphone</label>
-                                <input type="tel" id="telephone" formControlName="telephone" class="form-control" placeholder="Ex: (+242) 06 123 45 67">
+                                <input type="tel" id="telephone" formControlName="telephone" class="form-control form-control-sm" placeholder="Ex: (+242) 06 123 45 67">
                              </div>
                            
                             </div>
@@ -371,6 +380,67 @@
 
     </div>
     <!--end col-->
+    <div class="col-sm-4">
+        <div class="card" *ngIf="selectedUser">
+            <div class="card-header">
+                 <h5 class="card-title">Rôle Utilisateur</h5>
+                <span class="badge bg-primary mb-3">
+                  {{ selectedUser.nom }} {{ selectedUser.prenom }}
+                </span>
+            </div>
+
+            <div class="card-body">
+                <div *ngFor="let r of roles" class="form-check">
+                <input class="form-check-input"
+                        type="checkbox"
+                        [checked]="userRoles.includes(tonumber(r.idrole!))"
+                        (change)="toggleRole(r.idrole!, $event)">
+
+                <label class="form-check-label">
+                    {{ r.libelle }}
+                </label>
+                </div>
+            </div>
+            </div>
+     <div *ngIf="!selectedUser"
+           class="text-muted text-center mt-5">
+        Sélectionnez un utilisateur pour gérer ses rôles et départements
+      </div>
+
+      <div class="card" *ngIf="selectedUser">
+            <div class="card-header">
+                 <h5 class="card-title"> Département Utilisateur </h5>
+                <span class="badge bg-primary mb-3">
+                  {{ selectedUser.nom }} {{ selectedUser.prenom }}
+                </span>
+            </div>
+
+            <div class="card-body">
+                <div *ngFor="let d of departements" class="form-check">
+                <input class="form-check-input"
+                        type="checkbox"
+                        [checked]="userdepts.includes(d.iddepartement!)"
+                        (change)="toggledepartement(d.iddepartement!, $event)">
+
+                <label class="form-check-label">
+                   {{ d.codedept }}-{{ d.libelle }}
+                </label>
+                </div>
+            </div>
+     <!-- <div *ngIf="!selectedUser"
+           class="text-muted text-center mt-5">
+        Sélectionnez un utilisateur pour gérer ses départements 
+      </div> -->
+
+
+    </div>
 </div>
 <!--end row-->
+<div class="row">
+    <div class="col-sm-6">
+        
+
+    </div>
+</div>
+</div>
 
