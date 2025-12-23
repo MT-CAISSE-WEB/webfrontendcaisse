@@ -165,6 +165,7 @@
                     </div>
                   </th>
                   <th class="sort" data-sort="id">Code</th>
+                  <th class="sort" data-sort="id">Libellé</th>
                   <th class="sort" data-sort="customer_name">Type</th>
 
                   <th class="sort" data-sort="customer_name">Entité</th>
@@ -195,6 +196,7 @@
                       item.codebudget
                     }}</a>
                   </td>
+                  <td class="customer_name">{{ item.libelle }}</td>
                   <td class="customer_name">{{ item.typebudget }}</td>
 
                   <td class="customer_name">{{ item.entite }}</td>
@@ -355,7 +357,7 @@
                       id="typebudget-field"
                       formControlName="typebudget"
                     >
-                      <option selected>-- Sélectionner --</option>
+                      <option [ngValue]="null">-- Sélectionner --</option>
                       <option value="Annuel">Annuel</option>
                       <option value="Mensuel">Mensuel</option>
                     </select>
@@ -374,14 +376,13 @@
                       aria-label="Default select example"
                       id="idbudgetparent"
                       formControlName="idbudgetparent"
+                      (change)="onSelectionChange($event)"
                     >
-                      <option selected>-- Sélectionner --</option>
+                      <option [ngValue]="null">-- Sélectionner --</option>
                       @for (item of budgets; track $index){ @if(item.typebudget
                       === "Annuel") {
-                      <option value="{{ item.idbudget }}">
-                        {{ item.codebudget }} - Du:
-                        {{ item.datedebut | date : "dd-MM-yyyy" }} au
-                        {{ item.datefin | date : "dd-MM-yyyy" }}
+                      <option [value]="item.idbudget">
+                        {{ item.codebudget }} - {{ item.libelle }}
                       </option>
                       } }
                     </select>
@@ -389,22 +390,42 @@
                   </div>
                   } }
 
-                  <div class="mb-3">
-                    <label class="form-label form-label-sm" for=""
-                      >Entité</label
+                  <div class="mb-3" id="modal-id">
+                    <label
+                      for="libellebudgetId"
+                      class="form-label form-label-sm"
+                      >Libellé</label
                     >
+                    <input
+                      type="text"
+                      id="libellebudgetId"
+                      class="form-control form-control-sm {{
+                        isValidField('libelle')
+                      }}"
+                      formControlName="libelle"
+                      placeholder=""
+                      required
+                    />
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label form-label-sm" for="entite-field">
+                      Entité
+                    </label>
+
                     <select
+                      id="entite-field"
                       class="form-select form-control form-control-sm {{
                         isValidField('entite')
                       }}"
-                      aria-label="Default select example"
-                      id="entite-field"
                       formControlName="entite"
                     >
-                      <option selected>-- Sélectionner --</option>
+                      <option [ngValue]="null">-- Sélectionner --</option>
+
                       <option value="Département">Département</option>
                       <option value="Site">Site</option>
                     </select>
+
                     <div class="invalid-feedback">{{ msgErros }}</div>
                   </div>
 
@@ -439,6 +460,57 @@
                       />
                       <div class="invalid-feedback">{{ msgErros }}</div>
                     </div>
+                  </div>
+
+                  @if(selectedBudgetParent){
+                  <div
+                    class="invalid-feedback d-block"
+                    *ngIf="
+                        budgetForm.get('datedebut')?.errors?.['invalidParentRange'] ||
+                        budgetForm.get('datefin')?.errors?.['invalidParentRange']
+                      "
+                  >
+                    Les dates doivent être dans la plage du budget parent et sur
+                    l'année {{ selectedBudgetParent.datefin | date : "yyyy" }}.
+                  </div>
+                  }
+
+                  <div class="mb-3">
+                    <label class="form-label form-label-sm" for=""
+                      >Circuit de validation</label
+                    >
+                    <select
+                      class="form-select form-control form-control-sm"
+                      aria-label="Default select example"
+                      id="circuit-field"
+                    >
+                      <option>-- Sélectionner --</option>
+                    </select>
+                    <div class="invalid-feedback">{{ msgErros }}</div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label form-label-sm" for="">Site</label>
+                    <select
+                      class="form-select form-control form-control-sm"
+                      aria-label="Default select example"
+                      id="site-field"
+                    >
+                      <option disabled>-- Sélectionner --</option>
+                    </select>
+                    <div class="invalid-feedback">{{ msgErros }}</div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label form-label-sm" for=""
+                      >Société</label
+                    >
+                    <select
+                      class="form-select form-control form-control-sm"
+                      aria-label="Default select example"
+                      id="societe-field"
+                    >
+                      <option disabled>-- Sélectionner --</option>
+                    </select>
+                    <div class="invalid-feedback">{{ msgErros }}</div>
                   </div>
 
                   <div class="mb-3">

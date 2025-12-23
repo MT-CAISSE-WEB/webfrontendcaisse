@@ -340,17 +340,15 @@
                       <option selected>-- Sélectionner --</option>
                       @for(item of budgets; track $index) {
                       <option [value]="item.idbudget">
-                        {{ item.codebudget }} - Du:
-                        {{ item.datedebut | date : "dd-MM-yyyy" }} au
-                        {{ item.datefin | date : "dd-MM-yyyy" }}
+                        {{ item.codebudget }} - {{ item.libelle }}
                       </option>
                       }
                     </select>
                     <div class="invalid-feedback">{{ msgErros }}</div>
                   </div>
 
-                  @if(selectedBudget !== null && selectedBudget?.entite ===
-                  "Département") {
+                  @if(selectedBudget && selectedBudget.entite === "Département")
+                  {
                   <div class="mb-3">
                     <label class="form-label form-label-sm" for="iddepartement"
                       >Département</label
@@ -361,6 +359,11 @@
                       id="iddepartement"
                     >
                       <option selected>-- Sélectionner --</option>
+                      @for (departement of departements; track $index) {
+                      <option [value]="departement.iddepartement">
+                        {{ departement.libelle }}
+                      </option>
+                      }
                     </select>
                   </div>
                   }
@@ -378,8 +381,8 @@
                     </select>
                   </div>
 
-                  @if(selectedBudget !== null && selectedBudget?.entite ===
-                  "Département") {
+                  @if(selectedBudget && selectedBudget.entite === "Département")
+                  {
                   <div class="mb-3">
                     <div>
                       <label

@@ -5,10 +5,19 @@ import {
   FormGroup,
   Validators,
   ReactiveFormsModule,
+  FormControl,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DemandeService } from './services/demande.service';
-import { catchError, finalize, forkJoin, map, of, switchMap } from 'rxjs';
+import {
+  catchError,
+  debounceTime,
+  finalize,
+  forkJoin,
+  map,
+  of,
+  switchMap,
+} from 'rxjs';
 import { DemandeComplet } from './models/demande-complet.model';
 import { EnteteDemande } from './models/entete-demande.model';
 import { LigneDemande } from './models/ligne-demande.model';
@@ -38,11 +47,20 @@ export class DemandeDecaissementComponent implements OnInit {
   detailsDmd: DetailsDemande[] = [];
   selectedDemande?: DemandeComplet;
 
+  searchControl = new FormControl('');
+  filteredDemandes: DemandeComplet[] = [];
+
   // Définissez des propriétés de pagination
   currentPage: number = 1;
   // Nombre d'éléments par page
   totalPages: number = 0;
   limit: number = 5;
+
+  // tout sélectionné/désélectionné
+  allSelected = false;
+
+  // clé = iddemande, valeur = true/false
+  selectedEntetes = new Map<string, boolean>();
 
   // Etapes du formulaire
   step1Mode: 'create' | 'update' = 'create';
@@ -79,6 +97,48 @@ export class DemandeDecaissementComponent implements OnInit {
   ngOnInit(): void {
     this.loadAllDemandes();
     this.getAllBudgets();
+
+    // Filtrage live avec debounce pour éviter de spammer le filtre à chaque frappe
+    this.searchControl.valueChanges
+      .pipe(debounceTime(300))
+      .subscribe((searchText) => {
+        this.applyFilter(searchText as string);
+      });
+  }
+
+  applyFilter(value: string) {
+    const filter = value?.toLowerCase() || '';
+
+    if (!filter) {
+      this.filteredDemandes = [...this.demandes]; // aucune recherche => toutes les demandes
+      return;
+    }
+
+    this.filteredDemandes = this.demandes.filter(
+      (demande) =>
+        demande.entete.codedemande!.toLowerCase().includes(filter) ||
+        demande.entete.libelledemande!.toLowerCase().includes(filter) ||
+        demande.lignes.some((lc) =>
+          lc.ligne.libellelignedemande!.toLowerCase().includes(filter)
+        )
+    );
+  }
+
+  toggleAllEntetes() {
+    this.allSelected = !this.allSelected;
+    this.demandes.forEach((d) => {
+      this.selectedEntetes.set(d.entete.iddemande!, this.allSelected);
+    });
+  }
+
+  toggleEntete(demande: DemandeComplet) {
+    const current =
+      this.selectedEntetes.get(demande.entete.iddemande!) ?? false;
+    this.selectedEntetes.set(demande.entete.iddemande!, !current);
+
+    this.allSelected = this.demandes.every(
+      (d) => this.selectedEntetes.get(d.entete.iddemande!) ?? false
+    );
   }
 
   private resetLignes(): void {
@@ -275,6 +335,12 @@ export class DemandeDecaissementComponent implements OnInit {
             } as DemandeComplet;
           })
           .filter((d) => d.lignes.length > 0);
+
+        // Initialisation filteredDemandes
+        this.filteredDemandes = [...this.demandes];
+        this.demandes.forEach((d) => {
+          this.selectedEntetes.set(d.entete.iddemande!, false);
+        });
       },
       error: (err: any) => {
         console.error('Erreur chargement des données', err);

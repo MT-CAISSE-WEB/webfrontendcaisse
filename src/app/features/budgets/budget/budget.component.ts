@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import {
+  AbstractControl,
   FormBuilder,
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
   Validators,
 } from '@angular/forms';
 import { BudgetModel } from '../models/budget.model';
@@ -33,6 +36,7 @@ export class BudgetComponent implements OnInit {
   msgErros: string = '';
   loading: Boolean = false;
   budgetForm: FormGroup = this.fb.group({});
+  disabledSelectEntite: boolean = false;
 
   // formatage de date
   formatDateForInput(dateString: string | null): string | null {
@@ -66,13 +70,18 @@ export class BudgetComponent implements OnInit {
   //Element à supprimer
   deleteBudget: any = null;
 
+  selectedBudgetParent?: BudgetModel;
+  entiteParent?: string;
+
   constructor(private budgetservice: BudgetService, private router: Router) {}
 
   ngOnInit(): void {
-    //Afficher tous les journaux
-    this.getAllBudgets();
     //Initialisation du formulaire
     this.initForm();
+
+    //Afficher tous les journaux
+    this.getAllBudgets();
+
     this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION('Ce budget');
     this.titleMsg = TITLE_DELETE;
   }
@@ -95,16 +104,24 @@ export class BudgetComponent implements OnInit {
 
   //création du formulaire
   initForm(): void {
-    this.budgetForm = this.fb.group({
-      codebudget: ['', [Validators.required]],
-      datedebut: ['', [Validators.required]],
-      typebudget: ['', [Validators.required]],
-      entite: ['', [Validators.required]],
-      datefin: ['', [Validators.required]],
-      idbudgetparent: [''],
-      // createdby
-      actif: [false],
-    });
+    this.budgetForm = this.fb.group(
+      {
+        codebudget: ['', [Validators.required]],
+        libelle: ['', [Validators.required]],
+        datedebut: ['', [Validators.required]],
+        typebudget: ['', [Validators.required]],
+        entite: ['', [Validators.required]],
+        datefin: ['', [Validators.required]],
+        idbudgetparent: [''],
+        // createdby
+        actif: [false],
+      },
+      {
+        validators: this.budgetParentYearValidator(
+          () => this.selectedBudgetParent
+        ),
+      }
+    );
   }
 
   get form() {
@@ -115,6 +132,7 @@ export class BudgetComponent implements OnInit {
     // const status = _object.actif === 1;
     this.budgetForm.patchValue({
       codebudget: _object.codebudget,
+      libelle: _object.libelle,
       datedebut: this.formatDateForInput(_object.datedebut),
       typebudget: _object.typebudget,
       datefin: this.formatDateForInput(_object.datefin),
@@ -164,6 +182,66 @@ export class BudgetComponent implements OnInit {
     this.getAllBudgets(); // recharge les données
   }
 
+  // Validation des dates
+  budgetParentYearValidator(
+    getParent: () => BudgetModel | undefined
+  ): ValidatorFn {
+    return (group: AbstractControl): ValidationErrors | null => {
+      const parent = getParent();
+      const startCtrl = group.get('datedebut');
+      const endCtrl = group.get('datefin');
+
+      // Nettoyage des erreurs précédentes
+      startCtrl?.setErrors(null);
+      endCtrl?.setErrors(null);
+
+      if (!parent || !startCtrl?.value || !endCtrl?.value) {
+        return null;
+      }
+
+      const start = new Date(startCtrl.value);
+      const end = new Date(endCtrl.value);
+
+      const parentStart = new Date(parent.datedebut);
+      const parentEnd = new Date(parent.datefin);
+
+      const isValid =
+        start.getFullYear() === end.getFullYear() &&
+        start >= parentStart &&
+        end <= parentEnd;
+
+      if (!isValid) {
+        startCtrl?.setErrors({ invalidParentRange: true });
+        endCtrl?.setErrors({ invalidParentRange: true });
+
+        return { invalidParentRange: true };
+      }
+
+      return null;
+    };
+  }
+
+  // choix du budget parent
+  onSelectionChange(event: Event) {
+    const selectedId = (event.target as HTMLSelectElement).value;
+
+    this.selectedBudgetParent = this.budgets.find(
+      (b) => b.idbudget === selectedId
+    );
+
+    const entiteCtrl = this.budgetForm.get('entite');
+
+    if (!this.selectedBudgetParent) {
+      entiteCtrl?.reset(null);
+      entiteCtrl?.enable({ emitEvent: false });
+    } else {
+      entiteCtrl?.setValue(this.selectedBudgetParent.entite);
+      entiteCtrl?.disable({ emitEvent: false });
+    }
+
+    this.budgetForm.updateValueAndValidity();
+  }
+
   //Soumission du formulaire
   onSubmit() {
     /** Check formulaire */
@@ -178,11 +256,15 @@ export class BudgetComponent implements OnInit {
     }
 
     /** 2. prepare data */
-    const formValue = this.budgetForm.value;
+    const formValue = this.budgetForm.getRawValue();
 
-    this.budget.idcircuitvalidation = null;
-    this.budget.idsite = null;
-    this.budget.idsociete = null;
+    this.budget.idcircuitvalidation =
+      formValue.idcircuitvalidation === ''
+        ? null
+        : formValue.idcircuitvalidation;
+    this.budget.idsite = formValue.idsite === '' ? null : formValue.idsite;
+    this.budget.idsociete =
+      formValue.idsociete === '' ? null : formValue.idsociete;
     this.budget.datevalidedept = null;
     this.budget.datevalidesite = null;
     this.budget.datevalidesociete = null;
@@ -205,6 +287,7 @@ export class BudgetComponent implements OnInit {
     else {
       this.update({
         idbudget: _budget.idbudget,
+        libelle: _budget.libelle,
         entite: _budget.entite,
         datedebut: formValue.datedebut,
         datefin: formValue.datefin,
@@ -234,8 +317,7 @@ export class BudgetComponent implements OnInit {
       },
 
       error: (err: any) => {
-        this.error = 'Création échec';
-        alert(this.error + ': ' + err.message);
+        this.msgErros = err.error.error;
         this.loading = false;
       },
     });
@@ -254,8 +336,8 @@ export class BudgetComponent implements OnInit {
         }
         this.loading = false;
       },
-      error: (err: Error) => {
-        this.error = 'Modification échec';
+      error: (err: any) => {
+        this.msgErros = err.error.error;
         this.loading = false;
       },
     });

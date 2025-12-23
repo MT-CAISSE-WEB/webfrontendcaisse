@@ -13,15 +13,16 @@ import {
   TITLE_DELETE,
 } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
-import { DatePipe } from '@angular/common';
 import { LigneBudgetModel } from '../models/ligne_budget.model';
 import { LigneBudgetService } from '../services/ligne_budget.service';
 import { BudgetModel } from '../models/budget.model';
 import { BudgetService } from '../services/budget.service';
+import { departementservice } from '../../structure/service/departement.service';
+import { departementmodel } from '../../structure/model/departement.model';
 
 @Component({
   selector: 'app-ligne-budget',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, DatePipe],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './ligne-budget.component.html',
   styleUrl: './ligne-budget.component.css',
 })
@@ -32,6 +33,7 @@ export class LigneBudgetComponent implements OnInit {
   fb: FormBuilder = new FormBuilder();
   ligneBudgets: LigneBudgetModel[] = [];
   budgets: BudgetModel[] = [];
+  departements: departementmodel[] = [];
   ligneBudget: LigneBudgetModel = new LigneBudgetModel();
   msgErros: string = '';
   loading: Boolean = false;
@@ -65,12 +67,14 @@ export class LigneBudgetComponent implements OnInit {
   constructor(
     private lignebudgetservice: LigneBudgetService,
     private budgetservice: BudgetService,
+    private departementservice: departementservice,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     //Afficher toutes les lignes budgétaires
     this.getAllBudgets();
+    this.getAllDepartements();
     this.getAllLigneBudgets();
 
     //Initialisation du formulaire
@@ -89,6 +93,18 @@ export class LigneBudgetComponent implements OnInit {
       next: (res: any) => {
         if (res.success) {
           this.budgets = res.data;
+          // this.totalPages = res.totalPages;
+        }
+      },
+    });
+  }
+
+  // Obtenir les départements
+  getAllDepartements() {
+    this.departementservice.getAll().subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.departements = res.data;
           // this.totalPages = res.totalPages;
         }
       },
@@ -247,15 +263,14 @@ export class LigneBudgetComponent implements OnInit {
           this.getAllBudgets();
           this.getAllLigneBudgets();
         } else {
-          this.error = 'Erreur de création';
+          this.msgErros = 'Erreur de création';
           alert(this.error);
         }
         this.loading = false;
       },
 
       error: (err: any) => {
-        this.error = 'Création échec';
-        alert(this.error + ': ' + err.message);
+        this.msgErros = err.error.error;
         this.loading = false;
       },
     });
