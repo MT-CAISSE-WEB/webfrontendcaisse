@@ -60,8 +60,9 @@
                 </div>
                 <div class="d-flex align-items-end justify-content-between mt-4">
                     <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="maxDecaissementJour?.montant || 0 ">{{ maxDecaissementJour?.montant || 0 }}</span> {{ maxDecaissementJour?.devise?.codedevise }} </h4>
-                        <span class="badge bg-warning me-1">2</span> <span class="text-muted">Nature operation</span>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="maxDecaissementJour?.montant || 0 ">{{ maxDecaissementJour?.montantref || 0 }}</span> {{ user.devise_ref_code }}</h4>
+                        <span class="badge bg-warning me-1"> {{ maxDecaissementJour?.montant || 0 }} </span> <span class="text-muted text-small">{{ maxDecaissementJour?.devise?.codedevise }}</span>
+                        <!-- <span class="badge bg-warning me-1">2</span> <span class="text-muted">Nature operation</span> -->
                     </div>
                     <div class="avatar-sm flex-shrink-0">
                         <span class="avatar-title bg-light rounded fs-3">
@@ -89,8 +90,8 @@
                 </div>
                 <div class="d-flex align-items-end justify-content-between mt-4">
                     <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="136.98">{{ minDecaissementJour?.montant || 0 }}</span> {{ minDecaissementJour?.devise?.codedevise }} </h4>
-                        <span class="badge bg-warning me-1">1</span> <span class="text-muted">Nature operation</span>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="136.98">{{ minDecaissementJour?.montantref || 0 }}</span> {{ user.devise_ref_code }}</h4>
+                        <span class="badge bg-warning me-1">{{ minDecaissementJour?.montant || 0 }}</span> <span class="text-muted">{{ minDecaissementJour?.devise?.codedevise }}</span>
                     </div>
                     <div class="avatar-sm flex-shrink-0">
                         <span class="avatar-title bg-light rounded fs-3">
@@ -221,7 +222,7 @@
                                         <td>
                                             <ul class="list-inline hstack gap-2 mb-0">
                                                 <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="View">
-                                                    <a href="#" class="text-primary d-inline-block">
+                                                    <a href="#editModal" data-bs-toggle="modal" (click)="modalEdit(item)" class="text-primary d-inline-block">
                                                         <i class="ri-eye-fill fs-16"></i>
                                                     </a>
                                                 </li>
@@ -342,12 +343,6 @@
                     <!--end row-->
 
                     <!-- <div class="mb-3"> -->
-                        <!-- <label for="customername-field" class="form-label form-label-sm">societe</label> -->
-                        <input type="hidden" id="customername-field" value="B89B381E-691E-4BA7-979E-1AC4D5B1E018" class="form-control form-control-sm {{ isValidField('societe')}}" formControlName="societe" placeholder="societe"/>
-                        <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
-                    <!-- </div> -->
-
-                    <!-- <div class="mb-3"> -->
                         <!-- <label for="customername-field" class="form-label form-label-sm">site</label> -->
                         <input type="hidden" id="customername-field" value="197D7C37-7180-4DD1-80CC-843B9A6C5B52" class="form-control form-control-sm {{ isValidField('site')}}" formControlName="site" placeholder="site"/>
                         <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
@@ -457,7 +452,7 @@
                                                     <tr class="border-top border-top-dashed">
                                                         <th scope="row">Total référentiel</th>
                                                         <td>
-                                                            <input type="text" class="form-control form-control-sm bg-light border-0" id="cart-total" placeholder="$0.00" readonly />
+                                                            <input type="text" formControlName="montantRefglobal" class="form-control form-control-sm bg-light border-0" id="cart-total" placeholder="$0.00" readonly />
                                                         </td>
                                                     </tr>
                                                     <tr>
@@ -486,9 +481,10 @@
                                                 </thead>
                                                 <tbody *ngIf="!loadingModal; else loader">
                                                     @for(c of caisses.controls; track $index){
-                                                    <tr [formGroup]="c">
+                                                    <tr [formGroup]="c" class="caisse-row">
                                                         <td>
                                                             <span> <strong> {{ c.get('caisse')?.value }} </strong> </span>
+                                                            <input type="hidden" formControlName="idcaisse">
                                                         </td>
                                                         <td>
                                                             <span> {{ c.get('devisecaisse')?.value }} </span>
@@ -504,16 +500,21 @@
                                                         </td>
                                                         <td>
                                                             <input type="text" formControlName="montantref" [ngClass]="{'bg-danger-subtle': c.get('montantcaisse')?.errors?.['depassementMontant']}" class="form-control form-control-sm bg-light border-0"  readonly/>
-                                                            <div *ngIf="c.get('montantcaisse')?.errors?.['depassementMontant']" class="text-danger small">
+                                                            <div class="text-danger small error-slot" [class.visible]="c.get('montantcaisse')?.errors?.['depassementMontant']">
                                                                 Montant dépassé
                                                             </div>
                                                         </td>
                                                     </tr>
                                                     }
+                                                    <tr>
+                                                        <td colspan="6" class="text-end text-muted small">
+                                                            Reste à répartir : {{ resteARepartir | number:'1.0-2' }}
+                                                        </td>
+                                                    </tr>
                                                     <tr *ngIf="operationForm.errors?.['totalCaisseDepasse']">
-                                                        <div *ngIf="operationForm.errors?.['totalCaisseDepasse']" class="text-danger small">
+                                                        <td colspan="6" class="text-danger small">
                                                             Le total des caisses ne doit pas dépasser le montant total de l’opération.
-                                                        </div>
+                                                        </td>
                                                     </tr>
                                                 </tbody>
                                                 <ng-template #loader>
@@ -547,6 +548,96 @@
                     </div>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0">
+            <div class="modal-header p-3 bg-info-subtle">
+                <h5 class="modal-title" id="exampleModalLabel">Details {{title}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row gx-lg-5">
+                    <div class="col-xl-12">
+                        <div class="mt-xl-0 mt-5">
+                            <div class="d-flex">
+                                <div class="flex-grow-1">
+                                    <h5>{{ operationdetail.codeoperation }}</h5>
+                                    <div class="hstack gap-3 flex-wrap">
+                                        <div class="text-primary d-block">Demande :  </div>
+                                        <div class="vr"></div>
+                                        <div class="text-muted">type : <span class="text-body fw-medium"> {{ operationdetail.caisses[0]?.codtypeoperation }} </span></div>
+                                        <div class="vr"></div>
+                                        <div class="text-muted">Date : <span class="text-body fw-medium"> {{ formatDateFR(operationdetail.dateoperation || '') }} </span></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-lg-3 col-sm-6">
+                                    <div class="p-2 border border-dashed rounded">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm me-2">
+                                                <div class="avatar-title rounded bg-transparent text-success fs-24">
+                                                    <i class="ri-money-dollar-circle-fill"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <p class="text-muted mb-1">Total :</p>
+                                                <h5 class="mb-0">{{ operationdetail.montant }} {{ operationdetail.devise.codedevise }}</h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="product-content mt-5">
+                                <h5 class="fs-14 mb-3">Natures opérations </h5>
+                                <div class="tab-content border border-top-0 p-4" id="nav-tabContent">
+                                    <div class="tab-pane fade show active" id="nav-speci" role="tabpanel" aria-labelledby="nav-speci-tab">
+                                        <div class="table-responsive">
+                                            <table class="table mb-0">
+                                                <thead class="align-middle">
+                                                    <tr class="table-active">
+                                                        <th scope="col"> Nature operation</th>
+                                                        <th scope="col"> Centre analytique</th>
+                                                        <th scope="col"> Tiers </th>
+                                                        <th scope="col"> Montant </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @for(item of operationdetail.lignes; track $index){
+                                                        <tr>
+                                                            <td> {{ item.nature?.libelle }} </td>
+                                                            <td> {{ item.centre?.libelle }} </td>
+                                                            <td> {{ item.tiers?.designation }} </td>
+                                                            <td> {{ item.montantoperation }} </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <div class="hstack gap-2 justify-content-end">
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

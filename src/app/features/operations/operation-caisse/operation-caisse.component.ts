@@ -18,6 +18,7 @@ import { centreanalytiqueModel } from '../../donnee_base/models/centreanalytique
 import { CentreAnalytiqueService } from '../../donnee_base/services/centreanalytique.service';
 import { societemodel } from '../../structure/model/societe.model';
 import { societeservice } from '../../structure/service/societe.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-operation-caisse',
@@ -41,6 +42,7 @@ export class OperationCaisseComponent implements OnInit{
   limit: number = 10;
   operations : operationModel[] = [];
   operation : operationModel = new operationModel();
+  operationdetail : operationModel = new operationModel();
 
   //Faire le check selection **********
   objectsSelected : operationModel[] = [];
@@ -95,7 +97,7 @@ export class OperationCaisseComponent implements OnInit{
   minDecaissementJour : any = {};
   nbrDecaissementJour = 0;
   totalDecaissementJour = 0;
-  resteARepartir: number = 0;
+  //resteARepartir: number = 0;
 
   caisseStatuses: any = {};
   //caisseStatuses: string[] = [];
@@ -113,7 +115,7 @@ export class OperationCaisseComponent implements OnInit{
   constructor(private natureoperationservice: NatureoperationService, private caisseuserservice: AffectationCaisseService,
     private router : Router, private caissePeriodeservice: CaissePeriodeService, private centreanalytiqueservice: CentreAnalytiqueService,
     private operationservice: OperationService, private tiersservice: TiersService,private sc: societeservice,
-    private currencyPipe: CurrencyPipe
+    private currencyPipe: CurrencyPipe, private toastr : ToastrService
   ){}
 
   ngOnInit(): void {
@@ -167,6 +169,20 @@ export class OperationCaisseComponent implements OnInit{
           this.totalPages = res.data.totalPages;
         }
       }
+    });
+  }
+
+  //Reload les datas
+  reloadData() {
+    this.loading = true;
+
+    forkJoin([
+      this.getAllOperations(),
+      this.getSoldeCaisse(),
+      this.getCaisseUser()
+    ]).subscribe({
+      next: () => this.loading = false,
+      error: () => this.loading = false
     });
   }
 
@@ -302,18 +318,6 @@ export class OperationCaisseComponent implements OnInit{
     return d.toISOString().split('T')[0];
   }
 
-  //Recuperer les devises de la societe
-  // getSocieteUserconnected (){
-  //   this.sc.getOne(this.user?.idsociete).subscribe({
-  //     next : (res:any) => {
-  //       console.log(res);
-  //        if(res.success){
-  //           this.societe = res.data;
-  //        }
-  //     }
-  //   });
-  // }
-
   //Recuperer le Max des operations
   getMaxOperations(){
     this.operationservice.getMaxOperation().subscribe({
@@ -378,6 +382,7 @@ export class OperationCaisseComponent implements OnInit{
       site : ["197D7C37-7180-4DD1-80CC-843B9A6C5B52"],
       societe : [this.user.idsociete ?? null],
       montant: [0],
+      montantRefglobal: [0],
       caisses : this.fb.array([])
     })
   }
@@ -430,7 +435,7 @@ export class OperationCaisseComponent implements OnInit{
       },
       error: () => {
         this.loading = false;
-        console.error("Erreur chargement caisses utilisateur");
+        this.toastr.error('Erreur chargement caisses utilisateur');
       }
     });
   }
@@ -593,6 +598,7 @@ export class OperationCaisseComponent implements OnInit{
             caisse: [p.caisse?.codecaisse || null, Validators.required],
             statut: [p.statut],
             devisecaisse: [p.caisse?.devise?.codedevise || null],
+            iddevisecaisse: [p.caisse?.devise?.iddevise || null],
             solde: [this.formatNumber(p.soldeouverture) ?? 0],
             montantcaisse: [0],
             montantref: [""],
@@ -744,10 +750,10 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   protectionField(ligne: FormGroup, field: string) {
-    // if (!ligne.get("natureop")?.value) {
-    //   //this.showError("Veuillez renseigner la nature avant de continuer.");
-    //   return false;
-    // }
+    if (!ligne.get("natureop")?.value) {
+      this.toastr.error("Veuillez renseigner la nature avant de continuer.");
+      return false;
+    }
     // return true;
     if (field === 'tiers') {
       const natureId = ligne.get('natureop')?.value;
@@ -780,6 +786,7 @@ export class OperationCaisseComponent implements OnInit{
     if (this.operationForm.invalid) {
       Object.keys(controls).forEach(controlName => controls[controlName].markAsTouched());
       this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
+      //this.toastr.warning(this.msgErros);
       return;
     }
 
@@ -816,16 +823,19 @@ export class OperationCaisseComponent implements OnInit{
       next: (res) => {
         if (res.success) {
           this.closeModal('showModal');
-          this.getAllOperations();
+          //this.getAllOperations();
           this.rafreshpage();
+          this.reloadData();
+          this.toastr.success('Opération enregistrée avec succès');
         } else {
           this.error = "Erreur de création";
+          this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
-        this.error = "Création échec";
         this.loading = false;
+        this.toastr.error(err);
       }
     })
   }
@@ -838,14 +848,17 @@ export class OperationCaisseComponent implements OnInit{
           this.closeModal('showModal');
           this.getAllOperations();
           this.rafreshpage();
+          this.toastr.success('Opération modifée avec succès');
         } else {
           this.error = "Erreur de modification";
+          this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
-        this.error = "Modification échec";
+        this.error = "échec de Modification";
         this.loading = false;
+        this.toastr.error(this.error);
       }
     })
   }
@@ -877,6 +890,12 @@ export class OperationCaisseComponent implements OnInit{
     });
   }
 
+  //Modal edit 
+  modalEdit(_object: operationModel){
+    this.operationdetail = _object;
+    console.log(this.operationdetail);
+  }
+
   onTypePaiementChange(type: string) {
     this.filtrerNatures(type);
 
@@ -895,28 +914,67 @@ export class OperationCaisseComponent implements OnInit{
     });
   }
 
+  //Récuperer le taux de la devise transaction vers la devise du référentiel
+  // Si la devise de transaction est égale à l'un des devises de caisse aussi
+  private getTauxDeviseTransaction(): number {
+    const deviseTransaction = this.operationForm.get('devise')?.value;
+
+    const caisseConversion = this.caisses.controls.find(c =>
+      c.get('iddevisecaisse')?.value === deviseTransaction
+    );
+
+    return caisseConversion
+      ? parseFloat(caisseConversion.get('taux')?.value) || 1
+      : 1;
+  }
+
   applyAutoCalcul(caisseFG: FormGroup) {
     const montantCtrl = caisseFG.get('montantcaisse');
+    const devisecaisseCtrl = caisseFG.get('iddevisecaisse');
     const tauxCtrl = caisseFG.get('taux');
     const refCtrl = caisseFG.get('montantref');
-    const devCtrl = caisseFG.get('devise');
-
-    //Vérifier si la devise de transaction est égale à la devise de référentiel
+    const devTransactionCtrl = this.operationForm.get('devise');
+    const deviseReference = this.user?.devise_ref_id;
 
     if (!montantCtrl || !tauxCtrl || !refCtrl) return;
 
     const updateMontantRef = () => {
+      const deviseTransaction = devTransactionCtrl?.value;
       const montant = parseFloat(montantCtrl.value) || 0;
       const taux = parseFloat(tauxCtrl.value) || 1;
-
+  
       const montantRef = montant * taux;
-      //maxMontantRef sera égale au total ligne si la devise de la transaction est égale à la devise de référentiel
-      //Sinon ramener le taux récent de la devise de transaction
-      const maxMontantRef = this.totalLignes; 
+      refCtrl.setValue(montantRef, { emitEvent: false });
 
-      //contrôle 
+      if (deviseTransaction === deviseReference) {
+        // même devise → pas de conversion
+        this.operationForm.patchValue(
+          { montantRefglobal: this.totalLignes },
+          { emitEvent: false }
+        );
+      } else {
+        // utiliser le taux de la caisse correspondant à la devise transaction
+        const tauxConversion = this.getTauxDeviseTransaction();
+        const montantRefGlobal = this.totalLignes * tauxConversion;
+
+        this.operationForm.patchValue(
+          { montantRefglobal: montantRefGlobal },
+          { emitEvent: false }
+        );
+      }
+
+      const maxMontantRef = this.operationForm.get('montantRefglobal')?.value || 0;
+      //contrôle référentiel paiement dépasse référentiel global
       if (montantRef > maxMontantRef) {
+        // montantCtrl.setErrors({ depassementMontant: true });
+        // refCtrl.setValue(montantRef, { emitEvent: false });
+        // return;
         montantCtrl.setErrors({ depassementMontant: true });
+        this.operationForm.setErrors({
+          ...(this.operationForm.errors || {}),
+          totalCaisseDepasse: true
+        });
+
         refCtrl.setValue(montantRef, { emitEvent: false });
         return;
       }
@@ -937,10 +995,19 @@ export class OperationCaisseComponent implements OnInit{
           : montantCtrl.setErrors(null);
       }
 
+      // Nettoyage erreur globale
+      if (this.operationForm.hasError('totalCaisseDepasse')) {
+        const formErrors = { ...(this.operationForm.errors || {}) };
+        delete formErrors['totalCaisseDepasse'];
+        Object.keys(formErrors).length
+          ? this.operationForm.setErrors(formErrors)
+          : this.operationForm.setErrors(null);
+      }
+
       refCtrl.setValue(montantRef, { emitEvent: false });
 
       //contrôle global après chaque saisie
-      this.controlTotalCaisses();
+      this.controlTotalCaisses(maxMontantRef);
     };
 
     montantCtrl.valueChanges.subscribe(updateMontantRef);
@@ -948,6 +1015,14 @@ export class OperationCaisseComponent implements OnInit{
 
     //Calcul initial (pour UPDATE)
     updateMontantRef();
+  }
+
+  get resteARepartir(): number {
+    const max = this.operationForm.get('montantRefglobal')?.value || 0;
+    const total = this.caisses.controls.reduce((s, c) =>
+      s + (parseFloat(c.get('montantref')?.value) || 0), 0
+    );
+    return max - total;
   }
 
   //La somme de toutes les lignes opérations
@@ -964,15 +1039,24 @@ export class OperationCaisseComponent implements OnInit{
     }, 0);
   }
 
-  //Controler le total des caisses
-  controlTotalCaisses() {
-    const totalLignes = this.totalLignes;
-    const totalCaisses = this.totalCaisses;
+  controlTotalCaisses(maxMontantRef: number) {
+    const totalRef = this.caisses.controls.reduce((sum, c) =>
+      sum + (parseFloat(c.get('montantref')?.value) || 0), 0
+    );
 
-    if (totalCaisses > totalLignes) {
-      this.operationForm.setErrors({ totalCaisseDepasse: true });
+    if (totalRef > maxMontantRef) {
+      this.operationForm.setErrors({
+        ...(this.operationForm.errors || {}),
+        totalCaisseDepasse: true
+      });
     } else {
-      this.operationForm.setErrors(null);
+      if (this.operationForm.errors?.['totalCaisseDepasse']) {
+        const errors = { ...this.operationForm.errors };
+        delete errors['totalCaisseDepasse'];
+        Object.keys(errors).length
+          ? this.operationForm.setErrors(errors)
+          : this.operationForm.setErrors(null);
+      }
     }
   }
 
@@ -988,7 +1072,6 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   finaliserModal(){
-    console.log("finaliser");
     const sameDate = this.checkSameDatePeriodes();
     if (sameDate) {
       this.operationForm.patchValue({
@@ -1005,6 +1088,8 @@ export class OperationCaisseComponent implements OnInit{
 
     caisseFG.get('montantref')?.setValue(montant * taux, { emitEvent: false });
   }
+
+  // Recuperer la devise
 
   modalCreate(){
     this.actionModal = "create";
@@ -1034,35 +1119,6 @@ export class OperationCaisseComponent implements OnInit{
     });
   }
 
-  // modalCreate(){
-  //   this.actionModal = "create";
-  //   this.loadingModal = true;
-
-  //   forkJoin([this.operationservice.getSoldeCaisse()]).subscribe({
-  //       next: ([soldeRes, periodesRes]: any) => {
-
-  //         // charger soldes
-  //         this.caisseSoldeMap.clear();
-  //         soldeRes.data.data.forEach((c: any) => {
-  //           this.caisseSoldeMap.set(c.idcaisse, c.solde);
-  //         });
-
-  //         // charger caisses
-  //         this.initForm();
-  //         this.loadCaissesForm().subscribe(() => {
-  //           this.finaliserModal();
-  //           this.loadingModal = false;
-
-  //           // Filtrer les natures quand typepaiement change
-  //           this.operationForm.get("typepaiement")?.valueChanges.subscribe(type => {
-  //             this.onTypePaiementChange(type);
-  //           });
-  //         });
-  //       },
-  //       error: () => this.loadingModal = false
-  //     });
-  // }
-
   formatDateForInput(date: string) {
     return date ? date.substring(0, 10) : "";
   }
@@ -1086,14 +1142,17 @@ export class OperationCaisseComponent implements OnInit{
           this.closeModal('deleteOrder');
           this.getAllOperations();
           this.rafreshpage();
+          this.toastr.error('Opération supprimée');
         } else {
           this.error = "Erreur de Suppression";
+          this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Suppression échec";
         this.loading = false;
+        this.toastr.error(this.error);
       }
     })
   }

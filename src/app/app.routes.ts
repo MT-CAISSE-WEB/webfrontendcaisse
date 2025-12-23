@@ -45,6 +45,10 @@ export const routes: Routes = [
     component: LayoutMainComponent,
     children: [
       {
+        path : '',
+        component: LayoutContentComponent
+      },
+      {
         path : APP_STRUCTURE_DEPARTEMENT,
         component : DepartementComponent
       },

@@ -7,6 +7,7 @@ import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELE
 import { CommonModule } from '@angular/common';
 import { journalModel } from '../models/journal.model';
 import { JournalService } from '../services/journal.service';
+import { NotificationService } from '../../../_core/services/notification.service';
 
 @Component({
   selector: 'app-caisse',
@@ -276,10 +277,6 @@ export class CaisseComponent implements OnInit{
     this.caisseForm.reset();
     this.dispatchCaisse(_object);
   }
-
-  // loader(){
-  //   this.router.navigateByUrl(APP_caisse_CAISSE_caisse).then();
-  // }
 
   modalDelete(item: caisseModel){
     this.deleteCaisse = item;

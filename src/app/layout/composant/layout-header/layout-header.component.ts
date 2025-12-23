@@ -28,20 +28,6 @@ export class LayoutHeaderComponent implements OnInit {
 
   //Liste de caisse utilisateur
   caissesUser: AffectationCaisseModel[] = [];
-  // caissesX :  any[] = [
-  //   {
-  //     idcaisse : "47FCE466-8123-4DEB-942B-9F0E5BB22FD4",
-  //     codecaisse : "CA001",
-  //     libelle : "Caisse principale",
-  //     devise : "XAF"
-  //   },
-  //   {
-  //     idcaisse : "F1DD7EDE-EB9C-41D2-8EE1-55300B21777C",
-  //     codecaisse : "CA002",
-  //     libelle : "Caisse secondaire",
-  //     devise : "USD"
-  //   }
-  // ]
 
   loadingCaisses = false;
 
