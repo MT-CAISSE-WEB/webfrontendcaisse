@@ -31,7 +31,7 @@ export class CaisseComponent implements OnInit{
   currentPage: number = 1;
   // Nombre d'éléments par page
   totalPages: number = 0;
-  limit: number = 5;
+  limit: number = 10;
 
   //Faire le check selection **********
   objectsSelected : caisseModel[] = [];

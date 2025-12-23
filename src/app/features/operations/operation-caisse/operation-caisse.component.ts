@@ -893,7 +893,6 @@ export class OperationCaisseComponent implements OnInit{
   //Modal edit 
   modalEdit(_object: operationModel){
     this.operationdetail = _object;
-    console.log(this.operationdetail);
   }
 
   onTypePaiementChange(type: string) {

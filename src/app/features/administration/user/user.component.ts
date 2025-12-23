@@ -86,7 +86,6 @@ export class UserComponent {
          if(res.success){
             this.users = res.data;
             this.filtreusers = res.data;
-            console.log(res.data);
          }
       }
     });
