@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AffectationnaturecentreComponent } from './affectationnaturecentre.component';
+import { AffectationNatureCentreComponent } from './affectationnaturecentre.component';
 
-describe('AffectationnaturecentreComponent', () => {
-  let component: AffectationnaturecentreComponent;
-  let fixture: ComponentFixture<AffectationnaturecentreComponent>;
+describe('AffectationNatureCentreComponent', () => {
+  let component: AffectationNatureCentreComponent;
+  let fixture: ComponentFixture<AffectationNatureCentreComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AffectationnaturecentreComponent]
+      imports: [AffectationNatureCentreComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AffectationnaturecentreComponent);
+    fixture = TestBed.createComponent(AffectationNatureCentreComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

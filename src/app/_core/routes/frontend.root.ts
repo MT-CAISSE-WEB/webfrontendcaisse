@@ -57,12 +57,6 @@ export const APP_TAUX = 'taux_devise';
 export const APP_TAUX_DONNEE_BASE = APP_DONNEE_BASE + '/' + APP_TAUX;
 export const APP_ROOT_TAUX_DONNEE_BASE = APP_ROOT + '/' + APP_TAUX_DONNEE_BASE;
 
-
-//Route Plan comptable
-export const APP_PLAN_COMPTABLE = 'plan_comptable';
-export const APP_PLAN_COMPTABLE_DONNEE_BASE = APP_DONNEE_BASE + '/' + APP_PLAN_COMPTABLE;
-export const APP_ROOT_PLAN_COMPTABLE_DONNEE_BASE = APP_ROOT + '/' + APP_PLAN_COMPTABLE_DONNEE_BASE;
-
 //Route journal
 export const APP_JOURNAL = 'journal';
 export const APP_JOURNAL_CAISSE_JOURNAL = APP_CAISSE_JOURNAL + '/' + APP_JOURNAL;
@@ -84,7 +78,12 @@ export const APP_OPERATION_GENERAL = APP_GENERAL + "/" + APP_OPERATION;
 export const APP_ROOT_OPERATION_GENERAL = APP_ROOT + "/" + APP_OPERATION_GENERAL;
 
 
-// Richard
+// RICHARD
+//Route Plan comptable
+export const APP_PLAN_COMPTABLE = 'plan_comptable';
+export const APP_PLAN_COMPTABLE_DONNEE_BASE = APP_DONNEE_BASE + '/' + APP_PLAN_COMPTABLE;
+export const APP_ROOT_PLAN_COMPTABLE_DONNEE_BASE = APP_ROOT + '/' + APP_PLAN_COMPTABLE_DONNEE_BASE;
+
 //Route des tiers :
 export const APP_TIERS = "tiers";
 export const APP_TIERS_DONNEE_BASE = APP_DONNEE_BASE + "/" + APP_TIERS;
@@ -100,12 +99,12 @@ export const APP_NATURE_OPERATION = 'nature_operation';
 export const APP_NATURE_OPERATION_DONNEE_BASE = APP_DONNEE_BASE + "/" + APP_NATURE_OPERATION;
 export const APP_ROOT_NATURE_OPERATION_DONNEE_BASE = APP_ROOT + "/" + APP_NATURE_OPERATION_DONNEE_BASE;
 
-//Route affectation analytique
-export const APP_AFFECTATION_ANALYTIQUE = 'affectationanalytique'; 
-export const APP_AFFECTATION_ANALYTIQUE_DONNEE_BASE = APP_DONNEE_BASE + "/" + APP_AFFECTATION_ANALYTIQUE;
-export const APP_ROOT_AFFECTATION_ANALYTIQUE_DONNEE_BASE = APP_ROOT + "/" + APP_AFFECTATION_ANALYTIQUE_DONNEE_BASE;
-
 //Route affectation nature centre
 export const APP_AFF_NATURE_CENTRE = 'affectationnaturecentre'; 
 export const APP_AFF_NATURE_CENTRE_DONNEE_BASE = APP_DONNEE_BASE + "/" + APP_AFF_NATURE_CENTRE;
 export const APP_ROOT_AFF_NATURE_CENTRE_DONNEE_BASE = APP_ROOT + "/" + APP_AFF_NATURE_CENTRE_DONNEE_BASE;
+
+//Route affectation département nature
+export const APP_AFF_DEPT_NATURE = 'affectationdepartementnature'; 
+export const APP_AFF_DEPT_NATURE_DONNEE_BASE = APP_DONNEE_BASE + "/" + APP_AFF_DEPT_NATURE;
+export const APP_ROOT_AFF_DEPT_NATURE_DONNEE_BASE = APP_ROOT + "/" + APP_AFF_DEPT_NATURE_DONNEE_BASE;

@@ -1,38 +1,38 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { affectationnaturecentreModel } from '../models/affectationnaturecentre.model';
-import { AffectationNatureCentreService } from '../services/affectationnaturecentre.service';
+import { affectationdepartementnatureModel } from '../models/affectationdepartementnature.model';
+import { AffectationDepartementNatureService } from '../services/affectationdepartementnature.service';
 import { CommonModule } from '@angular/common';
-import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
+import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } 
+from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
 
-import { natureoperationModel } from '../models/natureoperation.model';
-import { NatureoperationService } from '../services/natureoperation.service';
+import { departementmodel } from '../../structure/model/departement.model';
+import { departementservice } from '../../structure/service/departement.service';
 
 // ADD-INS
 declare var $: any;
 
 @Component({
-  selector: 'app-affectationnaturecentre',
+  selector: 'app-affectationdepartementnature',
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
-  templateUrl: './affectationnaturecentre.component.html',
-  styleUrl: './affectationnaturecentre.component.css'
+  templateUrl: './affectationdepartementnature.component.html',
+  styleUrl: './affectationdepartementnature.component.css'
 })
 
 
-export class AffectationNatureCentreComponent implements OnInit{
-  title = "Affectation nature centre analytique";
+export class AffectationDepartementNatureComponent implements OnInit{
+  title = "Affectation département nature";
   params : any = {};
   breadCrumbs : any = {};
   fb: FormBuilder = new FormBuilder();
-  affectationnaturecentres : affectationnaturecentreModel[] = [];
-  affectationnaturecentre : affectationnaturecentreModel = new affectationnaturecentreModel();
+  affectationdepartementnatures : affectationdepartementnatureModel[] = [];
+  affectationdepartementnature : affectationdepartementnatureModel = new affectationdepartementnatureModel();
   msgErros : string = "";
   loading: Boolean = false;
-  affectationnaturecentreForm : FormGroup = this.fb.group({});
-
+  affectationdepartementnatureForm : FormGroup = this.fb.group({});
   //Faire le check selection **********
-  objectsSelected : affectationnaturecentreModel[] = [];
+  objectsSelected : affectationdepartementnatureModel[] = [];
   selectedItems : any[] = [];
   // Détermine si toutes les lignes sont selectionnées
   checkAllRow : any;
@@ -41,7 +41,7 @@ export class AffectationNatureCentreComponent implements OnInit{
   //Changement titre modal
   actionModal: string = "create";
 
-  natureoperations : natureoperationModel[] = [];
+  departements : departementmodel[] = [];
   
 
   nonAffectees: any[] = [];
@@ -49,30 +49,30 @@ export class AffectationNatureCentreComponent implements OnInit{
 
   selectedLeft: any[] = [];
   selectedRight: any[] = [];
-  natureoperationForm!: FormGroup;
+  departementForm!: FormGroup;
 
   
 
 
-  constructor( private AffectationNatureCentreService: AffectationNatureCentreService,
-    private natureoperationservice: NatureoperationService,
+  constructor( private AffectationDepartementNatureService: AffectationDepartementNatureService,
+    private departementservice: departementservice,
     private router: Router) {}
 
 
   ngOnInit(): void {
 
-    this.natureoperationForm = this.fb.group({
-      idnature: ["", Validators.required],
+    this.departementForm = this.fb.group({
+      iddepartement: ["", Validators.required],
       idsociete: ["6591AC47-11AA-4664-838E-B977292814FE", Validators.required],
-      idsCentres: [[]]
+      idsNatures: [[]]
     });
 
-    this.getAllNatureoperations();
+    this.getAllDepartements();
 
-    // ✅ Écoute du changement de nature
-    this.natureoperationForm.get('idnature')?.valueChanges.subscribe(idnature => {
-      if (idnature) {
-        this.getallAffectations(idnature);
+    // ✅ Écoute du changement de departement
+    this.departementForm.get('iddepartement')?.valueChanges.subscribe(iddepartement => {
+      if (iddepartement) {
+        this.getallAffectations(iddepartement);
       } else {
         this.affectees = [];
         this.nonAffectees = [];
@@ -81,23 +81,23 @@ export class AffectationNatureCentreComponent implements OnInit{
   }
 
 
-  getAllNatureoperations() {
-    this.natureoperationservice.getAll().subscribe({
+  getAllDepartements() {
+    this.departementservice.getAll().subscribe({
       next: (res) => {
         if (res.success) {
-          this.natureoperations = res.data;
+          this.departements = res.data;
         }
       }
     });
   }
 
 
-  getallAffectations(idnature: string) {
-    this.AffectationNatureCentreService.getAll(idnature).subscribe({
+  getallAffectations(iddepartement: string) {
+    this.AffectationDepartementNatureService.getAll(iddepartement).subscribe({
       next: (res) => {
         if (res.success) {
-          this.affectees = res.data.centresaffectes;
-          this.nonAffectees = res.data.centresnonaffectes;
+          this.affectees = res.data.naturesaffectes;
+          this.nonAffectees = res.data.naturesnonaffectes;
         }
       }
     });
@@ -111,7 +111,7 @@ export class AffectationNatureCentreComponent implements OnInit{
       this.selectedLeft.push(item);
     } else {
       this.selectedLeft = this.selectedLeft.filter(
-        x => x.idcentreanalytique !== item.idcentreanalytique
+        x => x.idnature !== item.idnature
       );
     }
   }
@@ -124,7 +124,7 @@ export class AffectationNatureCentreComponent implements OnInit{
       this.selectedRight.push(item);
     } else {
       this.selectedRight = this.selectedRight.filter(
-        x => x.idcentreanalytique !== item.idcentreanalytique
+        x => x.idnature !== item.idnature
       );
     }
   }
@@ -132,17 +132,17 @@ export class AffectationNatureCentreComponent implements OnInit{
 
 // Ajouter et retirer des affectations
 // ------------------------------------
-// Ajouter des centres analytiques à la nature d'opération
+// Ajouter des natures d'opérations au département
   add() {
     this.selectedLeft.forEach(item => {
 
       // éviter les doublons
-      if (!this.affectees.some(a => a.idcentreanalytique === item.idcentreanalytique)) {
+      if (!this.affectees.some(a => a.idnature === item.idnature)) {
         this.affectees = [...this.affectees, item];
       }
 
       this.nonAffectees = this.nonAffectees
-        .filter(x => x.idcentreanalytique !== item.idcentreanalytique);
+        .filter(x => x.idnature !== item.idnature);
     });
 
     this.selectedLeft = [];
@@ -153,24 +153,24 @@ export class AffectationNatureCentreComponent implements OnInit{
   remove() {
     this.selectedRight.forEach(item => {
 
-      if (!this.nonAffectees.some(n => n.idcentreanalytique === item.idcentreanalytique)) {
+      if (!this.nonAffectees.some(n => n.idnature === item.idnature)) {
         this.nonAffectees = [...this.nonAffectees, item];
       }
 
       this.affectees = this.affectees
-        .filter(x => x.idcentreanalytique !== item.idcentreanalytique);
+        .filter(x => x.idnature !== item.idnature);
     });
 
     this.selectedRight = [];
   }
 
 
-// Ajouter tous les centres analytiques à la nature d'opération
-// Déplace tous les centres NON affectés vers affectees
+// Ajouter toutes les natures d'opérations au département
+// Déplace toutes les natures d'opérations non affectées vers affectees
   addAll() {
     this.nonAffectees.forEach(item => {
       // Évite les doublons
-      if (!this.affectees.some(a => a.idcentreanalytique === item.idcentreanalytique)) {
+      if (!this.affectees.some(a => a.idnature === item.idnature)) {
         this.affectees.push(item);
       }
     });
@@ -183,11 +183,10 @@ export class AffectationNatureCentreComponent implements OnInit{
     this.selectedRight = [];
   }
 
-
-  // Déplace tous les centres affectés vers nonAffectees
+// Déplace toutes les natures d'opérations affectées vers nonAffectees
   removeAll() {
     this.affectees.forEach(item => {
-      if (!this.nonAffectees.some(n => n.idcentreanalytique === item.idcentreanalytique)) {
+      if (!this.nonAffectees.some(n => n.idnature === item.idnature)) {
         this.nonAffectees.push(item);
       }
     });
@@ -203,21 +202,23 @@ export class AffectationNatureCentreComponent implements OnInit{
 
 // Enregistrer les affectations
   save() {
-    const idnature = this.natureoperationForm.get('idnature')?.value;
+    const iddepartement = this.departementForm.get('iddepartement')?.value;
 
-    if (!idnature) {
+    console.log(iddepartement);
+
+    if (!iddepartement) {
       return;
     }
 
-    const idsCentres = this.affectees;
+    const idsNatures = this.affectees;
 
-    this.AffectationNatureCentreService
-      .saveAffectations(idnature, idsCentres)
+    this.AffectationDepartementNatureService
+      .saveAffectations(iddepartement, idsNatures)
       .subscribe({
         next: (res) => {
           if (res.success) {
             console.log('Affectations enregistrées');
-            this.getallAffectations(idnature);
+            this.getallAffectations(iddepartement);
           }
         },
         error: (err) => {
