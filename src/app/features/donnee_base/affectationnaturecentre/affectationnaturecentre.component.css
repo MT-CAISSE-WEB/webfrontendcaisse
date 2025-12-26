@@ -28,3 +28,18 @@ tr.selected {
   background-color: #00b368; /* bleu plus foncé */
   border-color: #008535;
 }
+
+
+#non-affectees {
+  background-color: #f6c8c8; /* rouge clair */
+  border-radius: 6px;
+  padding-top: 6px;
+  color: #000;
+}
+
+#affectees {
+  background-color: #c8f6d1; /* vert clair */
+  border-radius: 6px;
+  padding-top: 6px;
+  color: #000;
+}

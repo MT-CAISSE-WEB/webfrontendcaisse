@@ -9,6 +9,8 @@ import { Router } from '@angular/router';
 import { PlancomptableService } from '../services/plancomptable.service';
 import { plancomptableModel } from '../models/plancomptable.model';
 
+// import { ToastrService } from 'ngx-toastr';
+
 // ADD-INS
 declare var $: any;
 
@@ -52,7 +54,9 @@ export class NatureoperationComponent implements OnInit{
 
   constructor(private natureoperationservice: NatureoperationService, 
     private plancomptableservice: PlancomptableService,
-              private router: Router){}
+              private router: Router
+              // , private toastr : ToastrService
+            ){}
 
   ngOnInit(): void {
       //Afficher tous les natureoperations
@@ -247,12 +251,14 @@ export class NatureoperationComponent implements OnInit{
           this.getAllNatureoperations();
         } else {
           this.error = "Erreur de création";
+          // this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Echec de création";
         this.loading = false;
+        // this.toastr.error(err);
       }
     })
   }
@@ -264,14 +270,17 @@ export class NatureoperationComponent implements OnInit{
         if (res.success) {
           this.closeModal('showModal');
           this.getAllNatureoperations();
+          // this.toastr.success('Fiche modifée avec succès');
         } else {
           this.error = "Erreur de modification";
+          // this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Echec de modification";
         this.loading = false;
+        // this.toastr.error(this.error);
       }
     })
   }

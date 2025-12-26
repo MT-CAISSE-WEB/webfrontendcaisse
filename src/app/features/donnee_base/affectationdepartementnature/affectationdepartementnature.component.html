@@ -21,11 +21,7 @@
                 <div class="row align-items-center gy-3">
                     <div class="col-sm-auto">
                         <div class="d-flex gap-1 flex-wrap">
-                            <!-- <button type="button" class="btn btn-sm btn-soft-success" data-bs-toggle="modal" (click)="modalCreate()" id="create-btn" data-bs-target="#showModal">
-                                <i class="ri-add-line align-bottom me-1"></i>Créer
-                            </button> -->
                             <button type="button" class="btn btn-sm btn-soft-info"><i class="ri-file-download-line align-bottom me-1"></i> Import</button>
-                            <!-- <button class="btn btn-sm btn-soft-danger" [disabled]="!checkAllRow" onClick="deleteMultiple()"><i class="ri-delete-bin-2-line"></i></button> -->
                             <button type="button" class="btn btn-sm btn-info"> <i class="ri-refresh-fill align-bottom me-1"></i>Actualiser</button>
                         </div>
                     </div>
@@ -55,7 +51,7 @@
                 <div class="row mt-4">
 
                     <!-- N'est pas affecté à... -->
-                    <div class="col-5">
+                    <div class="col-5" id="non-affectees">
                         <h6><i class="ri-link-unlink"></i> N'est pas affecté à...</h6>
                         <table class="table table-sm table-hover border">
                             <thead class="table-light">
@@ -99,7 +95,7 @@
                     </div>
 
                     <!-- Est affecté à... -->
-                     <div class="col-5">
+                     <div class="col-5" id="affectees">
                         <h6><i class="ri-link"></i> Est affecté à...</h6>
                         <table class="table table-sm table-hover border">
                             <thead class="table-light">
@@ -125,9 +121,6 @@
                     <!-- Boutons en bas -->
                     <div class="row mt-3">
                         <div class="col-6">
-                            <!-- <button class="btn btn-outline-secondary">
-                            <i class="ri-printer-line"></i> Imprimer
-                            </button> -->
                         </div>
 
                         <div class="col-6 text-end">

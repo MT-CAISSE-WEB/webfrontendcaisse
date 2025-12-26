@@ -1,5 +1,5 @@
 <!-- ========== App Menu ========== -->
-<div class="app-menu navbar-menu">
+<div class="app-menu navbar-menu" id="sidebar">
     <!-- LOGO -->
     <div class="navbar-brand-box">
         <!-- Dark Logo-->
@@ -61,7 +61,7 @@
               <div class="collapse menu-dropdown" id="sidebarDashboards">
                   <ul class="nav nav-sm flex-column">
                       <li class="nav-item">
-                          <a [routerLink]="root_societe" data-key="t-analytics"> Societe </a>
+                          <a [routerLink]="root_societe" class="nav-link" data-key="t-analytics"> Societe </a>
                       </li>
                       <li class="nav-item">
                           <a [routerLink]="root_site" class="nav-link" data-key="t-crm"> Site </a>
@@ -212,3 +212,11 @@
 
 <!-- Vertical Overlay-->
 <div class="vertical-overlay"></div>
+
+<script>
+  document.getElementById('topnav-hamburger-icon')
+    .addEventListener('click', function () {
+      document.body.classList.toggle('sidebar-collapsed');
+    });
+</script>
+

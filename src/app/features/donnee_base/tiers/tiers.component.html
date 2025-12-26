@@ -122,17 +122,11 @@
                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                     </div>
 
-                                    <!-- <div class="mb-3">
-                                        <label for="customername-field" class="form-label form-label-sm">Type</label>
-                                        <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('typetiers')}}" formControlName="typetiers" placeholder="Type tiers"/>
-                                        <div class="invalid-feedback">{{ msgErros }}</div>
-                                    </div> -->
-
                                     <div class="mb-3">
                                         <label for="customername-field" class="form-label form-label-sm">Type</label>
                                         
                                         <select id="customername-field" class="form-control form-control-sm {{ isValidField('typetiers') }}" formControlName="typetiers">
-                                            <!-- <option value="">-- Sélectionner --</option> -->
+                                            <option value="">-- Sélectionner --</option>
                                             <option value="Client">Client</option>
                                             <option value="Fournisseur">Fournisseur</option>
                                             <option value="Divers">Divers</option>

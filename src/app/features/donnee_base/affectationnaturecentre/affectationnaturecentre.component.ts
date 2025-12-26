@@ -98,6 +98,7 @@ export class AffectationNatureCentreComponent implements OnInit{
         if (res.success) {
           this.affectees = res.data.centresaffectes;
           this.nonAffectees = res.data.centresnonaffectes;
+          this.nonAffectees = this.nonAffectees.filter((centre) => centre.actif === 1);
         }
       }
     });

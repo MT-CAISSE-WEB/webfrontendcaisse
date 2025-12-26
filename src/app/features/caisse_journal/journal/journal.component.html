@@ -25,7 +25,7 @@
                                 <i class="ri-add-line align-bottom me-1"></i>créer
                             </button>
                             <button type="button" class="btn btn-sm btn-soft-info"><i class="ri-file-download-line align-bottom me-1"></i> import</button>
-                            <button class="btn btn-sm btn-soft-danger" [disabled]="!checkAllRow"><i class="ri-delete-bin-2-line"></i></button>
+                            <button title="button" class="btn btn-sm btn-soft-danger" [disabled]="!checkAllRow"><i class="ri-delete-bin-2-line"></i></button>
                             <button type="button" class="btn btn-sm btn-info"> <i class="ri-refresh-fill align-bottom me-1"></i>actualiser</button>
                         </div>
                     </div>
@@ -46,7 +46,7 @@
                         <!--end col-->
                         <div class="col-xxl-2 col-sm-4">
                             <div>
-                                <select class="form-control form-control-sm" data-choices data-choices-search-false name="choices-single-default" id="idStatus">
+                                <select title="Status" class="form-control form-control-sm" data-choices data-choices-search-false name="choices-single-default" id="idStatus">
                                     <option value="">Status</option>
                                     <option value="all" selected>tous</option>
                                     <option value="Pending">Actif</option>
