@@ -105,7 +105,7 @@ export class TauxdeviseComponent implements OnInit {
   if (v && v > 0) {
     const inverse = 1 / v;
     this.tauxdeviseForm.patchValue({
-      coefficientinverse: inverse.toFixed(6)
+      coefficientinverse: inverse
     }, { emitEvent: false });
   }
 }

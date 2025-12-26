@@ -1,18 +1,17 @@
-export const DEFAULT = 'default';
-export const APP = 'app';
-export const APP_ROOT = '/app';
-export const APP_DONNEE_BASE = 'donnee_de_base';
-export const APP_CAISSE_JOURNAL = 'caisse_journal';
-export const APP_GENERAL = 'general';
-export const APP_STRUCTURE = "structure";
+export const DEFAULT = "default";
+export const APP = "app";
+export const APP_ROOT = "/app";
 export const APP_ADMINISTRATION = "administration";
-export const APP_ROOT_CAISSE_JOURNAL = APP_ROOT + '/' + APP_CAISSE_JOURNAL;
-export const APP_ROOT_DONNEE_BASE = APP_ROOT + '/' + APP_DONNEE_BASE;
-export const APP_ROOT_GENERAL = APP_ROOT + '/' + APP_GENERAL;
+export const APP_DONNEE_BASE = "donnee_de_base";
+export const APP_CAISSE_JOURNAL = "caisse_journal";
+export const APP_STRUCTURE = "structure";
+export const APP_GENERAL = "general";
+export const APP_ROOT_CAISSE_JOURNAL = APP_ROOT + "/" + APP_CAISSE_JOURNAL;
+export const APP_ROOT_DONNEE_BASE = APP_ROOT + "/" + APP_DONNEE_BASE;
+export const APP_ROOT_GENERAL = APP_ROOT + "/" + APP_GENERAL;
 export const APP_ROOT_STRUCTURE = APP_ROOT + "/"+APP_STRUCTURE;
 export const APP_ROOT_ADMINISTRATION = APP_ROOT + "/"+APP_ADMINISTRATION;
 
-// Route departement
 export const APP_DEPARTEMENT = "departement";
 export const APP_STRUCTURE_DEPARTEMENT = APP_STRUCTURE + "/" + APP_DEPARTEMENT;
 export const APP_ROOT_STRUCTURE_DEPARTEMENT = APP_ROOT + "/" + APP_STRUCTURE_DEPARTEMENT;
@@ -27,10 +26,25 @@ export const APP_SOCIETE ="societe";
 export const APP_STRUCTURE_SOCIETE = APP_STRUCTURE +"/"+APP_SOCIETE;
 export const APP_ROOT_STRUCTURE_SOCIETE = APP_ROOT + "/"+APP_STRUCTURE_SOCIETE;
 
-//Route Users
-export const APP_USER ="utilisateur";
-export const APP_ADMINISTRATION_USER = APP_ADMINISTRATION + "/" + APP_USER;
-export const APP_ROOT_ADMINISTRATION_USER = APP_ROOT + "/" + APP_ADMINISTRATION_USER;
+//Route Utilisateur
+export const APP_USER = 'utilisateur';
+export const APP_USER_ADMINISTRATION = APP_ADMINISTRATION + "/" + APP_USER;
+export const APP_ROOT_USER_ADMINISTRATION = APP_ROOT + "/" + APP_USER_ADMINISTRATION;
+
+//Route Role
+export const APP_ROLE = 'role';
+export const APP_ROLE_ADMINISTRATION = APP_ADMINISTRATION + "/" + APP_ROLE;
+export const APP_ROOT_ROLE_ADMINISTRATION = APP_ROOT + "/" + APP_ROLE_ADMINISTRATION;
+
+//Route Permission
+export const APP_PERMISSION = 'permission';
+export const APP_PERMISSION_ADMINISTRATION = APP_ADMINISTRATION + "/" + APP  + "/" + APP_PERMISSION;
+export const APP_ROOT_PERMISSION_ADMINISTRATION = APP_ROOT + "/" + APP_PERMISSION_ADMINISTRATION;
+
+//Route RolePermission
+export const APP_ROLE_PERMISSION = 'rolepermission';
+export const APP_ROLE_PERMISSION_ADMINISTRATION = APP_ADMINISTRATION + "/" + APP_ROLE_PERMISSION;
+export const APP_ROOT_ROLE_PERMISSION_ADMINISTRATION = APP_ROOT + "/" + APP_ROLE_PERMISSION_ADMINISTRATION;
 
 //Route de devise
 export const APP_DEVISE = 'devise';

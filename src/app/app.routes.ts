@@ -1,15 +1,14 @@
 import { Routes } from '@angular/router';
-import { APP, APP_TAUX_DONNEE_BASE, APP_TAUX, APP_PLAN_COMPTABLE_DONNEE_BASE, 
-  APP_CENTRE_ANALYTIQUE_DONNEE_BASE, APP_NATURE_OPERATION_DONNEE_BASE, APP_AFF_NATURE_CENTRE_DONNEE_BASE,
-  APP_JOURNAL_CAISSE_JOURNAL, APP_CAISSE_CAISSE_JOURNAL, APP_AFFECTATION_CAISSIER_CAISSE_JOURNAL, 
-  APP_OPERATION, APP_OPERATION_GENERAL, APP_TIERS_DONNEE_BASE,
-  APP_BUDGETS_LIGNE_BUDGET, APP_BUDGETS_BUDGET, APP_ROOT_DMD_DECAISSEMENT,
-  APP_STRUCTURE_DEPARTEMENT,
-  APP_STRUCTURE_SITE,
-  APP_STRUCTURE_SOCIETE,
-  APP_DONNEE_BASE_DEVISE,
-  APP_ADMINISTRATION_USER,
-  APP_AFF_DEPT_NATURE_DONNEE_BASE,} from './_core/routes/frontend.root';
+import { APP, APP_DONNEE_BASE_DEVISE, APP_AFF_NATURE_CENTRE_DONNEE_BASE, 
+    APP_TIERS_DONNEE_BASE, APP_BUDGETS_LIGNE_BUDGET, APP_BUDGETS_BUDGET, 
+    APP_ROOT_DMD_DECAISSEMENT, APP_AFF_DEPT_NATURE_DONNEE_BASE, APP_ROLE_ADMINISTRATION, 
+    APP_TAUX_DONNEE_BASE, 
+    APP_TAUX, APP_PLAN_COMPTABLE_DONNEE_BASE, APP_CENTRE_ANALYTIQUE_DONNEE_BASE, 
+    APP_NATURE_OPERATION_DONNEE_BASE, APP_JOURNAL_CAISSE_JOURNAL, 
+    APP_CAISSE_CAISSE_JOURNAL, APP_AFFECTATION_CAISSIER_CAISSE_JOURNAL,
+     APP_OPERATION, APP_OPERATION_GENERAL,APP_STRUCTURE_SOCIETE, APP_USER,
+     APP_USER_ADMINISTRATION, APP_STRUCTURE_SITE, APP_STRUCTURE_DEPARTEMENT, 
+     APP_PERMISSION_ADMINISTRATION, APP_ROLE_PERMISSION_ADMINISTRATION} from './_core/routes/frontend.root';
 
 import { LayoutMainComponent } from './layout/layout-main/layout-main.component';
 import { LayoutContentComponent } from './layout/composant/layout-content/layout-content.component';
@@ -37,6 +36,10 @@ import { SiteComponent } from './features/structure/site/site.component';
 import { SocieteComponent } from './features/structure/societe/societe.component';
 import { DeviseComponent } from './features/donnee_base/donnee_base/devise/devise.component';
 import { UserComponent } from './features/administration/user/user.component';
+import { RoleComponent } from './features/administration/role/role.component';
+import { PermissionComponent } from './features/administration/permission/permission.component';
+import { RolepermissionComponent } from './features/administration/rolepermission/rolepermission.component';
+
 
 export const routes: Routes = [
   {
@@ -85,7 +88,7 @@ export const routes: Routes = [
           component : DeviseComponent
       },
       {
-          path: APP_ADMINISTRATION_USER,
+          path: APP_USER_ADMINISTRATION,
           component: UserComponent
       },
       // ferreol
@@ -142,12 +145,19 @@ export const routes: Routes = [
           path : APP_AFF_DEPT_NATURE_DONNEE_BASE,
           component: AffectationDepartementNatureComponent,
       },
-    ],
-  },
-  {
-    path: '',
-    redirectTo: APP,
-    pathMatch: 'full',
-  },
+            {
+                path: APP_USER_ADMINISTRATION,
+                component: UserComponent
+            }
+         
+        ]
+    },
+    {
+        path: '',
+        redirectTo:'login',
+        pathMatch : 'full'
+    },
 ];
+
+
 

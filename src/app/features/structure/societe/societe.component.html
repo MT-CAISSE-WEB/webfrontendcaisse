@@ -255,6 +255,7 @@
                                     </div>
 
 <div class="mb-3">
+    <label for="devisereference">Devise de référence</label>
     <select class="form-select form-select-sm" formControlName="iddevisereference">
           <option value="">----Choisir la devise de référence-----</option>
           <option *ngFor="let d of devises"  [value]="d.iddevise">{{ d.codeiso }}</option>
@@ -263,6 +264,7 @@
 </div>
 
 <div class="mb-3">
+    <label for="devisereporting">Devise de reporting</label>
     <select class="form-select form-select-sm" formControlName="iddevisereporting">
           <option value="">----Choisir la devise de reporting-----</option>
           <option *ngFor="let d of devises" [value]="d.iddevise">{{ d.codeiso }}</option>

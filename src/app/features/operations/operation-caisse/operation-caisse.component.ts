@@ -6,7 +6,19 @@ import { operationModel } from '../model/operation.model';
 import { OperationService } from '../service/operation.service';
 import { caissePeriodeModel } from '../../caisse_journal/models/periodecaisse.model';
 import { CaissePeriodeService } from '../../caisse_journal/services/caisseperiode.service';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { debounceTime, distinctUntilChanged, forkJoin, map, Observable, takeUntil, tap } from 'rxjs';
+import { Router } from '@angular/router';
+import { AffectationCaisseModel } from '../../caisse_journal/models/affectationcaisse.model';
+import { AffectationCaisseService } from '../../caisse_journal/services/affectationcaisse.service';
+import { natureoperationModel } from '../../donnee_base/models/natureoperation.model';
+import { NatureoperationService } from '../../donnee_base/services/natureoperation.service';
+import { tiersModel } from '../../donnee_base/models/tiers.model';
+import { TiersService } from '../../donnee_base/services/tiers.service';
+import { centreanalytiqueModel } from '../../donnee_base/models/centreanalytique.model';
+import { CentreAnalytiqueService } from '../../donnee_base/services/centreanalytique.service';
+import { societemodel } from '../../structure/model/societe.model';
+import { societeservice } from '../../structure/service/societe.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-operation-caisse',
@@ -30,10 +42,12 @@ export class OperationCaisseComponent implements OnInit{
   limit: number = 10;
   operations : operationModel[] = [];
   operation : operationModel = new operationModel();
+  operationdetail : operationModel = new operationModel();
 
   //Faire le check selection **********
   objectsSelected : operationModel[] = [];
   selectedItems : any[] = [];
+
   // Détermine si toutes les lignes sont selectionnées
   checkAllRow : any;
   error : string = "";
@@ -42,63 +56,20 @@ export class OperationCaisseComponent implements OnInit{
   actionModal: string = "create";
 
   //Liste de caisse utilisateur
-  caissesAny: any[] = [
-    {
-      idcaisse : "47FCE466-8123-4DEB-942B-9F0E5BB22FD4",
-      codecaisse : "CA001",
-      libelle : "Caisse principale",
-      devise : "XAF"
-    },
-    {
-      idcaisse : "F1DD7EDE-EB9C-41D2-8EE1-55300B21777C",
-      codecaisse : "CA002",
-      libelle : "Caisse secondaire",
-      devise : "USD"
-    }
-  ];
-
-  //Liste des natures opérations
-  natureOperations: any[] = [
-    {
-      idnature : "A5E38801-5BCC-43D2-B695-453C2B78B1D3",
-      codenature : "NAT004",
-      libelle : "Achat consommables bureau",
-      imputationtiers : 0,
-      avanceajustifier : 0,
-      actif : 1,
-      typeoperation: "decaissement"
-    },
-    {
-      idnature : "AC0CBD05-D76E-4CB2-BB91-459C6B47C198",
-      codenature : "NAT003",
-      libelle : "Achat fournitures bureau",
-      imputationtiers : 0,
-      avanceajustifier : 0,
-      actif : 1,
-      typeoperation: "decaissement"
-    },
-    {
-      idnature : "DB432B1C-777C-4832-AF53-9CB8DE7681B0",
-      codenature : "NAT001",
-      libelle : "Achat eau fontaines",
-      imputationtiers : 0,
-      avanceajustifier : 0,
-      actif : 1,
-      typeoperation: "decaissement"
-    },
-    {
-      idnature : "783C77AD-E9D7-45CA-83BB-9643255B6F4A",
-      codenature : "NAT007",
-      libelle : "Approvisionnement caisse",
-      imputationtiers : 0,
-      avanceajustifier : 0,
-      actif : 1,
-      typeoperation: "encaissement"
-    },
-  ];
+  caissesUser: AffectationCaisseModel[] = [];
 
   //Liste des natures filtrées
   naturesFiltrees: any[] = [];
+  natureoperations : natureoperationModel[] = [];
+
+  //Liste des tiers
+  tiers : tiersModel[] = [];
+
+  //Liste des centres analytiques
+  centres : centreanalytiqueModel[] = [];
+
+  //Societé de l'utilisateur connecté
+  societe : societemodel = new societemodel();
 
   //Message suppression
   msgSup: string = "";
@@ -107,14 +78,29 @@ export class OperationCaisseComponent implements OnInit{
   //Element à supprimer 
   deleteOperation: any = null;
 
+  //Element statistiques
+  stats : any = null;
+
+  //caisseSolde
+  caisseSolde : any = [];
+  caisseSoldeMap = new Map<string, number>();
+
   //Liste periode 
   caisseperiodes: caissePeriodeModel[] = [];
 
   showCaisses = false;
-  caissesLoaded = false;
+  loadingModal = false;
   isAnyOpen: boolean = false;
 
+  private periodeDateMap = new Map<string, string>();
+  maxDecaissementJour : any = {};
+  minDecaissementJour : any = {};
+  nbrDecaissementJour = 0;
+  totalDecaissementJour = 0;
+  //resteARepartir: number = 0;
+
   caisseStatuses: any = {};
+  //caisseStatuses: string[] = [];
 
   //Formulaire de recherche
   searchForm : FormGroup = this.fb.group({});
@@ -126,35 +112,45 @@ export class OperationCaisseComponent implements OnInit{
     page: 1
   };
 
-  constructor(private caisseService: CaissePeriodeService,private operationservice: OperationService,
-    private currencyPipe: CurrencyPipe
+  constructor(private natureoperationservice: NatureoperationService, private caisseuserservice: AffectationCaisseService,
+    private router : Router, private caissePeriodeservice: CaissePeriodeService, private centreanalytiqueservice: CentreAnalytiqueService,
+    private operationservice: OperationService, private tiersservice: TiersService,private sc: societeservice,
+    private currencyPipe: CurrencyPipe, private toastr : ToastrService
   ){}
 
   ngOnInit(): void {
+    //Recuperer la societe de l'utilisateur connecté
+    //this.getSocieteUserconnected();
     //initialiser le formulaire de recherche
     this.initSearchForm();
     //Afficher toutes les opérations
     this.getAllOperations();
     //Initialisation du formulaire
     this.initForm();
+    //Charger les natures d'opérations
+    this.getAllNatureoperations();
     //Charger mes caisses
-    this.loadCaissesForm();
+    this.getCaisseUser();
+    //Récuperer les soldes de caisses
+    this.getSoldeCaisse();
+    //Récuperer le max operation
+    this.getMaxOperations();
 
     // Récupérer les statuts de caisse
-    this.caisseService.statuses$.subscribe(status => {
+    this.caissePeriodeservice.statuses$.subscribe(status => {
       this.caisseStatuses = status;
+      this.isAnyOpen = Object.values(status).some(
+        (s: any) => s?.toLowerCase() === 'ouverte'
+      );
     });
-
-    //Chzrger la journée
-    this.loadPeriodes();
 
     this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("cette opération");
     this.titleMsg = TITLE_DELETE;
     this.lignes;
 
     this.searchForm.valueChanges
-    .pipe(debounceTime(400),distinctUntilChanged()).subscribe(values => {
-      this.applyFilters(values);});
+      .pipe(debounceTime(400),distinctUntilChanged()).subscribe(values => {
+        this.applyFilters(values);});
   }
 
   //Recuperer toutes les opérations
@@ -176,6 +172,20 @@ export class OperationCaisseComponent implements OnInit{
     });
   }
 
+  //Reload les datas
+  reloadData() {
+    this.loading = true;
+
+    forkJoin([
+      this.getAllOperations(),
+      this.getSoldeCaisse(),
+      this.getCaisseUser()
+    ]).subscribe({
+      next: () => this.loading = false,
+      error: () => this.loading = false
+    });
+  }
+
   //Initialiser le formulaire de recherche
   initSearchForm() {
     this.searchForm = this.fb.group({
@@ -185,18 +195,7 @@ export class OperationCaisseComponent implements OnInit{
     });
   }
 
-  // Ecouter le filtre (saisie)
-  // listenFilters() {
-  //   this.searchForm.get('search')?.valueChanges
-  //     .pipe(debounceTime(300))
-  //     .subscribe(() => {
-  //       this.applyFilters();
-  //     });
-  // }
-
   applyFilters(filters: any) {
-    //const filters = this.searchForm.value;
-
     const params = {
       page: this.currentPage,
       limit: this.limit,
@@ -216,13 +215,135 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   //Recuperer les natures opérations
+  getAllNatureoperations(){
+    const params = {
+      page: 1,
+      limit: 100
+    };
+    this.natureoperationservice.getAll(params).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.natureoperations = (res.data.data || []).filter(
+            (n: any) => n.actif === 1
+          );
+        }
+      }
+    });
+  }
 
-  //Recuperer les devises de la societe
+  //Recupérer les centres analytiques
+  getAllcentres(){
+    const params = {
+      page: 1,
+      limit: 100
+    };
+    this.centreanalytiqueservice.getAll(params).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.centres = (res.data.data || []).filter(
+            (n: any) => n.actif === 1
+          )
+        }
+      }
+    });
+  }
+
+  tryComputeMaxDecaissement() {
+    if (this.stats?.length && this.caisseperiodes?.length) {
+      this.maxDecaissementJour = this.getMaxDecaissementDuJour().opmax;
+      this.minDecaissementJour = this.getMaxDecaissementDuJour().opmin;
+      this.nbrDecaissementJour = this.getMaxDecaissementDuJour().taille;
+      this.totalDecaissementJour = this.getMaxDecaissementDuJour().total;
+    }
+  }
+
+  getMaxDecaissementDuJour(): any {
+    if (!this.stats || this.stats.length === 0) return 0;
+
+    const idPeriodeJour = this.getIdPeriodeDuJour();
+    const datePeiordeJour = this.getDatePeriodeDuJour();
+
+    if (!idPeriodeJour) return 0;
+    if (!datePeiordeJour) return 0;
+
+    const jour = this.toDateOnly(datePeiordeJour);
+  
+    const decaissements = this.stats.filter((op: any) =>
+      op.codtypeoperation === 'decaissement' &&
+      this.toDateOnly(op.dateperiode) === jour
+    );
+
+    const nombreOperationsUniques = new Set(decaissements.map((op: any) => op.codeoperation)).size;
+
+    if (decaissements.length === 0) return 0;
+
+    const maxDecaissement = decaissements.length > 0 
+    ? decaissements.reduce((acc: any, curr: any) => 
+        curr.montantref > acc.montantref ? curr : acc
+      ) 
+    : null;
+
+    const minDecaissement = decaissements.length > 0 
+    ? decaissements.reduce((acc: any, curr: any) => 
+        curr.montantref < acc.montantref ? curr : acc
+      ) 
+    : null;
+
+    const totalDecaissements = decaissements.reduce((sum: number, op: any) => {
+      return sum + Number(op.montantref || 0);
+    }, 0);
+
+    return {opmin : minDecaissement, opmax : maxDecaissement, taille: nombreOperationsUniques, total: totalDecaissements};
+  }
+
+  //Recupérer les tiers
+  getAllTiers(){
+    const params = {
+      page: 1,
+      limit: 100
+    };
+    this.tiersservice.getAll(params).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.tiers = (res.data.data || []).filter(
+            (n: any) => n.actif === 1
+          )
+        }
+      }
+    });
+  }
+
+  private toDateOnly(value: string | Date): string {
+    const d = new Date(value);
+    return d.toISOString().split('T')[0];
+  }
+
+  //Recuperer le Max des operations
+  getMaxOperations(){
+    this.operationservice.getMaxOperation().subscribe({
+      next : (res) => {
+        if(res.success){
+          this.stats = res.data;
+          this.tryComputeMaxDecaissement();
+        }
+      }
+    });
+  }
+
+  //Récuperer les soldes
+  getSoldeCaisse(){
+    this.operationservice.getSoldeCaisse().subscribe({
+      next : (res) => {
+        if(res.success){
+          this.caisseSolde = res.data.data;
+        }
+      }
+    });
+  }
 
   //Calcul solde de caisse 
   calculerSoldeCaisse(idcaisse: string, operations: any[]): number {
     let solde = 0;
-
     operations.forEach(op => {
       op.caisses.forEach((c: any) => {
         if (c.idcaisse === idcaisse) {
@@ -238,6 +359,17 @@ export class OperationCaisseComponent implements OnInit{
     return solde;
   }
 
+  get user(){
+    return JSON.parse(localStorage.getItem('user') || '{}');
+  }
+
+  rafreshpage(){
+    const currentUrl = this.router.url; 
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.router.navigate([currentUrl]);
+    });
+  }
+
   //Initialiser le formulaire
   initForm(){
     this.operationForm = this.fb.group({
@@ -248,8 +380,9 @@ export class OperationCaisseComponent implements OnInit{
       lignes: this.fb.array([]),
       devise : ["", [Validators.required]],
       site : ["197D7C37-7180-4DD1-80CC-843B9A6C5B52"],
-      societe : ["B89B381E-691E-4BA7-979E-1AC4D5B1E018"],
+      societe : [this.user.idsociete ?? null],
       montant: [0],
+      montantRefglobal: [0],
       caisses : this.fb.array([])
     })
   }
@@ -286,6 +419,80 @@ export class OperationCaisseComponent implements OnInit{
     return this.operationForm.get('lignes') as FormArray<FormGroup>;
   }
 
+  getCaisseUser(){
+    this.loading = true;
+    this.caisseuserservice.getCaisseByUser(this.user.idutilisateur ?? null).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.caissesUser = res.data || [];
+          if (this.caissesUser.length > 0) {
+            this.loadCaissesEtPeriodes();
+          } else {
+            this.caisseperiodes = [];
+          }
+          this.loading = false;
+        }
+      },
+      error: () => {
+        this.loading = false;
+        this.toastr.error('Erreur chargement caisses utilisateur');
+      }
+    });
+  }
+
+  //Récupérer l'ID periode du jour
+  getIdPeriodeDuJour(): string | null {
+    if (!this.caisseperiodes || this.caisseperiodes.length === 0) return null;
+
+    // Toutes les périodes ont la même date
+    return this.caisseperiodes[0].idperiode ?? null;
+  }
+
+  //Récupérer date periode du jour
+  getDatePeriodeDuJour(): string | null {
+    if (!this.caisseperiodes || this.caisseperiodes.length === 0) return null;
+
+    // Toutes les périodes ont la même date
+    return this.caisseperiodes[0].dateperiode ?? null;
+  }
+
+  loadCaissesEtPeriodes() {
+    this.caissePeriodeservice.getCaissesPeriodes(this.caissesUser).subscribe({
+      next: (responses) => {
+        //périodes = source de vérité
+        this.caisseperiodes = responses.map(res => res.data);
+        //remplir le formulaire depuis les périodes
+        this.loadCaissesFormFromPeriodes(this.caisseperiodes);
+        //logique métier
+        this.updateButtonState();
+        //
+        this.tryComputeMaxDecaissement();
+      },
+      error: () => {
+        console.error("Erreur chargement caisses / périodes");
+      }
+    });
+  }
+
+  loadCaissesFormFromPeriodes(periodes: any[]) {
+    const caissesArray = this.operationForm.get('caisses') as FormArray;
+    caissesArray.clear();
+    periodes.forEach(p => {
+      caissesArray.push(
+        this.fb.group({
+          idcaisse: [p.idcaisse, Validators.required],
+          caisse: [p.caisse?.codecaisse || null, Validators.required],
+          statut: [p.statut],
+          devisecaisse: [p.caisse?.devise?.codedevise || null],
+          solde: [this.formatNumber(p.soldeouverture) ?? 0],
+          montantcaisse: [0],
+          taux: [1],
+          idperiode : [p.idperiode ? p.idperiode : null, Validators.required]
+        })
+      );
+    });
+  }
+
   formatMontant(montant: number, devise: string) {
     if (!montant && montant !== 0) return "";
 
@@ -308,28 +515,20 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   filtrerNatures(type: string) {
-    if (!type) {
+    if (!type || !this.natureoperations.length) {
       this.naturesFiltrees = [];
       return;
     }
 
     const cleanType = type.toLowerCase().trim();
-    this.naturesFiltrees = this.natureOperations.filter(n => 
-      n.typeoperation.toLowerCase().trim() === cleanType
+
+    this.naturesFiltrees = this.natureoperations.filter(n =>
+      n.typeoperation?.toLowerCase().trim() === cleanType
     );
   }
 
   get caisses(): FormArray<FormGroup> {
     return this.operationForm.get("caisses") as FormArray<FormGroup>;
-  }
-
-  toggleCaisses() {
-    this.showCaisses = !this.showCaisses;
-    // Charger les caisses UNE SEULE FOIS
-    if (this.showCaisses && !this.caissesLoaded) {
-      this.loadCaissesForm();
-      this.caissesLoaded = true;
-    }
   }
 
   //vérifie si _id est inclus dans un tableau d'IDs stocké
@@ -364,12 +563,12 @@ export class OperationCaisseComponent implements OnInit{
     const periode = this.caisseperiodes.find(p => p.idcaisse === _caisse.idcaisse);
     const caisseFG = this.fb.group({
       idcaisse : [_caisse.idcaisse, Validators.required],
-      caisse: [_caisse.codecaisse, Validators.required],
-      solde: [this.formatNumber(_caisse.solde) ?? 0],
+      caisse: [_caisse.caisse?.codecaisse, Validators.required],
+      solde: [this.formatNumber(_caisse.caisse?.solde) ?? 0],
       montantcaisse: [0],
       taux: [1],
       montantref: [0],
-      devisecaisse: [_caisse.devise],
+      devisecaisse: [_caisse.caisse?.devise],
       idperiode : [periode?.idperiode ? periode.idperiode : null, Validators.required]
     });
 
@@ -379,10 +578,37 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   //Charger les caisses sur le formulaires
-  loadCaissesForm(){
-    if(this.caisses.length === 0){
-      this.caissesAny.forEach(c => {this.addCaisse(c)});
-    }
+  loadCaissesForm(): Observable<void> {
+    return this.caissePeriodeservice.getCaissesPeriodes(this.caissesUser).pipe(
+      tap((responses: any[]) => {
+        const periodes = responses.map(r => r.data);
+        // caisse existante dans l'opération ?
+        //const opCaisse = this.operations.get(p.idcaisse);
+        // remplir tableau métier
+        this.caisseperiodes = periodes;
+        // remplir le formulaire
+        const caissesArray = this.operationForm.get('caisses') as FormArray;
+        //const caiss = forkJoin(this.caisseSolde);
+        //console.log(caiss);
+        caissesArray.clear();
+        periodes.forEach(p => {
+          //const soldeReel = this.caisseSoldeMap.get(p.idcaisse) ?? 0;
+          caissesArray.push(this.fb.group({
+            idcaisse: [p.idcaisse, Validators.required],
+            caisse: [p.caisse?.codecaisse || null, Validators.required],
+            statut: [p.statut],
+            devisecaisse: [p.caisse?.devise?.codedevise || null],
+            iddevisecaisse: [p.caisse?.devise?.iddevise || null],
+            solde: [this.formatNumber(p.soldeouverture) ?? 0],
+            montantcaisse: [0],
+            montantref: [""],
+            taux: [1],
+            idperiode : [p.idperiode ? p.idperiode : null, Validators.required]
+          }));
+        });
+      }),
+      map(() => void 0)
+    );
   }
 
   //Sélection/ Désélection de tous les éléments
@@ -390,6 +616,26 @@ export class OperationCaisseComponent implements OnInit{
     this.checkAllRow = $event;
     if (this.checkAllRow) this.objectsSelected = this.operations.slice();
     else this.objectsSelected = [];
+  }
+
+  //Selection de la nature / Activer ou desactiver imputation tiers
+  handleNatureChange(ligne: FormGroup, natureId: string) {
+    const nature = this.natureoperations.find(
+      n => n.idnature === natureId
+    );
+
+    if (!nature) {
+      ligne.get('tiers')?.disable();
+      ligne.get('tiers')?.reset();
+      return;
+    }
+
+    if (nature.imputationtiers === 1) {
+      ligne.get('tiers')?.enable();
+    } else {
+      ligne.get('tiers')?.disable();
+      ligne.get('tiers')?.reset();
+    }
   }
 
   dispatchOperation(_object: operationModel){
@@ -405,16 +651,16 @@ export class OperationCaisseComponent implements OnInit{
     //Construire les caisses en FormGroup[]
     const caisseFG = _object.caisses.map(c => {
       // Trouver la caisse dans caissesAny
-      const caisseSource = this.caissesAny.find(x => x.idcaisse === c.idcaisse);
+      const caisseSource = this.caissesUser?.find(x => x.idcaisse === c.idcaisse);
 
       return this.fb.group({
         idcaisse: [c.idcaisse],
-        caisse : [caisseSource.codecaisse ?? ""],
+        caisse : [c.codecaisse ?? ""],
         montantcaisse : [c.montant ?? 0],
         taux : [c.taux ?? 1],
-        montantref : [c.montantref ?? c.montant * c.taux],
+        montantref : [c.montantref ?? (c.montant ?? 0) * (c.taux ?? 1)],
         solde : [c.solde ?? 0],
-        devisecaisse : [caisseSource.devise ?? ""],
+        devisecaisse : [c.devise ?? null],
         idtypeoperation : [c.idtypeoperation ?? null]
       })
     });
@@ -439,6 +685,7 @@ export class OperationCaisseComponent implements OnInit{
     this.operationForm.setControl("caisses", this.fb.array(caisseFG));
   }
 
+  // Formater la date ( mer, 13-jan 2025)
   formatDatePreview(dateStr: string): string {
     if (!dateStr) return "";
 
@@ -452,29 +699,47 @@ export class OperationCaisseComponent implements OnInit{
 
     return `${dayShort}, ${day}-${month} ${year}`;
   }
+
+  formatDateFR(dateInput: string | Date): string {
+    const date = new Date(dateInput);
+
+    const dayShort = new Intl.DateTimeFormat('fr-FR', { weekday: 'short' })
+      .format(date)
+      .replace('.', '');
+
+    const day = date.getDate();
+    const month = new Intl.DateTimeFormat('fr-FR', { month: 'short' })
+      .format(date)
+      .replace('.', '');
+
+    const year = date.getFullYear();
+
+    return `${dayShort} ${day} ${month} ${year}`;
+  }
   
   //Ajouter la ligne dans le tableau
   addLine() {
     const ligne = this.fb.group({
-      natureop : [{ value: null, disabled: false }, [Validators.required]],
-      centre: [{ value: null, disabled: true }, ],
-      tiers: [{ value: null, disabled: true }, ],
+      natureop : [{ value: "", disabled: false }, [Validators.required]],
+      centre: [{ value: "", disabled: true }, ],
+      tiers: [{ value: "", disabled: true }, ],
       montantligne: [{ value: "", disabled: true }, [Validators.required]]
     });
 
-    // Quand natureop change → activer ou désactiver les autres champs
-    ligne.get("natureop")?.valueChanges.subscribe(value => {
-      if (value) {
-        // Activer les champs
-        ligne.get("centre")?.enable();
-        ligne.get("tiers")?.enable();
-        ligne.get("montantligne")?.enable();
-      } else {
-        // Désactiver les champs
+    ligne.get("natureop")?.valueChanges.subscribe(natureId => {
+      if (!natureId) {
         ligne.get("centre")?.disable();
         ligne.get("tiers")?.disable();
         ligne.get("montantligne")?.disable();
+        return;
       }
+
+      // Champs de base
+      ligne.get("centre")?.enable();
+      ligne.get("montantligne")?.enable();
+
+      // Règle métier sur tiers
+      this.handleNatureChange(ligne, natureId);
     });
 
     ligne.get("montantligne")?.valueChanges.subscribe(() => {
@@ -486,16 +751,19 @@ export class OperationCaisseComponent implements OnInit{
 
   protectionField(ligne: FormGroup, field: string) {
     if (!ligne.get("natureop")?.value) {
-      //this.showError("Veuillez renseigner la nature avant de continuer.");
+      this.toastr.error("Veuillez renseigner la nature avant de continuer.");
       return false;
+    }
+    // return true;
+    if (field === 'tiers') {
+      const natureId = ligne.get('natureop')?.value;
+      const nature = this.natureoperations.find(n => n.idnature === natureId);
+      if (!nature || nature.imputationtiers !== 1) {
+        return false;
+      }
     }
     return true;
   }
-
-  // Utilise ton système de toast / alert
-  // showError(message: string) {
-  //   this.error = message;
-  // }
 
   //validation required
   isValidField(label: string): string {
@@ -518,6 +786,7 @@ export class OperationCaisseComponent implements OnInit{
     if (this.operationForm.invalid) {
       Object.keys(controls).forEach(controlName => controls[controlName].markAsTouched());
       this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
+      //this.toastr.warning(this.msgErros);
       return;
     }
 
@@ -554,15 +823,19 @@ export class OperationCaisseComponent implements OnInit{
       next: (res) => {
         if (res.success) {
           this.closeModal('showModal');
-          this.getAllOperations();
+          //this.getAllOperations();
+          this.rafreshpage();
+          this.reloadData();
+          this.toastr.success('Opération enregistrée avec succès');
         } else {
           this.error = "Erreur de création";
+          this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
-        this.error = "Création échec";
         this.loading = false;
+        this.toastr.error(err);
       }
     })
   }
@@ -574,76 +847,279 @@ export class OperationCaisseComponent implements OnInit{
         if (res.success) {
           this.closeModal('showModal');
           this.getAllOperations();
+          this.rafreshpage();
+          this.toastr.success('Opération modifée avec succès');
         } else {
           this.error = "Erreur de modification";
+          this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
-        this.error = "Modification échec";
+        this.error = "échec de Modification";
         this.loading = false;
+        this.toastr.error(this.error);
       }
     })
   }
 
+  modalUpdate(_object: operationModel){
+    this.operation = _object;
+    this.actionModal = "update";
+    this.operationForm.reset();
+    this.initForm();
+    //Charger les tiers
+    this.getAllTiers();
+    //Charger les centres analytiques
+    this.getAllcentres();
+
+    this.loadCaissesForm().subscribe({
+      next: () => {
+        this.dispatchOperation(_object);
+        const type = _object.caisses[0]?.codtypeoperation;
+        this.operationForm.patchValue({ typepaiement: type });
+        this.filtrerNatures(type);
+
+        this.operationForm.get("dateoperation")?.disable();
+
+        // recalcul automatique
+        this.caisses.controls.forEach((caisseFG: any) => {
+          this.applyAutoCalcul(caisseFG);
+        });
+      }
+    });
+  }
+
+  //Modal edit 
+  modalEdit(_object: operationModel){
+    this.operationdetail = _object;
+  }
+
+  onTypePaiementChange(type: string) {
+    this.filtrerNatures(type);
+
+    // Réinitialiser les natures déjà choisies
+    this.lignes.controls.forEach((ligne: FormGroup) => {
+      ligne.patchValue({
+        natureop: null,
+        centre: null,
+        tiers: null,
+        montantligne: ""
+      });
+
+      ligne.get('centre')?.disable();
+      ligne.get('tiers')?.disable();
+      ligne.get('montantligne')?.disable();
+    });
+  }
+
+  //Récuperer le taux de la devise transaction vers la devise du référentiel
+  // Si la devise de transaction est égale à l'un des devises de caisse aussi
+  private getTauxDeviseTransaction(): number {
+    const deviseTransaction = this.operationForm.get('devise')?.value;
+
+    const caisseConversion = this.caisses.controls.find(c =>
+      c.get('iddevisecaisse')?.value === deviseTransaction
+    );
+
+    return caisseConversion
+      ? parseFloat(caisseConversion.get('taux')?.value) || 1
+      : 1;
+  }
+
   applyAutoCalcul(caisseFG: FormGroup) {
     const montantCtrl = caisseFG.get('montantcaisse');
+    const devisecaisseCtrl = caisseFG.get('iddevisecaisse');
     const tauxCtrl = caisseFG.get('taux');
     const refCtrl = caisseFG.get('montantref');
+    const devTransactionCtrl = this.operationForm.get('devise');
+    const deviseReference = this.user?.devise_ref_id;
+
+    if (!montantCtrl || !tauxCtrl || !refCtrl) return;
 
     const updateMontantRef = () => {
-      const montant = Number(montantCtrl?.value || 0);
-      const taux = Number(tauxCtrl?.value || 1);
-      refCtrl?.patchValue(montant * taux, { emitEvent: false });
+      const deviseTransaction = devTransactionCtrl?.value;
+      const montant = parseFloat(montantCtrl.value) || 0;
+      const taux = parseFloat(tauxCtrl.value) || 1;
+  
+      const montantRef = montant * taux;
+      refCtrl.setValue(montantRef, { emitEvent: false });
+
+      if (deviseTransaction === deviseReference) {
+        // même devise → pas de conversion
+        this.operationForm.patchValue(
+          { montantRefglobal: this.totalLignes },
+          { emitEvent: false }
+        );
+      } else {
+        // utiliser le taux de la caisse correspondant à la devise transaction
+        const tauxConversion = this.getTauxDeviseTransaction();
+        const montantRefGlobal = this.totalLignes * tauxConversion;
+
+        this.operationForm.patchValue(
+          { montantRefglobal: montantRefGlobal },
+          { emitEvent: false }
+        );
+      }
+
+      const maxMontantRef = this.operationForm.get('montantRefglobal')?.value || 0;
+      //contrôle référentiel paiement dépasse référentiel global
+      if (montantRef > maxMontantRef) {
+        // montantCtrl.setErrors({ depassementMontant: true });
+        // refCtrl.setValue(montantRef, { emitEvent: false });
+        // return;
+        montantCtrl.setErrors({ depassementMontant: true });
+        this.operationForm.setErrors({
+          ...(this.operationForm.errors || {}),
+          totalCaisseDepasse: true
+        });
+
+        refCtrl.setValue(montantRef, { emitEvent: false });
+        return;
+      }
+
+      // contrôle dépassement montant total
+      if (this.isCaisseOverTotal(montantRef, caisseFG)) {
+        montantCtrl.setErrors({ depassement: true });
+        refCtrl.setValue(0, { emitEvent: false });
+        return;
+      }
+
+      //OK → retirer l’erreur
+      if (montantCtrl.hasError('depassementMontant')) {
+        const errors = montantCtrl.errors;
+        delete errors?.['depassementMontant'];
+        Object.keys(errors || {}).length
+          ? montantCtrl.setErrors(errors)
+          : montantCtrl.setErrors(null);
+      }
+
+      // Nettoyage erreur globale
+      if (this.operationForm.hasError('totalCaisseDepasse')) {
+        const formErrors = { ...(this.operationForm.errors || {}) };
+        delete formErrors['totalCaisseDepasse'];
+        Object.keys(formErrors).length
+          ? this.operationForm.setErrors(formErrors)
+          : this.operationForm.setErrors(null);
+      }
+
+      refCtrl.setValue(montantRef, { emitEvent: false });
+
+      //contrôle global après chaque saisie
+      this.controlTotalCaisses(maxMontantRef);
     };
 
-    montantCtrl?.valueChanges.subscribe(updateMontantRef);
-    tauxCtrl?.valueChanges.subscribe(updateMontantRef);
+    montantCtrl.valueChanges.subscribe(updateMontantRef);
+    tauxCtrl.valueChanges.subscribe(updateMontantRef);
 
-    // Calcul initial (pour UPDATE)
+    //Calcul initial (pour UPDATE)
     updateMontantRef();
   }
 
-  modalCreate(){
-    //this.showCaisses = false;
-    this.actionModal = "create";
-    this.initForm();
-    this.loadCaissesForm();
+  get resteARepartir(): number {
+    const max = this.operationForm.get('montantRefglobal')?.value || 0;
+    const total = this.caisses.controls.reduce((s, c) =>
+      s + (parseFloat(c.get('montantref')?.value) || 0), 0
+    );
+    return max - total;
+  }
 
+  //La somme de toutes les lignes opérations
+  get totalLignes(): number {
+    return this.lignes.controls.reduce((sum, l) => {
+      return sum + (parseFloat(l.get('montantligne')?.value) || 0);
+    }, 0);
+  }
+
+  //Total des montants de caisse
+  get totalCaisses(): number {
+    return this.caisses.controls.reduce((sum, c) => {
+      return sum + (parseFloat(c.get('montantref')?.value) || 0);
+    }, 0);
+  }
+
+  controlTotalCaisses(maxMontantRef: number) {
+    const totalRef = this.caisses.controls.reduce((sum, c) =>
+      sum + (parseFloat(c.get('montantref')?.value) || 0), 0
+    );
+
+    if (totalRef > maxMontantRef) {
+      this.operationForm.setErrors({
+        ...(this.operationForm.errors || {}),
+        totalCaisseDepasse: true
+      });
+    } else {
+      if (this.operationForm.errors?.['totalCaisseDepasse']) {
+        const errors = { ...this.operationForm.errors };
+        delete errors['totalCaisseDepasse'];
+        Object.keys(errors).length
+          ? this.operationForm.setErrors(errors)
+          : this.operationForm.setErrors(null);
+      }
+    }
+  }
+
+  //Empêcher le dépassement par caisse
+  isCaisseOverTotal(montantRef: number, currentCaisse: FormGroup): boolean {
+    const totalAutresCaisses = this.caisses.controls
+      .filter(c => c !== currentCaisse)
+      .reduce((sum, c) => {
+        return sum + (parseFloat(c.get('montantref')?.value) || 0);
+      }, 0);
+
+    return (totalAutresCaisses + montantRef) > this.totalLignes;
+  }
+
+  finaliserModal(){
     const sameDate = this.checkSameDatePeriodes();
     if (sameDate) {
       this.operationForm.patchValue({
         dateoperation: this.formatDateForInput(sameDate)
       });
-      this.operationForm.get("dateoperation")?.disable();  // griser le champ
-    } else {
-      this.operationForm.get("dateoperation")?.enable();   // champ modifiable
+      this.operationForm.get("dateoperation")?.disable();
     }
+  }
 
-    //Filtrer les natures quand typeoperation change
-    this.operationForm.get("typepaiement")?.valueChanges.subscribe(type => {
-      this.filtrerNatures(type);
+  //Recalcule lors de la saisie
+  recalculateCaisse(caisseFG: FormGroup) {
+    const montant = Number(caisseFG.get('montantcaisse')?.value || 0);
+    const taux = Number(caisseFG.get('taux')?.value || 1);
+
+    caisseFG.get('montantref')?.setValue(montant * taux, { emitEvent: false });
+  }
+
+  // Recuperer la devise
+
+  modalCreate(){
+    this.actionModal = "create";
+    //Charger les tiers
+    this.getAllTiers();
+    //Charger les centres analytiques
+    this.getAllcentres();
+    this.loadingModal = true;
+    this.initForm();
+    this.loadCaissesForm().subscribe({
+      next: () => {
+        this.finaliserModal();
+        this.loadingModal = false;
+        // Filtrer les natures quand typepaiement change
+        this.operationForm.get("typepaiement")?.valueChanges.subscribe(type => {
+          this.onTypePaiementChange(type);
+        });
+
+        // recalcul automatique
+        this.caisses.controls.forEach((caisseFG: any) => {
+          this.applyAutoCalcul(caisseFG);
+        });
+      }, 
+      error: () => {
+        this.loadingModal = false;
+      }
     });
   }
 
   formatDateForInput(date: string) {
     return date ? date.substring(0, 10) : "";
-  }
-  
-  modalUpdate(_object: operationModel){
-    this.operation = _object;
-    this.actionModal = "update";
-    this.operationForm.reset();
-    //Réinitialiser le formulaire
-    this.initForm();
-    this.loadCaissesForm();
-    this.dispatchOperation(_object);
-    // Empêcher modification du champ
-    this.operationForm.get("dateoperation")?.disable();
-    // Appliquer le calcul automatique sur chaque caisse
-    this.caisses.controls.forEach((caisseFG: any) => {
-      this.applyAutoCalcul(caisseFG);
-    });
   }
 
   //Recharger la page
@@ -651,10 +1127,6 @@ export class OperationCaisseComponent implements OnInit{
     this.currentPage = page;
     this.getAllOperations(); // recharge les données
   }
-
-  // loader(){
-  //   this.router.navigateByUrl(APP_caisse_CAISSE_caisse).then();
-  // }
   
   modalDelete(item: operationModel){
     this.deleteOperation = item;
@@ -668,20 +1140,24 @@ export class OperationCaisseComponent implements OnInit{
           this.deleteOperation = null;
           this.closeModal('deleteOrder');
           this.getAllOperations();
+          this.rafreshpage();
+          this.toastr.error('Opération supprimée');
         } else {
           this.error = "Erreur de Suppression";
+          this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Suppression échec";
         this.loading = false;
+        this.toastr.error(this.error);
       }
     })
   }
 
   loadPeriodes() {
-    this.caisseService.getCaissesPeriodes(this.caissesAny).subscribe({
+    this.caissePeriodeservice.getCaissesPeriodes(this.caissesUser).subscribe({
       next: (responses) => {
         this.caisseperiodes = responses.map(res => res.data);
         this.updateButtonState();   // vérifie les statuts

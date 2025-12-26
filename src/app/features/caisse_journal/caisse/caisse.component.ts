@@ -74,7 +74,10 @@ export class CaisseComponent implements OnInit{
       next : (res) => {
         if(res.success){
           this.caisses = res.data.data;
+<<<<<<< HEAD
           console.log(this.caisses);
+=======
+>>>>>>> origin/junior
           this.totalPages = res.data.totalPages;
         }
       }
@@ -107,9 +110,12 @@ export class CaisseComponent implements OnInit{
       journal : ["", [Validators.required]],
       devise : ["", [Validators.required]],
       compte : ["", [Validators.required]],
+<<<<<<< HEAD
       dateinitialisation : ["", [Validators.required]],
       soldeinitialisation : [0],
       seuilminimal : [0],
+=======
+>>>>>>> origin/junior
       site : ["197D7C37-7180-4DD1-80CC-843B9A6C5B52"],
       societe : ["B89B381E-691E-4BA7-979E-1AC4D5B1E018"],
       actif : [true],
@@ -120,11 +126,14 @@ export class CaisseComponent implements OnInit{
     return this.caisseForm.controls;
   }
 
+<<<<<<< HEAD
   formatDate(date: any): string {
     const d = new Date(date);
     return d.toISOString().split('T')[0]; // YYYY-MM-DD
   }
 
+=======
+>>>>>>> origin/junior
   dispatchCaisse(_object: caisseModel){
     const status = _object.actif === 1;
     this.caisseForm.patchValue({
@@ -135,6 +144,7 @@ export class CaisseComponent implements OnInit{
       journal: _object.journal.idjournal,
       site: _object.site,
       compte: _object.compte.idcompte,
+<<<<<<< HEAD
       dateinitialisation: _object.dateinitialisation ? this.formatDate(_object.dateinitialisation) : null,
       soldeinitialisation: _object.soldeinitialisation,
       seuilminimal : _object.seuilminimal,
@@ -152,6 +162,10 @@ export class CaisseComponent implements OnInit{
     } else {
       this.caisseForm.get("soldeinitialisation")?.enable({ emitEvent: false });
     }
+=======
+      actif : status
+    })
+>>>>>>> origin/junior
   }
 
   //validation required

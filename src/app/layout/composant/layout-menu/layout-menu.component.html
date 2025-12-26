@@ -24,199 +24,185 @@
             <i class="ri-record-circle-line"></i>
         </button>
     </div>
-
-  <div id="scrollbar">
-    <div class="container-fluid">
-
-      <div id="two-column-menu">
-      </div>
-      <ul class="navbar-nav" id="navbar-nav">
-          <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Administration</span></li>
-          
-          <li class="nav-item">
-              <a class="nav-link menu-link" href="#sidebarLanding" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarLanding">
-                  <i class="ri-account-circle-line"></i> <span data-key="t-landing">Users</span>
-              </a>
-              <div class="collapse menu-dropdown" id="sidebarLanding">
-                  <ul class="nav nav-sm flex-column">
-                      <li class="nav-item">
-                          <a [routerLink]="root_utilisateur" class="nav-link" data-key="t-one-page"> Utilisateurs </a>
-                      </li>
-                      <li class="nav-item">
-                          <a href="#" class="nav-link" data-key="t-nft-landing"> Users - site </a>
-                      </li>
-                      <li class="nav-item">
-                          <a href="#" class="nav-link" data-key="t-job"> Users - departement </a>
-                      </li>
-                  </ul>
-              </div>
-          </li>
-
-          <li class="menu-title"><span data-key="t-menu">Paramétrages</span></li>
-
-          <li class="nav-item">
-              <a class="nav-link menu-link" href="#sidebarDashboards" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
-                  <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Structure</span>
-              </a>
-              <div class="collapse menu-dropdown" id="sidebarDashboards">
-                  <ul class="nav nav-sm flex-column">
-                      <li class="nav-item">
-                          <a [routerLink]="root_societe" class="nav-link" data-key="t-analytics"> Societe </a>
-                      </li>
-                      <li class="nav-item">
-                          <a [routerLink]="root_site" class="nav-link" data-key="t-crm"> Site </a>
-                      </li>
-                      <li class="nav-item">
-                          <a [routerLink]="root_departement" class="nav-link" data-key="t-ecommerce"> Département </a>
-                      </li>
-                  </ul>
-              </div>
-          </li>
-          
-          <!-- end Menu Budget -->
-          <!-- <li class="nav-item">
-              <a class="nav-link menu-link" href="#sidebarBudget" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
-                  <i class="ri-honour-line"></i> <span data-key="t-dashboards">Budget</span>
-              </a>
-              <div class="collapse menu-dropdown" id="sidebarBudget">
-                  <ul class="nav nav-sm flex-column">
-                      <li class="nav-item">
-                          <a href="#" class="nav-link" data-key="t-analytics"> Budget </a>
-                      </li>
-                      <li class="nav-item">
-                          <a href="#" class="nav-link" data-key="t-crm"> Version </a>
-                      </li>
-                  </ul>
-              </div>
-          </li> -->
-
-          <li class="nav-item">
-            <a class="nav-link menu-link" href="#sidebarBudget" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
-              <i class="ri-honour-line"></i>
-              <span data-key="t-dashboards">Gestion du budget</span>
-            </a>
-            <div class="collapse menu-dropdown" id="sidebarBudget">
-              <ul class="nav nav-sm flex-column">
-                <li class="nav-item">
-                  <a [routerLink]="root_budget" class="nav-link" data-key="t-analytics">Budget</a>
-                </li>
-                <li class="nav-item">
-                  <a [routerLink]="root_ligne_budget" class="nav-link" data-key="t-crm">
-                    Lignes du budget
-                  </a>
-                </li>
-              </ul>
+    
+    <div id="scrollbar">
+        <div class="container-fluid">
+            <div id="two-column-menu">
             </div>
-          </li>
+            <ul class="navbar-nav" id="navbar-nav">
+                <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Administration</span></li>
+                <li class="nav-item">
+                    <a class="nav-link" [routerLink]="root_utilisateur" data-key="t-user">
+                        <i class="ri-account-circle-line"></i> <span data-key="t-landing">Users</span>
+                    </a>
+                
+                    <a [routerLink]="root_role" class="nav-link" data-key="t-role"><i class="ri-tools-line">
+                        </i><span data-key="t-landing">Rôles & Permissions</span> 
+                    </a>
+                </li>
 
-          <li class="nav-item">
-            <a class="nav-link" [routerLink]="root_demande_decaissement">
-              <i class="ri-hand-coin-line"></i>
-              <span data-key="t-dashboards">Demande de décaissement</span>
-            </a>
-          </li>
+                <li class="menu-title"><span data-key="t-menu">Paramétrages</span></li>
 
-          <!-- end Menu donnees de base -->
-          <li class="nav-item">
-              <a class="nav-link menu-link" href="#sidebarDb" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarApps">
-                  <i class="ri-apps-2-line"></i> <span data-key="t-apps">Données de base</span>
-              </a>
-              <div class="collapse menu-dropdown" id="sidebarDb">
-                  <ul class="nav nav-sm flex-column">
-                      <li class="nav-item">
-                          <a href="#sidebarProfile" class="nav-link" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarProfile" data-key="t-profile"> Devise
-                          </a>
-                          <div class="collapse menu-dropdown" id="sidebarProfile">
-                              <ul class="nav nav-sm flex-column">
-                                  <li class="nav-item">
-                                      <a href="javascript:void(0)" class="nav-link" data-key="t-simple-page">Devise</a>
-                                  </li>
-                                  <li class="nav-item">
-                                      <a [routerLink]="root_taux" class="nav-link" data-key="t-settings">Taux de devise</a>
-                                  </li>
-                              </ul>
-                          </div>
-                      </li>
-                      <li class="nav-item">
-                          <a [routerLink]="root_plan_comptable" class="nav-link" data-key="t-chat"> Plan comptable </a>
-                      </li>
-                      <li class="nav-item">
-                          <a [routerLink]="root_nature_operation" class="nav-link" data-key="t-calendar"> Nature opération </a>
-                      </li>
-                      <li class="nav-item">
-                          <a [routerLink]="root_centre_analytique" class="nav-link" data-key="t-settings"> Centre analytique </a>
-                      </li>
-                      <!-- <li class="nav-item">
-                          <a [routerLink]="root_affectation_analytique" class="nav-link" data-key="t-chat"> Affectation analytique </a>
-                      </li> -->
-                      <li class="nav-item">
-                          <a [routerLink]="root_tiers" class="nav-link" data-key="t-chat"> Tiers </a>
-                      </li>
-                      <li class="nav-item">
-                          <a [routerLink]="root_aff_dept_nature" class="nav-link" data-key="t-chat"> Affectation Département - Nature </a>
-                      </li>
-                      <li class="nav-item">
-                          <a [routerLink]="root_aff_nature_centre" class="nav-link" data-key="t-chat"> Affectation Nature - CentreAnalytique </a>
-                      </li>
-                  </ul>
-              </div>
-          </li>
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="#sidebarDashboards" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
+                        <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Structure</span>
+                    </a>
+                    <div class="collapse menu-dropdown" id="sidebarDashboards">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a [routerLink]="root_societe" class="nav-link" data-key="t-analytics"> Societe </a>
+                            </li>
+                            <li class="nav-item">
+                                <a [routerLink]="root_site" class="nav-link" data-key="t-crm"> Site </a>
+                            </li>
+                            <li class="nav-item">
+                                <a [routerLink]="root_departement" class="nav-link" data-key="t-ecommerce"> Département </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
 
-          <!-- end Caisse Journal -->
-          <li class="nav-item">
-              <a class="nav-link menu-link" href="#sidebarApps" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarApps">
-                  <i class="ri-stack-line"></i> <span data-key="t-apps">Caisse et Journal</span>
-              </a>
-              <div class="collapse menu-dropdown" id="sidebarApps">
-                  <ul class="nav nav-sm flex-column">
-                      <li class="nav-item">
-                          <a [routerLink]="root_journal" class="nav-link" data-key="t-calendar"> Journal </a>
-                      </li>
-                      <li class="nav-item">
-                          <a [routerLink]="root_caisse" class="nav-link" data-key="t-chat"> Caisse </a>
-                      </li>
-                      <li class="nav-item">
-                          <a [routerLink]="root_affectation_caissier" class="nav-link" data-key="t-calendar">Affectation caissier </a>
-                      </li>
-                  </ul>
-              </div>
-          </li>
 
-          <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-menu">Opérations</span></li>
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="#sidebarLanding" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarLanding">
+                        <i class="ri-account-circle-line"></i> <span data-key="t-landing">Users</span>
+                    </a>
+                    <div class="collapse menu-dropdown" id="sidebarLanding">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a [routerLink]="root_utilisateur" class="nav-link" data-key="t-one-page"> Utilisateurs </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link" data-key="t-nft-landing"> Users - site </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link" data-key="t-job"> Users - departement </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
 
-          <!-- end Générales -->
-          <li class="nav-item">
-              <a class="nav-link menu-link" href="#sidebarOPS" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarOPS">
-                  <i class="ri-stack-line"></i> <span data-key="t-apps">Générales</span>
-              </a>
-              <div class="collapse menu-dropdown" id="sidebarOPS">
-                  <ul class="nav nav-sm flex-column">
-                      <li class="nav-item">
-                          <a [routerLink]="root" class="nav-link" data-key="t-calendar">Demande de caisse</a>
-                      </li>
-                      <li class="nav-item">
-                          <a [routerLink]="root_operation" class="nav-link" data-key="t-calendar">Opération caisse </a>
-                      </li>
-                  </ul>
-              </div>
-          </li>
 
-          <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Restitutions</span></li>
-      </ul>
+                <!-- <li class="nav-item">
+                    <a class="nav-link menu-link" href="#sidebarBudget" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
+                        <i class="ri-honour-line"></i>
+                        <span data-key="t-dashboards">Gestion du budget</span>
+                    </a>
+                    <div class="collapse menu-dropdown" id="sidebarBudget">
+                        <ul class="nav nav-sm flex-column">
+                        <li class="nav-item">
+                            <a [routerLink]="root_budget" class="nav-link" data-key="t-analytics">Budget</a>
+                        </li>
+                        <li class="nav-item">
+                            <a [routerLink]="root_ligne_budget" class="nav-link" data-key="t-crm">
+                            Lignes du budget
+                            </a>
+                        </li>
+                        </ul>
+                    </div>
+                </li> -->
+
+                <!-- <li class="nav-item">
+                    <a class="nav-link" [routerLink]="root_demande_decaissement">
+                        <i class="ri-hand-coin-line"></i>
+                        <span data-key="t-dashboards">Demande de décaissement</span>
+                    </a>
+                </li> -->
+
+                <!-- end Menu donnees de base -->
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="#sidebarDb" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarApps">
+                        <i class="ri-apps-2-line"></i> <span data-key="t-apps">Données de base</span>
+                    </a>
+                    <div class="collapse menu-dropdown" id="sidebarDb">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a href="#sidebarProfile" class="nav-link" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarProfile" data-key="t-profile"> Devise
+                                </a>
+                                <div class="collapse menu-dropdown" id="sidebarProfile">
+                                    <ul class="nav nav-sm flex-column">
+                                        <li class="nav-item">
+                                            <a href="javascript:void(0)" class="nav-link" data-key="t-simple-page">Devise</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a [routerLink]="root_taux" class="nav-link" data-key="t-settings">Taux de devise</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li class="nav-item">
+                                <a [routerLink]="root_plan_comptable" class="nav-link" data-key="t-chat"> Plan comptable </a>
+                            </li>
+                            <li class="nav-item">
+                                <a [routerLink]="root_nature_operation" class="nav-link" data-key="t-calendar"> Nature opération </a>
+                            </li>
+                            <li class="nav-item">
+                                <a [routerLink]="root_centre_analytique" class="nav-link" data-key="t-settings"> Centre analytique </a>
+                            </li>
+                            <!-- <li class="nav-item">
+                                <a [routerLink]="root_affectation_analytique" class="nav-link" data-key="t-chat"> Affectation analytique </a>
+                            </li> -->
+                            <li class="nav-item">
+                                <a [routerLink]="root_tiers" class="nav-link" data-key="t-chat"> Tiers </a>
+                            </li>
+                            <li class="nav-item">
+                                <a [routerLink]="root_aff_dept_nature" class="nav-link" data-key="t-chat"> Affectation Département - Nature </a>
+                            </li>
+                            <li class="nav-item">
+                                <a [routerLink]="root_aff_nature_centre" class="nav-link" data-key="t-chat"> Affectation Nature - CentreAnalytique </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- end Caisse Journal -->
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="#sidebarApps" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarApps">
+                        <i class="ri-stack-line"></i> <span data-key="t-apps">Caisse et Journal</span>
+                    </a>
+                    <div class="collapse menu-dropdown" id="sidebarApps">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a [routerLink]="root_journal" class="nav-link" data-key="t-calendar"> Journal </a>
+                            </li>
+                            <li class="nav-item">
+                                <a [routerLink]="root_caisse" class="nav-link" data-key="t-chat"> Caisse </a>
+                            </li>
+                            <li class="nav-item">
+                                <a [routerLink]="root_affectation_caissier" class="nav-link" data-key="t-calendar">Affectation caissier </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-menu">Opérations</span></li>
+
+                <!-- end Générales -->
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="#sidebarOPS" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarOPS">
+                        <i class="ri-stack-line"></i> <span data-key="t-apps">Générales</span>
+                    </a>
+                    <div class="collapse menu-dropdown" id="sidebarOPS">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a [routerLink]="root" class="nav-link" data-key="t-calendar">Demande de caisse</a>
+                            </li>
+                            <li class="nav-item">
+                                <a [routerLink]="root_operation" class="nav-link" data-key="t-calendar">Opération caisse </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Restitutions</span></li>
+            </ul>
+        </div>
     </div>
-  </div>
 
-  <div class="sidebar-background"></div>
+    <div class="sidebar-background"></div>
+    <!-- Left Sidebar End -->
+
 </div>
-<!-- Left Sidebar End -->
 
 <!-- Vertical Overlay-->
 <div class="vertical-overlay"></div>
-
-<script>
-  document.getElementById('topnav-hamburger-icon')
-    .addEventListener('click', function () {
-      document.body.classList.toggle('sidebar-collapsed');
-    });
-</script>
-

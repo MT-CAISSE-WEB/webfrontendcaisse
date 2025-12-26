@@ -158,6 +158,19 @@
                                     </div>
 
                                     <div class="mb-3">
+                                        <label for="customername-field" class="form-label form-label-sm">Type opération</label>
+                                        
+                                        <select id="customername-field" class="form-control form-control-sm {{ isValidField('typeoperation') }}" formControlName="typetiers">
+                                            <option value="">-- Sélectionner --</option>
+                                            <option value="Encaissement">Encaissement</option>
+                                            <option value="Decaissement">Decaissement</option>
+
+                                        </select>
+
+                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                    </div>
+
+                                    <div class="mb-3">
                                         <input type="hidden" id="customername-field" class="form-control form-control-sm {{ isValidField('idsociete')}}" formControlName="idsociete" placeholder="Societe"/>
                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                     </div>

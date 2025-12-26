@@ -66,6 +66,7 @@ export class CaisseService {
     );
   }
 
+<<<<<<< HEAD
   /**
    * get one
    * @param id
@@ -109,4 +110,6 @@ export class CaisseService {
   }
 
 
+=======
+>>>>>>> origin/junior
 }
