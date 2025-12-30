@@ -146,11 +146,8 @@ export class EditDemandeComponent implements OnInit {
 
   //Recuperer les natures opérations
   getAllNatureoperations(){
-    const params = {
-      page: 1,
-      limit: 100
-    };
-    this.natureoperationservice.getAll(params).subscribe({
+
+    this.natureoperationservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
           this.natureoperations = (res.data.data || []).filter(

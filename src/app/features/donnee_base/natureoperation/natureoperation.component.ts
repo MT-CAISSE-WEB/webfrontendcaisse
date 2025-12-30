@@ -145,6 +145,7 @@ export class NatureoperationComponent implements OnInit{
 
 
   //création du formulaire
+  
   initForm(): void{
     this.natureoperationForm = this.fb.group({
       codenature : ["", [Validators.required]],
