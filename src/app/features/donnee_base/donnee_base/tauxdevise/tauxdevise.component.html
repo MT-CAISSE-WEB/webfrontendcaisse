@@ -26,7 +26,7 @@
     <div class="col-xl-2 col-md-2">
       <div class="input-group input-group-sm mb-2">
     <input type="text" formControlName="codetauxdevise" 
-       class="form-control form-control-xl">
+       class="form-control form-control-sm">
        <label class="input-group-text">Code</label>
       </div>
     </div>
@@ -69,21 +69,21 @@
              Date 
         </span>
         <input type="date" formControlName="datecours" 
-       class="form-control form-control-xl">
+       class="form-control form-control-sm">
       </div>
     </div>
     <div class="col-xl-3 col-md-2">
     <div class="input-group input-group-sm mb-2">
     <input type="number" formControlName="coefficientinverse" 
-       class="form-control form-control-xl" readonly>
+       class="form-control form-control-sm" readonly>
        <label class="input-group-text">Taux Inverse</label>
     </div>
     </div>
 
-    <div class="col-xl-3 col-md-2">
+    <div class="col-xl-3 col-md-2" hidden="true">
             <div class="input-group input-group-sm mb-2">
     <input type="text" formControlName="typecours" 
-       class="form-control form-control-xl">
+       class="form-control form-control-sm"  >
        <label class="input-group-text">Type cours</label>
     </div>
     </div>
@@ -176,7 +176,7 @@
                             <tr>
                                  <th class="sort" data-sort="time" scope="col">Code</th>
                                 <th class="sort" data-sort="time" scope="col">Date</th>
-                                <th class="sort" data-sort="time" scope="col">Type cours</th>
+                                <!-- <th class="sort" data-sort="time" scope="col">Type cours</th> -->
                                 <th class="sort" data-sort="currency_name" scope="col">Devise origine</th>
                                 <th class="sort" data-sort="sort-avg_price" scope="col">taux</th>
                                 <th class="sort" data-sort="sort-price" scope="col">taux inverse</th>
@@ -190,7 +190,7 @@
                             <tr>
                                  <td>{{item.codetauxdevise}}</td>
                                 <td class="order_date time" data-timestamp="1641945600">{{ item.datecours | date:'fullDate' }}</td>
-                                 <td>{{item.typecours}}</td>
+                                 <!-- <td>{{item.typecours}}</td> -->
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <a href="javascript:void(0);" class="flex-grow-1 ms-2 currency_name">{{item.devise_origine}}</a>

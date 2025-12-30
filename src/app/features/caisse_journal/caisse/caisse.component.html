@@ -199,8 +199,8 @@
                                                 <div class="input-light input-light-sm">
                                                     <select class="form-control form-control-sm bg-light border-0" formControlName="devise"  id="choices-payment-status" required id="devise">
                                                         <option value="">devise</option>
-                                                        <option value="3FC45657-E282-4667-AA3A-50121F1CEB18">XAF</option>
-                                                        <option value="A4473CF8-A4E3-4CDB-92E6-A2CE1320741E">USD</option>
+                                                        <option value="719871D2-F67A-4DFC-890F-31289202E3C0">XAF</option>
+                                                        <option value="D1068793-5575-43ED-A68D-0DFB34A19844">USD</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -211,10 +211,10 @@
                                                 <label for="orderId" class="form-label form-label-sm">compte</label>
                                                 <div class="input-light input-light-sm">
                                                     <select class="form-control form-control-sm bg-light border-0" formControlName="compte"  id="choices-payment-status" required id="compte">
-                                                        <option value="">compte</option>
-                                                        <option value="7D2836D9-961A-47F6-B64C-020DE420E7D6">5730011  Fournisseurs</option>
-                                                        <option value="57E3A8E7-D9B0-457A-A6DB-C73C92C534CE">5710301  Caisse principale</option>
-                                                        <option value="5EF0C14F-9AAA-4CFE-9293-30233097CBF4">5729000  Caisse Charges diverses</option>
+                                                        <option value="">-- Sélectionner --</option>
+                                                        @for ( item of comptes; track $index ) {
+                                                            <option [value]="item.idcompte">{{ item.numcompte }} - {{ item.libelle }}</option>
+                                                        }
                                                     </select>
                                                 </div>
                                             </div>
@@ -268,13 +268,13 @@
 
                                     <!-- <div class="mb-3"> -->
                                         <!-- <label for="customername-field" class="form-label form-label-sm">societe</label> -->
-                                        <input type="hidden" id="customername-field" value="B89B381E-691E-4BA7-979E-1AC4D5B1E018" class="form-control form-control-sm {{ isValidField('societe')}}" formControlName="societe" placeholder="societe"/>
+                                        <input type="hidden" id="customername-field" value="757E104D-A394-4502-935A-5ED9DE6BFA35" class="form-control form-control-sm {{ isValidField('societe')}}" formControlName="societe" placeholder="societe"/>
                                         <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                                     <!-- </div> -->
 
                                     <!-- <div class="mb-3"> -->
                                         <!-- <label for="customername-field" class="form-label form-label-sm">site</label> -->
-                                        <input type="hidden" id="customername-field" value="197D7C37-7180-4DD1-80CC-843B9A6C5B52" class="form-control form-control-sm {{ isValidField('site')}}" formControlName="site" placeholder="site"/>
+                                        <input type="hidden" id="customername-field" value="1B386C16-B927-4124-BE18-7721862C1CE1" class="form-control form-control-sm {{ isValidField('site')}}" formControlName="site" placeholder="site"/>
                                         <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                                     <!-- </div> -->
 

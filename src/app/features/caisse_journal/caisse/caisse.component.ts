@@ -9,6 +9,9 @@ import { journalModel } from '../models/journal.model';
 import { JournalService } from '../services/journal.service';
 import { NotificationService } from '../../../_core/services/notification.service';
 
+import { PlancomptableService } from '../../donnee_base/services/plancomptable.service';
+import { plancomptableModel } from '../../donnee_base/models/plancomptable.model';
+
 @Component({
   selector: 'app-caisse',
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
@@ -50,9 +53,12 @@ export class CaisseComponent implements OnInit{
   //Element à supprimer 
   deleteCaisse: any = null;
 
+  comptes : plancomptableModel[] = [];
+
 
   constructor(private caisseservice: CaisseService,
               private journalservice: JournalService,
+              private plancomptableservice: PlancomptableService,
               private router: Router){}
 
   ngOnInit(): void {
@@ -60,6 +66,8 @@ export class CaisseComponent implements OnInit{
       this.getAllcaisses();
       //Ramener tous les journaux
       this.getAllJournaux();
+      // Ramener tous les comptes
+      this.getAllComptes();
       //Initialisation du formulaire
       this.initForm();
       this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("cette caisse");
@@ -97,7 +105,17 @@ export class CaisseComponent implements OnInit{
 
   getAllDevises(){}
 
-  getAllComptes(){}
+  getAllComptes(){
+    this.plancomptableservice.getAll().subscribe({
+      next : (res) => {
+        if(res.success){
+          this.comptes = res.data;
+          this.comptes = this.comptes.filter(compte => compte.numcompte.startsWith('5'));
+
+        }
+      }
+    });
+  }
 
   //création du formulaire
   initForm(): void{
@@ -110,8 +128,8 @@ export class CaisseComponent implements OnInit{
       dateinitialisation : ["", [Validators.required]],
       soldeinitialisation : [0],
       seuilminimal : [0],
-      site : ["197D7C37-7180-4DD1-80CC-843B9A6C5B52"],
-      societe : ["B89B381E-691E-4BA7-979E-1AC4D5B1E018"],
+      site : ["1B386C16-B927-4124-BE18-7721862C1CE1"],
+      societe : ["757E104D-A394-4502-935A-5ED9DE6BFA35"],
       actif : [true],
     })
   }

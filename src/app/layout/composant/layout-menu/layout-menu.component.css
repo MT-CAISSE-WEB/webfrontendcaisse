@@ -1,0 +1,9 @@
+#scrollbar {
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+#scrollbar a {
+  color: rgb(48, 48, 48);
+}

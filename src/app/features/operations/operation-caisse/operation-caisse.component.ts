@@ -219,6 +219,7 @@ export class OperationCaisseComponent implements OnInit{
     });
   }
 
+<<<<<<< HEAD
   //chargement des demandes
   loadAllDemandes() {
     const params = {
@@ -242,6 +243,8 @@ export class OperationCaisseComponent implements OnInit{
       }
     });
   }
+=======
+>>>>>>> origin/richard
 
   //Recuperer les natures opérations
   getAllNatureoperations(){
@@ -249,7 +252,7 @@ export class OperationCaisseComponent implements OnInit{
       page: 1,
       limit: 100
     };
-    this.natureoperationservice.getAll(params).subscribe({
+    this.natureoperationservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
           this.natureoperations = (res.data.data || []).filter(
@@ -266,7 +269,7 @@ export class OperationCaisseComponent implements OnInit{
       page: 1,
       limit: 100
     };
-    this.centreanalytiqueservice.getAll(params).subscribe({
+    this.centreanalytiqueservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
           this.centres = (res.data.data || []).filter(
@@ -331,7 +334,7 @@ export class OperationCaisseComponent implements OnInit{
       page: 1,
       limit: 100
     };
-    this.tiersservice.getAll(params).subscribe({
+    this.tiersservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
           this.tiers = (res.data.data || []).filter(
@@ -409,7 +412,11 @@ export class OperationCaisseComponent implements OnInit{
       typepaiement: ["", [Validators.required]],
       lignes: this.fb.array([]),
       devise : ["", [Validators.required]],
+<<<<<<< HEAD
       site : [this.user.idsite ?? null],
+=======
+      site : ["1B386C16-B927-4124-BE18-7721862C1CE1"],
+>>>>>>> origin/richard
       societe : [this.user.idsociete ?? null],
       montant: [0],
       montantRefglobal: [0],
@@ -1224,6 +1231,7 @@ export class OperationCaisseComponent implements OnInit{
     );
   }
 
+<<<<<<< HEAD
   //Sur la demande selectionnée
   onDemandeSelected(iddemande: string) {
     this.service.getEntete(iddemande).subscribe({
@@ -1280,3 +1288,6 @@ export class OperationCaisseComponent implements OnInit{
   }
 
 }
+=======
+}
+>>>>>>> origin/richard

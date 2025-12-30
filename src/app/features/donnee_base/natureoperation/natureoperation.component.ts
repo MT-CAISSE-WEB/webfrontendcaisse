@@ -9,6 +9,11 @@ import { Router } from '@angular/router';
 import { PlancomptableService } from '../services/plancomptable.service';
 import { plancomptableModel } from '../models/plancomptable.model';
 
+import { ToastrService } from 'ngx-toastr';
+
+// ADD-INS
+declare var $: any;
+
 @Component({
   selector: 'app-natureoperation',
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
@@ -26,12 +31,6 @@ export class NatureoperationComponent implements OnInit{
   msgErros : string = "";
   loading: Boolean = false;
   natureoperationForm : FormGroup = this.fb.group({})
-
-  // Définissez des propriétés de pagination
-  currentPage: number = 1;
-  // Nombre d'éléments par page
-  totalPages: number = 0;
-  limit: number = 10;
 
   //Faire le check selection **********
   objectsSelected : natureoperationModel[] = [];
@@ -55,7 +54,9 @@ export class NatureoperationComponent implements OnInit{
 
   constructor(private natureoperationservice: NatureoperationService, 
     private plancomptableservice: PlancomptableService,
-              private router: Router){}
+              private router: Router
+              , private toastr : ToastrService
+            ){}
 
   ngOnInit(): void {
       //Afficher tous les natureoperations
@@ -68,34 +69,80 @@ export class NatureoperationComponent implements OnInit{
   }
 
   getAllNatureoperations(){
-    this.params = {
-      page: this.currentPage,
-      limit: this.limit
-    };
-    this.natureoperationservice.getAll(this.params).subscribe({
+
+    this.natureoperationservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
-          this.natureoperations = res.data.data;
-          this.totalPages = res.data.totalPages;
+          this.natureoperations = res.data;
+
+          const table = $('#dataTable').DataTable();
+          table.destroy();
+
+          setTimeout(() => $('#dataTable').DataTable({
+            language: {
+            search: "Rechercher :",
+            lengthMenu: "Afficher _MENU_ éléments",
+            info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+            infoEmpty: "Affichage de 0 à 0 sur 0 élément",
+            infoFiltered: "(filtré de _MAX_ éléments au total)",
+            loadingRecords: "Chargement...",
+            processing: "Traitement...",
+            zeroRecords: "Aucun élément correspondant trouvé",
+            emptyTable: "Aucune donnée disponible dans le tableau",
+            paginate: {
+              first: "Premier",
+              previous: "Précédent",
+              next: "Suivant",
+              last: "Dernier"
+            },
+            aria: {
+              sortAscending: ": activer pour trier la colonne par ordre croissant",
+              sortDescending: ": activer pour trier la colonne par ordre décroissant"
+            }
+          },
+            responsive: true,
+            ordering: true,
+            lengthMenu: [
+                [10, 25, 50, 100, 250, 500, -1],
+                [10, 25, 50, 100, 250, 500, "Tous"]
+              ]
+
+          }), 0);
         }
       }
     });
   }
 
-    getAllComptes(){
-    this.params = {
-      page: this.currentPage,
-      limit: this.limit
-    };
-    this.plancomptableservice.getAll(this.params).subscribe({
+  getAllComptes(){
+    this.plancomptableservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
-          this.comptes = res.data.data;
-          this.totalPages = res.data.totalPages;
+          this.comptes = res.data;
         }
       }
     });
   }
+
+  // ngAfterViewInit(): void {
+  //   // Attendre que le DOM soit chargé
+  //   $('#dataTable').DataTable({
+  //     paging: true,
+  //     searching: true,
+  //     ordering: true,
+  //     info: true,
+  //     responsive: true,
+  //     language: {
+  //       search: "Rechercher :",
+  //       lengthMenu: "Afficher _MENU_ lignes",
+  //       info: "Affichage de _START_ à _END_ sur _TOTAL_ lignes",
+  //       paginate: {
+  //         previous: "Précédent",
+  //         next: "Suivant"
+  //       }
+  //     }
+  //   });
+  // }
+
 
   //création du formulaire
   initForm(): void{
@@ -105,7 +152,8 @@ export class NatureoperationComponent implements OnInit{
       decajustifier : [false],
       imputationtiers : [false],
       demandedecaissement : [true],
-      idsociete : ["58B53CD2-686A-4CED-9E64-3BA2A5A6D664", [Validators.required]],
+      typeoperation : ["", [Validators.required]],
+      idsociete : ["68EC05CB-0202-45EF-A3A9-B8DD1296DFEF", [Validators.required]],
       idcompte : ["", [Validators.required]],
       actif : [true],
     })
@@ -123,6 +171,7 @@ export class NatureoperationComponent implements OnInit{
       decajustifier : _object.decajustifier,
       imputationtiers : _object.imputationtiers,
       demandedecaissement : _object.demandedecaissement,
+      typoeration : _object.typeoperation,
       idsociete: _object.idsociete,
       idcompte : _object.idcompte,
       numcompte : _object.compte.compte_numcompte,
@@ -162,11 +211,6 @@ export class NatureoperationComponent implements OnInit{
     else this.objectsSelected = [];
   }
 
-  //Recharger la page
-  changePage(page: number) {
-    this.currentPage = page;
-    this.getAllNatureoperations(); // recharge les données
-  }
 
   //Soumission du formulaire
   onSubmit(){
@@ -192,8 +236,10 @@ export class NatureoperationComponent implements OnInit{
     };
 
     /** 3. choices action */
-    if(this.actionModal == "create")this.create(_natureoperations);
-    else this.update(_natureoperations);
+    if(this.actionModal == "create")
+      this.create(_natureoperations);
+    else 
+      this.update(_natureoperations);
     // if (!_natureoperations.idnatureoperations) this.create(_natureoperations);
     // else this.update(_natureoperations);
   }
@@ -209,12 +255,14 @@ export class NatureoperationComponent implements OnInit{
           this.getAllNatureoperations();
         } else {
           this.error = "Erreur de création";
+          this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Echec de création";
         this.loading = false;
+        this.toastr.error(err);
       }
     })
   }
@@ -226,14 +274,17 @@ export class NatureoperationComponent implements OnInit{
         if (res.success) {
           this.closeModal('showModal');
           this.getAllNatureoperations();
+          this.toastr.success('Fiche modifée avec succès');
         } else {
           this.error = "Erreur de modification";
+          this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Echec de modification";
         this.loading = false;
+        this.toastr.error(this.error);
       }
     })
   }

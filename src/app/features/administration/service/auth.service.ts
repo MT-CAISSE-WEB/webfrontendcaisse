@@ -43,11 +43,31 @@ export class AuthService {
     return false;
   }
 
-  getToken() {
+    getToken() {
     if (typeof window !== 'undefined') {
        return localStorage.getItem('token');
     }
     return false;
-   
   }
+  // auth.service.ts
+  logoutTimer: any;
+
+  startLogoutTimer() {
+    // 10 minutes = 600000 ms (exemple)
+    const time = 600000;
+
+    this.logoutTimer = setTimeout(() => {
+      this.logout();
+
+    window.location.href = '/login';
+    }, time);
+  }
+
+  resetLogoutTimer() {
+    if (this.logoutTimer) {
+      clearTimeout(this.logoutTimer);
+      this.startLogoutTimer();
+    }
+  }
+
 }

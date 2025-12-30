@@ -1,0 +1,223 @@
+<!-- start page title -->
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">Circuit de validation </h4>
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Données de base</a></li>
+                    <li class="breadcrumb-item active">Paramétrage Devise</li>
+                     <li class="breadcrumb-item active">Taux Devise</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end page title -->
+
+
+
+<div class="card">
+    <div class="card-body">
+       <form [formGroup]="circuitvalidationForm" (ngSubmit)="onsubmit()">
+  <div class="row g-3">
+
+     <!-- Code taux devise -->
+    <div class="col-xl-2 col-md-2">
+      <div class="input-group input-group-sm mb-2">
+    <input type="text" formControlName="codecircuitvalidation" 
+       class="form-control form-control-sm">
+       <label class="input-group-text">Code circuit de validation </label>
+      </div>
+    </div>
+
+    <!-- Devise Société -->
+    <div class="col-xl-3 col-md-2">
+      <div class="input-group input-group-sm mb-2">
+        <label class="input-group-text">1</label>
+        <select class="form-select form-select-sm" formControlName="iddeviseorigine">
+          <option value="">----Choisir la société -----</option>
+          <!-- <option *ngFor="let s of devises" [value]="d.iddevise">{{ d.codeiso }}</option> -->
+        </select>
+      </div>
+    </div>
+
+       <!-- Site -->
+    <div class="col-xl-3 col-md-2">
+      <div class="input-group input-group-sm mb-2">
+        <label class="input-group-text">1</label>
+        <select class="form-select form-select-sm" formControlName="iddeviseorigine">
+          <option value="">----Choisir le site -----</option>
+          <!-- <option *ngFor="let s of devises" [value]="d.iddevise">{{ d.codeiso }}</option> -->
+        </select>
+      </div>
+    </div>
+
+    <!-- Département -->
+    <div class="col-xl-3 col-md-2">
+      <div class="input-group input-group-sm mb-2">
+        <label class="input-group-text">1</label>
+        <select class="form-select form-select-sm" formControlName="iddeviseorigine">
+          <option value="">----Choisir le département -----</option>
+          <!-- <option *ngFor="let s of devises" [value]="d.iddevise">{{ d.codeiso }}</option> -->
+        </select>
+      </div>
+    </div>
+
+
+    <!-- Coefficient -->
+    <div class="col-md-2">
+      <div class="input-group input-group-sm mb-3">
+        <label class="input-group-text"> = </label>
+        <input type="number" formControlName="coefficient" class="form-control form-control-sm" placeholder="0">
+      </div>
+    </div>
+
+    <!-- Date -->
+    <div class="col-xl-3 col-md-2">
+      <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text">
+            <!-- <i class="ri-calendar-2-line"></i> -->
+             Nombre validateur 
+        </span>
+        <input type="number" formControlName="datecours" 
+       class="form-control form-control-sm">
+      </div>
+    </div>
+    
+
+
+
+
+    <div class="col-md-auto ms-auto d-flex gap-2">
+    
+    <button type="submit" class="btn btn-sm btn-soft-info w-100">
+      {{ actionModal === 'create' ? 'Enregistrer' :
+         actionModal === 'update' ? 'Modifier' :
+         'Dupliquer'
+      }}
+    </button>
+
+    <button class="btn btn-sm btn-success w-100" (click)="modalCreate()">
+      Réinitialiser
+    </button>
+
+</div>
+
+
+  </div>
+</form>
+    </div>
+</div>
+<!--end card-->
+
+<div class="row" id="contactList">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body border border-dashed border-end-0 border-start-0">
+                <div class="row g-2">
+                </div>
+  
+            </div>
+            <div class="card-body">
+                <div class="table-responsive table-card">
+                    <table class="table align-middle table-nowrap" id="customerTable">
+                        <thead class="table-light text-muted">
+                            <tr>
+                                <th class="sort" data-sort="time" scope="col">Code </th>
+                                <th class="sort" data-sort="time" scope="col">type entité</th>
+                                <th class="sort" data-sort="currency_name" scope="col">type action</th>
+                                <th class="sort" data-sort="sort-avg_price" scope="col">Société </th>
+                                <th class="sort" data-sort="sort-price" scope="col">Site </th>
+                                <th class="sort" data-sort="or_val" scope="col">Département </th>
+                                <th class="sort" data-sort="status" scope="col">Nombre de validateur</th>
+                                <th class="sort" data-sort="status" scope="col">Rang de validateur </th>
+                            </tr>
+                        </thead>
+                        <!--end thead-->
+                        <tbody class="list form-check-all">
+                             @for (item of pagedcircuitvalidation; track $index){
+                            <tr>
+                                <td>{{item.circuitvalidtion}}</td>
+                                <td class="order_date time" data-timestamp="1641945600">{{ item.datecours | date:'fullDate' }}</td>
+                                 <!-- <td>{{item.typecours}}</td> -->
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <a href="javascript:void(0);" class="flex-grow-1 ms-2 currency_name">{{item.devise_origine}}</a>
+                                    </div>
+                                </td>
+                                <td class="order_value or_val" data-orderval="370683.20">{{item.coefficient}}</td>
+                                <td class="avg_price sort-avg_price" data-av-price="46154.30">{{item.coefficientinverse}}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <a href="javascript:void(0);" class="flex-grow-1 ms-2 currency_name">{{item.devise_destination}}</a>
+                                    </div>
+                                </td>
+                                <td>
+                                    <ul class="list-inline hstack gap-2 mb-0">
+                                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" aria-label="View" data-bs-original-title="View">
+                                            <a href="#" class="view-item-btn" data-bs-toggle="modal" (click)="modalDuplicate(item)"><i class="ri-file-copy-2-line align-bottom text-secondary"></i></a>
+                                        </li>
+                                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" aria-label="Edit" data-bs-original-title="Edit">
+                                            <a class="edit-item-btn" href="#"  data-bs-toggle="modal" (click)="modalUpdate(item)" ><i class="ri-pencil-fill align-bottom text-primary"></i></a>
+                                        </li>
+                                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"   data-bs-placement="top" aria-label="Delete" data-bs-original-title="Delete">
+                                            <a class="remove-item-btn" data-bs-toggle="modal" (click)="modalDelete(item)" href="#deleteOrder" >
+                                                <i class="ri-delete-bin-fill align-bottom text-danger"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <!--end tr-->
+                        }
+                        </tbody>
+                    </table>
+                    <!--end table-->
+                    <div class="noresult" style="display: none">
+                        <div class="text-center">
+                            <h5 class="mt-2">Désolé ! Aucun resultat trouvé</h5>
+                            <p class="text-muted mb-0">We've searched more than 150+ orders We did not find any orders for you search.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mt-3">
+                    <div class="d-flex justify-content-end">
+                        <div class="pagination-wrap hstack gap-2">
+                            <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
+                                Précédent
+                            </button>
+                            <ul class="pagination listjs-pagination mb-0"> Page {{currentPage}} / {{totalPages}}</ul>
+                            <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)" class="btn btn-sm btn-soft-primary pagination-next">
+                                Suivant
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--end card-->
+    </div>
+    <!--end col-->
+</div>
+<!--end row-->
+
+
+                <!-- Modal -->
+                <div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-body p-5 text-center">
+                                <div class="mt-4 text-center">
+                                    <h4>{{titleMsg}}</h4>
+                                    <p class="text-muted fs-15 mb-4">{{msgSup}}</p>
+                                    <div class="hstack gap-2 justify-content-center remove">
+                                        <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> annuler</button>
+                                        <button class="btn btn-sm btn-danger" (click)="deleteConfirmed()" id="delete-record">Oui, supprimer</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--end modal -->

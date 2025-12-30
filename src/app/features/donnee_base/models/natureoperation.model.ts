@@ -8,8 +8,8 @@ export class natureoperationModel extends MainModel{
     imputationtiers : Number = 0;
     actif : Number = 0;
     demandedecaissement : Number = 0;
+    typeoperation : string = "";
     idsociete : string = "";
     idcompte : string = "";
     compte : any;
-    typeoperation: string = ""
 }

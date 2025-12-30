@@ -7,7 +7,8 @@ import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
 
-// import { AutreService } from '../services/plancomptable.service';
+// ADD-INS
+declare var $: any;
 
 @Component({
   selector: 'app-plancomptable',
@@ -18,7 +19,7 @@ import { Router } from '@angular/router';
 
 export class PlancomptableComponent implements OnInit{
   title = "Plan comptable";
-  params : any = {};
+  // params : any = {};
   breadCrumbs : any = {};
   fb: FormBuilder = new FormBuilder();
   comptes : plancomptableModel[] = [];
@@ -27,12 +28,6 @@ export class PlancomptableComponent implements OnInit{
   msgErros : string = "";
   loading: Boolean = false;
   plancomptableForm : FormGroup = this.fb.group({})
-
-  // Définissez des propriétés de pagination
-  currentPage: number = 1;
-  // Nombre d'éléments par page
-  totalPages: number = 0;
-  limit: number = 10;
 
   //Faire le check selection **********
   objectsSelected : plancomptableModel[] = [];
@@ -63,31 +58,68 @@ export class PlancomptableComponent implements OnInit{
       this.initForm();
       this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("ce compte");
       this.titleMsg = TITLE_DELETE;
-    //   this.autreService.chargerSocietes().subscribe(res => {
-    //   console.log(res);
-    // });
   }
 
+
   getAllComptes(){
-    this.params = {
-      page: this.currentPage,
-      limit: this.limit
-    };
-    this.plancomptableservice.getAll(this.params).subscribe({
+    this.plancomptableservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
-          this.comptes = res.data.data;
-          this.totalPages = res.data.totalPages;
+          this.comptes = res.data;
+
+          const table = $('#dataTable').DataTable();
+          table.destroy();
+
+          setTimeout(() => $('#dataTable').DataTable({
+            language: {
+            search: "Rechercher :",
+            lengthMenu: "Afficher _MENU_ éléments",
+            info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+            infoEmpty: "Affichage de 0 à 0 sur 0 élément",
+            infoFiltered: "(filtré de _MAX_ éléments au total)",
+            loadingRecords: "Chargement...",
+            processing: "Traitement...",
+            zeroRecords: "Aucun élément correspondant trouvé",
+            emptyTable: "Aucune donnée disponible dans le tableau",
+            paginate: {
+              first: "Premier",
+              previous: "Précédent",
+              next: "Suivant",
+              last: "Dernier"
+            },
+            aria: {
+              sortAscending: ": activer pour trier la colonne par ordre croissant",
+              sortDescending: ": activer pour trier la colonne par ordre décroissant"
+            }
+          },
+            responsive: true,
+            ordering: true,
+            lengthMenu: [
+                [10, 25, 50, 100, 250, 500, -1],
+                [10, 25, 50, 100, 250, 500, "Tous"]
+              ]
+          }), 0);
         }
       }
     });
   }
 
-
-  // getSocietes(){
-  //   this.autreservice.chargerSocietes().subscribe({
-  //     next : (res) => {
-  //       this.societes = res.data.data;
+  // ngAfterViewInit(): void {
+  //   // Attendre que le DOM soit chargé
+  //   $('#dataTable').DataTable({
+  //     paging: true,
+  //     searching: true,
+  //     ordering: true,
+  //     info: true,
+  //     responsive: true,
+  //     language: {
+  //       search: "Rechercher :",
+  //       lengthMenu: "Afficher _MENU_ lignes",
+  //       info: "Affichage de _START_ à _END_ sur _TOTAL_ lignes",
+  //       paginate: {
+  //         previous: "Précédent",
+  //         next: "Suivant"
+  //       }
   //     }
   //   });
   // }
@@ -100,9 +132,9 @@ export class PlancomptableComponent implements OnInit{
       libelle : ["", [Validators.required]],
       ventillable: [false],
       auxiliaire: [false],
-      suivibudgetaire: [false],
+      suivibudgetaire: [true],
       suivibudgetairemensuel: [false],
-      idsociete : ["58B53CD2-686A-4CED-9E64-3BA2A5A6D664", [Validators.required]],
+      idsociete : ["68EC05CB-0202-45EF-A3A9-B8DD1296DFEF", [Validators.required]],
       actif : [true],
     })
   }
@@ -121,11 +153,10 @@ export class PlancomptableComponent implements OnInit{
       suivibudgetaire : _object.suivibudgetaire,
       suivibudgetairemensuel : _object.suivibudgetairemensuel,
       idsociete: _object.idsociete,
-      codesociete : _object.societe.societe_codesociete,
-      raisonsociale : _object.societe.societe_raisonsociale,
       actif : status
     })
   }
+
 
   //validation required
   isValidField(label: string): string {
@@ -156,12 +187,6 @@ export class PlancomptableComponent implements OnInit{
     this.checkAllRow = $event;
     if (this.checkAllRow) this.objectsSelected = this.comptes.slice();
     else this.objectsSelected = [];
-  }
-
-  //Recharger la page
-  changePage(page: number) {
-    this.currentPage = page;
-    this.getAllComptes(); // recharge les données
   }
 
   //Soumission du formulaire
@@ -204,6 +229,7 @@ export class PlancomptableComponent implements OnInit{
         if (res.success) {
           this.closeModal('showModal');
           this.getAllComptes();
+          console.log("Création réussie");
         } else {
           this.error = "Erreur de création";
         }

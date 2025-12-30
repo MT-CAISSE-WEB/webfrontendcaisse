@@ -143,7 +143,7 @@
                     <div class="flex-shrink-0">
                         <div class="d-flex gap-2 flex-wrap">
                             <button class="btn btn-sm btn-primary"><i class="ri-delete-bin-2-line"></i></button>
-                            <button class="btn btn-sm btn-danger" [disabled]="!isAnyOpen" data-bs-toggle="modal" (click)="modalCreate()" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1"></i>nouvelle operation</button>
+                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1"></i>nouvelle operation</button>
                         </div>
                     </div>
                 </div>
@@ -152,14 +152,11 @@
                 <form [formGroup]="searchForm">
                     <div class="row g-3">
                         <div class="col-xxl-5 col-sm-12">
-                            <div class="search-box search-box-sm">
-                                <input type="text" class="form-control form-control-sm search bg-light border-light" formControlName="search" placeholder="rechercher par numero, montant et devise...">
-                                <i class="ri-search-line search-icon"></i>
-                            </div>
+                            <input type="text" class="form-control form-control-sm search bg-light border-light" placeholder="rechercher par numero, devise...">
+                            <i class="ri-search-line search-icon"></i>
                         </div>
-                        <!--end col-->
                         <div class="col-xxl-3 col-sm-4">
-                            <input type="date" formControlName="date" class="form-control form-control-sm bg-light border-light" id="datepicker-range" placeholder="Selectionner date">
+                            <input type="text" class="form-control form-control-sm bg-light border-light" id="datepicker-range" placeholder="Selectionner date">
                         </div>
                         <!--end col-->
                         <div class="col-xxl-3 col-sm-4">
@@ -167,11 +164,9 @@
                                 <select class="form-control form-control-sm" formControlName="status" id="idStatus">
                                     <option value="" selected>Tous</option>
                                     <option value="all">Comptabilisé</option>
-                                    <option value="Unpaid">Non comptabilisé</option>
                                 </select>
                             </div>
                         </div>
-                        <!--end col-->
                         <div class="col-xxl-1 col-sm-4">
                             <button type="button" class="btn btn-sm btn-primary w-100">
                             <i class="ri-equalizer-fill me-1 align-bottom"></i>filtrer</button>
@@ -198,7 +193,6 @@
                                         </div>
                                     </th>
                                     <th class="sort text-uppercase" data-sort="invoice_id">numero</th>
-                                    <th class="sort text-uppercase" data-sort="type">operation</th>
                                     <th class="sort text-uppercase" data-sort="invoice_amount">Montant</th>
                                     <th class="sort text-uppercase" data-sort="status">Devise</th>
                                     <th class="sort text-uppercase" data-sort="date">Date</th>
@@ -242,37 +236,37 @@
                                 }
                             </tbody>
                         </table>
-                        <div class="" *ngIf="operations.length == 0">
+                        <div class="noresult" style="display: none">
                             <div class="text-center">
                                 <h5 class="mt-2">Désolé! Aucune opération trouvé</h5>
-                                <p class="text-muted mb-0">Désole il n' y aucune donnée dans cette base</p>
+                                <p class="text-muted mb-0">We've searched more than 150+ invoices We did not find any invoices for you search.</p>
                             </div>
                         </div>
                     </div>
                     <div class="d-flex justify-content-end mt-3">
                         <div class="pagination-wrap hstack gap-2">
-                            <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
-                                Précédent
-                            </button>
-                            <ul class="pagination listjs-pagination mb-0"> Page {{currentPage}} / {{totalPages}} </ul>
-                            <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)" class="btn btn-sm btn-soft-primary pagination-next">
-                                Suivant
-                            </button>
+                            <a class="page-item pagination-prev disabled" href="#">
+                                Previous
+                            </a>
+                            <ul class="pagination listjs-pagination mb-0"></ul>
+                            <a class="page-item pagination-next" href="#">
+                                Next
+                            </a>
                         </div>
                     </div>
                 </div>
 
                 <!-- Modal -->
-                <div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
+                <div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-labelledby="deleteOrderLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-body p-5 text-center">
                                 <div class="mt-4 text-center">
-                                    <h4>{{titleMsg}}</h4>
-                                    <p class="text-muted fs-15 mb-4">{{msgSup}}</p>
+                                    <h4>You are about to delete a order ?</h4>
+                                    <p class="text-muted fs-15 mb-4">Deleting your order will remove all of your information from our database.</p>
                                     <div class="hstack gap-2 justify-content-center remove">
-                                        <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> annuler</button>
-                                        <button class="btn btn-sm btn-danger" (click)="deleteConfirmed()" id="delete-record">Oui, supprimer</button>
+                                        <button class="btn btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> Close</button>
+                                        <button class="btn btn-danger" id="delete-record">Yes, Delete It</button>
                                     </div>
                                 </div>
                             </div>
@@ -282,7 +276,6 @@
                 <!--end modal -->
             </div>
         </div>
-
     </div>
     <!--end col-->
 </div>
@@ -296,7 +289,7 @@
                 <h5 class="modal-title" id="exampleModalLabel">{{ actionModal === "create" ? 'Création' : 'Modification'}} {{title}}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
             </div>
-            <form [formGroup]="operationForm">
+            <form>
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-lg-12 col-sm-12">
@@ -314,41 +307,31 @@
 
                         <div class="col-lg-3 col-sm-6">
                             <label for="invoicenoInput">Numero operation</label>
-                            <input type="text" formControlName="codeoperation" class="form-control form-control-sm bg-light border-0"  placeholder="" readonly="readonly" />
-                            <div class="invalid-feedback">{{ msgErros }}</div>
+                            <input type="text" class="form-control form-control-sm bg-light border-0" id="invoicenoInput" placeholder="Invoice No" value="NUM-2025-05-13" readonly="readonly" />
                         </div>
                         <!--end col-->
                         <div class="col-lg-3 col-sm-6">
                             <div>
                                 <label for="date-field">Date</label>
-                                <input type="date" formControlName="dateoperation" class="form-control form-control-sm bg-light border-0 {{ isValidField('dateoperation')}}" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date" required>
-                                <div class="invalid-feedback">{{ msgErros }}</div>
+                                <input type="text" class="form-control form-control-sm bg-light border-0" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date">
+                            </div>
+                        </div>
+                        <!--end col-->
+                        <div class="col-lg-3 col-sm-6">
+                            <label for="choices-payment-status">Decaissement type</label>
+                            <div class="input-light">
+                                <select class="form-control form-control-sm bg-light border-0" data-choices data-choices-search-false id="choices-payment-status" required>
+                                    <option value="">Type decaissement</option>
+                                    <option value="Paid">Mono devise</option>
+                                    <option value="Unpaid">Bi devise</option>
+                                </select>
                             </div>
                         </div>
                         <!--end col-->
                         <div class="col-lg-3 col-sm-6">
                             <div>
-                                <label for="choices-payment-status">Devise</label>
-                                <div class="input-light">
-                                    <select formControlName="devise" class="form-control form-control-sm bg-light border-0 {{ isValidField('devise')}}" required>
-                                        <option value="">devise</option>
-                                        <option value="3FC45657-E282-4667-AA3A-50121F1CEB18">XAF</option>
-                                        <option value="A4473CF8-A4E3-4CDB-92E6-A2CE1320741E">USD</option>
-                                    </select>
-                                    <div class="invalid-feedback">{{ msgErros }}</div>
-                                </div>
-                            </div>
-                        </div>
-                        <!--end col-->
-                        <div class="col-lg-3 col-sm-6">
-                            <label for="choices-payment-status">Paiement type</label>
-                            <div class="input-light">
-                                <select class="form-control form-control-sm bg-light border-0" data-choices data-choices-search-false id="choices-payment-status" formControlName="typepaiement">
-                                    <option value="">Type paiement</option>
-                                    <option value="encaissement">encaissement</option>
-                                    <option value="decaissement">decaissement</option>
-                                </select>
-                                <div class="invalid-feedback">{{ msgErros }}</div>
+                                <label for="totalamountInput">Total</label>
+                                <input type="text" class="form-control form-control-sm bg-light border-0" id="totalamountInput" placeholder="00.000000" readonly />
                             </div>
                         </div>
                         <!--end col-->
@@ -364,27 +347,25 @@
                     <!-- Tableau detail-->
                      <div class="p-4">
                         <div class="table-responsive">
-                            <table class="table table-sm table-borderless table-nowrap mb-0">
-                                <colgroup>
-                                    <col style="width: 05%">
-                                    <col style="width: 30%">
-                                    <col style="width: 25%">
-                                    <col style="width: 25%">
-                                    <col style="width: 10%">
-                                    <col style="width: 05%">
-                                </colgroup>
+                            <table class="invoice-table table table-borderless table-nowrap mb-0">
                                 <thead class="align-middle">
                                     <tr class="table-active">
-                                        <th scope="col" style="width: 15px;">N°</th>
+                                        <th scope="col" style="width: 50px;">#</th>
                                         <th scope="col">
-                                            Nature opération
-                                        </th>
-                                        <th scope="col">
-                                            Centre analytique
+                                            Nature operation
                                         </th>
                                         <th scope="col" style="width: 120px;">
-                                            Tiers
+                                            <div class="d-flex currency-select input-light align-items-center">
+                                                devise
+                                                <select class="form-selectborder-0 bg-light" id="choices-payment-currency">
+                                                    <option value="$">($)</option>
+                                                    <option value="£">(£)</option>
+                                                    <option value="₹">(₹)</option>
+                                                    <option value="€">(€)</option>
+                                                </select>
+                                            </div>
                                         </th>
+                                        <th scope="col" style="width: 120px;">Qte</th>
                                         <th scope="col" class="text-end" style="width: 150px;">Montant</th>
                                         <th scope="col" class="text-end" style="width: 105px;"></th>
                                     </tr>
@@ -447,13 +428,12 @@
                                     <tr id="newForm" style="display: none;"><td class="d-none" colspan="5"><p>ajouter</p></td></tr>
                                     <tr>
                                         <td colspan="5">
-                                            <button type="button" [disabled]="!typePaiement" class="btn btn-sm btn-soft-secondary fw-medium" (click)="addLine()"><i class="ri-add-fill me-1 align-bottom"></i></button>
+                                            <a href="javascript:new_link()" id="add-item" class="btn btn-soft-secondary fw-medium"><i class="ri-add-fill me-1 align-bottom"></i> nouvelle ligne</a>
                                         </td>
                                     </tr>
-                                    <tr class="border-top border-top-dashed mt-3">
-                                        <td colspan="3">
-                                        </td>
-                                        <td colspan="3" class="p-0">
+                                    <tr class="border-top border-top-dashed mt-2">
+                                        <td colspan="3"></td>
+                                        <td colspan="2" class="p-0">
                                             <table class="table table-borderless table-sm table-nowrap align-middle mb-0">
                                                 <tbody>
                                                     <tr class="border-top border-top-dashed">
@@ -469,9 +449,15 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <th scope="row">Total reporting</th>
+                                                        <th scope="row">Sous total</th>
                                                         <td style="width:150px;">
                                                             <input type="text" class="form-control form-control-sm bg-light border-0" id="cart-subtotal" placeholder="$0.00" readonly />
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="border-top border-top-dashed">
+                                                        <th scope="row">Montant total</th>
+                                                        <td>
+                                                            <input type="text" class="form-control form-control-sm bg-light border-0" id="cart-total" placeholder="$0.00" readonly />
                                                         </td>
                                                     </tr>
                                                 </tbody>

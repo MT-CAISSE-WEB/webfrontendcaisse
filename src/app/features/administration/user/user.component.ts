@@ -9,6 +9,12 @@ import { CommonModule } from '@angular/common';
 import { societemodel } from '../../structure/model/societe.model';
 import { societeservice } from '../../structure/service/societe.service';
 import { ChangeDetectorRef } from '@angular/core';
+import { rolemodel } from '../model/role.model';
+import { utilisateurroleservice } from '../service/utilisateurrole.service';
+import { roleservice } from '../service/role.service';
+import { utilisateurdepartementservice } from '../service/userdepartement.service';
+import { departementmodel } from '../../structure/model/departement.model';
+import { departementservice } from '../../structure/service/departement.service';
 
 @Component({
   selector: 'app-user',
@@ -17,41 +23,41 @@ import { ChangeDetectorRef } from '@angular/core';
   styleUrl: './user.component.css'
 })
 export class UserComponent {
-    title = "Utilisateurs";
-    params : any = {};
-    breadCrumbs : any = {};
-    fb: FormBuilder = new FormBuilder();
-    users : usermodel[] = [];
-    user : usermodel = new usermodel();
-    msgErros : string = "";
-    loading: Boolean = false;
-    userForm : FormGroup = this.fb.group({});
-    societes : societemodel[] = [];
+      title = "Utilisateurs";
+      params : any = {};
+      breadCrumbs : any = {};
+      fb: FormBuilder = new FormBuilder();
+      users : usermodel[] = [];
+      user : usermodel = new usermodel();
+      msgErros : string = "";
+      loading: Boolean = false;
+      userForm : FormGroup = this.fb.group({});
+      societes : societemodel[] = [];
 
-    //Tri et recherche 
-    filtreusers : usermodel[] = [];
-    searchtext : string ="";
-    sortby: string = "code";
-    sortdirection : 'asc' | 'desc' = 'asc';
-    selectedstatus : string="";
-    activeTab: string = 'all';
+      //Tri et recherche 
+      filtreusers : usermodel[] = [];
+      searchtext : string ="";
+      sortby: string = "code";
+      sortdirection : 'asc' | 'desc' = 'asc';
+      selectedstatus : string="";
+      activeTab: string = 'all';
 
-    //Pagination 
-    pageSize: number = 10;        // éléments par page (à adapter si tu veux)
-    currentPage: number = 1;      // page courante
+      //Pagination 
+      pageSize: number = 10;        // éléments par page (à adapter si tu veux)
+      currentPage: number = 1;      // page courante
 
 
-    // Définissez des propriétés de pagination
-    //currentPage: number = 1;
-    // Nombre d'éléments par page
-    limit: number = 5;
+      // Définissez des propriétés de pagination
+      //currentPage: number = 1;
+      // Nombre d'éléments par page
+      limit: number = 5;
 
-    //Faire le check selection **********
-    objectsSelected : usermodel[] = [];
-    selectedItems : any[] = [];
-    // Détermine si toutes les lignes sont selectionnées
-    checkAllRow : any;
-    error : string = "";
+      //Faire le check selection **********
+      objectsSelected : usermodel[] = [];
+      selectedItems : any[] = [];
+      // Détermine si toutes les lignes sont selectionnées
+      checkAllRow : any;
+      error : string = "";
 
       //Changement titre modal
       actionModal: string = "create";
@@ -63,12 +69,29 @@ export class UserComponent {
       //Element à supprimer 
       deleteuser : any = null;
 
-      constructor(private us:userservice,private cdr: ChangeDetectorRef,private sc:societeservice,private router : Router){}
+      //Gestion des roles de l'utilisateur la tête chauffe dejà
+      roles : rolemodel [] = [];
+      departements : departementmodel [] = [];
+      selectedUser: usermodel | null = null;
+      userRoles: number[] = []; 
+      userdepts : string[] = [];  
+
+      constructor(
+        private us:userservice,
+        private cdr: ChangeDetectorRef,
+        private sc:societeservice,
+        private rol : roleservice,
+        private dp : departementservice,
+        private ud : utilisateurdepartementservice,
+        private ur:utilisateurroleservice,
+        private router : Router){}
       
       ngOnInit(): void {
       //Afficher toutes les users
       this.getallsocietes();
       this.getallusers();
+      this.loadRoles();
+      this.loaddepartements();
       //Initialisation du formulaire
       this.initForm();
       this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("cet utilisateur");
@@ -99,6 +122,19 @@ export class UserComponent {
         }
       }
     });
+  }
+
+  loadRoles(): void {
+    this.rol.getAll().subscribe(res => {
+      this.roles = res.data;
+      console.log(res.data);
+    });
+  }
+
+  loaddepartements(): void {
+    this.dp.getAll().subscribe(res => {
+      this.departements = res.data;
+    } );
   }
 
   // Nombre total de pages calculé dynamiquement
@@ -196,8 +232,8 @@ get departementCount(): number {
 get acheteurCount(): number {
   return this.users.filter(user => user.acheteur === 1).length;
 }
-//normaliser le test pour la recherche
-normalize(value: any): string {
+  //normaliser le test pour la recherche
+  normalize(value: any): string {
   return (value || "")
     .toString()
     .toLowerCase()
@@ -248,7 +284,7 @@ normalize(value: any): string {
       });
     }
 
-isValidField(field: string): string {
+    isValidField(field: string): string {
   const control = this.userForm.get(field);
   return control && control.invalid && (control.touched || control.dirty)
     ? 'is-invalid'
@@ -371,7 +407,7 @@ isValidField(field: string): string {
         this.deleteuser = item;
       }
 
-deleteConfirmed(){
+      deleteConfirmed(){
   if(!this.deleteuser) return ;
   this.us.delete(this.deleteuser.idutilisateur).subscribe({
     next: (res) => {
@@ -405,4 +441,80 @@ loadusers(applyFilterAfter: boolean = false) {
     }
   });
 }
+
+selectUser(user: usermodel) {
+  this.userRoles = [];
+  this.userdepts = [];
+
+   if (this.selectedUser?.idutilisateur === user.idutilisateur) {
+    this.selectedUser = null;
+    this.userRoles = [];
+    this.userdepts = [];
+  }
+  else {
+    // Sinon on sélectionne le rôle et on recharge ses permissions
+     this.selectedUser = user;
+     this.userRoles = [];
+     this.userdepts = [];
+
+     this.ur.getutilisateurroles(user.idutilisateur)
+    .subscribe(res => {
+      this.userRoles = res.data[0].map((r: any) => r.idrole);
+    });
+
+    this.ud.getutilisateurdepartement(user.idutilisateur)
+    .subscribe(res => {
+       this.userdepts = res.data[0].map((d: any) => d.iddepartement);
+    });
+  } 
+  
+}
+
+toggleRole(idrole: string, event: any) {
+  if (!this.selectedUser) return;
+
+  if (event.target.checked) {
+    // ADD ROLE
+    this.ur.upsert({
+      idutilisateur: this.selectedUser.idutilisateur,
+      idrole: idrole
+    }).subscribe(() => {
+      this.userRoles.push(Number(idrole));
+    });
+  } else {
+    // REMOVE ROLE
+    this.ur.delete(
+      this.selectedUser.idutilisateur,
+      idrole
+    ).subscribe(() => {
+      this.userRoles = this.userRoles.filter(r => r !== Number(idrole));
+    });
+  }
+}
+
+toggledepartement(iddepartement: string, event: any) {
+  if (!this.selectedUser) return;
+
+  if (event.target.checked) {
+    // ADD ROLE
+    this.ud.upsert({
+      idutilisateur: this.selectedUser.idutilisateur,
+      iddepartement: iddepartement
+    }).subscribe(() => {
+      this.userdepts.push(iddepartement);
+    });
+  } else {
+    // REMOVE ROLE
+    this.ud.delete(
+      this.selectedUser.idutilisateur,
+      iddepartement
+    ).subscribe(() => {
+      this.userdepts = this.userdepts.filter(r => r !== iddepartement);
+    });
+  }
+}
+tonumber (idrole:any){
+  return Number(idrole);
+}
+
 }
