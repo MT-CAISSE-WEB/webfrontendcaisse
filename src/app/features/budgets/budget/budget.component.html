@@ -112,6 +112,8 @@
             <li class="nav-item">
               <a
                 class="nav-link active All py-3"
+                [class.active]="currentStatusFilter === 'ALL'"
+                (click)="applyStatusFilter('ALL')"
                 data-bs-toggle="tab"
                 id="All"
                 href="#home1"
@@ -124,6 +126,8 @@
             <li class="nav-item">
               <a
                 class="nav-link py-3 Delivered"
+                [class.active]="currentStatusFilter === 'ACTIF'"
+                (click)="applyStatusFilter('ACTIF')"
                 data-bs-toggle="tab"
                 id="Delivered"
                 href="#delivered"
@@ -136,6 +140,8 @@
             <li class="nav-item">
               <a
                 class="nav-link py-3 Pickups"
+                [class.active]="currentStatusFilter === 'INACTIF'"
+                (click)="applyStatusFilter('INACTIF')"
                 data-bs-toggle="tab"
                 id="Pickups"
                 href="#pickups"
@@ -143,7 +149,9 @@
                 aria-selected="false"
               >
                 <i class="ri-truck-line me-1 align-bottom"></i> Inactif
-                <span class="badge bg-danger align-middle ms-1">2</span>
+                <span class="badge bg-danger align-middle ms-1">{{
+                  totalInactifs
+                }}</span>
               </a>
             </li>
           </ul>
@@ -165,106 +173,144 @@
                   </th>
                   <th class="sort" data-sort="id">Code</th>
                   <th class="sort" data-sort="id">Libellé</th>
-                  <th class="sort" data-sort="customer_name">Type</th>
-
                   <th class="sort" data-sort="customer_name">Entité</th>
-
                   <th class="sort" data-sort="customer_name">Date début</th>
                   <th class="sort" data-sort="customer_name">Date fin</th>
                   <th class="sort" data-sort="status">Status</th>
+                  <th class="sort" data-sort="status">Prévision</th>
                   <th class="sort" data-sort="city">Action</th>
                 </tr>
               </thead>
               <tbody class="list form-check-all">
-                @for (item of budgets; track $index){
-                <tr>
-                  <th scope="row">
-                    <div class="form-check">
-                      <input
-                        class="form-check-input"
-                        [checked]="isChecked(item.idbudget)"
-                        [(ngModel)]="selectedItems[$index]"
-                        (ngModelChange)="handleSelectOne(item, $event)"
-                        type="checkbox"
-                        name="itemGroup_{{ $index }}"
-                      />
-                    </div>
-                  </th>
-                  <td class="code">
-                    <a href="#" class="fw-medium link-primary">{{
-                      item.codebudget
-                    }}</a>
-                  </td>
-                  <td class="customer_name">{{ item.libelle }}</td>
-                  <td class="customer_name">{{ item.typebudget }}</td>
+                @if (getBudgetsAnnuels().length > 0) { @for (item of
+                getBudgetsAnnuels(); track item.idbudget) {
 
-                  <td class="customer_name">{{ item.entite }}</td>
-                  <td class="customer_name">
-                    {{ item.datedebut | date : "dd-MM-yyyy" }}
-                  </td>
-                  <td class="customer_name">
-                    {{ item.datefin | date : "dd-MM-yyyy" }}
-                  </td>
-                  <td class="status">
-                    <span
-                      *ngIf="item.actif == 1"
-                      class="badge bg-success-subtle text-success text-uppercase"
-                    >
-                      Actif
-                    </span>
-                    <span
-                      *ngIf="item.actif == 0"
-                      class="badge bg-danger-subtle text-danger text-uppercase"
-                    >
-                      Inactif
-                    </span>
-                  </td>
+                <!-- 🔹 LIGNE BUDGET ANNUEL -->
+                <tr class="table-primary-subtle fw-semibold">
                   <td>
-                    <ul class="list-inline hstack gap-2 mb-0">
-                      <li
-                        class="list-inline-item"
-                        data-bs-toggle="tooltip"
-                        data-bs-trigger="hover"
-                        data-bs-placement="top"
-                        title="View"
-                      >
-                        <a href="#" class="text-primary d-inline-block">
-                          <i class="ri-eye-fill fs-16"></i>
-                        </a>
-                      </li>
-                      <li
-                        class="list-inline-item edit"
-                        data-bs-toggle="tooltip"
-                        data-bs-trigger="hover"
-                        data-bs-placement="top"
-                        title="Edit"
-                      >
-                        <a
-                          href="#showModal"
-                          data-bs-toggle="modal"
-                          (click)="modalUpdate(item)"
-                          class="text-primary d-inline-block edit-item-btn"
-                        >
-                          <i class="ri-pencil-fill fs-16"></i>
-                        </a>
-                      </li>
-                      <li
-                        class="list-inline-item"
-                        data-bs-toggle="tooltip"
-                        data-bs-trigger="hover"
-                        data-bs-placement="top"
-                        title="Remove"
-                      >
-                        <a
-                          class="text-danger d-inline-block remove-item-btn"
-                          (click)="modalDelete(item)"
-                          data-bs-toggle="modal"
-                          href="#deleteOrder"
-                        >
-                          <i class="ri-delete-bin-5-fill fs-16"></i>
-                        </a>
-                      </li>
-                    </ul>
+                    <button
+                      class="btn btn-sm btn-link p-0"
+                      (click)="toggleExpand(item.idbudget)"
+                    >
+                      <i
+                        class="ri-arrow-right-s-line fs-16"
+                        [class.ri-arrow-down-s-line]="isExpanded[item.idbudget]"
+                      ></i>
+                    </button>
+                  </td>
+
+                  <td>
+                    {{ item.codebudget }}
+                  </td>
+
+                  <td>{{ item.libelle }}</td>
+                  <td>{{ item.entite }}</td>
+                  <td>{{ item.datedebut | date : "dd-MM-yyyy" }}</td>
+                  <td>{{ item.datefin | date : "dd-MM-yyyy" }}</td>
+
+                  <td>
+                    <span
+                      class="badge"
+                      [ngClass]="
+                        item.actif
+                          ? 'bg-success-subtle text-success'
+                          : 'bg-danger-subtle text-danger'
+                      "
+                    >
+                      {{ item.actif ? "Actif" : "Inactif" }}
+                    </span>
+                  </td>
+
+                  <td></td>
+
+                  <td>
+                    <a
+                      href="#showModal"
+                      data-bs-toggle="modal"
+                      (click)="modalUpdate(item)"
+                      class="text-primary"
+                    >
+                      <i class="ri-pencil-fill fs-16"></i>
+                    </a>
+                  </td>
+                </tr>
+
+                <!-- 🔸 LIGNES BUDGETS MENSUELS -->
+                @if (isExpanded[item.idbudget]) {
+                <tr>
+                  <td colspan="9" class="bg-light">
+                    <table class="table table-sm table-borderless mb-0">
+                      <thead class="text-muted">
+                        <tr>
+                          <th>Code</th>
+                          <th>Libellé</th>
+                          <th>Période</th>
+                          <th>Prévision</th>
+                          <th>Status</th>
+                          <th class="text-end">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (child of getBudgetsMensuels(item.idbudget); track
+                        child.idbudget) {
+                        <tr>
+                          <td>{{ child.codebudget }}</td>
+                          <td>{{ child.libelle }}</td>
+                          <td>
+                            {{ child.datedebut | date : "MMM yyyy" }}
+                          </td>
+                          <td></td>
+                          <td>
+                            <span
+                              class="badge"
+                              [ngClass]="
+                                child.actif
+                                  ? 'bg-success-subtle text-success'
+                                  : 'bg-danger-subtle text-danger'
+                              "
+                            >
+                              {{ child.actif ? "Actif" : "Inactif" }}
+                            </span>
+                          </td>
+                          <td class="text-end">
+                            <a
+                              href="#showModal"
+                              data-bs-toggle="modal"
+                              (click)="modalUpdate(child)"
+                              class="text-primary me-2"
+                            >
+                              <i class="ri-pencil-fill"></i>
+                            </a>
+                            <a
+                              class="text-danger"
+                              (click)="modalDelete(child)"
+                              data-bs-toggle="modal"
+                              href="#deleteOrder"
+                            >
+                              <i class="ri-delete-bin-5-fill"></i>
+                            </a>
+                          </td>
+                        </tr>
+                        } @if (getBudgetsMensuels(item.idbudget).length === 0) {
+                        <tr>
+                          <td colspan="5" class="text-center text-muted py-2">
+                            Aucun budget mensuel rattaché
+                          </td>
+                        </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+                } } } @else {
+                <tr>
+                  <td colspan="9" class="text-center py-5">
+                    <i class="ri-inbox-2-line fs-1 text-muted"></i>
+                    <h6 class="mt-2">Aucun budget annuel disponible</h6>
+                    <p class="text-muted mb-0">
+                      Créez un budget annuel pour pouvoir y rattacher des
+                      budgets mensuels.
+                    </p>
                   </td>
                 </tr>
                 }
@@ -327,7 +373,6 @@
                 <div class="modal-body">
                   <input type="hidden" id="id-field" />
 
-                  @if(actionModal === "create"){
                   <div class="mb-3" id="modal-id">
                     <label for="orderId" class="form-label form-label-sm"
                       >Code</label
@@ -360,7 +405,7 @@
                       <option value="Annuel">Annuel</option>
                       <option value="Mensuel">Mensuel</option>
                     </select>
-                    <div class="invalid-feedback">{{ msgErros }}</div>
+                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                   </div>
 
                   @if (budgetForm.value.typebudget === "Mensuel") {
@@ -385,9 +430,9 @@
                       </option>
                       } }
                     </select>
-                    <div class="invalid-feedback">{{ msgErros }}</div>
+                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                   </div>
-                  } }
+                  }
 
                   <div class="mb-3" id="modal-id">
                     <label
@@ -425,7 +470,7 @@
                       <option value="Site">Site</option>
                     </select>
 
-                    <div class="invalid-feedback">{{ msgErros }}</div>
+                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                   </div>
 
                   <div class="mb-3">
@@ -441,7 +486,29 @@
                         }}"
                         formControlName="datedebut"
                       />
-                      <div class="invalid-feedback">{{ msgErros }}</div>
+
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datedebut', 'invalidMonthRange')"
+                      >
+                        Le budget mensuel doit couvrir un mois complet.
+                      </div>
+
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datedebut', 'outOfParentRange')"
+                      >
+                        La date de début est hors de la période du budget
+                        parent.
+                      </div>
+
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datedebut', 'duplicateMonthlyBudget')"
+                      >
+                        Un budget mensuel existe déjà pour ce mois.
+                      </div>
+                      <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                     </div>
                   </div>
                   <div class="mb-3">
@@ -457,22 +524,37 @@
                         }}"
                         formControlName="datefin"
                       />
-                      <div class="invalid-feedback">{{ msgErros }}</div>
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datefin', 'startAfterEnd')"
+                      >
+                        La date de fin doit être postérieure à la date de début.
+                      </div>
+
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datefin', 'invalidMonthRange')"
+                      >
+                        La date de fin doit correspondre au dernier jour du
+                        mois.
+                      </div>
+
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datefin', 'outOfParentRange')"
+                      >
+                        La date de fin est hors de la période du budget parent.
+                      </div>
+
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datefin', 'duplicateMonthlyBudget')"
+                      >
+                        Un budget mensuel existe déjà pour cette période.
+                      </div>
+                      <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                     </div>
                   </div>
-
-                  @if(selectedBudgetParent){
-                  <div
-                    class="invalid-feedback d-block"
-                    *ngIf="
-                        budgetForm.get('datedebut')?.errors?.['invalidParentRange'] ||
-                        budgetForm.get('datefin')?.errors?.['invalidParentRange']
-                      "
-                  >
-                    Les dates doivent être dans la plage du budget parent et sur
-                    l'année {{ selectedBudgetParent.datefin | date : "yyyy" }}.
-                  </div>
-                  }
 
                   <div class="mb-3">
                     <label class="form-label form-label-sm" for=""
@@ -485,7 +567,7 @@
                     >
                       <option>-- Sélectionner --</option>
                     </select>
-                    <div class="invalid-feedback">{{ msgErros }}</div>
+                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                   </div>
                   <div class="mb-3">
                     <label class="form-label form-label-sm" for="">Site</label>
@@ -496,7 +578,7 @@
                     >
                       <option disabled>-- Sélectionner --</option>
                     </select>
-                    <div class="invalid-feedback">{{ msgErros }}</div>
+                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                   </div>
                   <div class="mb-3">
                     <label class="form-label form-label-sm" for=""
@@ -509,7 +591,7 @@
                     >
                       <option disabled>-- Sélectionner --</option>
                     </select>
-                    <div class="invalid-feedback">{{ msgErros }}</div>
+                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                   </div>
 
                   <div class="mb-3">
@@ -529,6 +611,9 @@
                         >Actif</label
                       >
                     </div>
+                  </div>
+                  <div *ngIf="msgErros" class="alert alert-danger mt-2">
+                    {{ msgErros }}
                   </div>
                 </div>
 

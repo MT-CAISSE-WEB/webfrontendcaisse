@@ -20,6 +20,8 @@ import {
 import { Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 
+type BudgetStatusFilter = 'ALL' | 'ACTIF' | 'INACTIF';
+
 @Component({
   selector: 'app-budget',
   imports: [CommonModule, FormsModule, ReactiveFormsModule, DatePipe],
@@ -36,7 +38,9 @@ export class BudgetComponent implements OnInit {
   msgErros: string = '';
   loading: Boolean = false;
   budgetForm: FormGroup = this.fb.group({});
-  disabledSelectEntite: boolean = false;
+  filteredBudgets: BudgetModel[] = [];
+
+  currentStatusFilter: BudgetStatusFilter = 'ALL';
 
   // formatage de date
   formatDateForInput(dateString: string | null): string | null {
@@ -87,19 +91,84 @@ export class BudgetComponent implements OnInit {
   }
 
   getAllBudgets() {
+    this.isExpanded = {};
     this.params = {
       page: this.currentPage,
-      limit: this.limit,
+      limit: this.getBudgetsAnnuels().length,
     };
     this.budgetservice.getAll(this.params).subscribe({
       next: (res: any) => {
         if (res.success) {
           this.budgets = res.data;
-          // console.log('Budgets:', this.budgets);
+          this.applyStatusFilter(this.currentStatusFilter);
           this.totalPages = res.totalPages;
+          this.budgetForm?.updateValueAndValidity({
+            onlySelf: false,
+            emitEvent: true,
+          });
         }
       },
+      error: (err: any) => {
+        this.msgErros = err.error.error;
+      },
     });
+  }
+
+  isExpanded: Record<string, boolean> = {};
+
+  toggleExpand(id: string) {
+    this.isExpanded[id] = !this.isExpanded[id];
+  }
+
+  getBudgetsAnnuels() {
+    return this.filteredBudgets.filter((b) => b.typebudget === 'Annuel');
+  }
+
+  getBudgetsMensuels(parentId: string): BudgetModel[] {
+    return this.filteredBudgets.filter(
+      (b) => b.typebudget === 'Mensuel' && b.idbudgetparent === parentId
+    );
+  }
+  get totalActifs(): number {
+    return this.budgets.filter(
+      (b) => b.actif === 1 && b.typebudget === 'Annuel'
+    ).length;
+  }
+
+  get totalInactifs(): number {
+    return this.budgets.filter(
+      (b) => b.actif === 0 && b.typebudget === 'Annuel'
+    ).length;
+  }
+
+  get hasNoResult(): boolean {
+    return this.filteredBudgets.length === 0;
+  }
+
+  applyStatusFilter(status: BudgetStatusFilter) {
+    this.currentStatusFilter = status;
+
+    switch (status) {
+      case 'ACTIF':
+        this.filteredBudgets = this.budgets.filter(
+          (b) => b.actif === 1 && b.typebudget === 'Annuel'
+        );
+        break;
+
+      case 'INACTIF':
+        this.filteredBudgets = this.budgets.filter(
+          (b) => b.actif === 0 && b.typebudget === 'Annuel'
+        );
+        break;
+
+      default:
+        this.filteredBudgets = [...this.budgets];
+    }
+
+    // Reset sélection (important)
+    this.objectsSelected = [];
+    this.selectedItems = [];
+    this.checkAllRow = false;
   }
 
   //création du formulaire
@@ -117,9 +186,7 @@ export class BudgetComponent implements OnInit {
         actif: [false],
       },
       {
-        validators: this.budgetParentYearValidator(
-          () => this.selectedBudgetParent
-        ),
+        validators: this.budgetDateValidator(() => this.selectedBudgetParent),
       }
     );
   }
@@ -153,6 +220,22 @@ export class BudgetComponent implements OnInit {
     return status;
   }
 
+  hasError(controlName: string, errorKey: string): boolean {
+    const ctrl = this.budgetForm.get(controlName);
+    return !!(
+      ctrl &&
+      ctrl.touched &&
+      ctrl.errors &&
+      ctrl.errors[errorKey] &&
+      !ctrl.errors['required']
+    );
+  }
+
+  isTouchedAndInvalid(controlName: string): boolean {
+    const ctrl = this.budgetForm.get(controlName);
+    return !!(ctrl && ctrl.touched && ctrl.invalid);
+  }
+
   //vérifie si _id est inclus dans un tableau d'IDs stocké
   isChecked(_id: string) {
     const ids: string[] = this.objectsSelected.map((el) => el.idbudget);
@@ -183,43 +266,220 @@ export class BudgetComponent implements OnInit {
   }
 
   // Validation des dates
-  budgetParentYearValidator(
-    getParent: () => BudgetModel | undefined
-  ): ValidatorFn {
+  budgetDateValidator(getParent: () => BudgetModel | undefined): ValidatorFn {
     return (group: AbstractControl): ValidationErrors | null => {
-      const parent = getParent();
       const startCtrl = group.get('datedebut');
       const endCtrl = group.get('datefin');
+      const typeCtrl = group.get('typebudget');
 
-      // Nettoyage des erreurs précédentes
-      startCtrl?.setErrors(null);
-      endCtrl?.setErrors(null);
+      if (!startCtrl || !endCtrl || !typeCtrl) return null;
 
-      if (!parent || !startCtrl?.value || !endCtrl?.value) {
-        return null;
-      }
+      /* ==========================
+       🔄 NETTOYAGE DES ERREURS
+       ========================== */
+      const resetErrors = (ctrl: AbstractControl, keys: string[]) => {
+        if (!ctrl.errors) return;
+
+        const errors = { ...ctrl.errors };
+        keys.forEach((k) => delete errors[k]);
+
+        ctrl.setErrors(Object.keys(errors).length ? errors : null);
+      };
+
+      resetErrors(startCtrl, [
+        'invalidMonthRange',
+        'outOfParentRange',
+        'duplicateMonthlyBudget',
+      ]);
+
+      resetErrors(endCtrl, [
+        'startAfterEnd',
+        'invalidMonthRange',
+        'outOfParentRange',
+        'duplicateMonthlyBudget',
+      ]);
+
+      if (!startCtrl.value || !endCtrl.value) return null;
 
       const start = new Date(startCtrl.value);
       const end = new Date(endCtrl.value);
 
-      const parentStart = new Date(parent.datedebut);
-      const parentEnd = new Date(parent.datefin);
+      /* ==========================
+       1️⃣ DÉBUT < FIN
+       ========================== */
+      if (start >= end) {
+        endCtrl.setErrors({
+          ...endCtrl.errors,
+          startAfterEnd: true,
+        });
+        return null;
+      }
 
-      const isValid =
-        start.getFullYear() === end.getFullYear() &&
-        start >= parentStart &&
-        end <= parentEnd;
+      /* ==========================
+       2️⃣ VALIDATION MENSUELLE
+       ========================== */
+      if (typeCtrl.value === 'Mensuel') {
+        const sameMonth =
+          start.getMonth() === end.getMonth() &&
+          start.getFullYear() === end.getFullYear();
 
-      if (!isValid) {
-        startCtrl?.setErrors({ invalidParentRange: true });
-        endCtrl?.setErrors({ invalidParentRange: true });
+        const lastDayOfMonth = new Date(
+          start.getFullYear(),
+          start.getMonth() + 1,
+          0
+        ).getDate();
 
-        return { invalidParentRange: true };
+        if (!sameMonth || end.getDate() !== lastDayOfMonth) {
+          startCtrl.setErrors({
+            ...startCtrl.errors,
+            invalidMonthRange: true,
+          });
+          endCtrl.setErrors({
+            ...endCtrl.errors,
+            invalidMonthRange: true,
+          });
+          return null;
+        }
+      }
+
+      /* ==========================
+       3️⃣ CONTRÔLE PARENT
+       ========================== */
+      const parent = getParent();
+      if (parent && typeCtrl.value === 'Mensuel') {
+        const parentStart = new Date(parent.datedebut);
+        const parentEnd = new Date(parent.datefin);
+
+        if (!(start >= parentStart && end <= parentEnd)) {
+          startCtrl.setErrors({
+            ...startCtrl.errors,
+            outOfParentRange: true,
+          });
+          endCtrl.setErrors({
+            ...endCtrl.errors,
+            outOfParentRange: true,
+          });
+          return null;
+        }
+      }
+
+      /* ==========================
+       4️⃣ CHEVAUCHEMENT EXISTANT
+       ========================== */
+      if (parent && typeCtrl.value === 'Mensuel') {
+        const startTime = start.getTime();
+        const endTime = end.getTime();
+
+        const overlap = this.budgets.some((b) => {
+          if (
+            b.typebudget !== 'Mensuel' ||
+            b.idbudgetparent !== parent.idbudget ||
+            b.idbudget === this.budget?.idbudget
+          ) {
+            return false;
+          }
+
+          const bStart = new Date(b.datedebut).getTime();
+          const bEnd = new Date(b.datefin).getTime();
+
+          return startTime <= bEnd && endTime >= bStart;
+        });
+
+        if (overlap) {
+          startCtrl.setErrors({
+            ...startCtrl.errors,
+            duplicateMonthlyBudget: true,
+          });
+          endCtrl.setErrors({
+            ...endCtrl.errors,
+            duplicateMonthlyBudget: true,
+          });
+        }
       }
 
       return null;
     };
   }
+
+  // budgetDateValidator(getParent: () => BudgetModel | undefined): ValidatorFn {
+  //   return (group: AbstractControl): ValidationErrors | null => {
+  //     const startCtrl = group.get('datedebut');
+  //     const endCtrl = group.get('datefin');
+  //     const typeCtrl = group.get('typebudget');
+
+  //     if (!startCtrl || !endCtrl || !typeCtrl) return null;
+
+  //     const clearError = (ctrl: AbstractControl, key: string) => {
+  //       if (!ctrl.errors) return;
+  //       const { [key]: _, ...rest } = ctrl.errors;
+  //       ctrl.setErrors(Object.keys(rest).length ? rest : null);
+  //     };
+
+  //     clearError(startCtrl, 'startAfterEnd');
+  //     clearError(endCtrl, 'startAfterEnd');
+  //     clearError(endCtrl, 'invalidMonthRange');
+  //     clearError(startCtrl, 'outOfParentRange');
+  //     clearError(endCtrl, 'outOfParentRange');
+
+  //     if (!startCtrl.value || !endCtrl.value) return null;
+
+  //     const start = new Date(startCtrl.value);
+  //     const end = new Date(endCtrl.value);
+
+  //     /* ==========================
+  //    1️⃣ DATE DÉBUT < DATE FIN
+  //    ========================== */
+  //     if (start >= end) {
+  //       endCtrl.setErrors({
+  //         ...endCtrl.errors,
+  //         startAfterEnd: true,
+  //       });
+  //       return { startAfterEnd: true };
+  //     }
+
+  //     /* ==========================
+  //    2️⃣ VALIDATION MENSUELLE
+  //    ========================== */
+  //     if (typeCtrl.value === 'Mensuel') {
+  //       const sameMonth =
+  //         start.getMonth() === end.getMonth() &&
+  //         start.getFullYear() === end.getFullYear();
+
+  //       const lastDayOfMonth = new Date(
+  //         start.getFullYear(),
+  //         start.getMonth() + 1,
+  //         0
+  //       ).getDate();
+
+  //       if (!sameMonth || end.getDate() !== lastDayOfMonth) {
+  //         endCtrl.setErrors({
+  //           ...endCtrl.errors,
+  //           invalidMonthRange: true,
+  //         });
+  //         return { invalidMonthRange: true };
+  //       }
+  //     }
+
+  //     /* ==========================
+  //    3️⃣ VALIDATION PARENT STRICTE
+  //    ========================== */
+  //     const parent = getParent();
+  //     if (parent && typeCtrl.value === 'Mensuel') {
+  //       const parentStart = new Date(parent.datedebut);
+  //       const parentEnd = new Date(parent.datefin);
+
+  //       if (!(start >= parentStart && end <= parentEnd)) {
+  //         endCtrl.setErrors({
+  //           ...endCtrl.errors,
+  //           outOfParentRange: true,
+  //         });
+  //         return { outOfParentRange: true };
+  //       }
+  //     }
+
+  //     return null;
+  //   };
+  // }
 
   // choix du budget parent
   onSelectionChange(event: Event) {
@@ -239,7 +499,13 @@ export class BudgetComponent implements OnInit {
       entiteCtrl?.disable({ emitEvent: false });
     }
 
-    this.budgetForm.updateValueAndValidity();
+    this.budgetForm.updateValueAndValidity({
+      onlySelf: false,
+      emitEvent: true,
+    });
+
+    this.budgetForm.get('datedebut')?.updateValueAndValidity();
+    this.budgetForm.get('datefin')?.updateValueAndValidity();
   }
 
   //Soumission du formulaire
@@ -307,6 +573,7 @@ export class BudgetComponent implements OnInit {
       next: (res: any) => {
         console.log('Resultat:', res);
         if (res.success) {
+          this.currentStatusFilter = 'ALL';
           this.closeModal('showModal');
           this.getAllBudgets();
         } else {
@@ -359,7 +626,19 @@ export class BudgetComponent implements OnInit {
     this.budget = _object;
     this.actionModal = 'update';
     this.budgetForm.reset();
+
+    this.selectedBudgetParent = this.budgets.find(
+      (b) => b.idbudget === _object.idbudgetparent
+    );
+
     this.dispatchBudget(_object);
+
+    /* 🔒 Désactivation */
+    this.budgetForm.get('codebudget')?.disable({ emitEvent: false });
+    this.budgetForm.get('typebudget')?.disable({ emitEvent: false });
+
+    this.budgetForm.markAllAsTouched();
+    this.budgetForm.updateValueAndValidity();
   }
 
   // loader(){

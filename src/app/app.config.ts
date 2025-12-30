@@ -7,15 +7,17 @@ import { AuthInterceptor } from './features/administration/service/auth-intercep
 import { loaderInterceptor } from './_core/utils/loaders.interceptor';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideToastr } from 'ngx-toastr';
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+import { LOCALE_ID } from '@angular/core';
+registerLocaleData(localeFr);
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(
-      withFetch(),
-      withInterceptors([loaderInterceptor]),
-      withInterceptorsFromDi()
+      withFetch(), withInterceptors([loaderInterceptor]), withInterceptorsFromDi()
     ),
 
     {
