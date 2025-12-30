@@ -3,8 +3,10 @@ import { MainModel } from '../../../_core/models/main.model';
 export class BudgetModel extends MainModel {
   idbudget: string = '';
   codebudget: string = '';
+  libelle: string = '';
   idbudgetparent: string | null = null;
   typebudget: string = '';
+  entite: string = '';
   datedebut: string = '';
   datefin: string = '';
   actif: Number | null = 0;

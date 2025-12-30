@@ -63,7 +63,7 @@ export class AffectationNatureCentreComponent implements OnInit{
 
     this.natureoperationForm = this.fb.group({
       idnature: ["", Validators.required],
-      idsociete: ["6591AC47-11AA-4664-838E-B977292814FE", Validators.required],
+      idsociete: ["68EC05CB-0202-45EF-A3A9-B8DD1296DFEF", Validators.required],
       idsCentres: [[]]
     });
 

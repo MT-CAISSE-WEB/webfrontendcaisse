@@ -1,0 +1,17 @@
+.bg-danger-subtle {
+  background-color: #f8d7da !important;
+}
+
+.error-slot {
+  /* min-height: 5px;   réserve l’espace */
+  visibility: hidden;
+}
+
+.error-slot.visible {
+  visibility: visible;
+}
+
+.caisse-row {
+  height:20px;
+  vertical-align: middle;
+}

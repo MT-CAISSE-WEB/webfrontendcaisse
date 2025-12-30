@@ -104,25 +104,25 @@ export class PlancomptableComponent implements OnInit{
     });
   }
 
-  ngAfterViewInit(): void {
-    // Attendre que le DOM soit chargé
-    $('#dataTable').DataTable({
-      paging: true,
-      searching: true,
-      ordering: true,
-      info: true,
-      responsive: true,
-      language: {
-        search: "Rechercher :",
-        lengthMenu: "Afficher _MENU_ lignes",
-        info: "Affichage de _START_ à _END_ sur _TOTAL_ lignes",
-        paginate: {
-          previous: "Précédent",
-          next: "Suivant"
-        }
-      }
-    });
-  }
+  // ngAfterViewInit(): void {
+  //   // Attendre que le DOM soit chargé
+  //   $('#dataTable').DataTable({
+  //     paging: true,
+  //     searching: true,
+  //     ordering: true,
+  //     info: true,
+  //     responsive: true,
+  //     language: {
+  //       search: "Rechercher :",
+  //       lengthMenu: "Afficher _MENU_ lignes",
+  //       info: "Affichage de _START_ à _END_ sur _TOTAL_ lignes",
+  //       paginate: {
+  //         previous: "Précédent",
+  //         next: "Suivant"
+  //       }
+  //     }
+  //   });
+  // }
 
 
   //Création du formulaire
@@ -134,7 +134,7 @@ export class PlancomptableComponent implements OnInit{
       auxiliaire: [false],
       suivibudgetaire: [true],
       suivibudgetairemensuel: [false],
-      idsociete : ["6591AC47-11AA-4664-838E-B977292814FE", [Validators.required]],
+      idsociete : ["68EC05CB-0202-45EF-A3A9-B8DD1296DFEF", [Validators.required]],
       actif : [true],
     })
   }

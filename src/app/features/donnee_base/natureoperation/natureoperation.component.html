@@ -49,6 +49,7 @@
                                     <th>Dec. à justifier</th>
                                     <th>Imputation tiers</th>
                                     <th>Aut. demande</th>
+                                    <th>Type opération</th>
                                     <th>Compte</th>
                                     <th>Statut</th>
                                     <th>Action</th>
@@ -78,7 +79,7 @@
                                         <span *ngIf="item.demandedecaissement == 1"> Oui </span>
                                         <span *ngIf="item.demandedecaissement == 0"> Non </span>
                                     </td>
-                                    <!-- <td class="compte">{{item.idcompte}}</td> -->
+                                    <td class="typeo">{{item.typeoperation}}</td>
                                     <td class="compte">{{item.compte?.numcompte}}</td>
 
                                     <td class="status">
@@ -160,10 +161,10 @@
                                     <div class="mb-3">
                                         <label for="customername-field" class="form-label form-label-sm">Type opération</label>
                                         
-                                        <select id="customername-field" class="form-control form-control-sm {{ isValidField('typeoperation') }}" formControlName="typetiers">
+                                        <select id="customername-field" class="form-control form-control-sm {{ isValidField('typeoperation') }}" formControlName="typeoperation">
                                             <option value="">-- Sélectionner --</option>
                                             <option value="Encaissement">Encaissement</option>
-                                            <option value="Decaissement">Decaissement</option>
+                                            <option value="Decaissement">Décaissement</option>
 
                                         </select>
 

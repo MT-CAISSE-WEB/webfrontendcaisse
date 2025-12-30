@@ -6,12 +6,16 @@ import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
 
+import { DataTablesModule } from 'angular-datatables';
+import { Subject } from 'rxjs';
+// import DataTables from 'datatables.net';
+
 // ADD-INS
 declare var $: any;
 
 @Component({
   selector: 'app-centreanalytique',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, DataTablesModule],
   templateUrl: './centreanalytique.component.html',
   styleUrl: './centreanalytique.component.css'
 })
@@ -45,23 +49,56 @@ export class CentreanalytiqueComponent implements OnInit{
   //Element à supprimer 
   deletecentre: any = null;
 
+  // dtOptions: DataTables.Settings = {};
+  dtOptions: any = {};
 
+  dtTrigger: Subject<any> = new Subject<any>(); 
+
+
+
+/**
+ * Constructor
+ * @param centreanalytiqueservice - Service du centre analytique
+ * @param router - Router pour la navigation
+ */
   constructor(private centreanalytiqueservice: CentreAnalytiqueService,
               private router: Router){}
 
   ngOnInit(): void {
-      //Afficher tous les centres
-      this.getAllcentres();
-      //Initialisation du formulaire
-      this.initForm();
-      this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("ce centre analytique");
-      this.titleMsg = TITLE_DELETE;
-  }
+    // this.dtOptions = {
+    //   responsive: true,
+    //   ordering: true,
+    //   pagingType: 'full_numbers',
+    //   language: {
+    //     search: "Rechercher :",
+    //     lengthMenu: "Afficher _MENU_ éléments",
+    //     info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+    //     infoEmpty: "Affichage de 0 à 0 sur 0 élément",
+    //     infoFiltered: "(filtré de _MAX_ éléments au total)",
+    //     zeroRecords: "Aucun élément correspondant trouvé",
+    //     emptyTable: "Aucune donnée disponible dans le tableau",
+    //     paginate: {
+    //       first: "Premier",
+    //       previous: "Précédent",
+    //       next: "Suivant",
+    //       last: "Dernier"
+    //     }
+    //   }
+    // };
+    // this.rerender();
+    // this.ngOnDestroy();
+    //Afficher tous les centres
+    this.getAllcentres();
+    //Initialisation du formulaire
+    this.initForm();
+    this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("ce centre analytique");
+    this.titleMsg = TITLE_DELETE;
+}
 
-  getAllcentres(){
+  getAllcentres() {
     this.centreanalytiqueservice.getAll().subscribe({
-      next : (res) => {
-        if(res.success){
+      next: (res) => {
+        if (res.success) {
           this.centres = res.data;
 
           const table = $('#dataTable').DataTable();
@@ -88,48 +125,51 @@ export class CentreanalytiqueComponent implements OnInit{
               sortAscending: ": activer pour trier la colonne par ordre croissant",
               sortDescending: ": activer pour trier la colonne par ordre décroissant"
             }
-            },
+          },
             responsive: true,
             ordering: true,
             lengthMenu: [
                 [10, 25, 50, 100, 250, 500, -1],
                 [10, 25, 50, 100, 250, 500, "Tous"]
               ]
+
           }), 0);
         }
       }
     });
   }
 
+
   //Création du formulaire
   initForm(): void{
     this.centreanalytiqueForm = this.fb.group({
       codecentreanalytique : ["", [Validators.required]],
       libelle : ["", [Validators.required]],
-      idsociete : ["6591AC47-11AA-4664-838E-B977292814FE", [Validators.required]],
+      idsociete : ["68EC05CB-0202-45EF-A3A9-B8DD1296DFEF", [Validators.required]],
       actif : [true],
     })
   }
 
-  ngAfterViewInit(): void {
-    // Attendre que le DOM soit chargé
-    $('#dataTable').DataTable({
-      paging: true,
-      searching: true,
-      ordering: true,
-      info: true,
-      responsive: true,
-      language: {
-        search: "Rechercher :",
-        lengthMenu: "Afficher _MENU_ lignes",
-        info: "Affichage de _START_ à _END_ sur _TOTAL_ lignes",
-        paginate: {
-          previous: "Précédent",
-          next: "Suivant"
-        }
-      }
-    });
-  }
+  // ngAfterViewInit(): void {
+  //   // Attendre que le DOM soit chargé
+  //   $('#dataTable').DataTable({
+  //     paging: true,
+  //     searching: true,
+  //     ordering: true,
+  //     info: true,
+  //     responsive: true,
+  //     language: {
+  //       search: "Rechercher :",
+  //       lengthMenu: "Afficher _MENU_ lignes",
+  //       info: "Affichage de _START_ à _END_ sur _TOTAL_ lignes",
+  //       paginate: {
+  //         previous: "Précédent",
+  //         next: "Suivant"
+  //       }
+  //     }
+  //   });
+  // }
+
 
   get form() {
     return this.centreanalytiqueForm.controls;

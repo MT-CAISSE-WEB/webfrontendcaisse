@@ -335,18 +335,20 @@
                       aria-label="Default select example"
                       id="idbudget-field"
                       formControlName="idbudget"
+                      (change)="onSelectionChange($event)"
                     >
                       <option selected>-- Sélectionner --</option>
                       @for(item of budgets; track $index) {
-                      <option value="{{ item.idbudget }}">
-                        {{ item.codebudget }} - Du:
-                        {{ item.datedebut | date : "dd-MM-yyyy" }} au
-                        {{ item.datefin | date : "dd-MM-yyyy" }}
+                      <option [value]="item.idbudget">
+                        {{ item.codebudget }} - {{ item.libelle }}
                       </option>
                       }
                     </select>
                     <div class="invalid-feedback">{{ msgErros }}</div>
                   </div>
+
+                  @if(selectedBudget && selectedBudget.entite === "Département")
+                  {
                   <div class="mb-3">
                     <label class="form-label form-label-sm" for="iddepartement"
                       >Département</label
@@ -357,8 +359,14 @@
                       id="iddepartement"
                     >
                       <option selected>-- Sélectionner --</option>
+                      @for (departement of departements; track $index) {
+                      <option [value]="departement.iddepartement">
+                        {{ departement.libelle }}
+                      </option>
+                      }
                     </select>
                   </div>
+                  }
 
                   <div class="mb-3">
                     <label class="form-label form-label-sm" for="idnature"
@@ -373,6 +381,8 @@
                     </select>
                   </div>
 
+                  @if(selectedBudget && selectedBudget.entite === "Département")
+                  {
                   <div class="mb-3">
                     <div>
                       <label
@@ -391,6 +401,7 @@
                       <div class="invalid-feedback">{{ msgErros }}</div>
                     </div>
                   </div>
+                  }
 
                   <div class="mb-3">
                     <div>
@@ -435,7 +446,7 @@
                       <label
                         for="totalconsocloture-field"
                         class="form-label mb-0"
-                        >Total</label
+                        >Total consommation à la clôture</label
                       >
                       <input
                         type="number"
@@ -452,7 +463,7 @@
                   <div class="mb-3">
                     <div>
                       <label for="soldecloture-field" class="form-label mb-0"
-                        >Solde clôturé</label
+                        >Solde à la clôture</label
                       >
                       <input
                         type="number"

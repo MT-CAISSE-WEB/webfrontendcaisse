@@ -64,8 +64,8 @@ export class TiersComponent implements OnInit{
         if(res.success){
           this.tiers = res.data;
 
-          const table = $('#dataTable').DataTable();
-          table.destroy();
+          // const table = $('#dataTable').DataTable();
+          // table.destroy();
 
           setTimeout(() => $('#dataTable').DataTable({
             language: {
@@ -102,33 +102,35 @@ export class TiersComponent implements OnInit{
     });
   }
 
-  ngAfterViewInit(): void {
-    // Attendre que le DOM soit chargé
-    $('#dataTable').DataTable({
-      paging: true,
-      searching: true,
-      ordering: true,
-      info: true,
-      responsive: true,
-      language: {
-        search: "Rechercher :",
-        lengthMenu: "Afficher _MENU_ lignes",
-        info: "Affichage de _START_ à _END_ sur _TOTAL_ lignes",
-        paginate: {
-          previous: "Précédent",
-          next: "Suivant"
-        }
-      }
-    });
-  }
+  // ngAfterViewInit(): void {
+  //   // Attendre que le DOM soit chargé
+  //   $('#dataTable').DataTable({
+  //     paging: true,
+  //     searching: true,
+  //     ordering: true,
+  //     info: true,
+  //     responsive: true,
+  //     language: {
+  //       search: "Rechercher :",
+  //       lengthMenu: "Afficher _MENU_ lignes",
+  //       info: "Affichage de _START_ à _END_ sur _TOTAL_ lignes",
+  //       paginate: {
+  //         previous: "Précédent",
+  //         next: "Suivant"
+  //       }
+  //     }
+  //   });
+  // }
+
 
   //création du formulaire
+  
   initForm(): void{
     this.tiersForm = this.fb.group({
       codetiers : ["", [Validators.required]],
       designation : ["", [Validators.required]],
       typetiers : ["", [Validators.required]],
-      idsociete : ["6591AC47-11AA-4664-838E-B977292814FE", [Validators.required]],
+      idsociete : ["68EC05CB-0202-45EF-A3A9-B8DD1296DFEF", [Validators.required]],
       actif : [true],
     })
   }

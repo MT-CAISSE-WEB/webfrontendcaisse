@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 import { PlancomptableService } from '../services/plancomptable.service';
 import { plancomptableModel } from '../models/plancomptable.model';
 
-// import { ToastrService } from 'ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 
 // ADD-INS
 declare var $: any;
@@ -55,7 +55,7 @@ export class NatureoperationComponent implements OnInit{
   constructor(private natureoperationservice: NatureoperationService, 
     private plancomptableservice: PlancomptableService,
               private router: Router
-              // , private toastr : ToastrService
+              , private toastr : ToastrService
             ){}
 
   ngOnInit(): void {
@@ -113,7 +113,7 @@ export class NatureoperationComponent implements OnInit{
     });
   }
 
-    getAllComptes(){
+  getAllComptes(){
     this.plancomptableservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
@@ -123,25 +123,25 @@ export class NatureoperationComponent implements OnInit{
     });
   }
 
-    ngAfterViewInit(): void {
-    // Attendre que le DOM soit chargé
-    $('#dataTable').DataTable({
-      paging: true,
-      searching: true,
-      ordering: true,
-      info: true,
-      responsive: true,
-      language: {
-        search: "Rechercher :",
-        lengthMenu: "Afficher _MENU_ lignes",
-        info: "Affichage de _START_ à _END_ sur _TOTAL_ lignes",
-        paginate: {
-          previous: "Précédent",
-          next: "Suivant"
-        }
-      }
-    });
-  }
+  // ngAfterViewInit(): void {
+  //   // Attendre que le DOM soit chargé
+  //   $('#dataTable').DataTable({
+  //     paging: true,
+  //     searching: true,
+  //     ordering: true,
+  //     info: true,
+  //     responsive: true,
+  //     language: {
+  //       search: "Rechercher :",
+  //       lengthMenu: "Afficher _MENU_ lignes",
+  //       info: "Affichage de _START_ à _END_ sur _TOTAL_ lignes",
+  //       paginate: {
+  //         previous: "Précédent",
+  //         next: "Suivant"
+  //       }
+  //     }
+  //   });
+  // }
 
 
   //création du formulaire
@@ -152,8 +152,8 @@ export class NatureoperationComponent implements OnInit{
       decajustifier : [false],
       imputationtiers : [false],
       demandedecaissement : [true],
-      typoeration : ["", [Validators.required]],
-      idsociete : ["6591AC47-11AA-4664-838E-B977292814FE", [Validators.required]],
+      typeoperation : ["", [Validators.required]],
+      idsociete : ["68EC05CB-0202-45EF-A3A9-B8DD1296DFEF", [Validators.required]],
       idcompte : ["", [Validators.required]],
       actif : [true],
     })
@@ -236,8 +236,10 @@ export class NatureoperationComponent implements OnInit{
     };
 
     /** 3. choices action */
-    if(this.actionModal == "create")this.create(_natureoperations);
-    else this.update(_natureoperations);
+    if(this.actionModal == "create")
+      this.create(_natureoperations);
+    else 
+      this.update(_natureoperations);
     // if (!_natureoperations.idnatureoperations) this.create(_natureoperations);
     // else this.update(_natureoperations);
   }
@@ -253,14 +255,14 @@ export class NatureoperationComponent implements OnInit{
           this.getAllNatureoperations();
         } else {
           this.error = "Erreur de création";
-          // this.toastr.error(this.error);
+          this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Echec de création";
         this.loading = false;
-        // this.toastr.error(err);
+        this.toastr.error(err);
       }
     })
   }
@@ -272,17 +274,17 @@ export class NatureoperationComponent implements OnInit{
         if (res.success) {
           this.closeModal('showModal');
           this.getAllNatureoperations();
-          // this.toastr.success('Fiche modifée avec succès');
+          this.toastr.success('Fiche modifée avec succès');
         } else {
           this.error = "Erreur de modification";
-          // this.toastr.error(this.error);
+          this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Echec de modification";
         this.loading = false;
-        // this.toastr.error(this.error);
+        this.toastr.error(this.error);
       }
     })
   }

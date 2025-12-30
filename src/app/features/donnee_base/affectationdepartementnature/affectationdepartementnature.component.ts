@@ -63,7 +63,7 @@ export class AffectationDepartementNatureComponent implements OnInit{
 
     this.departementForm = this.fb.group({
       iddepartement: ["", Validators.required],
-      idsociete: ["6591AC47-11AA-4664-838E-B977292814FE", Validators.required],
+      idsociete: ["68EC05CB-0202-45EF-A3A9-B8DD1296DFEF", Validators.required],
       idsNatures: [[]]
     });
 

@@ -23,6 +23,14 @@ export class CaisseService {
     }
 
   /**
+   * get All
+   * @param params
+   */
+    getAllactif(): Observable<QueryResultModel> {
+        return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url + "/actif");
+    }
+
+  /**
    * create
    * @param _object
    * 
@@ -66,7 +74,6 @@ export class CaisseService {
     );
   }
 
-<<<<<<< HEAD
   /**
    * get one
    * @param id
@@ -110,6 +117,4 @@ export class CaisseService {
   }
 
 
-=======
->>>>>>> origin/junior
 }

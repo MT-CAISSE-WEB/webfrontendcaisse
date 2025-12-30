@@ -60,8 +60,7 @@ export const APP_ROOT_BUDGETS_BUDGET = APP_ROOT + '/' + APP_BUDGETS_BUDGET;
 // Route ligne budgétaire
 export const APP_LIGNE_BUDGET = 'ligne_budget';
 export const APP_BUDGETS_LIGNE_BUDGET = APP_BUDGETS + '/' + APP_LIGNE_BUDGET; //APP_CAISSE_JOURNAL = caisse_journal
-export const APP_ROOT_BUDGETS_LIGNE_BUDGET =
-  APP_ROOT + '/' + APP_BUDGETS_LIGNE_BUDGET;
+export const APP_ROOT_BUDGETS_LIGNE_BUDGET = APP_ROOT + '/' + APP_BUDGETS_LIGNE_BUDGET;
 
 // Route de demande décaissement
 export const APP_ROOT_DMD_DECAISSEMENT = 'demande_decaissement';

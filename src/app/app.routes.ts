@@ -52,6 +52,10 @@ export const routes: Routes = [
     component: LayoutMainComponent,
     children: [
       {
+        path : '',
+        component: LayoutContentComponent
+      },
+      {
         path : APP_STRUCTURE_DEPARTEMENT,
         component : DepartementComponent
       },
@@ -145,10 +149,22 @@ export const routes: Routes = [
           path : APP_AFF_DEPT_NATURE_DONNEE_BASE,
           component: AffectationDepartementNatureComponent,
       },
-            {
-                path: APP_USER_ADMINISTRATION,
-                component: UserComponent
-            }
+      {
+          path: APP_USER_ADMINISTRATION,
+          component: UserComponent
+      },
+      {
+          path : APP_ROLE_ADMINISTRATION,
+          component : RoleComponent
+      },
+      {
+          path : APP_PERMISSION_ADMINISTRATION,
+          component : PermissionComponent
+      },
+      {
+          path : APP_ROLE_PERMISSION_ADMINISTRATION,
+          component : RolepermissionComponent
+      }
          
         ]
     },

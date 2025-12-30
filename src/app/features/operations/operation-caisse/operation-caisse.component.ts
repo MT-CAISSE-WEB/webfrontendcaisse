@@ -214,13 +214,14 @@ export class OperationCaisseComponent implements OnInit{
     });
   }
 
+
   //Recuperer les natures opérations
   getAllNatureoperations(){
     const params = {
       page: 1,
       limit: 100
     };
-    this.natureoperationservice.getAll(params).subscribe({
+    this.natureoperationservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
           this.natureoperations = (res.data.data || []).filter(
@@ -237,7 +238,7 @@ export class OperationCaisseComponent implements OnInit{
       page: 1,
       limit: 100
     };
-    this.centreanalytiqueservice.getAll(params).subscribe({
+    this.centreanalytiqueservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
           this.centres = (res.data.data || []).filter(
@@ -302,7 +303,7 @@ export class OperationCaisseComponent implements OnInit{
       page: 1,
       limit: 100
     };
-    this.tiersservice.getAll(params).subscribe({
+    this.tiersservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
           this.tiers = (res.data.data || []).filter(
@@ -379,7 +380,7 @@ export class OperationCaisseComponent implements OnInit{
       typepaiement: ["", [Validators.required]],
       lignes: this.fb.array([]),
       devise : ["", [Validators.required]],
-      site : ["197D7C37-7180-4DD1-80CC-843B9A6C5B52"],
+      site : ["1B386C16-B927-4124-BE18-7721862C1CE1"],
       societe : [this.user.idsociete ?? null],
       montant: [0],
       montantRefglobal: [0],

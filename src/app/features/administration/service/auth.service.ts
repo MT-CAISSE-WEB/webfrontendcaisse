@@ -12,38 +12,35 @@ export class AuthService {
 
     constructor(private http: HttpClient){}
 
-    login(credetials:any){
-        return this.http.post(`${URL_LOCAL.baseUrl}${this.apiUrl}/login`,credetials)
-        .pipe(
-            tap(((res: any) => {
-                if (res.token)
-                {
-                  if (typeof window !== 'undefined') {
-                    localStorage.setItem('token',res.token);
-                    localStorage.setItem('user',JSON.stringify(res.data));
-                    this.startLogoutTimer();
-                  }
-                
+  login(credetials:any){
+      return this.http.post(`${URL_LOCAL.baseUrl}${this.apiUrl}/login`,credetials)
+      .pipe(
+          tap(((res: any) => {
+              if (res.token)
+              {
+                if (typeof window !== 'undefined') {
+                  localStorage.setItem('token',res.token);
+                  localStorage.setItem('user',JSON.stringify(res.data));
                 }
-            }),
-          ),
+              }
+          }),
+        ),
+      );
+  }
 
-        );
-    }
-
-    logout() {
-       if (typeof window !== 'undefined') {
-          localStorage.removeItem('token');
-          localStorage.removeItem('client');
-       }
-    }
-
-
-    isLogged() {
+  logout() {
       if (typeof window !== 'undefined') {
-          return !!localStorage.getItem('token');
+        localStorage.removeItem('token');
+        localStorage.removeItem('client');
       }
-      return false;
+
+  }
+
+  isLogged() {
+    if (typeof window !== 'undefined') {
+        return !!localStorage.getItem('token');
+    }
+    return false;
   }
 
     getToken() {

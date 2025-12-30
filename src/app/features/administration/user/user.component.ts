@@ -9,15 +9,12 @@ import { CommonModule } from '@angular/common';
 import { societemodel } from '../../structure/model/societe.model';
 import { societeservice } from '../../structure/service/societe.service';
 import { ChangeDetectorRef } from '@angular/core';
-<<<<<<< HEAD
-=======
 import { rolemodel } from '../model/role.model';
 import { utilisateurroleservice } from '../service/utilisateurrole.service';
 import { roleservice } from '../service/role.service';
 import { utilisateurdepartementservice } from '../service/userdepartement.service';
 import { departementmodel } from '../../structure/model/departement.model';
 import { departementservice } from '../../structure/service/departement.service';
->>>>>>> origin/junior
 
 @Component({
   selector: 'app-user',
@@ -72,9 +69,6 @@ export class UserComponent {
       //Element à supprimer 
       deleteuser : any = null;
 
-<<<<<<< HEAD
-      constructor(private us:userservice,private cdr: ChangeDetectorRef,private sc:societeservice,private router : Router){}
-=======
       //Gestion des roles de l'utilisateur la tête chauffe dejà
       roles : rolemodel [] = [];
       departements : departementmodel [] = [];
@@ -91,17 +85,13 @@ export class UserComponent {
         private ud : utilisateurdepartementservice,
         private ur:utilisateurroleservice,
         private router : Router){}
->>>>>>> origin/junior
       
       ngOnInit(): void {
       //Afficher toutes les users
       this.getallsocietes();
       this.getallusers();
-<<<<<<< HEAD
-=======
       this.loadRoles();
       this.loaddepartements();
->>>>>>> origin/junior
       //Initialisation du formulaire
       this.initForm();
       this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("cet utilisateur");
@@ -119,10 +109,6 @@ export class UserComponent {
          if(res.success){
             this.users = res.data;
             this.filtreusers = res.data;
-<<<<<<< HEAD
-            console.log(res.data);
-=======
->>>>>>> origin/junior
          }
       }
     });
@@ -138,8 +124,6 @@ export class UserComponent {
     });
   }
 
-<<<<<<< HEAD
-=======
   loadRoles(): void {
     this.rol.getAll().subscribe(res => {
       this.roles = res.data;
@@ -153,7 +137,6 @@ export class UserComponent {
     } );
   }
 
->>>>>>> origin/junior
   // Nombre total de pages calculé dynamiquement
 get totalPages(): number {
   return Math.ceil(this.filtreusers.length / this.pageSize);
@@ -458,8 +441,6 @@ loadusers(applyFilterAfter: boolean = false) {
     }
   });
 }
-<<<<<<< HEAD
-=======
 
 selectUser(user: usermodel) {
   this.userRoles = [];
@@ -536,5 +517,4 @@ tonumber (idrole:any){
   return Number(idrole);
 }
 
->>>>>>> origin/junior
 }

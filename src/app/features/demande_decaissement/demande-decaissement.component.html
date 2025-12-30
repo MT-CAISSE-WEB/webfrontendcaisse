@@ -32,7 +32,7 @@
                 id="create-btn"
                 data-bs-target="#showModal"
               >
-                <i class="ri-add-line align-bottom me-1"></i>créer
+                <i class="ri-add-line align-bottom me-1"></i>Créer
               </button>
               <button type="button" class="btn btn-sm btn-soft-info">
                 <i class="ri-file-download-line align-bottom me-1"></i> import
@@ -59,43 +59,10 @@
                 <input
                   type="text"
                   class="form-control form-control-sm search"
-                  placeholder="rechercher par code, libelle..."
+                  placeholder="Rechercher par code, libellé,..."
+                  [formControl]="searchControl"
                 />
                 <i class="ri-search-line search-icon"></i>
-              </div>
-            </div>
-            <!--end col-->
-
-            <!--end col-->
-            <div class="col-xxl-2 col-sm-4">
-              <div>
-                <select
-                  class="form-control form-control-sm"
-                  data-choices
-                  data-choices-search-false
-                  name="choices-single-default"
-                  id="idStatus"
-                >
-                  <option value="">Status</option>
-                  <option value="all" selected>tous</option>
-                  <option value="Pending">Actif</option>
-                  <option value="Pending">Inactif</option>
-                </select>
-              </div>
-            </div>
-            <!--end col-->
-
-            <!--end col-->
-            <div class="col-xxl-1 col-sm-2">
-              <div>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-primary w-100"
-                  onclick="SearchData();"
-                >
-                  <i class="ri-equalizer-fill me-1 align-bottom"></i>
-                  Filtrer
-                </button>
               </div>
             </div>
             <!--end col-->
@@ -103,51 +70,8 @@
           <!--end row-->
         </form>
       </div>
-      <div class="card-body pt-0">
+      <div class="card-body pt-0 mt-3">
         <div>
-          <ul
-            class="nav nav-tabs nav-tabs-custom nav-success mb-3"
-            role="tablist"
-          >
-            <li class="nav-item">
-              <a
-                class="nav-link active All py-3"
-                data-bs-toggle="tab"
-                id="All"
-                href="#home1"
-                role="tab"
-                aria-selected="true"
-              >
-                <i class="ri-store-2-fill me-1 align-bottom"></i> Tous
-              </a>
-            </li>
-            <li class="nav-item">
-              <a
-                class="nav-link py-3 Delivered"
-                data-bs-toggle="tab"
-                id="Delivered"
-                href="#delivered"
-                role="tab"
-                aria-selected="false"
-              >
-                <i class="ri-checkbox-circle-line me-1 align-bottom"></i> Actif
-              </a>
-            </li>
-            <li class="nav-item">
-              <a
-                class="nav-link py-3 Pickups"
-                data-bs-toggle="tab"
-                id="Pickups"
-                href="#pickups"
-                role="tab"
-                aria-selected="false"
-              >
-                <i class="ri-truck-line me-1 align-bottom"></i> Inactif
-                <span class="badge bg-danger align-middle ms-1">2</span>
-              </a>
-            </li>
-          </ul>
-
           <div class="table-responsive table-card mb-1">
             <table class="table table-nowrap align-middle" id="orderTable">
               <thead class="text-muted table-light">
@@ -158,18 +82,123 @@
                         class="form-check-input"
                         type="checkbox"
                         id="checkAll"
+                        [checked]="allSelected"
+                        (change)="toggleAllEntetes()"
                       />
                     </div>
                   </th>
                   <th class="sort" data-sort="id">Code</th>
                   <th class="sort" data-sort="customer_name">Type</th>
-                  <th class="sort" data-sort="customer_name">Date début</th>
-                  <th class="sort" data-sort="customer_name">Date fin</th>
-                  <th class="sort" data-sort="status">Status</th>
+                  <th class="sort" data-sort="customer_name">
+                    Libellé demande
+                  </th>
+                  <th class="sort" data-sort="customer_name">Date demande</th>
+                  <th class="sort" data-sort="customer_name">Libellé</th>
+                  <th class="sort" data-sort="status">N° Ligne</th>
+                  <th class="sort" data-sort="status">Montant</th>
+                  <th class="sort" data-sort="description">Desciption</th>
+                  <th class="sort" data-sort="status">Statut</th>
                   <th class="sort" data-sort="city">Action</th>
                 </tr>
               </thead>
-              <tbody class="list form-check-all"></tbody>
+              <tbody class="list form-check-all">
+                <ng-container *ngFor="let demande of filteredDemandes">
+                  <ng-container *ngFor="let lc of demande.lignes">
+                    <tr>
+                      <td
+                        *ngIf="demande.lignes.indexOf(lc) === 0"
+                        [attr.rowspan]="demande.lignes.length"
+                      >
+                        <div class="form-check">
+                          <input
+                            class="form-check-input"
+                            type="checkbox"
+                            name="itemGroup_"
+                            [checked]="
+                              selectedEntetes.get(demande.entete.iddemande!)
+                            "
+                            (change)="toggleEntete(demande)"
+                          />
+                        </div>
+                      </td>
+                      <!-- Entête affiché uniquement sur la première ligne de l'entête -->
+                      <td
+                        *ngIf="demande.lignes.indexOf(lc) === 0"
+                        [attr.rowspan]="demande.lignes.length"
+                      >
+                        {{ demande.entete.codedemande }}
+                      </td>
+                      <td
+                        *ngIf="demande.lignes.indexOf(lc) === 0"
+                        [attr.rowspan]="demande.lignes.length"
+                      >
+                        {{ demande.entete.typedemande }}
+                      </td>
+                      <td
+                        *ngIf="demande.lignes.indexOf(lc) === 0"
+                        [attr.rowspan]="demande.lignes.length"
+                      >
+                        {{ demande.entete.libelledemande }}
+                      </td>
+                      <td
+                        *ngIf="demande.lignes.indexOf(lc) === 0"
+                        [attr.rowspan]="demande.lignes.length"
+                      >
+                        {{ demande.entete.datedemande | date : "dd-MM-yyyy" }}
+                      </td>
+
+                      <!-- Colonnes ligne -->
+                      <td>{{ lc.ligne.libellelignedemande }}</td>
+                      <td>{{ lc.ligne.numligne }}</td>
+                      <td>{{ lc.ligne.montantdemande }}</td>
+
+                      <!-- Colonnes détails -->
+                      <td>
+                        <ul
+                          class="list-inline hstack"
+                          *ngFor="let d of lc.details"
+                        >
+                          <li class="list-inline-item">
+                            {{ d.description }} - {{ d.quantite }} x
+                            {{ d.montant }}
+                          </li>
+                        </ul>
+                      </td>
+                      <td
+                        *ngIf="demande.lignes.indexOf(lc) === 0"
+                        [attr.rowspan]="demande.lignes.length"
+                      >
+                        <span class="badge bg-warning text-dark">{{
+                          demande.entete.statut
+                        }}</span>
+                      </td>
+
+                      <td
+                        *ngIf="demande.lignes.indexOf(lc) === 0"
+                        [attr.rowspan]="demande.lignes.length"
+                      >
+                        <ul class="list-inline hstack gap-2 mb-0">
+                          <li
+                            class="list-inline-item"
+                            data-bs-toggle="tooltip"
+                            data-bs-trigger="hover"
+                            data-bs-placement="top"
+                            title="Voir le détail"
+                          >
+                            <a
+                              href="javascript:void(0)"
+                              class="text-primary d-inline-block"
+                              (click)="openViewModal(demande.entete.iddemande!)"
+                            >
+                              <i class="ri-eye-fill fs-16"></i>
+                            </a>
+                          </li>
+                        </ul>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </ng-container>
+              </tbody>
             </table>
             <div class="noresult" style="display: none">
               <div class="text-center">
@@ -184,13 +213,18 @@
           <div class="d-flex justify-content-end">
             <div class="pagination-wrap hstack gap-2">
               <button
-                [disabled]=""
+                [disabled]="currentPage == 1"
+                (click)="changePage(currentPage - 1)"
                 class="btn btn-sm btn-soft-primary pagination-prev"
               >
                 Précédent
               </button>
               <ul class="pagination listjs-pagination mb-0"></ul>
-              <button class="btn btn-sm btn-soft-primary pagination-next">
+              <button
+                [disabled]="currentPage == totalPages"
+                (click)="changePage(currentPage + 1)"
+                class="btn btn-sm btn-soft-primary pagination-next"
+              >
                 Suivant
               </button>
             </div>
@@ -217,6 +251,7 @@
                   class="btn-close"
                   data-bs-dismiss="modal"
                   aria-label="Close"
+                  (click)="closeModal('showModal')"
                 ></button>
               </div>
 
@@ -287,7 +322,7 @@
                           <div class="col-md-3">
                             <label>Numéro</label>
                             <input
-                              type="text"
+                              type="number"
                               class="form-control"
                               formControlName="numligne"
                             />
@@ -299,6 +334,23 @@
                               class="form-control"
                               formControlName="libellelignedemande"
                             />
+                          </div>
+                          <div class="col-md-4">
+                            <label for="idbudget">Budget</label>
+                            <select
+                              class="form-select form-control form-control-sm"
+                              id="idbudget"
+                              formControlName="idbudget"
+                            >
+                              <option selected>-- Sélectionner --</option>
+                              @for (item of budgets; track $index) {
+                              <option value="{{ item.idbudget }}">
+                                {{ item.codebudget }} - Du:
+                                {{ item.datedebut | date : "dd-MM-yyyy" }} au
+                                {{ item.datefin | date : "dd-MM-yyyy" }}
+                              </option>
+                              }
+                            </select>
                           </div>
                           <div class="col-md-3">
                             <label>Montant</label>
@@ -395,8 +447,18 @@
                 <div class="modal-footer">
                   <button
                     type="button"
+                    class="btn btn-danger me-auto"
+                    *ngIf="actionModal === 'update'"
+                    (click)="deleteDemande()"
+                  >
+                    Supprimer la demande
+                  </button>
+
+                  <button
+                    type="button"
                     class="btn btn-light"
                     data-bs-dismiss="modal"
+                    (click)="closeModal('showModal')"
                   >
                     Fermer
                   </button>
@@ -464,6 +526,21 @@
           </div>
         </div>
         <!--end modal -->
+
+        <!-- Spinner global -->
+        <div
+          *ngIf="loading"
+          class="position-fixed top-50 start-50 translate-middle"
+          style="z-index: 1051"
+        >
+          <div
+            class="spinner-border text-primary"
+            role="status"
+            style="width: 3rem; height: 3rem"
+          >
+            <span class="visually-hidden">Chargement...</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>

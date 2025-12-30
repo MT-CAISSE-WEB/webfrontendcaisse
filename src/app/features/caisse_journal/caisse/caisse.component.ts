@@ -7,6 +7,10 @@ import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELE
 import { CommonModule } from '@angular/common';
 import { journalModel } from '../models/journal.model';
 import { JournalService } from '../services/journal.service';
+import { NotificationService } from '../../../_core/services/notification.service';
+
+import { PlancomptableService } from '../../donnee_base/services/plancomptable.service';
+import { plancomptableModel } from '../../donnee_base/models/plancomptable.model';
 
 @Component({
   selector: 'app-caisse',
@@ -30,7 +34,7 @@ export class CaisseComponent implements OnInit{
   currentPage: number = 1;
   // Nombre d'éléments par page
   totalPages: number = 0;
-  limit: number = 5;
+  limit: number = 10;
 
   //Faire le check selection **********
   objectsSelected : caisseModel[] = [];
@@ -49,9 +53,12 @@ export class CaisseComponent implements OnInit{
   //Element à supprimer 
   deleteCaisse: any = null;
 
+  comptes : plancomptableModel[] = [];
+
 
   constructor(private caisseservice: CaisseService,
               private journalservice: JournalService,
+              private plancomptableservice: PlancomptableService,
               private router: Router){}
 
   ngOnInit(): void {
@@ -59,6 +66,8 @@ export class CaisseComponent implements OnInit{
       this.getAllcaisses();
       //Ramener tous les journaux
       this.getAllJournaux();
+      // Ramener tous les comptes
+      this.getAllComptes();
       //Initialisation du formulaire
       this.initForm();
       this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("cette caisse");
@@ -74,10 +83,6 @@ export class CaisseComponent implements OnInit{
       next : (res) => {
         if(res.success){
           this.caisses = res.data.data;
-<<<<<<< HEAD
-          console.log(this.caisses);
-=======
->>>>>>> origin/junior
           this.totalPages = res.data.totalPages;
         }
       }
@@ -100,7 +105,17 @@ export class CaisseComponent implements OnInit{
 
   getAllDevises(){}
 
-  getAllComptes(){}
+  getAllComptes(){
+    this.plancomptableservice.getAll().subscribe({
+      next : (res) => {
+        if(res.success){
+          this.comptes = res.data;
+          this.comptes = this.comptes.filter(compte => compte.numcompte.startsWith('5'));
+
+        }
+      }
+    });
+  }
 
   //création du formulaire
   initForm(): void{
@@ -110,14 +125,11 @@ export class CaisseComponent implements OnInit{
       journal : ["", [Validators.required]],
       devise : ["", [Validators.required]],
       compte : ["", [Validators.required]],
-<<<<<<< HEAD
       dateinitialisation : ["", [Validators.required]],
       soldeinitialisation : [0],
       seuilminimal : [0],
-=======
->>>>>>> origin/junior
-      site : ["197D7C37-7180-4DD1-80CC-843B9A6C5B52"],
-      societe : ["B89B381E-691E-4BA7-979E-1AC4D5B1E018"],
+      site : ["1B386C16-B927-4124-BE18-7721862C1CE1"],
+      societe : ["757E104D-A394-4502-935A-5ED9DE6BFA35"],
       actif : [true],
     })
   }
@@ -126,14 +138,11 @@ export class CaisseComponent implements OnInit{
     return this.caisseForm.controls;
   }
 
-<<<<<<< HEAD
   formatDate(date: any): string {
     const d = new Date(date);
     return d.toISOString().split('T')[0]; // YYYY-MM-DD
   }
 
-=======
->>>>>>> origin/junior
   dispatchCaisse(_object: caisseModel){
     const status = _object.actif === 1;
     this.caisseForm.patchValue({
@@ -144,7 +153,6 @@ export class CaisseComponent implements OnInit{
       journal: _object.journal.idjournal,
       site: _object.site,
       compte: _object.compte.idcompte,
-<<<<<<< HEAD
       dateinitialisation: _object.dateinitialisation ? this.formatDate(_object.dateinitialisation) : null,
       soldeinitialisation: _object.soldeinitialisation,
       seuilminimal : _object.seuilminimal,
@@ -162,10 +170,6 @@ export class CaisseComponent implements OnInit{
     } else {
       this.caisseForm.get("soldeinitialisation")?.enable({ emitEvent: false });
     }
-=======
-      actif : status
-    })
->>>>>>> origin/junior
   }
 
   //validation required
@@ -291,10 +295,6 @@ export class CaisseComponent implements OnInit{
     this.caisseForm.reset();
     this.dispatchCaisse(_object);
   }
-
-  // loader(){
-  //   this.router.navigateByUrl(APP_caisse_CAISSE_caisse).then();
-  // }
 
   modalDelete(item: caisseModel){
     this.deleteCaisse = item;

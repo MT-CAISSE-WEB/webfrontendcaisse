@@ -5,6 +5,8 @@ import { provideClientHydration, withEventReplay } from '@angular/platform-brows
 import { provideHttpClient, withInterceptorsFromDi, withFetch, HTTP_INTERCEPTORS, withInterceptors } from '@angular/common/http';
 import { AuthInterceptor } from './features/administration/service/auth-interceptor.service';
 import { loaderInterceptor } from './_core/utils/loaders.interceptor';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideToastr } from 'ngx-toastr';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -22,7 +24,15 @@ export const appConfig: ApplicationConfig = {
       multi: true
     },
 
-    provideClientHydration(withEventReplay())
+    provideClientHydration(withEventReplay()),
+    provideAnimations(),
+    provideToastr({
+      timeOut: 3000,
+      positionClass: 'toast-top-right',
+      preventDuplicates: true,
+      closeButton: true,
+      progressBar: true
+    })
   ]
 };
 

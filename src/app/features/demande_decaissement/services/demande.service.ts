@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { forkJoin, map, Observable } from 'rxjs';
 import { URL_LOCAL } from '../../../_core/routes/backend.root';
 
 @Injectable({
@@ -10,6 +10,40 @@ export class DemandeService {
   base = URL_LOCAL.baseUrl; // adapte si nécessaire
 
   constructor(private http: HttpClient) {}
+
+  // obtenir le tout à partir de iddemande
+
+  getDemandeComplet(iddemande: string): Observable<any> {
+    return forkJoin({
+      entete: this.getEntete(iddemande),
+      lignes: this.getAllLigne(),
+      details: this.getAllDetails(),
+    }).pipe(
+      map(({ entete, lignes, details }) => {
+        const lignesFiltrees = lignes.data.filter(
+          (l: any) => l.iddemande === iddemande
+        );
+
+        const lignesCompletes = lignesFiltrees.map((l: any) => ({
+          ligne: l,
+          details: details.data.filter(
+            (d: any) => d.idlignedemande === l.idlignedemande
+          ),
+        }));
+
+        return {
+          entete: entete.data ?? entete,
+          lignes: lignesCompletes,
+        };
+      })
+    );
+  }
+
+  getAllEntetes(_page: number, _limit: number): Observable<any> {
+    return this.http.get<any>(`${this.base}entete-demande`, {
+      params: { page: _page, limit: _limit },
+    });
+  }
 
   // EnteteDemande
   createEntete(payload: any): Observable<any> {
@@ -36,25 +70,15 @@ export class DemandeService {
     return this.http.post<any>(`${this.base}ligne-demande/create`, payload);
   }
 
-  createLignesBatch(payload: any): Observable<any> {
-    return this.http.post<any>(`${this.base}ligne-demande/batch`, payload);
+  getAllLigne(params: any = { page: 1, limit: 1000 }): Observable<any> {
+    return this.http.get<any>(`${this.base}ligne-demande`, { params });
   }
 
   updateLigne(id: string, payload: any): Observable<any> {
     return this.http.patch<any>(
-      `${this.base}ligne/ligne-demande/${id}`,
+      `${this.base}ligne-demande/update/${id}`,
       payload
     );
-  }
-
-  getLignesByDemande(iddemande: string): Observable<any> {
-    const params = {
-      iddemande,
-      limit: 1000, // Pour récupérer largement toutes les lignes
-      page: 1,
-    };
-
-    return this.http.get<any>(`${URL_LOCAL.baseUrl}ligne-demande`, { params });
   }
 
   deleteLigne(id: string): Observable<any> {
@@ -66,20 +90,8 @@ export class DemandeService {
     return this.http.post<any>(`${this.base}details-demande/create`, payload);
   }
 
-  createDetailsBatch(payload: any): Observable<any> {
-    return this.http.post<any>(`${this.base}/details-demande/batch`, payload);
-  }
-
-  getDetailsByLigne(idlignedemande: string): Observable<any> {
-    const params = {
-      idlignedemande,
-      limit: 1000,
-      page: 1,
-    };
-
-    return this.http.get<any>(`${URL_LOCAL.baseUrl}details-demande`, {
-      params,
-    });
+  getAllDetails(params: any = { page: 1, limit: 1000 }): Observable<any> {
+    return this.http.get<any>(`${this.base}details-demande`, { params });
   }
 
   updateDetail(id: string, payload: any): Observable<any> {
@@ -91,5 +103,12 @@ export class DemandeService {
 
   deleteDetail(id: string): Observable<any> {
     return this.http.delete<any>(`${this.base}details-demande/delete/${id}`);
+  }
+
+  // delete by ligne
+  deleteDetailsByLigne(idlignedemande: string) {
+    return this.http.delete<any>(
+      `${this.base}details-demande/delete-by-ligne/${idlignedemande}`
+    );
   }
 }
