@@ -19,6 +19,8 @@ import { CentreAnalytiqueService } from '../../donnee_base/services/centreanalyt
 import { societemodel } from '../../structure/model/societe.model';
 import { societeservice } from '../../structure/service/societe.service';
 import { ToastrService } from 'ngx-toastr';
+import { EnteteDemande } from '../../demande/models/entete-demande.model';
+import { DemandeService } from '../../demande/services/demande.service';
 
 @Component({
   selector: 'app-operation-caisse',
@@ -42,7 +44,7 @@ export class OperationCaisseComponent implements OnInit{
   limit: number = 10;
   operations : operationModel[] = [];
   operation : operationModel = new operationModel();
-  operationdetail : operationModel = new operationModel();
+  operationdetail : operationModel | null = new operationModel();
 
   //Faire le check selection **********
   objectsSelected : operationModel[] = [];
@@ -99,6 +101,9 @@ export class OperationCaisseComponent implements OnInit{
   totalDecaissementJour = 0;
   //resteARepartir: number = 0;
 
+  //Les demandes
+  entetesDmd: EnteteDemande[] = [];
+
   caisseStatuses: any = {};
   //caisseStatuses: string[] = [];
 
@@ -115,7 +120,7 @@ export class OperationCaisseComponent implements OnInit{
   constructor(private natureoperationservice: NatureoperationService, private caisseuserservice: AffectationCaisseService,
     private router : Router, private caissePeriodeservice: CaissePeriodeService, private centreanalytiqueservice: CentreAnalytiqueService,
     private operationservice: OperationService, private tiersservice: TiersService,private sc: societeservice,
-    private currencyPipe: CurrencyPipe, private toastr : ToastrService
+    private currencyPipe: CurrencyPipe, private toastr : ToastrService, private service: DemandeService,
   ){}
 
   ngOnInit(): void {
@@ -210,6 +215,30 @@ export class OperationCaisseComponent implements OnInit{
           this.operations = res.data.data;
           this.totalPages = res.data.totalPages;
         }
+      }
+    });
+  }
+
+  //chargement des demandes
+  loadAllDemandes() {
+    const params = {
+      page: this.currentPage,
+      limit: 100,
+      search: '',
+      date: '',
+      status: '',
+    };
+    this.service.getAllEntetes(params).subscribe({
+      next : (res) => {
+        if(res.success){
+          //this.entetesDmd = res.data.data;
+          this.entetesDmd = (res.data.data || []).filter(
+            (n: any) => n.decaisse === 0
+          )
+        }
+      },
+      error: (err) => {
+        this.toastr.error("Erreur backend");
       }
     });
   }
@@ -373,13 +402,14 @@ export class OperationCaisseComponent implements OnInit{
   //Initialiser le formulaire
   initForm(){
     this.operationForm = this.fb.group({
+      demande : [""],
       codeoperation : [""],
       libelle : [""],
       dateoperation : [{ value: null, disabled: false }, [Validators.required]],
       typepaiement: ["", [Validators.required]],
       lignes: this.fb.array([]),
       devise : ["", [Validators.required]],
-      site : ["197D7C37-7180-4DD1-80CC-843B9A6C5B52"],
+      site : [this.user.idsite ?? null],
       societe : [this.user.idsociete ?? null],
       montant: [0],
       montantRefglobal: [0],
@@ -523,8 +553,9 @@ export class OperationCaisseComponent implements OnInit{
     const cleanType = type.toLowerCase().trim();
 
     this.naturesFiltrees = this.natureoperations.filter(n =>
-      n.typeoperation?.toLowerCase().trim() === cleanType
+      n.typeoperation?.toLowerCase().trim() === cleanType 
     );
+    //&& n.demandedecaissement === 0
   }
 
   get caisses(): FormArray<FormGroup> {
@@ -582,14 +613,11 @@ export class OperationCaisseComponent implements OnInit{
     return this.caissePeriodeservice.getCaissesPeriodes(this.caissesUser).pipe(
       tap((responses: any[]) => {
         const periodes = responses.map(r => r.data);
-        // caisse existante dans l'opération ?
-        //const opCaisse = this.operations.get(p.idcaisse);
         // remplir tableau métier
         this.caisseperiodes = periodes;
         // remplir le formulaire
         const caissesArray = this.operationForm.get('caisses') as FormArray;
         //const caiss = forkJoin(this.caisseSolde);
-        //console.log(caiss);
         caissesArray.clear();
         periodes.forEach(p => {
           //const soldeReel = this.caisseSoldeMap.get(p.idcaisse) ?? 0;
@@ -700,7 +728,10 @@ export class OperationCaisseComponent implements OnInit{
     return `${dayShort}, ${day}-${month} ${year}`;
   }
 
-  formatDateFR(dateInput: string | Date): string {
+  formatDateFR(dateInput: string | Date | null | undefined): string {
+    if (!dateInput) {
+      return '';
+    }
     const date = new Date(dateInput);
 
     const dayShort = new Intl.DateTimeFormat('fr-FR', { weekday: 'short' })
@@ -715,6 +746,11 @@ export class OperationCaisseComponent implements OnInit{
     const year = date.getFullYear();
 
     return `${dayShort} ${day} ${month} ${year}`;
+  }
+
+  //Calculer la somme des lignes de la demande
+  getTotalDemande(demande: EnteteDemande): number {
+    return demande.lignes.reduce((sum, l) => sum + l.montantdemande, 0);
   }
   
   //Ajouter la ligne dans le tableau
@@ -786,7 +822,7 @@ export class OperationCaisseComponent implements OnInit{
     if (this.operationForm.invalid) {
       Object.keys(controls).forEach(controlName => controls[controlName].markAsTouched());
       this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
-      //this.toastr.warning(this.msgErros);
+      this.toastr.warning(this.msgErros);
       return;
     }
 
@@ -1096,12 +1132,26 @@ export class OperationCaisseComponent implements OnInit{
     this.getAllTiers();
     //Charger les centres analytiques
     this.getAllcentres();
+    //charger les demandes
+    this.loadAllDemandes();
     this.loadingModal = true;
     this.initForm();
     this.loadCaissesForm().subscribe({
       next: () => {
         this.finaliserModal();
         this.loadingModal = false;
+        //Si la demande est sélectionnée
+        this.operationForm.get('demande')?.valueChanges.subscribe(iddemande => {
+          if (iddemande) {
+            this.onDemandeSelected(iddemande);
+
+            //Verrouiller tout le formulaire
+            this.operationForm.disable({ emitEvent: false });
+
+            //Champs autorisés
+            this.operationForm.get('caisses')?.enable({ emitEvent: false });
+          }
+        });
         // Filtrer les natures quand typepaiement change
         this.operationForm.get("typepaiement")?.valueChanges.subscribe(type => {
           this.onTypePaiementChange(type);
@@ -1172,6 +1222,61 @@ export class OperationCaisseComponent implements OnInit{
     this.isAnyOpen = this.caisseperiodes.some(
       p => p.statut?.toLowerCase() === "ouverte"
     );
+  }
+
+  //Sur la demande selectionnée
+  onDemandeSelected(iddemande: string) {
+    this.service.getEntete(iddemande).subscribe({
+      next: (res) => {
+        if(res.success){
+          this.fillFormFromDemande(res.data);
+        }else{
+          this.loadingModal = false;
+        }
+      },
+      error: () => {
+        this.loadingModal = false;
+      }
+    });
+  }
+
+  //Création des lignes depuis la demande
+  createLigneFromDemande(ligne: any): FormGroup {
+    return this.fb.group({
+      idligne: [''],
+      montantligne: [ligne.montantdemande, Validators.required],
+      natureop: [ligne.natureoperation?.idnature],
+      centre: [ligne.centreanalytique?.idcentre],
+      tiers: [ligne.tiers?.idtiers],
+    });
+  }
+
+  //Remplir le formulaire depuis la demande
+  fillFormFromDemande(demande: any) {
+    /**Patch entête */
+    this.operationForm.patchValue({
+      libelle: demande.libelledemande,
+      devise: demande.devise?.iddevise,
+      site: demande.site?.idsite,
+      societe: demande.societe?.idsociete,
+      typepaiement: demande.typedemande === 'Décaissement' ? 'decaissement' : 'encaissement',
+      montant: this.getTotalDemande(demande)
+    });
+
+    /** Reset lignes */
+    const lignesFA = this.operationForm.get('lignes') as FormArray;
+    lignesFA.clear();
+
+    /** Recréer lignes */
+    demande.lignes.forEach((ligne: any) => {
+      const ligneFG = this.createLigneFromDemande(ligne);
+      lignesFA.push(ligneFG);
+    });
+
+    /** Recalcul auto */
+    this.caisses.controls.forEach((caisseFG: any) => {
+      this.applyAutoCalcul(caisseFG);
+    });
   }
 
 }

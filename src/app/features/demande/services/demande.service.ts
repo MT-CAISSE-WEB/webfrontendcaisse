@@ -39,10 +39,8 @@ export class DemandeService {
     );
   }
 
-  getAllEntetes(_page: number, _limit: number): Observable<any> {
-    return this.http.get<any>(`${this.base}entete-demande`, {
-      params: { page: _page, limit: _limit },
-    });
+  getAllEntetes(payload: any): Observable<any> {
+    return this.http.get<any>(`${this.base}entete-demande`, {params : payload});
   }
 
   // EnteteDemande
@@ -51,7 +49,7 @@ export class DemandeService {
   }
 
   updateEntete(id: string, payload: any): Observable<any> {
-    return this.http.patch<any>(
+    return this.http.put<any>(
       `${this.base}entete-demande/update/${id}`,
       payload
     );
@@ -109,6 +107,13 @@ export class DemandeService {
   deleteDetailsByLigne(idlignedemande: string) {
     return this.http.delete<any>(
       `${this.base}details-demande/delete-by-ligne/${idlignedemande}`
+    );
+  }
+
+  validationDemande(iddemande: string, payload: any): Observable<any>{
+     return this.http.patch<any>(
+      `${this.base}entete-demande/validate/${iddemande}`,
+      payload
     );
   }
 }

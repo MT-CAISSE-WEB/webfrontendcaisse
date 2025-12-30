@@ -8,7 +8,9 @@ import { APP, APP_TAUX_DONNEE_BASE, APP_TAUX, APP_PLAN_COMPTABLE_DONNEE_BASE,
   APP_STRUCTURE_SITE,
   APP_STRUCTURE_SOCIETE,
   APP_DONNEE_BASE_DEVISE,
-  APP_ADMINISTRATION_USER,} from './_core/routes/frontend.root';
+  APP_ADMINISTRATION_USER,
+  APP_ROOT_DMD_EDIT_DECAISSEMENT,
+  APP_ROOT_EDIT_DECAISSEMENT,} from './_core/routes/frontend.root';
 
 import { LayoutMainComponent } from './layout/layout-main/layout-main.component';
 import { LayoutContentComponent } from './layout/composant/layout-content/layout-content.component';
@@ -22,7 +24,7 @@ import { AffectationCaissierComponent } from './features/caisse_journal/affectat
 import { OperationCaisseComponent } from './features/operations/operation-caisse/operation-caisse.component';
 import { BudgetComponent } from './features/budgets/budget/budget.component';
 import { LigneBudgetComponent } from './features/budgets/ligne-budget/ligne-budget.component';
-import { DemandeDecaissementComponent } from './features/demande_decaissement/demande-decaissement.component';
+import { DemandeDecaissementComponent } from './features/demande/demande_decaissement/demande-decaissement.component';
 
 import { TiersComponent } from './features/donnee_base/tiers/tiers.component';
 import { AffectationanalytiqueComponent } from './features/donnee_base/affectationanalytique/affectationanalytique.component';
@@ -33,6 +35,7 @@ import { SiteComponent } from './features/structure/site/site.component';
 import { SocieteComponent } from './features/structure/societe/societe.component';
 import { DeviseComponent } from './features/donnee_base/donnee_base/devise/devise.component';
 import { UserComponent } from './features/administration/user/user.component';
+import { EditDemandeComponent } from './features/demande/edit-demande/edit-demande.component';
 
 export const routes: Routes = [
   {
@@ -112,6 +115,14 @@ export const routes: Routes = [
       {
         path: APP_ROOT_DMD_DECAISSEMENT,
         component: DemandeDecaissementComponent,
+      },
+      {
+        path: APP_ROOT_DMD_EDIT_DECAISSEMENT,
+        component: EditDemandeComponent,
+      },
+      {
+        path: APP_ROOT_EDIT_DECAISSEMENT,
+        component: EditDemandeComponent,
       },
       {
         path: APP_JOURNAL_CAISSE_JOURNAL,

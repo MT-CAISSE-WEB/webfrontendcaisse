@@ -51,6 +51,8 @@ export const APP_ROOT_BUDGETS_LIGNE_BUDGET =
 
 // Route de demande décaissement
 export const APP_ROOT_DMD_DECAISSEMENT = 'demande_decaissement';
+export const APP_ROOT_EDIT_DECAISSEMENT = 'demande_decaissement/edit';
+export const APP_ROOT_DMD_EDIT_DECAISSEMENT = 'demande_decaissement/edit/:id';
 
 //Route taux de devise
 export const APP_TAUX = 'taux_devise';

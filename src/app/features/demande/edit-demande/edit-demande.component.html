@@ -1,0 +1,278 @@
+<!-- start page title -->
+<div class="row">
+  <div class="col-12">
+    <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+      <h4 class="mb-sm-0">{{ title }} de la demande</h4>
+      <div class="page-title-right">
+        <ol class="breadcrumb m-0">
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);">Données de base</a>
+          </li>
+          <li class="breadcrumb-item active">{{ title }} de la demande</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end page title -->
+
+
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card" id="orderList">
+      <div class="card-header border-0">
+        <div class="row align-items-center gy-3">
+          <div class="col-sm-auto">
+            <div class="d-flex gap-1 flex-wrap">
+              <button type="button" class="btn btn-sm btn-soft-info"> <i class="ri-file-download-line align-bottom me-1"></i> import </button>
+              <button type="button" class="btn btn-sm btn-info"> <i class="ri-refresh-fill align-bottom me-1"></i>actualiser </button>
+              <button type="button" class="btn btn-sm btn-primary" (click)="resetForm()"> <i class="ri-refresh-fill align-bottom me-1"></i> renitialiser</button>
+              <button type="button" class="btn btn-sm btn-success" (click)="submit()"> <i class="bx bx-comment-check align-bottom me-1"></i> enregistrer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body pt-0 mt-3">
+        <form [formGroup]="demandeForm">
+          <!-- ==================== STEP 1 : ENTÊTE ==================== -->
+          <div class="row g-3">
+            <div class="col-lg-2 col-sm-4">
+              <div class="mb-3">
+                <label class="form-label">Code demande</label>
+                <input type="text" class="form-control form-control-sm bg-light" formControlName="codedemande" readonly="readonly"/>
+              </div>
+            </div>
+
+            <div class="col-lg-5 col-sm-8">
+              <div class="mb-3">
+                  <label class="form-label">Libellé demande</label>
+                  <input type="text" class="form-control form-control-sm bg-light {{ isValidField('libelledemande')}}" formControlName="libelledemande" />
+              </div>
+            </div>
+
+            <div class="col-lg-2 col-sm-6">
+              <div class="mb-3">
+                <label class="form-label">Date demande</label>
+                <input type="date" class="form-control form-control-sm bg-light {{ isValidField('datedemande')}}" formControlName="datedemande" />
+              </div>
+            </div>
+
+            <div class="col-lg-3 col-sm-6">
+              <div class="mb-3">
+                <label class="form-label">Type demande</label>
+                <select class="form-select form-select-sm bg-light {{ isValidField('typedemande')}}" formControlName="typedemande">
+                  <option value="">-- Sélectionner --</option>
+                  <option value="decaissement">Décaissement</option>
+                  <option value="approvisionnement">
+                    Approvisionnement
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-lg-2 col-sm-4">
+              <div class="mb-3">
+                <select class="form-select form-select-sm bg-light {{ isValidField('devise')}}" formControlName="devise">
+                  <option value="">-- Sélectionner devise --</option>
+                  <option value="3FC45657-E282-4667-AA3A-50121F1CEB18">XAF</option>
+                  <option value="A4473CF8-A4E3-4CDB-92E6-A2CE1320741E">USD</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-lg-4 col-sm-4">
+              <div class="mb-3">
+                <select class="form-select form-select-sm bg-light" formControlName="departement">
+                  <option value="">-- Sélectionner departement --</option>
+                  <option value="Décaissement">Departement</option>
+                  <option value="Approvisionnement">Departement</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- <div class="col-lg-2 col-sm-4">
+              <div class="mb-3">
+                <span *ngIf="demande.statut! == '0'" class="badge bg-primary-subtle text-primary"> non valide </span>
+                <span *ngIf="demande.statut! == '0'" class="badge bg-info-subtle text-info"> en cours </span>
+                <span *ngIf="demande.statut! == '0'" class="badge bg-dark-subtle text-body"> rejetée </span>
+                <span *ngIf="demande.statut! == '0'" class="badge bg-success-subtle text-success"> validée </span>
+              </div>
+            </div> -->
+            
+          </div>
+
+          <!-- ==================== STEP 2 : LIGNES ==================== -->
+          <div class="row g-3">
+            <div class="table-responsive">
+              <table class="table table-sm table-borderless table-nowrap mb-0">
+                <colgroup>
+                  <col style="width: 05%">
+                  <col style="width: 30%">
+                  <col style="width: 25%">
+                  <col style="width: 25%">
+                  <col style="width: 10%">
+                  <col style="width: 05%">
+                </colgroup>
+                <thead class="align-middle">
+                  <tr class="table-active">
+                    <th scope="col" style="width: 15px;">N°</th>
+                    <th scope="col">
+                        Nature opération
+                    </th>
+                    <th scope="col">
+                        Centre analytique
+                    </th>
+                    <th scope="col" style="width: 120px;">
+                        Tiers
+                    </th>
+                    <th scope="col" class="text-end" style="width: 150px;">Montant</th>
+                    <th scope="col" class="text-end" style="width: 105px;"></th>
+                  </tr>
+                </thead>
+                  <tbody id="newlink">
+                    @for(ligne of lignes.controls; track $index){
+                      <tr class="product" [formGroup]="ligne">
+                        <th scope="row" class="product-id">{{$index + 1}}</th>
+                        <td class="text-start">
+                          <div class="input-light">
+                            <select class="form-control form-control-sm bg-light border-0" formControlName="natureop" required>
+                                <option value="" selected>Choisir nature operation</option>
+                                @for(item of natureoperations; track $index){
+                                    <option value="{{item.idnature}}"> {{item.libelle}} </option>
+                                }
+                            </select>
+                          </div>
+                        </td>
+                        <td class="text-start">
+                          <div class="input-light">
+                            <select formControlName="centre" class="form-control form-control-sm bg-light border-0">
+                                <option value="" selected>Choisir centre analytique</option>
+                                @for(item of centres; track $index){
+                                    <option value="{{item.idcentreanalytique}}"> {{item.libelle}} </option>
+                                }
+                            </select>
+                            <div class="invalid-feedback">{{ msgErros }}</div>
+                          </div>
+                        </td>
+                        <td class="text-start">
+                          <div class="input-light">
+                            <select formControlName="tiers" class="form-control form-control-sm bg-light border-0">
+                                <option value="" selected>Choisir tiers</option>
+                                @for(item of tiers; track $index){
+                                    <option value="{{item.idtiers}}"> {{item.designation}} </option>
+                                }
+                            </select>
+                            <div class="invalid-feedback">{{ msgErros }}</div>
+                          </div>
+                        </td>
+                        <td>
+                          <input type="number" class="form-control form-control-sm bg-light border-0" formControlName="montantdemande" />
+                        </td>
+                        <td class="product-removal align-right">
+                          <button type="button" class="btn btn-sm btn-danger" (click)="removeLigne($index)">
+                            <i class="ri-delete-bin-2-line align-bottom"></i>
+                          </button> 
+                          <button type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#detailModal' + $index" class="btn btn-sm btn-primary">
+                            <i class="ri-pencil-fill align-bottom"></i>
+                          </button>
+                        </td>
+                      </tr>
+
+                      <!-- Modal -->
+                      <div class="modal fade flip" [attr.id]="'detailModal' + $index" tabindex="-1" aria-hidden="true">
+                          <div class="modal-dialog modal-dialog-centered">
+                              <div class="modal-content">
+                                  <div class="modal-header bg-light p-3">
+                                    <h5 class="modal-title">Détail de la demande </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                  </div>
+                                  
+                                  <div [formGroup]="lignesFormArray.at($index)">
+                                    <div class="modal-body">
+                                      <div formArrayName="details" class="mt-2">
+                                        <div class="table-responsive">
+                                          <table class="table table-sm table-borderless table-nowrap mb-0">
+                                            <colgroup>
+                                              <col style="width: 05%">
+                                              <col style="width: 50%">
+                                              <col style="width: 20%">
+                                              <col style="width: 20%">
+                                              <col style="width: 05%">
+                                            </colgroup>
+                                            <thead class="align-middle">
+                                              <tr class="table-active">
+                                                <th scope="col" style="width: 15px;">N°</th>
+                                                <th scope="col"> Description </th>
+                                                <th scope="col"> Quantité </th>
+                                                <th scope="col" style="width: 120px;"> Montant </th>
+                                                <th scope="col" class="text-end" style="width: 150px;"></th>
+                                              </tr>
+                                            </thead>
+                                            <tbody id="newlink">
+                                              <tr *ngFor="let detail of getDetailsArray($index).controls; let j = index" [formGroupName]="j">
+                                                <th scope="row" class="product-id">{{j + 1}}</th>
+                                                <td class="text-start">
+                                                  <div class="input-light">
+                                                    <input type="textarea" class="form-control form-control-sm" formControlName="description"/>
+                                                  </div>
+                                                </td>
+                                                <td class="text-start">
+                                                  <div class="input-light">
+                                                    <input type="number" class="form-control form-control-sm" formControlName="quantite" />
+                                                  </div>
+                                                </td>
+                                                <td class="text-start">
+                                                  <div class="input-light">
+                                                    <input type="number" class="form-control form-control-sm" formControlName="montant" />
+                                                  </div>
+                                                </td>
+                                                <td class="product-removal align-right">
+                                                  <button type="button" class="btn btn-sm btn-danger" (click)="removeDetail($index, j)">
+                                                    <i class="ri-delete-bin-2-line align-bottom"></i>
+                                                  </button> 
+                                                </td>
+                                              </tr>
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <div class="hstack gap-2 justify-content-end">
+                                            <div class="d-flex gap-2">
+                                                <button type="submit" class="btn btn-sm btn-secondary" (click)="addDetail($index)">Ajouter</button>
+                                                <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                    }
+                  </tbody>
+                  <tbody>
+                  <tr>
+                    <td colspan="5">
+                      <button type="button" class="btn btn-sm btn-primary" (click)="addLigne()"> <i class="bx bx-zoom-in align-bottom me-1"></i> </button>
+                    </td>
+                  </tr>
+                  </tbody>
+              </table>
+            </div>
+              <!-- ==================== STEP 3 : FINISH ==================== -->
+              <div>
+                <div class="alert alert-success">
+                  Vérifiez toutes les informations avant de terminer.
+                </div>
+              </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
