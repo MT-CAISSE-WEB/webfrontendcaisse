@@ -13,6 +13,7 @@ import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.contantes';
 import { EnteteDemande } from '../models/entete-demande.model';
+import { utilisateurdepartementservice } from '../../administration/service/userdepartement.service';
 
 @Component({
   selector: 'app-edit-demande',
@@ -38,6 +39,9 @@ export class EditDemandeComponent implements OnInit {
 
   iddemande: any = "0";
 
+  //Liste des départements de l'utilisateurs
+  departementUser: any = [];
+
   //Changement titre modal
   actionModal: string = "create";
 
@@ -55,7 +59,7 @@ export class EditDemandeComponent implements OnInit {
   centres : centreanalytiqueModel[] = [];
 
   constructor(private service: DemandeService, private natureoperationservice: NatureoperationService, private router : Router,
-    private centreanalytiqueservice: CentreAnalytiqueService,
+    private centreanalytiqueservice: CentreAnalytiqueService, private userdepartement: utilisateurdepartementservice,
     private tiersservice: TiersService, private toastr : ToastrService, private activatedRoute: ActivatedRoute,){}
 
   ngOnInit(): void {
@@ -80,6 +84,8 @@ export class EditDemandeComponent implements OnInit {
     this.getAllcentres();
     //charger les tiers
     this.getAllTiers();
+    //Charger les départements de l'user
+    this.getDepartementOfUser();
     //charger la demande 
     //this.iddemande = this.activatedRoute.snapshot.paramMap.get('id')!;
   }
@@ -146,14 +152,10 @@ export class EditDemandeComponent implements OnInit {
 
   //Recuperer les natures opérations
   getAllNatureoperations(){
-    const params = {
-      page: 1,
-      limit: 100
-    };
-    this.natureoperationservice.getAll(params).subscribe({
+    this.natureoperationservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
-          this.natureoperations = (res.data.data || []).filter(
+          this.natureoperations = (res.data || []).filter(
             (n: any) => n.actif === 1
           );
         }
@@ -161,16 +163,27 @@ export class EditDemandeComponent implements OnInit {
     });
   }
 
-  //Recupérer les centres analytiques
-  getAllcentres(){
-    const params = {
-      page: 1,
-      limit: 100
-    };
-    this.centreanalytiqueservice.getAll(params).subscribe({
+  //Récuperer le departement de l'utilisateur
+  getDepartementOfUser(){
+    this.userdepartement.getutilisateurdepartement(this.user.idutilisateur).subscribe({
       next : (res) => {
         if(res.success){
-          this.centres = (res.data.data || []).filter(
+          this.departementUser = res.data;
+          console.log(this.departementUser);
+        }
+      },
+      error: (err) => {
+        this.toastr.error(err.error.message)
+      }
+    });
+  }
+
+  //Recupérer les centres analytiques
+  getAllcentres(){
+    this.centreanalytiqueservice.getAll().subscribe({
+      next : (res) => {
+        if(res.success){
+          this.centres = (res.data || []).filter(
             (n: any) => n.actif === 1
           )
         }
@@ -210,14 +223,10 @@ export class EditDemandeComponent implements OnInit {
 
   //Recupérer les tiers
   getAllTiers(){
-    const params = {
-      page: 1,
-      limit: 100
-    };
-    this.tiersservice.getAll(params).subscribe({
+    this.tiersservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
-          this.tiers = (res.data.data || []).filter(
+          this.tiers = (res.data || []).filter(
             (n: any) => n.actif === 1
           )
         }

@@ -181,6 +181,8 @@ export class BudgetComponent implements OnInit {
         typebudget: ['', [Validators.required]],
         entite: ['', [Validators.required]],
         datefin: ['', [Validators.required]],
+        idsite : [this.user.idsite ?? null],
+        idsociete : [this.user.idsociete ?? null],
         idbudgetparent: [''],
         // createdby
         actif: [false],
@@ -193,6 +195,10 @@ export class BudgetComponent implements OnInit {
 
   get form() {
     return this.budgetForm.controls;
+  }
+
+  get user(){
+    return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
   dispatchBudget(_object: BudgetModel) {
@@ -523,7 +529,7 @@ export class BudgetComponent implements OnInit {
 
     /** 2. prepare data */
     const formValue = this.budgetForm.getRawValue();
-
+    console.log(formValue);
     this.budget.idcircuitvalidation =
       formValue.idcircuitvalidation === ''
         ? null
@@ -560,8 +566,6 @@ export class BudgetComponent implements OnInit {
         actif: formValue.actif,
       });
     }
-    // if (!_journal.idjournal) this.create(_journal);
-    // else this.update(_journal);
   }
 
   //Enregistrement de données

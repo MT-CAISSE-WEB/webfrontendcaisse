@@ -57,6 +57,9 @@ export class OperationCaisseComponent implements OnInit{
   //Changement titre modal
   actionModal: string = "create";
 
+  //Bouton active / inactive
+  isUpdated: boolean = true;
+
   //Liste de caisse utilisateur
   caissesUser: AffectationCaisseModel[] = [];
 
@@ -219,7 +222,6 @@ export class OperationCaisseComponent implements OnInit{
     });
   }
 
-<<<<<<< HEAD
   //chargement des demandes
   loadAllDemandes() {
     const params = {
@@ -243,19 +245,14 @@ export class OperationCaisseComponent implements OnInit{
       }
     });
   }
-=======
->>>>>>> origin/richard
 
   //Recuperer les natures opérations
   getAllNatureoperations(){
-    const params = {
-      page: 1,
-      limit: 100
-    };
     this.natureoperationservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
-          this.natureoperations = (res.data.data || []).filter(
+          console.log(this.natureoperations);
+          this.natureoperations = (res.data || []).filter(
             (n: any) => n.actif === 1
           );
         }
@@ -265,14 +262,10 @@ export class OperationCaisseComponent implements OnInit{
 
   //Recupérer les centres analytiques
   getAllcentres(){
-    const params = {
-      page: 1,
-      limit: 100
-    };
     this.centreanalytiqueservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
-          this.centres = (res.data.data || []).filter(
+          this.centres = (res.data || []).filter(
             (n: any) => n.actif === 1
           )
         }
@@ -330,14 +323,10 @@ export class OperationCaisseComponent implements OnInit{
 
   //Recupérer les tiers
   getAllTiers(){
-    const params = {
-      page: 1,
-      limit: 100
-    };
     this.tiersservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
-          this.tiers = (res.data.data || []).filter(
+          this.tiers = (res.data || []).filter(
             (n: any) => n.actif === 1
           )
         }
@@ -412,11 +401,7 @@ export class OperationCaisseComponent implements OnInit{
       typepaiement: ["", [Validators.required]],
       lignes: this.fb.array([]),
       devise : ["", [Validators.required]],
-<<<<<<< HEAD
       site : [this.user.idsite ?? null],
-=======
-      site : ["1B386C16-B927-4124-BE18-7721862C1CE1"],
->>>>>>> origin/richard
       societe : [this.user.idsociete ?? null],
       montant: [0],
       montantRefglobal: [0],
@@ -1134,6 +1119,7 @@ export class OperationCaisseComponent implements OnInit{
   // Recuperer la devise
 
   modalCreate(){
+    this.isUpdated = true;
     this.actionModal = "create";
     //Charger les tiers
     this.getAllTiers();
@@ -1150,12 +1136,14 @@ export class OperationCaisseComponent implements OnInit{
         //Si la demande est sélectionnée
         this.operationForm.get('demande')?.valueChanges.subscribe(iddemande => {
           if (iddemande) {
-            this.onDemandeSelected(iddemande);
+            // Désactiver les boutons sur le formulaire de création
+            this.isUpdated = false;
 
+            this.onDemandeSelected(iddemande);
             //Verrouiller tout le formulaire
             this.operationForm.disable({ emitEvent: false });
-
             //Champs autorisés
+            this.operationForm.get('demande')?.enable({ emitEvent: false });
             this.operationForm.get('caisses')?.enable({ emitEvent: false });
           }
         });
@@ -1231,7 +1219,6 @@ export class OperationCaisseComponent implements OnInit{
     );
   }
 
-<<<<<<< HEAD
   //Sur la demande selectionnée
   onDemandeSelected(iddemande: string) {
     this.service.getEntete(iddemande).subscribe({
@@ -1288,6 +1275,3 @@ export class OperationCaisseComponent implements OnInit{
   }
 
 }
-=======
-}
->>>>>>> origin/richard
