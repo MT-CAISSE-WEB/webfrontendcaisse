@@ -19,6 +19,9 @@ import { BudgetModel } from '../models/budget.model';
 import { BudgetService } from '../services/budget.service';
 import { departementservice } from '../../structure/service/departement.service';
 import { departementmodel } from '../../structure/model/departement.model';
+import { AffectationDepartementNatureService } from '../../donnee_base/services/affectationdepartementnature.service';
+import { affectationdepartementnatureModel } from '../../donnee_base/models/affectationdepartementnature.model';
+import { natureoperationModel } from '../../donnee_base/models/natureoperation.model';
 
 @Component({
   selector: 'app-ligne-budget',
@@ -32,6 +35,10 @@ export class LigneBudgetComponent implements OnInit {
   breadCrumbs: any = {};
   fb: FormBuilder = new FormBuilder();
   ligneBudgets: LigneBudgetModel[] = [];
+  ligneBudgetsGrouped: Array<{
+    budget: BudgetModel;
+    lignes: LigneBudgetModel[];
+  }> = [];
   budgets: BudgetModel[] = [];
   departements: departementmodel[] = [];
   ligneBudget: LigneBudgetModel = new LigneBudgetModel();
@@ -47,7 +54,7 @@ export class LigneBudgetComponent implements OnInit {
 
   //Faire le check selection **********
   objectsSelected: LigneBudgetModel[] = [];
-  selectedItems: any[] = [];
+  selectedItems: { [id: string]: boolean } = {};
   // Détermine si toutes les lignes sont selectionnées
   checkAllRow: any;
   error: string = '';
@@ -68,6 +75,7 @@ export class LigneBudgetComponent implements OnInit {
     private lignebudgetservice: LigneBudgetService,
     private budgetservice: BudgetService,
     private departementservice: departementservice,
+    private affectationService: AffectationDepartementNatureService,
     private router: Router
   ) {}
 
@@ -83,20 +91,57 @@ export class LigneBudgetComponent implements OnInit {
     this.titleMsg = TITLE_DELETE;
   }
 
+  natureGrid: Array<{
+    idnature: string;
+    libelle: string;
+
+    // ID de la ligne budgétaire existante (si présente)
+    idbudgetdepartementnature?: string;
+
+    montantDept: number;
+    montantSite: number;
+    montantSociete: number;
+  }> = [];
+
   // Obtenir la liste de tous les budgets
   getAllBudgets() {
-    this.params = {
-      page: 1,
-      limit: 1000,
-    };
+    this.params = { page: 1, limit: 1000 };
+
     this.budgetservice.getAll(this.params).subscribe({
       next: (res: any) => {
         if (res.success) {
           this.budgets = res.data;
-          // this.totalPages = res.totalPages;
         }
       },
+      error: (err) => {
+        console.error('Erreur récupération budgets', err);
+        this.msgErros = err.error.error;
+      },
     });
+  }
+
+  groupLigneBudgetsByBudget() {
+    const map = new Map<
+      string,
+      { budget: BudgetModel; lignes: LigneBudgetModel[] }
+    >();
+
+    for (const ligne of this.ligneBudgets) {
+      if (!ligne.budget) continue;
+
+      const idBudget = ligne.budget.idbudget;
+
+      if (!map.has(idBudget)) {
+        map.set(idBudget, {
+          budget: ligne.budget,
+          lignes: [],
+        });
+      }
+
+      map.get(idBudget)!.lignes.push(ligne);
+    }
+
+    this.ligneBudgetsGrouped = Array.from(map.values());
   }
 
   // Obtenir les départements
@@ -108,13 +153,18 @@ export class LigneBudgetComponent implements OnInit {
           // this.totalPages = res.totalPages;
         }
       },
+      error: (err: any) => {
+        this.msgErros = err.error.error;
+      },
     });
   }
 
   onSelectionChange(event: Event) {
-    this.selectedBudget = this.budgets.find(
-      (budget) => budget.idbudget === (event.target as HTMLSelectElement).value
-    );
+    const id = (event.target as HTMLSelectElement).value;
+
+    this.selectedBudget = this.budgets.find((b) => b.idbudget === id);
+
+    this.ligneBudgetForm.patchValue({ idbudget: id });
   }
 
   getAllLigneBudgets() {
@@ -126,22 +176,191 @@ export class LigneBudgetComponent implements OnInit {
       next: (res: any) => {
         if (res.success) {
           this.ligneBudgets = res.data;
-          // console.log('Budgets:', this.budgets);
+          this.groupLigneBudgetsByBudget();
           this.totalPages = res.totalPages;
         }
       },
+      error: (err: any) => {
+        this.msgErros = err.error.error;
+      },
     });
+  }
+
+  onBudgetChange(event: any) {
+    const id = event.target.value;
+    this.selectedBudget = this.budgets.find((b) => b.idbudget === id);
+    this.natureGrid = [];
+    this.ligneBudgetForm.patchValue({ iddepartement: '' });
+  }
+
+  onDepartementChange(event: any) {
+    const idDept = event.target.value;
+
+    // Reset STRICT
+    this.natureGrid = [];
+
+    if (!idDept || !this.selectedBudget) return;
+
+    this.loadNatureGrid(idDept);
+  }
+
+  loadNatureGrid(idDepartement: string) {
+    if (!idDepartement) return;
+    this.affectationService.getAll(idDepartement).subscribe({
+      next: (res: any) => {
+        console.log('Affectation:', res.data.naturesaffectes);
+        if (res.success) {
+          this.natureGrid = res.data.naturesaffectes
+            .sort((a: natureoperationModel, b: natureoperationModel) =>
+              a.libelle.localeCompare(b.libelle)
+            )
+            .map((item: natureoperationModel) => ({
+              idnature: item.idnature,
+              libelle: item.libelle,
+              montantDept: 0,
+              montantSite: 0,
+              montantSociete: 0,
+            }));
+          this.prefillNatureGrid();
+        }
+      },
+    });
+  }
+
+  // prefillNatureGrid() {
+  //   if (!this.selectedBudget) return;
+
+  //   const idDept = this.ligneBudgetForm.value.iddepartement;
+
+  //   this.natureGrid.forEach((ligne) => {
+  //     const existing = this.ligneBudgets.find(
+  //       (l) =>
+  //         l.idbudget === this.selectedBudget!.idbudget &&
+  //         l.iddepartement === idDept &&
+  //         l.idnature === ligne.idnature
+  //     );
+
+  //     if (existing) {
+  //       ligne.montantDept = existing.montantprevisiondept ?? 0;
+  //       ligne.montantSite = existing.montantprevisionsite ?? 0;
+  //       ligne.montantSociete = existing.montantprevisionsociete ?? 0;
+  //     } else {
+  //       // Reset explicite (évite toute pollution mémoire)
+  //       ligne.montantDept = 0;
+  //       ligne.montantSite = 0;
+  //       ligne.montantSociete = 0;
+  //     }
+  //   });
+
+  //   this.updateMontantsSelonValidation();
+  // }
+
+  // prefillNatureGrid() {
+  //   if (!this.selectedBudget) return;
+
+  //   const idDept = this.ligneBudgetForm.value.iddepartement;
+
+  //   this.natureGrid.forEach((ligne) => {
+  //     const existing = this.ligneBudgets.find(
+  //       (l) =>
+  //         l.idbudget === this.selectedBudget!.idbudget &&
+  //         l.iddepartement === idDept &&
+  //         l.idnature === ligne.idnature
+  //     );
+
+  //     if (existing) {
+  //       ligne.idbudgetdepartementnature = existing.idbudgetdepartementnature;
+
+  //       ligne.montantDept = existing.montantprevisiondept ?? 0;
+  //       ligne.montantSite = existing.montantprevisionsite ?? 0;
+  //       ligne.montantSociete = existing.montantprevisionsociete ?? 0;
+  //     } else {
+  //       // IMPORTANT : reset si aucune ligne existante
+  //       ligne.idbudgetdepartementnature = undefined;
+  //       ligne.montantDept = 0;
+  //       ligne.montantSite = 0;
+  //       ligne.montantSociete = 0;
+  //     }
+  //   });
+  // }
+
+  prefillNatureGrid() {
+    if (!this.selectedBudget) return;
+
+    const idDept = this.ligneBudgetForm.value.iddepartement;
+
+    this.natureGrid.forEach((ligne) => {
+      const existing = this.ligneBudgets.find(
+        (l) =>
+          l.idbudget === this.selectedBudget!.idbudget &&
+          l.iddepartement === idDept &&
+          l.idnature === ligne.idnature
+      );
+
+      // Si ligne existante, on prend les montants
+      if (existing) {
+        ligne.idbudgetdepartementnature = existing.idbudgetdepartementnature;
+        ligne.montantDept = existing.montantprevisiondept ?? ligne.montantDept;
+        ligne.montantSite = existing.montantprevisionsite ?? ligne.montantSite;
+        ligne.montantSociete =
+          existing.montantprevisionsociete ?? ligne.montantSociete;
+      } else {
+        // Sinon garder ce qui était dans la grid ou 0
+        ligne.idbudgetdepartementnature = undefined;
+        ligne.montantDept = ligne.montantDept ?? 0;
+        ligne.montantSite = ligne.montantSite ?? 0;
+        ligne.montantSociete = ligne.montantSociete ?? 0;
+      }
+    });
+  }
+
+  private hasExistingLines(budgetId: string, deptId: string): boolean {
+    return this.ligneBudgets.some(
+      (l) => l.idbudget === budgetId && l.iddepartement === deptId
+    );
+  }
+
+  updateMontantsSelonValidation() {
+    if (!this.selectedBudget) return;
+    const vDept = this.selectedBudget.validedept === 1;
+    const vSite = this.selectedBudget.validesite === 1;
+    this.natureGrid = this.natureGrid.map((l) => {
+      if (vDept && !vSite) {
+        return { ...l, montantSite: l.montantDept };
+      }
+      if (vSite) {
+        return { ...l, montantSociete: l.montantSite };
+      }
+      return l;
+    });
+  }
+
+  onMontantChange(
+    ligne: any,
+    field: 'montantDept' | 'montantSite' | 'montantSociete',
+    value: number
+  ) {
+    ligne[field] = value;
+    if (
+      field === 'montantDept' &&
+      this.selectedBudget?.validedept === 1 &&
+      !this.selectedBudget?.validesite
+    )
+      ligne.montantSite = value;
+    if (field === 'montantSite' && this.selectedBudget?.validesite === 1)
+      ligne.montantSociete = value;
   }
 
   //création du formulaire
   initForm(): void {
     this.ligneBudgetForm = this.fb.group({
       idbudget: ['', [Validators.required]],
+      iddepartement: [''],
       montantprevisiondept: ['', [Validators.required]],
       montantprevisionsite: ['', [Validators.required]],
       montantprevisionsociete: ['', [Validators.required]],
-      totalconsocloture: ['', [Validators.required]],
-      soldecloture: ['', [Validators.required]],
+      // totalconsocloture: ['', [Validators.required]],
+      // soldecloture: ['', [Validators.required]],
     });
   }
 
@@ -152,11 +371,11 @@ export class LigneBudgetComponent implements OnInit {
   dispatchLigneBudget(_object: LigneBudgetModel) {
     this.ligneBudgetForm.patchValue({
       idbudget: _object.idbudget,
+      iddepartement: _object.iddepartement,
+      idnature: _object.idnature,
       montantprevisiondept: _object.montantprevisiondept,
       montantprevisionsite: _object.montantprevisionsite,
       montantprevisionsociete: _object.montantprevisionsociete,
-      totalconsocloture: _object.totalconsocloture,
-      soldecloture: _object.soldecloture,
     });
   }
 
@@ -206,49 +425,134 @@ export class LigneBudgetComponent implements OnInit {
   }
 
   //Soumission du formulaire
+
+  // onSubmit() {
+  //   this.msgErros = '';
+
+  //   const formValue = this.ligneBudgetForm.value;
+
+  //   // ============================
+  //   // MODE GRILLE (prioritaire)
+  //   // ============================
+  //   if (
+  //     this.natureGrid?.length > 0 &&
+  //     this.selectedBudget &&
+  //     formValue.iddepartement
+  //   ) {
+  //     const payload = this.natureGrid.map((l) => ({
+  //       idbudget: this.selectedBudget!.idbudget,
+  //       iddepartement: formValue.iddepartement,
+  //       idnature: l.idnature,
+  //       montantprevisiondept: l.montantDept || 0,
+  //       montantprevisionsite: l.montantSite || 0,
+  //       montantprevisionsociete: l.montantSociete || 0,
+  //       createdby: 'MAF',
+  //     }));
+
+  //     this.lignebudgetservice.createMultiple(payload).subscribe({
+  //       next: () => {
+  //         this.getAllLigneBudgets();
+  //         this.resetAfterSubmit();
+  //       },
+  //       error: (err) => (this.msgErros = err.error?.error || 'Erreur serveur'),
+  //     });
+
+  //     return;
+  //   }
+
+  //   // ============================
+  //   // MODE MODAL (une seule ligne)
+  //   // ============================
+  //   if (this.ligneBudgetForm.invalid) {
+  //     Object.values(this.ligneBudgetForm.controls).forEach((c) =>
+  //       c.markAsTouched()
+  //     );
+  //     this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
+  //     return;
+  //   }
+
+  //   const ligne: LigneBudgetModel = {
+  //     ...this.ligneBudget,
+  //     ...formValue,
+  //     createdby: 'MAF',
+  //   };
+
+  //   this.actionModal === 'create' ? this.create(ligne) : this.update(ligne);
+  // }
+
   onSubmit() {
-    /** Check formulaire */
     this.msgErros = '';
-    const controls = this.ligneBudgetForm.controls;
-    if (this.ligneBudgetForm.invalid) {
-      Object.keys(controls).forEach((controlName) =>
-        controls[controlName].markAsTouched()
-      );
+    const formValue = this.ligneBudgetForm.value;
+
+    if (!this.selectedBudget || !formValue.iddepartement) {
       this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
       return;
     }
 
-    /** 2. prepare data */
-    const formValue = this.ligneBudgetForm.value;
+    // Payload commun
+    const payload = this.natureGrid.map((l) => ({
+      idbudget: this.selectedBudget!.idbudget,
+      iddepartement: formValue.iddepartement,
+      idnature: l.idnature,
+      montantprevisiondept: l.montantDept ?? 0,
+      montantprevisionsite: l.montantSite ?? 0,
+      montantprevisionsociete: l.montantSociete ?? 0,
+      createdby: 'MAF',
+    }));
+    const payloadUpdate = this.natureGrid
+      .filter((l) => l.idbudgetdepartementnature) // sécurité
+      .map((l) => ({
+        idbudgetdepartementnature: l.idbudgetdepartementnature!,
+        idbudget: this.selectedBudget!.idbudget,
+        iddepartement: formValue.iddepartement,
+        idnature: l.idnature,
+        montantprevisiondept: l.montantDept ?? 0,
+        montantprevisionsite: l.montantSite ?? 0,
+        montantprevisionsociete: l.montantSociete ?? 0,
+        updatedby: 'MAF',
+      }));
 
-    this.ligneBudget.createdby = 'MAF';
+    const exists = this.hasExistingLines(
+      this.selectedBudget.idbudget,
+      formValue.iddepartement
+    );
 
-    const _ligneBudget: LigneBudgetModel = {
-      ...this.ligneBudget,
-      ...formValue,
-      iddepartement:
-        formValue.iddepartement === '' ? null : formValue.iddepartement,
-      idnature: formValue.idnature === '' ? null : formValue.idnature,
-    };
+    this.loading = true;
 
-    /** 3. choices action */
-    if (this.actionModal == 'create') this.create(_ligneBudget);
-    else {
-      this.update({
-        idbudgetdepartementnature: _ligneBudget.idbudgetdepartementnature,
-        idbudget: formValue.idbudget,
-        iddepartement:
-          formValue.iddepartement === '' ? null : formValue.iddepartement,
-        idnature: formValue.idnature === '' ? null : formValue.idnature,
-        montantprevisiondept: formValue.montantprevisiondept,
-        montantprevisionsite: formValue.montantprevisionsite,
-        montantprevisionsociete: formValue.montantprevisionsociete,
-        totalconsocloture: formValue.totalconsocloture,
-        soldecloture: formValue.soldecloture,
-      });
-    }
-    // if (!_journal.idjournal) this.create(_journal);
-    // else this.update(_journal);
+    const request$ = exists
+      ? this.lignebudgetservice.updateMultiple(payloadUpdate)
+      : this.lignebudgetservice.createMultiple(payload);
+
+    request$.subscribe({
+      next: () => {
+        this.getAllLigneBudgets();
+        this.prefillNatureGrid();
+        this.resetAfterSubmit();
+      },
+      error: (err) => {
+        this.msgErros = err.error?.error || 'Erreur serveur';
+        this.loading = false;
+      },
+    });
+  }
+
+  resetAfterSubmit(modalId: string = 'showModal') {
+    // Reset formulaire
+    this.ligneBudgetForm.reset();
+
+    // Reset état métier
+    this.ligneBudget = new LigneBudgetModel();
+    this.selectedBudget = undefined;
+    this.natureGrid = [];
+    this.actionModal = 'create';
+    this.msgErros = '';
+
+    // Reset validations visuelles
+    this.ligneBudgetForm.markAsPristine();
+    this.ligneBudgetForm.markAsUntouched();
+
+    // Fermer la modale
+    this.closeModal(modalId);
   }
 
   //Enregistrement de données
@@ -259,9 +563,9 @@ export class LigneBudgetComponent implements OnInit {
     this.lignebudgetservice.create(dataToSend).subscribe({
       next: (res: any) => {
         if (res.success) {
-          this.closeModal('showModal');
           this.getAllBudgets();
           this.getAllLigneBudgets();
+          this.resetAfterSubmit();
         } else {
           this.msgErros = 'Erreur de création';
           alert(this.error);
@@ -282,9 +586,9 @@ export class LigneBudgetComponent implements OnInit {
     this.lignebudgetservice.update(_ligneBudget).subscribe({
       next: (res: any) => {
         if (res.success) {
-          this.closeModal('showModal');
           this.getAllBudgets();
           this.getAllLigneBudgets();
+          this.resetAfterSubmit();
         } else {
           this.error = 'Erreur de modification';
         }

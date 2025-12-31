@@ -61,6 +61,9 @@
                   type="text"
                   class="form-control form-control-sm search"
                   placeholder="rechercher par code, libelle..."
+                  [(ngModel)]="searchTerm"
+                  (ngModelChange)="applyFilters()"
+                  [ngModelOptions]="{ standalone: true }"
                 />
                 <i class="ri-search-line search-icon"></i>
               </div>
