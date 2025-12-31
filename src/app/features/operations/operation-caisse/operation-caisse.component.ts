@@ -57,6 +57,9 @@ export class OperationCaisseComponent implements OnInit{
   //Changement titre modal
   actionModal: string = "create";
 
+  //Bouton active / inactive
+  isUpdated: boolean = true;
+
   //Liste de caisse utilisateur
   caissesUser: AffectationCaisseModel[] = [];
 
@@ -219,17 +222,37 @@ export class OperationCaisseComponent implements OnInit{
     });
   }
 
+  //chargement des demandes
+  loadAllDemandes() {
+    const params = {
+      page: this.currentPage,
+      limit: 100,
+      search: '',
+      date: '',
+      status: '',
+    };
+    this.service.getAllEntetes(params).subscribe({
+      next : (res) => {
+        if(res.success){
+          //this.entetesDmd = res.data.data;
+          this.entetesDmd = (res.data.data || []).filter(
+            (n: any) => n.decaisse === 0
+          )
+        }
+      },
+      error: (err) => {
+        this.toastr.error("Erreur backend");
+      }
+    });
+  }
 
   //Recuperer les natures opérations
   getAllNatureoperations(){
-    const params = {
-      page: 1,
-      limit: 100
-    };
     this.natureoperationservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
-          this.natureoperations = (res.data.data || []).filter(
+          console.log(this.natureoperations);
+          this.natureoperations = (res.data || []).filter(
             (n: any) => n.actif === 1
           );
         }
@@ -239,14 +262,10 @@ export class OperationCaisseComponent implements OnInit{
 
   //Recupérer les centres analytiques
   getAllcentres(){
-    const params = {
-      page: 1,
-      limit: 100
-    };
     this.centreanalytiqueservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
-          this.centres = (res.data.data || []).filter(
+          this.centres = (res.data || []).filter(
             (n: any) => n.actif === 1
           )
         }
@@ -304,14 +323,10 @@ export class OperationCaisseComponent implements OnInit{
 
   //Recupérer les tiers
   getAllTiers(){
-    const params = {
-      page: 1,
-      limit: 100
-    };
     this.tiersservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
-          this.tiers = (res.data.data || []).filter(
+          this.tiers = (res.data || []).filter(
             (n: any) => n.actif === 1
           )
         }
@@ -386,7 +401,7 @@ export class OperationCaisseComponent implements OnInit{
       typepaiement: ["", [Validators.required]],
       lignes: this.fb.array([]),
       devise : ["", [Validators.required]],
-      site : ["1B386C16-B927-4124-BE18-7721862C1CE1"],
+      site : [this.user.idsite ?? null],
       societe : [this.user.idsociete ?? null],
       montant: [0],
       montantRefglobal: [0],
@@ -1104,6 +1119,7 @@ export class OperationCaisseComponent implements OnInit{
   // Recuperer la devise
 
   modalCreate(){
+    this.isUpdated = true;
     this.actionModal = "create";
     //Charger les tiers
     this.getAllTiers();
@@ -1120,12 +1136,14 @@ export class OperationCaisseComponent implements OnInit{
         //Si la demande est sélectionnée
         this.operationForm.get('demande')?.valueChanges.subscribe(iddemande => {
           if (iddemande) {
-            this.onDemandeSelected(iddemande);
+            // Désactiver les boutons sur le formulaire de création
+            this.isUpdated = false;
 
+            this.onDemandeSelected(iddemande);
             //Verrouiller tout le formulaire
             this.operationForm.disable({ emitEvent: false });
-
             //Champs autorisés
+            this.operationForm.get('demande')?.enable({ emitEvent: false });
             this.operationForm.get('caisses')?.enable({ emitEvent: false });
           }
         });
@@ -1199,6 +1217,61 @@ export class OperationCaisseComponent implements OnInit{
     this.isAnyOpen = this.caisseperiodes.some(
       p => p.statut?.toLowerCase() === "ouverte"
     );
+  }
+
+  //Sur la demande selectionnée
+  onDemandeSelected(iddemande: string) {
+    this.service.getEntete(iddemande).subscribe({
+      next: (res) => {
+        if(res.success){
+          this.fillFormFromDemande(res.data);
+        }else{
+          this.loadingModal = false;
+        }
+      },
+      error: () => {
+        this.loadingModal = false;
+      }
+    });
+  }
+
+  //Création des lignes depuis la demande
+  createLigneFromDemande(ligne: any): FormGroup {
+    return this.fb.group({
+      idligne: [''],
+      montantligne: [ligne.montantdemande, Validators.required],
+      natureop: [ligne.natureoperation?.idnature],
+      centre: [ligne.centreanalytique?.idcentre],
+      tiers: [ligne.tiers?.idtiers],
+    });
+  }
+
+  //Remplir le formulaire depuis la demande
+  fillFormFromDemande(demande: any) {
+    /**Patch entête */
+    this.operationForm.patchValue({
+      libelle: demande.libelledemande,
+      devise: demande.devise?.iddevise,
+      site: demande.site?.idsite,
+      societe: demande.societe?.idsociete,
+      typepaiement: demande.typedemande === 'Décaissement' ? 'decaissement' : 'encaissement',
+      montant: this.getTotalDemande(demande)
+    });
+
+    /** Reset lignes */
+    const lignesFA = this.operationForm.get('lignes') as FormArray;
+    lignesFA.clear();
+
+    /** Recréer lignes */
+    demande.lignes.forEach((ligne: any) => {
+      const ligneFG = this.createLigneFromDemande(ligne);
+      lignesFA.push(ligneFG);
+    });
+
+    /** Recalcul auto */
+    this.caisses.controls.forEach((caisseFG: any) => {
+      this.applyAutoCalcul(caisseFG);
+    });
   }
 
 }
