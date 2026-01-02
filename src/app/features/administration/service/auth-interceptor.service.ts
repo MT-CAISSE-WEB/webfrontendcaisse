@@ -23,7 +23,7 @@ export class AuthInterceptor implements HttpInterceptor {
       catchError((err: HttpErrorResponse) => {
         console.log('HTTP Error:', err);
         if (err.status === 401 ) {
-          //alert(' Vous n’êtes pas authentifié ou votre session a expiré.');
+          alert(' Vous n’êtes pas authentifié ou votre session a expiré.');
           this.authService.logout();
           this.router.navigate(['/login']);
         }

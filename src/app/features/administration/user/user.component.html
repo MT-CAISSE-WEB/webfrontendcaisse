@@ -254,7 +254,7 @@
                                 <input type="email" id="login" formControlName="login" class="form-control form-control-sm" value="email">
                               </div>
 
-                             <div class="col-md-12 mb-3">
+                             <div class="col-md-12 mb-3" *ngIf="(actionModal==='create')">
                                 <label for="password" class="form-label">Mot de passe </label>
                                 <input type="password" id="password" formControlName="password" class="form-control form-control-sm" placeholder="Mot de passe">
                               </div>

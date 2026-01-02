@@ -42,6 +42,11 @@ export const APP_USER = 'utilisateur';
 export const APP_USER_ADMINISTRATION = APP_ADMINISTRATION + "/" + APP_USER;
 export const APP_ROOT_USER_ADMINISTRATION = APP_ROOT + "/" + APP_USER_ADMINISTRATION;
 
+//Route circuitvalidation
+export const APP_WORKFLOW = 'workflow';
+export const APP_WORKFLOW_ADMINISTRATION = APP_ADMINISTRATION + "/" + APP_WORKFLOW;
+export const APP_ROOT_WORKFLOW_ADMINISTRATION = APP_ROOT + "/" + APP_WORKFLOW_ADMINISTRATION;
+
 //Route Role
 export const APP_ROLE = 'role';
 export const APP_ROLE_ADMINISTRATION = APP_ADMINISTRATION + "/" + APP_ROLE;

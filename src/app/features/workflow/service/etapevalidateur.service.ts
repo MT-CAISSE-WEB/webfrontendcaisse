@@ -3,13 +3,13 @@ import { Observable } from "rxjs";
 import { QueryResultModel } from "../../../_core/models/query-result.model";
 import { URL_LOCAL } from "../../../_core/routes/backend.root";
 import { Injectable } from "@angular/core";
-import { circuitvalidationmodel } from "../model/circuitvalidation.model";
+import { etapevalidateurmodel } from "../model/etapevalidateur.model";
 
 @Injectable({
   providedIn: 'root'
 })
-export class circuitvalidationservice {
-    url : string = 'circuitvalidation' ;
+export class  etapevalidateurservice {
+    url : string = 'etapevalidateur' ;
 
     constructor(private http: HttpClient) {}
 
@@ -40,21 +40,9 @@ export class circuitvalidationservice {
    * @param _object
    * 
    */
-   createcomplete (_object: any): Observable<any> {
-    return this.http.post<any>(
-      URL_LOCAL.baseUrl + this.url + "/",
-      _object
-    );
-  }
-
-    /**
-   *upsert
-   * @param _object
-   * 
-   */
-   update (_object : circuitvalidationmodel): Observable< circuitvalidationmodel> {
-    return this.http.put < circuitvalidationmodel>(
-      URL_LOCAL.baseUrl + this.url+"/update/"+_object.idcircuitvalidation,_object
+   update (_object :  etapevalidateurmodel): Observable<etapevalidateurmodel> {
+    return this.http.put <etapevalidateurmodel>(
+      URL_LOCAL.baseUrl + this.url+"/update/"+_object.idcircuitetape+"/"+_object.idutilisateur,_object
     );
   }
 
@@ -62,11 +50,12 @@ export class circuitvalidationservice {
    * delete
    * @param id
    */
-  delete(id: string): Observable<any> {
+  delete(idutilisateur: string,idcircuitetape:string): Observable<any> {
     return this.http.delete<any>(
-      URL_LOCAL.baseUrl + this.url + "/delete/" + id
+      URL_LOCAL.baseUrl + this.url + "/delete/" + idcircuitetape +"/"+idutilisateur
     );
   }
+
 
   /**
    * get one
