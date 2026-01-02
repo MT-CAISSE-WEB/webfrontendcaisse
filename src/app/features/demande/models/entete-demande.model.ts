@@ -1,5 +1,6 @@
 import { devisemodel } from "../../donnee_base/donnee_base/model/devise.model";
 import { societeModel } from "../../donnee_base/models/societe.model";
+import { departementmodel } from "../../structure/model/departement.model";
 import { sitemodel } from "../../structure/model/site.model";
 import { LigneDemande } from "./ligne-demande.model";
 
@@ -26,4 +27,5 @@ export interface EnteteDemande {
   site?: sitemodel;
   societe? : societeModel;
   devise? : devisemodel;
+  departement?: departementmodel;
 }

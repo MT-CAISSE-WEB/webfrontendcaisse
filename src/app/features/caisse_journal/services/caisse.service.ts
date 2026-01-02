@@ -98,9 +98,9 @@ export class CaisseService {
    * open caisse
    * @param _object
    */
-  open(_object: any): Observable<any> {
+  open(id: string, _object: any): Observable<any> {
     return this.http.put<any>(
-      URL_LOCAL.baseUrl + this.url + "/open/" + _object.idperiode,
+      URL_LOCAL.baseUrl + this.url + "/open/" + id,
       _object
     );
   }
@@ -109,9 +109,9 @@ export class CaisseService {
    * open caisse
    * @param _object
    */
-  close(_object: any): Observable<any> {
+  close(id: string, _object: any): Observable<any> {
     return this.http.put<any>(
-      URL_LOCAL.baseUrl + this.url + "/close/" + _object.idperiode,
+      URL_LOCAL.baseUrl + this.url + "/close/" + id,
       _object
     );
   }

@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.contantes';
 import { AffectationCaisseModel } from '../../../features/caisse_journal/models/affectationcaisse.model';
 import { AffectationCaisseService } from '../../../features/caisse_journal/services/affectationcaisse.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-layout-header',
@@ -19,7 +20,7 @@ import { AffectationCaisseService } from '../../../features/caisse_journal/servi
 export class LayoutHeaderComponent implements OnInit {
 
   caisserecent : caissePeriodeModel = new caissePeriodeModel();
-  caisseperiodes : caissePeriodeModel[] = [];
+  caisseperiodes : any[] = [];
   fb: FormBuilder = new FormBuilder();
   caisseperiodeForm : FormGroup = this.fb.group({});
   msgErros: string = "";
@@ -33,7 +34,8 @@ export class LayoutHeaderComponent implements OnInit {
 
   caissesStatuses: { [id: string]: string } = {};
 
-  constructor(private caisseuserservice: AffectationCaisseService, private caisseservice: CaisseService,private caisseStatusService: CaissePeriodeService){}
+  constructor(private caisseuserservice: AffectationCaisseService, private caisseservice: CaisseService,
+    private caisseStatusService: CaissePeriodeService, private toastr : ToastrService,){}
 
   ngOnInit(): void {
     //récuperer les caisses de l'utilisateur
@@ -63,42 +65,36 @@ export class LayoutHeaderComponent implements OnInit {
         if(res.success){
           this.caissesUser = res.data;
           if (this.caissesUser.length > 0) {
-            this.getCaissesPerdiodes();
+            //this.getCaissesPerdiodes();
+            this.getcaissesPeriodes();
           }else {
             this.loadingCaisses = false;
-        }
+            this.toastr.error("Erreur chargement caisses utilisateur");
+          }
         }
       },
-      error: () => {
+      error: (err) => {
         this.loadingCaisses = false;
-        console.error("Erreur chargement caisses utilisateur");
+        this.toastr.error(err.error.message);
       }
     });
   }
 
-  getCaissesPerdiodes() {
-    const requests = this.caissesUser.map(c =>
-      this.caisseservice.getRecentCaisse(c.idcaisse)
-    );
-
-    forkJoin(requests).subscribe({
-      next: (responses) => {
-        const statuses : any = {};
-        this.caisseperiodes = responses.map((res, index) => {
-          const item = res.data;
-          const caisseId = this.caissesUser[index].idcaisse;
-          statuses[caisseId] = item.statut;
-          return item;
-        });
-        // mise à jour globale
-        this.caisseStatusService.updateStatuses(statuses);
-        // maintenant que tout est chargé → on initialise le formulaire
-        this.initForm();
-        this.loadingCaisses = false;
+  //Récuperer les caisses périodes
+  getcaissesPeriodes(){
+    this.loadingCaisses = true;
+    this.caisseuserservice.getCaissePeriodeByUser(this.user.idutilisateur ?? null).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.caisseperiodes = res.data;
+          this.initForm();
+          this.loadingCaisses = false;
+        }else{
+          this.toastr.error("Echec de récupération de la période")
+        }
       },
-      error: () => {
-        this.loadingCaisses = false;
-        console.log("Erreur de chargement des caisses");
+      error : (err) => {
+        this.toastr.error(err.error.message);
       }
     });
   }
@@ -108,13 +104,13 @@ export class LayoutHeaderComponent implements OnInit {
     this.caisseperiodes.forEach(c => {
       this.caissesArray.push(
         this.fb.group({
-          idperiode: [c.idperiode],
-          idcaisse: [c.idcaisse],
-          statut: [c.statut],
-          dateperiode: [c.dateperiode],
+          idperiode: [c.dernierePeriode.idperiode],
+          idcaisse: [c.caisse.idcaisse],
+          statut: [c.dernierePeriode.statut],
+          dateperiode: [c.dernierePeriode.dateperiode],
           caisse: [c.caisse]
-        }));
-      });
+      }));
+    });
   }
 
   get caissesArray(): FormArray<FormGroup> {
@@ -139,28 +135,26 @@ export class LayoutHeaderComponent implements OnInit {
     };
 
     if (this.isJourneeOuverte()) {
-      this.closeCaisse(_caisse.caisses);   // Journée ouverte → fermer
+      this.closeCaisse(this.user.idutilisateur, _caisse.caisses);   // Journée ouverte → fermer
     } else {
-      this.openCaisse(_caisse.caisses);    // Journée fermée → ouvrir
+      this.openCaisse(this.user.idutilisateur, _caisse.caisses);    // Journée fermée → ouvrir
     }
   }
 
-  openCaisse(caisse: any[]){
-    caisse.forEach(c => {
-      this.caisseservice.open(c).subscribe({
-        next: (res) => {
-          if (res.success) {
-            this.error = "Caisse ouverte";
-          } else {
-            this.error = "Erreur de modification";
-          }
-          this.loading = false;
-        },
-        error: (err) => {
-          this.error = "Modification échec";
-          this.loading = false;
+  openCaisse(iduser: string, caisses: any){
+    this.caisseservice.open(iduser, caisses).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.error = "Caisse ouverte";
+        } else {
+          this.error = "Erreur de modification";
         }
-      })
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = "Modification échec";
+        this.loading = false;
+      }
     })
   }
 
@@ -171,13 +165,13 @@ export class LayoutHeaderComponent implements OnInit {
 
   isJourneeOuverte(): boolean {
     return this.caisseperiodes.some(
-      p => p.statut?.toLowerCase() === "ouverte"
+      p => p.dernierePeriode.statut?.toLowerCase() === "ouverte"
     );
   }
 
   isJourneeCloturee(): boolean {
     return this.caisseperiodes.some(
-      p => p.statut?.toLowerCase() === "cloturee"
+      p => p.dernierePeriode.statut?.toLowerCase() === "cloturee"
     );
   }
 
@@ -195,18 +189,16 @@ export class LayoutHeaderComponent implements OnInit {
     }
   }
 
-  closeCaisse(caisses: any[]) {
-    caisses.forEach(c => {
-      this.caisseservice.close(c).subscribe({
-        next: (res) => {
-          this.error = res.success ? "Caisse clôturée" : "Erreur de clôture";
-          this.loading = false;
-        },
-        error: () => {
-          this.error = "Clôture échouée";
-          this.loading = false;
-        }
-      });
+  closeCaisse(iduser : string, caisses: any) {
+    this.caisseservice.close(iduser, caisses).subscribe({
+      next: (res) => {
+        this.error = res.success ? "Caisse clôturée" : "Erreur de clôture";
+        this.loading = false;
+      },
+      error: (err) => {
+        this.loading = false;
+        this.toastr.error(err.error.message);
+      }
     });
   }
 
@@ -229,9 +221,9 @@ export class LayoutHeaderComponent implements OnInit {
 
     /** Décision */
     if (this.isJourneeOuverte()) {
-      this.closeCaisse(caisses);   // Journée ouverte → fermer
+      this.closeCaisse(this.user.idutilisateur, caisses);   // Journée ouverte → fermer
     } else {
-      this.openCaisse(caisses);    // Journée fermée → ouvrir
+      this.openCaisse(this.user.idutilisateur, caisses);    // Journée fermée → ouvrir
     }
   }
 
@@ -251,9 +243,4 @@ export class LayoutHeaderComponent implements OnInit {
 
     return `${dayShort} ${day} ${month} ${year}`;
   }
-
-  // actionJournee() {
-  //   this.handleCaisseAction();
-  // }
-
 }

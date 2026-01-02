@@ -77,4 +77,14 @@ export class AffectationCaisseService {
     );
   }
 
+  /**
+   * get one
+   * @param id
+   */
+  getCaissePeriodeByUser(id: string): Observable<any> {
+    return this.http.get<any>(
+      URL_LOCAL.baseUrl + this.url + "/periode/user/" + id
+    );
+  }
+
 }

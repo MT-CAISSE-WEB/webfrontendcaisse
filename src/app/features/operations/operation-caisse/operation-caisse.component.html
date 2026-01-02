@@ -406,9 +406,12 @@
                                                     <div class="input-light">
                                                         <select formControlName="centre" (mousedown)="protectionField(ligne, 'centre')" class="form-control form-control-sm bg-light border-0">
                                                             <option value="" selected>Choisir centre analytique</option>
-                                                            @for(item of centres; track $index){
+                                                            <option *ngFor="let c of ligne.get('centres')?.value" [value]="c.idcentreanalytique">
+                                                                    {{ c.libelle }}
+                                                            </option>
+                                                            <!-- @for(item of centres; track $index){
                                                                 <option value="{{item.idcentreanalytique}}"> {{item.libelle}} </option>
-                                                            }
+                                                            } -->
                                                         </select>
                                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                                     </div>

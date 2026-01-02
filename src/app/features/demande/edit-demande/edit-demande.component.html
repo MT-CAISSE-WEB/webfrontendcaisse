@@ -87,8 +87,9 @@
               <div class="mb-3">
                 <select class="form-select form-select-sm bg-light" formControlName="departement">
                   <option value="">-- Sélectionner departement --</option>
-                  <option value="Décaissement">Departement</option>
-                  <option value="Approvisionnement">Departement</option>
+                  @for(item of departementUser; track $index){
+                    <option value="{{item.iddepartement! }}">{{item.codedept! }} - {{ item.libelle! }} </option>
+                  }
                 </select>
               </div>
             </div>
@@ -140,7 +141,7 @@
                           <div class="input-light">
                             <select class="form-control form-control-sm bg-light border-0" formControlName="natureop" required>
                                 <option value="" selected>Choisir nature operation</option>
-                                @for(item of natureoperations; track $index){
+                                @for(item of naturesBydepartements; track $index){
                                     <option value="{{item.idnature}}"> {{item.libelle}} </option>
                                 }
                             </select>
@@ -150,9 +151,12 @@
                           <div class="input-light">
                             <select formControlName="centre" class="form-control form-control-sm bg-light border-0">
                                 <option value="" selected>Choisir centre analytique</option>
-                                @for(item of centres; track $index){
+                                <option *ngFor="let c of ligne.get('centres')?.value" [value]="c.idcentreanalytique">
+                                  {{ c.libelle }}
+                                </option>
+                                <!-- @for(item of centresBynatures; track $index){
                                     <option value="{{item.idcentreanalytique}}"> {{item.libelle}} </option>
-                                }
+                                } -->
                             </select>
                             <div class="invalid-feedback">{{ msgErros }}</div>
                           </div>
@@ -258,7 +262,7 @@
                   <tbody>
                   <tr>
                     <td colspan="5">
-                      <button type="button" class="btn btn-sm btn-primary" (click)="addLigne()"> <i class="bx bx-zoom-in align-bottom me-1"></i> </button>
+                      <button type="button" [disabled]="!departement" class="btn btn-sm btn-primary" (click)="addLigne()"> <i class="bx bx-zoom-in align-bottom me-1"></i> </button>
                     </td>
                   </tr>
                   </tbody>
