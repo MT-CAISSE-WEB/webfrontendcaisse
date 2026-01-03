@@ -1,209 +1,257 @@
-<!-- start page title -->
+<!-- ================= PAGE TITLE ================= -->
 <div class="row">
-    <div class="col-12">
-        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">Circuit de validation </h4>
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Données de base</a></li>
-                    <li class="breadcrumb-item active">Paramétrage Devise</li>
-                     <li class="breadcrumb-item active">Taux Devise</li>
-                </ol>
-            </div>
-        </div>
+  <div class="col-12">
+    <div class="page-title-box d-flex justify-content-between align-items-center">
+      <h4>Circuit de validation</h4>
+      <ol class="breadcrumb m-0">
+        <li class="breadcrumb-item">Administration</li>
+        <li class="breadcrumb-item active">Workflow</li>
+      </ol>
     </div>
+  </div>
 </div>
-<!-- end page title -->
+
+<!-- ================= CARD ================= -->
+<div class="card">
+  <div class="card-header">
+    <div class="row">
+      <div class="col-sm-10">
+         <h5>Configuration du workflow</h5>
+      </div>
+
+      <div class="col-sm-2">
+          <button type="button" class="btn btn-md btn-light" (click)="modalCreate()"> Rénitialiser </button>
+      </div>
+    </div>
+   
+  </div>
+
+  <div class="card-body">
+
+    <!-- ================= FORM ================= -->
+    <form [formGroup]="circuitvalidationForm" (ngSubmit)="onsubmit()">
+
+      <!-- ================= NAV STEPS ================= -->
+      <ul class="nav nav-pills nav-justified mb-4">
+        <li class="nav-item">
+          <button type="button" class="nav-link active" data-bs-toggle="pill" data-bs-target="#step1">
+           Etape 1 :  Circuit de validation
+          </button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-link" data-bs-toggle="pill" data-bs-target="#step2">
+            Etape 2 : Etapes et Validateurs
+          </button>
+        </li>
+        <li class="nav-item">
+          <button type="button" class="nav-link" data-bs-toggle="pill" data-bs-target="#step3">
+            Etape 3 : Finish
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content">
+
+        <!-- ================= STEP 1 ================= -->
+        <div class="tab-pane fade show active" id="step1">
+          <div class="row g-3">
+
+            <div class="col-md-4">
+              <label>Code circuit</label>
+              <input class="form-control form-control-sm"
+                     formControlName="codecircuitvalidation">
+            </div>
+
+            <div class="col-md-4">
+              <label>Type entité</label>
+              <select class="form-select form-select-sm" formControlName="typeentite">
+                <option value="">-- Choisir --</option>
+                <option value="societe">Société</option>
+                <option value="site">Site</option>
+              </select>
+            </div>
+
+            <div class="col-md-4">
+              <label>Type action</label>
+              <select class="form-select form-select-sm" formControlName="typeaction">
+                <option value="">-- Choisir --</option>
+                <option value="budget">Budget</option>
+                <option value="decaissement">Décaissement</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label>Société</label>
+              <select class="form-select form-select-sm" formControlName="idsociete">
+                <option value="">-- Société --</option>
+                <option *ngFor="let s of societes" [value]="s.idsociete">
+                  {{ s.raisonsociale }}
+                </option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <div *ngIf="circuitvalidationForm.get('typeentite')?.value !== 'societe'">
+              <label>Site</label>
+              <select class="form-select form-select-sm" formControlName="idsite">
+                <option value="">-- Site --</option>
+                <option *ngFor="let st of sites" [value]="st.idsite">
+                  {{ st.libelle }}
+                </option>
+              </select>
+            </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ================= STEP 2 ================= -->
+        <div class="tab-pane fade" id="step2">
+
+          <div formArrayName="etapes">
+
+            <div *ngFor="let etape of etapes.controls; let i = index"
+                 [formGroupName]="i"
+                 class="card mb-3">
+
+             <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Étape {{ i + 1 }}</strong>
+
+                <div class="d-flex gap-2">
+                    <button
+                    type="button"
+                    class="btn btn-sm btn-outline-primary"
+                    (click)="addValidateur(i)">
+                    + Validateur
+                    </button>
+
+                    <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="removeEtape(i)"
+                    *ngIf="etapes.length > 1">
+                    🗑️ Étape
+                    </button>
+                </div>
+                </div>
 
 
+              <div class="card-body">
+
+                <div formArrayName="validateurs">
+
+                  <div *ngFor="let v of getValidateurs(i).controls; let j = index"
+                       [formGroupName]="j"
+                       class="row align-items-center mb-2">
+
+                    <div class="col-md-10">
+                      <select class="form-select form-select-sm"
+                              formControlName="idutilisateur">
+                        <option value="">-- Utilisateur --</option>
+                        <option *ngFor="let u of utilisateursFiltres"
+                                [value]="u.idutilisateur">
+                          {{ u.prenom }} {{ u.nom }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-2 text-end">
+                      <button type="button"
+                              class="btn btn-sm btn-danger"
+                              (click)="removeValidateur(i, j)">
+                        ❌
+                      </button>
+                    </div>
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <button type="button"
+                  class="btn btn-success"
+                  (click)="addEtape()">
+            + Ajouter une étape
+          </button>
+        </div>
+
+        <!-- ================= STEP 3 ================= -->
+        <div class="tab-pane fade text-center" id="step3">
+          <h4 class="mt-4">Prêt à enregistrer le circuit </h4>
+          <!-- <button type="submit" class="btn btn-primary mt-3">   Enregistrer
+          </button>-->
+
+            <!-- <div class="hstack gap-2 justify-content-end"> -->
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                           {{actionModal === 'create' ? 'Enregistrer' :
+                                             actionModal === 'update' ? 'Modifier' :
+                                             'Dupliquer'
+                                            }}
+                                        </button>
+                                    </div>
+          
+        <!-- </div> -->
+
+      </div>
+    </form>
+  </div>
+</div>
 
 <div class="card">
+    <div class="card-header">
+      <h5>Circuits de validations </h5>
+    </div>
     <div class="card-body">
-       <form [formGroup]="circuitvalidationForm" (ngSubmit)="onsubmit()">
-  <div class="row g-3">
-
-     <!-- Code taux devise -->
-    <div class="col-xl-2 col-md-2">
-      <div class="input-group input-group-sm mb-2">
-    <input type="text" formControlName="codecircuitvalidation" 
-       class="form-control form-control-sm">
-       <label class="input-group-text">Code circuit de validation </label>
-      </div>
-    </div>
-
-    <!-- Devise Société -->
-    <div class="col-xl-3 col-md-2">
-      <div class="input-group input-group-sm mb-2">
-        <label class="input-group-text">1</label>
-        <select class="form-select form-select-sm" formControlName="iddeviseorigine">
-          <option value="">----Choisir la société -----</option>
-          <!-- <option *ngFor="let s of devises" [value]="d.iddevise">{{ d.codeiso }}</option> -->
-        </select>
-      </div>
-    </div>
-
-       <!-- Site -->
-    <div class="col-xl-3 col-md-2">
-      <div class="input-group input-group-sm mb-2">
-        <label class="input-group-text">1</label>
-        <select class="form-select form-select-sm" formControlName="iddeviseorigine">
-          <option value="">----Choisir le site -----</option>
-          <!-- <option *ngFor="let s of devises" [value]="d.iddevise">{{ d.codeiso }}</option> -->
-        </select>
-      </div>
-    </div>
-
-    <!-- Département -->
-    <div class="col-xl-3 col-md-2">
-      <div class="input-group input-group-sm mb-2">
-        <label class="input-group-text">1</label>
-        <select class="form-select form-select-sm" formControlName="iddeviseorigine">
-          <option value="">----Choisir le département -----</option>
-          <!-- <option *ngFor="let s of devises" [value]="d.iddevise">{{ d.codeiso }}</option> -->
-        </select>
-      </div>
-    </div>
-
-
-    <!-- Coefficient -->
-    <div class="col-md-2">
-      <div class="input-group input-group-sm mb-3">
-        <label class="input-group-text"> = </label>
-        <input type="number" formControlName="coefficient" class="form-control form-control-sm" placeholder="0">
-      </div>
-    </div>
-
-    <!-- Date -->
-    <div class="col-xl-3 col-md-2">
-      <div class="input-group input-group-sm mb-2">
-        <span class="input-group-text">
-            <!-- <i class="ri-calendar-2-line"></i> -->
-             Nombre validateur 
-        </span>
-        <input type="number" formControlName="datecours" 
-       class="form-control form-control-sm">
-      </div>
-    </div>
-    
-
-
-
-
-    <div class="col-md-auto ms-auto d-flex gap-2">
-    
-    <button type="submit" class="btn btn-sm btn-soft-info w-100">
-      {{ actionModal === 'create' ? 'Enregistrer' :
-         actionModal === 'update' ? 'Modifier' :
-         'Dupliquer'
-      }}
-    </button>
-
-    <button class="btn btn-sm btn-success w-100" (click)="modalCreate()">
-      Réinitialiser
-    </button>
-
-</div>
-
-
-  </div>
-</form>
+          <table class="table">
+  <thead>
+    <tr>
+      <th>Code</th>
+      <th>Type Entité</th>
+      <th>Type Action</th>
+      <th>Société</th>
+      <th>Site</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let circuit of filtrecircuitvalidation">
+      <td>{{ circuit.codecircuitvalidation }}</td>
+      <td>{{ circuit.typeentite }}</td>
+      <td>{{ circuit.typeaction }}</td>
+      <td>{{ getSocieteName(circuit.idsociete) }}</td>
+      <td>{{ getSiteName(circuit.idsite) }}</td>
+      <td>
+        <ul>
+           <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
+              <a href="#showModal" data-bs-toggle="modal" (click)="modalUpdate(circuit)" class="text-primary d-inline-block edit-item-btn">
+                  <i class="ri-pencil-fill fs-16"></i> 
+              </a>
+          </li>
+            <!-- <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
+              <a href="#showModal" data-bs-toggle="modal" (click)="modalDuplicate(circuit)" class="text-primary d-inline-block edit-item-btn">
+                  <i class="ri-file-copy-2-line fs-16"></i>
+              </a>
+          </li> -->
+          <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
+              <a class="text-danger d-inline-block remove-item-btn" (click)="modalDelete(circuit)" data-bs-toggle="modal" href="#deleteOrder">
+                  <i class="ri-delete-bin-5-fill fs-16"></i>
+              </a>
+          </li>
+        </ul>
+     </td>
+        
+        
+    </tr>
+  </tbody>
+</table>
     </div>
 </div>
-<!--end card-->
-
-<div class="row" id="contactList">
-    <div class="col-lg-12">
-        <div class="card">
-            <div class="card-body border border-dashed border-end-0 border-start-0">
-                <div class="row g-2">
-                </div>
-  
-            </div>
-            <div class="card-body">
-                <div class="table-responsive table-card">
-                    <table class="table align-middle table-nowrap" id="customerTable">
-                        <thead class="table-light text-muted">
-                            <tr>
-                                <th class="sort" data-sort="time" scope="col">Code </th>
-                                <th class="sort" data-sort="time" scope="col">type entité</th>
-                                <th class="sort" data-sort="currency_name" scope="col">type action</th>
-                                <th class="sort" data-sort="sort-avg_price" scope="col">Société </th>
-                                <th class="sort" data-sort="sort-price" scope="col">Site </th>
-                                <th class="sort" data-sort="or_val" scope="col">Département </th>
-                                <th class="sort" data-sort="status" scope="col">Nombre de validateur</th>
-                                <th class="sort" data-sort="status" scope="col">Rang de validateur </th>
-                            </tr>
-                        </thead>
-                        <!--end thead-->
-                        <tbody class="list form-check-all">
-                             @for (item of pagedcircuitvalidation; track $index){
-                            <tr>
-                                <td>{{item.circuitvalidtion}}</td>
-                                <td class="order_date time" data-timestamp="1641945600">{{ item.datecours | date:'fullDate' }}</td>
-                                 <!-- <td>{{item.typecours}}</td> -->
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <a href="javascript:void(0);" class="flex-grow-1 ms-2 currency_name">{{item.devise_origine}}</a>
-                                    </div>
-                                </td>
-                                <td class="order_value or_val" data-orderval="370683.20">{{item.coefficient}}</td>
-                                <td class="avg_price sort-avg_price" data-av-price="46154.30">{{item.coefficientinverse}}</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <a href="javascript:void(0);" class="flex-grow-1 ms-2 currency_name">{{item.devise_destination}}</a>
-                                    </div>
-                                </td>
-                                <td>
-                                    <ul class="list-inline hstack gap-2 mb-0">
-                                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" aria-label="View" data-bs-original-title="View">
-                                            <a href="#" class="view-item-btn" data-bs-toggle="modal" (click)="modalDuplicate(item)"><i class="ri-file-copy-2-line align-bottom text-secondary"></i></a>
-                                        </li>
-                                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" aria-label="Edit" data-bs-original-title="Edit">
-                                            <a class="edit-item-btn" href="#"  data-bs-toggle="modal" (click)="modalUpdate(item)" ><i class="ri-pencil-fill align-bottom text-primary"></i></a>
-                                        </li>
-                                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"   data-bs-placement="top" aria-label="Delete" data-bs-original-title="Delete">
-                                            <a class="remove-item-btn" data-bs-toggle="modal" (click)="modalDelete(item)" href="#deleteOrder" >
-                                                <i class="ri-delete-bin-fill align-bottom text-danger"></i>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </td>
-                            </tr>
-                            <!--end tr-->
-                        }
-                        </tbody>
-                    </table>
-                    <!--end table-->
-                    <div class="noresult" style="display: none">
-                        <div class="text-center">
-                            <h5 class="mt-2">Désolé ! Aucun resultat trouvé</h5>
-                            <p class="text-muted mb-0">We've searched more than 150+ orders We did not find any orders for you search.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-end mt-3">
-                    <div class="d-flex justify-content-end">
-                        <div class="pagination-wrap hstack gap-2">
-                            <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
-                                Précédent
-                            </button>
-                            <ul class="pagination listjs-pagination mb-0"> Page {{currentPage}} / {{totalPages}}</ul>
-                            <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)" class="btn btn-sm btn-soft-primary pagination-next">
-                                Suivant
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--end card-->
-    </div>
-    <!--end col-->
-</div>
-<!--end row-->
 
 
-                <!-- Modal -->
+   <!-- Modal -->
                 <div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
@@ -221,3 +269,4 @@
                     </div>
                 </div>
                 <!--end modal -->
+                            

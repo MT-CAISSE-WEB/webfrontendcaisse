@@ -1,10 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { circuitvalidationmodel } from '../model/circuitvalidation.model';
 import { circuitvalidationservice } from '../service/circuitvalidation.service';
 import { Router } from '@angular/router';
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
 import { CommonModule } from '@angular/common';
+import { societemodel } from '../../structure/model/societe.model';
+import { sitemodel } from '../../structure/model/site.model';
+import { departementmodel } from '../../structure/model/departement.model';
+import { societeservice } from '../../structure/service/societe.service';
+import { siteservice } from '../../structure/service/site.service';
+import { departementservice } from '../../structure/service/departement.service';
+import { usermodel } from '../../administration/model/user.model';
+import { userservice } from '../../administration/service/user.service';
 
 @Component({
   selector: 'app-circuitvalidation',
@@ -23,6 +31,14 @@ export class CircuitvalidationComponent implements OnInit{
       msgErros : string = "";
       loading: Boolean = false;
       circuitvalidationForm : FormGroup = this.fb.group({});
+      iscircuitvalidateur : Boolean = false;
+      iscircuitvalidation : Boolean = false;
+
+      //Société Site Dept
+      societes : societemodel[] = [];
+      sites : sitemodel[] = [];
+      departements : departementmodel [] = [];
+      utilisateurs : usermodel [] = [];
 
       //Tri et recherche 
       searchtext : string ="";
@@ -61,15 +77,38 @@ export class CircuitvalidationComponent implements OnInit{
       //Element à supprimer 
       deletetcircuitvalidation : any = null;
 
-      constructor(private cv:circuitvalidationservice,private router : Router){}
+      utilisateursFiltres: usermodel[] = [];
+
+      constructor(
+        private cv:circuitvalidationservice,
+        private soc : societeservice,
+        private st : siteservice,
+        private dep : departementservice,
+        private us : userservice,
+        private router : Router){}
 
         ngOnInit(): void {
             //Afficher toutes les devises
             this.getallcircuitvalidation()
+            this.loadsociete();
+            this.loadsite();
+            this.loaddepartement();
+            this.loadutilisateur();
             //Initialisation du formulaire
             this.initForm();
             this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("ce Circuit de validation");
             this.titleMsg = TITLE_DELETE;
+
+             // Quand typeentite change, on filtre les utilisateurs et on clear les validateurs
+              this.circuitvalidationForm.get('typeentite')?.valueChanges.subscribe(value => {
+                  console.log("typeentite changed:", value);
+                  this.filtrerUtilisateurs(value);
+                  // this.etapes.controls.forEach(etapeGroup => {
+                  //   const validateurs = etapeGroup.get('validateurs') as FormArray;
+                  //   validateurs.clear();
+                  // });
+              });
+
         }
 
   getallcircuitvalidation(){
@@ -82,6 +121,75 @@ export class CircuitvalidationComponent implements OnInit{
       }
     })
   }
+
+  loadsociete(){
+    this.soc.getAll().subscribe({
+      next : (res) => {
+        this.societes = res.data;
+      }
+    })
+  }
+
+  loadsite(){
+    this.st.getAll().subscribe({
+      next : (res) => {
+        this.sites = res.data;
+      }
+    })
+  }
+
+  loaddepartement(){
+    this.dep.getAll().subscribe({
+      next : (res) => {
+        this.departements = res.data;
+      }
+    })
+  }
+
+   loadutilisateur(){
+    this.us.getAll().subscribe({
+      next : (res) => {
+        this.utilisateurs = res.data;
+      }
+    })
+  }
+
+
+ filtrerUtilisateurs(typeEntiteForm: string) {
+  if (!typeEntiteForm) {
+    console.log(typeEntiteForm);
+
+    this.utilisateursFiltres = [...this.utilisateurs];
+    console.log(this.utilisateursFiltres);
+    return;
+  }
+
+  this.utilisateursFiltres = this.utilisateurs.filter(u => {
+    if (typeEntiteForm === 'societe') {
+      return u.typeentitesociete === 1;
+    } else if (typeEntiteForm === 'site') {
+      return u.typeentitesite === 1;
+  
+    } else {
+      return true;
+    }
+  });
+}
+
+getSocieteName(id: string): string {
+  const soc = this.societes.find(s => s.idsociete === id);
+  return soc ? soc.raisonsociale : '-';
+}
+
+getSiteName(id: string): string {
+  const site = this.sites.find(s => s.idsite === id);
+  return site ? site.libelle : '-';
+}
+
+
+
+
+
 
 
 
@@ -136,10 +244,6 @@ searchtauxdevise() {
     const typeaction = this.normalize(c.typeaction);
     const idsociete  = this.normalize(c.idsociete);
     const idsite = this.normalize(c.idsite);
-    const iddepartement = this.normalize(c.iddepartement);
-    const nombrevalidateur  = this.normalize(c.nombrevalidateur);
-    const rangvalidation = this.normalize(c.rangvalidation);
-    const actif  = this.normalize(c.actif);
     
 
     const matchtext =
@@ -148,11 +252,7 @@ searchtauxdevise() {
      typeentite.includes(term) ||
      typeaction.includes(term) ||
      idsociete.includes(term) ||
-     idsite.includes(term) ||
-     iddepartement.includes(term) ||
-     nombrevalidateur.includes(term) ||
-     rangvalidation.includes(term) ||
-     actif.includes(term) ;
+     idsite.includes(term) ;
 
     // const matchstatus =
     //   this.selectedstatus === ""
@@ -181,14 +281,52 @@ searchtauxdevise() {
       codecircuitvalidation : ['', Validators.required],
       typeentite :[''],
       typeaction :[''],
-      idsociete : [''],
-      idsite : [''],
-      iddepartement : [''],
-      nombrevalidateur : [''],
-      rangvalidation : [''],
-      actif : 0,
+      idsociete : [null],
+      idsite : [null],
+      etapes : this.fb.array([])
     })
   }
+
+  //Gestion des étapes et des validateurs 
+get etapes(): FormArray {
+  return this.circuitvalidationForm.get('etapes') as FormArray;
+}
+
+addEtape() {
+  this.etapes.push(
+    this.fb.group({
+      rang: [this.etapes.length + 1],
+      nombrevalidateur: [0],
+      validateurs: this.fb.array([])
+    })
+  );
+}
+
+getValidateurs(index: number): FormArray {
+  return this.etapes.at(index).get('validateurs') as FormArray;
+}
+
+addValidateur(etapeIndex: number) {
+  this.getValidateurs(etapeIndex).push(
+    this.fb.group({
+      idutilisateur: ['', Validators.required]
+    })
+  );
+}
+
+removeValidateur(etapeIndex: number, valIndex: number) {
+  this.getValidateurs(etapeIndex).removeAt(valIndex);
+}
+
+removeEtape(index: number) {
+  this.etapes.removeAt(index);
+
+  // Recalcul du rang (optionnel mais propre)
+  this.etapes.controls.forEach((ctrl, i) => {
+    ctrl.get('rang')?.setValue(i + 1);
+  });
+}
+
 
   get form(){
     return this.circuitvalidationForm.controls;
@@ -203,12 +341,8 @@ searchtauxdevise() {
       codecircuitvalidation : item.codecircuitvalidation,
       typeentite :item.typeentite,
       typeaction :item.typeaction,
-      idsociete : item.typeaction,
+      idsociete : item.idsociete,
       idsite : item.idsite,
-      iddepartement :item.iddepartement,
-      nombrevalidateur : item.nombrevalidateur,
-      rangvalidation : item.rangvalidation,
-      actif :item.actif,
     });
   }
 
@@ -227,10 +361,6 @@ searchtauxdevise() {
       typeaction :item.typeaction,
       idsociete : item.typeaction,
       idsite : item.idsite,
-      iddepartement :item.iddepartement,
-      nombrevalidateur : item.nombrevalidateur,
-      rangvalidation : item.rangvalidation,
-      actif :item.actif,
     });
   }
 
@@ -255,7 +385,7 @@ searchtauxdevise() {
       //   this.checkAllRow = this.objectsSelected?.length == this.tauxdevise?.length;
       // }
 
-//Soumission du formulaire
+      //Soumission du formulaire
         onsubmit(){
           /** Check formulaire */
           this.msgErros = '';
@@ -268,6 +398,13 @@ searchtauxdevise() {
 
           /** 2. prepare data */
           const formValue = this.circuitvalidationForm.value;
+
+           if (formValue.etapes && Array.isArray(formValue.etapes)) {
+            formValue.etapes = formValue.etapes.map((etape:any) => ({
+              ...etape,
+              nombrevalidateur: etape.validateurs ? etape.validateurs.length : 0
+            }));
+          }
           
           const _circuitvalidation: circuitvalidationmodel = {
                 ...this.circuitvalidation,
@@ -303,8 +440,9 @@ searchtauxdevise() {
         });
       }
 
-      create (circuitvalidation : circuitvalidationmodel){
-          this.cv.create(circuitvalidation).subscribe({
+      create (circuitvalidation : any){
+          console.log(circuitvalidation);
+          this.cv.createcomplete(circuitvalidation).subscribe({
             next: (res: any) => {
               if(res.success){
                 this.getallcircuitvalidation();
@@ -313,7 +451,7 @@ searchtauxdevise() {
               }
             },
             error :(err) => {
-                console.log(err);
+                console.log("erreur "+ err);
             }
           });
       }
@@ -342,15 +480,41 @@ searchtauxdevise() {
       
             modalCreate(){
             this.actionModal = "create";
-            this.initForm();
+            this.circuitvalidationForm.reset();
+            this.etapes.clear();
             }
-      
-            modalUpdate(_object: circuitvalidationmodel){
-              this.circuitvalidation = _object;
-              this.actionModal = "update";
-              this.circuitvalidationForm.reset();
-              this.dispatchcircuitvalidation(_object);
-            }
+
+ modalUpdate(circuit: any) {
+  this.actionModal = 'update';
+  this.circuitvalidation = circuit;
+
+  this.initForm();
+
+  this.dispatchcircuitvalidation(circuit);
+
+  const etapesFA = this.etapes;
+  etapesFA.clear();
+
+  circuit.etapes.forEach((etape: any) => {
+    const validateursFA = this.fb.array<FormGroup>([]);
+    
+    etape.validateurs.forEach((validateur: any) => { 
+      validateursFA.push(
+        this.fb.group({
+          idutilisateur: [validateur.idutilisateur, Validators.required]
+        })
+      );
+    });
+
+    etapesFA.push(
+      this.fb.group({
+        rang: [etape.rang, Validators.required],
+        validateurs: validateursFA
+      })
+    );
+  });
+}
+
       
             modalDuplicate(_object: circuitvalidationmodel){
               this.circuitvalidation = _object;

@@ -179,7 +179,7 @@
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header bg-light p-3">
-                                <h5 class="modal-title" id="exampleModalLabel">{{ actionModal === "create" ? 'Création' : 'Modification'}} Société </h5>
+                                <h5 class="modal-title" id="exampleModalLabel">{{ actionModal === "create" ? 'Création' : 'Modification'}} Site </h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
                             </div>
                             <form [formGroup]="siteForm">
@@ -207,7 +207,7 @@
                                     </div>
 
                                  <div class="mb-3">
-                                    <select class="form-select form-select-sm" formControlName="idanalytique">
+                                    <select class="form-select form-select-sm" formControlName="idanalytique" *ngIf="siteForm.get('estcentreanalytique')?.value">
                                         <option value="">----Choisir le centre analytique-----</option>
                                         <!-- <option *ngFor="let d of devises"  [value]="d.iddevise">{{ d.codeiso }}</option> -->
                                          <option value="">CFD</option>
@@ -223,18 +223,22 @@
                                         </select>
                                         <!-- <label class="input-group-text">Dévise de référence</label> -->
                                 </div>
+                                    <div class="row">
+                                        <div class="col-lg-6 mb-3">
+                                            <label class="form-label form-label-sm">Email</label>
+                                            <input type="text" class="form-control form-control-sm {{ isValidField('email')}}" 
+                                                formControlName="email" />
+                                        </div>
 
-                                    <div class="mb-3">
-                                        <label class="form-label form-label-sm">Email</label>
-                                        <input type="text" class="form-control form-control-sm {{ isValidField('email')}}" 
-                                            formControlName="email" />
+                                         <div class="col-lg-6 mb-3">
+                                            <label class="form-label form-label-sm">Téléphone</label>
+                                            <input type="text" class="form-control form-control-sm {{ isValidField('telephone')}}" 
+                                                formControlName="telephone" />
+                                        </div>
                                     </div>
+                                   
 
-                                    <div class="mb-3">
-                                        <label class="form-label form-label-sm">Téléphone</label>
-                                        <input type="text" class="form-control form-control-sm {{ isValidField('telephone')}}" 
-                                            formControlName="telephone" />
-                                    </div>
+                                   
 
                                     <div class="mb-3">
                                         <label class="form-label form-label-sm">Adresse</label>

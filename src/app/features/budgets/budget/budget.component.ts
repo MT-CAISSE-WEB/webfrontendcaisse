@@ -19,6 +19,7 @@ import {
 } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { LigneBudgetModel } from '../models/ligne_budget.model';
 
 type BudgetStatusFilter = 'ALL' | 'ACTIF' | 'INACTIF';
 
@@ -41,6 +42,7 @@ export class BudgetComponent implements OnInit {
   filteredBudgets: BudgetModel[] = [];
 
   currentStatusFilter: BudgetStatusFilter = 'ALL';
+  searchTerm: string = '';
 
   // formatage de date
   formatDateForInput(dateString: string | null): string | null {
@@ -101,6 +103,7 @@ export class BudgetComponent implements OnInit {
         if (res.success) {
           this.budgets = res.data;
           this.applyStatusFilter(this.currentStatusFilter);
+          this.applyFilters();
           this.totalPages = res.totalPages;
           this.budgetForm?.updateValueAndValidity({
             onlySelf: false,
@@ -145,27 +148,90 @@ export class BudgetComponent implements OnInit {
     return this.filteredBudgets.length === 0;
   }
 
-  applyStatusFilter(status: BudgetStatusFilter) {
+  applyFilters(): void {
+    let result = [...this.budgets];
+
+    /* ==========================
+   1️⃣ FILTRE PAR STATUT (ANNUELS UNIQUEMENT)
+   ========================== */
+    switch (this.currentStatusFilter) {
+      case 'ACTIF':
+        result = result.filter((b) => b.actif === 1);
+        break;
+
+      case 'INACTIF':
+        result = result.filter((b) => b.actif === 0);
+        break;
+    }
+
+    /* ==========================
+   2️⃣ FILTRE PAR RECHERCHE (PARENTS + ENFANTS)
+   ========================== */
+    if (this.searchTerm.trim()) {
+      const term = this.searchTerm.toLowerCase();
+
+      // Budgets qui matchent le texte
+      const matched = this.budgets.filter(
+        (b) =>
+          b.codebudget?.toLowerCase().includes(term) ||
+          b.libelle?.toLowerCase().includes(term)
+      );
+
+      // IDs des budgets annuels trouvés
+      const parentIds = new Set(
+        matched.filter((b) => b.typebudget === 'Annuel').map((b) => b.idbudget)
+      );
+
+      // Appliquer la recherche en incluant les mensuels liés
+      result = this.budgets.filter(
+        (b) =>
+          matched.includes(b) ||
+          (b.idbudgetparent && parentIds.has(b.idbudgetparent))
+      );
+    }
+
+    this.filteredBudgets = result;
+
+    /* ==========================
+   Reset sélection
+   ========================== */
+    this.objectsSelected = [];
+    this.selectedItems = [];
+    this.checkAllRow = false;
+  }
+
+  applyStatusFilter(status: BudgetStatusFilter): void {
     this.currentStatusFilter = status;
+
+    let parents: BudgetModel[] = [];
 
     switch (status) {
       case 'ACTIF':
-        this.filteredBudgets = this.budgets.filter(
+        parents = this.budgets.filter(
           (b) => b.actif === 1 && b.typebudget === 'Annuel'
         );
         break;
 
       case 'INACTIF':
-        this.filteredBudgets = this.budgets.filter(
+        parents = this.budgets.filter(
           (b) => b.actif === 0 && b.typebudget === 'Annuel'
         );
         break;
 
       default:
         this.filteredBudgets = [...this.budgets];
+        return;
     }
 
-    // Reset sélection (important)
+    const parentIds = new Set(parents.map((p) => p.idbudget));
+
+    this.filteredBudgets = this.budgets.filter(
+      (b) =>
+        parentIds.has(b.idbudget) ||
+        (b.idbudgetparent && parentIds.has(b.idbudgetparent))
+    );
+
+    // Reset sélection
     this.objectsSelected = [];
     this.selectedItems = [];
     this.checkAllRow = false;
@@ -181,8 +247,6 @@ export class BudgetComponent implements OnInit {
         typebudget: ['', [Validators.required]],
         entite: ['', [Validators.required]],
         datefin: ['', [Validators.required]],
-        idsite : [this.user.idsite ?? null],
-        idsociete : [this.user.idsociete ?? null],
         idbudgetparent: [''],
         // createdby
         actif: [false],
@@ -195,10 +259,6 @@ export class BudgetComponent implements OnInit {
 
   get form() {
     return this.budgetForm.controls;
-  }
-
-  get user(){
-    return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
   dispatchBudget(_object: BudgetModel) {
@@ -529,7 +589,7 @@ export class BudgetComponent implements OnInit {
 
     /** 2. prepare data */
     const formValue = this.budgetForm.getRawValue();
-    console.log(formValue);
+
     this.budget.idcircuitvalidation =
       formValue.idcircuitvalidation === ''
         ? null
@@ -566,6 +626,8 @@ export class BudgetComponent implements OnInit {
         actif: formValue.actif,
       });
     }
+    // if (!_journal.idjournal) this.create(_journal);
+    // else this.update(_journal);
   }
 
   //Enregistrement de données

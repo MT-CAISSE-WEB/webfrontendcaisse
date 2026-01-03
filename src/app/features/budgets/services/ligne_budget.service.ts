@@ -5,6 +5,19 @@ import { QueryResultModel } from '../../../_core/models/query-result.model';
 import { URL_LOCAL } from '../../../_core/routes/backend.root';
 import { Injectable } from '@angular/core';
 
+export interface LigneBudgetBulkUpdateDto {
+  idbudgetdepartementnature: string;
+  idbudget: string;
+  iddepartement: string;
+  idnature: string;
+
+  montantprevisiondept: number;
+  montantprevisionsite: number;
+  montantprevisionsociete: number;
+
+  updatedby?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -65,5 +78,16 @@ export class LigneBudgetService {
    */
   getOne(id: string): Observable<any> {
     return this.http.get<any>(URL_LOCAL.baseUrl + this.url + '/' + id);
+  }
+
+  createMultiple(payload: any[]): Observable<any> {
+    return this.http.post(URL_LOCAL.baseUrl + this.url + '/bulk', payload);
+  }
+
+  updateMultiple(payload: LigneBudgetBulkUpdateDto[]): Observable<any> {
+    return this.http.put(
+      `${URL_LOCAL.baseUrl}${this.url}/bulk-update`,
+      payload
+    );
   }
 }

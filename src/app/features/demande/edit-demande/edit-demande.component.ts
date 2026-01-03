@@ -14,6 +14,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.contantes';
 import { EnteteDemande } from '../models/entete-demande.model';
 import { utilisateurdepartementservice } from '../../administration/service/userdepartement.service';
+import { affectationdepartementnatureModel } from '../../donnee_base/models/affectationdepartementnature.model';
+import { AffectationDepartementNatureService } from '../../donnee_base/services/affectationdepartementnature.service';
+import { affectationnaturecentreModel } from '../../donnee_base/models/affectationnaturecentre.model';
+import { AffectationNatureCentreService } from '../../donnee_base/services/affectationnaturecentre.service';
+import { devisemodel } from '../../donnee_base/donnee_base/model/devise.model';
+import { deviseservice } from '../../donnee_base/donnee_base/service/devise.service';
 
 @Component({
   selector: 'app-edit-demande',
@@ -41,9 +47,17 @@ export class EditDemandeComponent implements OnInit {
 
   //Liste des départements de l'utilisateurs
   departementUser: any = [];
+  //Liste des natures des départements
+  naturesBydepartements: any[] = [];
+  //Liste des centres analytiques des natures opérations
+  centresBynatures: any[] = [];
 
   //Changement titre modal
   actionModal: string = "create";
+
+  //Ramener la devise
+  devises : devisemodel[] = [];
+  devise : devisemodel = new devisemodel();
 
   //Liste des natures filtrées
   naturesFiltrees: any[] = [];
@@ -58,9 +72,9 @@ export class EditDemandeComponent implements OnInit {
   //Liste des centres analytiques
   centres : centreanalytiqueModel[] = [];
 
-  constructor(private service: DemandeService, private natureoperationservice: NatureoperationService, private router : Router,
-    private centreanalytiqueservice: CentreAnalytiqueService, private userdepartement: utilisateurdepartementservice,
-    private tiersservice: TiersService, private toastr : ToastrService, private activatedRoute: ActivatedRoute,){}
+  constructor(private service: DemandeService, private natureoperationservice: NatureoperationService, private router : Router, private ds:deviseservice,
+    private centreanalytiqueservice: CentreAnalytiqueService, private userdepartement: utilisateurdepartementservice, private AffectationDepartementNatureService: AffectationDepartementNatureService,
+    private tiersservice: TiersService, private toastr : ToastrService, private activatedRoute: ActivatedRoute,private AffectationNatureCentreService: AffectationNatureCentreService){}
 
   ngOnInit(): void {
     this.breadCrumbItems = [
@@ -79,7 +93,8 @@ export class EditDemandeComponent implements OnInit {
       }
     });
     //Charger les natures opérations
-    this.getAllNatureoperations();
+    //Afficher toutes les devises
+    this.getalldevises();
     //charger les centres analytiques
     this.getAllcentres();
     //charger les tiers
@@ -88,6 +103,13 @@ export class EditDemandeComponent implements OnInit {
     this.getDepartementOfUser();
     //charger la demande 
     //this.iddemande = this.activatedRoute.snapshot.paramMap.get('id')!;
+
+    this.demandeForm.get('departement')?.valueChanges.subscribe(dept => {
+      if(dept){
+        //filtrer sur la natures des opérations
+        this.onTypeDepartementChange(dept);
+      }
+    });
   }
 
   //Retour
@@ -113,6 +135,21 @@ export class EditDemandeComponent implements OnInit {
 
       // STEP 2
       lignes: this.fb.array([]),
+    });
+  }
+
+  //Récupérer les devise
+  getalldevises (){
+    const params = {
+      page: 1,
+      limit: 20
+    };
+    this.ds.getAll(params).subscribe({
+      next : (res) => {
+         if(res.success){
+            this.devises = res.data;
+         }
+      }
     });
   }
 
@@ -168,8 +205,7 @@ export class EditDemandeComponent implements OnInit {
     this.userdepartement.getutilisateurdepartement(this.user.idutilisateur).subscribe({
       next : (res) => {
         if(res.success){
-          this.departementUser = res.data;
-          console.log(this.departementUser);
+          this.departementUser = res.data[0];
         }
       },
       error: (err) => {
@@ -177,6 +213,83 @@ export class EditDemandeComponent implements OnInit {
       }
     });
   }
+
+  //Affectation natures departements
+  getallAffectationNatures(iddepartement: string) {
+    this.AffectationDepartementNatureService.getAll(iddepartement).subscribe({
+      next: (res) => {
+        if (res.success) {
+          //this.naturesBydepartements = res.data.naturesaffectes;
+          this.naturesBydepartements = (res.data.naturesaffectes || []).filter(
+            (n: any) => n.actif === 1
+          );
+        }
+      }
+    });
+  }
+
+  //Affectation natures centre
+  getallAffectationCentres(idnature: string) {
+    this.AffectationNatureCentreService.getAll(idnature).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.centresBynatures = (res.data.centresaffectes || []).filter(
+            (n: any) => n.actif === 1
+          );
+        }
+      }
+    });
+  }
+
+  //Affectation natures centre for modify
+  getallCentresDispatch(natureId: string, ligne: FormGroup, centreId?: string) {
+    this.AffectationNatureCentreService.getAll(natureId).subscribe(res => {
+      if (res.success) {
+        const centres = (res.data.centresaffectes || [])
+          .filter((c: any) => c.actif === 1);
+
+        //stocker les centres dans la ligne
+        ligne.get('centres')?.setValue(centres);
+
+        //activer le champ centre
+        ligne.get('centre')?.enable({ emitEvent: false });
+
+        //positionner le centre APRÈS chargement
+        if (centreId) {
+          ligne.get('centre')?.setValue(centreId, { emitEvent: false });
+        }
+      }
+  });
+  }
+
+
+  //Recuperer le departement selectionné
+  get departement() {
+    return this.demandeForm.get("departement")?.value;
+  }
+
+  //
+  onTypeDepartementChange(type: string) {
+      this.getallAffectationNatures(type);
+  
+      // Réinitialiser les natures déjà choisies
+      this.lignes.controls.forEach((ligne: FormGroup) => {
+        ligne.reset();
+
+        ligne.patchValue({
+          natureop: null,
+          centre: null,
+          tiers: null,
+          montantdemande: ""
+        });
+  
+        ligne.get('centre')?.disable();
+        ligne.get('tiers')?.disable();
+        ligne.get('montantdemande')?.disable();
+      });
+  }
+
+  //Recuperer la nature
 
   //Recupérer les centres analytiques
   getAllcentres(){
@@ -202,7 +315,8 @@ export class EditDemandeComponent implements OnInit {
       typedemande: this.demande.typedemande,
       libelledemande: this.demande.libelledemande,
       devise: this.demande.iddevise,
-      datedemande: this.formatDateForInput(this.demande.datedemande!)
+      datedemande: this.formatDateForInput(this.demande.datedemande!),
+      departement: this.demande.iddepartement
     });
 
     // Lignes
@@ -218,6 +332,9 @@ export class EditDemandeComponent implements OnInit {
       ligne.details.forEach((detail: any) => {
         detailsArray.push(this.newDetail(detail));
       });
+
+      //charger centres + positionner centre
+      this.getallCentresDispatch(ligne.natureoperation.idnature, ligneGroup, ligne.centreanalytique.idcentre );
     });
   }
 
@@ -246,19 +363,84 @@ export class EditDemandeComponent implements OnInit {
   }
 
   newLigne(ligne?: any): FormGroup {
-    return this.fb.group({
+    const ligneOf = this.fb.group({
       idlignedemande: [ligne?.idlignedemande || null],
       numligne: [ligne?.numligne || null],
       natureop: [ligne?.natureoperation.idnature || '', Validators.required],
-      centre: [ligne?.centreanalytique.idcentre || '', Validators.required],
-      tiers: [ligne?.tiers.idtiers || null],
-      montantdemande: [ligne?.montantdemande || 0, Validators.required],
-      details: this.fb.array([])
+      centre: [{ value: ligne?.centreanalytique?.idcentre || null, disabled: true }, Validators.required],
+      tiers: [{ value: ligne?.tiers?.idtiers || null, disabled: true }],
+      montantdemande: [{ value: ligne?.montantdemande || 0, disabled: true }, Validators.required],
+      details: this.fb.array([]),
+      //CENTRES PAR LIGNE
+      centres: this.fb.control<any[]>([])
     });
+
+    //ÉCOUTE CORRECTE
+    ligneOf.get('natureop')?.valueChanges.subscribe(nature => {
+      if (!nature) {
+        ligneOf.get('centre')?.disable();
+        ligneOf.get('tiers')?.disable();
+        ligneOf.get('montantdemande')?.disable();
+        ligneOf.patchValue({ centre: null });
+        ligneOf.get('centres')?.setValue([]);
+        return;
+      }
+
+      ligneOf.get('centre')?.enable();
+      ligneOf.get('montantdemande')?.enable();
+
+      //charger centres POUR CETTE LIGNE
+      this.loadCentresForLigne(ligneOf, nature);
+
+      // règle métier tiers
+      this.handleNatureChange(ligneOf, nature);
+    });
+
+    return ligneOf;
+  }
+
+  //Selection de la nature / Activer ou desactiver imputation tiers
+  handleNatureChange(ligne: FormGroup, natureId: string) {
+    const nature = this.naturesBydepartements.find(
+      n => n.idnature === natureId
+    );
+
+    console.log(nature);
+
+    if (!nature) {
+      ligne.get('tiers')?.disable();
+      ligne.get('tiers')?.reset();
+      return;
+    }
+
+    if (nature.imputationtiers === 1) {
+      ligne.get('tiers')?.enable();
+    } else {
+      ligne.get('tiers')?.disable();
+      ligne.get('tiers')?.reset();
+    }
   }
 
   addLigne() {
     this.lignes.push(this.newLigne());
+  }
+
+  //Charger les centres de chaque ligne
+  loadCentresForLigne(ligne: FormGroup, idnature: string) {
+    this.AffectationNatureCentreService.getAll(idnature).subscribe({
+      next: (res) => {
+        if (res.success) {
+          const centres = (res.data.centresaffectes || [])
+            .filter((c: any) => c.actif === 1);
+
+          //stocké dans la ligne
+          ligne.get('centres')?.setValue(centres);
+
+          // reset centre sélectionné
+          ligne.get('centre')?.reset();
+        }
+      }
+    });
   }
 
   removeLigne(ligneIndex: number) {

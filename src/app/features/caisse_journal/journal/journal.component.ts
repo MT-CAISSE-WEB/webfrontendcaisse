@@ -135,12 +135,12 @@ export class JournalComponent implements OnInit {
     this.journalForm = this.fb.group({
       codejournal: ['', [Validators.required]],
       designation: ['', [Validators.required]],
-      idsociete: [this.userConnect.idsociete ?? null, [Validators.required]],
+      idsociete: [this.user.idsociete ?? null, [Validators.required]],
       actif: [true],
     });
   }
 
-  get userConnect(){
+  get user(){
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
 

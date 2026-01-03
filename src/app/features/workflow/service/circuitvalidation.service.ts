@@ -19,7 +19,7 @@ export class circuitvalidationservice {
    */
     getAll(params: any = {}): Observable<QueryResultModel> {
         return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url, {
-        params,
+        params
         });
     }
 
@@ -30,7 +30,19 @@ export class circuitvalidationservice {
    */
    create (_object: any): Observable<any> {
     return this.http.post<any>(
-      URL_LOCAL.baseUrl + this.url,
+      URL_LOCAL.baseUrl + this.url + "/create",
+      _object
+    );
+  }
+
+    /**
+   *upsert
+   * @param _object
+   * 
+   */
+   createcomplete (_object: any): Observable<any> {
+    return this.http.post<any>(
+      URL_LOCAL.baseUrl + this.url + "/",
       _object
     );
   }
@@ -42,7 +54,7 @@ export class circuitvalidationservice {
    */
    update (_object : circuitvalidationmodel): Observable< circuitvalidationmodel> {
     return this.http.put < circuitvalidationmodel>(
-      URL_LOCAL.baseUrl + this.url+"/"+_object.idcircuitvalidation,_object
+      URL_LOCAL.baseUrl + this.url+"/update/"+_object.idcircuitvalidation,_object
     );
   }
 
@@ -52,10 +64,9 @@ export class circuitvalidationservice {
    */
   delete(id: string): Observable<any> {
     return this.http.delete<any>(
-      URL_LOCAL.baseUrl + this.url + "/" + id
+      URL_LOCAL.baseUrl + this.url + "/delete/" + id
     );
   }
-
 
   /**
    * get one

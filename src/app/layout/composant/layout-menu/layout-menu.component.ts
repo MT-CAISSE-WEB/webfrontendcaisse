@@ -11,7 +11,8 @@ import { APP_ROOT,APP_ROOT_DONNEE_BASE_DEVISE,
   APP_ROOT_ROLE_ADMINISTRATION,APP_ROOT_AFF_NATURE_CENTRE_DONNEE_BASE, 
   APP_AFF_DEPT_NATURE_DONNEE_BASE,
   APP_ROOT_BUDGETS_LIGNE_BUDGET, APP_ROOT_BUDGETS_BUDGET,
-  APP_ROOT_DMD_DECAISSEMENT } from '../../../_core/routes/frontend.root';
+  APP_ROOT_DMD_DECAISSEMENT, 
+  APP_ROOT_WORKFLOW_ADMINISTRATION} from '../../../_core/routes/frontend.root';
 
 import { RouterLink, RouterModule, RouterOutlet } from "@angular/router";
 
@@ -44,5 +45,6 @@ export class LayoutMenuComponent {
   root_role = APP_ROOT_ROLE_ADMINISTRATION;
   root_permission = APP_ROOT_PERMISSION_ADMINISTRATION;
   root_role_permission = APP_ROOT_ROLE_PERMISSION_ADMINISTRATION;
+  root_workflow = APP_ROOT_WORKFLOW_ADMINISTRATION;
   root = APP_ROOT;
 }

@@ -1,15 +1,15 @@
 import { HttpClient } from "@angular/common/http";
-import { APP_JOURNAL_CAISSE_JOURNAL } from "../../../_core/routes/frontend.root";
 import { Observable } from "rxjs";
 import { QueryResultModel } from "../../../_core/models/query-result.model";
 import { URL_LOCAL } from "../../../_core/routes/backend.root";
 import { Injectable } from "@angular/core";
+import { circuitetapemodel } from "../model/circuitetape.model";
 
 @Injectable({
   providedIn: 'root'
 })
-export class AffectationCaisseService {
-    url : string = 'utilisateur_caisse' ;
+export class  circuitetapeservice {
+    url : string = 'circuitetape' ;
 
     constructor(private http: HttpClient) {}
 
@@ -19,30 +19,30 @@ export class AffectationCaisseService {
    */
     getAll(params: any = {}): Observable<QueryResultModel> {
         return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url, {
-        params,
+        params
         });
     }
 
   /**
-   * create
+   *upsert
    * @param _object
    * 
    */
-  create(_object: any): Observable<any> {
+   create (_object: any): Observable<any> {
     return this.http.post<any>(
       URL_LOCAL.baseUrl + this.url + "/create",
       _object
     );
   }
 
-  /**
-   * update
+    /**
+   *upsert
    * @param _object
+   * 
    */
-  update(_object: any): Observable<any> {
-    return this.http.put<any>(
-      URL_LOCAL.baseUrl + this.url + "/update/" + _object.idutilisateurcaisse,
-      _object
+   update (_object :  circuitetapemodel): Observable<circuitetapemodel> {
+    return this.http.put <circuitetapemodel>(
+      URL_LOCAL.baseUrl + this.url+"/update/"+_object.idcircuitetape,_object
     );
   }
 
@@ -64,26 +64,6 @@ export class AffectationCaisseService {
   getOne(id: string): Observable<any> {
     return this.http.get<any>(
       URL_LOCAL.baseUrl + this.url + "/" + id
-    );
-  }
-
-  /**
-   * get one
-   * @param id
-   */
-  getCaisseByUser(id: string): Observable<any> {
-    return this.http.get<any>(
-      URL_LOCAL.baseUrl + this.url + "/user/" + id
-    );
-  }
-
-  /**
-   * get one
-   * @param id
-   */
-  getCaissePeriodeByUser(id: string): Observable<any> {
-    return this.http.get<any>(
-      URL_LOCAL.baseUrl + this.url + "/periode/user/" + id
     );
   }
 

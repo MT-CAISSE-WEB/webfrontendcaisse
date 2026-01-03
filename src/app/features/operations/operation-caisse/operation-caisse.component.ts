@@ -21,6 +21,9 @@ import { societeservice } from '../../structure/service/societe.service';
 import { ToastrService } from 'ngx-toastr';
 import { EnteteDemande } from '../../demande/models/entete-demande.model';
 import { DemandeService } from '../../demande/services/demande.service';
+import { AffectationNatureCentreService } from '../../donnee_base/services/affectationnaturecentre.service';
+import { devisemodel } from '../../donnee_base/donnee_base/model/devise.model';
+import { deviseservice } from '../../donnee_base/donnee_base/service/devise.service';
 
 @Component({
   selector: 'app-operation-caisse',
@@ -57,6 +60,10 @@ export class OperationCaisseComponent implements OnInit{
   //Changement titre modal
   actionModal: string = "create";
 
+  //Ramener la devise
+  devises : devisemodel[] = [];
+  devise : devisemodel = new devisemodel();
+
   //Bouton active / inactive
   isUpdated: boolean = true;
 
@@ -66,6 +73,9 @@ export class OperationCaisseComponent implements OnInit{
   //Liste des natures filtrées
   naturesFiltrees: any[] = [];
   natureoperations : natureoperationModel[] = [];
+
+  //Liste des centres analytiques des natures opérations
+  centresBynatures: any[] = [];
 
   //Liste des tiers
   tiers : tiersModel[] = [];
@@ -122,13 +132,13 @@ export class OperationCaisseComponent implements OnInit{
 
   constructor(private natureoperationservice: NatureoperationService, private caisseuserservice: AffectationCaisseService,
     private router : Router, private caissePeriodeservice: CaissePeriodeService, private centreanalytiqueservice: CentreAnalytiqueService,
-    private operationservice: OperationService, private tiersservice: TiersService,private sc: societeservice,
-    private currencyPipe: CurrencyPipe, private toastr : ToastrService, private service: DemandeService,
+    private operationservice: OperationService, private tiersservice: TiersService,private sc: societeservice, private AffectationNatureCentreService: AffectationNatureCentreService,
+    private currencyPipe: CurrencyPipe, private toastr : ToastrService, private service: DemandeService, private ds:deviseservice,
   ){}
 
   ngOnInit(): void {
-    //Recuperer la societe de l'utilisateur connecté
-    //this.getSocieteUserconnected();
+    //Recuperer la devise
+    this.getalldevises();
     //initialiser le formulaire de recherche
     this.initSearchForm();
     //Afficher toutes les opérations
@@ -175,6 +185,73 @@ export class OperationCaisseComponent implements OnInit{
         if(res.success){
           this.operations = res.data.data;
           this.totalPages = res.data.totalPages;
+        }
+      }
+    });
+  }
+
+  //Récupérer les devise
+  getalldevises (){
+    const params = {
+      page: 1,
+      limit: 20
+    };
+    this.ds.getAll(params).subscribe({
+      next : (res) => {
+         if(res.success){
+            this.devises = res.data;
+         }
+      }
+    });
+  }
+
+  //Affectation natures centre
+  getallAffectationCentres(idnature: string) {
+    this.AffectationNatureCentreService.getAll(idnature).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.centresBynatures = (res.data.centresaffectes || []).filter(
+            (n: any) => n.actif === 1
+          );
+        }
+      }
+    });
+  }
+
+  //Affectation natures centre for modify
+  getallCentresDispatch(natureId: string, ligne: FormGroup, centreId?: string) {
+    this.AffectationNatureCentreService.getAll(natureId).subscribe(res => {
+      if (res.success) {
+        const centres = (res.data.centresaffectes || [])
+          .filter((c: any) => c.actif === 1);
+
+        //stocker les centres dans la ligne
+        ligne.get('centres')?.setValue(centres);
+
+        //activer le champ centre
+        ligne.get('centre')?.enable({ emitEvent: false });
+
+        //positionner le centre APRÈS chargement
+        if (centreId) {
+          ligne.get('centre')?.setValue(centreId, { emitEvent: false });
+        }
+      }
+    });
+  }
+
+  //Charger les centres de chaque ligne
+  loadCentresForLigne(ligne: FormGroup, idnature: string) {
+    this.AffectationNatureCentreService.getAll(idnature).subscribe({
+      next: (res) => {
+        if (res.success) {
+          const centres = (res.data.centresaffectes || [])
+            .filter((c: any) => c.actif === 1);
+
+          //stocké dans la ligne
+          ligne.get('centres')?.setValue(centres);
+
+          // reset centre sélectionné
+          ligne.get('centre')?.reset();
         }
       }
     });
@@ -659,14 +736,42 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   dispatchOperation(_object: operationModel){
-    // Construire les lignes en FormGroup[]
-    const lignesFG = _object.lignes.map(l => this.fb.group({
-      idligne : [l.idligneoperation ?? null],
-      natureop : [l.nature?.idnature ?? null],
-      centre   : [l.centre?.idcentreanalytique ?? null],
-      tiers    : [l.tiers?.idtiers ?? null],
-      montantligne : [l.montantoperation ?? ""]
-    }));
+    // Patch des champs simples
+    this.operationForm.patchValue({
+      codeoperation : _object.codeoperation,
+      libelle       : _object.libelle,
+      devise        : _object.devise.iddevise,
+      site          : _object.site.idsite,
+      typepaiement  : _object.caisses[0].codtypeoperation,
+      montant       : _object.montant,
+      dateoperation : this.formatDateForInput(_object.dateoperation),
+      societe       : _object.societe.idsociete,
+    });
+
+    this.lignes.clear();
+    _object.lignes.forEach((l: any) => {
+
+      const ligneGroup = this.fb.group({
+        idligne: [l.idligneoperation ?? null],
+        natureop: [l.nature?.idnature ?? null, Validators.required],
+        centre: [{ value: null, disabled: true }],
+        tiers: [{ value: l.tiers?.idtiers ?? null, disabled: true }],
+        montantligne: [{ value: l.montantoperation ?? "", disabled: false }, Validators.required],
+
+        // 🔑 centres propres à la ligne
+        centres: this.fb.control<any[]>([])
+      });
+
+      this.lignes.push(ligneGroup);
+
+      // règles métier
+      this.handleNatureChange(ligneGroup, l.nature?.idnature);
+
+      //charger centres PUIS positionner le centre
+      if (l.nature?.idnature) {
+        this.getallCentresDispatch(l.nature.idnature, ligneGroup, l.centre?.idcentreanalytique);
+      }
+    });
 
     //Construire les caisses en FormGroup[]
     const caisseFG = _object.caisses.map(c => {
@@ -685,23 +790,11 @@ export class OperationCaisseComponent implements OnInit{
       })
     });
 
-    // Patch des champs simples
-    this.operationForm.patchValue({
-      codeoperation : _object.codeoperation,
-      libelle       : _object.libelle,
-      devise        : _object.devise.iddevise,
-      site          : _object.site.idsite,
-      typepaiement  : _object.caisses[0].codtypeoperation,
-      montant       : _object.montant,
-      dateoperation : this.formatDateForInput(_object.dateoperation),
-      societe       : _object.societe.idsociete,
-    });
-
     //Filtrer les natures quand typeoperation change
     this.filtrerNatures(_object.caisses[0].codtypeoperation,);
 
     // Mise à jour du FormArray
-    this.operationForm.setControl("lignes", this.fb.array(lignesFG));
+    //this.operationForm.setControl("lignes", this.fb.array(lignesFG));
     this.operationForm.setControl("caisses", this.fb.array(caisseFG));
   }
 
@@ -751,7 +844,9 @@ export class OperationCaisseComponent implements OnInit{
       natureop : [{ value: "", disabled: false }, [Validators.required]],
       centre: [{ value: "", disabled: true }, ],
       tiers: [{ value: "", disabled: true }, ],
-      montantligne: [{ value: "", disabled: true }, [Validators.required]]
+      montantligne: [{ value: "", disabled: true }, [Validators.required]],
+      //CENTRES PAR LIGNE
+      centres: this.fb.control<any[]>([])
     });
 
     ligne.get("natureop")?.valueChanges.subscribe(natureId => {
@@ -759,6 +854,7 @@ export class OperationCaisseComponent implements OnInit{
         ligne.get("centre")?.disable();
         ligne.get("tiers")?.disable();
         ligne.get("montantligne")?.disable();
+        ligne.get('centres')?.setValue([]);
         return;
       }
 
@@ -766,6 +862,8 @@ export class OperationCaisseComponent implements OnInit{
       ligne.get("centre")?.enable();
       ligne.get("montantligne")?.enable();
 
+      //charger centres POUR CETTE LIGNE
+      this.loadCentresForLigne(ligne, natureId);
       // Règle métier sur tiers
       this.handleNatureChange(ligne, natureId);
     });
@@ -863,7 +961,7 @@ export class OperationCaisseComponent implements OnInit{
       },
       error: (err) => {
         this.loading = false;
-        this.toastr.error(err);
+        this.toastr.error(err.error.message);
       }
     })
   }
@@ -886,7 +984,7 @@ export class OperationCaisseComponent implements OnInit{
       error: (err) => {
         this.error = "échec de Modification";
         this.loading = false;
-        this.toastr.error(this.error);
+        this.toastr.error(err.error.message);
       }
     })
   }
