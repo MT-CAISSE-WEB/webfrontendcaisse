@@ -18,6 +18,8 @@ import { affectationdepartementnatureModel } from '../../donnee_base/models/affe
 import { AffectationDepartementNatureService } from '../../donnee_base/services/affectationdepartementnature.service';
 import { affectationnaturecentreModel } from '../../donnee_base/models/affectationnaturecentre.model';
 import { AffectationNatureCentreService } from '../../donnee_base/services/affectationnaturecentre.service';
+import { devisemodel } from '../../donnee_base/donnee_base/model/devise.model';
+import { deviseservice } from '../../donnee_base/donnee_base/service/devise.service';
 
 @Component({
   selector: 'app-edit-demande',
@@ -53,6 +55,10 @@ export class EditDemandeComponent implements OnInit {
   //Changement titre modal
   actionModal: string = "create";
 
+  //Ramener la devise
+  devises : devisemodel[] = [];
+  devise : devisemodel = new devisemodel();
+
   //Liste des natures filtrées
   naturesFiltrees: any[] = [];
   natureoperations : natureoperationModel[] = [];
@@ -66,7 +72,7 @@ export class EditDemandeComponent implements OnInit {
   //Liste des centres analytiques
   centres : centreanalytiqueModel[] = [];
 
-  constructor(private service: DemandeService, private natureoperationservice: NatureoperationService, private router : Router,
+  constructor(private service: DemandeService, private natureoperationservice: NatureoperationService, private router : Router, private ds:deviseservice,
     private centreanalytiqueservice: CentreAnalytiqueService, private userdepartement: utilisateurdepartementservice, private AffectationDepartementNatureService: AffectationDepartementNatureService,
     private tiersservice: TiersService, private toastr : ToastrService, private activatedRoute: ActivatedRoute,private AffectationNatureCentreService: AffectationNatureCentreService){}
 
@@ -87,7 +93,8 @@ export class EditDemandeComponent implements OnInit {
       }
     });
     //Charger les natures opérations
-    //this.getAllNatureoperations();
+    //Afficher toutes les devises
+    this.getalldevises();
     //charger les centres analytiques
     this.getAllcentres();
     //charger les tiers
@@ -131,7 +138,20 @@ export class EditDemandeComponent implements OnInit {
     });
   }
 
-  //Récupérer les affectations departements natures
+  //Récupérer les devise
+  getalldevises (){
+    const params = {
+      page: 1,
+      limit: 20
+    };
+    this.ds.getAll(params).subscribe({
+      next : (res) => {
+         if(res.success){
+            this.devises = res.data;
+         }
+      }
+    });
+  }
 
   get user(){
     return JSON.parse(localStorage.getItem('user') || '{}');

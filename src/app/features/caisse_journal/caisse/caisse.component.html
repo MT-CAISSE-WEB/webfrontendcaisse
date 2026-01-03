@@ -199,8 +199,9 @@
                                                 <div class="input-light input-light-sm">
                                                     <select class="form-control form-control-sm bg-light border-0" formControlName="devise"  id="choices-payment-status" required id="devise">
                                                         <option value="">devise</option>
-                                                        <option value="719871D2-F67A-4DFC-890F-31289202E3C0">XAF</option>
-                                                        <option value="D1068793-5575-43ED-A68D-0DFB34A19844">USD</option>
+                                                        @for (item of devises; track $index){
+                                                            <option value="{{item.iddevise}}">{{item.codedevise}}</option>
+                                                        }
                                                     </select>
                                                 </div>
                                             </div>

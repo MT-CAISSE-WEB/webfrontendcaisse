@@ -332,8 +332,9 @@
                                 <div class="input-light">
                                     <select formControlName="devise" class="form-control form-control-sm bg-light border-0 {{ isValidField('devise')}}" required>
                                         <option value="">devise</option>
-                                        <option value="3FC45657-E282-4667-AA3A-50121F1CEB18">XAF</option>
-                                        <option value="A4473CF8-A4E3-4CDB-92E6-A2CE1320741E">USD</option>
+                                        @for (item of devises; track $index){
+                                            <option value="{{item.iddevise}}">{{item.codedevise}}</option>
+                                        }
                                     </select>
                                     <div class="invalid-feedback">{{ msgErros }}</div>
                                 </div>

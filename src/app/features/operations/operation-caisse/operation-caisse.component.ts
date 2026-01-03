@@ -22,6 +22,8 @@ import { ToastrService } from 'ngx-toastr';
 import { EnteteDemande } from '../../demande/models/entete-demande.model';
 import { DemandeService } from '../../demande/services/demande.service';
 import { AffectationNatureCentreService } from '../../donnee_base/services/affectationnaturecentre.service';
+import { devisemodel } from '../../donnee_base/donnee_base/model/devise.model';
+import { deviseservice } from '../../donnee_base/donnee_base/service/devise.service';
 
 @Component({
   selector: 'app-operation-caisse',
@@ -57,6 +59,10 @@ export class OperationCaisseComponent implements OnInit{
 
   //Changement titre modal
   actionModal: string = "create";
+
+  //Ramener la devise
+  devises : devisemodel[] = [];
+  devise : devisemodel = new devisemodel();
 
   //Bouton active / inactive
   isUpdated: boolean = true;
@@ -127,12 +133,12 @@ export class OperationCaisseComponent implements OnInit{
   constructor(private natureoperationservice: NatureoperationService, private caisseuserservice: AffectationCaisseService,
     private router : Router, private caissePeriodeservice: CaissePeriodeService, private centreanalytiqueservice: CentreAnalytiqueService,
     private operationservice: OperationService, private tiersservice: TiersService,private sc: societeservice, private AffectationNatureCentreService: AffectationNatureCentreService,
-    private currencyPipe: CurrencyPipe, private toastr : ToastrService, private service: DemandeService,
+    private currencyPipe: CurrencyPipe, private toastr : ToastrService, private service: DemandeService, private ds:deviseservice,
   ){}
 
   ngOnInit(): void {
-    //Recuperer la societe de l'utilisateur connecté
-    //this.getSocieteUserconnected();
+    //Recuperer la devise
+    this.getalldevises();
     //initialiser le formulaire de recherche
     this.initSearchForm();
     //Afficher toutes les opérations
@@ -180,6 +186,21 @@ export class OperationCaisseComponent implements OnInit{
           this.operations = res.data.data;
           this.totalPages = res.data.totalPages;
         }
+      }
+    });
+  }
+
+  //Récupérer les devise
+  getalldevises (){
+    const params = {
+      page: 1,
+      limit: 20
+    };
+    this.ds.getAll(params).subscribe({
+      next : (res) => {
+         if(res.success){
+            this.devises = res.data;
+         }
       }
     });
   }
@@ -940,7 +961,7 @@ export class OperationCaisseComponent implements OnInit{
       },
       error: (err) => {
         this.loading = false;
-        this.toastr.error(err);
+        this.toastr.error(err.error.message);
       }
     })
   }
@@ -963,7 +984,7 @@ export class OperationCaisseComponent implements OnInit{
       error: (err) => {
         this.error = "échec de Modification";
         this.loading = false;
-        this.toastr.error(this.error);
+        this.toastr.error(err.error.message);
       }
     })
   }

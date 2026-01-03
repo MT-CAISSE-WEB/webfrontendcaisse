@@ -11,6 +11,8 @@ import { NotificationService } from '../../../_core/services/notification.servic
 
 import { PlancomptableService } from '../../donnee_base/services/plancomptable.service';
 import { plancomptableModel } from '../../donnee_base/models/plancomptable.model';
+import { devisemodel } from '../../donnee_base/donnee_base/model/devise.model';
+import { deviseservice } from '../../donnee_base/donnee_base/service/devise.service';
 
 @Component({
   selector: 'app-caisse',
@@ -43,6 +45,10 @@ export class CaisseComponent implements OnInit{
   checkAllRow : any;
   error : string = "";
 
+  //Ramener la devise
+  devises : devisemodel[] = [];
+  devise : devisemodel = new devisemodel();
+
   //Changement titre modal
   actionModal: string = "create";
 
@@ -59,9 +65,11 @@ export class CaisseComponent implements OnInit{
   constructor(private caisseservice: CaisseService,
               private journalservice: JournalService,
               private plancomptableservice: PlancomptableService,
-              private router: Router){}
+              private router: Router, private ds:deviseservice){}
 
   ngOnInit(): void {
+      //Afficher toutes les devises
+      this.getalldevises();
       //Afficher tous les caisses
       this.getAllcaisses();
       //Ramener tous les journaux
@@ -89,6 +97,20 @@ export class CaisseComponent implements OnInit{
     });
   }
 
+  getalldevises (){
+    this.params = {
+      page: this.currentPage,
+      limit: 20
+    };
+    this.ds.getAll(this.params).subscribe({
+      next : (res) => {
+         if(res.success){
+            this.devises = res.data;
+         }
+      }
+    });
+  }
+
   getAllJournaux(){
     const params = {
       page: 1,
@@ -102,8 +124,6 @@ export class CaisseComponent implements OnInit{
       }
     });
   }
-
-  getAllDevises(){}
 
   getAllComptes(){
     this.plancomptableservice.getAll().subscribe({
@@ -128,14 +148,18 @@ export class CaisseComponent implements OnInit{
       dateinitialisation : ["", [Validators.required]],
       soldeinitialisation : [0],
       seuilminimal : [0],
-      site : ["1B386C16-B927-4124-BE18-7721862C1CE1"],
-      societe : ["757E104D-A394-4502-935A-5ED9DE6BFA35"],
+      site : [this.user.idsite ?? null],
+      societe : [this.user.idsociete ?? null],
       actif : [true],
     })
   }
 
   get form() {
     return this.caisseForm.controls;
+  }
+
+  get user(){
+    return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
   formatDate(date: any): string {

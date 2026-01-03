@@ -42,6 +42,7 @@ import { EditDemandeComponent } from './features/demande/edit-demande/edit-deman
 import { RoleComponent } from './features/administration/role/role.component';
 import { PermissionComponent } from './features/administration/permission/permission.component';
 import { RolepermissionComponent } from './features/administration/rolepermission/rolepermission.component';
+import { CircuitvalidationComponent } from './features/workflow/circuitvalidation/circuitvalidation.component';
 
 export const routes: Routes = [
   {
@@ -175,14 +176,8 @@ export const routes: Routes = [
           path : APP_ROLE_PERMISSION_ADMINISTRATION,
           component : RolepermissionComponent
       }
-         
-        ]
-    },
-    {
-        path: '',
-        redirectTo:'login',
-        pathMatch : 'full'
-    },
+    ]
+  }
 ];
 
 

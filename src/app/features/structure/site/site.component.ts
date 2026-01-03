@@ -62,6 +62,7 @@ export class SiteComponent implements OnInit {
             this.getallsites();
             //Initialisation du formulaire
             this.initForm();
+            this.initcentreanalytique();
             this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("ce Site");
             this.titleMsg = TITLE_DELETE
         }
@@ -157,8 +158,17 @@ setActiveTab(tab: string) {
       email : [''],
       telephone : [''],
       adresse : [''],
-      estcentreanalytique : [true]
+      estcentreanalytique : [false]
     });
+  }
+
+  initcentreanalytique (){
+    this.siteForm.get('estcentreanalytique')?.valueChanges.subscribe(value => {
+  if (!value) {
+    this.siteForm.get('idanalytique')?.reset();
+  }
+});
+
   }
 
   get form(){

@@ -68,14 +68,11 @@ export class DepartementComponent implements OnInit {
                   this.getalldepartements();
                   //Initialisation du formulaire
                   this.initForm();
-                  console.log("Changement de site détecté");
-                  this.getsocietebysite();
                   this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("ce Département");
                   this.titleMsg = TITLE_DELETE
               }
 
 getsocietebysite(){
-  console.log("Changement de site détecté");
     this.departementForm.get('idsite')?.valueChanges.subscribe(idsite => {
     const site = this.sites.find(s => s.idsite === idsite);
   
@@ -186,12 +183,14 @@ initForm(): void{
       idsociete: [''],
       responsable : [''],
       codedept : ['', Validators.required],
-      societe : [''],
+      societe : [{ value: '', disabled: true }],
       libelle : [''],
       email : [''],
       telephone : [''],
       adresse : ['']
     });
+
+    this.getsocietebysite();
   }
 
 get form(){
@@ -336,5 +335,4 @@ modalUpdate(_object: departementmodel){
     }
   })
 }
-
 }

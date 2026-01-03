@@ -7,8 +7,4 @@ export class circuitvalidationmodel extends MainModel{
         typeaction : string="";
         idsociete : string="";
         idsite : string="";
-        iddepartement : string="";
-        nombrevalidateur : number =0;
-        rangvalidation : number =0;
-        actif : number =0;
 }
