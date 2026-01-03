@@ -61,6 +61,7 @@
                   type="text"
                   class="form-control form-control-sm search"
                   placeholder="rechercher par code, libelle..."
+                  [formControl]="searchCtrl"
                 />
                 <i class="ri-search-line search-icon"></i>
               </div>
@@ -122,31 +123,6 @@
                 <i class="ri-store-2-fill me-1 align-bottom"></i> Tous
               </a>
             </li>
-            <li class="nav-item">
-              <a
-                class="nav-link py-3 Delivered"
-                data-bs-toggle="tab"
-                id="Delivered"
-                href="#delivered"
-                role="tab"
-                aria-selected="false"
-              >
-                <i class="ri-checkbox-circle-line me-1 align-bottom"></i> Actif
-              </a>
-            </li>
-            <li class="nav-item">
-              <a
-                class="nav-link py-3 Pickups"
-                data-bs-toggle="tab"
-                id="Pickups"
-                href="#pickups"
-                role="tab"
-                aria-selected="false"
-              >
-                <i class="ri-truck-line me-1 align-bottom"></i> Inactif
-                <span class="badge bg-danger align-middle ms-1">2</span>
-              </a>
-            </li>
           </ul>
 
           <div class="table-responsive table-card mb-1">
@@ -178,94 +154,72 @@
                   <th class="sort" data-sort="customer_name">
                     Montant prev société
                   </th>
-                  <th class="sort" data-sort="customer_name">
-                    Total conso clôture
-                  </th>
-                  <th class="sort" data-sort="customer_name">Solde clôture</th>
                   <th class="sort" data-sort="city">Action</th>
                 </tr>
               </thead>
               <tbody class="list form-check-all">
-                @for (item of ligneBudgets; track $index){
+                @if (ligneBudgetsGrouped.length === 0) {
+                <tr>
+                  <td colspan="8" class="text-center text-muted py-4">
+                    Aucune ligne budgétaire n'a encore été créée.
+                  </td>
+                </tr>
+                } @for (group of ligneBudgetsGrouped; track
+                group.budget.idbudget) {
+
+                <!-- En-tête Budget -->
+                <tr class="table-primary fw-bold">
+                  <td colspan="8">
+                    Budget : {{ group.budget.codebudget }} –
+                    {{ group.budget.libelle }}
+                  </td>
+                </tr>
+
+                <!-- Lignes du budget -->
+                @for (item of group.lignes; track
+                item.idbudgetdepartementnature) {
                 <tr>
                   <th scope="row">
                     <div class="form-check">
                       <input
                         class="form-check-input"
                         [checked]="isChecked(item.idbudgetdepartementnature)"
-                        [(ngModel)]="selectedItems[$index]"
+                        [(ngModel)]="
+                          selectedItems[item.idbudgetdepartementnature]
+                        "
                         (ngModelChange)="handleSelectOne(item, $event)"
                         type="checkbox"
-                        name="itemGroup_{{ $index }}"
                       />
                     </div>
                   </th>
-                  <td class="code">
-                    <a href="#" class="fw-medium link-primary">{{
-                      item.budget?.codebudget
-                    }}</a>
-                  </td>
-                  <td class="customer_name">
-                    {{ item.iddepartement || "N/A" }}
-                  </td>
-                  <td class="customer_name">{{ item.idnature || "N/A" }}</td>
-                  <td class="customer_name">{{ item.montantprevisiondept }}</td>
-                  <td class="customer_name">{{ item.montantprevisionsite }}</td>
-                  <td class="customer_name">
-                    {{ item.montantprevisionsociete }}
-                  </td>
-                  <td class="customer_name">{{ item.totalconsocloture }}</td>
-                  <td class="customer_name">{{ item.soldecloture }}</td>
 
-                  <td>
-                    <ul class="list-inline hstack gap-2 mb-0">
-                      <li
-                        class="list-inline-item"
-                        data-bs-toggle="tooltip"
-                        data-bs-trigger="hover"
-                        data-bs-placement="top"
-                        title="View"
-                      >
-                        <a href="#" class="text-primary d-inline-block">
-                          <i class="ri-eye-fill fs-16"></i>
-                        </a>
-                      </li>
-                      <li
-                        class="list-inline-item edit"
-                        data-bs-toggle="tooltip"
-                        data-bs-trigger="hover"
-                        data-bs-placement="top"
-                        title="Edit"
-                      >
-                        <a
-                          href="#showModal"
-                          data-bs-toggle="modal"
-                          (click)="modalUpdate(item)"
-                          class="text-primary d-inline-block edit-item-btn"
-                        >
-                          <i class="ri-pencil-fill fs-16"></i>
-                        </a>
-                      </li>
-                      <li
-                        class="list-inline-item"
-                        data-bs-toggle="tooltip"
-                        data-bs-trigger="hover"
-                        data-bs-placement="top"
-                        title="Remove"
-                      >
-                        <a
-                          class="text-danger d-inline-block remove-item-btn"
-                          (click)="modalDelete(item)"
-                          data-bs-toggle="modal"
-                          href="#deleteOrder"
-                        >
-                          <i class="ri-delete-bin-5-fill fs-16"></i>
-                        </a>
-                      </li>
-                    </ul>
+                  <td>{{ group.budget.codebudget }}</td>
+                  <td>{{ item.departement?.libelle || "—" }}</td>
+                  <td>{{ item.nature_operation?.libelle || "—" }}</td>
+                  <td>{{ item.montantprevisiondept }}</td>
+                  <td>{{ item.montantprevisionsite }}</td>
+                  <td>{{ item.montantprevisionsociete }}</td>
+
+                  <td class="text-end">
+                    <a
+                      href="#showModal"
+                      data-bs-toggle="modal"
+                      (click)="modalUpdate(item)"
+                      class="text-primary me-2"
+                    >
+                      <i class="ri-pencil-fill"></i>
+                    </a>
+                    <a
+                      class="text-danger"
+                      (click)="modalDelete(item)"
+                      data-bs-toggle="modal"
+                      href="#deleteOrder"
+                    >
+                      <i class="ri-delete-bin-5-fill"></i>
+                    </a>
                   </td>
                 </tr>
-                }
+                } }
               </tbody>
             </table>
             <div class="noresult" style="display: none">
@@ -306,7 +260,7 @@
           aria-labelledby="exampleModalLabel"
           aria-hidden="true"
         >
-          <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
               <div class="modal-header bg-light p-3">
                 <h5 class="modal-title" id="exampleModalLabel">
@@ -319,6 +273,7 @@
                   data-bs-dismiss="modal"
                   aria-label="Close"
                   id="close-modal"
+                  (click)="resetAfterSubmit()"
                 ></button>
               </div>
               <form [formGroup]="ligneBudgetForm">
@@ -336,8 +291,10 @@
                       id="idbudget-field"
                       formControlName="idbudget"
                       (change)="onSelectionChange($event)"
+                      [class.bg-light]="actionModal === 'update'"
                     >
-                      <option selected>-- Sélectionner --</option>
+                      >
+                      <option [ngValue]="null">-- Sélectionner --</option>
                       @for(item of budgets; track $index) {
                       <option [value]="item.idbudget">
                         {{ item.codebudget }} - {{ item.libelle }}
@@ -347,101 +304,147 @@
                     <div class="invalid-feedback">{{ msgErros }}</div>
                   </div>
 
-                  @if(selectedBudget && selectedBudget.entite === "Département")
-                  {
-                  <div class="mb-3">
-                    <label class="form-label form-label-sm" for="iddepartement"
-                      >Département</label
-                    >
+                  <div
+                    class="mb-3"
+                    *ngIf="selectedBudget?.entite === 'Département'"
+                  >
+                    <label class="form-label">Département</label>
                     <select
-                      class="form-select form-control"
-                      aria-label="Default select example"
-                      id="iddepartement"
+                      class="form-select"
+                      (change)="onDepartementChange($event)"
+                      formControlName="iddepartement"
+                      [class.bg-light]="actionModal === 'update'"
                     >
-                      <option selected>-- Sélectionner --</option>
-                      @for (departement of departements; track $index) {
-                      <option [value]="departement.iddepartement">
-                        {{ departement.libelle }}
+                      <option value="">-- Sélectionner --</option>
+                      <option
+                        *ngFor="let dep of departements"
+                        [value]="dep.iddepartement"
+                      >
+                        {{ dep.libelle }}
                       </option>
-                      }
-                    </select>
-                  </div>
-                  }
-
-                  <div class="mb-3">
-                    <label class="form-label form-label-sm" for="idnature"
-                      >Nature opération</label
-                    >
-                    <select
-                      class="form-select form-control"
-                      aria-label="Default select example"
-                      id="idnature"
-                    >
-                      <option selected>-- Sélectionner --</option>
                     </select>
                   </div>
 
-                  @if(selectedBudget && selectedBudget.entite === "Département")
-                  {
-                  <div class="mb-3">
-                    <div>
-                      <label
-                        for="montantprevisiondept-field"
-                        class="form-label mb-0"
-                        >Montant prévision département</label
-                      >
-                      <input
-                        type="number"
-                        id="montantprevisiondept-field"
-                        class="form-control form-control-sm {{
-                          isValidField('montantprevisiondept')
-                        }}"
-                        formControlName="montantprevisiondept"
-                      />
-                      <div class="invalid-feedback">{{ msgErros }}</div>
+                  <div *ngIf="natureGrid.length > 0">
+                    <table
+                      class="table table-bordered table-striped align-middle"
+                    >
+                      <thead class="table-light">
+                        <tr>
+                          <th>#</th>
+                          <th>Nature opération</th>
+                          <th>Montant prévision département</th>
+                          <th>Montant prévision site</th>
+                          <th>Montant prévision société</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let ligne of natureGrid; let i = index">
+                          <td>{{ i + 1 }}</td>
+                          <td>{{ ligne.libelle }}</td>
+                          <td>
+                            <input
+                              type="number"
+                              class="form-control form-control-sm"
+                              [disabled]="selectedBudget?.validedept === 1"
+                              [(ngModel)]="ligne.montantDept"
+                              [ngModelOptions]="{ standalone: true }"
+                              (ngModelChange)="
+                                onMontantChange(ligne, 'montantDept', $event)
+                              "
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              class="form-control form-control-sm"
+                              [disabled]="
+                                selectedBudget?.validedept === 0 ||
+                                selectedBudget?.validesite === 1
+                              "
+                              [(ngModel)]="ligne.montantSite"
+                              [ngModelOptions]="{ standalone: true }"
+                              (ngModelChange)="
+                                onMontantChange(ligne, 'montantSite', $event)
+                              "
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              class="form-control form-control-sm"
+                              [disabled]="selectedBudget?.validesite !== 1"
+                              [ngModelOptions]="{ standalone: true }"
+                              [(ngModel)]="ligne.montantSociete"
+                              (ngModelChange)="
+                                onMontantChange(ligne, 'montantSociete', $event)
+                              "
+                            />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div *ngIf="natureGrid.length === 0">
+                    @if(selectedBudget && selectedBudget.entite ===
+                    "Département") {
+                    <div class="mb-3">
+                      <div>
+                        <label
+                          for="montantprevisiondept-field"
+                          class="form-label mb-0"
+                          >Montant prévision département</label
+                        >
+                        <input
+                          type="number"
+                          id="montantprevisiondept-field"
+                          class="form-control form-control-sm"
+                        />
+                        <div class="invalid-feedback">{{ msgErros }}</div>
+                      </div>
+                    </div>
+                    }
+                    <div class="mb-3">
+                      <div>
+                        <label
+                          for="montantprevisionsite-field"
+                          class="form-label mb-0"
+                          >Montant prévision site</label
+                        >
+                        <input
+                          type="number"
+                          id="montantprevisionsite-field"
+                          class="form-control form-control-sm {{
+                            isValidField('montantprevisionsite')
+                          }}"
+                          formControlName="montantprevisionsite"
+                        />
+                        <div class="invalid-feedback">{{ msgErros }}</div>
+                      </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <div>
+                        <label
+                          for="montantprevisionsociete-field"
+                          class="form-label mb-0"
+                          >Montant prévision société</label
+                        >
+                        <input
+                          type="number"
+                          id="montantprevisionsociete-field"
+                          class="form-control form-control-sm {{
+                            isValidField('montantprevisionsociete')
+                          }}"
+                          formControlName="montantprevisionsociete"
+                        />
+                        <div class="invalid-feedback">{{ msgErros }}</div>
+                      </div>
                     </div>
                   </div>
-                  }
 
-                  <div class="mb-3">
-                    <div>
-                      <label
-                        for="montantprevisionsite-field"
-                        class="form-label mb-0"
-                        >Montant prévision site</label
-                      >
-                      <input
-                        type="number"
-                        id="montantprevisionsite-field"
-                        class="form-control form-control-sm {{
-                          isValidField('montantprevisionsite')
-                        }}"
-                        formControlName="montantprevisionsite"
-                      />
-                      <div class="invalid-feedback">{{ msgErros }}</div>
-                    </div>
-                  </div>
-
-                  <div class="mb-3">
-                    <div>
-                      <label
-                        for="montantprevisionsociete-field"
-                        class="form-label mb-0"
-                        >Montant prévision société</label
-                      >
-                      <input
-                        type="number"
-                        id="montantprevisionsociete-field"
-                        class="form-control form-control-sm {{
-                          isValidField('montantprevisionsociete')
-                        }}"
-                        formControlName="montantprevisionsociete"
-                      />
-                      <div class="invalid-feedback">{{ msgErros }}</div>
-                    </div>
-                  </div>
-
-                  <div class="mb-3">
+                  <!-- <div class="mb-3">
                     <div>
                       <label
                         for="totalconsocloture-field"
@@ -451,16 +454,13 @@
                       <input
                         type="number"
                         id="totalconsocloture-field"
-                        class="form-control form-control-sm {{
-                          isValidField('totalconsocloture')
-                        }}"
-                        formControlName="totalconsocloture"
+                        class="form-control form-control-sm"
                       />
                       <div class="invalid-feedback">{{ msgErros }}</div>
                     </div>
-                  </div>
+                  </div> -->
 
-                  <div class="mb-3">
+                  <!-- <div class="mb-3">
                     <div>
                       <label for="soldecloture-field" class="form-label mb-0"
                         >Solde à la clôture</label
@@ -468,13 +468,13 @@
                       <input
                         type="number"
                         id="soldecloture-field"
-                        class="form-control form-control-sm {{
-                          isValidField('soldecloture')
-                        }}"
-                        formControlName="soldecloture"
+                        class="form-control form-control-sm"
                       />
                       <div class="invalid-feedback">{{ msgErros }}</div>
                     </div>
+                  </div> -->
+                  <div *ngIf="msgErros" class="alert alert-danger mt-2">
+                    {{ msgErros }}
                   </div>
                 </div>
 
@@ -484,6 +484,7 @@
                       type="button"
                       class="btn btn-sm btn-light"
                       data-bs-dismiss="modal"
+                      (click)="resetAfterSubmit()"
                     >
                       Fermer
                     </button>
@@ -492,6 +493,7 @@
                       class="btn btn-sm btn-success"
                       id="add-btn"
                       (click)="onSubmit()"
+                      [disabled]="loading"
                     >
                       {{
                         actionModal === "create" ? "Enregistrer" : "Modifier"

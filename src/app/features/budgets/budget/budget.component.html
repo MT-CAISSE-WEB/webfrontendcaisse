@@ -38,9 +38,11 @@
               <button type="button" class="btn btn-sm btn-soft-info">
                 <i class="ri-file-download-line align-bottom me-1"></i> import
               </button>
-              <button class="btn btn-sm btn-soft-danger"
+              <button
+                class="btn btn-sm btn-soft-danger"
                 [disabled]="!checkAllRow"
-                onClick="deleteMultiple()">
+                onClick="deleteMultiple()"
+              >
                 <i class="ri-delete-bin-2-line"></i>
               </button>
               <button type="button" class="btn btn-sm btn-info">
@@ -59,6 +61,9 @@
                   type="text"
                   class="form-control form-control-sm search"
                   placeholder="rechercher par code, libelle..."
+                  [(ngModel)]="searchTerm"
+                  (ngModelChange)="applyFilters()"
+                  [ngModelOptions]="{ standalone: true }"
                 />
                 <i class="ri-search-line search-icon"></i>
               </div>
@@ -568,7 +573,7 @@
                     </select>
                     <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                   </div>
-                  <!-- <div class="mb-3">
+                  <div class="mb-3">
                     <label class="form-label form-label-sm" for="">Site</label>
                     <select
                       class="form-select form-control form-control-sm"
@@ -577,9 +582,9 @@
                     >
                       <option disabled>-- Sélectionner --</option>
                     </select>
-                    <div class="invalid-feedback">{{ msgErros }}</div>
-                  </div> -->
-                  <!-- <div class="mb-3">
+                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
+                  </div>
+                  <div class="mb-3">
                     <label class="form-label form-label-sm" for=""
                       >Société</label
                     >
@@ -590,8 +595,8 @@
                     >
                       <option disabled>-- Sélectionner --</option>
                     </select>
-                    <div class="invalid-feedback">{{ msgErros }}</div>
-                  </div> -->
+                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
+                  </div>
 
                   <div class="mb-3">
                     <div class="form-check form-switch">
