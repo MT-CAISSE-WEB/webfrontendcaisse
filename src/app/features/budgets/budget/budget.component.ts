@@ -19,6 +19,7 @@ import {
 } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { LigneBudgetModel } from '../models/ligne_budget.model';
 
 type BudgetStatusFilter = 'ALL' | 'ACTIF' | 'INACTIF';
 

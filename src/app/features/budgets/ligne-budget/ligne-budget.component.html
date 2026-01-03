@@ -61,6 +61,7 @@
                   type="text"
                   class="form-control form-control-sm search"
                   placeholder="rechercher par code, libelle..."
+                  [formControl]="searchCtrl"
                 />
                 <i class="ri-search-line search-icon"></i>
               </div>
@@ -120,31 +121,6 @@
                 aria-selected="true"
               >
                 <i class="ri-store-2-fill me-1 align-bottom"></i> Tous
-              </a>
-            </li>
-            <li class="nav-item">
-              <a
-                class="nav-link py-3 Delivered"
-                data-bs-toggle="tab"
-                id="Delivered"
-                href="#delivered"
-                role="tab"
-                aria-selected="false"
-              >
-                <i class="ri-checkbox-circle-line me-1 align-bottom"></i> Actif
-              </a>
-            </li>
-            <li class="nav-item">
-              <a
-                class="nav-link py-3 Pickups"
-                data-bs-toggle="tab"
-                id="Pickups"
-                href="#pickups"
-                role="tab"
-                aria-selected="false"
-              >
-                <i class="ri-truck-line me-1 align-bottom"></i> Inactif
-                <span class="badge bg-danger align-middle ms-1">2</span>
               </a>
             </li>
           </ul>
@@ -224,19 +200,23 @@
                   <td>{{ item.montantprevisionsite }}</td>
                   <td>{{ item.montantprevisionsociete }}</td>
 
-                  <td>
-                    <ul class="list-inline hstack gap-2 mb-0">
-                      <li class="list-inline-item">
-                        <a class="text-primary" (click)="modalUpdate(item)">
-                          <i class="ri-pencil-fill fs-16"></i>
-                        </a>
-                      </li>
-                      <li class="list-inline-item">
-                        <a class="text-danger" (click)="modalDelete(item)">
-                          <i class="ri-delete-bin-5-fill fs-16"></i>
-                        </a>
-                      </li>
-                    </ul>
+                  <td class="text-end">
+                    <a
+                      href="#showModal"
+                      data-bs-toggle="modal"
+                      (click)="modalUpdate(item)"
+                      class="text-primary me-2"
+                    >
+                      <i class="ri-pencil-fill"></i>
+                    </a>
+                    <a
+                      class="text-danger"
+                      (click)="modalDelete(item)"
+                      data-bs-toggle="modal"
+                      href="#deleteOrder"
+                    >
+                      <i class="ri-delete-bin-5-fill"></i>
+                    </a>
                   </td>
                 </tr>
                 } }
@@ -293,6 +273,7 @@
                   data-bs-dismiss="modal"
                   aria-label="Close"
                   id="close-modal"
+                  (click)="resetAfterSubmit()"
                 ></button>
               </div>
               <form [formGroup]="ligneBudgetForm">
@@ -310,7 +291,9 @@
                       id="idbudget-field"
                       formControlName="idbudget"
                       (change)="onSelectionChange($event)"
+                      [class.bg-light]="actionModal === 'update'"
                     >
+                      >
                       <option [ngValue]="null">-- Sélectionner --</option>
                       @for(item of budgets; track $index) {
                       <option [value]="item.idbudget">
@@ -330,6 +313,7 @@
                       class="form-select"
                       (change)="onDepartementChange($event)"
                       formControlName="iddepartement"
+                      [class.bg-light]="actionModal === 'update'"
                     >
                       <option value="">-- Sélectionner --</option>
                       <option
@@ -415,10 +399,7 @@
                         <input
                           type="number"
                           id="montantprevisiondept-field"
-                          class="form-control form-control-sm {{
-                            isValidField('montantprevisiondept')
-                          }}"
-                          formControlName="montantprevisiondept"
+                          class="form-control form-control-sm"
                         />
                         <div class="invalid-feedback">{{ msgErros }}</div>
                       </div>
@@ -492,6 +473,9 @@
                       <div class="invalid-feedback">{{ msgErros }}</div>
                     </div>
                   </div> -->
+                  <div *ngIf="msgErros" class="alert alert-danger mt-2">
+                    {{ msgErros }}
+                  </div>
                 </div>
 
                 <div class="modal-footer">
@@ -500,6 +484,7 @@
                       type="button"
                       class="btn btn-sm btn-light"
                       data-bs-dismiss="modal"
+                      (click)="resetAfterSubmit()"
                     >
                       Fermer
                     </button>
