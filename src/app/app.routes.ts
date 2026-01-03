@@ -10,7 +10,8 @@ import { APP, APP_DONNEE_BASE_DEVISE, APP_AFF_NATURE_CENTRE_DONNEE_BASE,
      APP_USER_ADMINISTRATION, APP_STRUCTURE_SITE, APP_STRUCTURE_DEPARTEMENT, 
      APP_PERMISSION_ADMINISTRATION, APP_ROLE_PERMISSION_ADMINISTRATION,
      APP_ROOT_DMD_EDIT_DECAISSEMENT,
-     APP_ROOT_EDIT_DECAISSEMENT} from './_core/routes/frontend.root';
+     APP_ROOT_EDIT_DECAISSEMENT,
+     APP_WORKFLOW_ADMINISTRATION} from './_core/routes/frontend.root';
 
 import { LayoutMainComponent } from './layout/layout-main/layout-main.component';
 import { LayoutContentComponent } from './layout/composant/layout-content/layout-content.component';
@@ -175,7 +176,11 @@ export const routes: Routes = [
       {
           path : APP_ROLE_PERMISSION_ADMINISTRATION,
           component : RolepermissionComponent
-      }
+      },
+      {
+          path : APP_WORKFLOW_ADMINISTRATION,
+          component:CircuitvalidationComponent
+      },
     ]
   }
 ];
