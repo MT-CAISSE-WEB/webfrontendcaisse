@@ -165,9 +165,9 @@ export class CircuitvalidationComponent implements OnInit{
   }
 
   this.utilisateursFiltres = this.utilisateurs.filter(u => {
-    if (typeEntiteForm === 'societe') {
+    if (typeEntiteForm === 'Societe') {
       return u.typeentitesociete === 1;
-    } else if (typeEntiteForm === 'site') {
+    } else if (typeEntiteForm === 'Site') {
       return u.typeentitesite === 1;
   
     } else {

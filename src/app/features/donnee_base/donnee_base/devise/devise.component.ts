@@ -75,7 +75,7 @@ export class DeviseComponent implements OnInit {
       page: this.currentPage,
       limit: this.limit
     };
-    this.ds.getAll(this.params).subscribe({
+    this.ds.getAll().subscribe({
       next : (res) => {
          if(res.success){
             this.devises = res.data;
