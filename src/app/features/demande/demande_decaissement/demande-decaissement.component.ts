@@ -37,6 +37,8 @@ export class DemandeDecaissementComponent implements OnInit {
 
   demandes: DemandeComplet[] = [];
   demandesValide: any[] = [];
+  validateurs: any[] = [];
+  detailBudgets: any;
   entetesDmd: EnteteDemande[] = [];
   selectedDemande?: DemandeComplet;
 
@@ -239,7 +241,6 @@ export class DemandeDecaissementComponent implements OnInit {
         if(res.success){
           this.entetesDmd = res.data.data;
           this.totalPages = res.data.totalPages;
-          console.log(this.entetesDmd);
           this.loadDemandeAvalide();
         }else{
           this.toastr.error("Erreur de récuperation des données");
@@ -253,6 +254,26 @@ export class DemandeDecaissementComponent implements OnInit {
 
   get user(){
     return JSON.parse(localStorage.getItem('user') || '{}');
+  }
+
+  openDetail(_object: any){
+    this.loadDetailsBudget(_object.iddemande)
+  }
+
+  //Recharger les details budget de la demande
+  loadDetailsBudget(iddemande: string){
+    this.service.get_detailBudget(iddemande).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.detailBudgets = res.data;
+        }else{
+          this.toastr.error("Cette demande n'a pas de detail budget");
+        }
+      },
+      error: (err) => {
+        this.toastr.error(err.error.message);
+      }
+    });
   }
 
   // Recharger toutes les demandes a valider
@@ -271,8 +292,31 @@ export class DemandeDecaissementComponent implements OnInit {
     });
   }
 
+  openValidateur(_object: any){
+    this.validateurs = []; // reset
+    this.loadValidateurs(_object.iddemande)
+  }
+
+  //Recharger tous les validateurs d'une demande
+  loadValidateurs(iddemande: string){
+    this.service.get_validateurs(iddemande).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.validateurs = res.data;
+          console.log(this.validateurs);
+        }else{
+          this.toastr.error("Cette demande n'a pas de validateur");
+        }
+      },
+      error: (err) => {
+        this.toastr.error(err.error.message);
+      }
+    });
+  }
+
   //Ouverture
   openValidationModal(demande: any) {
+    this.validForm.reset();
     this.selectedDmd = demande;
   }
 

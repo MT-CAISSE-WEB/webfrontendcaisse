@@ -122,4 +122,16 @@ export class DemandeService {
       `${this.base}entete-demande/avalider/${idutilisateur}`
     );
   }
+
+  get_validateurs(iddemande: string): Observable<any>{
+     return this.http.get<any>(
+      `${this.base}entete-demande/validateurs/${iddemande}`
+    );
+  }
+
+  get_detailBudget(iddemande: string): Observable<any>{
+      return this.http.get<any>(
+      `${this.base}entete-demande/detail/budget/${iddemande}`
+    );
+  }
 }

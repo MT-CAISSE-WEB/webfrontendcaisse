@@ -51,6 +51,11 @@ export const routes: Routes = [
       component:LoginComponent
   },
   {
+    path: '',
+    redirectTo: 'APP',
+    pathMatch: 'full'
+  },
+  {
     path: APP,
     canActivate: [AuthGuard],
     component: LayoutMainComponent,

@@ -113,8 +113,8 @@
 
                                       <div class="dropdown-menu dropdown-menu-end">
                                           <a *ngIf="item.canValidate == '1'" class="dropdown-item" data-bs-toggle="modal" (click)="openValidationModal(item)" [attr.data-bs-target]="'#validationModal' + $index"><i class="ri-eye-fill align-bottom me-2 text-muted"></i>Validation</a>
-                                          <a *ngIf="item.canValidate == '1'" class="dropdown-item" data-bs-toggle="modal" href="#historiqueModal"><i class="ri-pencil-fill align-bottom me-2 text-muted"></i>Historique de validation</a>
-                                          <a *ngIf="item.canValidate == '1'" class="dropdown-item" data-bs-toggle="modal" href="#"><i class="ri-ri-currency-fill align-bottom me-2 text-muted"></i>Detail budget</a>
+                                          <a *ngIf="item.canValidate == '1'" class="dropdown-item" data-bs-toggle="modal" (click)="openValidateur(item)" [attr.data-bs-target]="'#historiqueModal'"><i class="ri-pencil-fill align-bottom me-2 text-muted"></i>Historique de validation</a>
+                                          <a class="dropdown-item" data-bs-toggle="modal" (click)="openDetail(item)" [attr.data-bs-target]="'#detailBudget'"><i class="ri-currency-fill align-bottom me-2 text-muted"></i>Detail budget</a>
                                           <div class="dropdown-divider"></div>
                                       </div>
                                   </div>
@@ -226,6 +226,119 @@
                             <div class="hstack gap-2 justify-content-center remove">
                                 <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> annuler</button>
                                 <button class="btn btn-sm btn-danger" (click)="deleteConfirmed()" id="delete-record">Oui, supprimer</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--end modal -->
+
+        <!-- Modal Circuit validateurs -->
+        <div class="modal fade flip" [attr.id]="'historiqueModal'" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-info-subtle">
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                          <table class="table table-sm align-middle table-nowrap">
+                            <thead class="table-light">
+                              <tr>
+                                <th>#</th>
+                                <th>Circuit</th>
+                                <th>Validateur</th>
+                                <th>Statut</th>
+                                <th>Commentaire</th>
+                                <th>Date</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <!-- ROLES LIST -->
+                              <tr class="role-row" *ngFor="let v of validateurs; let i = index">
+                                <td>{{ i + 1 }}</td>
+                                <td>{{ v.codecircuitvalidation }}</td>
+                                <td>{{ v.nom }}  {{ v.prenom }}</td>
+                                <td>
+                                  <span class="badge bg-success" *ngIf="v.decision === 'valide'">
+                                    Validé
+                                  </span>
+                                  <span class="badge bg-warning" *ngIf="v.decision === 'en attente'">
+                                    En attente
+                                  </span>
+                                  <span class="badge bg-danger" *ngIf="v.decision === 'refuse'">
+                                    Rejeté
+                                  </span>
+                                </td>
+                                <td *ngIf="v.commentaire"> {{ v.commentaire }} </td>
+                                <td *ngIf="!v.commentaire"> aucun commentaire </td>
+                                <td *ngIf="!v.datevalidation"> aucune </td>
+                                <td *ngIf="v.datevalidation"> {{ formatDateInput(v.datevalidation) }} </td>
+                              </tr>
+                              <tr *ngIf="validateurs.length === 0">
+                                <td colspan="6" class="text-center text-muted">
+                                  Aucun validateur trouvé
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--end modal -->
+
+        <!-- Modal Detail budget -->
+        <div class="modal fade" [attr.id]="'detailBudget'" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-info-subtle">
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3" *ngIf="detailBudgets">
+                            <div class="col-lg-3 col-sm-3 col-6">
+                                <p class="text-muted mb-2 text-uppercase fw-semibold">Numero demande</p>
+                                <h5 class="fs-14 mb-0">#<span id="invoice-no">{{detailBudgets?.codedemande}}</span></h5>
+                            </div>
+                            <!--end col-->
+                            <div class="col-lg-3 col-sm-3 col-6">
+                                <p class="text-muted mb-2 text-uppercase fw-semibold">Date demande</p>
+                                <h5 class="fs-14 mb-0"><span id="invoice-date">{{formatDateFR(detailBudgets?.datedemande)}}</span></h5>
+                            </div>
+                            <!--end col-->
+                            <div class="col-lg-3 col-sm-3 col-6">
+                                <p class="text-muted mb-2 text-uppercase fw-semibold">Montant</p>
+                                <h5 class="fs-14 mb-0"><span id="total-amount">{{detailBudgets?.montant_demande}} </span>  {{detailBudgets.codedevise}}</h5>
+                            </div>
+                            <!--end col-->
+                            <div class="col-lg-3 col-sm-3 col-6">
+                                <p class="text-muted mb-2 text-uppercase fw-semibold">Décaissée</p>
+                                <span *ngIf="detailBudgets?.decaisse == 1" class="badge bg-success-subtle text-success fs-11" id="payment-status"> Oui </span>
+                                <span *ngIf="detailBudgets?.decaisse == 0" class="badge bg-warning-subtle text-warning fs-11" id="payment-status"> Non </span>
+                            </div>
+                            <!--end col-->
+                            <div class="col-lg-12 col-sm-12 col-12">
+                               <div class="d-flex">
+                                  <div class="flex-grow-1 p-2">
+                                      <div class="hstack gap-3 flex-wrap">
+                                          <div class="text-primary d-block">Code budget :  {{detailBudgets?.codebudget}}</div>
+                                          <div class="vr"></div>
+                                          <div class="text-muted">Type : <span class="text-body fw-medium">Budget {{detailBudgets?.typebudget}} </span></div>
+                                          <div class="vr"></div>
+                                          <div class="text-muted">Debut : <span class="text-body fw-medium"> {{formatDateFR(detailBudgets?.datedebut)}} </span></div>
+                                          <div class="vr"></div>
+                                          <div class="text-muted">Fin : <span class="text-body fw-medium"> {{formatDateFR(detailBudgets?.datefin)}} </span></div>
+                                      </div>
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row g-3" *ngIf="!detailBudgets">
+                          <div class="col-lg-12 col-sm-12 col-12">
+                                <p class="text-muted mb-2 text-uppercase fw-semibold">Pas de budget sur cette demande</p>
                             </div>
                         </div>
                     </div>
