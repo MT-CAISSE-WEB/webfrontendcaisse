@@ -5,6 +5,7 @@ import { sitemodel } from "../../structure/model/site.model";
 import { LigneDemande } from "./ligne-demande.model";
 
 export interface EnteteDemande {
+  canValidate: any;
   iddemande: string;
   codedemande?: string;
   iddemandeur?: string;

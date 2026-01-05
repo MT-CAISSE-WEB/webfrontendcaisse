@@ -105,20 +105,22 @@
                               </a>
                           </li>
                           <li class="list-inline-item">
-                            <div class="d-flex gap-1 align-items-center">
-                                <div class="dropdown">
-                                    <button class="btn btn-link text-muted p-1 mt-n2 py-0 text-decoration-none fs-15" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                        <i class=" bx bx-dots-vertical-rounded"></i>
-                                    </button>
+                              <div class="d-flex gap-1 align-items-center">
+                                  <div class="dropdown">
+                                      <button class="btn btn-link text-muted p-1 mt-n2 py-0 text-decoration-none fs-15" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                          <i class=" bx bx-dots-vertical-rounded"></i>
+                                      </button>
 
-                                    <div class="dropdown-menu dropdown-menu-end">
-                                        <a class="dropdown-item" data-bs-toggle="modal" (click)="openValidationModal(item)" [attr.data-bs-target]="'#validationModal' + $index"><i class="ri-eye-fill align-bottom me-2 text-muted"></i>Validation</a>
-                                        <a class="dropdown-item" data-bs-toggle="modal" href="#historiqueModal"><i class="ri-pencil-fill align-bottom me-2 text-muted"></i>Historique de validation</a>
-                                        <div class="dropdown-divider"></div>
-                                    </div>
-                                </div>
-                            </div>
+                                      <div class="dropdown-menu dropdown-menu-end">
+                                          <a *ngIf="item.canValidate == '1'" class="dropdown-item" data-bs-toggle="modal" (click)="openValidationModal(item)" [attr.data-bs-target]="'#validationModal' + $index"><i class="ri-eye-fill align-bottom me-2 text-muted"></i>Validation</a>
+                                          <a *ngIf="item.canValidate == '1'" class="dropdown-item" data-bs-toggle="modal" href="#historiqueModal"><i class="ri-pencil-fill align-bottom me-2 text-muted"></i>Historique de validation</a>
+                                          <a *ngIf="item.canValidate == '1'" class="dropdown-item" data-bs-toggle="modal" href="#"><i class="ri-ri-currency-fill align-bottom me-2 text-muted"></i>Detail budget</a>
+                                          <div class="dropdown-divider"></div>
+                                      </div>
+                                  </div>
+                              </div>
                           </li>
+                          
                       </ul>
                     </td>
                   </tr>
