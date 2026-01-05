@@ -36,6 +36,7 @@ export class DemandeDecaissementComponent implements OnInit {
   titleMsg: string ="";
 
   demandes: DemandeComplet[] = [];
+  demandesValide: any[] = [];
   entetesDmd: EnteteDemande[] = [];
   selectedDemande?: DemandeComplet;
 
@@ -76,8 +77,6 @@ export class DemandeDecaissementComponent implements OnInit {
     this.initValidForm();
     //charger les demandes
     this.loadAllDemandes();
-    //Charger le budgets
-    this.getAllBudgets();
 
     // Filtrage live avec debounce pour éviter de spammer le filtre à chaque frappe
     this.searchControl.valueChanges
@@ -147,20 +146,6 @@ export class DemandeDecaissementComponent implements OnInit {
     const year = date.getFullYear();
 
     return `${dayShort} ${day} ${month} ${year}`;
-  }
-
-  getAllBudgets() {
-    const params = {
-      page: 1,
-      limit: 1000,
-    };
-    this.budgetservice.getAll(params).subscribe({
-      next: (res: any) => {
-        if (res.success) {
-          this.budgets = res.data;
-        }
-      },
-    });
   }
 
   //Initialiser le formulaire de validation
@@ -254,10 +239,34 @@ export class DemandeDecaissementComponent implements OnInit {
         if(res.success){
           this.entetesDmd = res.data.data;
           this.totalPages = res.data.totalPages;
+          console.log(this.entetesDmd);
+          this.loadDemandeAvalide();
+        }else{
+          this.toastr.error("Erreur de récuperation des données");
         }
       },
       error: (err) => {
-        this.toastr.error("Erreur backend");
+        this.toastr.error(err.error.message);
+      }
+    });
+  }
+
+  get user(){
+    return JSON.parse(localStorage.getItem('user') || '{}');
+  }
+
+  // Recharger toutes les demandes a valider
+  loadDemandeAvalide() {
+    this.service.avalider(this.user.idutilisateur).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.demandesValide = res.data;
+        }else{
+          this.toastr.error("Aucune demande a valider");
+        }
+      },
+      error: (err) => {
+        this.toastr.error(err.error.message);
       }
     });
   }

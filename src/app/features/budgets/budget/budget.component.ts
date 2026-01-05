@@ -248,6 +248,8 @@ export class BudgetComponent implements OnInit {
         entite: ['', [Validators.required]],
         datefin: ['', [Validators.required]],
         idbudgetparent: [''],
+        site : [this.user.idsite ?? null],
+        societe : [this.user.idsociete ?? null],
         // createdby
         actif: [false],
       },
@@ -255,6 +257,10 @@ export class BudgetComponent implements OnInit {
         validators: this.budgetDateValidator(() => this.selectedBudgetParent),
       }
     );
+  }
+
+  get user(){
+    return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
   get form() {
@@ -637,7 +643,7 @@ export class BudgetComponent implements OnInit {
     this.loading = true;
     this.budgetservice.create(dataToSend).subscribe({
       next: (res: any) => {
-        console.log('Resultat:', res);
+        //console.log('Resultat:', res);
         if (res.success) {
           this.currentStatusFilter = 'ALL';
           this.closeModal('showModal');

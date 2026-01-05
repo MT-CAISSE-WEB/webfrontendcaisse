@@ -116,4 +116,10 @@ export class DemandeService {
       payload
     );
   }
+
+  avalider(idutilisateur: string): Observable<any>{
+     return this.http.get<any>(
+      `${this.base}entete-demande/avalider/${idutilisateur}`
+    );
+  }
 }
