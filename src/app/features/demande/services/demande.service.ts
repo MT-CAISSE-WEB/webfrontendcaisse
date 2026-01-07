@@ -111,7 +111,7 @@ export class DemandeService {
   }
 
   validationDemande(iddemande: string, payload: any): Observable<any>{
-     return this.http.patch<any>(
+     return this.http.post<any>(
       `${this.base}entete-demande/validate/${iddemande}`,
       payload
     );

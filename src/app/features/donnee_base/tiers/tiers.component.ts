@@ -102,6 +102,10 @@ export class TiersComponent implements OnInit{
     });
   }
 
+  get user(){
+    return JSON.parse(localStorage.getItem('user') || '{}');
+  }
+
   // ngAfterViewInit(): void {
   //   // Attendre que le DOM soit chargé
   //   $('#dataTable').DataTable({
@@ -130,7 +134,7 @@ export class TiersComponent implements OnInit{
       codetiers : ["", [Validators.required]],
       designation : ["", [Validators.required]],
       typetiers : ["", [Validators.required]],
-      idsociete : ["68EC05CB-0202-45EF-A3A9-B8DD1296DFEF", [Validators.required]],
+      idsociete : [this.user?.idsociete, [Validators.required]],
       actif : [true],
     })
   }

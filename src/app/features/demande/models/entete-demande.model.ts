@@ -5,7 +5,7 @@ import { sitemodel } from "../../structure/model/site.model";
 import { LigneDemande } from "./ligne-demande.model";
 
 export interface EnteteDemande {
-  canValidate: any;
+  circuitExist: number;
   iddemande: string;
   codedemande?: string;
   iddemandeur?: string;
@@ -14,7 +14,7 @@ export interface EnteteDemande {
   datedemande?: string; // ISO
   decaisse?: number;
   solde?: number;
-  statut?: string;
+  statut?: number;
   idcircuit?: string;
   idsociete?: string;
   idsite?: string;

@@ -240,7 +240,7 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   //Charger les centres de chaque ligne
-  loadCentresForLigne(ligne: FormGroup, idnature: string) {
+  loadCentresForLigne(ligne: FormGroup, idnature: string, resetCentre: boolean = true) {
     this.AffectationNatureCentreService.getAll(idnature).subscribe({
       next: (res) => {
         if (res.success) {
@@ -251,7 +251,9 @@ export class OperationCaisseComponent implements OnInit{
           ligne.get('centres')?.setValue(centres);
 
           // reset centre sélectionné
-          ligne.get('centre')?.reset();
+          if (resetCentre) {
+            ligne.get('centre')?.reset();
+          }
         }
       }
     });
@@ -313,7 +315,7 @@ export class OperationCaisseComponent implements OnInit{
         if(res.success){
           //this.entetesDmd = res.data.data;
           this.entetesDmd = (res.data.data || []).filter(
-            (n: any) => n.decaisse === 0
+            (n: any) => n.decaisse === 0 && n.statut === 2
           )
         }
       },
@@ -863,7 +865,7 @@ export class OperationCaisseComponent implements OnInit{
       ligne.get("montantligne")?.enable();
 
       //charger centres POUR CETTE LIGNE
-      this.loadCentresForLigne(ligne, natureId);
+      this.loadCentresForLigne(ligne, natureId, true);
       // Règle métier sur tiers
       this.handleNatureChange(ligne, natureId);
     });
@@ -1236,7 +1238,6 @@ export class OperationCaisseComponent implements OnInit{
           if (iddemande) {
             // Désactiver les boutons sur le formulaire de création
             this.isUpdated = false;
-
             this.onDemandeSelected(iddemande);
             //Verrouiller tout le formulaire
             this.operationForm.disable({ emitEvent: false });
@@ -1335,13 +1336,19 @@ export class OperationCaisseComponent implements OnInit{
 
   //Création des lignes depuis la demande
   createLigneFromDemande(ligne: any): FormGroup {
-    return this.fb.group({
+    const fg = this.fb.group({
       idligne: [''],
       montantligne: [ligne.montantdemande, Validators.required],
       natureop: [ligne.natureoperation?.idnature],
       centre: [ligne.centreanalytique?.idcentre],
       tiers: [ligne.tiers?.idtiers],
+      centres: this.fb.control<any[]>([])
     });
+
+    //charger centres POUR CETTE LIGNE
+    this.loadCentresForLigne(fg, ligne.natureoperation?.idnature, false);
+
+    return fg;
   }
 
   //Remplir le formulaire depuis la demande
@@ -1352,7 +1359,7 @@ export class OperationCaisseComponent implements OnInit{
       devise: demande.devise?.iddevise,
       site: demande.site?.idsite,
       societe: demande.societe?.idsociete,
-      typepaiement: demande.typedemande === 'Décaissement' ? 'decaissement' : 'encaissement',
+      typepaiement: demande.typedemande === 'decaissement' ? 'decaissement' : 'encaissement',
       montant: this.getTotalDemande(demande)
     });
 
@@ -1363,6 +1370,8 @@ export class OperationCaisseComponent implements OnInit{
     /** Recréer lignes */
     demande.lignes.forEach((ligne: any) => {
       const ligneFG = this.createLigneFromDemande(ligne);
+      //charger centres POUR CETTE LIGNE
+      this.loadCentresForLigne(ligneFG, ligne.natureoperation?.idnature, false);
       lignesFA.push(ligneFG);
     });
 

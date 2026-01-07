@@ -52,7 +52,7 @@ export const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: 'APP',
+    redirectTo: 'app',
     pathMatch: 'full'
   },
   {

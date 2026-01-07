@@ -51,6 +51,9 @@ export class DemandeDecaissementComponent implements OnInit {
   totalPages: number = 0;
   limit: number = 10;
 
+  //Validation possible ou non
+  canValidateUser: boolean = false;
+
   //Element à supprimer 
   deleteDemande: any = null;
   //Demande à selectionner
@@ -174,6 +177,11 @@ export class DemandeDecaissementComponent implements OnInit {
     });
   }
 
+  //Calcul du solde budget
+  calculateSoldeBudget(prevision: number, consomme: number): number {
+    return prevision - consomme;
+  }
+
   handleDecisionChange(): void {
     this.validForm.get('decision')?.valueChanges.subscribe(decision => {
       const motifCtrl = this.validForm.get('motif');
@@ -200,6 +208,7 @@ export class DemandeDecaissementComponent implements OnInit {
     }
 
     const payload = {
+      userId: this.user.idutilisateur,
       iddemande: this.selectedDmd?.iddemande,
       decision: this.validForm.value.decision,
       motif: this.validForm.value.decision === 'refuser'
@@ -211,7 +220,8 @@ export class DemandeDecaissementComponent implements OnInit {
     if(payload.iddemande){
         this.service.validationDemande(payload.iddemande, payload).subscribe({
         next: (res) => {
-          if(res.succes){
+          if(res.success){
+            this.loadAllDemandes();
             this.toastr.success('Décision enrégistrée');
           }else{
             this.toastr.error('Erreur lors de la validation');
@@ -241,7 +251,6 @@ export class DemandeDecaissementComponent implements OnInit {
         if(res.success){
           this.entetesDmd = res.data.data;
           this.totalPages = res.data.totalPages;
-          this.loadDemandeAvalide();
         }else{
           this.toastr.error("Erreur de récuperation des données");
         }
@@ -266,6 +275,7 @@ export class DemandeDecaissementComponent implements OnInit {
       next : (res) => {
         if(res.success){
           this.detailBudgets = res.data;
+          console.log(this.detailBudgets);
         }else{
           this.toastr.error("Cette demande n'a pas de detail budget");
         }
@@ -276,12 +286,36 @@ export class DemandeDecaissementComponent implements OnInit {
     });
   }
 
-  // Recharger toutes les demandes a valider
+  prepareValidation(item: any) {
+    // éviter les appels multiples
+    if (item._validationLoaded) return;
+
+    this.validateurs = []; // reset
+    this.service.get_validateurs(item.iddemande).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.canValidateUser = res.data.some(
+            (v: any) => v.idutilisateur === this.user.idutilisateur
+          );
+        } else {
+          this.canValidateUser = false;
+        }
+        item._validationLoaded = true;
+      },
+      error: () => {
+        this.canValidateUser = false;
+        item._validationLoaded = true;
+      }
+    });
+  }
+
+  // Recharger toutes les demandes a valider par l'utilisateur
   loadDemandeAvalide() {
     this.service.avalider(this.user.idutilisateur).subscribe({
       next : (res) => {
         if(res.success){
           this.demandesValide = res.data;
+          console.log("Demande a valider", this.demandesValide);
         }else{
           this.toastr.error("Aucune demande a valider");
         }
@@ -294,7 +328,7 @@ export class DemandeDecaissementComponent implements OnInit {
 
   openValidateur(_object: any){
     this.validateurs = []; // reset
-    this.loadValidateurs(_object.iddemande)
+    this.loadValidateurs(_object.iddemande);
   }
 
   //Recharger tous les validateurs d'une demande
@@ -303,12 +337,17 @@ export class DemandeDecaissementComponent implements OnInit {
       next : (res) => {
         if(res.success){
           this.validateurs = res.data;
-          console.log(this.validateurs);
+          // Vérifier si l'utilisateur connecté est dans la liste
+          this.canValidateUser = this.validateurs.some(
+            (v: any) => v.idutilisateur === this.user.idutilisateur
+          );
         }else{
+          this.canValidateUser = false;
           this.toastr.error("Cette demande n'a pas de validateur");
         }
       },
       error: (err) => {
+        this.canValidateUser = false;
         this.toastr.error(err.error.message);
       }
     });

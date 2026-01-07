@@ -88,10 +88,10 @@
                     <td class="montant"> {{ formatNumber(getTotalDemande(item)) }} </td>
                     <td class="devise"> {{ item.devise!.codedevise }} </td>
                     <td class="date"> {{ formatDateFR(item.datedemande!) }}</td>
-                    <td class="devise" *ngIf="item.statut! == '0'"> <span class="badge bg-primary-subtle text-primary"> non valide </span> </td>
-                    <td class="devise text-primary" *ngIf="item.statut! == '1'"> <span class="badge bg-info-subtle text-info"> en cours </span> </td>
-                    <td class="devise text-success" *ngIf="item.statut! == '2'"> <span class="badge bg-success-subtle text-success"> validée </span> </td>
-                    <td class="devise text-danger" *ngIf="item.statut! == '3'"> <span class="badge bg-dark-subtle text-body"> rejetée </span> </td>
+                    <td class="devise" *ngIf="item.statut! == 0"> <span class="badge bg-primary-subtle text-primary"> non valide </span> </td>
+                    <td class="devise text-primary" *ngIf="item.statut! == 1"> <span class="badge bg-info-subtle text-info"> en cours </span> </td>
+                    <td class="devise text-success" *ngIf="item.statut! == 2"> <span class="badge bg-success-subtle text-success"> validée </span> </td>
+                    <td class="devise text-danger" *ngIf="item.statut! == 3"> <span class="badge bg-dark-subtle text-body"> rejetée </span> </td>
                     <td>
                       <ul class="list-inline hstack gap-2 mb-0">
                           <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
@@ -107,13 +107,13 @@
                           <li class="list-inline-item">
                               <div class="d-flex gap-1 align-items-center">
                                   <div class="dropdown">
-                                      <button class="btn btn-link text-muted p-1 mt-n2 py-0 text-decoration-none fs-15" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                      <button class="btn btn-link text-muted p-1 mt-n2 py-0 text-decoration-none fs-15" (click)="prepareValidation(item)" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                           <i class=" bx bx-dots-vertical-rounded"></i>
                                       </button>
 
                                       <div class="dropdown-menu dropdown-menu-end">
-                                          <a *ngIf="item.canValidate == '1'" class="dropdown-item" data-bs-toggle="modal" (click)="openValidationModal(item)" [attr.data-bs-target]="'#validationModal' + $index"><i class="ri-eye-fill align-bottom me-2 text-muted"></i>Validation</a>
-                                          <a *ngIf="item.canValidate == '1'" class="dropdown-item" data-bs-toggle="modal" (click)="openValidateur(item)" [attr.data-bs-target]="'#historiqueModal'"><i class="ri-pencil-fill align-bottom me-2 text-muted"></i>Historique de validation</a>
+                                          <a *ngIf="canValidateUser && item.circuitExist! == 1 && [0,1].includes(item.statut!)" class="dropdown-item" data-bs-toggle="modal" (click)="openValidationModal(item)" [attr.data-bs-target]="'#validationModal' + $index"><i class="ri-eye-fill align-bottom me-2 text-muted"></i>Validation</a>
+                                          <a *ngIf="item.circuitExist! == 1" class="dropdown-item" data-bs-toggle="modal" (click)="openValidateur(item)" [attr.data-bs-target]="'#historiqueModal'"><i class="ri-pencil-fill align-bottom me-2 text-muted"></i>Historique de validation</a>
                                           <a class="dropdown-item" data-bs-toggle="modal" (click)="openDetail(item)" [attr.data-bs-target]="'#detailBudget'"><i class="ri-currency-fill align-bottom me-2 text-muted"></i>Detail budget</a>
                                           <div class="dropdown-divider"></div>
                                       </div>
@@ -236,7 +236,7 @@
 
         <!-- Modal Circuit validateurs -->
         <div class="modal fade flip" [attr.id]="'historiqueModal'" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content">
                     <div class="modal-header bg-info-subtle">
                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
@@ -261,20 +261,20 @@
                                 <td>{{ v.codecircuitvalidation }}</td>
                                 <td>{{ v.nom }}  {{ v.prenom }}</td>
                                 <td>
-                                  <span class="badge bg-success" *ngIf="v.decision === 'valide'">
+                                  <span class="badge bg-success" *ngIf="v.decision === 'approuve'">
                                     Validé
                                   </span>
                                   <span class="badge bg-warning" *ngIf="v.decision === 'en attente'">
                                     En attente
                                   </span>
-                                  <span class="badge bg-danger" *ngIf="v.decision === 'refuse'">
+                                  <span class="badge bg-danger" *ngIf="v.decision === 'rejete'">
                                     Rejeté
                                   </span>
                                 </td>
                                 <td *ngIf="v.commentaire"> {{ v.commentaire }} </td>
                                 <td *ngIf="!v.commentaire"> aucun commentaire </td>
                                 <td *ngIf="!v.datevalidation"> aucune </td>
-                                <td *ngIf="v.datevalidation"> {{ formatDateInput(v.datevalidation) }} </td>
+                                <td *ngIf="v.datevalidation"> {{ formatDateFR(v.datevalidation!)}} </td>
                               </tr>
                               <tr *ngIf="validateurs.length === 0">
                                 <td colspan="6" class="text-center text-muted">
@@ -299,23 +299,28 @@
                     </div>
                     <div class="modal-body">
                         <div class="row g-3" *ngIf="detailBudgets">
-                            <div class="col-lg-3 col-sm-3 col-6">
+                            <div class="col-lg-3 col-sm-3 col-4">
                                 <p class="text-muted mb-2 text-uppercase fw-semibold">Numero demande</p>
                                 <h5 class="fs-14 mb-0">#<span id="invoice-no">{{detailBudgets?.codedemande}}</span></h5>
                             </div>
                             <!--end col-->
-                            <div class="col-lg-3 col-sm-3 col-6">
+                            <div class="col-lg-2 col-sm-2 col-4">
                                 <p class="text-muted mb-2 text-uppercase fw-semibold">Date demande</p>
                                 <h5 class="fs-14 mb-0"><span id="invoice-date">{{formatDateFR(detailBudgets?.datedemande)}}</span></h5>
                             </div>
                             <!--end col-->
-                            <div class="col-lg-3 col-sm-3 col-6">
+                            <div class="col-lg-2 col-sm-2 col-4">
                                 <p class="text-muted mb-2 text-uppercase fw-semibold">Montant</p>
                                 <h5 class="fs-14 mb-0"><span id="total-amount">{{detailBudgets?.montant_demande}} </span>  {{detailBudgets.codedevise}}</h5>
                             </div>
                             <!--end col-->
-                            <div class="col-lg-3 col-sm-3 col-6">
-                                <p class="text-muted mb-2 text-uppercase fw-semibold">Décaissée</p>
+                            <div class="col-lg-4 col-sm-4 col-4">
+                                <p class="text-muted mb-2 text-uppercase fw-semibold">Département</p>
+                                <h5 class="fs-14 mb-0"><span id="total-amount">{{detailBudgets?.dept_lib}} </span></h5>
+                            </div>
+                            <!--end col-->
+                            <div class="col-lg-1 col-sm-1 col-4">
+                                <p class="text-muted mb-2 text-uppercase fw-semibold">Payée</p>
                                 <span *ngIf="detailBudgets?.decaisse == 1" class="badge bg-success-subtle text-success fs-11" id="payment-status"> Oui </span>
                                 <span *ngIf="detailBudgets?.decaisse == 0" class="badge bg-warning-subtle text-warning fs-11" id="payment-status"> Non </span>
                             </div>
@@ -324,22 +329,51 @@
                                <div class="d-flex">
                                   <div class="flex-grow-1 p-2">
                                       <div class="hstack gap-3 flex-wrap">
-                                          <div class="text-primary d-block">Code budget :  {{detailBudgets?.codebudget}}</div>
+                                          <div class="text-primary d-block">Code budget :  {{detailBudgets?.budget?.codebudget}}</div>
                                           <div class="vr"></div>
-                                          <div class="text-muted">Type : <span class="text-body fw-medium">Budget {{detailBudgets?.typebudget}} </span></div>
+                                          <div class="text-muted">Type : <span class="text-body fw-medium">{{detailBudgets?.budget?.typebudget}} </span></div>
                                           <div class="vr"></div>
-                                          <div class="text-muted">Debut : <span class="text-body fw-medium"> {{formatDateFR(detailBudgets?.datedebut)}} </span></div>
-                                          <div class="vr"></div>
-                                          <div class="text-muted">Fin : <span class="text-body fw-medium"> {{formatDateFR(detailBudgets?.datefin)}} </span></div>
+                                          <div class="text-muted">Du : <span class="text-body fw-medium"> {{formatDateFR(detailBudgets?.budget?.datedebut)}} </span></div>
+                                          <div class="text-muted">au : <span class="text-body fw-medium"> {{formatDateFR(detailBudgets?.budget?.datefin)}} </span></div>
                                       </div>
                                   </div>
                                 </div>
+                            </div>
+                            <div class="col-lg-12 col-sm-12 col-12">
+                              <div class="table-responsive">
+                                  <table class="table mb-0">
+                                      <thead class="align-middle">
+                                          <tr class="table-active">
+                                              <th scope="col"> Nature operation</th>
+                                              <th scope="col"> Prévision </th>
+                                              <th scope="col"> Total consommé </th>
+                                              <th scope="col"> Solde </th>
+                                          </tr>
+                                      </thead>
+                                      <tbody>
+                                        @for(det of detailBudgets?.details; track $index){
+                                          <tr>
+                                            <td> {{ det?.nature_lib }} </td>
+                                            <td> {{ det?.prevision }} </td>
+                                            <td> {{ det?.conso }} </td>
+                                            <td> {{calculateSoldeBudget(det?.prevision, det?.conso)}} </td>
+                                          </tr>
+                                        }
+                                      </tbody>
+                                  </table>
+                              </div>
                             </div>
                         </div>
                         <div class="row g-3" *ngIf="!detailBudgets">
                           <div class="col-lg-12 col-sm-12 col-12">
                                 <p class="text-muted mb-2 text-uppercase fw-semibold">Pas de budget sur cette demande</p>
                             </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                    <div class="hstack gap-2 justify-content-end">
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
                         </div>
                     </div>
                 </div>
