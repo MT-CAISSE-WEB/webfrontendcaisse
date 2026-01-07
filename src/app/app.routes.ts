@@ -11,7 +11,8 @@ import { APP, APP_DONNEE_BASE_DEVISE, APP_AFF_NATURE_CENTRE_DONNEE_BASE,
      APP_PERMISSION_ADMINISTRATION, APP_ROLE_PERMISSION_ADMINISTRATION,
      APP_ROOT_DMD_EDIT_DECAISSEMENT,
      APP_ROOT_EDIT_DECAISSEMENT,
-     APP_WORKFLOW_ADMINISTRATION} from './_core/routes/frontend.root';
+     APP_WORKFLOW_ADMINISTRATION, APP_SUIVIBUDGET_CONSULTATION,
+    APP_SUIVIBUDGETFILTRE_CONSULTATION } from './_core/routes/frontend.root';
 
 import { LayoutMainComponent } from './layout/layout-main/layout-main.component';
 import { LayoutContentComponent } from './layout/composant/layout-content/layout-content.component';
@@ -31,6 +32,9 @@ import { NatureoperationComponent } from './features/donnee_base/natureoperation
 import { TiersComponent } from './features/donnee_base/tiers/tiers.component';
 import { AffectationNatureCentreComponent } from './features/donnee_base/affectationnaturecentre/affectationnaturecentre.component';
 import { AffectationDepartementNatureComponent } from './features/donnee_base/affectationdepartementnature/affectationdepartementnature.component';
+
+import { SuiviBudgetComponent } from './features/consultations/suivibudget/suivibudget.component';
+import { SuiviBudgetByFiltresComponent } from './features/consultations/suivibudgetbyfiltres/suivibudgetbyfiltres.component';
 
 import { LoginComponent } from './features/administration/login/login.component';
 import { AuthGuard } from './features/administration/service/auth.guard';
@@ -180,6 +184,14 @@ export const routes: Routes = [
       {
           path : APP_WORKFLOW_ADMINISTRATION,
           component:CircuitvalidationComponent
+      },
+      {
+          path : APP_SUIVIBUDGET_CONSULTATION,
+          component:SuiviBudgetComponent
+      },
+      {
+          path : APP_SUIVIBUDGETFILTRE_CONSULTATION,
+          component:SuiviBudgetByFiltresComponent
       },
     ]
   }

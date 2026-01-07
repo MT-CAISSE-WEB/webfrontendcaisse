@@ -63,7 +63,7 @@ export class AffectationNatureCentreComponent implements OnInit{
 
     this.natureoperationForm = this.fb.group({
       idnature: ["", Validators.required],
-      idsociete: ["68EC05CB-0202-45EF-A3A9-B8DD1296DFEF", Validators.required],
+      idsociete : [this.user.idsociete, [Validators.required]],
       idsCentres: [[]]
     });
 
@@ -102,6 +102,10 @@ export class AffectationNatureCentreComponent implements OnInit{
         }
       }
     });
+  }
+
+  get user(){
+    return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
 

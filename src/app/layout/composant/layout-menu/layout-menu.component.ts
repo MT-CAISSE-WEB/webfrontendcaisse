@@ -12,7 +12,8 @@ import { APP_ROOT,APP_ROOT_DONNEE_BASE_DEVISE,
   APP_AFF_DEPT_NATURE_DONNEE_BASE,
   APP_ROOT_BUDGETS_LIGNE_BUDGET, APP_ROOT_BUDGETS_BUDGET,
   APP_ROOT_DMD_DECAISSEMENT, 
-  APP_ROOT_WORKFLOW_ADMINISTRATION} from '../../../_core/routes/frontend.root';
+  APP_ROOT_WORKFLOW_ADMINISTRATION,
+  APP_ROOT_SUIVIBUDGET_CONSULTATION, APP_ROOT_SUIVIBUDGETFILTRE_CONSULTATION} from '../../../_core/routes/frontend.root';
 
 import { RouterLink, RouterModule, RouterOutlet } from "@angular/router";
 
@@ -47,4 +48,6 @@ export class LayoutMenuComponent {
   root_role_permission = APP_ROOT_ROLE_PERMISSION_ADMINISTRATION;
   root_workflow = APP_ROOT_WORKFLOW_ADMINISTRATION;
   root = APP_ROOT;
+  root_suivibudget = APP_ROOT_SUIVIBUDGET_CONSULTATION;
+  root_suivibudgetfiltre = APP_ROOT_SUIVIBUDGETFILTRE_CONSULTATION;
 }

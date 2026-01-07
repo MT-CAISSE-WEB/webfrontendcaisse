@@ -323,7 +323,7 @@ export class DemandeDecaissementComponent implements OnInit {
       error: (err) => {
         this.error = "Suppression échec";
         this.loading = false;
-        this.toastr.error(this.error + "\n", err);
+        this.toastr.error(this.error + "\n", err.error.message);
       }
     })
   }

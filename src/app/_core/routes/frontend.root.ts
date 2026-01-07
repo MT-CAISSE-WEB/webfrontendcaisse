@@ -6,11 +6,14 @@ export const APP_DONNEE_BASE = "donnee_de_base";
 export const APP_CAISSE_JOURNAL = "caisse_journal";
 export const APP_STRUCTURE = "structure";
 export const APP_GENERAL = "general";
+export const APP_CONSULTATION = "consultations";
 export const APP_ROOT_CAISSE_JOURNAL = APP_ROOT + "/" + APP_CAISSE_JOURNAL;
 export const APP_ROOT_DONNEE_BASE = APP_ROOT + "/" + APP_DONNEE_BASE;
 export const APP_ROOT_GENERAL = APP_ROOT + "/" + APP_GENERAL;
 export const APP_ROOT_STRUCTURE = APP_ROOT + "/"+APP_STRUCTURE;
 export const APP_ROOT_ADMINISTRATION = APP_ROOT + "/"+APP_ADMINISTRATION;
+export const APP_ROOT_CONSULTATION = APP_ROOT + "/"+APP_CONSULTATION;
+
 
 export const APP_DEPARTEMENT = "departement";
 export const APP_STRUCTURE_DEPARTEMENT = APP_STRUCTURE + "/" + APP_DEPARTEMENT;
@@ -128,3 +131,13 @@ export const APP_ROOT_AFF_NATURE_CENTRE_DONNEE_BASE = APP_ROOT + "/" + APP_AFF_N
 export const APP_AFF_DEPT_NATURE = 'affectationdepartementnature'; 
 export const APP_AFF_DEPT_NATURE_DONNEE_BASE = APP_DONNEE_BASE + "/" + APP_AFF_DEPT_NATURE;
 export const APP_ROOT_AFF_DEPT_NATURE_DONNEE_BASE = APP_ROOT + "/" + APP_AFF_DEPT_NATURE_DONNEE_BASE;
+
+
+// Route pour les écrans de consultations
+export const APP_SUIVIBUDGET = 'suivibudget'; 
+export const APP_SUIVIBUDGET_CONSULTATION = APP_CONSULTATION + "/" + APP_SUIVIBUDGET;
+export const APP_ROOT_SUIVIBUDGET_CONSULTATION = APP_ROOT + "/" + APP_SUIVIBUDGET_CONSULTATION;
+
+export const APP_SUIVIBUDGETFILTRE = 'suivibudget/recherche'; 
+export const APP_SUIVIBUDGETFILTRE_CONSULTATION = APP_CONSULTATION + "/" + APP_SUIVIBUDGETFILTRE;
+export const APP_ROOT_SUIVIBUDGETFILTRE_CONSULTATION = APP_ROOT + "/" + APP_SUIVIBUDGETFILTRE_CONSULTATION;

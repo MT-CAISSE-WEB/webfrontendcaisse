@@ -63,7 +63,7 @@ export class AffectationDepartementNatureComponent implements OnInit{
 
     this.departementForm = this.fb.group({
       iddepartement: ["", Validators.required],
-      idsociete: ["68EC05CB-0202-45EF-A3A9-B8DD1296DFEF", Validators.required],
+      idsociete : [this.user.idsociete, [Validators.required]],
       idsNatures: [[]]
     });
 
@@ -101,6 +101,10 @@ export class AffectationDepartementNatureComponent implements OnInit{
         }
       }
     });
+  }
+
+  get user(){
+    return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
 

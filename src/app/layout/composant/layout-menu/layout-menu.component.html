@@ -103,13 +103,6 @@
                     </div>
                 </li>
 
-                <!-- <li class="nav-item">
-                    <a class="nav-link" [routerLink]="root_demande_decaissement">
-                        <i class="ri-hand-coin-line"></i>
-                        <span data-key="t-dashboards">Demande de décaissement</span>
-                    </a>
-                </li> -->
-
                 <!-- end Menu donnees de base -->
                 <li class="nav-item">
                     <a class="nav-link menu-link" href="#sidebarDb" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarApps">
@@ -192,7 +185,23 @@
                     </div>
                 </li>
 
-                <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Restitutions</span></li>
+                <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Consultations</span></li>
+
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="#sidebarDashboards" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
+                        <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Budget</span>
+                    </a>
+                    <div class="collapse menu-dropdown" id="sidebarDashboards">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a [routerLink]="root_suivibudget" class="nav-link" data-key="t-analytics"> Evolution budget </a>
+                            </li>
+                            <li class="nav-item">
+                                <a [routerLink]="root_suivibudgetfiltre" class="nav-link" data-key="t-analyticss"> Evolution budget 2 </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
             </ul>
         </div>
     </div>
