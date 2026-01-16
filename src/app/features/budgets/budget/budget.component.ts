@@ -20,6 +20,8 @@ import {
 import { Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { LigneBudgetModel } from '../models/ligne_budget.model';
+import { circuitvalidationservice } from '../../workflow/service/circuitvalidation.service';
+import { circuitvalidationmodel } from '../../workflow/model/circuitvalidation.model';
 
 type BudgetStatusFilter = 'ALL' | 'ACTIF' | 'INACTIF';
 
@@ -40,6 +42,7 @@ export class BudgetComponent implements OnInit {
   loading: Boolean = false;
   budgetForm: FormGroup = this.fb.group({});
   filteredBudgets: BudgetModel[] = [];
+  circuitValidations?: circuitvalidationmodel[] = [];
 
   currentStatusFilter: BudgetStatusFilter = 'ALL';
   searchTerm: string = '';
@@ -79,7 +82,11 @@ export class BudgetComponent implements OnInit {
   selectedBudgetParent?: BudgetModel;
   entiteParent?: string;
 
-  constructor(private budgetservice: BudgetService, private router: Router) {}
+  constructor(
+    private budgetservice: BudgetService,
+    private circuitvalidationservice: circuitvalidationservice,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     //Initialisation du formulaire
@@ -87,6 +94,7 @@ export class BudgetComponent implements OnInit {
 
     //Afficher tous les journaux
     this.getAllBudgets();
+    this.getAllCircuits();
 
     this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION('Ce budget');
     this.titleMsg = TITLE_DELETE;
@@ -109,6 +117,23 @@ export class BudgetComponent implements OnInit {
             onlySelf: false,
             emitEvent: true,
           });
+        }
+      },
+      error: (err: any) => {
+        this.msgErros = err.error.error;
+      },
+    });
+  }
+
+  getAllCircuits() {
+    this.isExpanded = {};
+
+    this.circuitvalidationservice.getAll().subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          console.log('Utilisateur connecté:', this.user);
+          console.log('Circuits:', res);
+          this.circuitValidations = res.data;
         }
       },
       error: (err: any) => {
@@ -248,6 +273,9 @@ export class BudgetComponent implements OnInit {
         entite: ['', [Validators.required]],
         datefin: ['', [Validators.required]],
         idbudgetparent: [''],
+        site: [this.user.idsite ?? null],
+        societe: [this.user.idsociete ?? null],
+        idcircuitvalidation: ['', [Validators.required]],
         // createdby
         actif: [false],
       },
@@ -255,6 +283,10 @@ export class BudgetComponent implements OnInit {
         validators: this.budgetDateValidator(() => this.selectedBudgetParent),
       }
     );
+  }
+
+  get user() {
+    return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
   get form() {
@@ -270,6 +302,7 @@ export class BudgetComponent implements OnInit {
       typebudget: _object.typebudget,
       datefin: this.formatDateForInput(_object.datefin),
       idbudgetparent: _object.idbudgetparent,
+      idcircuitvalidation: _object.idcircuitvalidation,
       entite: _object.entite,
       actif: _object.actif,
     });
@@ -600,7 +633,7 @@ export class BudgetComponent implements OnInit {
     this.budget.datevalidedept = null;
     this.budget.datevalidesite = null;
     this.budget.datevalidesociete = null;
-    this.budget.createdby = 'MAF';
+    this.budget.createdby = this.user.nom ?? 'MAF';
     this.budget.dernierniveau = null;
     this.budget.niveauactuel = null;
 
@@ -623,6 +656,7 @@ export class BudgetComponent implements OnInit {
         entite: _budget.entite,
         datedebut: formValue.datedebut,
         datefin: formValue.datefin,
+        idcircuitvalidation: _budget.idcircuitvalidation,
         actif: formValue.actif,
       });
     }
@@ -637,7 +671,7 @@ export class BudgetComponent implements OnInit {
     this.loading = true;
     this.budgetservice.create(dataToSend).subscribe({
       next: (res: any) => {
-        console.log('Resultat:', res);
+        //console.log('Resultat:', res);
         if (res.success) {
           this.currentStatusFilter = 'ALL';
           this.closeModal('showModal');

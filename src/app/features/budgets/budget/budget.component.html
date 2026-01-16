@@ -565,11 +565,19 @@
                       >Circuit de validation</label
                     >
                     <select
-                      class="form-select form-control form-control-sm"
+                      class="form-select form-control form-control-sm {{
+                        isValidField('idcircuitvalidation')
+                      }}"
                       aria-label="Default select example"
-                      id="circuit-field"
+                      id="idcircuitvalidation-field"
+                      formControlName="idcircuitvalidation"
                     >
-                      <option>-- Sélectionner --</option>
+                      <option [ngValue]="null">-- Sélectionner --</option>
+                      @for (item of circuitValidations; track $index){
+                      <option [value]="item.idcircuitvalidation">
+                        {{ item.codecircuitvalidation }}
+                      </option>
+                      }
                     </select>
                     <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                   </div>
