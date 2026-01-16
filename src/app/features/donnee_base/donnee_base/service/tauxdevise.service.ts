@@ -59,4 +59,16 @@ export class tauxdeviseservice {
     );
   }
 
+  /**
+   *get dernier taux
+   * @param _object
+   * 
+   */
+  tauxrecent(_object: any): Observable<any> {
+    return this.http.post<any>(
+      URL_LOCAL.baseUrl + this.url + "/recent",
+      _object
+    );
+  }
+
 }

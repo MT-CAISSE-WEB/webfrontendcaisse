@@ -31,7 +31,6 @@ export class LoginComponent {
   }
 
   login(){
-    console.log("Test");
     if(this.form.invalid){
       console.log(this.form.value);
       return;

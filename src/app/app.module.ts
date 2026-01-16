@@ -2,6 +2,11 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
+import { LOCALE_ID } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+
+registerLocaleData(localeFr);
 
 @NgModule({
   declarations: [
@@ -17,7 +22,9 @@ import { ToastrModule } from 'ngx-toastr';
       progressBar: true
     })
   ],
-  providers: [],
+  providers: [
+    { provide: LOCALE_ID, useValue: 'fr-FR' }
+  ],
   bootstrap: []
 })
 export class AppModule { }

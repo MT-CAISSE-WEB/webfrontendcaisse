@@ -90,7 +90,8 @@
                     <td class="date"> {{ formatDateFR(item.datedemande!) }}</td>
                     <td class="devise" *ngIf="item.statut! == 0"> <span class="badge bg-primary-subtle text-primary"> non valide </span> </td>
                     <td class="devise text-primary" *ngIf="item.statut! == 1"> <span class="badge bg-info-subtle text-info"> en cours </span> </td>
-                    <td class="devise text-success" *ngIf="item.statut! == 2"> <span class="badge bg-success-subtle text-success"> validée </span> </td>
+                    <td class="devise text-success" *ngIf="item.statut! == 2 && item.decaisse! == 0"> <span class="badge bg-success-subtle text-success"> validée </span> </td>
+                    <td class="devise text-secondary" *ngIf="item.statut! == 2 && item.decaisse! == 1"> <span class="badge bg-secondary-subtle text-secondary"> decaissée </span> </td>
                     <td class="devise text-danger" *ngIf="item.statut! == 3"> <span class="badge bg-dark-subtle text-body"> rejetée </span> </td>
                     <td>
                       <ul class="list-inline hstack gap-2 mb-0">
@@ -176,9 +177,7 @@
                                     Annuler
                                   </button>
 
-                                  <button type="submit"
-                                          class="btn btn-sm btn-success"
-                                          [disabled]="validForm.invalid">
+                                  <button type="submit" class="btn btn-sm btn-success" [disabled]="validForm.invalid" data-bs-dismiss="modal">
                                     Envoyer
                                   </button>
                                 </div>
@@ -311,7 +310,7 @@
                             <!--end col-->
                             <div class="col-lg-2 col-sm-2 col-4">
                                 <p class="text-muted mb-2 text-uppercase fw-semibold">Montant</p>
-                                <h5 class="fs-14 mb-0"><span id="total-amount">{{detailBudgets?.montant_demande}} </span>  {{detailBudgets.codedevise}}</h5>
+                                <h5 class="fs-14 mb-0"><span id="total-amount">{{ (detailBudgets?.totaldemande) }} </span>  {{detailBudgets.codedevise}}</h5>
                             </div>
                             <!--end col-->
                             <div class="col-lg-4 col-sm-4 col-4">
@@ -346,17 +345,35 @@
                                           <tr class="table-active">
                                               <th scope="col"> Nature operation</th>
                                               <th scope="col"> Prévision </th>
-                                              <th scope="col"> Total consommé </th>
-                                              <th scope="col"> Solde </th>
+                                              <th scope="col"> Preengagé </th>
+                                              <th scope="col"> Engagé </th>
+                                              <th scope="col"> Decaissé </th>
+                                              <th scope="col"> Disponible </th>
+                                              <th scope="col"> Mt demande </th>
                                           </tr>
                                       </thead>
                                       <tbody>
                                         @for(det of detailBudgets?.details; track $index){
                                           <tr>
-                                            <td> {{ det?.nature_lib }} </td>
-                                            <td> {{ det?.prevision }} </td>
-                                            <td> {{ det?.conso }} </td>
-                                            <td> {{calculateSoldeBudget(det?.prevision, det?.conso)}} </td>
+                                            <td class="text-start"> {{ det?.nature_lib }} </td>
+                                            <td class="text-end"> {{ det?.prevision | number:'1.0-0' }} </td>
+                                            <td class="text-end"> {{ det?.preengage | number:'1.0-0'}} </td>
+                                            <td class="text-end"> {{ det?.engage | number:'1.0-0':'fr-FR'}} </td>
+                                            <td class="text-end"> {{ det?.realise | number:'1.0-0':'fr-FR'}} </td>
+                                            <td class="text-end">
+                                              <span class="me-2">{{calculateSoldeBudget(det?.prevision, det?.conso, det?.preengage) | number:'1.0-0'}} </span>
+                                              <span class="badge bg-danger rounded-circle" style="width:10px; height:10px;" *ngIf="calculateSoldeBudget(det?.prevision, det?.conso) < det?.montant_ref">
+                                                <i class="me-2 mdi mdi-circle-medium"></i>
+                                              </span>
+                                              <span class="badge bg-success rounded-circle" style="width:10px; height:10px;" *ngIf="calculateSoldeBudget(det?.prevision, det?.conso) >= det?.montant_ref">
+                                                <i class="me-2 mdi mdi-circle-medium"></i>
+                                              </span>                                   
+                                            </td>
+                                            <td class="text-end">
+                                              <span class="badge bg-success-subtle text-success" style="width:80px; height:20px;">
+                                                {{ det?.montant_demande | number:'1.0-0' }} 
+                                              </span>
+                                            </td>
                                           </tr>
                                         }
                                       </tbody>

@@ -20,6 +20,8 @@ import { affectationnaturecentreModel } from '../../donnee_base/models/affectati
 import { AffectationNatureCentreService } from '../../donnee_base/services/affectationnaturecentre.service';
 import { devisemodel } from '../../donnee_base/donnee_base/model/devise.model';
 import { deviseservice } from '../../donnee_base/donnee_base/service/devise.service';
+import { tauxdevisemodel } from '../../donnee_base/donnee_base/model/tauxdevise.model';
+import { tauxdeviseservice } from '../../donnee_base/donnee_base/service/tauxdevise.service';
 
 @Component({
   selector: 'app-edit-demande',
@@ -44,6 +46,9 @@ export class EditDemandeComponent implements OnInit {
   demande!: EnteteDemande;
 
   iddemande: any = "0";
+
+  //Liste des taux de devises
+  tauxdevise : tauxdevisemodel = new tauxdevisemodel();
 
   //Liste des départements de l'utilisateurs
   departementUser: any = [];
@@ -72,7 +77,7 @@ export class EditDemandeComponent implements OnInit {
   //Liste des centres analytiques
   centres : centreanalytiqueModel[] = [];
 
-  constructor(private service: DemandeService, private natureoperationservice: NatureoperationService, private router : Router, private ds:deviseservice,
+  constructor(private service: DemandeService, private natureoperationservice: NatureoperationService, private router : Router, private ds:deviseservice, private ts: tauxdeviseservice,
     private centreanalytiqueservice: CentreAnalytiqueService, private userdepartement: utilisateurdepartementservice, private AffectationDepartementNatureService: AffectationDepartementNatureService,
     private tiersservice: TiersService, private toastr : ToastrService, private activatedRoute: ActivatedRoute,private AffectationNatureCentreService: AffectationNatureCentreService){}
 
@@ -101,8 +106,6 @@ export class EditDemandeComponent implements OnInit {
     this.getAllTiers();
     //Charger les départements de l'user
     this.getDepartementOfUser();
-    //charger la demande 
-    //this.iddemande = this.activatedRoute.snapshot.paramMap.get('id')!;
 
     this.demandeForm.get('departement')?.valueChanges.subscribe(dept => {
       if(dept){
@@ -110,12 +113,53 @@ export class EditDemandeComponent implements OnInit {
         this.onTypeDepartementChange(dept);
       }
     });
+
+    //A la selectionner de la devise
+    this.demandeForm.get('devise')?.valueChanges.subscribe(devise => {
+      if(devise){
+        if (devise === this.user.devise_ref_id) {
+          this.demandeForm.patchValue({ taux: 1 });
+          return;
+        }
+        //Charger sur le dernier taux
+        this.loadLastdeviseTaux(devise);
+      }
+    });
   }
 
-  //Retour
-  // back() {
-  //   this.location.back();
-  // }
+  //Get le taux recent
+  getderniertaux (payload: any){
+    this.ts.tauxrecent(payload).subscribe({
+      next : (res) => {
+         if(res.success){
+            this.tauxdevise = res.data;
+            if(!this.tauxdevise){
+              this.demandeForm.patchValue({ taux: 1 });
+              this.toastr.warning("Pas de taux recent trouvé");
+            }else{
+              this.demandeForm.patchValue({ taux: this.tauxdevise.coefficient });
+            }
+         }else{
+          this.toastr.error("Erreur serveur", res);
+         }
+      },
+      error: (err)=> {
+        this.toastr.error("Erreur backend", err.error.message)
+      }
+    });
+  }
+
+  //Charger le dernier taux
+  loadLastdeviseTaux(devise: any){
+    const datePivot = this.demandeForm.get('datedemande')?.value;
+    const devises = {
+      iddeviseorigine: devise,
+      iddevisedestination : this.user.devise_ref_id,
+      datepiece : datePivot
+    };
+
+    this.getderniertaux(devises);
+  }
 
   //Initialiser le formulaire
   initForm(){
@@ -132,6 +176,7 @@ export class EditDemandeComponent implements OnInit {
       site: [this.user.idsite],
       departement: [''],
       devise: [''],
+      taux: [1],
 
       // STEP 2
       lignes: this.fb.array([]),
@@ -262,13 +307,12 @@ export class EditDemandeComponent implements OnInit {
   });
   }
 
-
   //Recuperer le departement selectionné
   get departement() {
     return this.demandeForm.get("departement")?.value;
   }
 
-  //
+  //Lorsque le departement change
   onTypeDepartementChange(type: string) {
       this.getallAffectationNatures(type);
   
@@ -277,9 +321,9 @@ export class EditDemandeComponent implements OnInit {
         ligne.reset();
 
         ligne.patchValue({
-          natureop: null,
-          centre: null,
-          tiers: null,
+          natureop: "",
+          centre: "",
+          tiers: "",
           montantdemande: ""
         });
   
@@ -554,7 +598,7 @@ export class EditDemandeComponent implements OnInit {
     // }
 
     /** 2. prepare data */
-    const formValue = this.demandeForm.value;
+    const formValue = {...this.demandeForm.value, createdby : this.user.codeutilisateur ?? null};
 
     /** 3. choices action */
     if(this.title == "Création")this.create(formValue);
@@ -590,7 +634,6 @@ export class EditDemandeComponent implements OnInit {
 
   //Enregistrement de données
   create(_demande: any) {
-    console.log("create");
     const {iddemande, ...dataToSend} = _demande;
     this.loading = true;
     this.service.createEntete(dataToSend).subscribe({

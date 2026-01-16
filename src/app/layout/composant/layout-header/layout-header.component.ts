@@ -69,7 +69,7 @@ export class LayoutHeaderComponent implements OnInit {
             this.getcaissesPeriodes();
           }else {
             this.loadingCaisses = false;
-            this.toastr.error("Erreur chargement caisses utilisateur");
+            //this.toastr.warning("Aucune caisse affectée à l\'utilisateur");
           }
         }
       },

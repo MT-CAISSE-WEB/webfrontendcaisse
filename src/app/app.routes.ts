@@ -11,7 +11,10 @@ import { APP, APP_DONNEE_BASE_DEVISE, APP_AFF_NATURE_CENTRE_DONNEE_BASE,
      APP_PERMISSION_ADMINISTRATION, APP_ROLE_PERMISSION_ADMINISTRATION,
      APP_ROOT_DMD_EDIT_DECAISSEMENT,
      APP_ROOT_EDIT_DECAISSEMENT,
-     APP_WORKFLOW_ADMINISTRATION} from './_core/routes/frontend.root';
+     APP_WORKFLOW_ADMINISTRATION, APP_SUIVIBUDGET_CONSULTATION,
+    APP_SUIVIBUDGETFILTRE_CONSULTATION, 
+    APP_OPERATIONPERIODE_CONSULTATION,
+    APP_OPERATIONDETAILS_CONSULTATION} from './_core/routes/frontend.root';
 
 import { LayoutMainComponent } from './layout/layout-main/layout-main.component';
 import { LayoutContentComponent } from './layout/composant/layout-content/layout-content.component';
@@ -32,6 +35,9 @@ import { TiersComponent } from './features/donnee_base/tiers/tiers.component';
 import { AffectationNatureCentreComponent } from './features/donnee_base/affectationnaturecentre/affectationnaturecentre.component';
 import { AffectationDepartementNatureComponent } from './features/donnee_base/affectationdepartementnature/affectationdepartementnature.component';
 
+import { SuiviBudgetComponent } from './features/consultations/suivibudget/suivibudget.component';
+import { SuiviBudgetByFiltresComponent } from './features/consultations/suivibudgetbyfiltres/suivibudgetbyfiltres.component';
+
 import { LoginComponent } from './features/administration/login/login.component';
 import { AuthGuard } from './features/administration/service/auth.guard';
 import { DepartementComponent } from './features/structure/departement/departement.component';
@@ -44,6 +50,9 @@ import { RoleComponent } from './features/administration/role/role.component';
 import { PermissionComponent } from './features/administration/permission/permission.component';
 import { RolepermissionComponent } from './features/administration/rolepermission/rolepermission.component';
 import { CircuitvalidationComponent } from './features/workflow/circuitvalidation/circuitvalidation.component';
+import { operationModel } from './features/operations/model/operation.model';
+import { OperationPeriodeComponent } from './features/consultations/operation-periode/operation-periode.component';
+import { OperationDetailComponent } from './features/consultations/operation-detail/operation-detail.component';
 
 export const routes: Routes = [
   {
@@ -185,6 +194,22 @@ export const routes: Routes = [
       {
           path : APP_WORKFLOW_ADMINISTRATION,
           component:CircuitvalidationComponent
+      },
+      {
+          path : APP_SUIVIBUDGET_CONSULTATION,
+          component:SuiviBudgetComponent
+      },
+      {
+          path : APP_SUIVIBUDGETFILTRE_CONSULTATION,
+          component:SuiviBudgetByFiltresComponent
+      },
+      {
+          path : APP_OPERATIONPERIODE_CONSULTATION,
+          component: OperationPeriodeComponent
+      },
+      {
+          path : APP_OPERATIONDETAILS_CONSULTATION,
+          component: OperationDetailComponent
       },
     ]
   }

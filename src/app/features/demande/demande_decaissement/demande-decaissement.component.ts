@@ -13,6 +13,8 @@ import { APP_ROOT_DMD_EDIT_DECAISSEMENT } from '../../../_core/routes/frontend.r
 import { RouterLink, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
+import { tauxdevisemodel } from '../../donnee_base/donnee_base/model/tauxdevise.model';
+import { tauxdeviseservice } from '../../donnee_base/donnee_base/service/tauxdevise.service';
 
 @Component({
   selector: 'app-demande-decaissement',
@@ -54,6 +56,9 @@ export class DemandeDecaissementComponent implements OnInit {
   //Validation possible ou non
   canValidateUser: boolean = false;
 
+  //Liste des taux de devises
+  tauxdevises : tauxdevisemodel[] = [];
+
   //Element à supprimer 
   deleteDemande: any = null;
   //Demande à selectionner
@@ -74,7 +79,7 @@ export class DemandeDecaissementComponent implements OnInit {
   constructor(
     private service: DemandeService,
     private budgetservice: BudgetService,
-    private toastr : ToastrService
+    private toastr : ToastrService, private ts: tauxdeviseservice
   ) {}
 
   ngOnInit(): void {
@@ -178,8 +183,8 @@ export class DemandeDecaissementComponent implements OnInit {
   }
 
   //Calcul du solde budget
-  calculateSoldeBudget(prevision: number, consomme: number): number {
-    return prevision - consomme;
+  calculateSoldeBudget(prevision?: number, engage?: number, preengage?: number): number {
+    return (prevision ?? 0) - (engage ?? 0) - (preengage ?? 0);
   }
 
   handleDecisionChange(): void {
@@ -275,7 +280,6 @@ export class DemandeDecaissementComponent implements OnInit {
       next : (res) => {
         if(res.success){
           this.detailBudgets = res.data;
-          console.log(this.detailBudgets);
         }else{
           this.toastr.error("Cette demande n'a pas de detail budget");
         }
@@ -375,6 +379,10 @@ export class DemandeDecaissementComponent implements OnInit {
     return demande.lignes.reduce((sum, l) => sum + l.montantdemande, 0);
   }
 
+  getTotalAny(element: any): number {
+    return element.details.reduce((sum: number, l: any) => sum + l.montant_demande, 0);
+  }
+
   //selectionner une instance dans une liste
   handleSelectOne(demande: EnteteDemande, actif: any) {
     const index = this.objectsSelected.findIndex(
@@ -406,7 +414,7 @@ export class DemandeDecaissementComponent implements OnInit {
       error: (err) => {
         this.error = "Suppression échec";
         this.loading = false;
-        this.toastr.error(this.error + "\n", err);
+        this.toastr.error(this.error + "\n", err.error.message);
       }
     })
   }

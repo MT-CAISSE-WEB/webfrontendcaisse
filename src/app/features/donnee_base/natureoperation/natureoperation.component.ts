@@ -123,6 +123,11 @@ export class NatureoperationComponent implements OnInit{
     });
   }
 
+  get user(){
+    return JSON.parse(localStorage.getItem('user') || '{}');
+  }
+
+
   // ngAfterViewInit(): void {
   //   // Attendre que le DOM soit chargé
   //   $('#dataTable').DataTable({
@@ -145,6 +150,7 @@ export class NatureoperationComponent implements OnInit{
 
 
   //création du formulaire
+  
   initForm(): void{
     this.natureoperationForm = this.fb.group({
       codenature : ["", [Validators.required]],
@@ -153,7 +159,7 @@ export class NatureoperationComponent implements OnInit{
       imputationtiers : [false],
       demandedecaissement : [true],
       typeoperation : ["", [Validators.required]],
-      idsociete : ["68EC05CB-0202-45EF-A3A9-B8DD1296DFEF", [Validators.required]],
+      idsociete : [this.user.idsociete, [Validators.required]],
       idcompte : ["", [Validators.required]],
       actif : [true],
     })

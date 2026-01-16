@@ -64,8 +64,8 @@ export class TiersComponent implements OnInit{
         if(res.success){
           this.tiers = res.data;
 
-          // const table = $('#dataTable').DataTable();
-          // table.destroy();
+          const table = $('#dataTable').DataTable();
+          table.destroy();
 
           setTimeout(() => $('#dataTable').DataTable({
             language: {

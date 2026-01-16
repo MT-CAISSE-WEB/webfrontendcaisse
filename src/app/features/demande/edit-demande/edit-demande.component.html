@@ -26,8 +26,8 @@
             <div class="d-flex gap-1 flex-wrap">
               <button type="button" class="btn btn-sm btn-soft-info"> <i class="ri-file-download-line align-bottom me-1"></i> import </button>
               <button type="button" class="btn btn-sm btn-info"> <i class="ri-refresh-fill align-bottom me-1"></i>actualiser </button>
-              <button type="button" class="btn btn-sm btn-primary" (click)="resetForm()"> <i class="ri-refresh-fill align-bottom me-1"></i> renitialiser</button>
               <button type="button" class="btn btn-sm btn-success" (click)="submit()"> <i class="bx bx-comment-check align-bottom me-1"></i> enregistrer</button>
+              <button type="button" class="btn btn-sm btn-primary" (click)="resetForm()"> <i class="ri-add-fill align-bottom me-1"></i></button>
             </div>
           </div>
         </div>
@@ -92,6 +92,13 @@
                     <option value="{{item.iddepartement! }}">{{item.codedept! }} - {{ item.libelle! }} </option>
                   }
                 </select>
+              </div>
+            </div>
+
+            <div class="col-lg-2 col-sm-2">
+              <div class="input-group input-group-sm mb-3">
+                <label class="input-group-text">taux</label>
+                <input type="number" class="form-control form-control-sm bg-light" formControlName="taux"/>
               </div>
             </div>
 

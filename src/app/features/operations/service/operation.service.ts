@@ -84,4 +84,14 @@ export class OperationService {
     );
   }
 
+  /**
+   * get one reçu PDF
+   */
+  getRecuPdf(idoperation: string): Observable<Blob> {
+    return this.http.get(
+      `${URL_LOCAL.baseUrl}${this.url}/recu-caisse/${idoperation}`,
+      { responseType: 'blob' }
+    );
+  }
+
 }

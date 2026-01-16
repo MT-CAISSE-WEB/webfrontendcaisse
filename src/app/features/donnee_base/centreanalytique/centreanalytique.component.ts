@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 
 import { DataTablesModule } from 'angular-datatables';
 import { Subject } from 'rxjs';
+import DataTables from 'datatables.net';
 // import DataTables from 'datatables.net';
 
 // ADD-INS
@@ -134,10 +135,18 @@ export class CentreanalytiqueComponent implements OnInit{
               ]
 
           }), 0);
+
+          // $('#dataTable').DataTable().destroy()
         }
       }
     });
   }
+
+
+  get user(){
+    return JSON.parse(localStorage.getItem('user') || '{}');
+  }
+
 
 
   //Création du formulaire
@@ -145,7 +154,7 @@ export class CentreanalytiqueComponent implements OnInit{
     this.centreanalytiqueForm = this.fb.group({
       codecentreanalytique : ["", [Validators.required]],
       libelle : ["", [Validators.required]],
-      idsociete : ["68EC05CB-0202-45EF-A3A9-B8DD1296DFEF", [Validators.required]],
+      idsociete : [this.user.idsociete, [Validators.required]],
       actif : [true],
     })
   }

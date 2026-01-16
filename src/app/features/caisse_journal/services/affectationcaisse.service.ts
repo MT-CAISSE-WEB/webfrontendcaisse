@@ -87,4 +87,11 @@ export class AffectationCaisseService {
     );
   }
 
+  getCaissesUserPeriode(payload: any){
+    return this.http.post<any>(
+      URL_LOCAL.baseUrl + this.url + "/periode/caisse/",
+      payload
+    );
+  }
+
 }

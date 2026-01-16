@@ -58,37 +58,6 @@ export class LayoutContentComponent implements OnInit{
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
-  // getCaissesPerdiodes() {
-  //     const requests = this.caissesUser.map(c =>
-  //       this.caisseservice.getRecentCaisse(c.idcaisse)
-  //     );
-  
-  //     forkJoin(requests).subscribe({
-  //       next: (responses) => {
-  //         const statuses : any = {};
-  //         this.caisseperiodes = responses.map((res, index) => {
-  //           const item = res.data;
-  //           const caisseId = this.caissesUser[index].idcaisse;
-  //           statuses[caisseId] = item.statut;
-  //           return item;
-  //         });
-  //         // mise à jour globale
-  //         this.caisseStatusService.updateStatuses(statuses);
-  //         // maintenant que tout est chargé → on initialise le formulaire
-  //         this.initForm();
-  //         this.loadingCaisses = false;
-  //         //Date du jour
-  //         this.dateDujour();
-  //       },
-  //       error: () => {
-  //         this.loadingCaisses = false;
-  //         console.log("Erreur de chargement des caisses");
-  //       }
-  //     });
-  // }
-
-  //Récuperer les caisses périodes
-  
   getcaissesPeriodes(){
     this.loadingCaisses = true;
     this.caisseuserservice.getCaissePeriodeByUser(this.user.idutilisateur ?? null).subscribe({
@@ -102,6 +71,7 @@ export class LayoutContentComponent implements OnInit{
         }
       },
       error : (err) => {
+        console.log(err);
         this.toastr.error(err.error.message);
       }
     });
@@ -114,11 +84,10 @@ export class LayoutContentComponent implements OnInit{
         if(res.success){
           this.caissesUser = res.data;
           if (this.caissesUser.length > 0) {
-            //this.getCaissesPerdiodes();
             this.getcaissesPeriodes();
           }else {
             this.loadingCaisses = false;
-            this.toastr.error("Echec de récupération de la période")
+            this.toastr.warning("Aucune caisse affectée à l\'utilisateur");
           }
         }
       },

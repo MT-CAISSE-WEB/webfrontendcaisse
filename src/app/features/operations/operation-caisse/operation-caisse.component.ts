@@ -240,7 +240,7 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   //Charger les centres de chaque ligne
-  loadCentresForLigne(ligne: FormGroup, idnature: string, resetCentre: boolean = true) {
+  loadCentresForLigne(ligne: FormGroup, idnature: string, resetCentre: boolean = true, centreId: string) {
     this.AffectationNatureCentreService.getAll(idnature).subscribe({
       next: (res) => {
         if (res.success) {
@@ -253,6 +253,16 @@ export class OperationCaisseComponent implements OnInit{
           // reset centre sélectionné
           if (resetCentre) {
             ligne.get('centre')?.reset();
+          }
+
+          // Patch le centre sélectionné si fourni
+          if (centreId) {
+            const centreTrouve = centres.find(
+              (c: any) => c.idcentre === centreId
+            );
+            if (centreTrouve) {
+              ligne.get('centre')?.setValue(centreTrouve.idcentre);
+            }
           }
         }
       }
@@ -330,7 +340,6 @@ export class OperationCaisseComponent implements OnInit{
     this.natureoperationservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
-          console.log(this.natureoperations);
           this.natureoperations = (res.data || []).filter(
             (n: any) => n.actif === 1
           );
@@ -588,6 +597,7 @@ export class OperationCaisseComponent implements OnInit{
           solde: [this.formatNumber(p.soldeouverture) ?? 0],
           montantcaisse: [0],
           taux: [1],
+          montantref: [0],
           idperiode : [p.idperiode ? p.idperiode : null, Validators.required]
         })
       );
@@ -681,32 +691,33 @@ export class OperationCaisseComponent implements OnInit{
 
   //Charger les caisses sur le formulaires
   loadCaissesForm(): Observable<void> {
-    return this.caissePeriodeservice.getCaissesPeriodes(this.caissesUser).pipe(
-      tap((responses: any[]) => {
-        const periodes = responses.map(r => r.data);
-        // remplir tableau métier
-        this.caisseperiodes = periodes;
-        // remplir le formulaire
+    const payload = {
+      idutilisateur : this.user.idutilisateur,
+      iddeviserefsoc: this.user.devise_ref_id
+    };
+
+    return this.caisseuserservice.getCaissesUserPeriode(payload).pipe(
+      tap(res => {
+        const periodes = res?.data ?? [];
+        // this.caisseperiodes = periodes;
         const caissesArray = this.operationForm.get('caisses') as FormArray;
-        //const caiss = forkJoin(this.caisseSolde);
         caissesArray.clear();
-        periodes.forEach(p => {
-          //const soldeReel = this.caisseSoldeMap.get(p.idcaisse) ?? 0;
+        periodes.forEach((p: any) => {
           caissesArray.push(this.fb.group({
-            idcaisse: [p.idcaisse, Validators.required],
-            caisse: [p.caisse?.codecaisse || null, Validators.required],
-            statut: [p.statut],
-            devisecaisse: [p.caisse?.devise?.codedevise || null],
-            iddevisecaisse: [p.caisse?.devise?.iddevise || null],
-            solde: [this.formatNumber(p.soldeouverture) ?? 0],
-            montantcaisse: [0],
-            montantref: [""],
-            taux: [1],
-            idperiode : [p.idperiode ? p.idperiode : null, Validators.required]
+            idcaisse: [p.caisse?.idcaisse, Validators.required],
+            caisse: [p.caisse?.code, Validators.required],
+            statut: [p.periode?.statut ?? null],
+            devisecaisse: [p.devise?.code ?? null],
+            iddevisecaisse: [p.devise?.iddevise ?? null],
+            solde: [this.formatNumber(p.solde?.montant ?? 0)],
+            montantcaisse: [0, [Validators.required, Validators.min(0)]],
+            montantref: [0],
+            taux: [p.solde?.taux ?? 1],
+            idperiode: [p.periode?.idperiode, Validators.required]
           }));
         });
       }),
-      map(() => void 0)
+      map(res => res?.data ?? [])
     );
   }
 
@@ -741,7 +752,7 @@ export class OperationCaisseComponent implements OnInit{
     // Patch des champs simples
     this.operationForm.patchValue({
       codeoperation : _object.codeoperation,
-      libelle       : _object.libelle,
+      libelle       : _object.lignes[0]?.libelle,
       devise        : _object.devise.iddevise,
       site          : _object.site.idsite,
       typepaiement  : _object.caisses[0].codtypeoperation,
@@ -752,7 +763,6 @@ export class OperationCaisseComponent implements OnInit{
 
     this.lignes.clear();
     _object.lignes.forEach((l: any) => {
-
       const ligneGroup = this.fb.group({
         idligne: [l.idligneoperation ?? null],
         natureop: [l.nature?.idnature ?? null, Validators.required],
@@ -760,7 +770,7 @@ export class OperationCaisseComponent implements OnInit{
         tiers: [{ value: l.tiers?.idtiers ?? null, disabled: true }],
         montantligne: [{ value: l.montantoperation ?? "", disabled: false }, Validators.required],
 
-        // 🔑 centres propres à la ligne
+        //centres propres à la ligne
         centres: this.fb.control<any[]>([])
       });
 
@@ -775,29 +785,44 @@ export class OperationCaisseComponent implements OnInit{
       }
     });
 
-    //Construire les caisses en FormGroup[]
-    const caisseFG = _object.caisses.map(c => {
-      // Trouver la caisse dans caissesAny
-      const caisseSource = this.caissesUser?.find(x => x.idcaisse === c.idcaisse);
+    //différentes caisses utilisées 
+    const caissesUtiliseesMap = new Map<string, any>();
 
-      return this.fb.group({
-        idcaisse: [c.idcaisse],
-        caisse : [c.codecaisse ?? ""],
-        montantcaisse : [c.montant ?? 0],
-        taux : [c.taux ?? 1],
-        montantref : [c.montantref ?? (c.montant ?? 0) * (c.taux ?? 1)],
-        solde : [c.solde ?? 0],
-        devisecaisse : [c.devise ?? null],
-        idtypeoperation : [c.idtypeoperation ?? null]
-      })
+    _object.caisses.forEach(c => {
+      caissesUtiliseesMap.set(c.idcaisse, c);
+    });
+
+    const caissesFA = this.operationForm.get('caisses') as FormArray;
+
+    caissesFA.controls.forEach(control => {
+      const fg = control as FormGroup;
+      const idcaisse = fg.get('idcaisse')?.value;
+      const caisseOp = caissesUtiliseesMap.get(idcaisse);
+
+      if (caisseOp) {
+        fg.patchValue({
+          montantcaisse   : caisseOp.montant,
+          taux            : caisseOp.taux,
+          montantref      : caisseOp.montantref,
+          idtypeoperation : caisseOp.idtypeoperation
+        });
+
+        fg.enable({ emitEvent: false });
+      } else {
+        fg.patchValue({
+          montantcaisse : 0,
+          montantref    : 0
+        });
+
+        fg.disable({ emitEvent: false });
+      }
     });
 
     //Filtrer les natures quand typeoperation change
-    this.filtrerNatures(_object.caisses[0].codtypeoperation,);
+    this.filtrerNatures(_object.caisses[0].codtypeoperation);
 
-    // Mise à jour du FormArray
-    //this.operationForm.setControl("lignes", this.fb.array(lignesFG));
-    this.operationForm.setControl("caisses", this.fb.array(caisseFG));
+    //Bloquer tout le formulaire
+    this.operationForm.disable({ emitEvent: false });
   }
 
   // Formater la date ( mer, 13-jan 2025)
@@ -865,7 +890,7 @@ export class OperationCaisseComponent implements OnInit{
       ligne.get("montantligne")?.enable();
 
       //charger centres POUR CETTE LIGNE
-      this.loadCentresForLigne(ligne, natureId, true);
+      this.loadCentresForLigne(ligne, natureId, true, '');
       // Règle métier sur tiers
       this.handleNatureChange(ligne, natureId);
     });
@@ -967,6 +992,30 @@ export class OperationCaisseComponent implements OnInit{
       }
     })
   }
+
+  //Impression du reçu
+  printRecu(){
+    if (!this.operation) return;
+
+    //Recuperationd de l'id
+    const id = this.operation.idoperation;
+    this.operationservice.getRecuPdf(id).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const win = window.open(url, '_blank');
+      // next: (blob) => {
+      //   const url = URL.createObjectURL(blob);
+      //   const iframe = document.createElement('iframe');
+      //   iframe.style.display = 'none';
+      //   iframe.src = url;
+      //   document.body.appendChild(iframe);
+      //   iframe.contentWindow?.print();
+      },
+      error: (err) => {
+        this.toastr.error("Erreur d\'impression du reçu");
+      }
+    });
+  }
   
   //Modification de données
   update(_operation: operationModel){
@@ -992,6 +1041,7 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   modalUpdate(_object: operationModel){
+    this.isUpdated = false;
     this.operation = _object;
     this.actionModal = "update";
     this.operationForm.reset();
@@ -1000,14 +1050,12 @@ export class OperationCaisseComponent implements OnInit{
     this.getAllTiers();
     //Charger les centres analytiques
     this.getAllcentres();
-
     this.loadCaissesForm().subscribe({
       next: () => {
         this.dispatchOperation(_object);
         const type = _object.caisses[0]?.codtypeoperation;
         this.operationForm.patchValue({ typepaiement: type });
         this.filtrerNatures(type);
-
         this.operationForm.get("dateoperation")?.disable();
 
         // recalcul automatique
@@ -1300,18 +1348,6 @@ export class OperationCaisseComponent implements OnInit{
     })
   }
 
-  loadPeriodes() {
-    this.caissePeriodeservice.getCaissesPeriodes(this.caissesUser).subscribe({
-      next: (responses) => {
-        this.caisseperiodes = responses.map(res => res.data);
-        this.updateButtonState();   // vérifie les statuts
-      },
-      error: () => {
-        console.error("Erreur chargement périodes");
-      }
-    });
-  }
-
   updateButtonState() {
     this.isAnyOpen = this.caisseperiodes.some(
       p => p.statut?.toLowerCase() === "ouverte"
@@ -1341,12 +1377,13 @@ export class OperationCaisseComponent implements OnInit{
       montantligne: [ligne.montantdemande, Validators.required],
       natureop: [ligne.natureoperation?.idnature],
       centre: [ligne.centreanalytique?.idcentre],
+      // centre: [""],
       tiers: [ligne.tiers?.idtiers],
       centres: this.fb.control<any[]>([])
     });
 
     //charger centres POUR CETTE LIGNE
-    this.loadCentresForLigne(fg, ligne.natureoperation?.idnature, false);
+    this.loadCentresForLigne(fg, ligne.natureoperation?.idnature, false, ligne.centreanalytique?.idcentre);
 
     return fg;
   }
@@ -1370,8 +1407,6 @@ export class OperationCaisseComponent implements OnInit{
     /** Recréer lignes */
     demande.lignes.forEach((ligne: any) => {
       const ligneFG = this.createLigneFromDemande(ligne);
-      //charger centres POUR CETTE LIGNE
-      this.loadCentresForLigne(ligneFG, ligne.natureoperation?.idnature, false);
       lignesFA.push(ligneFG);
     });
 

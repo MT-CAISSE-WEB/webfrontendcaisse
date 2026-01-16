@@ -355,8 +355,6 @@ export class AffectationCaissierComponent implements OnInit{
     }
 
     const _affectation: any = {...ligne, actif: ligne.actif ? 1 : 0, createdby : this.userConnect.codeutilisateur ?? null, updatedby : this.userConnect.codeutilisateur ?? null};
-
-    console.log(_affectation);
     // Appel API
     if(!_affectation.idutilisateurcaisse){
       this.create(_affectation);
