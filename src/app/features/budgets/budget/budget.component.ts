@@ -115,7 +115,12 @@ export class BudgetComponent implements OnInit {
     this.budgetservice.getAll(this.params).subscribe({
       next: (res: any) => {
         if (res.success) {
-          this.budgets = res.data;
+          const lesbudgets = res.data as BudgetModel[];
+          this.budgets = lesbudgets.filter(
+            (b) =>
+              b.idsite === this.user.idsite &&
+              b.idsociete === this.user.idsociete
+          );
           this.applyStatusFilter(this.currentStatusFilter);
           this.applyFilters();
           this.totalPages = res.totalPages;
@@ -181,7 +186,6 @@ export class BudgetComponent implements OnInit {
       (b) => b.typebudget === 'Mensuel' && b.idbudgetparent === parentId
     );
   }
-
   get totalActifs(): number {
     return this.budgets.filter(
       (b) => b.actif === 1 && b.typebudget === 'Annuel'
@@ -313,8 +317,8 @@ export class BudgetComponent implements OnInit {
         entite: ['', [Validators.required]],
         datefin: ['', [Validators.required]],
         idbudgetparent: [''],
-        site: [this.user.idsite ?? null],
-        societe: [this.user.idsociete ?? null],
+        idsite: [this.user.idsite ?? null],
+        idsociete: [this.user.idsociete ?? null],
         idcircuitvalidation: [
           this.circuitValidation?.idcircuitvalidation ?? null,
         ],
@@ -348,6 +352,8 @@ export class BudgetComponent implements OnInit {
       datefin: this.formatDateForInput(_object.datefin),
       idbudgetparent: _object.idbudgetparent,
       idcircuitvalidation: _object.idcircuitvalidation,
+      idsite: _object.idsite,
+      idsociete: _object.idsociete,
       entite: _object.entite,
       actif: _object.actif,
     });
@@ -700,8 +706,8 @@ export class BudgetComponent implements OnInit {
     const formValue = this.budgetForm.getRawValue();
 
     this.budget.idcircuitvalidation = this.circuitValidation?.idcircuitvalidation as string;
-    this.budget.idsite = formValue.idsite === '' ? null : formValue.idsite;
-    this.budget.idsociete = formValue.idsociete === '' ? null : formValue.idsociete;
+    this.budget.idsite = this.user?.idsite as string;
+    this.budget.idsociete = this.user?.idsociete as string;
     this.budget.datevalidedept = null;
     this.budget.datevalidesite = null;
     this.budget.datevalidesociete = null;
@@ -712,7 +718,8 @@ export class BudgetComponent implements OnInit {
     const _budget: BudgetModel = {
       ...this.budget,
       ...formValue,
-      idbudgetparent: formValue.idbudgetparent === '' ? null : formValue.idbudgetparent,
+      idbudgetparent:
+        formValue.idbudgetparent === '' ? null : formValue.idbudgetparent,
       datedebut: formValue.datedebut,
       datefin: formValue.datefin,
       actif: formValue.actif ? 1 : 0,
@@ -728,6 +735,8 @@ export class BudgetComponent implements OnInit {
         datedebut: formValue.datedebut,
         datefin: formValue.datefin,
         idcircuitvalidation: _budget.idcircuitvalidation,
+        idsite: _budget.idsite,
+        idsociete: _budget.idsociete,
         actif: formValue.actif,
       });
     }

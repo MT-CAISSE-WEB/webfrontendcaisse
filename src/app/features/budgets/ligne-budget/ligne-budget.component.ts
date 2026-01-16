@@ -28,11 +28,7 @@ import { utilisateurdepartementservice } from '../../administration/service/user
 
 @Component({
   selector: 'app-ligne-budget',
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-  ],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './ligne-budget.component.html',
   styleUrl: './ligne-budget.component.css',
 })
@@ -137,7 +133,12 @@ export class LigneBudgetComponent implements OnInit {
     this.budgetservice.getAll(this.params).subscribe({
       next: (res: any) => {
         if (res.success) {
-          this.budgets = res.data;
+          const lesbudgets = res.data as BudgetModel[];
+          this.budgets = lesbudgets.filter(
+            (b) =>
+              b.idsite === this.user.idsite &&
+              b.idsociete === this.user.idsociete
+          );
         }
       },
       error: (err) => {

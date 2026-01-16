@@ -434,7 +434,7 @@
                       >Type de budget</label
                     >
                     <select
-                      class="form-select form-select-sm {{
+                      class="form-select form-control form-control-sm {{
                         isValidField('typebudget')
                       }}"
                       aria-label="Default select example"
@@ -456,7 +456,7 @@
                       >Budget Parent</label
                     >
                     <select
-                      class="form-select form-select-sm"
+                      class="form-select form-control form-control-sm"
                       aria-label="Default select example"
                       id="idbudgetparent"
                       formControlName="idbudgetparent"
@@ -499,7 +499,7 @@
 
                     <select
                       id="entite-field"
-                      class="form-select form-select-sm {{
+                      class="form-select form-control form-control-sm {{
                         isValidField('entite')
                       }}"
                       formControlName="entite"
@@ -632,30 +632,44 @@
 
                     <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                   </div>
-                  <!-- <div class="mb-3">
-                    <label class="form-label form-label-sm" for="">Site</label>
-                    <select
-                      class="form-select form-control form-control-sm"
-                      aria-label="Default select example"
-                      id="site-field"
+                  <div class="mb-3">
+                    <label
+                      class="form-label form-label-sm"
+                      [hidden]="true"
+                      for=""
+                      >Site</label
                     >
-                      <option disabled>-- Sélectionner --</option>
-                    </select>
-                    <div class="invalid-feedback">{{ msgErros }}</div>
-                  </div> -->
-                  <!-- <div class="mb-3">
-                    <label class="form-label form-label-sm" for=""
+                    <input
+                      type="text"
+                      id="idsite-field"
+                      class="form-control form-control-sm {{
+                        isValidField('idsite')
+                      }}"
+                      formControlName="idsite"
+                      [value]="user.idsite"
+                      [hidden]="true"
+                    />
+                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
+                  </div>
+                  <div class="mb-3">
+                    <label
+                      class="form-label form-label-sm"
+                      for=""
+                      [hidden]="true"
                       >Société</label
                     >
-                    <select
-                      class="form-select form-control form-control-sm"
-                      aria-label="Default select example"
-                      id="societe-field"
-                    >
-                      <option disabled>-- Sélectionner --</option>
-                    </select>
-                    <div class="invalid-feedback">{{ msgErros }}</div>
-                  </div> -->
+                    <input
+                      type="text"
+                      id="idsociete-field"
+                      class="form-control form-control-sm {{
+                        isValidField('idsociete')
+                      }}"
+                      formControlName="idsociete"
+                      [value]="user.idsociete"
+                      [hidden]="true"
+                    />
+                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
+                  </div>
 
                   <div class="mb-3">
                     <div class="form-check form-switch">
