@@ -22,6 +22,8 @@ import { DatePipe } from '@angular/common';
 import { LigneBudgetModel } from '../models/ligne_budget.model';
 import { circuitvalidationservice } from '../../workflow/service/circuitvalidation.service';
 import { circuitvalidationmodel } from '../../workflow/model/circuitvalidation.model';
+import { BudgetPrevisionService } from '../services/budget-calcul.service';
+import { LigneBudgetService } from '../services/ligne_budget.service';
 
 type BudgetStatusFilter = 'ALL' | 'ACTIF' | 'INACTIF';
 
@@ -42,7 +44,8 @@ export class BudgetComponent implements OnInit {
   loading: Boolean = false;
   budgetForm: FormGroup = this.fb.group({});
   filteredBudgets: BudgetModel[] = [];
-  circuitValidations?: circuitvalidationmodel[] = [];
+  circuitValidation?: circuitvalidationmodel;
+  lignesBudgetaires: LigneBudgetModel[] = [];
 
   currentStatusFilter: BudgetStatusFilter = 'ALL';
   searchTerm: string = '';
@@ -85,6 +88,8 @@ export class BudgetComponent implements OnInit {
   constructor(
     private budgetservice: BudgetService,
     private circuitvalidationservice: circuitvalidationservice,
+    private budgetPrevisionService: BudgetPrevisionService,
+    private lignebudgetservice: LigneBudgetService,
     private router: Router
   ) {}
 
@@ -95,6 +100,7 @@ export class BudgetComponent implements OnInit {
     //Afficher tous les journaux
     this.getAllBudgets();
     this.getAllCircuits();
+    this.getAllLigneBudgetaire();
 
     this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION('Ce budget');
     this.titleMsg = TITLE_DELETE;
@@ -131,9 +137,27 @@ export class BudgetComponent implements OnInit {
     this.circuitvalidationservice.getAll().subscribe({
       next: (res: any) => {
         if (res.success) {
-          console.log('Utilisateur connecté:', this.user);
-          console.log('Circuits:', res);
-          this.circuitValidations = res.data;
+          const circuits: circuitvalidationmodel[] = res.data;
+          this.circuitValidation = circuits.find(
+            (c) =>
+              c.idsite === this.user.idsite &&
+              c.idsociete === this.user.idsociete &&
+              c.typeaction.toLocaleLowerCase() === 'budget' &&
+              c.typeentite.toLocaleLowerCase() === 'site'
+          );
+        }
+      },
+      error: (err: any) => {
+        this.msgErros = err.error.error;
+      },
+    });
+  }
+
+  getAllLigneBudgetaire() {
+    this.lignebudgetservice.getAll().subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.lignesBudgetaires = res.data;
         }
       },
       error: (err: any) => {
@@ -157,6 +181,7 @@ export class BudgetComponent implements OnInit {
       (b) => b.typebudget === 'Mensuel' && b.idbudgetparent === parentId
     );
   }
+
   get totalActifs(): number {
     return this.budgets.filter(
       (b) => b.actif === 1 && b.typebudget === 'Annuel'
@@ -262,6 +287,21 @@ export class BudgetComponent implements OnInit {
     this.checkAllRow = false;
   }
 
+  getPrevisionAnnuel(budget: BudgetModel): number {
+    return this.budgetPrevisionService.calculPrevisionBudgetAnnuel(
+      budget,
+      this.budgets,
+      this.lignesBudgetaires
+    );
+  }
+
+  getPrevisionMensuel(budget: BudgetModel): number {
+    return this.budgetPrevisionService.calculPrevisionBudget(
+      budget,
+      this.lignesBudgetaires
+    );
+  }
+
   //création du formulaire
   initForm(): void {
     this.budgetForm = this.fb.group(
@@ -275,7 +315,9 @@ export class BudgetComponent implements OnInit {
         idbudgetparent: [''],
         site: [this.user.idsite ?? null],
         societe: [this.user.idsociete ?? null],
-        idcircuitvalidation: ['', [Validators.required]],
+        idcircuitvalidation: [
+          this.circuitValidation?.idcircuitvalidation ?? null,
+        ],
         // createdby
         actif: [false],
       },
@@ -283,6 +325,9 @@ export class BudgetComponent implements OnInit {
         validators: this.budgetDateValidator(() => this.selectedBudgetParent),
       }
     );
+
+    // Désactivation et masquage du circuit de validation
+    this.budgetForm.get('idcircuitvalidation')?.disable({ emitEvent: false });
   }
 
   get user() {
@@ -389,6 +434,7 @@ export class BudgetComponent implements OnInit {
         'invalidMonthRange',
         'outOfParentRange',
         'duplicateMonthlyBudget',
+        'invalidAnnualStartDate',
       ]);
 
       resetErrors(endCtrl, [
@@ -396,6 +442,7 @@ export class BudgetComponent implements OnInit {
         'invalidMonthRange',
         'outOfParentRange',
         'duplicateMonthlyBudget',
+        'invalidAnnualEndDate',
       ]);
 
       if (!startCtrl.value || !endCtrl.value) return null;
@@ -411,6 +458,35 @@ export class BudgetComponent implements OnInit {
           ...endCtrl.errors,
           startAfterEnd: true,
         });
+        return null;
+      }
+
+      /* ==========================
+ 2️⃣ VALIDATION ANNUELLE
+ ========================== */
+      if (typeCtrl.value === 'Annuel') {
+        const startYear = start.getFullYear();
+        const endYear = end.getFullYear();
+
+        const isFirstDayOfYear =
+          start.getDate() === 1 && start.getMonth() === 0; // Janvier = 0
+
+        const isLastDayOfYear = end.getDate() === 31 && end.getMonth() === 11; // Décembre = 11
+
+        if (!isFirstDayOfYear) {
+          startCtrl.setErrors({
+            ...startCtrl.errors,
+            invalidAnnualStartDate: true,
+          });
+        }
+
+        if (!isLastDayOfYear || startYear !== endYear) {
+          endCtrl.setErrors({
+            ...endCtrl.errors,
+            invalidAnnualEndDate: true,
+          });
+        }
+
         return null;
       }
 
@@ -623,13 +699,9 @@ export class BudgetComponent implements OnInit {
     /** 2. prepare data */
     const formValue = this.budgetForm.getRawValue();
 
-    this.budget.idcircuitvalidation =
-      formValue.idcircuitvalidation === ''
-        ? null
-        : formValue.idcircuitvalidation;
+    this.budget.idcircuitvalidation = this.circuitValidation?.idcircuitvalidation as string;
     this.budget.idsite = formValue.idsite === '' ? null : formValue.idsite;
-    this.budget.idsociete =
-      formValue.idsociete === '' ? null : formValue.idsociete;
+    this.budget.idsociete = formValue.idsociete === '' ? null : formValue.idsociete;
     this.budget.datevalidedept = null;
     this.budget.datevalidesite = null;
     this.budget.datevalidesociete = null;
@@ -640,8 +712,7 @@ export class BudgetComponent implements OnInit {
     const _budget: BudgetModel = {
       ...this.budget,
       ...formValue,
-      idbudgetparent:
-        formValue.idbudgetparent === '' ? null : formValue.idbudgetparent,
+      idbudgetparent: formValue.idbudgetparent === '' ? null : formValue.idbudgetparent,
       datedebut: formValue.datedebut,
       datefin: formValue.datefin,
       actif: formValue.actif ? 1 : 0,
@@ -736,6 +807,8 @@ export class BudgetComponent implements OnInit {
     /* 🔒 Désactivation */
     this.budgetForm.get('codebudget')?.disable({ emitEvent: false });
     this.budgetForm.get('typebudget')?.disable({ emitEvent: false });
+    // Désactivation et masquage du circuit de validation
+    this.budgetForm.get('idcircuitvalidation')?.disable({ emitEvent: false });
 
     this.budgetForm.markAllAsTouched();
     this.budgetForm.updateValueAndValidity();

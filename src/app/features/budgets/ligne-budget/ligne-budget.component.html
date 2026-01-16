@@ -196,9 +196,15 @@
                   <td>{{ group.budget.codebudget }}</td>
                   <td>{{ item.departement?.libelle || "—" }}</td>
                   <td>{{ item.nature_operation?.libelle || "—" }}</td>
-                  <td>{{ item.montantprevisiondept }}</td>
-                  <td>{{ item.montantprevisionsite }}</td>
-                  <td>{{ item.montantprevisionsociete }}</td>
+                  <td class="text-end">
+                    {{ item.montantprevisiondept | number : "1.0-0" : "fr" }}
+                  </td>
+                  <td class="text-end">
+                    {{ item.montantprevisionsite | number : "1.0-0" : "fr" }}
+                  </td>
+                  <td class="text-end">
+                    {{ item.montantprevisionsociete | number : "1.0-0" : "fr" }}
+                  </td>
 
                   <td class="text-end">
                     <a
@@ -317,7 +323,7 @@
                     >
                       <option value="">-- Sélectionner --</option>
                       <option
-                        *ngFor="let dep of departements"
+                        *ngFor="let dep of appartenanceDepartement"
                         [value]="dep.iddepartement"
                       >
                         {{ dep.libelle }}
@@ -386,8 +392,43 @@
                     </table>
                   </div>
 
-                  <div *ngIf="natureGrid.length === 0">
-                    @if(selectedBudget && selectedBudget.entite ===
+                  <div
+                    *ngIf="
+                      natureGrid.length === 0 &&
+                      selectedBudget?.entite === 'Département' &&
+                      selectedDept
+                    "
+                  >
+                    <table
+                      class="table table-bordered table-striped align-middle"
+                    >
+                      <thead class="table-light">
+                        <tr>
+                          <th>#</th>
+                          <th>Nature opération</th>
+                          <th>Montant prévision département</th>
+                          <th>Montant prévision site</th>
+                          <th>Montant prévision société</th>
+                        </tr>
+                      </thead>
+                      <tbody class="list form-check-all">
+                        <tr>
+                          <td colspan="8" class="text-center text-muted py-4">
+                            Aucune nature d'opération n'a été affectée à ce
+                            département.
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div
+                    *ngIf="
+                      natureGrid.length === 0 &&
+                      selectedBudget?.entite !== 'Département'
+                    "
+                  >
+                    <!-- @if(selectedBudget && selectedBudget.entite ===
                     "Département") {
                     <div class="mb-3">
                       <div>
@@ -404,7 +445,7 @@
                         <div class="invalid-feedback">{{ msgErros }}</div>
                       </div>
                     </div>
-                    }
+                    } -->
                     <div class="mb-3">
                       <div>
                         <label

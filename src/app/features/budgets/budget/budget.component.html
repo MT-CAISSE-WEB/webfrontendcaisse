@@ -225,17 +225,51 @@
                     </span>
                   </td>
 
-                  <td></td>
+                  <td class="fw-bold text-end">
+                    {{ getPrevisionAnnuel(item) | number : "1.0-0" }}
+                  </td>
 
-                  <td>
-                    <a
-                      href="#showModal"
-                      data-bs-toggle="modal"
-                      (click)="modalUpdate(item)"
-                      class="text-primary"
-                    >
-                      <i class="ri-pencil-fill fs-16"></i>
-                    </a>
+                  <td class="text-end">
+                    <div class="dropdown">
+                      <button
+                        class="btn btn-sm btn-icon btn-soft-secondary"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                      >
+                        <i class="ri-more-2-fill fs-16"></i>
+                      </button>
+
+                      <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                          <a
+                            class="dropdown-item text-success"
+                            href="javascript:void(0)"
+                          >
+                            <i class="ri-check-double-line me-2"></i> Valider
+                          </a>
+                        </li>
+
+                        <li>
+                          <a class="dropdown-item" href="javascript:void(0)">
+                            <i class="ri-bar-chart-2-line me-2"></i> Lignes
+                            budgétaires
+                          </a>
+                        </li>
+
+                        <li><hr class="dropdown-divider" /></li>
+
+                        <li>
+                          <a
+                            class="dropdown-item text-primary"
+                            href="#showModal"
+                            data-bs-toggle="modal"
+                            (click)="modalUpdate(item)"
+                          >
+                            <i class="ri-pencil-fill me-2"></i> Modifier
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
                   </td>
                 </tr>
 
@@ -263,7 +297,9 @@
                           <td>
                             {{ child.datedebut | date : "MMM yyyy" }}
                           </td>
-                          <td></td>
+                          <td class="text-end">
+                            {{ getPrevisionMensuel(child) | number : "1.0-0" }}
+                          </td>
                           <td>
                             <span
                               class="badge"
@@ -398,7 +434,7 @@
                       >Type de budget</label
                     >
                     <select
-                      class="form-select form-control form-control-sm {{
+                      class="form-select form-select-sm {{
                         isValidField('typebudget')
                       }}"
                       aria-label="Default select example"
@@ -420,7 +456,7 @@
                       >Budget Parent</label
                     >
                     <select
-                      class="form-select form-control form-control-sm"
+                      class="form-select form-select-sm"
                       aria-label="Default select example"
                       id="idbudgetparent"
                       formControlName="idbudgetparent"
@@ -463,7 +499,7 @@
 
                     <select
                       id="entite-field"
-                      class="form-select form-control form-control-sm {{
+                      class="form-select form-select-sm {{
                         isValidField('entite')
                       }}"
                       formControlName="entite"
@@ -512,6 +548,14 @@
                       >
                         Un budget mensuel existe déjà pour ce mois.
                       </div>
+
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datedebut', 'invalidAnnualStartDate')"
+                      >
+                        Pour un budget annuel, la date de début doit être le
+                        01/01 de l'année.
+                      </div>
                       <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                     </div>
                   </div>
@@ -556,32 +600,39 @@
                       >
                         Un budget mensuel existe déjà pour cette période.
                       </div>
+
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datefin', 'invalidAnnualEndDate')"
+                      >
+                        Pour un budget annuel, la date de fin doit être le 31/12
+                        de la même année.
+                      </div>
                       <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                     </div>
                   </div>
 
                   <div class="mb-3">
-                    <label class="form-label form-label-sm" for=""
+                    <label
+                      class="form-label form-label-sm"
+                      for="idcircuitvalidation-field"
+                      [hidden]="true"
                       >Circuit de validation</label
                     >
-                    <select
-                      class="form-select form-control form-control-sm {{
+                    <input
+                      type="text"
+                      id="idcircuitvalidation-field"
+                      class="form-control form-control-sm {{
                         isValidField('idcircuitvalidation')
                       }}"
-                      aria-label="Default select example"
-                      id="idcircuitvalidation-field"
                       formControlName="idcircuitvalidation"
-                    >
-                      <option [ngValue]="null">-- Sélectionner --</option>
-                      @for (item of circuitValidations; track $index){
-                      <option [value]="item.idcircuitvalidation">
-                        {{ item.codecircuitvalidation }}
-                      </option>
-                      }
-                    </select>
+                      [value]="circuitValidation?.idcircuitvalidation"
+                      [hidden]="true"
+                    />
+
                     <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                   </div>
-                  <div class="mb-3">
+                  <!-- <div class="mb-3">
                     <label class="form-label form-label-sm" for="">Site</label>
                     <select
                       class="form-select form-control form-control-sm"
@@ -590,9 +641,9 @@
                     >
                       <option disabled>-- Sélectionner --</option>
                     </select>
-                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
-                  </div>
-                  <div class="mb-3">
+                    <div class="invalid-feedback">{{ msgErros }}</div>
+                  </div> -->
+                  <!-- <div class="mb-3">
                     <label class="form-label form-label-sm" for=""
                       >Société</label
                     >
@@ -603,8 +654,8 @@
                     >
                       <option disabled>-- Sélectionner --</option>
                     </select>
-                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
-                  </div>
+                    <div class="invalid-feedback">{{ msgErros }}</div>
+                  </div> -->
 
                   <div class="mb-3">
                     <div class="form-check form-switch">

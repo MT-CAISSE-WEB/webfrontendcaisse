@@ -24,10 +24,15 @@ import { AffectationDepartementNatureService } from '../../donnee_base/services/
 import { affectationdepartementnatureModel } from '../../donnee_base/models/affectationdepartementnature.model';
 import { natureoperationModel } from '../../donnee_base/models/natureoperation.model';
 import { debounceTime, distinctUntilChanged, forkJoin, map } from 'rxjs';
+import { utilisateurdepartementservice } from '../../administration/service/userdepartement.service';
 
 @Component({
   selector: 'app-ligne-budget',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+  ],
   templateUrl: './ligne-budget.component.html',
   styleUrl: './ligne-budget.component.css',
 })
@@ -43,6 +48,7 @@ export class LigneBudgetComponent implements OnInit {
   }> = [];
   budgets: BudgetModel[] = [];
   departements: departementmodel[] = [];
+  appartenanceDepartement: departementmodel[] = [];
   ligneBudget: LigneBudgetModel = new LigneBudgetModel();
   lignesBudgetsFiltered: LigneBudgetModel[] = [];
   msgErros: string = '';
@@ -77,11 +83,13 @@ export class LigneBudgetComponent implements OnInit {
 
   // savoir l'entité du budget
   selectedBudget?: BudgetModel;
+  selectedDept?: departementmodel;
   constructor(
     private lignebudgetservice: LigneBudgetService,
     private budgetservice: BudgetService,
     private departementservice: departementservice,
     private affectationService: AffectationDepartementNatureService,
+    private utilisateurdepartementservice: utilisateurdepartementservice,
     private router: Router
   ) {}
 
@@ -90,6 +98,7 @@ export class LigneBudgetComponent implements OnInit {
     this.getAllBudgets();
     this.getAllDepartements();
     this.getAllLigneBudgets();
+    this.getUserDepartement();
 
     //Initialisation du formulaire
     this.initForm();
@@ -168,13 +177,42 @@ export class LigneBudgetComponent implements OnInit {
       next: (res: any) => {
         if (res.success) {
           this.departements = res.data;
-          // this.totalPages = res.totalPages;
         }
       },
       error: (err: any) => {
         this.msgErros = err.error.error;
       },
     });
+  }
+
+  getUserDepartement() {
+    this.utilisateurdepartementservice
+      .getutilisateurdepartement(this.user.idutilisateur)
+      .subscribe({
+        next: (res: any) => {
+          if (res.success) {
+            const userDepartements: any[] = res.data[0];
+
+            const allowedIds = new Set(
+              userDepartements.map((item) => item.iddepartement)
+            );
+            // Filtrage du tableau complet
+            const filteredDepartments = this.departements.filter((dept) =>
+              allowedIds.has(dept.iddepartement)
+            );
+            this.appartenanceDepartement = filteredDepartments;
+
+            console.log(filteredDepartments);
+          }
+        },
+        error: (err: any) => {
+          this.msgErros = err.error.error;
+        },
+      });
+  }
+
+  get user() {
+    return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
   private applySearchFilter(search: string): void {
@@ -193,6 +231,11 @@ export class LigneBudgetComponent implements OnInit {
     );
 
     this.rebuildGroupedData();
+  }
+
+  onSelectionDepartementChange(event: Event) {
+    const id = (event.target as HTMLSelectElement).value;
+    this.selectedDept = this.departements.find((d) => d.iddepartement === id);
   }
 
   onSelectionChange(event: Event) {
@@ -313,6 +356,7 @@ export class LigneBudgetComponent implements OnInit {
 
   onDepartementChange(event: any) {
     const idDept = event.target.value;
+    this.onSelectionDepartementChange(event);
 
     // Reset STRICT
     this.natureGrid = [];
