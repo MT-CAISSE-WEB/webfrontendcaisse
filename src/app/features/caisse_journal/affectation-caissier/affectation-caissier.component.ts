@@ -326,8 +326,6 @@ export class AffectationCaissierComponent implements OnInit{
 
     const _affectation: any = {...formValue};
 
-    console.log(_affectation);
-
     /** 3. choices action */
     // if(this.actionModal == "create")this.create(_operation);
     // else this.update(_operation);

@@ -58,7 +58,7 @@
                   <div class="spinner-border text-info"></div>
               </div>
             }
-            <table class="table table-nowrap align-middle" id="orderTable">
+            <table class="table table-hover table-nowrap align-middle table-scroll" id="orderTable">
               <thead class="text-muted table-light">
                 <tr class="text-uppercase">
                   <th scope="col" style="width: 25px">
@@ -127,7 +127,7 @@
                   </tr>
 
                   <!-- Modal -->
-                  <div class="modal fade flip" [attr.id]="'validationModal' + $index" tabindex="-1" aria-hidden="true">
+                  <div class="modal fade" [attr.id]="'validationModal' + $index" tabindex="-1" aria-hidden="true">
                       <div class="modal-dialog modal-dialog-centered">
                           <div class="modal-content">
                             <div class="modal-header p-3 bg-info-subtle">
@@ -146,6 +146,11 @@
                                     <span class="form-check-label fw-semibold"> ✔ Accepter </span>
                                   </label>
 
+                                  <label class="radio-line form-check form-check-sm form-radio-warning w-75" [class.active]="validForm.get('decision')?.value === 'complement'">
+                                    <input class="form-check-input" type="radio" formControlName="decision" value="complement"/>
+                                    <span class="form-check-label fw-semibold"> Complément d'information </span>
+                                  </label>
+
                                   <label class="radio-line form-check form-check-sm form-radio-danger w-75" [class.active]="validForm.get('decision')?.value === 'refuser'">
                                     <input class="form-check-input" type="radio" formControlName="decision" value="refuser"/>
                                     <span class="form-check-label fw-semibold"> ✖ Rejeter </span>
@@ -154,10 +159,17 @@
                                 </div>
 
                                 <!-- Motif de refus -->
-                                <div *ngIf="validForm.get('decision')?.value === 'refuser'" class="mt-3 w-75 mx-auto">
+                                <div *ngIf="validForm.get('decision')?.value === 'refuser' || validForm.get('decision')?.value === 'complement'" class="mt-3 w-75 mx-auto">
 
-                                  <textarea class="form-control form-control-sm"
-                                            formControlName="motif"
+                                  <select class="form-select form-select-sm bg-light border-0" formControlName="motif">
+                                      <option value="" selected>Choisir le motif</option>
+                                      @for(item of motifs; track $index){
+                                          <option value="{{item.idmotif}}"> {{item.libellemotif}} </option>
+                                      }
+                                  </select>
+
+                                  <textarea class="form-control form-control-sm mt-3"
+                                            formControlName="comment"
                                             rows="3"
                                             placeholder="Veuillez saisir le motif du refus">
                                   </textarea>
@@ -205,7 +217,7 @@
                 class="btn btn-sm btn-soft-primary pagination-prev">
                 Précédent
               </button>
-              <ul class="pagination listjs-pagination mb-0"></ul>
+              <ul class="pagination listjs-pagination mb-0"> Page {{currentPage}} / {{totalPages}} </ul>
               <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)"
                 class="btn btn-sm btn-soft-primary pagination-next">
                 Suivant

@@ -10,10 +10,12 @@ import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.c
 import { AffectationCaisseModel } from '../../../features/caisse_journal/models/affectationcaisse.model';
 import { AffectationCaisseService } from '../../../features/caisse_journal/services/affectationcaisse.service';
 import { ToastrService } from 'ngx-toastr';
+import { APP_ROOT_PARAMETREPAGE_PARAMETRE } from '../../../_core/routes/frontend.root';
+import { RouterLink, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-layout-header',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, RouterModule],
   templateUrl: './layout-header.component.html',
   styleUrl: './layout-header.component.css'
 })
@@ -26,6 +28,9 @@ export class LayoutHeaderComponent implements OnInit {
   msgErros: string = "";
   error: string = "";
   loading: boolean = false;
+
+  //Liste des routes
+  root_parametre = APP_ROOT_PARAMETREPAGE_PARAMETRE;
 
   //Liste de caisse utilisateur
   caissesUser: AffectationCaisseModel[] = [];

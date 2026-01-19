@@ -956,8 +956,6 @@ export class OperationCaisseComponent implements OnInit{
     /** 3. choices action */
     if(this.actionModal == "create")this.create(_operation);
     else this.update(_operation);
-    // if (!_caisse.idcaisse) this.create(_caisse);
-    // else this.update(_caisse);
   }
 
   closeModal(modal: string){
@@ -1265,7 +1263,6 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   // Recuperer la devise
-
   modalCreate(){
     this.isUpdated = true;
     this.actionModal = "create";

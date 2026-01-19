@@ -7,12 +7,14 @@ export const APP_CAISSE_JOURNAL = "caisse_journal";
 export const APP_STRUCTURE = "structure";
 export const APP_GENERAL = "general";
 export const APP_CONSULTATION = "consultations";
+export const APP_PARAMETRE = "paramètres";
 export const APP_ROOT_CAISSE_JOURNAL = APP_ROOT + "/" + APP_CAISSE_JOURNAL;
 export const APP_ROOT_DONNEE_BASE = APP_ROOT + "/" + APP_DONNEE_BASE;
 export const APP_ROOT_GENERAL = APP_ROOT + "/" + APP_GENERAL;
 export const APP_ROOT_STRUCTURE = APP_ROOT + "/"+APP_STRUCTURE;
 export const APP_ROOT_ADMINISTRATION = APP_ROOT + "/"+APP_ADMINISTRATION;
 export const APP_ROOT_CONSULTATION = APP_ROOT + "/"+APP_CONSULTATION;
+export const APP_ROOT_PARAMETRE = APP_ROOT + "/" + APP_PARAMETRE;
 
 
 export const APP_DEPARTEMENT = "departement";
@@ -152,3 +154,9 @@ export const APP_ROOT_OPERATIONPERIODE_CONSULTATION = APP_ROOT + "/" + APP_OPERA
 export const APP_OPERATIONDETAILS = 'operation_details';
 export const APP_OPERATIONDETAILS_CONSULTATION = APP_CONSULTATION + "/" + APP_OPERATIONDETAILS;
 export const APP_ROOT_OPERATIONDETAILS_CONSULTATION = APP_ROOT + "/" + APP_OPERATIONDETAILS_CONSULTATION;
+
+
+//Route paramètre
+export const APP_PARAMETREPAGE = 'générale';
+export const APP_PARAMETREPAGE_PARAMETRE = APP_PARAMETRE + "/" + APP_PARAMETREPAGE;
+export const APP_ROOT_PARAMETREPAGE_PARAMETRE = APP_ROOT + "/" + APP_PARAMETREPAGE_PARAMETRE;

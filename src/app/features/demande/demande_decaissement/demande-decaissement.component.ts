@@ -15,6 +15,8 @@ import { ToastrService } from 'ngx-toastr';
 import { MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
 import { tauxdevisemodel } from '../../donnee_base/donnee_base/model/tauxdevise.model';
 import { tauxdeviseservice } from '../../donnee_base/donnee_base/service/tauxdevise.service';
+import { motifModel } from '../../paramètres/models/motif.model';
+import { MotifService } from '../../paramètres/services/motif.service';
 
 @Component({
   selector: 'app-demande-decaissement',
@@ -59,6 +61,8 @@ export class DemandeDecaissementComponent implements OnInit {
   //Liste des taux de devises
   tauxdevises : tauxdevisemodel[] = [];
 
+  motifs : motifModel[] = [];
+
   //Element à supprimer 
   deleteDemande: any = null;
   //Demande à selectionner
@@ -79,7 +83,8 @@ export class DemandeDecaissementComponent implements OnInit {
   constructor(
     private service: DemandeService,
     private budgetservice: BudgetService,
-    private toastr : ToastrService, private ts: tauxdeviseservice
+    private toastr : ToastrService, private ts: tauxdeviseservice,
+    private motifservice: MotifService
   ) {}
 
   ngOnInit(): void {
@@ -87,6 +92,9 @@ export class DemandeDecaissementComponent implements OnInit {
     this.initValidForm();
     //charger les demandes
     this.loadAllDemandes();
+
+    //charger les motifs aussi
+    this.getAllMotif();
 
     // Filtrage live avec debounce pour éviter de spammer le filtre à chaque frappe
     this.searchControl.valueChanges
@@ -137,6 +145,23 @@ export class DemandeDecaissementComponent implements OnInit {
     (document.querySelector('.modal-backdrop') as HTMLElement)?.remove();
   }
 
+   //Recuperer tous les motifs
+  getAllMotif(){
+    const params = {
+      page: 1,
+      limit: 50,
+      search: '',
+      actif: '',
+    };
+    this.motifservice.getAll(params).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.motifs = res.data.data;
+        }
+      }
+    });
+  }
+
   formatDateInput(date: Date): string {
     return date.toISOString().split('T')[0];
   }
@@ -164,6 +189,7 @@ export class DemandeDecaissementComponent implements OnInit {
       iddemande: [''],
       decision: ['', Validators.required],
       motif: [''],
+      mcomment: [''],
     });
 
     this.validForm.get('decision')?.valueChanges.subscribe(value => {
@@ -218,7 +244,8 @@ export class DemandeDecaissementComponent implements OnInit {
       decision: this.validForm.value.decision,
       motif: this.validForm.value.decision === 'refuser'
         ? this.validForm.value.motif
-        : null
+        : null,
+      comment : this.validForm.value.comment 
     };
 
       // Exemple appel backend

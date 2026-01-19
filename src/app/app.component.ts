@@ -26,7 +26,6 @@ export class AppComponent implements OnInit{
       if (typeof window !== 'undefined') {
            window.addEventListener(event, () => this.auth.resetLogoutTimer());
       }
-   
   });
   
   }
