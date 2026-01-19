@@ -91,7 +91,7 @@ export class BudgetComponent implements OnInit {
     private budgetPrevisionService: BudgetPrevisionService,
     private lignebudgetservice: LigneBudgetService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     //Initialisation du formulaire
@@ -110,7 +110,7 @@ export class BudgetComponent implements OnInit {
     this.isExpanded = {};
     this.params = {
       page: this.currentPage,
-      limit: this.getBudgetsAnnuels().length,
+      limit: 10000,
     };
     this.budgetservice.getAll(this.params).subscribe({
       next: (res: any) => {
@@ -122,6 +122,7 @@ export class BudgetComponent implements OnInit {
               b.idsociete === this.user.idsociete
           );
           this.applyStatusFilter(this.currentStatusFilter);
+          this.filteredBudgets = [...this.budgets];
           this.applyFilters();
           this.totalPages = res.totalPages;
           this.budgetForm?.updateValueAndValidity({
@@ -169,6 +170,33 @@ export class BudgetComponent implements OnInit {
         this.msgErros = err.error.error;
       },
     });
+  }
+
+  openContextMenu: string | null = null;
+
+  toggleContextMenu(id: string) {
+    this.openContextMenu = this.openContextMenu === id ? null : id;
+  }
+
+  selectedBudgetForLignes?: BudgetModel;
+  lignesBudgetDuBudget: LigneBudgetModel[] = [];
+
+  openLignesBudgetModal(budget: BudgetModel) {
+    this.selectedBudgetForLignes = budget;
+
+    this.lignesBudgetDuBudget = this.lignesBudgetaires.filter(
+      (l) => l.idbudget === budget.idbudget
+    );
+
+    const modal = document.getElementById('modalLignesBudget');
+    modal?.classList.add('show');
+    modal?.setAttribute('style', 'display:block');
+  }
+
+  closeLignesBudgetModal() {
+    const modal = document.getElementById('modalLignesBudget');
+    modal?.classList.remove('show');
+    modal?.setAttribute('style', 'display:none');
   }
 
   isExpanded: Record<string, boolean> = {};
@@ -291,6 +319,10 @@ export class BudgetComponent implements OnInit {
     this.checkAllRow = false;
   }
 
+  get hasAnnualBudgets(): boolean {
+  return this.filteredBudgets.some(b => b.typebudget === 'Annuel');
+}
+
   getPrevisionAnnuel(budget: BudgetModel): number {
     return this.budgetPrevisionService.calculPrevisionBudgetAnnuel(
       budget,
@@ -365,8 +397,8 @@ export class BudgetComponent implements OnInit {
     this.form[label].valid && this.form[label].touched
       ? (status = 'is-valid')
       : this.form[label].invalid && this.form[label].touched
-      ? (status = 'is-invalid')
-      : (status = '');
+        ? (status = 'is-invalid')
+        : (status = '');
     return status;
   }
 
@@ -713,7 +745,7 @@ export class BudgetComponent implements OnInit {
     this.budget.datevalidesociete = null;
     this.budget.createdby = this.user.nom ?? 'MAF';
     this.budget.dernierniveau = null;
-    this.budget.niveauactuel = null;
+    this.budget.niveauactuel = 1;
 
     const _budget: BudgetModel = {
       ...this.budget,

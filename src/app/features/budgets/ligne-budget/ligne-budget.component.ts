@@ -51,6 +51,9 @@ export class LigneBudgetComponent implements OnInit {
   loading: Boolean = false;
   ligneBudgetForm: FormGroup = this.fb.group({});
 
+  availableNatures: natureoperationModel[] = [];
+
+
   // Définissez des propriétés de pagination
   currentPage: number = 1;
   // Nombre d'éléments par page
@@ -66,6 +69,8 @@ export class LigneBudgetComponent implements OnInit {
 
   //Changement titre modal
   actionModal: string = 'create';
+  showRejectComment = false;
+  rejectComment = '';
 
   //Message suppression
   msgSup: string = '';
@@ -80,6 +85,28 @@ export class LigneBudgetComponent implements OnInit {
   // savoir l'entité du budget
   selectedBudget?: BudgetModel;
   selectedDept?: departementmodel;
+
+
+  // MODE DE SAISIE
+  modeSaisie = '';
+
+  // Gestion progressive des natures
+
+  allNatures: Array<{
+    idnature: string;
+    libelle: string;
+    iddepartement: string;
+  }> = [];
+  currentNatureIndex: number = 0;
+  validationLines: Array<{
+    departement: string;
+    nature: string;
+    montantDept: number;
+    montantSite: number;
+    montantSociete: number;
+  }> = [];
+
+
   constructor(
     private lignebudgetservice: LigneBudgetService,
     private budgetservice: BudgetService,
@@ -87,7 +114,7 @@ export class LigneBudgetComponent implements OnInit {
     private affectationService: AffectationDepartementNatureService,
     private utilisateurdepartementservice: utilisateurdepartementservice,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     //Afficher toutes les lignes budgétaires
@@ -114,6 +141,12 @@ export class LigneBudgetComponent implements OnInit {
       });
   }
 
+  naturesSource: Array<{
+    idnature: string;
+    libelle: string;
+    iddepartement: string;
+  }> = [];
+
   natureGrid: Array<{
     idnature: string;
     libelle: string;
@@ -124,7 +157,53 @@ export class LigneBudgetComponent implements OnInit {
     montantDept: number;
     montantSite: number;
     montantSociete: number;
+
   }> = [];
+
+  isDeptReadonly(): boolean {
+    return true; // toujours grisé
+  }
+
+  isSiteReadonly(): boolean {
+    if (!this.selectedBudget) return true;
+
+    // Utilisateur SITE peut saisir tant que site non validé
+    return !(
+      this.user.typeentitesite === 1 &&
+      this.selectedBudget.validesite !== 1
+    );
+  }
+
+  isSocieteReadonly(): boolean {
+    if (!this.selectedBudget) return true;
+
+    // Utilisateur SOCIETE peut saisir seulement si site validé
+    return !(
+      this.user.typeentitesociete === 1 &&
+      this.selectedBudget.validesite === 1
+    );
+  }
+
+  applyMontantPropagation(ligne: any) {
+    if (!this.selectedBudget) return;
+
+    // SITE → recopie depuis DEPT
+    if (
+      this.user.typeentitesite === 1 &&
+      this.selectedBudget.validesite !== 1
+    ) {
+      ligne.montantSite = ligne.montantDept;
+    }
+
+    // SOCIETE → recopie depuis SITE
+    if (
+      this.user.typeentitesociete === 1 &&
+      this.selectedBudget.validesite === 1
+    ) {
+      ligne.montantSociete = ligne.montantSite;
+    }
+  }
+
 
   // Obtenir la liste de tous les budgets
   getAllBudgets() {
@@ -234,10 +313,177 @@ export class LigneBudgetComponent implements OnInit {
     this.rebuildGroupedData();
   }
 
+  // onSelectionDepartementChange(event: Event) {
+  //   const id = (event.target as HTMLSelectElement).value;
+  //   this.selectedDept = this.departements.find((d) => d.iddepartement === id);
+  // }
+
   onSelectionDepartementChange(event: Event) {
     const id = (event.target as HTMLSelectElement).value;
-    this.selectedDept = this.departements.find((d) => d.iddepartement === id);
+
+    // 1. Département sélectionné
+    this.selectedDept = this.departements.find(
+      d => d.iddepartement === id
+    );
+
+    if (!this.selectedDept) {
+      this.resetNatureSaisie();
+      return;
+    }
+
+    // 2. Synchroniser le formulaire (si utilisé ailleurs)
+    this.ligneBudgetForm.patchValue({
+      iddepartement: id,
+    });
+
+    // 3. Déclencher la logique métier centrale
+    this.onDepartementChange();
   }
+
+  private resetNatureSaisie() {
+    this.allNatures = [];
+    this.natureGrid = [];
+    this.selectedNatureId = null;
+  }
+
+  onDepartementChange(event?: any) {
+    const idDept = this.ligneBudgetForm.get('iddepartement')?.value;
+    if (!idDept) return;
+
+    // Charger les natures du département
+    this.allNatures = this.naturesSource.filter(
+      n => n.iddepartement === idDept
+    );
+
+    // Reset
+    this.natureGrid = [];
+    this.selectedNatureId = null;
+
+    // Mode ALL → on ajoute tout automatiquement
+    if (this.modeSaisie === 'ALL') {
+      this.allNatures.forEach(nature => {
+        this.addNatureToGrid(nature);
+      });
+    }
+  }
+
+  get naturesDisponibles() {
+    return this.natureGrid;
+  }
+
+  addSelectedNature() {
+    if (!this.selectedNatureId) return;
+
+    const index = this.availableNatures.findIndex(
+      n => n.idnature === this.selectedNatureId
+    );
+
+    if (index === -1) return;
+
+    const nature = this.availableNatures.splice(index, 1)[0];
+    const ligne = {
+      idnature: nature.idnature,
+      libelle: nature.libelle,
+      montantDept: 0,
+      montantSite: 0,
+      montantSociete: 0,
+    }
+
+    this.natureGrid.push(ligne);
+    this.applyMontantPropagation(ligne);
+
+    this.selectedNatureId = null;
+  }
+
+  canValidateCurrentLine(): boolean {
+    if (this.natureGrid.length === 0) return false;
+
+    const line = this.natureGrid[this.natureGrid.length - 1];
+
+    return (
+      (line.montantDept ?? 0) > 0 ||
+      (line.montantSite ?? 0) > 0 ||
+      (line.montantSociete ?? 0) > 0
+    );
+  }
+
+
+  validateCurrentStep() {
+    if (!this.selectedBudget || !this.selectedDept) return;
+    if (this.natureGrid.length === 0) return;
+
+    const line = this.natureGrid[this.natureGrid.length - 1];
+
+    const hasMontant =
+      (line.montantDept ?? 0) > 0 ||
+      (line.montantSite ?? 0) > 0 ||
+      (line.montantSociete ?? 0) > 0;
+
+    if (!hasMontant) return;
+
+    const idBudget = this.selectedBudget.idbudget;
+    const idDept = this.selectedDept.iddepartement;
+
+    // 1️⃣ Mise à jour de la source
+    this.ligneBudgetsSource.push({
+      idbudget: idBudget,
+      iddepartement: idDept,
+      idnature: line.idnature,
+      montantprevisiondept: line.montantDept,
+      montantprevisionsite: line.montantSite,
+      montantprevisionsociete: line.montantSociete,
+      nature_operation: { libelle: line.libelle },
+    } as LigneBudgetModel);
+
+    // 2️⃣ Passage en ALL SANS RECHARGER
+    this.modeSaisie = 'ALL';
+
+    // 3️⃣ Injection directe dans la vue
+    this.natureGrid = [
+      {
+        idnature: line.idnature,
+        libelle: line.libelle,
+        montantDept: line.montantDept,
+        montantSite: line.montantSite,
+        montantSociete: line.montantSociete,
+      },
+    ];
+  }
+
+
+
+
+
+
+
+  private addNatureToGrid(nature: any) {
+    const idDept = this.ligneBudgetForm.getRawValue().iddepartement;
+
+    const ligne = {
+      idnature: nature.idnature,
+      libelle: nature.libelle,
+      montantDept: 0,
+      montantSite: 0,
+      montantSociete: 0,
+    } as any;
+
+    const existing = this.ligneBudgetsSource.find(
+      l =>
+        l.idbudget === this.selectedBudget!.idbudget &&
+        l.iddepartement === idDept &&
+        l.idnature === nature.idnature
+    );
+
+    if (existing) {
+      ligne.idbudgetdepartementnature = existing.idbudgetdepartementnature;
+      ligne.montantDept = existing.montantprevisiondept ?? 0;
+      ligne.montantSite = existing.montantprevisionsite ?? 0;
+      ligne.montantSociete = existing.montantprevisionsociete ?? 0;
+    }
+
+    this.natureGrid.push(ligne);
+  }
+
 
   onSelectionChange(event: Event) {
     const id = (event.target as HTMLSelectElement).value;
@@ -306,7 +552,7 @@ export class LigneBudgetComponent implements OnInit {
   getAllLigneBudgets() {
     this.params = {
       page: this.currentPage,
-      limit: this.limit,
+      limit: 100000,
     };
 
     this.lignebudgetservice.getAll(this.params).subscribe({
@@ -355,39 +601,231 @@ export class LigneBudgetComponent implements OnInit {
     this.ligneBudgetForm.patchValue({ iddepartement: '' });
   }
 
-  onDepartementChange(event: any) {
-    const idDept = event.target.value;
-    this.onSelectionDepartementChange(event);
+  // onDepartementChange(event: any) {
+  //   const idDept = event.target.value;
+  //   this.onSelectionDepartementChange(event);
 
-    // Reset STRICT
-    this.natureGrid = [];
+  //   // Reset STRICT
+  //   this.natureGrid = [];
 
-    if (!idDept || !this.selectedBudget) return;
+  //   if (!idDept || !this.selectedBudget) return;
 
-    this.loadNatureGrid(idDept);
+  //   this.loadNatureGrid(idDept);
+  // }
+
+  // loadNatureGrid(idDepartement: string) {
+  //   if (!idDepartement) return;
+  //   this.affectationService.getAll(idDepartement).subscribe({
+  //     next: (res: any) => {
+  //       if (res.success) {
+  //         this.natureGrid = res.data.naturesaffectes
+  //           .sort((a: natureoperationModel, b: natureoperationModel) =>
+  //             a.libelle.localeCompare(b.libelle)
+  //           )
+  //           .map((item: natureoperationModel) => ({
+  //             idnature: item.idnature,
+  //             libelle: item.libelle,
+  //             montantDept: 0,
+  //             montantSite: 0,
+  //             montantSociete: 0,
+  //           }));
+  //         this.prefillNatureGrid();
+  //       }
+  //     },
+  //   });
+  // }
+
+  stepNatures: Array<{ idnature: string; libelle: string; montantDept: number; montantSite: number; montantSociete: number }> = [];
+
+  loadNextNature() {
+    if (this.currentNatureIndex >= this.stepNatures.length) return;
+
+    const next = this.stepNatures[this.currentNatureIndex];
+
+    // Ajouter la nature suivante à la grille
+    this.natureGrid.push(next);
+
+    this.prefillNatureGrid(); // si tu veux pré-remplir avec des valeurs existantes
+    this.currentNatureIndex++;
   }
 
+  onClickNextNature() {
+    this.loadNextNature();
+  }
+
+  // au cas où
+  // loadNatureGrid(idDepartement: string) {
+  //   if (!idDepartement || !this.selectedBudget) return;
+
+  //   this.natureGrid = [];
+  //   this.currentNatureIndex = 0;
+
+  //   this.affectationService.getAll(idDepartement).subscribe({
+  //     next: (res: any) => {
+  //       if (!res.success) return;
+
+  //       this.allNatures = res.data.naturesaffectes.sort((a: any, b: any) =>
+  //         a.libelle.localeCompare(b.libelle)
+  //       );
+
+  //       if (this.modeSaisie === 'ALL') {
+  //         this.natureGrid = this.allNatures.map((n: any) => ({
+  //           idnature: n.idnature,
+  //           libelle: n.libelle,
+  //           idbudgetdepartementnature: undefined,
+  //           montantDept: 0,
+  //           montantSite: 0,
+  //           montantSociete: 0,
+  //         }));
+  //         this.prefillNatureGrid();
+  //       } else {
+  //         // STEP mode → table vide au départ
+  //         this.stepNatures = this.allNatures.map((n: any) => ({
+  //           idnature: n.idnature,
+  //           libelle: n.libelle,
+  //           idbudgetdepartementnature: undefined,
+  //           montantDept: 0,
+  //           montantSite: 0,
+  //           montantSociete: 0,
+  //         }));
+  //         this.loadNextNature(); // optionnel : charge la 1ère si tu veux
+  //       }
+  //     },
+  //   });
+  // }
   loadNatureGrid(idDepartement: string) {
-    if (!idDepartement) return;
+    if (!this.selectedBudget || !idDepartement) return;
+
+    this.natureGrid = [];
+    this.availableNatures = [];
+    this.selectedNatureId = null;
+
     this.affectationService.getAll(idDepartement).subscribe({
       next: (res: any) => {
-        if (res.success) {
-          this.natureGrid = res.data.naturesaffectes
-            .sort((a: natureoperationModel, b: natureoperationModel) =>
-              a.libelle.localeCompare(b.libelle)
-            )
-            .map((item: natureoperationModel) => ({
-              idnature: item.idnature,
-              libelle: item.libelle,
-              montantDept: 0,
-              montantSite: 0,
-              montantSociete: 0,
-            }));
-          this.prefillNatureGrid();
+        if (!res.success) return;
+
+        const allNatures = res.data.naturesaffectes;
+
+        const existingLines = this.ligneBudgetsSource.filter(
+          l => l.idbudget === this.selectedBudget!.idbudget && l.iddepartement === idDepartement
+        );
+
+        if (this.modeSaisie === 'ALL') {
+          // 🔵 Mode complet : afficher toutes les natures + montants
+          this.natureGrid = allNatures.map((n: any) => {
+            const existing = existingLines.find(l => l.idnature === n.idnature);
+            return {
+              idnature: existing?.idnature ?? n.idnature ?? '', // <-- fix TS
+              libelle: n.libelle,
+              idbudgetdepartementnature: existing?.idbudgetdepartementnature,
+              montantDept: existing?.montantprevisiondept ?? 0,
+              montantSite: existing?.montantprevisionsite ?? 0,
+              montantSociete: existing?.montantprevisionsociete ?? 0,
+            };
+          });
+
+          return;
         }
+
+        // 🟢 Mode STEP : lignes existantes
+        const usedIds = new Set(existingLines.map(l => l.idnature));
+
+        this.natureGrid = existingLines.map(l => ({
+          idnature: l.idnature!, // assurance non-null
+          libelle: l.nature_operation?.libelle ?? '',
+          idbudgetdepartementnature: l.idbudgetdepartementnature,
+          montantDept: l.montantprevisiondept ?? 0,
+          montantSite: l.montantprevisionsite ?? 0,
+          montantSociete: l.montantprevisionsociete ?? 0,
+        }));
+
+        this.natureGrid.forEach(ligne =>
+          this.applyMontantPropagation(ligne)
+        );
+
+        // natures encore disponibles pour ajout
+        this.availableNatures = allNatures.filter((n: any) => !usedIds.has(n.idnature));
       },
     });
   }
+
+
+
+  // Nature choisie par l'utilisateur
+  selectedNatureId: string | null = null;
+
+  addEmptyLine() {
+    if (this.availableNatures.length === 0) return;
+
+    const nature = this.availableNatures.shift()!;
+
+    this.natureGrid.push({
+      idnature: nature.idnature,
+      libelle: nature.libelle,
+      idbudgetdepartementnature: undefined,
+      montantDept: 0,
+      montantSite: 0,
+      montantSociete: 0,
+    });
+  }
+
+
+  setMode(mode: 'ALL' | 'STEP') {
+    this.modeSaisie = mode;
+
+    const idDept = this.ligneBudgetForm.getRawValue().iddepartement;
+    if (idDept) {
+      this.loadNatureGrid(idDept);
+    }
+  }
+
+
+
+  // ajoutons un ligne à chaque clic
+  addNextNature() {
+    if (
+      this.currentNatureIndex >= this.allNatures.length ||
+      !this.selectedBudget
+    ) {
+      return;
+    }
+
+    const nature = this.allNatures[this.currentNatureIndex];
+
+    // Nouvelle ligne conforme à ton type natureGrid
+    const nouvelleLigne = {
+      idnature: nature.idnature,
+      libelle: nature.libelle,
+      idbudgetdepartementnature: '', // optionnelle
+      montantDept: 0,
+      montantSite: 0,
+      montantSociete: 0,
+    };
+
+    // Préremplissage si une ligne existe déjà
+    const idDept = this.ligneBudgetForm.getRawValue().iddepartement;
+
+    const existing = this.ligneBudgetsSource.find(
+      (l) =>
+        l.idbudget === this.selectedBudget!.idbudget &&
+        l.iddepartement === idDept &&
+        l.idnature === nature.idnature
+    );
+
+    if (existing) {
+      nouvelleLigne.idbudgetdepartementnature =
+        existing.idbudgetdepartementnature;
+      nouvelleLigne.montantDept = existing.montantprevisiondept ?? 0;
+      nouvelleLigne.montantSite = existing.montantprevisionsite ?? 0;
+      nouvelleLigne.montantSociete = existing.montantprevisionsociete ?? 0;
+    }
+
+    this.natureGrid.push(nouvelleLigne);
+    this.updateMontantsSelonValidation();
+    this.currentNatureIndex++;
+  }
+
+
 
   // prefillNatureGrid() {
   //   if (!this.selectedBudget) return;
@@ -520,6 +958,10 @@ export class LigneBudgetComponent implements OnInit {
       }
     });
 
+    this.natureGrid.forEach(l =>
+      this.applyMontantPropagation(l)
+    );
+
     this.updateMontantsSelonValidation();
   }
 
@@ -594,8 +1036,8 @@ export class LigneBudgetComponent implements OnInit {
     this.form[label].valid && this.form[label].touched
       ? (status = 'is-valid')
       : this.form[label].invalid && this.form[label].touched
-      ? (status = 'is-invalid')
-      : (status = '');
+        ? (status = 'is-invalid')
+        : (status = '');
     return status;
   }
 
@@ -699,6 +1141,32 @@ export class LigneBudgetComponent implements OnInit {
     this.ligneBudgetForm.get('iddepartement')?.enable({ emitEvent: false });
   }
 
+  openValidationBudget(budget: BudgetModel) {
+    this.selectedBudget = budget;
+    this.showRejectComment = false;
+    this.rejectComment = '';
+    this.msgErros = '';
+
+    const lignes = this.ligneBudgetsSource.filter(
+      l => l.idbudget === budget.idbudget
+    );
+
+    this.validationLines = lignes.map(l => ({
+      departement: l.departement?.libelle ?? '-',
+      nature: l.nature_operation?.libelle ?? '-',
+      montantDept:
+        budget.entite === 'Département'
+          ? l.montantprevisiondept ?? 0
+          : budget.entite === 'Site'
+            ? l.montantprevisionsite ?? 0
+            : l.montantprevisionsociete ?? 0,
+      montantSite: l.montantprevisionsite,
+      montantSociete: l.montantprevisionsociete
+    }));
+
+  }
+
+
   onSubmit() {
     this.msgErros = '';
     const formValue = this.ligneBudgetForm.getRawValue();
@@ -765,9 +1233,11 @@ export class LigneBudgetComponent implements OnInit {
     forkJoin(requests$).subscribe({
       next: () => {
         this.getAllLigneBudgets();
-        this.resetAfterSubmit();
+        // this.resetAfterSubmit();
+        this.loading = false;
+        if (this.actionModal === 'update') this.closeModal('showModal')
       },
-      error: (err) => (this.msgErros = err.error?.error || 'Erreur serveur'),
+      error: (err) => { this.msgErros = err.error?.error || 'Erreur serveur' },
     });
 
     // ============================
@@ -797,8 +1267,9 @@ export class LigneBudgetComponent implements OnInit {
       this.lignebudgetservice.create(payload).subscribe({
         next: () => {
           this.getAllLigneBudgets();
-          this.resetAfterSubmit();
+          // this.resetAfterSubmit();
           this.loading = false;
+          if (this.actionModal === 'update') this.closeModal('showModal')
         },
         error: (err) => {
           this.msgErros = err.error?.error || 'Erreur serveur';
@@ -824,6 +1295,8 @@ export class LigneBudgetComponent implements OnInit {
     // Reset validations visuelles
     this.ligneBudgetForm.markAsPristine();
     this.ligneBudgetForm.markAsUntouched();
+
+    this.modeSaisie = '';
 
     // Fermer la modale
     this.closeModal(modalId);
@@ -895,10 +1368,53 @@ export class LigneBudgetComponent implements OnInit {
   //   this.dispatchLigneBudget(_object);
   // }
 
+  onRejectClick() {
+    this.showRejectComment = true;
+  }
+
+  confirmRejectBudget() {
+    if (!this.rejectComment.trim()) {
+      this.msgErros = 'Le motif de rejet est obligatoire';
+      return;
+    }
+
+    this.loading = true;
+
+    // 👉 appel API rejet budget
+    // this.budgetservice.reject(this.selectedBudget!.idbudget, this.rejectComment)
+
+    this.loading = false;
+    this.resetValidationModal();
+  }
+
+  resetValidationModal() {
+    this.validationLines = [];
+    this.selectedBudget = undefined;
+    this.rejectComment = '';
+    this.showRejectComment = false;
+    this.msgErros = '';
+
+    this.closeModal('validateBudgetModal');
+  }
+
+
+  onValidateClick() {
+    if (!this.selectedBudget) return;
+
+    // 👉 appel service validation
+    // budgetService.validateBudget(this.selectedBudget.idbudget)
+
+    this.resetAfterSubmit();
+  }
+
+
   modalUpdate(ligne: LigneBudgetModel) {
     this.actionModal = 'update';
+
+    this.modeSaisie = 'ALL'
     this.ligneBudgetForm.reset();
     this.msgErros = '';
+
 
     // Sélection du budget
     this.selectedBudget = this.budgets.find(

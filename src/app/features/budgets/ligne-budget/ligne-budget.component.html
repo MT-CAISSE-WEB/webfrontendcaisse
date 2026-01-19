@@ -1,9 +1,7 @@
 <!-- start page title -->
 <div class="row">
   <div class="col-12">
-    <div
-      class="page-title-box d-sm-flex align-items-center justify-content-between"
-    >
+    <div class="page-title-box d-sm-flex align-items-center justify-content-between">
       <h4 class="mb-sm-0">{{ title }}</h4>
       <div class="page-title-right">
         <ol class="breadcrumb m-0">
@@ -25,24 +23,14 @@
         <div class="row align-items-center gy-3">
           <div class="col-sm-auto">
             <div class="d-flex gap-1 flex-wrap">
-              <button
-                type="button"
-                class="btn btn-sm btn-soft-success"
-                data-bs-toggle="modal"
-                (click)="modalCreate()"
-                id="create-btn"
-                data-bs-target="#showModal"
-              >
+              <button type="button" class="btn btn-sm btn-soft-success" data-bs-toggle="modal" (click)="modalCreate()"
+                id="create-btn" data-bs-target="#showModal">
                 <i class="ri-add-line align-bottom me-1"></i>créer
               </button>
               <button type="button" class="btn btn-sm btn-soft-info">
                 <i class="ri-file-download-line align-bottom me-1"></i> import
               </button>
-              <button
-                class="btn btn-sm btn-soft-danger"
-                [disabled]="!checkAllRow"
-                onClick="deleteMultiple()"
-              >
+              <button class="btn btn-sm btn-soft-danger" [disabled]="!checkAllRow" onClick="deleteMultiple()">
                 <i class="ri-delete-bin-2-line"></i>
               </button>
               <button type="button" class="btn btn-sm btn-info">
@@ -57,12 +45,8 @@
           <div class="row g-3">
             <div class="col-xxl-5 col-sm-6">
               <div class="search-box">
-                <input
-                  type="text"
-                  class="form-control form-control-sm search"
-                  placeholder="rechercher par code, libelle..."
-                  [formControl]="searchCtrl"
-                />
+                <input type="text" class="form-control form-control-sm search"
+                  placeholder="rechercher par code, libelle..." [formControl]="searchCtrl" />
                 <i class="ri-search-line search-icon"></i>
               </div>
             </div>
@@ -71,13 +55,8 @@
             <!--end col-->
             <div class="col-xxl-2 col-sm-4">
               <div>
-                <select
-                  class="form-control form-control-sm"
-                  data-choices
-                  data-choices-search-false
-                  name="choices-single-default"
-                  id="idStatus"
-                >
+                <select class="form-control form-control-sm" data-choices data-choices-search-false
+                  name="choices-single-default" id="idStatus">
                   <option value="">Status</option>
                   <option value="all" selected>tous</option>
                   <option value="Pending">Actif</option>
@@ -90,11 +69,7 @@
             <!--end col-->
             <div class="col-xxl-1 col-sm-2">
               <div>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-primary w-100"
-                  onclick="SearchData();"
-                >
+                <button type="button" class="btn btn-sm btn-primary w-100" onclick="SearchData();">
                   <i class="ri-equalizer-fill me-1 align-bottom"></i>
                   Filtrer
                 </button>
@@ -107,19 +82,10 @@
       </div>
       <div class="card-body pt-0">
         <div>
-          <ul
-            class="nav nav-tabs nav-tabs-custom nav-success mb-3"
-            role="tablist"
-          >
+          <ul class="nav nav-tabs nav-tabs-custom nav-success mb-3" role="tablist">
             <li class="nav-item">
-              <a
-                class="nav-link active All py-3"
-                data-bs-toggle="tab"
-                id="All"
-                href="#home1"
-                role="tab"
-                aria-selected="true"
-              >
+              <a class="nav-link active All py-3" data-bs-toggle="tab" id="All" href="#home1" role="tab"
+                aria-selected="true">
                 <i class="ri-store-2-fill me-1 align-bottom"></i> Tous
               </a>
             </li>
@@ -131,13 +97,8 @@
                 <tr class="text-uppercase">
                   <th scope="col" style="width: 25px">
                     <div class="form-check">
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        [(ngModel)]="checkAllRow"
-                        id="checkAll"
-                        (ngModelChange)="handleSelectAll($event)"
-                      />
+                      <input class="form-check-input" type="checkbox" [(ngModel)]="checkAllRow" id="checkAll"
+                        (ngModelChange)="handleSelectAll($event)" />
                     </div>
                   </th>
                   <th class="sort" data-sort="id">Budget</th>
@@ -170,10 +131,45 @@
                 <!-- En-tête Budget -->
                 <tr class="table-primary fw-bold">
                   <td colspan="8">
-                    Budget : {{ group.budget.codebudget }} –
-                    {{ group.budget.libelle }}
+                    <div class="d-flex justify-content-between align-items-center">
+                      <!-- Libellé budget -->
+                      <div>
+                        Budget : {{ group.budget.codebudget }} –
+                        {{ group.budget.libelle }}
+                      </div>
+
+                      <!-- Bouton actions -->
+                      <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="dropdown"
+                          aria-expanded="false">
+                          <i class="ri-more-2-fill"></i>
+                        </button>
+
+                        <ul class="dropdown-menu dropdown-menu-end">
+                          <li>
+                            <a class="dropdown-item" href="javascript:void(0)">
+                              <i class="ri-time-line me-2"></i>
+                              Historique de validation
+                            </a>
+                          </li>
+
+                          <li>
+                            <hr class="dropdown-divider" />
+                          </li>
+
+                          <li>
+                            <a class="dropdown-item text-success" data-bs-toggle="modal" href="#validateBudgetModal"
+                              (click)="openValidationBudget(group.budget)">
+                              <i class="ri-check-line me-2"></i>
+                              Valider le budget
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
                   </td>
                 </tr>
+
 
                 <!-- Lignes du budget -->
                 @for (item of group.lignes; track
@@ -181,15 +177,9 @@
                 <tr>
                   <th scope="row">
                     <div class="form-check">
-                      <input
-                        class="form-check-input"
-                        [checked]="isChecked(item.idbudgetdepartementnature)"
-                        [(ngModel)]="
+                      <input class="form-check-input" [checked]="isChecked(item.idbudgetdepartementnature)" [(ngModel)]="
                           selectedItems[item.idbudgetdepartementnature]
-                        "
-                        (ngModelChange)="handleSelectOne(item, $event)"
-                        type="checkbox"
-                      />
+                        " (ngModelChange)="handleSelectOne(item, $event)" type="checkbox" />
                     </div>
                   </th>
 
@@ -207,20 +197,10 @@
                   </td>
 
                   <td class="text-end">
-                    <a
-                      href="#showModal"
-                      data-bs-toggle="modal"
-                      (click)="modalUpdate(item)"
-                      class="text-primary me-2"
-                    >
+                    <a href="#showModal" data-bs-toggle="modal" (click)="modalUpdate(item)" class="text-primary me-2">
                       <i class="ri-pencil-fill"></i>
                     </a>
-                    <a
-                      class="text-danger"
-                      (click)="modalDelete(item)"
-                      data-bs-toggle="modal"
-                      href="#deleteOrder"
-                    >
+                    <a class="text-danger" (click)="modalDelete(item)" data-bs-toggle="modal" href="#deleteOrder">
                       <i class="ri-delete-bin-5-fill"></i>
                     </a>
                   </td>
@@ -240,65 +220,40 @@
           </div>
           <div class="d-flex justify-content-end">
             <div class="pagination-wrap hstack gap-2">
-              <button
-                [disabled]="currentPage == 1"
-                (click)="changePage(currentPage - 1)"
-                class="btn btn-sm btn-soft-primary pagination-prev"
-              >
+              <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)"
+                class="btn btn-sm btn-soft-primary pagination-prev">
                 Précédent
               </button>
               <ul class="pagination listjs-pagination mb-0"></ul>
-              <button
-                [disabled]="currentPage == totalPages"
-                (click)="changePage(currentPage + 1)"
-                class="btn btn-sm btn-soft-primary pagination-next"
-              >
+              <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)"
+                class="btn btn-sm btn-soft-primary pagination-next">
                 Suivant
               </button>
             </div>
           </div>
         </div>
 
-        <div
-          class="modal fade"
-          id="showModal"
-          tabindex="-1"
-          aria-labelledby="exampleModalLabel"
-          aria-hidden="true"
-        >
+        <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
               <div class="modal-header bg-light p-3">
                 <h5 class="modal-title" id="exampleModalLabel">
-                  {{ actionModal === "create" ? "Création" : "Modification" }}
+                  <span *ngIf="actionModal === 'create'">Création</span>
+                  <span *ngIf="actionModal === 'update'">Modification</span>
                   ligne budgétaire
                 </h5>
-                <button
-                  type="button"
-                  class="btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                  id="close-modal"
-                  (click)="resetAfterSubmit()"
-                ></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"
+                  (click)="resetAfterSubmit()"></button>
               </div>
               <form [formGroup]="ligneBudgetForm">
                 <div class="modal-body">
                   <input type="hidden" id="id-field" />
                   <div class="mb-3" id="modal-id">
-                    <label for="idbudget-field" class="form-label form-label-sm"
-                      >Budget</label
-                    >
-                    <select
-                      class="form-select form-control form-control-sm {{
+                    <label for="idbudget-field" class="form-label form-label-sm">Budget</label>
+                    <select class="form-select form-control form-control-sm {{
                         isValidField('idbudget')
-                      }}"
-                      aria-label="Default select example"
-                      id="idbudget-field"
-                      formControlName="idbudget"
-                      (change)="onSelectionChange($event)"
-                      [class.bg-light]="actionModal === 'update'"
-                    >
+                      }}" aria-label="Default select example" id="idbudget-field" formControlName="idbudget"
+                      (change)="onSelectionChange($event)" [class.bg-light]="actionModal === 'update'">
                       >
                       <option [ngValue]="null">-- Sélectionner --</option>
                       @for(item of budgets; track $index) {
@@ -310,98 +265,106 @@
                     <div class="invalid-feedback">{{ msgErros }}</div>
                   </div>
 
-                  <div
-                    class="mb-3"
-                    *ngIf="selectedBudget?.entite === 'Département'"
-                  >
+                  <div class="mb-3" *ngIf="selectedBudget?.entite === 'Département'">
                     <label class="form-label">Département</label>
-                    <select
-                      class="form-select"
-                      (change)="onDepartementChange($event)"
-                      formControlName="iddepartement"
-                      [class.bg-light]="actionModal === 'update'"
-                    >
+                    <select class="form-select" (change)="onDepartementChange($event)" formControlName="iddepartement"
+                      [class.bg-light]="actionModal === 'update'">
                       <option value="">-- Sélectionner --</option>
-                      <option
-                        *ngFor="let dep of appartenanceDepartement"
-                        [value]="dep.iddepartement"
-                      >
+                      <option *ngFor="let dep of appartenanceDepartement" [value]="dep.iddepartement">
                         {{ dep.libelle }}
                       </option>
                     </select>
                   </div>
 
-                  <div *ngIf="natureGrid.length > 0">
-                    <table
-                      class="table table-bordered table-striped align-middle"
-                    >
-                      <thead class="table-light">
-                        <tr>
-                          <th>#</th>
-                          <th>Nature opération</th>
-                          <th>Montant prévision département</th>
-                          <th>Montant prévision site</th>
-                          <th>Montant prévision société</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr *ngFor="let ligne of natureGrid; let i = index">
-                          <td>{{ i + 1 }}</td>
-                          <td>{{ ligne.libelle }}</td>
-                          <td>
-                            <input
-                              type="number"
-                              class="form-control form-control-sm"
-                              [disabled]="selectedBudget?.validedept === 1"
-                              [(ngModel)]="ligne.montantDept"
-                              [ngModelOptions]="{ standalone: true }"
-                              (ngModelChange)="
-                                onMontantChange(ligne, 'montantDept', $event)
-                              "
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="number"
-                              class="form-control form-control-sm"
-                              [disabled]="
-                                selectedBudget?.validedept === 0 ||
-                                selectedBudget?.validesite === 1
-                              "
-                              [(ngModel)]="ligne.montantSite"
-                              [ngModelOptions]="{ standalone: true }"
-                              (ngModelChange)="
-                                onMontantChange(ligne, 'montantSite', $event)
-                              "
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="number"
-                              class="form-control form-control-sm"
-                              [disabled]="selectedBudget?.validesite !== 1"
-                              [ngModelOptions]="{ standalone: true }"
-                              [(ngModel)]="ligne.montantSociete"
-                              (ngModelChange)="
-                                onMontantChange(ligne, 'montantSociete', $event)
-                              "
-                            />
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                  <div *ngIf="selectedBudget?.entite === 'Département'" class="btn-group mb-3">
+                    <button type="button" class="btn btn-sm" [class.btn-primary]="modeSaisie === 'ALL'"
+                      [class.btn-outline-primary]="modeSaisie !== 'ALL'" (click)="setMode('ALL')">
+                      Saisie complète
+                    </button>
+
+                    <button type="button" class="btn btn-sm" [class.btn-primary]="modeSaisie === 'STEP'"
+                      [class.btn-outline-primary]="modeSaisie !== 'STEP'" [disabled]="actionModal==='update'"
+                      (click)="setMode('STEP')">
+                      Saisie progressive
+                    </button>
                   </div>
 
-                  <div
-                    *ngIf="
+
+
+                  <div *ngIf="modeSaisie === 'STEP' || modeSaisie === 'ALL'">
+                    <div class="table-container">
+                      <table class="table table-bordered table-striped align-middle table-custom">
+                        <thead class="table-light">
+                          <tr>
+                            <th>#</th>
+                            <th class="text-nowrap">Nature opération</th>
+                            <th class="text-nowrap">Montant prévision département</th>
+                            <th class="text-nowrap">Montant prévision site</th>
+                            <th class="text-nowrap">Montant prévision société</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let ligne of natureGrid; let i = index">
+                            <td>{{ i + 1 }}</td>
+                            <td class="text-nowrap">{{ ligne.libelle }}</td>
+                            <td>
+                              <input type="number" class="form-control form-control-sm input-custom"
+                                [disabled]="selectedBudget?.validedept === 1 || user.typeentitedepartement !== 1"
+                                [(ngModel)]="ligne.montantDept" [ngModelOptions]="{ standalone: true }"
+                                (ngModelChange)="onMontantChange(ligne, 'montantDept', $event)" />
+                            </td>
+                            <td>
+                              <input type="number" class="form-control form-control-sm input-custom"
+                                [disabled]="selectedBudget?.validedept === 0 || selectedBudget?.validesite === 1"
+                                [(ngModel)]="ligne.montantSite" [ngModelOptions]="{ standalone: true }"
+                                (ngModelChange)="onMontantChange(ligne, 'montantSite', $event)" />
+                            </td>
+                            <td>
+                              <input type="number" class="form-control form-control-sm input-custom"
+                                [disabled]="selectedBudget?.validesite !== 1" [(ngModel)]="ligne.montantSociete"
+                                [ngModelOptions]="{ standalone: true }"
+                                (ngModelChange)="onMontantChange(ligne, 'montantSociete', $event)" />
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <!-- <button *ngIf="modeSaisie === 'STEP' && allNatures.length > 0" type="button"
+                      class="btn w-md btn-success mb-2" (click)="addNextNature()"
+                      [disabled]="currentNatureIndex >= allNatures.length">
+                      <i class="ri-add-line me-1"></i>
+                      Ajouter
+                    </button> -->
+
+                    <div *ngIf="modeSaisie === 'STEP'" class="d-flex align-items-end gap-2 mb-3">
+                      <div class="flex-grow-1">
+                        <label class="form-label mb-1">Nature d'opération</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="selectedNatureId"
+                          [ngModelOptions]="{ standalone: true }">
+                          <option [ngValue]="null">— Sélectionner —</option>
+
+                          <option *ngFor="let n of availableNatures" [ngValue]="n.idnature">
+                            {{ n.libelle }}
+                          </option>
+                        </select>
+                      </div>
+
+                      <button class="btn btn-sm btn-outline-primary" [disabled]="!selectedNatureId"
+                        (click)="addSelectedNature()">
+                        + Ajouter
+                      </button>
+                    </div>
+
+
+                  </div>
+
+                  <div *ngIf="
                       natureGrid.length === 0 &&
                       selectedBudget?.entite === 'Département' &&
                       selectedDept
-                    "
-                  >
-                    <table
-                      class="table table-bordered table-striped align-middle"
-                    >
+                    ">
+                    <table class="table table-bordered table-striped align-middle">
                       <thead class="table-light">
                         <tr>
                           <th>#</th>
@@ -422,12 +385,10 @@
                     </table>
                   </div>
 
-                  <div
-                    *ngIf="
+                  <div *ngIf="
                       natureGrid.length === 0 &&
                       selectedBudget?.entite !== 'Département'
-                    "
-                  >
+                    ">
                     <!-- @if(selectedBudget && selectedBudget.entite ===
                     "Département") {
                     <div class="mb-3">
@@ -448,38 +409,21 @@
                     } -->
                     <div class="mb-3">
                       <div>
-                        <label
-                          for="montantprevisionsite-field"
-                          class="form-label mb-0"
-                          >Montant prévision site</label
-                        >
-                        <input
-                          type="number"
-                          id="montantprevisionsite-field"
-                          class="form-control form-control-sm {{
+                        <label for="montantprevisionsite-field" class="form-label mb-0">Montant prévision site</label>
+                        <input type="number" id="montantprevisionsite-field" class="form-control form-control-sm {{
                             isValidField('montantprevisionsite')
-                          }}"
-                          formControlName="montantprevisionsite"
-                        />
+                          }}" formControlName="montantprevisionsite" />
                         <div class="invalid-feedback">{{ msgErros }}</div>
                       </div>
                     </div>
 
                     <div class="mb-3">
                       <div>
-                        <label
-                          for="montantprevisionsociete-field"
-                          class="form-label mb-0"
-                          >Montant prévision société</label
-                        >
-                        <input
-                          type="number"
-                          id="montantprevisionsociete-field"
-                          class="form-control form-control-sm {{
+                        <label for="montantprevisionsociete-field" class="form-label mb-0">Montant prévision
+                          société</label>
+                        <input type="number" id="montantprevisionsociete-field" class="form-control form-control-sm {{
                             isValidField('montantprevisionsociete')
-                          }}"
-                          formControlName="montantprevisionsociete"
-                        />
+                          }}" formControlName="montantprevisionsociete" />
                         <div class="invalid-feedback">{{ msgErros }}</div>
                       </div>
                     </div>
@@ -511,9 +455,11 @@
                         id="soldecloture-field"
                         class="form-control form-control-sm"
                       />
+
                       <div class="invalid-feedback">{{ msgErros }}</div>
                     </div>
                   </div> -->
+
                   <div *ngIf="msgErros" class="alert alert-danger mt-2">
                     {{ msgErros }}
                   </div>
@@ -521,40 +467,135 @@
 
                 <div class="modal-footer">
                   <div class="hstack gap-2 justify-content-end">
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-light"
-                      data-bs-dismiss="modal"
-                      (click)="resetAfterSubmit()"
-                    >
+                    <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal"
+                      (click)="resetAfterSubmit()">
                       Fermer
                     </button>
-                    <button
-                      type="submit"
-                      class="btn btn-sm btn-success"
-                      id="add-btn"
-                      (click)="onSubmit()"
-                      [disabled]="loading"
-                    >
-                      {{
-                        actionModal === "create" ? "Enregistrer" : "Modifier"
-                      }}
+
+                    <!-- MODE CREATE / UPDATE -->
+                    <button *ngIf="actionModal !== 'validate'" type="submit" class="btn btn-sm btn-success"
+                      (click)="onSubmit()" [disabled]="loading">
+                      {{ actionModal === "create" ? "Enregistrer" : "Modifier" }}
                     </button>
-                    <!-- <button type="button" class="btn btn-success" id="edit-btn">Update</button> -->
                   </div>
                 </div>
+
               </form>
             </div>
           </div>
         </div>
 
+        <div class="modal fade" id="validateBudgetModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+
+              <!-- HEADER -->
+              <div class="modal-header bg-light p-3">
+                <h5 class="modal-title">
+                  Validation du budget - {{ selectedBudget?.codebudget }}: {{selectedBudget?.libelle}}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                  (click)="resetValidationModal()"></button>
+              </div>
+
+              <!-- BODY -->
+              <div class="modal-body">
+
+                <div class="my-3 fs-5">
+                  Valide du: <span class="fw-bold">{{ selectedBudget?.datedebut | date : 'dd-MM-yyyy' }}</span> {{ '
+                  ' }}
+                  au: <span class="fw-bold">{{ selectedBudget?.datefin | date : 'dd-MM-yyyy' }}</span>
+                </div>
+
+                <!-- TABLE -->
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped align-middle">
+                    <thead class="table-light">
+                      <tr>
+                        <th style="width: 50px">#</th>
+                        <th>Département</th>
+                        <th>Nature d'opération</th>
+
+                        <th>Prévision Département</th>
+                        <th>Prévision Site</th>
+                        <th>Prévision Société</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      <tr *ngFor="let ligne of validationLines; let i = index">
+                        <td class="text-center">{{ i + 1 }}</td>
+
+                        <td>{{ ligne.departement }}</td>
+                        <td>{{ ligne.nature }}</td>
+
+                        <!-- MONTANT DÉPARTEMENT -->
+                        <td>
+                          <input type="number" class="form-control form-control-sm text-end"
+                            [(ngModel)]="ligne.montantDept" [readonly]="isDeptReadonly()" />
+                        </td>
+
+                        <!-- MONTANT SITE -->
+                        <td>
+                          <input type="number" class="form-control form-control-sm text-end"
+                            [(ngModel)]="ligne.montantSite" [readonly]="isSiteReadonly()" (ngModelChange)="
+            !isSiteReadonly() && (ligne.montantSociete = ligne.montantSite)
+          " />
+                        </td>
+
+                        <!-- MONTANT SOCIÉTÉ -->
+                        <td>
+                          <input type="number" class="form-control form-control-sm text-end"
+                            [(ngModel)]="ligne.montantSociete" [readonly]="isSocieteReadonly()" />
+                        </td>
+                      </tr>
+
+                      <!-- AUCUNE LIGNE -->
+                      <tr *ngIf="validationLines.length === 0">
+                        <td colspan="6" class="text-center text-muted py-3">
+                          Aucune ligne budgétaire
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                </div>
+
+                <!-- COMMENTAIRE REJET -->
+                <div *ngIf="showRejectComment" class="mt-3">
+                  <label class="form-label">Motif du rejet</label>
+                  <textarea class="form-control" rows="3" [(ngModel)]="rejectComment"
+                    [ngModelOptions]="{ standalone: true }" placeholder="Motif obligatoire"></textarea>
+                </div>
+
+                <div *ngIf="msgErros" class="alert alert-danger mt-2">
+                  {{ msgErros }}
+                </div>
+
+              </div>
+
+              <!-- FOOTER -->
+              <div class="modal-footer">
+                <button class="btn btn-light btn-sm" data-bs-dismiss="modal" (click)="resetValidationModal()">
+                  Fermer
+                </button>
+
+                <button class="btn btn-outline-danger btn-sm" (click)="onRejectClick()">
+                  Rejeter
+                </button>
+
+                <button class="btn btn-success btn-sm" [disabled]="loading">
+                  Valider
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+
         <!-- Modal -->
-        <div
-          class="modal fade flip"
-          id="deleteOrder"
-          tabindex="-1"
-          aria-hidden="true"
-        >
+        <div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
               <div class="modal-body p-5 text-center">
@@ -562,18 +603,11 @@
                   <h4>{{ titleMsg }}</h4>
                   <p class="text-muted fs-15 mb-4">{{ msgSup }}</p>
                   <div class="hstack gap-2 justify-content-center remove">
-                    <button
-                      class="btn btn-sm btn-link link-success fw-medium text-decoration-none"
-                      id="deleteRecord-close"
-                      data-bs-dismiss="modal"
-                    >
+                    <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none"
+                      id="deleteRecord-close" data-bs-dismiss="modal">
                       <i class="ri-close-line me-1 align-middle"></i> annuler
                     </button>
-                    <button
-                      class="btn btn-sm btn-danger"
-                      (click)="deleteConfirmed()"
-                      id="delete-record"
-                    >
+                    <button class="btn btn-sm btn-danger" (click)="deleteConfirmed()" id="delete-record">
                       Oui, supprimer
                     </button>
                   </div>
