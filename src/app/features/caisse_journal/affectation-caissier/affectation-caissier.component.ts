@@ -32,11 +32,15 @@ export class AffectationCaissierComponent implements OnInit{
   totalPages: number = 0;
   limit: number = 10;
   caisses : caisseModel[] = [];
+  allCaisses: caisseModel[] = [];
   users : usermodel[] = [];
   //Utilisateur caisse
   usercaisses : AffectationCaisseModel[] = [];
   usercaisse : AffectationCaisseModel = new AffectationCaisseModel();
   usedCaisses : any[] = [];
+
+  //Changement titre modal
+  actionModal: string = 'create';
 
   //Faire le check selection **********
   objectsSelected : AffectationCaisseModel[] = [];
@@ -76,10 +80,16 @@ export class AffectationCaissierComponent implements OnInit{
     this.getAllcaisses();
     //Obtenir les utilisateurs
     this.getallusers();
+    //Formulaire
+    // this.filterCaissesForAllRows();
 
     this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("cette affectation");
     this.titleMsg = TITLE_DELETE;
-    this.caisseUsers;
+
+    // écoute du changement
+    this.usercaisseForm.get('idcaisse')?.valueChanges.subscribe(() => {
+      // this.filterCaissesForAllRows();
+    });
 
     this.searchForm.valueChanges
       .pipe(debounceTime(400),distinctUntilChanged()).subscribe(values => {
@@ -126,89 +136,26 @@ export class AffectationCaissierComponent implements OnInit{
       next : (res) => {
         if(res.success){
           // Toutes les caisses
-          this.caisses = res.data.data;
-
-          // this.usedCaisses = this.caisseUsers.controls
-          //   .map((fg: any) => fg.value.idcaisse)
-          //   .filter((x: any) => x);
-
-          // this.caisseUsers.controls.forEach((ligne: any) => {
-          //   const currentId = ligne.value.idcaisse;
-
-          //   ligne.patchValue({
-          //     filteredCaisses: allCaisses.filter((c: any) =>
-          //       c.idcaisse === currentId || !this.usedCaisses.includes(c.idcaisse)
-          //     )
-          //   });
-          // });
+          this.allCaisses = res.data.data;
+          this.caisses = this.allCaisses.filter(caisse => !this.usedCaisses.includes(caisse.idcaisse));
         }
       }
-    });
-  }
-
-  filterCaissesForAllRows() {
-    const allCaisses =  this.caisses;// les caisses chargées depuis le backend
-
-    // récupérer toutes les caisses déjà choisies
-    const used = this.caisseUsers.controls
-      .map((fg: any) => fg.value.idcaisse)
-      .filter((x: any) => x);
-
-    this.caisseUsers.controls.forEach((ligne: any) => {
-      const currentId = ligne.value.idcaisse;
-
-      ligne.patchValue({
-        filteredCaisses: allCaisses.filter((c: any) =>
-          c.idcaisse === currentId || !used.includes(c.idcaisse)
-        )
-      }, { emitEvent: false });
     });
   }
 
   //Initialiser le formulaire
   initForm(){
     this.usercaisseForm = this.fb.group({
-      caisseUsers : this.fb.array([]),
-      idsociete : [this.userConnect.idsociete ?? null]
-    })
+      idutilisateurcaisse: [""],
+      idcaisse : ["", [Validators.required]],
+      actif: [0],
+      idutilisateur: ["", [Validators.required]],
+      idsociete : [this.userConnect.idsociete ?? null],
+    });
   }
 
   get form() {
     return this.usercaisseForm.controls;
-  }
-
-  openDeleteModal(index: number) {
-    this.indexToDelete = index;
-  }
-
-  // confirmDelete() {
-  //   if (this.indexToDelete !== null) {
-  //     this.caisseUsers.removeAt(this.indexToDelete);
-  //     this.indexToDelete = null;
-  //   }
-  // }
-
-  confirmDelete() {
-    const ligne = this.caisseUsers.at(this.indexToDelete!);
-    const id = ligne.value.idutilisateurcaisse;
-
-    this.usercaisseservice.delete(id).subscribe({
-      next: (res) => {
-        if(res.success){
-          this.caisseUsers.removeAt(this.indexToDelete!);
-          this.indexToDelete = null;
-          this.getAllUserCaisse();
-          this.rafreshpage();
-        }
-      },
-      error: err => {
-        console.error(err)
-      }
-    });
-  }
-
-  get caisseUsers(): FormArray<FormGroup> {
-    return this.usercaisseForm.get('caisseUsers') as FormArray<FormGroup>;
   }
 
   //Obtenir les utilisateurs
@@ -238,46 +185,17 @@ export class AffectationCaissierComponent implements OnInit{
       next : (res) => {
         if(res.success){
           this.usercaisses = res.data.data;
-          this.usedCaisses = this.usercaisses.map(u => u.idcaisse);
-          if(this.usercaisses.length !== 0){
-            this.usercaisses.forEach(item => {
-              this.caisseUsers.push(
-                this.fb.group({  
-                  idutilisateurcaisse: [item.idutilisateurcaisse],
-                  idcaisse : [item.idcaisse, [Validators.required]],
-                  actif: [item.actif],
-                  idutilisateur: [item.idutilisateur, [Validators.required]],
-                  idsociete : [this.userConnect.idsociete ?? null]
-                })
-              );
-            })
+          this.usedCaisses = this.usercaisses.map(u => u.idcaisse).filter(id => id !== null);
           }
-        }
       }
     });
   }
 
-  //Ajouter la ligne dans le tableau
-  addLine() {
-    const ligne = this.fb.group({
-      idutilisateurcaisse: [""],
-      idcaisse : ["", [Validators.required]],
-      actif: [0],
-      idutilisateur: ["", [Validators.required]],
-      idsociete : [this.userConnect.idsociete ?? null],
-      filteredCaisses: [[]] //Ligne filtrée
-    });
-
-    // écoute du changement
-    ligne.get('idcaisse')?.valueChanges.subscribe(() => {
-      this.filterCaissesForAllRows();
-    });
-
-    this.caisseUsers.push(ligne);
-  }
-
-  removeLine(index: number) {
-    this.caisseUsers.removeAt(index);
+  closeModal(modal: string) {
+    const modalEl = document.getElementById(modal);
+    modalEl?.classList.remove('show');
+    modalEl?.setAttribute('aria-hidden', 'true');
+    (document.querySelector('.modal-backdrop') as HTMLElement)?.remove();
   }
 
   //Confirmer la suppression
@@ -285,11 +203,47 @@ export class AffectationCaissierComponent implements OnInit{
     this.deleteElement = item;
   }
 
+  //Creation du modal
+  modalCreate(){
+    this.actionModal = 'create';
+    //Initialiser le formulaire
+    this.initForm();
+    //Charger les utilisateurs caisses
+    this.getAllUserCaisse();
+    //charger les caisses
+    this.getAllcaisses();
+  }
+
+  //Modification du modal
+  modalUpdate(item: AffectationCaisseModel){
+    this.usercaisse = item;
+    this.actionModal = 'update';
+    this.usercaisseForm.reset();
+    //Renitialiser le chargement de la caisse
+    this.getAllcaisses();
+    //Ajouter que la caisse à modifier
+    this.caisses.push(this.usercaisse.caisse);
+    //Remplir le formulaire
+    this.dispatchAffectation(this.usercaisse);
+  }
+
+  dispatchAffectation(_object: AffectationCaisseModel) {
+    const status = _object.actif === 1;
+    this.usercaisseForm.patchValue({
+      idutilisateurcaisse: _object.idutilisateurcaisse,
+      idcaisse : _object.idcaisse,
+      actif: status,
+      idutilisateur: _object.idutilisateur,
+      idsociete : _object.idsociete
+    });
+  }
+
   deleteConfirmed(){
     if(!this.deleteElement) return ;
     this.usercaisseservice.delete(this.deleteElement.idutilisateurcaisse).subscribe({
       next: (res) => {
         if (res.success) {
+          this.closeModal('deleteOrder');
           this.deleteElement = null;
           this.getAllUserCaisse();
         } else {
@@ -322,15 +276,12 @@ export class AffectationCaissierComponent implements OnInit{
     }
 
     /** 2. prepare data */
-    const formValue = this.usercaisseForm.getRawValue();
-
-    const _affectation: any = {...formValue};
+    const formValue = this.usercaisseForm.value;
+    const _affectation: any = {...formValue, createdby: this.userConnect.nom + ' ' + this.userConnect.prenom};
 
     /** 3. choices action */
-    // if(this.actionModal == "create")this.create(_operation);
-    // else this.update(_operation);
-    // if (!_caisse.idcaisse) this.create(_caisse);
-    // else this.update(_caisse);
+    if(this.actionModal == "create")this.create(_affectation);
+    else this.update(_affectation);
   }
 
   rafreshpage(){
@@ -340,9 +291,7 @@ export class AffectationCaissierComponent implements OnInit{
     });
   }
 
-  saveLigne(index: number) {
-    const ligne = this.caisseUsers.at(index).value;
-    
+  saveLigne() {
     /** Check formulaire */
     this.msgErros = '';
     const controls = this.usercaisseForm.controls;
@@ -352,6 +301,7 @@ export class AffectationCaissierComponent implements OnInit{
       return;
     }
 
+    const ligne = this.usercaisseForm.value;
     const _affectation: any = {...ligne, actif: ligne.actif ? 1 : 0, createdby : this.userConnect.codeutilisateur ?? null, updatedby : this.userConnect.codeutilisateur ?? null};
     // Appel API
     if(!_affectation.idutilisateurcaisse){
@@ -367,6 +317,7 @@ export class AffectationCaissierComponent implements OnInit{
     this.usercaisseservice.create(dataToSend).subscribe({
       next: (res) => {
         if (res.success) {
+          this.closeModal('showModal');
           this.getAllUserCaisse();
           this.rafreshpage();
         } else {
@@ -386,6 +337,7 @@ export class AffectationCaissierComponent implements OnInit{
     this.usercaisseservice.update(_affectation).subscribe({
       next: (res) => {
         if (res.success) {
+          this.closeModal('showModal');
           this.getAllUserCaisse();
           this.rafreshpage();
         } else {

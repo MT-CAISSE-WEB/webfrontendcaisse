@@ -37,8 +37,8 @@
 
                     <form [formGroup]="departementForm">
                         <div class="border">
-                            <select title="Selection" id="departementselected" class="form-control text-center" formControlName="iddepartement">
-                                <option value="">-- Sélectionner --</option>
+                            <select title="Selection" id="departementselected" class="form-select form-select-sm" formControlName="iddepartement">
+                                <option value="" class="text-center">-- Sélectionner --</option>
                                 <option *ngFor="let d of departements" [value]="d.iddepartement">
                                     {{ d.codedept }} - {{ d.libelle }}
                                 </option>

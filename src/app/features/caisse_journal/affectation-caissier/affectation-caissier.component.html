@@ -22,9 +22,10 @@
                     <h5 class="card-title mb-0 flex-grow-1">{{title}}</h5>
                     <div class="flex-shrink-0">
                         <div class="d-flex gap-2 flex-wrap">
-                            <button class="btn btn-sm btn-primary"><i class="ri-delete-bin-2-line"></i></button>
-                            <button type="button" class="btn btn-sm btn-success waves-effect waves-light"><i class="ri-check-double-line"></i> enregistrer </button>
-                            <button type="button" class="btn btn-sm btn-danger" (click)="addLine()"><i class="ri-add-line align-bottom me-1"></i>nouvelle</button>
+                            <button class="btn btn-sm btn-danger"><i class="ri-delete-bin-2-line"></i></button>
+                            <button type="button" class="btn btn-sm btn-primary waves-effect waves-light" (click)="modalCreate()" data-bs-toggle="modal" data-bs-target="#showModal">
+                                <i class="ri-add-line align-bottom me-1"></i> nouvelle 
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -45,94 +46,63 @@
             <div class="card-body">
                 <div>
                     <div class="table-responsive table-card">
-                        <form [formGroup]="usercaisseForm">
-                            <table class="table align-middle table-nowrap" id="invoiceTable">
-                                <colgroup>
-                                    <col style="width: 05%">
-                                    <col style="width: 35%">
-                                    <col style="width: 35%">
-                                    <col style="width: 10%">
-                                    <col style="width: 15%">
-                                </colgroup>
-                                <thead class="text-muted">
-                                    <tr>
-                                        <th scope="col" style="width: 50px;">
-                                            <div class="form-check form-check-sm">
-                                                <input class="form-check-input" type="checkbox" id="checkAll" value="option">
+                        <table class="table align-middle table-nowrap table-container table-custom table-compact" id="invoiceTable">
+                            <colgroup>
+                                <col style="width: 05%">
+                                <col style="width: 35%">
+                                <col style="width: 35%">
+                                <col style="width: 10%">
+                                <col style="width: 15%">
+                            </colgroup>
+                            <thead class="text-muted">
+                                <tr>
+                                    <th scope="col" style="width: 50px;">
+                                        <div class="form-check form-check-sm">
+                                            <input class="form-check-input" type="checkbox" id="checkAll" value="option">
+                                        </div>
+                                    </th>
+                                    <th class="sort text-uppercase" data-sort="invoice_id">caisse</th>
+                                    <th class="sort text-uppercase" data-sort="type">caissier</th>
+                                    <th class="sort text-uppercase" data-sort="status">Statut</th>
+                                    <th class="sort text-uppercase" data-sort="action">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="list form-check-all" id="invoice-list-data">
+                                @for (ligne of usercaisses; track $index){
+                                    <tr class="bg-light text-center">
+                                        <th scope="row">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox">
                                             </div>
                                         </th>
-                                        <th class="sort text-uppercase" data-sort="invoice_id">caisse</th>
-                                        <th class="sort text-uppercase" data-sort="type">caissier</th>
-                                        <th class="sort text-uppercase" data-sort="status">Statut</th>
-                                        <th class="sort text-uppercase" data-sort="action">Action</th>
+                                        <td class="caisse"> {{ligne.caisse.codecaisse}} - {{ligne.caisse.libelle}} </td>
+                                        <td class="user"> {{ligne.utilisateur.prenom}} - {{ligne.utilisateur.nom}}  </td>
+                                        <td class="actif" *ngIf="ligne.actif! == 1"><span class="badge bg-info-subtle text-info"> actif </span>  </td>
+                                        <td class="actif" *ngIf="ligne.actif! == 0"><span class="badge bg-secondary-subtle text-secondary"> inactif </span>  </td>
+                                        <td>
+                                            <ul class="list-inline hstack gap-2 mb-0">
+                                                <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="View">
+                                                    <a href="#" class="text-primary d-inline-block">
+                                                        <i class="ri-eye-fill fs-16"></i>
+                                                    </a>
+                                                </li>
+                                                <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
+                                                    <a class="text-primary d-inline-block edit-item-btn" (click)="modalUpdate(ligne)" data-bs-toggle="modal" href="#showModal">
+                                                        <i class="ri-pencil-fill fs-16"></i>
+                                                    </a>
+                                                </li>
+                                                <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
+                                                    <a class="text-danger d-inline-block remove-item-btn" (click)="modalDelete(ligne)" data-bs-toggle="modal" href="#deleteOrder">
+                                                        <i class="ri-delete-bin-5-fill fs-16"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody class="list form-check-all" id="invoice-list-data">
-                                    @for (ligne of caisseUsers.controls; track $index){
-                                        <tr [formGroup]="ligne">
-                                            <th scope="row">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox">
-                                                </div>
-                                            </th>
-                                            <td class="numero">
-                                                <div class="mb-2">
-                                                    <div class="input-light">
-                                                        <select class="form-control form-control-sm bg-light border-0" formControlName="idcaisse" required>
-                                                            <option value="" selected>Choisir la caisse</option>
-                                                            @for(item of caisses; track $index){
-                                                                <option value="{{item.idcaisse}}"> {{item.codecaisse}} - {{ item.libelle}} </option>
-                                                            }
-                                                        </select>
-                                                    </div>
-                                                    <div class="invalid-feedback">{{ msgErros }}</div>
-                                                </div>
-                                            </td>
-                                            <td class="montant">
-                                                <div class="mb-2">
-                                                    <div class="input-light">
-                                                        <select class="form-control form-control-sm bg-light border-0" formControlName="idutilisateur" required>
-                                                            <option value="" selected>Choisir le caissier</option>
-                                                            @for(item of users; track $index){
-                                                                <option value="{{item.idutilisateur}}"> {{item.prenom}} - {{ item.nom}} </option>
-                                                            }
-                                                        </select>
-                                                    </div>
-                                                    <div class="invalid-feedback">{{ msgErros }}</div>
-                                                </div>
-                                            </td>
-                                            <td class="devise">
-                                                <div class="mb-3">
-                                                    <div class="form-check form-switch">
-                                                        <input class="form-check-input" type="checkbox" role="switch" value="1" formControlName="actif" id="flexSwitchCheckChecked" checked>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <ul class="list-inline hstack gap-2 mb-0">
-                                                    <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="View">
-                                                        <a href="#" class="text-primary d-inline-block">
-                                                            <i class="ri-eye-fill fs-16"></i>
-                                                        </a>
-                                                    </li>
-                                                    <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                        <a (click)="saveLigne($index)"  class="text-primary d-inline-block edit-item-btn">
-                                                            <i class="ri-pencil-fill fs-16"></i>
-                                                        </a>
-                                                    </li>
-                                                    <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
-                                                        <a class="text-danger d-inline-block remove-item-btn" (click)="openDeleteModal($index)" data-bs-toggle="modal" href="#deleteOrder">
-                                                            <i class="ri-delete-bin-5-fill fs-16"></i>
-                                                        </a>
-                                                    </li>
-                                                </ul>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </form>
-                        <div class="" *ngIf="usercaisses.length === 0 && caisseUsers.length == 0">
+                                }
+                            </tbody>
+                        </table>
+                        <div class="" *ngIf="usercaisses.length === 0">
                             <div class="text-center">
                                 <h5 class="mt-2">Désolé! Aucune opération trouvé</h5>
                                 <p class="text-muted mb-0">Désole il n' y aucune donnée dans cette base</p>
@@ -143,7 +113,7 @@
                                 <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
                                     Précédent
                                 </button>
-                                <ul class="pagination listjs-pagination mb-0"></ul>
+                                <ul class="pagination listjs-pagination mb-0">Page {{currentPage}} / {{totalPages}}</ul>
                                 <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)" class="btn btn-sm btn-soft-primary pagination-next">
                                     Suivant
                                 </button>
@@ -166,7 +136,7 @@
                     <p class="text-muted fs-15 mb-4">{{msgSup}}</p>
                     <div class="hstack gap-2 justify-content-center remove">
                         <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> annuler</button>
-                        <button class="btn btn-sm btn-danger" (click)="confirmDelete()" id="delete-record">Oui, supprimer</button>
+                        <button class="btn btn-sm btn-danger" (click)="deleteConfirmed()" id="delete-record">Oui, supprimer</button>
                     </div>
                 </div>
             </div>
@@ -174,3 +144,60 @@
     </div>
 </div>
 <!--end modal -->
+
+
+<div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light p-3">
+                <h5 class="modal-title" id="exampleModalLabel">Affectation caisse</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+            </div>
+            <form [formGroup]="usercaisseForm">
+                <div class="modal-body">
+                    <input type="hidden" id="id-field"/>
+
+                    <div class="mb-3">
+                        <div class="input-light">
+                            <select class="form-select form-select-sm bg-light border-0" formControlName="idcaisse">
+                                <option value="" selected>Choisir la caisse</option>
+                                @for(item of caisses; track $index;){
+                                    <option value="{{item.idcaisse}}"> {{item.codecaisse}} - {{ item.libelle}} </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="invalid-feedback">{{ msgErros }}</div>
+                    </div>
+
+                    <div class="mb-2">
+                        <div class="input-light">
+                            <select class="form-control form-control-sm bg-light border-0" formControlName="idutilisateur">
+                                <option value="" selected>Choisir le caissier</option>
+                                @for(item of users; track $index){
+                                    <option value="{{item.idutilisateur}}"> {{item.prenom}} - {{ item.nom}} </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="invalid-feedback">{{ msgErros }}</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" value="1" formControlName="actif" id="flexSwitchCheckChecked" checked>
+                            <label class="form-check-label" for="flexSwitchCheckChecked">Actif</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="hstack gap-2 justify-content-end">
+                        <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
+                        <button type="submit" class="btn btn-sm btn-success" id="add-btn" (click)="onSubmit()" [disabled]="this.usercaisseForm.invalid">
+                            <i class="ri-check-double-line"></i>  {{ actionModal === "create" ? 'enregistrer' : 'modifier'}}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -41,8 +41,8 @@
 
                     <form [formGroup]="natureoperationForm">
                         <div class="border">
-                            <select title="Selection" id="natureselected" class="form-control text-center" formControlName="idnature">
-                                <option value="">-- Sélectionner --</option>
+                            <select title="Selection" id="natureselected" class="form-select form-select-sm" formControlName="idnature">
+                                <option value="" class="text-center">-- Sélectionner --</option>
                                 <option *ngFor="let n of natureoperations" [value]="n.idnature">
                                     {{ n.codenature }} - {{ n.libelle }}
                                 </option>

@@ -116,5 +116,14 @@ export class CaisseService {
     );
   }
 
+  /**
+   * get solde
+   */
+  getSolde(): Observable<any> {
+    return this.http.get<any>(
+      URL_LOCAL.baseUrl + this.url + "/solde/user"
+    );
+  }
+
 
 }

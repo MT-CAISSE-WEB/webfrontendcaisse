@@ -12,6 +12,7 @@ import { AffectationCaisseService } from '../../../features/caisse_journal/servi
 import { ToastrService } from 'ngx-toastr';
 import { APP_ROOT_PARAMETREPAGE_PARAMETRE } from '../../../_core/routes/frontend.root';
 import { RouterLink, RouterModule } from '@angular/router';
+import { OperationService } from '../../../features/operations/service/operation.service';
 
 @Component({
   selector: 'app-layout-header',
@@ -28,6 +29,7 @@ export class LayoutHeaderComponent implements OnInit {
   msgErros: string = "";
   error: string = "";
   loading: boolean = false;
+  caisseSolde : any;
 
   //Liste des routes
   root_parametre = APP_ROOT_PARAMETREPAGE_PARAMETRE;
@@ -40,7 +42,7 @@ export class LayoutHeaderComponent implements OnInit {
   caissesStatuses: { [id: string]: string } = {};
 
   constructor(private caisseuserservice: AffectationCaisseService, private caisseservice: CaisseService,
-    private caisseStatusService: CaissePeriodeService, private toastr : ToastrService,){}
+    private caisseStatusService: CaissePeriodeService, private caisseService: CaisseService, private toastr : ToastrService,){}
 
   ngOnInit(): void {
     //récuperer les caisses de l'utilisateur
@@ -58,6 +60,13 @@ export class LayoutHeaderComponent implements OnInit {
   get user(){
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
+
+  formatCFA(montant: number | null | undefined): string {
+    return new Intl.NumberFormat('fr-FR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(montant ?? 0);
+  }
   
   logout (){
     localStorage.clear();
@@ -72,6 +81,8 @@ export class LayoutHeaderComponent implements OnInit {
           if (this.caissesUser.length > 0) {
             //this.getCaissesPerdiodes();
             this.getcaissesPeriodes();
+            //Charger les soldes
+            this.getSoldeCaisse();
           }else {
             this.loadingCaisses = false;
             //this.toastr.warning("Aucune caisse affectée à l\'utilisateur");
@@ -83,6 +94,52 @@ export class LayoutHeaderComponent implements OnInit {
         this.toastr.error(err.error.message);
       }
     });
+  }
+
+  //Récuperer les soldes
+  getSoldeCaisse(){
+    this.caisseService.getSolde().subscribe({
+      next : (res) => {
+        if(res.success){
+          this.caisseSolde = res.data ;
+          this.caisseSolde = this.caisseSolde.filter((cs: any) =>
+              this.caissesUser.some(cu => cu.idcaisse === cs.idcaisse)
+            );
+        }
+      }
+    });
+  }
+
+  getSolde(item: any): number {
+    return (Number(item?.soldeinitialisation) || 0) + (Number(item?.solde) || 0);
+  }
+
+  calculSolde(item: any): string {
+    return this.formatCFA(this.getSolde(item));
+  }
+
+  // calculSolde(item: any) {
+  //   const s = (item.soldeinitialisation ?? 0) + (item.solde ?? 0);
+  //   return this.formatCFA(s);
+  // }
+
+  getSoldeClass(item: any): string {
+    const solde = this.getSolde(item);
+    const seuil = Number(item?.seuilmnimal) || 0;
+
+    if (solde == 0) {
+      return 'text-danger';
+    }
+
+    if (solde == seuil) {
+      return 'text-warning';
+    }
+
+    if (solde > seuil) {
+      return 'text-success';
+    }
+
+    return 'text-muted';
   }
 
   //Récuperer les caisses périodes
