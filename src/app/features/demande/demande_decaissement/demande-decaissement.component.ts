@@ -55,6 +55,9 @@ export class DemandeDecaissementComponent implements OnInit {
   totalPages: number = 0;
   limit: number = 10;
 
+  // Nombre d'éléments par page
+  demandeMontant: number = 0;
+
   //Validation possible ou non
   canValidateUser: boolean = false;
 
@@ -189,15 +192,15 @@ export class DemandeDecaissementComponent implements OnInit {
       iddemande: [''],
       decision: ['', Validators.required],
       motif: [''],
-      mcomment: [''],
+      comment: [''],
     });
 
     this.validForm.get('decision')?.valueChanges.subscribe(value => {
-      const motifCtrl = this.validForm.get('motifRefus');
+      const motifCtrl = this.validForm.get('motif');
 
-      if (value === 'refuser') {
+      if (value !== 'accepter') {
         motifCtrl?.enable();
-        motifCtrl?.setValidators([Validators.required, Validators.minLength(5)]);
+        motifCtrl?.setValidators([Validators.required, Validators.minLength(10)]);
       } else {
         motifCtrl?.reset();
         motifCtrl?.clearValidators();
@@ -242,13 +245,13 @@ export class DemandeDecaissementComponent implements OnInit {
       userId: this.user.idutilisateur,
       iddemande: this.selectedDmd?.iddemande,
       decision: this.validForm.value.decision,
-      motif: this.validForm.value.decision === 'refuser'
-        ? this.validForm.value.motif
+      comment: this.validForm.value.decision !== 'accepter'
+        ? this.validForm.value.comment
         : null,
-      comment : this.validForm.value.comment 
+      motif : this.validForm.value.motif 
     };
 
-      // Exemple appel backend
+      // Appel backend
     if(payload.iddemande){
         this.service.validationDemande(payload.iddemande, payload).subscribe({
         next: (res) => {
@@ -281,7 +284,12 @@ export class DemandeDecaissementComponent implements OnInit {
     this.service.getAllEntetes(params).subscribe({
       next : (res) => {
         if(res.success){
-          this.entetesDmd = res.data.data;
+          // this.entetesDmd = res.data.data;
+           this.entetesDmd = res.data.data.map((item: any) => ({
+            ...item,
+            // canValidateUser: false,
+            // _validationLoaded: false
+          }));
           this.totalPages = res.data.totalPages;
         }else{
           this.toastr.error("Erreur de récuperation des données");
@@ -307,6 +315,7 @@ export class DemandeDecaissementComponent implements OnInit {
       next : (res) => {
         if(res.success){
           this.detailBudgets = res.data;
+          this.demandeMontant = this.getTotalBydemande(this.detailBudgets?.iddemande);
         }else{
           this.toastr.error("Cette demande n'a pas de detail budget");
         }
@@ -320,7 +329,7 @@ export class DemandeDecaissementComponent implements OnInit {
   prepareValidation(item: any) {
     // éviter les appels multiples
     if (item._validationLoaded) return;
-
+  
     this.validateurs = []; // reset
     this.service.get_validateurs(item.iddemande).subscribe({
       next: (res) => {
@@ -331,13 +340,18 @@ export class DemandeDecaissementComponent implements OnInit {
         } else {
           this.canValidateUser = false;
         }
-        item._validationLoaded = true;
       },
       error: () => {
         this.canValidateUser = false;
         item._validationLoaded = true;
+        item.canValidateUser = false;
       }
     });
+  }
+
+  getMontantAffiche(montant: any): number {
+    const total = montant;
+    return total === 0 || total == null ? this.demandeMontant : total;
   }
 
   // Recharger toutes les demandes a valider par l'utilisateur
@@ -368,10 +382,12 @@ export class DemandeDecaissementComponent implements OnInit {
       next : (res) => {
         if(res.success){
           this.validateurs = res.data;
+          console.log(this.validateurs)
           // Vérifier si l'utilisateur connecté est dans la liste
           this.canValidateUser = this.validateurs.some(
             (v: any) => v.idutilisateur === this.user.idutilisateur
           );
+          console.log(this.canValidateUser);
         }else{
           this.canValidateUser = false;
           this.toastr.error("Cette demande n'a pas de validateur");
@@ -404,6 +420,18 @@ export class DemandeDecaissementComponent implements OnInit {
 
   getTotalDemande(demande: EnteteDemande): number {
     return demande.lignes.reduce((sum, l) => sum + l.montantdemande, 0);
+  }
+
+  getTotalBydemande(iddemande: string){
+    const d = this.entetesDmd.find(
+      (c: EnteteDemande) => c.iddemande === iddemande
+    );
+
+    if (!d) {
+      return 0;
+    }
+
+    return this.getTotalDemande(d);
   }
 
   getTotalAny(element: any): number {

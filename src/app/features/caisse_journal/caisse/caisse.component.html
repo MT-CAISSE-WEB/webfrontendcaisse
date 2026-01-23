@@ -197,7 +197,7 @@
                                             <div class="mb-3" id="modal-id">
                                                 <label for="orderId" class="form-label form-label-sm">devise</label>
                                                 <div class="input-light input-light-sm">
-                                                    <select class="form-control form-control-sm bg-light border-0" formControlName="devise"  id="choices-payment-status" required id="devise">
+                                                    <select class="form-control form-control-sm bg-light border-0" formControlName="iddevise"  id="choices-payment-status" required id="devise">
                                                         <option value="">devise</option>
                                                         @for (item of devises; track $index){
                                                             <option value="{{item.iddevise}}">{{item.codedevise}}</option>
@@ -211,7 +211,7 @@
                                             <div class="mb-3" id="modal-id">
                                                 <label for="orderId" class="form-label form-label-sm">compte</label>
                                                 <div class="input-light input-light-sm">
-                                                    <select class="form-control form-control-sm bg-light border-0" formControlName="compte"  id="choices-payment-status" required id="compte">
+                                                    <select class="form-control form-control-sm bg-light border-0" formControlName="idcompte"  id="choices-payment-status" required id="compte">
                                                         <option value="">-- Sélectionner --</option>
                                                         @for ( item of comptes; track $index ) {
                                                             <option [value]="item.idcompte">{{ item.numcompte }} - {{ item.libelle }}</option>
@@ -225,7 +225,7 @@
                                             <div class="mb-3" id="modal-id">
                                                 <label for="orderId" class="form-label form-label-sm">journal</label>
                                                 <div class="input-light input-light-sm">
-                                                    <select class="form-control form-control-sm bg-light border-0" formControlName="journal" id="choices-payment-status" required id="journal">
+                                                    <select class="form-control form-control-sm bg-light border-0" formControlName="idjournal" id="choices-payment-status" required id="journal">
                                                         <option value="">journal</option>
                                                         @for (journal of journaux; track $index) {
                                                             <option value="{{journal.idjournal}}">{{journal.codejournal}} {{journal.designation}}</option>
@@ -265,19 +265,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
-
-                                    <!-- <div class="mb-3"> -->
-                                        <!-- <label for="customername-field" class="form-label form-label-sm">societe</label> -->
-                                        <input type="hidden" id="customername-field" value="757E104D-A394-4502-935A-5ED9DE6BFA35" class="form-control form-control-sm {{ isValidField('societe')}}" formControlName="societe" placeholder="societe"/>
-                                        <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
-                                    <!-- </div> -->
-
-                                    <!-- <div class="mb-3"> -->
-                                        <!-- <label for="customername-field" class="form-label form-label-sm">site</label> -->
-                                        <input type="hidden" id="customername-field" value="1B386C16-B927-4124-BE18-7721862C1CE1" class="form-control form-control-sm {{ isValidField('site')}}" formControlName="site" placeholder="site"/>
-                                        <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
-                                    <!-- </div> -->
+                                
 
                                     <div class="mb-3">
                                         <div class="form-check form-switch">

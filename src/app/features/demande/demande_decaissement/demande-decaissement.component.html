@@ -58,7 +58,7 @@
                   <div class="spinner-border text-info"></div>
               </div>
             }
-            <table class="table table-hover table-nowrap align-middle table-scroll" id="orderTable">
+            <table class="table table-hover table-nowrap align-middle table-scroll table-container table-custom table-compact" id="orderTable">
               <thead class="text-muted table-light">
                 <tr class="text-uppercase">
                   <th scope="col" style="width: 25px">
@@ -76,7 +76,7 @@
                 </tr>
               </thead>
               <tbody class="list form-check-all">
-                @for (item of entetesDmd; track $index){
+                @for (item of entetesDmd; track item.iddemande){
                   <tr>
                     <th scope="row">
                         <div class="form-check">
@@ -90,9 +90,11 @@
                     <td class="date"> {{ formatDateFR(item.datedemande!) }}</td>
                     <td class="devise" *ngIf="item.statut! == 0"> <span class="badge bg-primary-subtle text-primary"> non valide </span> </td>
                     <td class="devise text-primary" *ngIf="item.statut! == 1"> <span class="badge bg-info-subtle text-info"> en cours </span> </td>
-                    <td class="devise text-success" *ngIf="item.statut! == 2 && item.decaisse! == 0"> <span class="badge bg-success-subtle text-success"> validée </span> </td>
-                    <td class="devise text-secondary" *ngIf="item.statut! == 2 && item.decaisse! == 1"> <span class="badge bg-secondary-subtle text-secondary"> decaissée </span> </td>
-                    <td class="devise text-danger" *ngIf="item.statut! == 3"> <span class="badge bg-dark-subtle text-body"> rejetée </span> </td>
+                    <td class="devise text-warning" *ngIf="item.statut! == 2 && item.decaisse! == 0"> <span class="badge bg-warning-subtle text-warning"> a revoir </span> </td>
+                    <td class="devise text-warning" *ngIf="item.statut! == 2 && item.decaisse! == 1"> <span class="badge bg-warning-subtle text-warning"> a revoir </span> </td>
+                    <td class="devise text-success" *ngIf="item.statut! == 3 && item.decaisse! == 0"> <span class="badge bg-success-subtle text-success"> validée </span> </td>
+                    <td class="devise text-secondary" *ngIf="item.statut! == 3 && item.decaisse! == 1"> <span class="badge bg-secondary-subtle text-secondary"> decaissée </span> </td>
+                    <td class="devise text-danger" *ngIf="item.statut! == 4"> <span class="badge bg-dark-subtle text-body"> rejetée </span> </td>
                     <td>
                       <ul class="list-inline hstack gap-2 mb-0">
                           <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
@@ -113,7 +115,7 @@
                                       </button>
 
                                       <div class="dropdown-menu dropdown-menu-end">
-                                          <a *ngIf="canValidateUser && item.circuitExist! == 1 && [0,1].includes(item.statut!)" class="dropdown-item" data-bs-toggle="modal" (click)="openValidationModal(item)" [attr.data-bs-target]="'#validationModal' + $index"><i class="ri-eye-fill align-bottom me-2 text-muted"></i>Validation</a>
+                                          <a *ngIf="item.circuitExist! == 1" class="dropdown-item" data-bs-toggle="modal" (click)="openValidationModal(item)" [attr.data-bs-target]="'#validationModal' + $index"><i class="ri-eye-fill align-bottom me-2 text-muted"></i>Validation</a>
                                           <a *ngIf="item.circuitExist! == 1" class="dropdown-item" data-bs-toggle="modal" (click)="openValidateur(item)" [attr.data-bs-target]="'#historiqueModal'"><i class="ri-pencil-fill align-bottom me-2 text-muted"></i>Historique de validation</a>
                                           <a class="dropdown-item" data-bs-toggle="modal" (click)="openDetail(item)" [attr.data-bs-target]="'#detailBudget'"><i class="ri-currency-fill align-bottom me-2 text-muted"></i>Detail budget</a>
                                           <div class="dropdown-divider"></div>
@@ -162,7 +164,7 @@
                                 <div *ngIf="validForm.get('decision')?.value === 'refuser' || validForm.get('decision')?.value === 'complement'" class="mt-3 w-75 mx-auto">
 
                                   <select class="form-select form-select-sm bg-light border-0" formControlName="motif">
-                                      <option value="" selected>Choisir le motif</option>
+                                      <option value="null">Choisir le motif</option>
                                       @for(item of motifs; track $index){
                                           <option value="{{item.idmotif}}"> {{item.libellemotif}} </option>
                                       }
@@ -201,12 +203,11 @@
                 }
               </tbody>
             </table>
-            <div class="noresult" style="display: none">
+            <div class="noresult" *ngIf="entetesDmd.length == 0">
               <div class="text-center">
                 <h5 class="mt-2">Désole! Aucun resultat trouvé</h5>
                 <p class="text-muted">
-                  We've searched more than 150+ Orders We did not find any
-                  orders for you search.
+                  Désole il n' y aucune demande dans cette base
                 </p>
               </div>
             </div>
@@ -254,13 +255,14 @@
                     </div>
                     <div class="modal-body">
                         <div class="table-responsive">
-                          <table class="table table-sm align-middle table-nowrap">
+                          <table class="table table-sm align-middle table-nowrap table-container table-custom">
                             <thead class="table-light">
                               <tr>
                                 <th>#</th>
                                 <th>Circuit</th>
                                 <th>Validateur</th>
                                 <th>Statut</th>
+                                <th>Motif</th>
                                 <th>Commentaire</th>
                                 <th>Date</th>
                               </tr>
@@ -278,10 +280,15 @@
                                   <span class="badge bg-warning" *ngIf="v.decision === 'en attente'">
                                     En attente
                                   </span>
+                                  <span class="badge bg-secondary" *ngIf="v.decision === 'revoir'">
+                                    Complément d'info
+                                  </span>
                                   <span class="badge bg-danger" *ngIf="v.decision === 'rejete'">
                                     Rejeté
                                   </span>
                                 </td>
+                                <td *ngIf="v.libellemotif">{{ v.libellemotif }} </td>
+                                <td *ngIf="!v.libellemotif"> aucun </td>
                                 <td *ngIf="v.commentaire"> {{ v.commentaire }} </td>
                                 <td *ngIf="!v.commentaire"> aucun commentaire </td>
                                 <td *ngIf="!v.datevalidation"> aucune </td>
@@ -322,7 +329,7 @@
                             <!--end col-->
                             <div class="col-lg-2 col-sm-2 col-4">
                                 <p class="text-muted mb-2 text-uppercase fw-semibold">Montant</p>
-                                <h5 class="fs-14 mb-0"><span id="total-amount">{{ (detailBudgets?.totaldemande) }} </span>  {{detailBudgets.codedevise}}</h5>
+                                <h5 class="fs-14 mb-0"><span id="total-amount">{{ getMontantAffiche(detailBudgets?.totaldemande) }} </span>  {{detailBudgets.codedevise}}</h5>
                             </div>
                             <!--end col-->
                             <div class="col-lg-4 col-sm-4 col-4">
@@ -340,9 +347,9 @@
                                <div class="d-flex">
                                   <div class="flex-grow-1 p-2">
                                       <div class="hstack gap-3 flex-wrap">
-                                          <div class="text-primary d-block">Code budget :  {{detailBudgets?.budget?.codebudget}}</div>
+                                          <div class="text-primary d-block">Code budget :  {{detailBudgets?.budget?.codebudget || 'aucun'}}</div>
                                           <div class="vr"></div>
-                                          <div class="text-muted">Type : <span class="text-body fw-medium">{{detailBudgets?.budget?.typebudget}} </span></div>
+                                          <div class="text-muted">Type : <span class="text-body fw-medium">{{detailBudgets?.budget?.typebudget || 'aucun'}} </span></div>
                                           <div class="vr"></div>
                                           <div class="text-muted">Du : <span class="text-body fw-medium"> {{formatDateFR(detailBudgets?.budget?.datedebut)}} </span></div>
                                           <div class="text-muted">au : <span class="text-body fw-medium"> {{formatDateFR(detailBudgets?.budget?.datefin)}} </span></div>

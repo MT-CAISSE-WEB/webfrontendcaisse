@@ -13,6 +13,7 @@ import { PlancomptableService } from '../../donnee_base/services/plancomptable.s
 import { plancomptableModel } from '../../donnee_base/models/plancomptable.model';
 import { devisemodel } from '../../donnee_base/donnee_base/model/devise.model';
 import { deviseservice } from '../../donnee_base/donnee_base/service/devise.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-caisse',
@@ -62,7 +63,7 @@ export class CaisseComponent implements OnInit{
   comptes : plancomptableModel[] = [];
 
 
-  constructor(private caisseservice: CaisseService,
+  constructor(private caisseservice: CaisseService, private toastr : ToastrService,
               private journalservice: JournalService,
               private plancomptableservice: PlancomptableService,
               private router: Router, private ds:deviseservice){}
@@ -142,14 +143,14 @@ export class CaisseComponent implements OnInit{
     this.caisseForm = this.fb.group({
       codecaisse : ["", [Validators.required]],
       libelle : ["", [Validators.required]],
-      journal : ["", [Validators.required]],
-      devise : ["", [Validators.required]],
-      compte : ["", [Validators.required]],
+      idjournal : ["", [Validators.required]],
+      iddevise : ["", [Validators.required]],
+      idcompte : ["", [Validators.required]],
       dateinitialisation : ["", [Validators.required]],
       soldeinitialisation : [0],
       seuilminimal : [0],
-      site : [this.user.idsite ?? null],
-      societe : [this.user.idsociete ?? null],
+      idsite : [this.user.idsite ?? null],
+      idsociete : [this.user.idsociete ?? null],
       actif : [true],
     })
   }
@@ -172,11 +173,11 @@ export class CaisseComponent implements OnInit{
     this.caisseForm.patchValue({
       codecaisse : _object.codecaisse,
       libelle : _object.libelle,
-      societe: _object.societe.idsociete,
-      devise: _object.devise.iddevise,
-      journal: _object.journal.idjournal,
-      site: _object.site,
-      compte: _object.compte.idcompte,
+      idsociete: _object.societe.idsociete,
+      iddevise: _object.devise.iddevise,
+      idjournal: _object.journal.idjournal,
+      idsite: _object.site.idsite,
+      idcompte: _object.compte.idcompte,
       dateinitialisation: _object.dateinitialisation ? this.formatDate(_object.dateinitialisation) : null,
       soldeinitialisation: _object.soldeinitialisation,
       seuilminimal : _object.seuilminimal,
@@ -235,7 +236,6 @@ export class CaisseComponent implements OnInit{
 
   //Soumission du formulaire
   onSubmit(){
-    console.log("Sumit");
     /** Check formulaire */
     this.msgErros = '';
     const controls = this.caisseForm.controls;
@@ -251,14 +251,13 @@ export class CaisseComponent implements OnInit{
     const _caisse: caisseModel = {
       ...this.caisse,
       ...formValue,
-      actif: formValue.actif ? 1 : 0  
+      actif: formValue.actif ? 1 : 0,
+      createdby: this.user.nom + '' + this.user.prenom  
     };
 
     /** 3. choices action */
     if(this.actionModal == "create")this.create(_caisse);
     else this.update(_caisse);
-    // if (!_caisse.idcaisse) this.create(_caisse);
-    // else this.update(_caisse);
   }
 
   //Enregistrement de données
@@ -289,14 +288,17 @@ export class CaisseComponent implements OnInit{
         if (res.success) {
           this.closeModal('showModal');
           this.getAllcaisses();
+          this.toastr.success('Caisse modifiée avec succès');
         } else {
           this.error = "Erreur de modification";
+          this.toastr.warning('Erreur lors de la modification');
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Modification échec";
         this.loading = false;
+        this.toastr.error(err.error.message);
       }
     })
   }
@@ -343,4 +345,5 @@ export class CaisseComponent implements OnInit{
       }
     })
   }
+  
 }
