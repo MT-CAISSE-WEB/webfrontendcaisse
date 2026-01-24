@@ -31,8 +31,8 @@
                 </div>
                 <div class="d-flex align-items-end justify-content-between mt-4">
                     <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value">{{ formatNumber(totalDecaissementJour) || 0 }}</span> {{ user.devise_ref_code }} </h4>
-                        <span class="badge bg-warning me-1">{{ formatNumber(nbrDecaissementJour) || 0 }}</span> <span class="text-muted">Décaissement</span>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value">{{ formatCFA(totalDecaissementJour) || 0 }}</span> {{ user.devise_ref_code }} </h4>
+                        <span class="badge bg-warning me-1">{{ formatCFA(nbrDecaissementJour) || 0 }}</span> <span class="text-muted">Décaissement</span>
                     </div>
                     <div class="avatar-sm flex-shrink-0">
                         <span class="avatar-title bg-light rounded fs-3">
@@ -60,8 +60,8 @@
                 </div>
                 <div class="d-flex align-items-end justify-content-between mt-4">
                     <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="maxDecaissementJour?.montant || 0 ">{{ formatNumber(maxDecaissementJour?.montantref ) || 0 }}</span> {{ user.devise_ref_code }}</h4>
-                        <span class="badge bg-warning me-1"> {{ formatNumber(maxDecaissementJour?.montant) || 0 }} </span> <span class="text-muted text-small">{{ maxDecaissementJour?.devise?.codedevise }}</span>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="maxDecaissementJour?.montant || 0 ">{{ formatCFA(maxDecaissementJour?.montantref ) || 0 }}</span> {{ user.devise_ref_code }}</h4>
+                        <span class="badge bg-warning me-1"> {{ formatCFA(maxDecaissementJour?.montant) || 0 }} </span> <span class="text-muted text-small">{{ maxDecaissementJour?.devise?.codedevise }}</span>
                         <!-- <span class="badge bg-warning me-1">2</span> <span class="text-muted">Nature operation</span> -->
                     </div>
                     <div class="avatar-sm flex-shrink-0">
@@ -90,8 +90,8 @@
                 </div>
                 <div class="d-flex align-items-end justify-content-between mt-4">
                     <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="136.98">{{ formatNumber(minDecaissementJour?.montantref ) || 0 }}</span> {{ user.devise_ref_code }}</h4>
-                        <span class="badge bg-warning me-1">{{ formatNumber(minDecaissementJour?.montant) || 0 }}</span> <span class="text-muted">{{ minDecaissementJour?.devise?.codedevise }}</span>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="136.98">{{ formatCFA(minDecaissementJour?.montantref ) || 0 }}</span> {{ user.devise_ref_code }}</h4>
+                        <span class="badge bg-warning me-1">{{ formatCFA(minDecaissementJour?.montant) || 0 }}</span> <span class="text-muted">{{ minDecaissementJour?.devise?.codedevise }}</span>
                     </div>
                     <div class="avatar-sm flex-shrink-0">
                         <span class="avatar-title bg-light rounded fs-3">
@@ -189,7 +189,7 @@
                             <div class="spinner-border text-info"></div>
                         </div>
                         }
-                        <table class="table align-middle table-nowrap" id="invoiceTable">
+                        <table class="table align-middle table-nowrap table-container table-custom table-compact" id="invoiceTable">
                             <thead class="text-muted">
                                 <tr>
                                     <th scope="col" style="width: 50px;">
@@ -207,7 +207,7 @@
                             </thead>
                             <tbody class="list form-check-all" id="invoice-list-data">
                                 @for (item of operations; track $index){
-                                    <tr>
+                                    <tr class="fs-12"> 
                                         <th scope="row">
                                             <div class="form-check">
                                                 <input class="form-check-input" [checked]="isChecked(item.idoperation)" [(ngModel)]="selectedItems[$index]" (ngModelChange)="handleSelectOne(item, $event)" type="checkbox" name="itemGroup_{{ $index }}">
@@ -216,9 +216,9 @@
                                         <td class="numero"><a href="#" class="fw-medium link-primary">{{ item.codeoperation }}</a></td>
                                         <td class="typepaiement text-success" *ngIf="item.caisses[0].codtypeoperation == 'encaissement'"> {{ item.caisses[0].codtypeoperation}} <i class="ri-arrow-right-up-line fs-13 align-middle"></i> </td>
                                         <td class="typepaiement text-warning" *ngIf="item.caisses[0].codtypeoperation == 'decaissement'"> {{ item.caisses[0].codtypeoperation}} <i class="ri-arrow-right-down-line fs-13 align-middle"></i> </td>
-                                        <td class="montant"> {{ formatNumber(item.montant) }} </td>
+                                        <td class="montant text-center"> {{ formatCFA(item.montant) }} </td>
                                         <td class="devise"> {{ item.devise.codedevise }} </td>
-                                        <td class="date"> {{ formatDateFR(item.dateoperation) }}</td>
+                                        <td class="text-muted text-uppercase fs-11"> {{ formatDateFR(item.dateoperation) }}</td>
                                         <td>
                                             <ul class="list-inline hstack gap-2 mb-0">
                                                 <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="View">

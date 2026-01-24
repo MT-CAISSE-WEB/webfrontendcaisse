@@ -183,7 +183,7 @@ export class DemandeDecaissementComponent implements OnInit {
 
     const year = date.getFullYear();
 
-    return `${dayShort} ${day} ${month} ${year}`;
+    return `${day} ${month} ${year}`;
   }
 
   //Initialiser le formulaire de validation

@@ -25,6 +25,10 @@ import { affectationdepartementnatureModel } from '../../donnee_base/models/affe
 import { natureoperationModel } from '../../donnee_base/models/natureoperation.model';
 import { debounceTime, distinctUntilChanged, forkJoin, map } from 'rxjs';
 import { utilisateurdepartementservice } from '../../administration/service/userdepartement.service';
+import { MotifService } from '../services/motif.service';
+import { Motif } from '../models/motif.model';
+import { ValidateursBudget } from '../models/validateursbudget.model';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-ligne-budget',
@@ -52,6 +56,7 @@ export class LigneBudgetComponent implements OnInit {
   ligneBudgetForm: FormGroup = this.fb.group({});
 
   availableNatures: natureoperationModel[] = [];
+  motifs: Motif[] = [];
 
 
   // Définissez des propriétés de pagination
@@ -71,6 +76,7 @@ export class LigneBudgetComponent implements OnInit {
   actionModal: string = 'create';
   showRejectComment = false;
   rejectComment = '';
+  rejectForm!: FormGroup;
 
   //Message suppression
   msgSup: string = '';
@@ -113,6 +119,8 @@ export class LigneBudgetComponent implements OnInit {
     private departementservice: departementservice,
     private affectationService: AffectationDepartementNatureService,
     private utilisateurdepartementservice: utilisateurdepartementservice,
+    private motifservice: MotifService,
+    private toastr: ToastrService,
     private router: Router
   ) { }
 
@@ -122,6 +130,7 @@ export class LigneBudgetComponent implements OnInit {
     this.getAllDepartements();
     this.getAllLigneBudgets();
     this.getUserDepartement();
+    this.getAllMotifs();
 
     //Initialisation du formulaire
     this.initForm();
@@ -139,6 +148,10 @@ export class LigneBudgetComponent implements OnInit {
       .subscribe((search) => {
         this.applySearchFilter(search as string);
       });
+
+    this.rejectForm = this.fb.group({
+      motif: [null, Validators.required],
+    });
   }
 
   naturesSource: Array<{
@@ -159,6 +172,8 @@ export class LigneBudgetComponent implements OnInit {
     montantSociete: number;
 
   }> = [];
+
+  validateursBudget: ValidateursBudget[] = [];
 
   isDeptReadonly(): boolean {
     return true; // toujours grisé
@@ -184,24 +199,39 @@ export class LigneBudgetComponent implements OnInit {
     );
   }
 
-  applyMontantPropagation(ligne: any) {
-    if (!this.selectedBudget) return;
+  // Obtenir la liste de tous les motifs
+  getAllMotifs() {
+    this.params = { page: 1, limit: 1000 };
 
-    // SITE → recopie depuis DEPT
-    if (
-      this.user.typeentitesite === 1 &&
-      this.selectedBudget.validesite !== 1
-    ) {
-      ligne.montantSite = ligne.montantDept;
-    }
+    this.motifservice.getAll(this.params).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.motifs = res.data.data as Motif[];
+        }
+      },
+      error: (err) => {
+        console.error('Erreur récupération motifs', err);
+        this.msgErros = err.error.error;
+      },
+    });
+  }
 
-    // SOCIETE → recopie depuis SITE
-    if (
-      this.user.typeentitesociete === 1 &&
-      this.selectedBudget.validesite === 1
-    ) {
-      ligne.montantSociete = ligne.montantSite;
-    }
+  // Obtenir tous les validateurs du budget
+  getAllValidateursBudget(idbudget: string) {
+    console.log('idbudget:', idbudget)
+
+    this.budgetservice.getValidateursBudget(idbudget).subscribe({
+
+      next: (res: any) => {
+        if (res.success) {
+          this.validateursBudget = res.data as ValidateursBudget[];
+        }
+      },
+      error: (err) => {
+        console.error('Erreur récupération des validateurs du budget', err);
+        this.msgErros = err.error.error;
+      },
+    });
   }
 
 
@@ -225,6 +255,15 @@ export class LigneBudgetComponent implements OnInit {
         this.msgErros = err.error.error;
       },
     });
+  }
+
+  // 
+  isValidateur(): boolean {
+    return this.validateursBudget.some(u => u.idutilisateur === this.user.idutilisateur && u.decision === 'en attente')
+  }
+
+  isRejected(): boolean {
+    return this.validateursBudget.some(u => u.decision === "rejete")
   }
 
   groupLigneBudgetsByBudget() {
@@ -390,7 +429,6 @@ export class LigneBudgetComponent implements OnInit {
     }
 
     this.natureGrid.push(ligne);
-    this.applyMontantPropagation(ligne);
 
     this.selectedNatureId = null;
   }
@@ -739,10 +777,6 @@ export class LigneBudgetComponent implements OnInit {
           montantSociete: l.montantprevisionsociete ?? 0,
         }));
 
-        this.natureGrid.forEach(ligne =>
-          this.applyMontantPropagation(ligne)
-        );
-
         // natures encore disponibles pour ajout
         this.availableNatures = allNatures.filter((n: any) => !usedIds.has(n.idnature));
       },
@@ -956,11 +990,7 @@ export class LigneBudgetComponent implements OnInit {
         ligne.montantSite = 0;
         ligne.montantSociete = 0;
       }
-    });
-
-    this.natureGrid.forEach(l =>
-      this.applyMontantPropagation(l)
-    );
+    })
 
     this.updateMontantsSelonValidation();
   }
@@ -970,6 +1000,32 @@ export class LigneBudgetComponent implements OnInit {
       (l) => l.idbudget === budgetId && l.iddepartement === deptId
     );
   }
+
+  private propagateMontantsOnValidationOpen(): void {
+    if (!this.selectedBudget) return;
+
+    const vDept = Number(this.selectedBudget.validedept) === 1;
+    const vSite = Number(this.selectedBudget.validesite) === 1;
+
+    this.validationLines = this.validationLines.map((l: any) => {
+      const dept = Number(l.montantDept ?? 0);
+      const site = Number(l.montantSite ?? 0);
+      const soc = Number(l.montantSociete ?? 0);
+
+      const newSite = vDept && site === 0 ? dept : site;
+      const newSoc = vSite && soc === 0 ? newSite : soc;
+
+      return {
+        ...l,
+        montantSite: newSite,
+        montantSociete: newSoc,
+      };
+    });
+  }
+
+
+
+
 
   updateMontantsSelonValidation() {
     if (!this.selectedBudget) return;
@@ -1141,6 +1197,24 @@ export class LigneBudgetComponent implements OnInit {
     this.ligneBudgetForm.get('iddepartement')?.enable({ emitEvent: false });
   }
 
+  updateBudget(_budget: any) {
+    _budget.updatedby = this.user.nom + ' ' + this.user.prenom;
+    this.budgetservice.update(_budget).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.getAllBudgets();
+        } else {
+          this.error = 'Erreur de modification';
+        }
+        this.loading = false;
+      },
+      error: (err: any) => {
+        this.msgErros = err.error.error;
+        this.loading = false;
+      },
+    });
+  }
+
   openValidationBudget(budget: BudgetModel) {
     this.selectedBudget = budget;
     this.showRejectComment = false;
@@ -1152,19 +1226,106 @@ export class LigneBudgetComponent implements OnInit {
     );
 
     this.validationLines = lignes.map(l => ({
+      idbudgetdepartementnature: l.idbudgetdepartementnature,
+      iddepartement: l.iddepartement,
+      idnature: l.idnature,
+
       departement: l.departement?.libelle ?? '-',
       nature: l.nature_operation?.libelle ?? '-',
-      montantDept:
-        budget.entite === 'Département'
-          ? l.montantprevisiondept ?? 0
-          : budget.entite === 'Site'
-            ? l.montantprevisionsite ?? 0
-            : l.montantprevisionsociete ?? 0,
-      montantSite: l.montantprevisionsite,
-      montantSociete: l.montantprevisionsociete
+
+      montantDept: Number(l.montantprevisiondept ?? 0),
+      montantSite: Number(l.montantprevisionsite ?? 0),
+      montantSociete: Number(l.montantprevisionsociete ?? 0),
     }));
 
+    // ✅ SI dept pas encore validé => on force le front à 1
+    if (Number(this.selectedBudget.validedept) !== 1) {
+      this.selectedBudget.validedept = 1; // ✅ IMPORTANT (résout l'intermittence)
+
+      this.updateBudget({
+        idbudget: budget.idbudget,
+        libelle: budget.libelle,
+        entite: budget.entite,
+        datedebut: budget.datedebut,
+        datefin: budget.datefin,
+        idcircuitvalidation: budget.idcircuitvalidation,
+        idsite: budget.idsite,
+        idsociete: budget.idsociete,
+        actif: budget.actif,
+        validedept: 1,
+        datevalidedept: new Date(),
+      });
+    }
+
+    // ✅ Maintenant vDept sera toujours true
+    this.propagateMontantsOnValidationOpen();
+
+    // ✅ force le refresh dans la vue (très important avec modals Bootstrap)
+    this.validationLines = [...this.validationLines];
   }
+
+
+  private updateMontantsBudgetFromValidationModal() {
+    if (!this.selectedBudget) return;
+
+    // Ici on met à jour uniquement les champs qui ont été modifiés dans la modale
+    const payload = this.validationLines
+      .filter((l: any) => !!l.idbudgetdepartementnature)
+      .map((l: any) => ({
+        idbudgetdepartementnature: l.idbudgetdepartementnature,
+        idbudget: this.selectedBudget!.idbudget,
+        iddepartement: l.iddepartement,
+        idnature: l.idnature,
+
+        // ✅ On push les montants de la modale
+        montantprevisiondept: Number(l.montantDept ?? 0),
+        montantprevisionsite: Number(l.montantSite ?? 0),
+        montantprevisionsociete: Number(l.montantSociete ?? 0),
+
+        updatedby: this.user.nom + ' ' + this.user.prenom,
+      }));
+
+    if (payload.length === 0) return;
+
+    return this.lignebudgetservice.updateMultiple(payload);
+  }
+
+  onClickValidateBudget() {
+    if (!this.selectedBudget) return;
+
+    this.msgErros = '';
+    this.loading = true;
+
+    // 1) Sauvegarder les montants de la modale en DB
+    const update$ = this.updateMontantsBudgetFromValidationModal();
+
+    // Si aucune ligne à mettre à jour → on valide directement
+    if (!update$) {
+      this.validationBudget(this.selectedBudget.idbudget);
+      return;
+    }
+
+    update$.subscribe({
+      next: () => {
+        // 2) Recharge les lignes pour être clean
+        this.getAllBudgets();
+        this.getAllLigneBudgets();
+
+        // 3) Ensuite validation du workflow
+        this.validationBudget(this.selectedBudget!.idbudget);
+      },
+      error: (err: any) => {
+        this.loading = false;
+        this.msgErros =
+          err?.error?.error ||
+          err?.error?.message ||
+          "Erreur lors de la mise à jour des montants";
+        this.toastr.error(this.msgErros);
+      },
+    });
+  }
+
+
 
 
   onSubmit() {
@@ -1327,6 +1488,38 @@ export class LigneBudgetComponent implements OnInit {
     });
   }
 
+  validationBudget(id: string) {
+    const data = {
+      idbudget: id,
+      iduser: this.user.idutilisateur,
+      decision: "accepter",
+      motif: null,
+      comment: null
+    }
+
+    this.loading = true;
+    this.budgetservice.validationBudget(id, data).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.getAllBudgets();
+          this.getAllLigneBudgets();
+          this.toastr.success('Décision enrégistrée');
+          this.closeModal('validateBudgetModal')
+        } else {
+          this.msgErros = 'Erreur lors de la validation';
+          this.toastr.error('Erreur lors de la validation');
+        }
+        this.loading = false;
+      },
+
+      error: (err: any) => {
+        this.msgErros = err.error.message;
+        this.toastr.error(err.error.message ?? 'Erreur lors de la validation');
+        this.loading = false;
+      },
+    });
+  }
+
   //Modification de données
   update(_ligneBudget: any) {
     _ligneBudget.updatedby = 'admin';
@@ -1369,19 +1562,52 @@ export class LigneBudgetComponent implements OnInit {
   // }
 
   onRejectClick() {
+    if (!this.selectedBudget) return;
     this.showRejectComment = true;
+    this.confirmRejectBudget(this.selectedBudget!.idbudget)
   }
 
-  confirmRejectBudget() {
+  confirmRejectBudget(id: string) {
+    const motifId = this.rejectForm.get('motif')?.value;
+    const commentaire = this.rejectComment;
+
     if (!this.rejectComment.trim()) {
       this.msgErros = 'Le motif de rejet est obligatoire';
       return;
     }
 
+    const data = {
+      idbudget: id,
+      iduser: this.user.idutilisateur,
+      decision: "refuser",
+      motif: motifId,
+      comment: commentaire
+    }
+
+    console.log("Data:", data);
     this.loading = true;
 
     // 👉 appel API rejet budget
-    // this.budgetservice.reject(this.selectedBudget!.idbudget, this.rejectComment)
+    this.budgetservice.validationBudget(id, data).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.getAllBudgets();
+          this.getAllLigneBudgets();
+          this.toastr.error('Décision de refus enrégistrée');
+          this.closeModal('validateBudgetModal')
+        } else {
+          this.msgErros = 'Erreur lors du refus du budget';
+          this.toastr.error('Erreur lors du refus du budget');
+        }
+        this.loading = false;
+      },
+
+      error: (err: any) => {
+        this.msgErros = err.error.message;
+        this.toastr.error(err.error.message ?? 'Erreur lors du refus du budget');
+        this.loading = false;
+      },
+    });
 
     this.loading = false;
     this.resetValidationModal();

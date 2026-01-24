@@ -36,7 +36,6 @@ export class LayoutHeaderComponent implements OnInit {
 
   //Liste de caisse utilisateur
   caissesUser: AffectationCaisseModel[] = [];
-
   loadingCaisses = false;
 
   caissesStatuses: { [id: string]: string } = {};
@@ -118,24 +117,19 @@ export class LayoutHeaderComponent implements OnInit {
     return this.formatCFA(this.getSolde(item));
   }
 
-  // calculSolde(item: any) {
-  //   const s = (item.soldeinitialisation ?? 0) + (item.solde ?? 0);
-  //   return this.formatCFA(s);
-  // }
-
   getSoldeClass(item: any): string {
     const solde = this.getSolde(item);
     const seuil = Number(item?.seuilmnimal) || 0;
 
-    if (solde == 0) {
+    if (solde == 0){
       return 'text-danger';
     }
 
-    if (solde == seuil) {
+    if (solde == seuil){
       return 'text-warning';
     }
 
-    if (solde > seuil) {
+    if (solde > seuil){
       return 'text-success';
     }
 

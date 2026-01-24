@@ -468,6 +468,13 @@ export class OperationCaisseComponent implements OnInit{
     return solde;
   }
 
+  formatCFA(montant: number | null | undefined): string {
+    return new Intl.NumberFormat('fr-FR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(montant ?? 0);
+  }
+
   get user(){
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
@@ -857,7 +864,7 @@ export class OperationCaisseComponent implements OnInit{
 
     const year = date.getFullYear();
 
-    return `${dayShort} ${day} ${month} ${year}`;
+    return `${day} ${month} ${year}`;
   }
 
   //Calculer la somme des lignes de la demande

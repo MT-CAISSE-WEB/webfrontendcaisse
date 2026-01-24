@@ -27,4 +27,20 @@ export class ConsultationService {
     getDetailoperation(_data: any): Observable<QueryResultModel> {
         return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/detailoperation', _data);
     }
+
+    /**
+   * get Last Operation
+   * @param params
+   */
+    getLastOperation(_data: any): Observable<QueryResultModel> {
+        return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/lastoperation', _data);
+    }
+
+    /**
+   * get Historique
+   * @param params
+   */
+    getHistoryOperation(_data: any): Observable<QueryResultModel> {
+        return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/historyoperation', _data);
+    }
 }

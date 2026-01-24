@@ -804,7 +804,7 @@ export class BudgetComponent implements OnInit {
 
   //Modification de données
   update(_budget: any) {
-    _budget.updatedby = 'admin';
+    _budget.updatedby = this.user.nom + ' ' + this.user.prenom;
     this.budgetservice.update(_budget).subscribe({
       next: (res: any) => {
         if (res.success) {

@@ -77,7 +77,7 @@
               </thead>
               <tbody class="list form-check-all">
                 @for (item of entetesDmd; track item.iddemande){
-                  <tr>
+                  <tr class="fs-12">
                     <th scope="row">
                         <div class="form-check">
                             <input class="form-check-input" [checked]="isChecked(item.iddemande)" [(ngModel)]="selectedItems[$index]" (ngModelChange)="handleSelectOne(item, $event)" type="checkbox" name="itemGroup_{{ $index }}">
@@ -87,7 +87,7 @@
                     <td class="typedemande"> {{ item.typedemande! }} </td>
                     <td class="montant"> {{ formatNumber(getTotalDemande(item)) }} </td>
                     <td class="devise"> {{ item.devise!.codedevise }} </td>
-                    <td class="date"> {{ formatDateFR(item.datedemande!) }}</td>
+                    <td class="text-muted text-uppercase fs-11"> {{ formatDateFR(item.datedemande!) }}</td>
                     <td class="devise" *ngIf="item.statut! == 0"> <span class="badge bg-primary-subtle text-primary"> non valide </span> </td>
                     <td class="devise text-primary" *ngIf="item.statut! == 1"> <span class="badge bg-info-subtle text-info"> en cours </span> </td>
                     <td class="devise text-warning" *ngIf="item.statut! == 2 && item.decaisse! == 0"> <span class="badge bg-warning-subtle text-warning"> a revoir </span> </td>
@@ -269,7 +269,7 @@
                             </thead>
                             <tbody>
                               <!-- ROLES LIST -->
-                              <tr class="role-row" *ngFor="let v of validateurs; let i = index">
+                              <tr class="role-row fs-12" *ngFor="let v of validateurs; let i = index">
                                 <td>{{ i + 1 }}</td>
                                 <td>{{ v.codecircuitvalidation }}</td>
                                 <td>{{ v.nom }}  {{ v.prenom }}</td>

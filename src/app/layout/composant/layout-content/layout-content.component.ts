@@ -12,10 +12,12 @@ import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.contantes';
 import { OperationService } from '../../../features/operations/service/operation.service';
 import { ToastrService } from 'ngx-toastr';
+import { InterfaceCaissierComponent } from "../layout-bloc/interface-caissier/interface-caissier.component";
 
 @Component({
   selector: 'app-layout-content',
-  imports: [RouterLink, RouterModule, CommonModule, FormsModule, ReactiveFormsModule],
+  standalone: true,
+  imports: [RouterLink, RouterModule, CommonModule, FormsModule, ReactiveFormsModule, InterfaceCaissierComponent],
   templateUrl: './layout-content.component.html',
   styleUrl: './layout-content.component.css'
 })

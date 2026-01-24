@@ -10,6 +10,8 @@ import { Injectable } from '@angular/core';
 })
 export class BudgetService {
   url: string = 'budget';
+  url_validateur: string = this.url + '/validateurs/'
+  url_validation: string = this.url + '/validate/'
 
   constructor(private http: HttpClient) {}
 
@@ -62,5 +64,25 @@ export class BudgetService {
    */
   getOne(id: string): Observable<any> {
     return this.http.get<any>(URL_LOCAL.baseUrl + this.url + '/' + id);
+  }
+
+  /**
+   * Validateurs du budget
+   * @param id
+   */
+  getValidateursBudget(id: string): Observable<any> {
+    return this.http.get<any>(URL_LOCAL.baseUrl + this.url_validateur + id);
+  }
+
+  /**
+   * create
+   * @param _object
+   *
+   */
+  validationBudget(id: string, _object: any): Observable<any> {
+    return this.http.post<any>(
+      URL_LOCAL.baseUrl + this.url_validation + id,
+      _object
+    );
   }
 }

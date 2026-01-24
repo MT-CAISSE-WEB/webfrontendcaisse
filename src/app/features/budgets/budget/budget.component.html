@@ -167,10 +167,16 @@
                   </td>
 
                   <td>
-                    <a class="dropdown-item text-primary" href="#showModal" data-bs-toggle="modal"
-                      (click)="modalUpdate(item)">
-                      <i class="ri-pencil-fill me-2"></i>
-                    </a>
+                    <div class="d-flex align-items-center gap-2">
+                      <a class="dropdown-item text-primary" href="#showModal" data-bs-toggle="modal"
+                        (click)="modalUpdate(item)">
+                        <i class="ri-pencil-fill me-2"></i>
+                      </a>
+                      <a *ngIf="getBudgetsMensuels(item.idbudget).length === 0" class="text-danger"
+                        (click)="modalDelete(item)" data-bs-toggle="modal" href="#deleteOrder">
+                        <i class="ri-delete-bin-5-fill"></i>
+                      </a>
+                    </div>
                   </td>
 
                 </tr>
