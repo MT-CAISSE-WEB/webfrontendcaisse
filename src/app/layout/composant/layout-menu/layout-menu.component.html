@@ -31,10 +31,30 @@
             </div>
             <ul class="navbar-nav" id="navbar-nav">
                 <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Administration</span></li>
+
                 <li class="nav-item">
-                    <a class="nav-link" [routerLink]="root_utilisateur" data-key="t-user">
+                    <a class="nav-link menu-link" href="#sidebarLanding" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarLanding">
                         <i class="ri-account-circle-line"></i> <span data-key="t-landing">Users</span>
                     </a>
+                    <div class="collapse menu-dropdown" id="sidebarLanding">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a [routerLink]="root_utilisateur" class="nav-link" data-key="t-one-page"> Utilisateurs </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link" data-key="t-nft-landing"> Users - site </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link" data-key="t-job"> Users - departement </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li class="nav-item">
+                    <!-- <a class="nav-link" [routerLink]="root_utilisateur" data-key="t-user">
+                        <i class="ri-account-circle-line"></i> <span data-key="t-landing">Users</span>
+                    </a> -->
                 
                     <a [routerLink]="root_role" class="nav-link" data-key="t-role"><i class="ri-tools-line">
                         </i><span data-key="t-landing">Rôles & Permissions</span> 
@@ -64,27 +84,6 @@
                         </ul>
                     </div>
                 </li>
-
-
-                <li class="nav-item">
-                    <a class="nav-link menu-link" href="#sidebarLanding" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarLanding">
-                        <i class="ri-account-circle-line"></i> <span data-key="t-landing">Users</span>
-                    </a>
-                    <div class="collapse menu-dropdown" id="sidebarLanding">
-                        <ul class="nav nav-sm flex-column">
-                            <li class="nav-item">
-                                <a [routerLink]="root_utilisateur" class="nav-link" data-key="t-one-page"> Utilisateurs </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link" data-key="t-nft-landing"> Users - site </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link" data-key="t-job"> Users - departement </a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-
 
                 <li class="nav-item">
                     <a class="nav-link menu-link" href="#sidebarBudget" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDashboards">

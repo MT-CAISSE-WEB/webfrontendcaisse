@@ -17,7 +17,7 @@ import { InterfaceCaissierComponent } from "../layout-bloc/interface-caissier/in
 @Component({
   selector: 'app-layout-content',
   standalone: true,
-  imports: [RouterLink, RouterModule, CommonModule, FormsModule, ReactiveFormsModule, InterfaceCaissierComponent],
+  imports: [RouterModule, CommonModule, FormsModule, ReactiveFormsModule, InterfaceCaissierComponent],
   templateUrl: './layout-content.component.html',
   styleUrl: './layout-content.component.css'
 })
@@ -73,7 +73,6 @@ export class LayoutContentComponent implements OnInit{
         }
       },
       error : (err) => {
-        console.log(err);
         this.toastr.error(err.error.message);
       }
     });

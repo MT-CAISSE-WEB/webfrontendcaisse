@@ -1,3 +1,95 @@
+
+<div class="row">
+    <div class="col-xl-4 col-md-6">
+        <!-- card -->
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0"> Total encaissement</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-success fs-14 mb-0">
+                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i> +16.24 %
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4">$<span class="counter-value" data-target="559.25">0</span>k </h4>
+                        <a [routerLink]="root_operation"  class="text-decoration-underline">Voir plus</a>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-success-subtle rounded fs-3">
+                            <i class="bx bx-dollar-circle text-success"></i>
+                        </span>
+                    </div>
+                </div>
+            </div><!-- end card body -->
+        </div><!-- end card -->
+    </div><!-- end col -->
+
+    <div class="col-xl-4 col-md-6">
+        <!-- card -->
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Demandes</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-danger fs-14 mb-0">
+                            <i class="ri-arrow-right-down-line fs-13 align-middle"></i> -3.57 %
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="36894">0</span></h4>
+                        <a href="#" class="text-decoration-underline">Voir plus</a>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-info-subtle rounded fs-3">
+                            <i class="bx bx-shopping-bag text-info"></i>
+                        </span>
+                    </div>
+                </div>
+            </div><!-- end card body -->
+        </div><!-- end card -->
+    </div><!-- end col -->
+
+    <div class="col-xl-4 col-md-6">
+        <!-- card -->
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Total DECAISSEMENT</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-success fs-14 mb-0">
+                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i> +29.08 %
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="183.35">0</span>M </h4>
+                        <a [routerLink]="root_operation" class="text-decoration-underline">Voir plus</a>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-warning-subtle rounded fs-3">
+                            <i class="bx bx-user-circle text-warning"></i>
+                        </span>
+                    </div>
+                </div>
+            </div><!-- end card body -->
+        </div><!-- end card -->
+    </div><!-- end col -->
+</div> <!-- end row-->
+
+
+
 <div class="row">
     @for(item of caisseSolde; track $index){
         <div [ngClass]="getCaisseClass(caisseSolde)">
@@ -32,13 +124,8 @@
                 </div>
             </div>
         </div><!--end col-->
-    }
-    
+    } 
 </div>
-
-
-
-
 
 <div class="row">
     <div class="col-xl-7">
@@ -101,8 +188,39 @@
                                     <td class="text-muted text-uppercase"> {{ formatDateFR(item.date!) }} </td>
                                 </tr><!-- end -->
                             }
+                            <tr class="fs-12">
+                                <td colspan="3"></td>
+                                <td col="2">
+                                    <div class="d-flex justify-content-end">
+                                        <div class="pagination-wrap">
+                                            <ul class="pagination pagination-separated pagination-sm mb-0 justify-content-center">
+                                                <li class="page-item" [class.disabled]="currentPageL == 1">
+                                                    <a href="javascript:void(0)" class="page-link" (click)="currentPageL > 1 && changePageLast(currentPageL - 1)">←</a>
+                                                </li>
+
+                                                <li class="page-item">
+                                                    <a href="javascript:void(0)" class="page-link"> Page {{currentPageL}} / {{totalPagesL}}</a>
+                                                </li>
+                                                
+                                                <li class="page-item" [class.disabled]="currentPageL == totalPagesL">
+                                                    <a href="javascript:void(0)" class="page-link" (click)="currentPageL < totalPagesL && changePageLast(currentPageL + 1)">→</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
                         </tbody><!-- end tbody -->
                     </table><!-- end table -->
+                    <div class="noresult" *ngIf="opLast.length == 0">
+                         <div class="text-center"> 
+                            <i class="ri-inbox-2-line fs-1 text-muted"></i>
+                            <h6 class="mt-2">Aucune donnée disponible</h6>
+                            <p class="text-muted mb-0">
+                                Désolé pas de donnée trouvée dans la base de donnée
+                            </p>
+                         </div>
+                    </div>
                 </div><!-- end tbody -->
             </div><!-- end cardbody -->
         </div><!-- end card -->
@@ -114,13 +232,13 @@
                 <h4 class="card-title mb-0 flex-grow-1">Historique du jour</h4>
             </div><!-- end card header -->
             <div class="card-body p-0">
-                <div style="height: 390px;">
+                <div class="d-flex flex-column" style="height: 390px;">
                     @if (loadingHistory) {
                         <div class="text-center py-4">
                             <div class="spinner-border text-info"></div>
                         </div>
                     }
-                    <div class="p-3">
+                    <div class="p-3 flex-grow-1 d-flex flex-column" *ngIf="opHistory.length != 0">
                         @for(item of opHistory; track $index){
                             <h6 class="text-muted text-uppercase mb-3 mt-4 fs-11">{{ formatDateFR(item.date!) }}</h6>
 
@@ -143,19 +261,28 @@
                                     </div>
                                     <div class="flex-shrink-0 text-end">
                                         <h6 class="mb-1 text-muted" *ngIf="e.typeoperation == 'decaissement'">- {{ formatCFA(e.montant!)}} <span class="text-uppercase ms-1">{{ e.devise! }}</span></h6>
-                                        <p class="text-muted fs-13 mb-0" *ngIf="e.typeoperation == 'decaissement'">- {{ formatCFA(e.montant_ref) }} {{user.devise_ref_code}}</p>
+                                        <p class="text-warning fs-13 mb-0" *ngIf="e.typeoperation == 'decaissement'">- {{ formatCFA(e.montant_ref) }} {{user.devise_ref_code}}</p>
 
                                         <h6 class="mb-1 text-success" *ngIf="e.typeoperation == 'encaissement'">+ {{ formatCFA(e.montant!)}} <span class="text-uppercase ms-1">{{ e.devise! }}</span></h6>
-                                        <p class="text-muted fs-13 mb-0" *ngIf="e.typeoperation == 'encaissement'">+ {{ formatCFA(e.montant_ref) }} {{user.devise_ref_code}} </p>
+                                        <p class="text-success fs-13 mb-0" *ngIf="e.typeoperation == 'encaissement'">+ {{ formatCFA(e.montant_ref) }} {{user.devise_ref_code}} </p>
                                     </div>
                                 </div><!-- end -->
                             }
 
                         }
 
-                        <div class="mt-3 text-center">
+                        <div class="mt-auto text-center">
                             <a href="javascript:void(0);" class="text-muted text-decoration-underline">Voir plus</a>
                         </div>
+                    </div>
+                    <div *ngIf="opHistory.length == 0">
+                         <div class="text-center"> 
+                            <i class="ri-inbox-2-line fs-1 text-muted"></i>
+                            <h6 class="mt-2">Aucune donnée disponible</h6>
+                            <p class="text-muted mb-0">
+                                Désolé pas de donnée trouvée dans la base de donnée
+                            </p>
+                         </div>
                     </div>
                 </div>
             </div><!-- end cardbody -->

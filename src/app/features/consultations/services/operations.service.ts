@@ -43,4 +43,12 @@ export class ConsultationService {
     getHistoryOperation(_data: any): Observable<QueryResultModel> {
         return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/historyoperation', _data);
     }
+
+    /**
+   * get paiement
+   * @param params
+   */
+    getAllpayment(): Observable<QueryResultModel> {
+        return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/allpayment');
+    }
 }

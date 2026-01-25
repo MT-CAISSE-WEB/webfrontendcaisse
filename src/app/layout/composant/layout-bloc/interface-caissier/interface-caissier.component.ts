@@ -9,16 +9,17 @@ import { OperationService } from '../../../../features/operations/service/operat
 import { AffectationCaisseModel } from '../../../../features/caisse_journal/models/affectationcaisse.model';
 import { AffectationCaisseService } from '../../../../features/caisse_journal/services/affectationcaisse.service';
 import { ConsultationService } from '../../../../features/consultations/services/operations.service';
+import { APP_ROOT_OPERATION_GENERAL } from '../../../../_core/routes/frontend.root';
 
 @Component({
   selector: 'app-interface-caissier',
   standalone: true,
-  imports: [RouterModule, CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [RouterLink, RouterModule, CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './interface-caissier.component.html',
   styleUrl: './interface-caissier.component.css'
 })
 export class InterfaceCaissierComponent implements OnInit{
-
+  root_operation = APP_ROOT_OPERATION_GENERAL;
   caisseSolde : any;
   msgErros: string = "";
   error: string = "";
@@ -27,6 +28,7 @@ export class InterfaceCaissierComponent implements OnInit{
   // Définissez des propriétés de pagination
   currentPageL: number = 1;
   currentPageH: number = 1;
+
   // Nombre d'éléments par page
   totalPagesL: number = 0;
   totalPagesH: number = 0;
@@ -53,6 +55,8 @@ export class InterfaceCaissierComponent implements OnInit{
     this.getcaissesPeriodes();
     //Charger les caisses du caissier et ses soldes
     this.getCaisseUser();
+    //Chargement des paiements de caisses
+    // this.getAllpayment();
   }
 
   //Récuperer les soldes
@@ -177,26 +181,42 @@ export class InterfaceCaissierComponent implements OnInit{
   getLastOperation(data : any){
     data.page = this.currentPageL;
     data.limit = this.limitL;
+    this.loadingLast = true ;
     this.service.getLastOperation(data).subscribe({
       next : (res) => {
-        console.log(res);
         this.opLast = res.data.data;
         this.totalPagesL = res.data.totalPages;
+        this.loadingLast = false;
       },
-      error : (err) => {}
+      error : (err) => {
+        this.loadingLast = true ;
+      }
+    });
+  }
+
+  getAllpayment(){
+    this.service.getAllpayment().subscribe({
+      next : (res) => {
+        console.log(res);
+      },
+      error : (err) => {
+        this.loadingLast = true ;
+      }
     });
   }
 
   getHistoryOperation(data : any){
     data.page = this.currentPageH;
     data.limit = this.limitH;
+    this.loadingHistory = true ;
     this.service.getHistoryOperation(data).subscribe({
       next : (res) => {
         this.opHistory = res.data.data;
         this.totalPagesH = res.data.totalPages;
+        this.loadingHistory = false ;
       },
       error : (err) => {
-
+        this.loadingHistory = true ;
       }
     });
   }
