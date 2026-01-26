@@ -325,7 +325,7 @@ export class OperationCaisseComponent implements OnInit{
         if(res.success){
           //this.entetesDmd = res.data.data;
           this.entetesDmd = (res.data.data || []).filter(
-            (n: any) => n.decaisse === 0 && n.statut === 2
+            (n: any) => n.decaisse === 0 && n.statut === 3
           )
         }
       },

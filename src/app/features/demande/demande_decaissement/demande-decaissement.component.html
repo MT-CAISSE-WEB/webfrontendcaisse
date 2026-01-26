@@ -85,7 +85,7 @@
                     </th>
                     <td class="numero"><a href="#" class="fw-medium link-primary">{{ item.codedemande }}</a></td>
                     <td class="typedemande"> {{ item.typedemande! }} </td>
-                    <td class="montant"> {{ formatNumber(getTotalDemande(item)) }} </td>
+                    <td class="text-end"> {{ formatCFA(getTotalDemande(item)) }} </td>
                     <td class="devise"> {{ item.devise!.codedevise }} </td>
                     <td class="text-muted text-uppercase fs-11"> {{ formatDateFR(item.datedemande!) }}</td>
                     <td class="devise" *ngIf="item.statut! == 0"> <span class="badge bg-primary-subtle text-primary"> non valide </span> </td>
@@ -364,7 +364,7 @@
                                           <tr class="table-active">
                                               <th scope="col"> Nature operation</th>
                                               <th scope="col"> Prévision </th>
-                                              <th scope="col"> Preengagé </th>
+                                              <th scope="col"> Préengagé </th>
                                               <th scope="col"> Engagé </th>
                                               <th scope="col"> Decaissé </th>
                                               <th scope="col"> Disponible </th>
@@ -380,7 +380,7 @@
                                             <td class="text-end"> {{ det?.engage | number:'1.0-0':'fr-FR'}} </td>
                                             <td class="text-end"> {{ det?.realise | number:'1.0-0':'fr-FR'}} </td>
                                             <td class="text-end">
-                                              <span class="me-2">{{calculateSoldeBudget(det?.prevision, det?.conso, det?.preengage) | number:'1.0-0'}} </span>
+                                              <span class="me-2">{{calculateSoldeBudget(det?.prevision, det?.engage, det?.preengage, det?.realise) | number:'1.0-0'}} </span>
                                               <span class="badge bg-danger rounded-circle" style="width:10px; height:10px;" *ngIf="calculateSoldeBudget(det?.prevision, det?.conso) < det?.montant_ref">
                                                 <i class="me-2 mdi mdi-circle-medium"></i>
                                               </span>

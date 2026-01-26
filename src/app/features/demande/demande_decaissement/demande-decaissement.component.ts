@@ -212,8 +212,8 @@ export class DemandeDecaissementComponent implements OnInit {
   }
 
   //Calcul du solde budget
-  calculateSoldeBudget(prevision?: number, engage?: number, preengage?: number): number {
-    return (prevision ?? 0) - (engage ?? 0) - (preengage ?? 0);
+  calculateSoldeBudget(prevision?: number, engage?: number, preengage?: number, realise?: number): number {
+    return (prevision ?? 0) - (engage ?? 0) - (preengage ?? 0) - (realise ?? 0);
   }
 
   handleDecisionChange(): void {
@@ -472,6 +472,13 @@ export class DemandeDecaissementComponent implements OnInit {
         this.toastr.error(this.error + "\n", err.error.message);
       }
     })
+  }
+
+  formatCFA(montant: number | null | undefined): string {
+    return new Intl.NumberFormat('fr-FR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(montant ?? 0);
   }
 
 }
