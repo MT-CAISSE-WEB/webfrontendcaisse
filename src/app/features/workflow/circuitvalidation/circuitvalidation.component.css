@@ -1,0 +1,4 @@
+.etapes-scroll {
+  max-height: 60vh;   /* 60% de la hauteur écran */
+  overflow-y: auto;
+}

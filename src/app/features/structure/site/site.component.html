@@ -209,9 +209,9 @@
                                  <div class="mb-3">
                                     <select class="form-select form-select-sm" formControlName="idanalytique" *ngIf="siteForm.get('estcentreanalytique')?.value">
                                         <option value="">----Choisir le centre analytique-----</option>
-                                        <!-- <option *ngFor="let d of devises"  [value]="d.iddevise">{{ d.codeiso }}</option> -->
-                                         <option value="">CFD</option>
-                                           <option value="">ABC</option>
+                                        <option *ngFor="let d of centres"  [value]="d.idcentreanalytique">{{ d.libelle }}</option>
+                                         <!-- <option value="">CFD</option>
+                                           <option value="">ABC</option> -->
                                         </select>
                                         <!-- <label class="input-group-text">Dévise de référence</label> -->
                                 </div>

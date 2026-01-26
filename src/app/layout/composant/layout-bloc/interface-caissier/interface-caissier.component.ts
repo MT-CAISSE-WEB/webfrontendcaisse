@@ -138,7 +138,7 @@ export class InterfaceCaissierComponent implements OnInit{
   }
 
   calculEntree(item: any): string {
-    return this.formatCFA(this.getSolde(item));
+    return this.formatCFA(this.getEntree(item));
   }
 
   getCaisseClass(item: any[]): string {

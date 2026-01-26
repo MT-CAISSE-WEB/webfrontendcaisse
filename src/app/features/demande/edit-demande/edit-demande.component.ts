@@ -129,7 +129,7 @@ export class EditDemandeComponent implements OnInit {
 
   //Get le taux recent
   getderniertaux (payload: any){
-    this.ts.tauxrecent(payload).subscribe({
+    this.service.tauxrecent(payload).subscribe({
       next : (res) => {
          if(res.success){
             this.tauxdevise = res.data;
@@ -143,7 +143,7 @@ export class EditDemandeComponent implements OnInit {
           this.toastr.error("Erreur serveur", res);
          }
       },
-      error: (err)=> {
+      error: (err) => {
         this.toastr.error("Erreur backend", err.error.message)
       }
     });

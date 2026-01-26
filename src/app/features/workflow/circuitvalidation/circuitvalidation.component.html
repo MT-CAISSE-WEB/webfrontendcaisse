@@ -108,7 +108,7 @@
         <!-- ================= STEP 2 ================= -->
         <div class="tab-pane fade" id="step2">
 
-          <div formArrayName="etapes">
+          <div class ="etapes-scroll" formArrayName="etapes">
 
             <div *ngFor="let etape of etapes.controls; let i = index"
                  [formGroupName]="i"
@@ -147,12 +147,13 @@
                     <div class="col-md-10">
                       <select class="form-select form-select-sm"
                               formControlName="idutilisateur">
-                        <option value="">-- Utilisateur --</option>
+                        <option [ngValue]="">-- Utilisateur --</option>
                         <option *ngFor="let u of utilisateursFiltres"
-                                [value]="u.idutilisateur">
+                                [ngValue]="u.idutilisateur">
                           {{ u.prenom }} {{ u.nom }}
                         </option>
                       </select>
+
                     </div>
 
                     <div class="col-md-2 text-end">

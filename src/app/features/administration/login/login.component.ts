@@ -31,9 +31,7 @@ export class LoginComponent {
   }
 
   login(){
-    if(this.form.invalid){
-      return;
-    }
+    if(this.form.invalid) return;
 
     this.loading =true;
     this.errormsg ='';

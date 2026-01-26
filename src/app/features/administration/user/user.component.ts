@@ -15,6 +15,9 @@ import { roleservice } from '../service/role.service';
 import { utilisateurdepartementservice } from '../service/userdepartement.service';
 import { departementmodel } from '../../structure/model/departement.model';
 import { departementservice } from '../../structure/service/departement.service';
+import { sitemodel } from '../../structure/model/site.model';
+import { siteservice } from '../../structure/service/site.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-user',
@@ -33,6 +36,7 @@ export class UserComponent {
       loading: Boolean = false;
       userForm : FormGroup = this.fb.group({});
       societes : societemodel[] = [];
+      sites : sitemodel[] = [];
 
       //Tri et recherche 
       filtreusers : usermodel[] = [];
@@ -84,11 +88,14 @@ export class UserComponent {
         private dp : departementservice,
         private ud : utilisateurdepartementservice,
         private ur:utilisateurroleservice,
+        private st: siteservice,
+        private toast: ToastrService,
         private router : Router){}
       
       ngOnInit(): void {
       //Afficher toutes les users
       this.getallsocietes();
+      this.loadsites();
       this.getallusers();
       this.loadRoles();
       this.loaddepartements();
@@ -114,6 +121,23 @@ export class UserComponent {
     });
   }
 
+  getsocietebysite(){
+    this.userForm.get('idsite')?.valueChanges.subscribe(idsite => {
+    const site = this.sites.find(s => s.idsite === idsite);
+  
+    if (site) {
+      // Mettre l’ID société dans le formulaire
+      this.userForm.get('idsociete')?.setValue(site.idsociete);
+
+      // Mettre le nom société dans l’input affiché
+      this.userForm.get('societe')?.setValue(site.raisonsociale);
+    } else {
+      this.userForm.get('idsociete')?.setValue(null);
+      this.userForm.get('societe')?.setValue('');
+    }
+  });
+}
+
   getallsocietes(){
     this.sc.getAll().subscribe({
       next : (res) => {
@@ -134,6 +158,11 @@ export class UserComponent {
   loaddepartements(): void {
     this.dp.getAll().subscribe(res => {
       this.departements = res.data;
+    } );
+  }
+  loadsites():void {
+    this.st.getAll().subscribe(res => {
+      this.sites = res.data;
     } );
   }
 
@@ -247,6 +276,8 @@ get acheteurCount(): number {
     this.userForm = this.fb.group({
        codeutilisateur :['', Validators.required],
        idsociete :[''],
+       idsite : ['', Validators.required],
+       societe :[''],
        nom :[''],
        prenom :[''],
        adresse :[''],
@@ -259,7 +290,8 @@ get acheteurCount(): number {
        typeentitesociete : [''],
        acheteur: ['']
 
-    })
+    });
+    this.getsocietebysite();
   }
 
   get form(){
@@ -270,6 +302,8 @@ get acheteurCount(): number {
       this.userForm.patchValue({
         codeutilisateur :_object.codeutilisateur,
         idsociete :_object.idsociete,
+        societe : _object.societe,
+        idsite :_object.idsite,
         nom :_object.nom,
         prenom :_object.prenom,
         adresse :_object.adresse,
@@ -347,10 +381,12 @@ get acheteurCount(): number {
                 this.loadusers(true);
                 this.closeModal('showModal');
                 this.rafreshpage();
+                this.toast.success(res.message);
               }
             },
             error :(err) => {
-                console.log(err);
+                 this.rafreshpage();
+                 this.toast.error(err.error.message);
             }
           });
       }
@@ -381,6 +417,8 @@ get acheteurCount(): number {
         this.userForm.patchValue({
         codeutilisateur :'',
         idsociete :_object.idsociete,
+        societe : _object.societe,
+        idsite :_object.idsite,
         nom :_object.nom,
         prenom :_object.prenom,
         adresse :_object.adresse,
@@ -415,14 +453,19 @@ get acheteurCount(): number {
         this.closeModal('deleteOrder');
         this.getallusers();
         this.rafreshpage();
+        this.toast.warning(res.message);
       } else {
+        this.rafreshpage();
         this.error = "Erreur de Suppression";
+        this.toast.error(this.error);
       }
       this.loading = false;
     },
     error: (err) => {
+      this.rafreshpage();
       this.error = "Suppression échec";
       this.loading = false;
+      this.toast.error(err.error.message);
     }
   })
 }

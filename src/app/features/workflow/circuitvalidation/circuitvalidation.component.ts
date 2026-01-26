@@ -13,6 +13,7 @@ import { siteservice } from '../../structure/service/site.service';
 import { departementservice } from '../../structure/service/departement.service';
 import { usermodel } from '../../administration/model/user.model';
 import { userservice } from '../../administration/service/user.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-circuitvalidation',
@@ -85,6 +86,7 @@ export class CircuitvalidationComponent implements OnInit{
         private st : siteservice,
         private dep : departementservice,
         private us : userservice,
+        private toast : ToastrService,
         private router : Router){}
 
         ngOnInit(): void {
@@ -155,26 +157,32 @@ export class CircuitvalidationComponent implements OnInit{
   }
 
 
- filtrerUtilisateurs(typeEntiteForm: string) {
-  if (!typeEntiteForm) {
-    console.log(typeEntiteForm);
+filtrerUtilisateurs(typeEntite: string | null) {
 
+  if (!this.utilisateurs?.length) {
+    this.utilisateursFiltres = [];
+    return;
+  }
+
+  if (!typeEntite) {
     this.utilisateursFiltres = [...this.utilisateurs];
-    console.log(this.utilisateursFiltres);
     return;
   }
 
   this.utilisateursFiltres = this.utilisateurs.filter(u => {
-    if (typeEntiteForm === 'Societe') {
-      return u.typeentitesociete === 1;
-    } else if (typeEntiteForm === 'Site') {
-      return u.typeentitesite === 1;
-  
-    } else {
-      return true;
+    switch (typeEntite) {
+      case 'societe':
+        return u.typeentitesociete === 1;
+
+      case 'site':
+        return u.typeentitesite === 1;
+
+      default:
+        return true;
     }
   });
 }
+
 
 getSocieteName(id: string): string {
   const soc = this.societes.find(s => s.idsociete === id);
@@ -447,11 +455,12 @@ removeEtape(index: number) {
               if(res.success){
                 this.getallcircuitvalidation();
                 this.refreshpage();
+                this.toast.success(res.message);
                 //this.router.navigate(["/"])
               }
             },
             error :(err) => {
-                console.log("erreur "+ err);
+                this.toast.error(err.error.message);
             }
           });
       }
@@ -459,14 +468,13 @@ removeEtape(index: number) {
       update (circuitvalidation : circuitvalidationmodel){
           this.cv.update(circuitvalidation).subscribe({
             next: (res: any) => {
-              if(res.success){
                 this.getallcircuitvalidation();
                 this.refreshpage();
+                this.toast.success(res.message);
                 //this.router.navigate(["/"])
-              }
             },
             error :(err) => {
-                console.log(err);
+                this.toast.error(err.error.message);
             }
           });
       }
@@ -484,12 +492,11 @@ removeEtape(index: number) {
             this.etapes.clear();
             }
 
- modalUpdate(circuit: any) {
+modalUpdate(circuit: any) {
   this.actionModal = 'update';
   this.circuitvalidation = circuit;
 
   this.initForm();
-
   this.dispatchcircuitvalidation(circuit);
 
   const etapesFA = this.etapes;
@@ -497,8 +504,8 @@ removeEtape(index: number) {
 
   circuit.etapes.forEach((etape: any) => {
     const validateursFA = this.fb.array<FormGroup>([]);
-    
-    etape.validateurs.forEach((validateur: any) => { 
+
+    etape.validateurs.forEach((validateur: any) => {
       validateursFA.push(
         this.fb.group({
           idutilisateur: [validateur.idutilisateur, Validators.required]
@@ -513,7 +520,12 @@ removeEtape(index: number) {
       })
     );
   });
+
+  const typeEntite = this.circuitvalidationForm.get('typeentite')?.value;
+  this.filtrerUtilisateurs(typeEntite);
 }
+
+
 
       
             modalDuplicate(_object: circuitvalidationmodel){
@@ -544,12 +556,15 @@ removeEtape(index: number) {
         this.closeModal('deleteOrder');
         this.getallcircuitvalidation();
         this.refreshpage();
+        this.toast.warning(res.message);
       } else {
         this.error = "Erreur de Suppression";
+        this.toast.error(res.message);
       }
       this.loading = false;
     },
     error: (err) => {
+      this.toast.error(err.error.message);
       this.error = "Suppression échec";
       this.loading = false;
     }

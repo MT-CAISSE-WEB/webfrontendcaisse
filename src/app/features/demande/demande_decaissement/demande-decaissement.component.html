@@ -53,11 +53,6 @@
       <div class="card-body pt-0 mt-3">
         <div>
           <div class="table-responsive table-card mb-1">
-            @if (loading) {
-              <div class="text-center py-4">
-                  <div class="spinner-border text-info"></div>
-              </div>
-            }
             <table class="table table-hover table-nowrap align-middle table-scroll table-container table-custom table-compact" id="orderTable">
               <thead class="text-muted table-light">
                 <tr class="text-uppercase">
@@ -201,9 +196,17 @@
                       </div>
                   </div>
                 }
+                <tr *ngIf="loading">
+                  <td colspan="8">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-info"></div>
+                        <h6 class="mt-2">Chargement...</h6>
+                      </div>
+                  </td>
+                </tr>
               </tbody>
             </table>
-            <div class="noresult" *ngIf="entetesDmd.length == 0">
+            <div class="noresult" *ngIf="entetesDmd.length == 0 && !loading">
               <div class="text-center">
                 <h6 class="mt-2">Désole! Aucun resultat trouvé</h6>
                 <p class="text-muted">
@@ -375,22 +378,22 @@
                                         @for(det of detailBudgets?.details; track $index){
                                           <tr>
                                             <td class="text-start"> {{ det?.nature_lib }} </td>
-                                            <td class="text-end"> {{ det?.prevision | number:'1.0-0' }} </td>
-                                            <td class="text-end"> {{ det?.preengage | number:'1.0-0'}} </td>
-                                            <td class="text-end"> {{ det?.engage | number:'1.0-0':'fr-FR'}} </td>
-                                            <td class="text-end"> {{ det?.realise | number:'1.0-0':'fr-FR'}} </td>
+                                            <td class="text-end"> {{ formatCFA(det?.prevision) }} </td>
+                                            <td class="text-end"> {{ formatCFA(det?.preengage) }} </td>
+                                            <td class="text-end"> {{ formatCFA(det?.engage) }} </td>
+                                            <td class="text-end"> {{ formatCFA(det?.realise) }} </td>
                                             <td class="text-end">
-                                              <span class="me-2">{{calculateSoldeBudget(det?.prevision, det?.engage, det?.preengage, det?.realise) | number:'1.0-0'}} </span>
-                                              <span class="badge bg-danger rounded-circle" style="width:10px; height:10px;" *ngIf="calculateSoldeBudget(det?.prevision, det?.conso) < det?.montant_ref">
+                                              <span class="me-2">{{ formatCFA(calculateSoldeBudget(det?.prevision, det?.engage, det?.preengage, det?.realise)) }} </span>
+                                              <span class="badge bg-danger rounded-circle" style="width:10px; height:10px;" *ngIf="calculateSoldeBudget(det?.prevision, det?.engage, det?.preengage, det?.realise) < det?.montant_ref">
                                                 <i class="me-2 mdi mdi-circle-medium"></i>
                                               </span>
-                                              <span class="badge bg-success rounded-circle" style="width:10px; height:10px;" *ngIf="calculateSoldeBudget(det?.prevision, det?.conso) >= det?.montant_ref">
+                                              <span class="badge bg-success rounded-circle" style="width:10px; height:10px;" *ngIf="calculateSoldeBudget(det?.prevision, det?.engage, det?.preengage, det?.realise) >= det?.montant_ref">
                                                 <i class="me-2 mdi mdi-circle-medium"></i>
                                               </span>                                   
                                             </td>
                                             <td class="text-end">
                                               <span class="badge bg-success-subtle text-success" style="width:80px; height:20px;">
-                                                {{ det?.montant_demande | number:'1.0-0' }} 
+                                                {{ formatCFA(det?.montant_ref) }} 
                                               </span>
                                             </td>
                                           </tr>

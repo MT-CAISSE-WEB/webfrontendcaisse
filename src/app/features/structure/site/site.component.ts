@@ -7,6 +7,8 @@ import { Router } from '@angular/router';
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
 import { societemodel } from '../model/societe.model';
 import { CommonModule } from '@angular/common';
+import { CentreAnalytiqueService } from '../../donnee_base/services/centreanalytique.service';
+import { centreanalytiqueModel } from '../../donnee_base/models/centreanalytique.model';
 
 @Component({
   selector: 'app-site',
@@ -38,8 +40,11 @@ export class SiteComponent implements OnInit {
       pageSize: number = 5;        // éléments par page (à adapter si tu veux)
       currentPage: number = 1;      // page courante
 
-       objectsSelected : sitemodel[] = [];
+      objectsSelected : sitemodel[] = [];
       selectedItems : any[] = [];
+
+      centres : centreanalytiqueModel[] = [];
+      
       // Détermine si toutes les lignes sont selectionnées
       checkAllRow : any;
       error : string = "";
@@ -54,7 +59,7 @@ export class SiteComponent implements OnInit {
       //Element à supprimer 
       deletesite : any = null;
 
-      constructor(private st:siteservice,private sc:societeservice,private router : Router){}
+      constructor(private st:siteservice,private sc:societeservice,private router : Router, private centreanalytiqueservice: CentreAnalytiqueService){}
 
       ngOnInit(): void {
             //Afficher toutes les sites 
@@ -65,6 +70,9 @@ export class SiteComponent implements OnInit {
             this.initcentreanalytique();
             this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("ce Site");
             this.titleMsg = TITLE_DELETE
+
+            //charger tous les centres analytiques
+            this.getAllcentres();
         }
 
   getallsites (){
@@ -76,6 +84,19 @@ export class SiteComponent implements OnInit {
          }
       }
     });
+  }
+
+  getAllcentres() {
+    this.centreanalytiqueservice.getAll().subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.centres = res.data;
+        }
+      },
+      error(err) {
+          console.log(err);
+      },
+    })
   }
 
     getallsocietes (){
@@ -164,6 +185,7 @@ setActiveTab(tab: string) {
 
   initcentreanalytique (){
     this.siteForm.get('estcentreanalytique')?.valueChanges.subscribe(value => {
+      console.log(value);
   if (!value) {
     this.siteForm.get('idanalytique')?.reset();
   }

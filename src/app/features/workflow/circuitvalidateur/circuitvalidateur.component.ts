@@ -112,7 +112,6 @@ loadcircuitvalidation(){
     this.us.getAll().subscribe({
       next : (res) => {
         this.utilisateurs = res.data;
-        console.log(this.utilisateurs);
       }
     })
   }

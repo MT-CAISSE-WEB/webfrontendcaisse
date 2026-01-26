@@ -35,7 +35,7 @@
                     <div class="row g-3">
                         <div class="col-xxl-5 col-sm-6">
                             <div class="search-box">
-                                <input type="text" [(ngModel)]="searchtext" [ngModelOptions]="{standalone: true}" (input)="searchdevise()" class="form-control form-control-sm search" placeholder="rechercher par code,code ISO...">
+                                <input type="text" [(ngModel)]="searchtext" [ngModelOptions]="{standalone: true}" (input)="searchtauxdevise()" class="form-control form-control-sm search" placeholder="rechercher par code,code ISO...">
                                 <i class="ri-search-line search-icon"></i>
                             </div>
                         </div>
@@ -69,7 +69,7 @@
             </div>
             <div class="card-body pt-0">
                 <div>
-                    <ul class="nav nav-tabs nav-tabs-custom nav-success mb-3" role="tablist" >
+                    <!-- <ul class="nav nav-tabs nav-tabs-custom nav-success mb-3" role="tablist" >
                         <li class="nav-item">
                             <a class="nav-link active All py-3" [class.active]="selectedstatus === ''" (click)="setActiveTab('All')"  data-bs-toggle="tab" id="All" href="#" role="tab" aria-selected="true">
                                 <i class="ri-store-2-fill me-1 align-bottom"></i> Tous 
@@ -85,7 +85,7 @@
                                 <i class="ri-truck-line me-1 align-bottom"></i> Inactif <span class="badge bg-danger align-middle ms-1">{{inactifCount}}</span>
                             </a>
                         </li>
-                    </ul>
+                    </ul> -->
 
                     <div class="table-responsive table-card mb-1">
                         <table class="table table-nowrap align-middle" id="orderTable">
@@ -97,27 +97,32 @@
                                         </div> -->
                                     </th>
                                     <th class="sort" data-sort="id">Code </th>
-                                    <th class="sort" data-sort="customer_name">Code Iso </th>
+                                    <th class="sort" data-sort="customer_name">Dévise Origine </th>
+                                    <th class="sort" data-sort="status">Dévise Destination</th>
                                     <th class="sort" data-sort="status">Intitulé </th>
-                                    <th class="sort" data-sort="status">Status </th>
-                                    <th class="sort" data-sort="city">Actions </th>
+                                    <th class="sort" data-sort="city">Type cours </th>
+                                    <th class="sort" data-sort="city">Date  </th>
+                                    <th class="sort" data-sort="city">Coefficient  </th>
+                                     <th class="sort" data-sort="city">Coefficient Inverse </th>
+                                     <th class="sort" data-sort="city">Actions </th>
                                 </tr>
                             </thead>
                             <tbody class="list form-check-all">
-                                @for (item of pagedDevises; track $index){
+                                @for (item of pagedtauxDevises; track $index){
                                     <tr>
                                     <th scope="row">
                                         <!-- <div class="form-check">
                                             <input class="form-check-input" [checked]="isChecked(item.idsociete)" [(ngModel)]="selectedItems[$index]" (ngModelChange)="handleSelectOne(item, $event)" type="checkbox" name="itemGroup_{{ $index }}">
                                         </div> -->
                                     </th>
-                                    <td class="code"><a href="#" class="fw-medium link-primary">{{item.codedevise}}</a></td>
-                                    <td class="customer_name">{{item.codeiso}}</td>
+                                    <td class="code"><a href="#" class="fw-medium link-primary">{{item.codetauxdevise}}</a></td>
+                                    <td class="customer_name">{{item.iddeviseorigine}}</td>
+                                    <td class="customer_name">{{item.iddevisedestination}}</td>
                                     <td class="customer_name">{{item.intitule}}</td>
-                                    <td class="status">
-                                        <span *ngIf="item.actif == 1" class="badge bg-success-subtle text-success text-uppercase"> Actif </span>
-                                        <span *ngIf="item.actif == 0" class="badge bg-danger-subtle text-danger text-uppercase"> Inactif </span>
-                                    </td>
+                                     <td class="customer_name">{{item.typecours}}</td>
+                                     <td class="customer_name">{{item.datecours}}</td>
+                                     <td class="customer_name">{{item.Coefficient}}</td>
+                                     <td class="customer_name">{{item.coefficientinverse}}</td>
                                     <td>
                                         <ul class="list-inline hstack gap-2 mb-0">
                                             <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Dupliquer">
@@ -172,31 +177,47 @@
                                                                                 }} Dévise </h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
                             </div>
-                        <form [formGroup]="deviseForm" (ngSubmit)="onsubmit()" class="ng-untouched ng-pristine ng-invalid">
+                        <form [formGroup]="tauxdeviseForm" (ngSubmit)="onsubmit()" class="ng-untouched ng-pristine ng-invalid">
                              <div class="modal-body">
                                      <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="codedevise" class="form-label">Code Dévise </label>
-                                <input id="code" formControlName="codedevise" class="form-control form-control-sm" placeholder="Ex: 952">
+                                <label for="codedevise" class="form-label">Code Taux Dévise </label>
+                                <input id="code" formControlName="codetauxdevise" class="form-control" placeholder="Ex: 952">
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="codeiso" class="form-label">Code ISO</label>
-                                <input id="codeiso" formControlName="codeiso" class="form-control form-control-sm" placeholder="Ex: XOF">
+                                <label for="iddeviseorigine" class="form-label">Devise Origine</label>
+                                <input id="iddeviseorigine" formControlName="iddeviseorigine" class="form-control" placeholder="Ex: XOF">
+                            </div>
+
+                             <div class="col-md-6 mb-3">
+                                <label for="iddevisedestination" class="form-label">Devise Destination</label>
+                                <input id="iddevisedestination" formControlName="iddevisedestination" class="form-control" placeholder="Ex: XOF">
                             </div>
 
                             <div class="col-md-12 mb-3">
                                 <label for="intitule" class="form-label">Intitulé</label>
-                                <input id="intitule" formControlName="intitule" class="form-control form-control-sm" placeholder="Ex: Franc CFA">
+                                <input id="intitule" formControlName="intitule" class="form-control" placeholder="Ex: Franc CFA">
                             </div>
-                            
 
                             <div class="col-md-12 mb-3">
-                                <label class="form-label">Statut</label>
-                                <select formControlName="actif" class="form-select">
-                                <option [value]="1">Actif</option>
-                                <option [value]="0">Inactif</option>
-                                </select>
+                                <label for="typecours" class="form-label">Type cours</label>
+                                <input id="typecours" type="number" formControlName="typecours" class="form-control" placeholder="Ex: Franc CFA">
+                            </div>
+
+                             <div class="col-md-12 mb-3">
+                                <label for="datecours" class="form-label">Date </label>
+                                <input type="datetime" id="datecours" formControlName="datecours" class="form-control" placeholder="Ex: Franc CFA">
+                            </div>
+
+                             <div class="col-md-12 mb-3">
+                                <label for="Coefficient" class="form-label">Coefficient </label>
+                                <input type="number" id="Coefficient" formControlName="Coefficient" class="form-control" placeholder="Ex: Franc CFA">
+                            </div>
+
+                              <div class="col-md-12 mb-3">
+                                <label for="coefficientinverse" class="form-label">Coefficient inverse </label>
+                                <input type="number" id="coefficientinverse" formControlName="coefficientinverse" class="form-control" placeholder="Ex: Franc CFA">
                             </div>
                             </div>
                              </div>
@@ -240,3 +261,4 @@
     <!--end col-->
 </div>
 <!--end row-->
+

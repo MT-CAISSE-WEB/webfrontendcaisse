@@ -274,6 +274,7 @@ export class DemandeDecaissementComponent implements OnInit {
 
   // afficher toutes les demandes
   loadAllDemandes() {
+    this.loading = true;
     const params = {
       page: this.currentPage,
       limit: this.limit,
@@ -287,11 +288,11 @@ export class DemandeDecaissementComponent implements OnInit {
           // this.entetesDmd = res.data.data;
            this.entetesDmd = res.data.data.map((item: any) => ({
             ...item,
-            // canValidateUser: false,
-            // _validationLoaded: false
           }));
           this.totalPages = res.data.totalPages;
+          this.loading = false;
         }else{
+          this.loading = false;
           this.toastr.error("Erreur de récuperation des données");
         }
       },

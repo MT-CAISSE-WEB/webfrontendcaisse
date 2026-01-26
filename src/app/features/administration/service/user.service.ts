@@ -34,6 +34,19 @@ export class userservice {
     );
   }
 
+   /**
+   *Changepassword
+   * @param _object
+   * 
+   */
+  changepassword(_object: any,id:any): Observable<any> {
+    return this.http.put<any>(
+      URL_LOCAL.baseUrl + this.url +"/changepassword/"+id,
+      _object
+    );
+  }
+
+
   /**
    * delete
    * @param id

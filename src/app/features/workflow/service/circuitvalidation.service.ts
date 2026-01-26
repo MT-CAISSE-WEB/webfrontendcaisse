@@ -54,7 +54,7 @@ export class circuitvalidationservice {
    */
    update (_object : circuitvalidationmodel): Observable< circuitvalidationmodel> {
     return this.http.put < circuitvalidationmodel>(
-      URL_LOCAL.baseUrl + this.url+"/update/"+_object.idcircuitvalidation,_object
+      URL_LOCAL.baseUrl + this.url+"/"+_object.idcircuitvalidation,_object
     );
   }
 

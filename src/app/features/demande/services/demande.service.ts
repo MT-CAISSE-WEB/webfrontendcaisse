@@ -134,4 +134,16 @@ export class DemandeService {
       `${this.base}entete-demande/detail/budget/${iddemande}`
     );
   }
+
+  /**
+   *get dernier taux
+   * @param _object
+   * 
+   */
+  tauxrecent(_object: any): Observable<any> {
+    return this.http.post<any>(
+      `${this.base}entete-demande/tauxdevise/recent`,
+      _object
+    );
+  }
 }

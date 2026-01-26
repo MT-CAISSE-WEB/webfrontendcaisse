@@ -225,14 +225,25 @@
 
                             <div class="col-md-6 mb-3">
                                <div class="mb-3">
-                                <label for="codedevise" class="form-label">Société </label>
-                                <select class="form-control form-control-sm" formControlName="idsociete">
-                                    <option value="">----Choisir la société-----</option>
-                                    <option *ngFor="let s of societes"  [value]="s.idsociete">{{ s.raisonsociale }}</option>
-                                    </select>
+                                <label for="site" class="form-label">Site </label>
+                                <select class="form-control form-control-sm" formControlName="idsite">
+                                    <option value="">----Choisir le site-----</option>
+                                    <option *ngFor="let s of sites"  [value]="s.idsite">{{ s.libelle }}</option>
+                                </select>
         <!-- <label class="input-group-text">Dévise de référence</label> -->
                                 </div>
                             </div>
+
+                            <!-- ID Société (hidden) -->
+                                <input type="hidden" formControlName="idsociete" />
+
+                                 <div class="mb-3">
+                                        <label class="form-label form-label-sm">Société</label>
+                                        <input type="text" class="form-control form-control-sm"
+                                            formControlName="societe" readonly/>
+                                </div>
+
+                            
 
                             <div class="col-md-12 mb-3">
                                 <label for="nom" class="form-label">Nom</label>
@@ -443,3 +454,4 @@
     </div>
 </div>
 </div>
+
