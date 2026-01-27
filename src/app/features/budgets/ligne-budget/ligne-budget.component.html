@@ -41,54 +41,34 @@
         </div>
       </div>
       <div class="card-body border border-dashed border-end-0 border-start-0">
-        <form>
+        <form (ngSubmit)="onClickAfficher()" #filterForm="ngForm">
           <div class="row g-3">
             <div class="col-xxl-5 col-sm-6">
               <div class="search-box">
-                <input type="text" class="form-control form-control-sm search"
-                  placeholder="rechercher par code, libelle..." [formControl]="searchCtrl" />
-                <i class="ri-search-line search-icon"></i>
-              </div>
-            </div>
-            <!--end col-->
-
-            <!--end col-->
-            <div class="col-xxl-2 col-sm-4">
-              <div>
-                <select class="form-control form-control-sm" data-choices data-choices-search-false
-                  name="choices-single-default" id="idStatus">
-                  <option value="">Status</option>
-                  <option value="all" selected>tous</option>
-                  <option value="Pending">Actif</option>
-                  <option value="Pending">Inactif</option>
+                <select class="form-select" name="budget" [(ngModel)]="selectedBudgetId" required>
+                  <option [ngValue]="null">-- Sélectionner --</option>
+                  <option *ngFor="let budget of budgets" [ngValue]="budget.idbudget">
+                    {{ budget.codebudget }} : {{ budget.libelle }}
+                  </option>
                 </select>
               </div>
             </div>
-            <!--end col-->
 
-            <!--end col-->
             <div class="col-xxl-1 col-sm-2">
-              <div>
-                <button type="button" class="btn btn-sm btn-primary w-100" onclick="SearchData();">
-                  <i class="ri-equalizer-fill me-1 align-bottom"></i>
-                  Filtrer
-                </button>
-              </div>
+              <button type="submit" class="btn btn-sm btn-primary py-2" [disabled]="!selectedBudgetId">
+                <i class="ri-equalizer-fill me-1 align-bottom"></i>
+                Afficher
+              </button>
             </div>
-            <!--end col-->
           </div>
-          <!--end row-->
         </form>
+
+
       </div>
       <div class="card-body pt-0">
         <div>
           <ul class="nav nav-tabs nav-tabs-custom nav-success mb-3" role="tablist">
-            <li class="nav-item">
-              <a class="nav-link active All py-3" data-bs-toggle="tab" id="All" href="#home1" role="tab"
-                aria-selected="true">
-                <i class="ri-store-2-fill me-1 align-bottom"></i> Tous
-              </a>
-            </li>
+
           </ul>
 
           <div class="table-responsive table-card mb-1">
@@ -122,7 +102,7 @@
                 @if (ligneBudgetsGrouped.length === 0) {
                 <tr>
                   <td colspan="8" class="text-center text-muted py-4">
-                    Aucune ligne budgétaire n'a encore été créée.
+                    Veuillez sélectionner un budget pour afficher les lignes budgétaires.
                   </td>
                 </tr>
                 } @for (group of ligneBudgetsGrouped; track
@@ -174,6 +154,13 @@
 
 
                 <!-- Lignes du budget -->
+                @if (group.lignes.length === 0) {
+                <tr>
+                  <td colspan="8" class="text-center text-muted py-4">
+                    Aucune ligne budgétaire n'est associée à ce budget.
+                  </td>
+                </tr>
+                }
                 @for (item of group.lignes; track
                 item.idbudgetdepartementnature) {
                 <tr>
@@ -639,6 +626,7 @@
                         <th>Validateur</th>
 
                         <th>Statut</th>
+                        <th *ngIf="isRejected()">Motif</th>
                         <th>Commentaire</th>
                         <th>Date</th>
                       </tr>
@@ -660,6 +648,10 @@
                       ">
                             {{ validateur.decision }}
                           </span>
+                        </td>
+
+                        <td *ngIf="isRejected() && validateur.decision === 'rejete'">
+                          {{ motifOfBudgetRejected ?? '-' }}
                         </td>
 
                         <td>

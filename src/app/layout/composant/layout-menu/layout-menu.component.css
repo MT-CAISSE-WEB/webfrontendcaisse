@@ -4,6 +4,96 @@
   overflow-x: hidden;
 }
 
-#scrollbar a {
-  color: rgb(48, 48, 48);
+
+/* ==============================
+   SCROLLBAR
+============================== */
+/* #scrollbar {
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+} */
+
+/* Zone scrollable */
+#scrollbar {
+  height: calc(100vh - 70px); /* 70px = hauteur du logo/header */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+
+/* ==============================
+   TYPOGRAPHIE
+============================== */
+.app-menu .navbar-nav .nav-link {
+  font-size: 14px;
+}
+
+.app-menu .menu-title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.app-menu .nav-sm .nav-link {
+  font-size: 13px;
+  color: #c7def8f6;
+}
+
+/* ==============================
+   BACKGROUND SIDEBAR
+============================== */
+.app-menu.navbar-menu {
+  background: #405189;
+}
+
+/* ==============================
+   COULEURS PAR DÉFAUT
+============================== */
+.app-menu .nav-link,
+.app-menu .menu-title span,
+.app-menu .nav-item span,
+.app-menu .nav-item i {
+  color: #c7def8f6;
+}
+
+/* Hover */
+.app-menu .nav-link:hover {
+  color: #ffffff;
+}
+
+/* ==============================
+   LIEN ACTIF (SURBRILLANCE)
+============================== */
+.app-menu .nav-link.active,
+.app-menu .menu-link.active,
+.app-menu .nav-sm .nav-link.active {
+  background-color: rgba(255, 255, 255, 0.18); /* surbrillance */
+  color: #ffffff !important;
+  border-radius: 6px;
+}
+
+/* Icône active */
+.app-menu .nav-link.active i {
+  color: #ffffff !important;
+}
+
+/* ==============================
+   AMÉLIORATION UX
+============================== */
+.app-menu .nav-link {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.app-menu .nav .nav-sm .nav-link {
+  color: #c7def8f6;
+}
+
+.app-menu .nav .nav-sm .nav-link:hover {
+  color: #ffffff;
+}
+
+.app-menu .nav .nav-sm .nav-link.active {
+  background-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
 }

@@ -84,6 +84,7 @@ export class BudgetComponent implements OnInit {
 
   selectedBudgetParent?: BudgetModel;
   entiteParent?: string;
+  selectedBudget?: BudgetModel;
 
   constructor(
     private budgetservice: BudgetService,
@@ -135,6 +136,18 @@ export class BudgetComponent implements OnInit {
         this.msgErros = err.error.error;
       },
     });
+  }
+
+  lignesByBudget: LigneBudgetModel[] = [];
+
+  // Afficher les lignes budgétaires du budget
+  onClickAfficherLignesBudgetaire(budget: BudgetModel): void{
+    if(!budget) return
+    this.selectedBudget = budget
+    const lignes = this.lignesBudgetaires.filter(
+      l => l.idbudget === budget.idbudget
+    );
+    this.lignesByBudget = lignes
   }
 
   getAllCircuits() {

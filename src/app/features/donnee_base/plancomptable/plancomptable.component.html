@@ -24,9 +24,21 @@
                             <button type="button" class="btn btn-sm btn-soft-success" data-bs-toggle="modal" (click)="modalCreate()" id="create-btn" data-bs-target="#showModal">
                                 <i class="ri-add-line align-bottom me-1"></i>Créer
                             </button>
-                            <button type="button" class="btn btn-sm btn-soft-info"><i class="ri-file-download-line align-bottom me-1"></i> Import</button>
-                            <!-- <button class="btn btn-sm btn-soft-danger" [disabled]="!checkAllRow" onClick="deleteMultiple()"><i class="ri-delete-bin-2-line"></i></button> -->
-                            <button type="button" class="btn btn-sm btn-info"> <i class="ri-refresh-fill align-bottom me-1"></i>Actualiser</button>
+
+                            <!-- Importer un plan comptable à partir d'un fichier CSV -->
+                            <input type="file" #fileInput style="display: none;" (change)="importPlanComptable($event)" accept=".csv" />
+                            <button type="button" class="btn btn-sm btn-soft-info" (click)="fileInput.click()">
+                                <i class="ri-file-download-line align-bottom me-1"></i> Importer CSV
+                            </button>
+
+                            <button type="button" class="btn btn-success btn-sm" (click)="exportToCSV()">
+                                 Exporter CSV
+                            </button>
+
+                            <button title ="button" class="btn btn-sm btn-soft-danger" [disabled]="!checkAllRow" (click)="deleteMultiple()"><i class="ri-delete-bin-2-line"></i></button>
+                            <button type="button" class="btn btn-sm btn-info">
+                                <i class="ri-refresh-fill align-bottom me-1"></i>Actualiser
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -45,12 +57,12 @@
                                             <input title="input" class="form-check-input" type="checkbox" [(ngModel)]="checkAllRow" id="checkAll" (ngModelChange)="handleSelectAll($event)">
                                         </div>
                                     </th>
-                                    <th>Compte</th>
-                                    <th>Libelle</th>
+                                    <th style="width: 50px;">Compte</th>
+                                    <th style="width: auto; max-width: 600px;">Libelle</th>
                                     <th>Ventillable</th>
                                     <th>Auxiliaire</th>
-                                    <th>Suivi budgetaire</th>
-                                    <th>Suivi budget mensuel</th>
+                                    <!-- <th>Suivi budgetaire</th>
+                                    <th>Suivi budget mensuel</th> -->
                                     <th>Statut</th>
                                     <th>Action</th>
                                 </tr>
@@ -64,7 +76,7 @@
                                             <input title="input" class="form-check-input" [checked]="isChecked(item.idcompte)" [(ngModel)]="selectedItems[$index]" (ngModelChange)="handleSelectOne(item, $event)" type="checkbox" name="itemGroup_{{ $index }}">
                                         </div>
                                     </th>
-                                    <td class="code"><a href="#" class="fw-medium link-primary">{{item.numcompte}}</a></td>
+                                    <td class="code">{{item.numcompte}}</td>
                                     <td class="libelle">{{item.libelle}}</td>
                                     <td class="ventillable">
                                         <span *ngIf="item.ventillable == 1"> Oui </span>
@@ -74,14 +86,14 @@
                                         <span *ngIf="item.auxiliaire == 1"> Oui </span>
                                         <span *ngIf="item.auxiliaire == 0"> Non </span>
                                     </td>
-                                    <td class="suivibudget">
+                                    <!-- <td class="suivibudget">
                                         <span *ngIf="item.suivibudgetaire == 1"> Oui </span>
                                         <span *ngIf="item.suivibudgetaire == 0"> Non </span>
                                     </td>
                                     <td class="suivibudgetairemensuel">
                                         <span *ngIf="item.suivibudgetairemensuel == 1"> Oui </span>
                                         <span *ngIf="item.suivibudgetairemensuel == 0"> Non </span>
-                                    </td>
+                                    </td> -->
                                     <td class="status">
                                         <span *ngIf="item.actif == 1" class="badge bg-success-subtle text-success text-uppercase"> Actif </span>
                                         <span *ngIf="item.actif == 0" class="badge bg-danger-subtle text-danger text-uppercase"> Inactif </span>
@@ -91,7 +103,7 @@
                                     <td>
                                         <ul class="list-inline hstack gap-2 mb-0">
                                             <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="View">
-                                                <a title="link" href="#showModal" data-bs-toggle="modal" class="text-primary d-inline-block">
+                                                <a href="#showModal" class="text-primary d-inline-block" data-bs-toggle="modal" (click)="modalview(item)">
                                                     <i class="ri-eye-fill fs-16"></i>
                                                 </a>
                                             </li>

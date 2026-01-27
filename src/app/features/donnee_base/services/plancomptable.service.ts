@@ -1,5 +1,4 @@
 import { HttpClient } from "@angular/common/http";
-import { APP_PLAN_COMPTABLE_DONNEE_BASE } from "../../../_core/routes/frontend.root";
 import { Observable } from "rxjs";
 import { QueryResultModel } from "../../../_core/models/query-result.model";
 import { URL_LOCAL } from "../../../_core/routes/backend.root";
@@ -66,5 +65,13 @@ export class PlancomptableService {
       URL_LOCAL.baseUrl + this.url + "/" + id
     );
   }
+  
 
+  importPlanComptable(file: File, _object: any): Observable<any> {
+    const formData: FormData = new FormData();
+    formData.append('file', file, file.name);
+    formData.append('idsociete', _object.idsociete);
+    formData.append('createdby', _object.createdby);
+    return this.http.post<any>(URL_LOCAL.baseUrl + this.url + '/import', formData);
+  }
 }

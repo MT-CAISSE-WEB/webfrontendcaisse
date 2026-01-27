@@ -5,7 +5,11 @@ import { TiersService } from '../services/tiers.service';
 import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
+
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+
 
 // ADD-INS
 declare var $: any;
@@ -47,7 +51,9 @@ export class TiersComponent implements OnInit{
 
 
   constructor(private tiersservice: TiersService,
-              private router: Router){}
+              private router: Router
+            , private toastr : ToastrService
+          ){}
 
   ngOnInit(): void {
       //Afficher tous les tiers
@@ -106,36 +112,16 @@ export class TiersComponent implements OnInit{
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
-  // ngAfterViewInit(): void {
-  //   // Attendre que le DOM soit chargé
-  //   $('#dataTable').DataTable({
-  //     paging: true,
-  //     searching: true,
-  //     ordering: true,
-  //     info: true,
-  //     responsive: true,
-  //     language: {
-  //       search: "Rechercher :",
-  //       lengthMenu: "Afficher _MENU_ lignes",
-  //       info: "Affichage de _START_ à _END_ sur _TOTAL_ lignes",
-  //       paginate: {
-  //         previous: "Précédent",
-  //         next: "Suivant"
-  //       }
-  //     }
-  //   });
-  // }
-
-
   //création du formulaire
-  
   initForm(): void{
     this.tiersForm = this.fb.group({
       codetiers : ["", [Validators.required]],
       designation : ["", [Validators.required]],
       typetiers : ["", [Validators.required]],
-      idsociete : [this.user?.idsociete, [Validators.required]],
+      idsociete : [this.user.idsociete, [Validators.required]],
       actif : [true],
+      createdby : [this.user.codeutilisateur],
+      updatedby : [this.user.codeutilisateur]
     })
   }
 
@@ -225,14 +211,17 @@ export class TiersComponent implements OnInit{
         if (res.success) {
           this.closeModal('showModal');
           this.getAllTiers();
+          this.toastr.success('Fiche créée');
         } else {
           this.error = "Erreur de création";
+          this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Echec de création";
         this.loading = false;
+        this.toastr.error(this.error);
       }
     })
   }
@@ -244,14 +233,17 @@ export class TiersComponent implements OnInit{
         if (res.success) {
           this.closeModal('showModal');
           this.getAllTiers();
+          this.toastr.success('Fiche modifée');
         } else {
           this.error = "Erreur de modification";
+          this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Echec de modification";
         this.loading = false;
+        this.toastr.error(this.error);
       }
     })
   }
@@ -286,14 +278,104 @@ export class TiersComponent implements OnInit{
         if (res.success) {
           this.closeModal('delete');
           this.getAllTiers();
+          this.toastr.success('Fiche supprimée');
         } else {
           this.error = "Erreur de Suppression";
+          this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Suppression échec";
         this.loading = false;
+        this.toastr.error(this.error);
+      }
+    })
+  }
+
+  // Suppression multiple
+  deleteMultiple(){
+    for (let i = 0; i < this.objectsSelected.length; i++) {
+      this.tiersservice.delete(this.objectsSelected[i].idtiers).subscribe({})
+    }
+    this.getAllTiers();
+    this.toastr.success('Fiches supprimées');
+  }
+
+
+  exportToExcel(): void {
+    const element = document.getElementById('dataTable');
+  
+    if (!element) {
+      console.error('Table non trouvée');
+      return;
+    }
+  
+    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
+    const workbook: XLSX.WorkBook = {
+      Sheets: { 'Evolution Budget': worksheet },
+      SheetNames: ['Evolution Budget']
+    };
+  
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array'
+    });
+  
+    const data: Blob = new Blob(
+      [excelBuffer],
+      { type: 'application/octet-stream' }
+    );
+  
+    saveAs(data, `Liste_Tiers_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.xlsx`);
+  }
+    
+  exportToCSV(): void {
+    const element = document.getElementById('dataTable');
+  
+    if (!element) {
+      console.error('Table non trouvée');
+      return;
+    }
+  
+    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
+    
+    // 🔥 forcer le séparateur ;
+    const csv = XLSX.utils.sheet_to_csv(worksheet, {
+      FS: ';'
+    });
+  
+    const blob = new Blob([csv], {
+      type: 'text/csv;charset=utf-8;'
+    });
+
+    saveAs(blob, `Liste_Tiers_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.csv`);
+  }
+
+    //Importation des tiers
+  importTiers(event: any){
+    const file = event.target.files[0];
+    const info = {
+      idsociete : this.user.idsociete,
+      createdby : this.user.codeutilisateur
+
+    }
+
+    this.tiersservice.importTiers(file, info).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.getAllTiers();
+          this.toastr.success('Importation effectuée avec succès');
+        } else {
+          this.error = "Echec de l'importation";
+          this.toastr.error(this.error);
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = "Echec de l'importation";
+        this.loading = false;
+        this.toastr.error(err);
       }
     })
   }

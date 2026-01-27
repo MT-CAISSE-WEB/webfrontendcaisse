@@ -24,8 +24,17 @@
                             <button type="button" class="btn btn-sm btn-soft-success" data-bs-toggle="modal" (click)="modalCreate()" id="create-btn" data-bs-target="#showModal">
                                 <i class="ri-add-line align-bottom me-1"></i>Créer
                             </button>
-                            <button type="button" class="btn btn-sm btn-soft-info"><i class="ri-file-download-line align-bottom me-1"></i> Import</button>
-                            <!-- <button class="btn btn-sm btn-soft-danger" [disabled]="!checkAllRow" onClick="deleteMultiple()"><i class="ri-delete-bin-2-line"></i></button> -->
+
+                            <!-- Importer un plan comptable à partir d'un fichier CSV -->
+                            <input type="file" #fileInput style="display: none;" (change)="importNatureOperation($event)" accept=".csv" />
+                            <button type="button" class="btn btn-sm btn-soft-info" (click)="fileInput.click()">
+                                <i class="ri-file-download-line align-bottom me-1"></i> Importer CSV
+                            </button>
+
+                            <button type="button" class="btn btn-success btn-sm" (click)="exportToCSV()">
+                                 Exporter CSV
+                            </button>
+                            <button title ="button" class="btn btn-sm btn-soft-danger" [disabled]="!checkAllRow" (click)="deleteMultiple()"><i class="ri-delete-bin-2-line"></i></button>
                             <button type="button" class="btn btn-sm btn-info"> <i class="ri-refresh-fill align-bottom me-1"></i>Actualiser</button>
                         </div>
                     </div>
@@ -39,15 +48,15 @@
                             <!-- Entete du tableau  -->
                             <thead class="text-muted table-light">
                                 <tr class="text-uppercase">
-                                    <th>
+                                    <th style="width: 10px;">
                                         <div class="form-check">
                                             <input title="input" class="form-check-input" type="checkbox" [(ngModel)]="checkAllRow" id="checkAll" (ngModelChange)="handleSelectAll($event)">
                                         </div>
                                     </th>
-                                    <th>Code</th>
-                                    <th>Libelle</th>
-                                    <th>Dec. à justifier</th>
-                                    <th>Imputation tiers</th>
+                                    <th style="width: 80px;">Code</th>
+                                    <th style="width: auto; max-width: 600px;">Libelle</th>
+                                    <!-- <th>Dec. à justifier</th> -->
+                                    <!-- <th>Imputation tiers</th> -->
                                     <th>Aut. demande</th>
                                     <th>Type opération</th>
                                     <th>Compte</th>
@@ -67,14 +76,14 @@
                                     </th>
                                     <td class="code"><a href="#" class="fw-medium link-primary">{{item.codenature}}</a></td>
                                     <td class="libelle">{{item.libelle}}</td>
-                                    <td class="decajustifier">
+                                    <!-- <td class="decajustifier">
                                         <span *ngIf="item.decajustifier == 1"> Oui </span>
                                         <span *ngIf="item.decajustifier == 0"> Non </span>
                                     </td>
                                     <td class="imputationtiers">
                                         <span *ngIf="item.imputationtiers == 1"> Oui </span>
                                         <span *ngIf="item.imputationtiers == 0"> Non </span>
-                                    </td>
+                                    </td> -->
                                     <td class="demandec">
                                         <span *ngIf="item.demandedecaissement == 1"> Oui </span>
                                         <span *ngIf="item.demandedecaissement == 0"> Non </span>
@@ -91,7 +100,7 @@
                                     <td>
                                         <ul class="list-inline hstack gap-2 mb-0">
                                             <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="View">
-                                                <a title="link" href="#showModal" data-bs-toggle="modal" class="text-primary d-inline-block show">
+                                                <a href="#showModal" class="text-primary d-inline-block" data-bs-toggle="modal" (click)="modalview(item)">
                                                     <i class="ri-eye-fill fs-16"></i>
                                                 </a>
                                             </li>
@@ -112,7 +121,6 @@
 
                             </tbody>
                         </table>
-
                     </div>
                 </div>
 
@@ -160,14 +168,11 @@
 
                                     <div class="mb-3">
                                         <label for="customername-field" class="form-label form-label-sm">Type opération</label>
-                                        
                                         <select id="customername-field" class="form-control form-control-sm {{ isValidField('typeoperation') }}" formControlName="typeoperation">
                                             <option value="">-- Sélectionner --</option>
                                             <option value="Encaissement">Encaissement</option>
                                             <option value="Decaissement">Décaissement</option>
-
                                         </select>
-
                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                     </div>
 
@@ -182,7 +187,7 @@
                                             <select id="customername-field" class="form-control form-control-sm" formControlName="idcompte">
                                                 <option value="">-- Sélectionner --</option>
                                                 @for ( item of comptes; track $index ) {
-                                                    <option [value]="item.idcompte">{{ item.numcompte }} - {{ item.libelle }}</option>
+                                                <option [value]="item.idcompte">{{ item.numcompte }} - {{ item.libelle }}</option>
                                                 }
                                             </select>
                                         </div>

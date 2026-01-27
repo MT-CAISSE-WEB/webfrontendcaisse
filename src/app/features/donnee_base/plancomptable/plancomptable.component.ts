@@ -7,8 +7,14 @@ import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
 
+import { ToastrService } from 'ngx-toastr';
+
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+
 // ADD-INS
 declare var $: any;
+
 
 @Component({
   selector: 'app-plancomptable',
@@ -47,9 +53,10 @@ export class PlancomptableComponent implements OnInit{
   deleteCompte: any = null;
 
 
-  constructor(private plancomptableservice: PlancomptableService, 
+  constructor(private plancomptableservice: PlancomptableService
     // private autreservice: AutreService,
-              private router: Router){}
+    , private toastr : ToastrService
+    , private router: Router){}
 
   ngOnInit(): void {
       //Afficher tous les comptes
@@ -108,27 +115,6 @@ export class PlancomptableComponent implements OnInit{
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
-  
-  // ngAfterViewInit(): void {
-  //   // Attendre que le DOM soit chargé
-  //   $('#dataTable').DataTable({
-  //     paging: true,
-  //     searching: true,
-  //     ordering: true,
-  //     info: true,
-  //     responsive: true,
-  //     language: {
-  //       search: "Rechercher :",
-  //       lengthMenu: "Afficher _MENU_ lignes",
-  //       info: "Affichage de _START_ à _END_ sur _TOTAL_ lignes",
-  //       paginate: {
-  //         previous: "Précédent",
-  //         next: "Suivant"
-  //       }
-  //     }
-  //   });
-  // }
-
 
   //Création du formulaire
   initForm(): void{
@@ -141,6 +127,8 @@ export class PlancomptableComponent implements OnInit{
       suivibudgetairemensuel: [false],
       idsociete : [this.user.idsociete, [Validators.required]],
       actif : [true],
+      createdby : [this.user.codeutilisateur],
+      updatedby : [this.user.codeutilisateur]
     })
   }
 
@@ -234,15 +222,18 @@ export class PlancomptableComponent implements OnInit{
         if (res.success) {
           this.closeModal('showModal');
           this.getAllComptes();
-          console.log("Création réussie");
+          this.toastr.success('Fiche créée');
+
         } else {
           this.error = "Erreur de création";
+          this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Echec de création";
         this.loading = false;
+        this.toastr.error(err);
       }
     })
   }
@@ -254,14 +245,17 @@ export class PlancomptableComponent implements OnInit{
         if (res.success) {
           this.closeModal('showModal');
           this.getAllComptes();
+          this.toastr.success('Fiche modifée');
         } else {
           this.error = "Erreur de modification";
+          this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Echec de modification";
         this.loading = false;
+        this.toastr.error(this.error);
       }
     })
   }
@@ -276,6 +270,13 @@ export class PlancomptableComponent implements OnInit{
   modalCreate(){
     this.actionModal = "create";
     this.initForm();
+  }
+
+ modalview(_object: plancomptableModel){
+    this.compte = _object;
+    this.actionModal = "view";
+    this.plancomptableForm.reset();
+    this.dispatchComptes(_object);
   }
 
   modalUpdate(_object: plancomptableModel){
@@ -304,6 +305,93 @@ export class PlancomptableComponent implements OnInit{
       error: (err) => {
         this.error = "Suppression échec";
         this.loading = false;
+      }
+    })
+  }
+
+
+  deleteMultiple(){
+    for (let i = 0; i < this.objectsSelected.length; i++) {
+      this.plancomptableservice.delete(this.objectsSelected[i].idcompte).subscribe({})
+    }
+    this.toastr.success('Fiches supprimées');
+    this.getAllComptes();
+  }
+
+  
+  exportToExcel(): void {
+    const element = document.getElementById('dataTable');
+  
+    if (!element) {
+      console.error('Table non trouvée');
+      return;
+    }
+  
+    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
+    const workbook: XLSX.WorkBook = {
+      Sheets: { 'Evolution Budget': worksheet },
+      SheetNames: ['Evolution Budget']
+    };
+  
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array'
+    });
+  
+    const data: Blob = new Blob(
+      [excelBuffer],
+      { type: 'application/octet-stream' }
+    );
+  
+    saveAs(data, `Evolution_budget_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.xlsx`);
+  }
+    
+  exportToCSV(): void {
+    const element = document.getElementById('dataTable');
+  
+    if (!element) {
+      console.error('Table non trouvée');
+      return;
+    }
+  
+    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
+    
+    // 🔥 forcer le séparateur ;
+    const csv = XLSX.utils.sheet_to_csv(worksheet, {
+      FS: ';'
+    });
+  
+    const blob = new Blob([csv], {
+      type: 'text/csv;charset=utf-8;'
+    });
+
+    saveAs(blob, `plan_comptable_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.csv`);
+  }
+
+  //Importation du plan comptable
+  importPlanComptable(event: any){
+    const file = event.target.files[0];
+    const info = {
+      idsociete : this.user.idsociete,
+      createdby : this.user.codeutilisateur
+
+    }
+    
+    this.plancomptableservice.importPlanComptable(file, info).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.getAllComptes();
+          this.toastr.success('Importation effectuée avec succès');
+        } else {
+          this.error = "Echec de l'importation";
+          this.toastr.error(this.error);
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = "Echec de l'importation";
+        this.loading = false;
+        this.toastr.error(err);
       }
     })
   }

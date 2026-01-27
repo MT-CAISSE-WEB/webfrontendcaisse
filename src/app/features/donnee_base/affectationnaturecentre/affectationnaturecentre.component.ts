@@ -86,6 +86,8 @@ export class AffectationNatureCentreComponent implements OnInit{
       next: (res) => {
         if (res.success) {
           this.natureoperations = res.data;
+          // filtrer sur les natures dont les comptes sont ventillables
+          this.natureoperations = this.natureoperations.filter(nature => nature.compte.ventillable === 1);
         }
       }
     });

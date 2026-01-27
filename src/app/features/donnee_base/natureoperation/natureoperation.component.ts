@@ -11,6 +11,10 @@ import { plancomptableModel } from '../models/plancomptable.model';
 
 import { ToastrService } from 'ngx-toastr';
 
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+
+
 // ADD-INS
 declare var $: any;
 
@@ -69,7 +73,6 @@ export class NatureoperationComponent implements OnInit{
   }
 
   getAllNatureoperations(){
-
     this.natureoperationservice.getAll().subscribe({
       next : (res) => {
         if(res.success){
@@ -128,29 +131,7 @@ export class NatureoperationComponent implements OnInit{
   }
 
 
-  // ngAfterViewInit(): void {
-  //   // Attendre que le DOM soit chargé
-  //   $('#dataTable').DataTable({
-  //     paging: true,
-  //     searching: true,
-  //     ordering: true,
-  //     info: true,
-  //     responsive: true,
-  //     language: {
-  //       search: "Rechercher :",
-  //       lengthMenu: "Afficher _MENU_ lignes",
-  //       info: "Affichage de _START_ à _END_ sur _TOTAL_ lignes",
-  //       paginate: {
-  //         previous: "Précédent",
-  //         next: "Suivant"
-  //       }
-  //     }
-  //   });
-  // }
-
-
   //création du formulaire
-  
   initForm(): void{
     this.natureoperationForm = this.fb.group({
       codenature : ["", [Validators.required]],
@@ -162,6 +143,8 @@ export class NatureoperationComponent implements OnInit{
       idsociete : [this.user.idsociete, [Validators.required]],
       idcompte : ["", [Validators.required]],
       actif : [true],
+      createdby : [this.user.codeutilisateur],
+      updatedby : [this.user.codeutilisateur]
     })
   }
 
@@ -246,8 +229,6 @@ export class NatureoperationComponent implements OnInit{
       this.create(_natureoperations);
     else 
       this.update(_natureoperations);
-    // if (!_natureoperations.idnatureoperations) this.create(_natureoperations);
-    // else this.update(_natureoperations);
   }
 
   //Enregistrement de données
@@ -259,6 +240,7 @@ export class NatureoperationComponent implements OnInit{
         if (res.success) {
           this.closeModal('showModal');
           this.getAllNatureoperations();
+          this.toastr.success('Fiche créée avec succès');
         } else {
           this.error = "Erreur de création";
           this.toastr.error(this.error);
@@ -313,7 +295,14 @@ export class NatureoperationComponent implements OnInit{
     this.natureoperationForm.reset();
     this.dispatchNatureoperations(_object);
   }
- 
+
+  modalview(_object: natureoperationModel){
+    this.natureoperation = _object;
+    this.actionModal = "view";
+    this.natureoperationForm.reset();
+    this.dispatchNatureoperations(_object);
+  }
+
 
   modalDelete(item: natureoperationModel){
     this.deleteNatureoperation = item;
@@ -326,14 +315,103 @@ export class NatureoperationComponent implements OnInit{
         if (res.success) {
           this.closeModal('delete');
           this.getAllNatureoperations();
+          this.toastr.success('Fiche supprimée avec succès');
         } else {
           this.error = "Erreur de Suppression";
+          this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Suppression échec";
         this.loading = false;
+        this.toastr.error(this.error);
+      }
+    })
+  }
+  
+  deleteMultiple(){
+    for (let i = 0; i < this.objectsSelected.length; i++) {
+      this.natureoperationservice.delete(this.objectsSelected[i].idnature).subscribe({})
+    }
+    this.toastr.success('Fiches supprimées');
+    this.getAllNatureoperations();
+  }
+  
+  exportToExcel(): void {
+    const element = document.getElementById('dataTable');
+  
+    if (!element) {
+      console.error('Table non trouvée');
+      return;
+    }
+  
+    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
+    const workbook: XLSX.WorkBook = {
+      Sheets: { 'Nature operation': worksheet },
+      SheetNames: ['Nature operation']
+    };
+  
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array'
+    });
+  
+    const data: Blob = new Blob(
+      [excelBuffer],
+      { type: 'application/octet-stream' }
+    );
+  
+    saveAs(data, `Nature_operation_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.xlsx`);
+  }
+    
+  exportToCSV(): void {
+    const element = document.getElementById('dataTable');
+  
+    if (!element) {
+      console.error('Table non trouvée');
+      return;
+    }
+  
+    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
+    
+    // 🔥 forcer le séparateur ;
+    const csv = XLSX.utils.sheet_to_csv(worksheet, {
+      FS: ';'
+    });
+  
+    const blob = new Blob([csv], {
+      type: 'text/csv;charset=utf-8;'
+    });
+
+    saveAs(blob, `nature_operation_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.csv`);
+  }
+
+  //Importation du plan comptable
+  importNatureOperation(event: any){
+    const file = event.target.files[0];
+    const info = {
+      idsociete : this.user.idsociete,
+      // idcompte : this.user.idcompte,
+      createdby : this.user.codeutilisateur
+
+    }
+
+    this.natureoperationservice.importNatureOperation(file, info).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.getAllNatureoperations();
+          this.toastr.success('Importation effectuée avec succès');
+        } else {
+          this.error = "Echec de l'importation";
+          this.toastr.error(this.error);
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = "Echec de l'importation";
+        this.loading = false;
+        this.toastr.error(err);
       }
     })
   }

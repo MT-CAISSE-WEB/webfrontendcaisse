@@ -24,9 +24,16 @@
                             <button type="button" class="btn btn-sm btn-soft-success" data-bs-toggle="modal" (click)="modalCreate()" id="create-btn" data-bs-target="#showModal">
                                 <i class="ri-add-line align-bottom me-1"></i>Créer
                             </button>
-                            <button type="button" class="btn btn-sm btn-soft-info"><i class="ri-file-download-line align-bottom me-1"></i> Import</button>
-                            <!-- <button type="button" class="btn btn-sm btn-soft-danger" [disabled]="!checkAllRow" (click)="deleteMultiple()" title="Supprimer"><i class="ri-delete-bin-2-line"></i></button> -->
+                            <!-- Importer un plan comptable à partir d'un fichier CSV -->
+                            <input type="file" #fileInput style="display: none;" (change)="importTiers($event)" accept=".csv" />
+                            <button type="button" class="btn btn-sm btn-soft-info" (click)="fileInput.click()">
+                                <i class="ri-file-download-line align-bottom me-1"></i> Importer CSV
+                            </button>
+                            <button type="button" class="btn btn-success btn-sm" (click)="exportToCSV()">
+                                 Exporter CSV
+                            </button>
                             <button type="button" class="btn btn-sm btn-info"> <i class="ri-refresh-fill align-bottom me-1"></i>Actualiser</button>
+                            <button title="Supprimer" type="button" class="btn btn-sm btn-soft-danger" [disabled]="!checkAllRow" (click)="deleteMultiple()"><i class="ri-delete-bin-2-line"></i></button>
                         </div>
                     </div>
                 </div>
@@ -41,13 +48,13 @@
                             <!-- Entete de la liste -->
                             <thead class="text-muted table-light">
                                 <tr>
-                                    <th>
+                                    <th style="width: 2px;">
                                         <div class="form-check">
                                             <input title="input" class="form-check-input" type="checkbox" [(ngModel)]="checkAllRow" id="checkAll" (ngModelChange)="handleSelectAll($event)">
                                         </div>
                                     </th>
                                     <th>Code</th>
-                                    <th>Designation</th>
+                                    <th >Designation</th>
                                     <th>Type</th>
                                     <th>Societe</th>
                                     <th>Statut</th>

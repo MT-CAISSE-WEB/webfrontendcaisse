@@ -8,8 +8,11 @@ import { Router } from '@angular/router';
 
 import { DataTablesModule } from 'angular-datatables';
 import { Subject } from 'rxjs';
-import DataTables from 'datatables.net';
-// import DataTables from 'datatables.net';
+
+import { ToastrService } from 'ngx-toastr';
+
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 // ADD-INS
 declare var $: any;
@@ -63,31 +66,11 @@ export class CentreanalytiqueComponent implements OnInit{
  * @param router - Router pour la navigation
  */
   constructor(private centreanalytiqueservice: CentreAnalytiqueService,
-              private router: Router){}
+              private router: Router
+            , private toastr : ToastrService
+          ){}
 
   ngOnInit(): void {
-    // this.dtOptions = {
-    //   responsive: true,
-    //   ordering: true,
-    //   pagingType: 'full_numbers',
-    //   language: {
-    //     search: "Rechercher :",
-    //     lengthMenu: "Afficher _MENU_ éléments",
-    //     info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
-    //     infoEmpty: "Affichage de 0 à 0 sur 0 élément",
-    //     infoFiltered: "(filtré de _MAX_ éléments au total)",
-    //     zeroRecords: "Aucun élément correspondant trouvé",
-    //     emptyTable: "Aucune donnée disponible dans le tableau",
-    //     paginate: {
-    //       first: "Premier",
-    //       previous: "Précédent",
-    //       next: "Suivant",
-    //       last: "Dernier"
-    //     }
-    //   }
-    // };
-    // this.rerender();
-    // this.ngOnDestroy();
     //Afficher tous les centres
     this.getAllcentres();
     //Initialisation du formulaire
@@ -156,29 +139,10 @@ export class CentreanalytiqueComponent implements OnInit{
       libelle : ["", [Validators.required]],
       idsociete : [this.user.idsociete, [Validators.required]],
       actif : [true],
+      createdby : [this.user.codeutilisateur],
+      updatedby : [this.user.codeutilisateur]
     })
   }
-
-  // ngAfterViewInit(): void {
-  //   // Attendre que le DOM soit chargé
-  //   $('#dataTable').DataTable({
-  //     paging: true,
-  //     searching: true,
-  //     ordering: true,
-  //     info: true,
-  //     responsive: true,
-  //     language: {
-  //       search: "Rechercher :",
-  //       lengthMenu: "Afficher _MENU_ lignes",
-  //       info: "Affichage de _START_ à _END_ sur _TOTAL_ lignes",
-  //       paginate: {
-  //         previous: "Précédent",
-  //         next: "Suivant"
-  //       }
-  //     }
-  //   });
-  // }
-
 
   get form() {
     return this.centreanalytiqueForm.controls;
@@ -262,14 +226,17 @@ export class CentreanalytiqueComponent implements OnInit{
         if (res.success) {
           this.closeModal('showModal');
           this.getAllcentres();
+          this.toastr.success("Fiche créée");
         } else {
           this.error = "Erreur de création";
+          this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Echec de création";
         this.loading = false;
+        this.toastr.error(this.error);
       }
     })
   }
@@ -281,14 +248,17 @@ export class CentreanalytiqueComponent implements OnInit{
         if (res.success) {
           this.closeModal('showModal');
           this.getAllcentres();
+          this.toastr.success("Fiche modifiée");
         } else {
           this.error = "Erreur de modification";
+          this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Echec de modification";
         this.loading = false;
+        this.toastr.error(this.error);
       }
     })
   }
@@ -323,14 +293,105 @@ export class CentreanalytiqueComponent implements OnInit{
         if (res.success) {
           this.closeModal('delete');
           this.getAllcentres();
+          this.toastr.success('Fiche supprimée');
         } else {
           this.error = "Erreur de Suppression";
+          this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Suppression échec";
         this.loading = false;
+        this.toastr.error(this.error);
+
+      }
+    })
+  }
+
+
+  deleteMultiple(){
+    for (let i = 0; i < this.objectsSelected.length; i++) {
+      this.centreanalytiqueservice.delete(this.objectsSelected[i].idcentreanalytique).subscribe({})
+    }
+    this.toastr.success('Fiches supprimées');
+    this.getAllcentres();
+  }
+
+
+  exportToExcel(): void {
+    const element = document.getElementById('dataTable');
+  
+    if (!element) {
+      console.error('Table non trouvée');
+      return;
+    }
+  
+    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
+    const workbook: XLSX.WorkBook = {
+      Sheets: { 'Evolution Budget': worksheet },
+      SheetNames: ['Evolution Budget']
+    };
+  
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array'
+    });
+  
+    const data: Blob = new Blob(
+      [excelBuffer],
+      { type: 'application/octet-stream' }
+    );
+  
+    saveAs(data, `Evolution_budget_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.xlsx`);
+  }
+      
+  exportToCSV(): void {
+    const element = document.getElementById('dataTable');
+  
+    if (!element) {
+      console.error('Table non trouvée');
+      return;
+    }
+  
+    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
+    
+    // forcer le séparateur ;
+    const csv = XLSX.utils.sheet_to_csv(worksheet, {
+      FS: ';'
+    });
+  
+    const blob = new Blob([csv], {
+      type: 'text/csv;charset=utf-8;'
+    });
+
+    saveAs(blob, `centres_analytiques_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.csv`);
+    this.toastr.success('Fiches exportées avec succès');
+  }
+  
+  //Importation du plan comptable
+  importCentre(event: any){
+    const file = event.target.files[0];
+    const info = {
+      idsociete : this.user.idsociete,
+      createdby : this.user.codeutilisateur
+    }
+    
+    this.centreanalytiqueservice.importCentreAnalytique(file, info).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.getAllcentres();
+          this.toastr.success('Importation effectuée avec succès');
+        } else {
+          this.error = "Echec de l'importation";
+          this.toastr.error(this.error);
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = "Echec de l'importation";
+        this.loading = false;
+        this.toastr.error(err);
       }
     })
   }

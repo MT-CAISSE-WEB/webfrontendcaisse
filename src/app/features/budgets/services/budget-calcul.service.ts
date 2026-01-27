@@ -35,31 +35,43 @@ export class BudgetPrevisionService {
     budget: BudgetModel,
     lignes: LigneBudgetModel[]
   ): number {
-    const lignesBudget = lignes.filter(
-      (l) =>
-        l.idbudget === budget.idbudget &&
-        (!budget.entite ||
-          !l.iddepartement ||
-          l.iddepartement === l.iddepartement)
-    );
 
-    // 🔥 Priorité SOCIÉTÉ
-    if (budget.validesociete === 1) {
-      return this.sum(lignesBudget, 'montantprevisionsociete');
+    // 🔥 SOCIÉTÉ = uniquement les montants société
+    if (budget.validesociete === 1 && budget.validesite === 1 && budget.validedept === 1) {
+      const lignesSociete = lignes.filter(
+        l =>
+          l.idbudget === budget.idbudget &&
+          l.montantprevisionsociete != null
+      );
+
+      return this.sum(lignesSociete, 'montantprevisionsociete');
     }
 
     // 🔥 SITE
-    if (budget.validedept === 1 && budget.validesite === 1) {
-      return this.sum(lignesBudget, 'montantprevisionsite');
+    if (budget.validesite === 1 && budget.validedept === 1 && budget.validesociete === 0) {
+      const lignesSite = lignes.filter(
+        l =>
+          l.idbudget === budget.idbudget &&
+          l.montantprevisionsite != null
+      );
+
+      return this.sum(lignesSite, 'montantprevisionsite');
     }
 
     // 🔥 DÉPARTEMENT
-    if (budget.validedept === 1) {
-      return this.sum(lignesBudget, 'montantprevisiondept');
+    if (budget.validedept === 1 && budget.validesite === 0 && budget.validesociete === 0) {
+      const lignesDept = lignes.filter(
+        l =>
+          l.idbudget === budget.idbudget &&
+          l.montantprevisiondept != null
+      );
+
+      return this.sum(lignesDept, 'montantprevisiondept');
     }
 
     return 0;
   }
+
 
   /* ==========================
    🧮 UTILITAIRE

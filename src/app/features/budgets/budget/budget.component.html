@@ -168,16 +168,37 @@
 
                   <td>
                     <div class="d-flex align-items-center gap-2">
-                      <a class="dropdown-item text-primary" href="#showModal" data-bs-toggle="modal"
-                        (click)="modalUpdate(item)">
-                        <i class="ri-pencil-fill me-2"></i>
+                      <!-- Bouton modifier -->
+                      <a class="text-primary" href="#showModal" data-bs-toggle="modal" (click)="modalUpdate(item)">
+                        <i class="ri-pencil-fill"></i>
                       </a>
+
+                      <!-- Bouton supprimer -->
                       <a *ngIf="getBudgetsMensuels(item.idbudget).length === 0" class="text-danger"
                         (click)="modalDelete(item)" data-bs-toggle="modal" href="#deleteOrder">
                         <i class="ri-delete-bin-5-fill"></i>
                       </a>
+
+                      <!-- Menu contextuel -->
+                      <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="dropdown"
+                          aria-expanded="false">
+                          <i class="ri-more-2-fill"></i>
+                        </button>
+
+                        <ul class="dropdown-menu dropdown-menu-end">
+                          <li>
+                            <a class="dropdown-item" href="#lignesBudgetairesModal" data-bs-toggle="modal"
+                              (click)="onClickAfficherLignesBudgetaire(item)">
+                              <i class="ri-time-line me-2"></i>
+                              Consulter les lignes budgétaires
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
                     </div>
                   </td>
+
 
                 </tr>
 
@@ -218,15 +239,39 @@
                             </span>
                           </td>
                           <td class="text-end">
-                            <a href="#showModal" data-bs-toggle="modal" (click)="modalUpdate(child)"
-                              class="text-primary me-2">
-                              <i class="ri-pencil-fill"></i>
-                            </a>
-                            <a class="text-danger" (click)="modalDelete(child)" data-bs-toggle="modal"
-                              href="#deleteOrder">
-                              <i class="ri-delete-bin-5-fill"></i>
-                            </a>
+                            <div class="d-flex justify-content-end align-items-center gap-2">
+                              <!-- Modifier -->
+                              <a href="#showModal" data-bs-toggle="modal" (click)="modalUpdate(child)"
+                                class="text-primary">
+                                <i class="ri-pencil-fill"></i>
+                              </a>
+
+                              <!-- Supprimer -->
+                              <a class="text-danger" (click)="modalDelete(child)" data-bs-toggle="modal"
+                                href="#deleteOrder">
+                                <i class="ri-delete-bin-5-fill"></i>
+                              </a>
+
+                              <!-- Menu contextuel -->
+                              <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="dropdown"
+                                  aria-expanded="false">
+                                  <i class="ri-more-2-fill"></i>
+                                </button>
+
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                  <li>
+                                    <a class="dropdown-item" href="#lignesBudgetairesModal" data-bs-toggle="modal"
+                                      (click)="onClickAfficherLignesBudgetaire(child)">
+                                      <i class="ri-time-line me-2"></i>
+                                      Consulter les lignes budgétaires
+                                    </a>
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
                           </td>
+
                         </tr>
                         } @if (getBudgetsMensuels(item.idbudget).length === 0) {
                         <tr>
@@ -555,6 +600,73 @@
           </div>
         </div>
         <!--end modal -->
+        <!-- Modal visionnage des validateurs -->
+        <div class="modal fade" id="lignesBudgetairesModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+
+              <!-- HEADER -->
+              <div class="modal-header bg-light p-3">
+                <h5 class="modal-title">
+                  Lignes budgétaire du budget: {{ selectedBudget?.codebudget }} - {{ selectedBudget?.libelle }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                  (click)="closeModal('lignesBudgetairesModal')"></button>
+              </div>
+
+              <!-- BODY -->
+              <div class="modal-body">
+                <!-- TABLE -->
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped align-middle table-compact">
+                    <thead class="table-light">
+                      <tr>
+                        <th style="width: 50px">#</th>
+                        <th>Département</th>
+                        <th>Nature d'opération</th>
+                        <th>Prévision Département</th>
+                        <th>Prévision Site</th>
+                        <th>Prévision Société</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      <tr *ngFor="let ligne of lignesByBudget; let i = index">
+                        <td class="text-center">{{ i + 1 }}</td>
+
+                        <td>{{ ligne.departement?.libelle }}</td>
+                        <td>{{ ligne.nature_operation?.libelle }}</td>
+
+
+                        <td>
+                          {{ ligne.montantprevisiondept | number : "1.0-0" : "fr" }}
+                        </td>
+
+                        <td>
+                          {{ ligne.montantprevisionsite | number : "1.0-0" : "fr" }}
+                        </td>
+
+                        <td>
+                          {{ ligne.montantprevisionsociete | number : "1.0-0" : "fr" }}
+                        </td>
+                      </tr>
+                      <tr *ngIf="lignesByBudget.length === 0">
+                        <td colspan="6" class="text-center text-muted py-3">
+                          Aucune ligne budgétaire n'est associée à ce budget.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div *ngIf="msgErros" class="alert alert-danger mt-2">
+                  {{ msgErros }}
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

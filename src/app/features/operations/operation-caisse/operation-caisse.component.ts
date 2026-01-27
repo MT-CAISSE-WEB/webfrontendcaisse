@@ -1528,6 +1528,7 @@ export class OperationCaisseComponent implements OnInit{
     /**Patch entête */
     this.operationForm.patchValue({
       libelle: demande.libelledemande,
+      tauxoperation: demande.taux,
       devise: demande.devise?.iddevise,
       site: demande.site?.idsite,
       societe: demande.societe?.idsociete,

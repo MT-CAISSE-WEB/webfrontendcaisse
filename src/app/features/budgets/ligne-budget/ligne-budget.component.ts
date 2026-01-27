@@ -126,6 +126,9 @@ export class LigneBudgetComponent implements OnInit {
 
   ngOnInit(): void {
     //Afficher toutes les lignes budgétaires
+
+    this.ligneBudgetsGrouped = [];
+    this.selectedBudgetId = null;
     this.getAllBudgets();
     this.getAllDepartements();
     this.getAllLigneBudgets();
@@ -136,18 +139,6 @@ export class LigneBudgetComponent implements OnInit {
     this.initForm();
     this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION('cette ligne budgétaire');
     this.titleMsg = TITLE_DELETE;
-
-    this.lignesBudgetsFiltered = [...this.ligneBudgets];
-
-    this.searchCtrl.valueChanges
-      .pipe(
-        debounceTime(200),
-        distinctUntilChanged(),
-        map((value) => value?.trim().toLowerCase())
-      )
-      .subscribe((search) => {
-        this.applySearchFilter(search as string);
-      });
 
     this.rejectForm = this.fb.group({
       motif: [null, Validators.required],
@@ -199,6 +190,12 @@ export class LigneBudgetComponent implements OnInit {
     );
   }
 
+  motifOfBudgetRejected?: string;
+
+  getMotifLibelle(id: string) {
+    this.motifOfBudgetRejected = this.motifs.find(m => m.idmotif === id)?.libellemotif
+  }
+
   // Obtenir la liste de tous les motifs
   getAllMotifs() {
     this.params = { page: 1, limit: 1000 };
@@ -218,13 +215,13 @@ export class LigneBudgetComponent implements OnInit {
 
   // Obtenir tous les validateurs du budget
   getAllValidateursBudget(idbudget: string) {
-    console.log('idbudget:', idbudget)
 
     this.budgetservice.getValidateursBudget(idbudget).subscribe({
 
       next: (res: any) => {
         if (res.success) {
           this.validateursBudget = res.data as ValidateursBudget[];
+          this.getMotifLibelle(this.validateursBudget.find(v => v.decision === 'rejete')?.idmotif as string)
         }
       },
       error: (err) => {
@@ -334,23 +331,7 @@ export class LigneBudgetComponent implements OnInit {
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
-  private applySearchFilter(search: string): void {
-    if (!search) {
-      this.lignesBudgetsFiltered = [...this.ligneBudgetsSource];
-      this.rebuildGroupedData();
-      return;
-    }
 
-    this.lignesBudgetsFiltered = this.ligneBudgetsSource.filter(
-      (l) =>
-        l.budget?.codebudget?.toLowerCase().includes(search) ||
-        l.departement?.codedept?.toLowerCase().includes(search) ||
-        l.departement?.libelle?.toLowerCase().includes(search) ||
-        l.nature_operation?.libelle?.toLowerCase().includes(search)
-    );
-
-    this.rebuildGroupedData();
-  }
 
   // onSelectionDepartementChange(event: Event) {
   //   const id = (event.target as HTMLSelectElement).value;
@@ -590,7 +571,7 @@ export class LigneBudgetComponent implements OnInit {
   getAllLigneBudgets() {
     this.params = {
       page: this.currentPage,
-      limit: 100000,
+      limit: this.limit,
     };
 
     this.lignebudgetservice.getAll(this.params).subscribe({
@@ -598,7 +579,6 @@ export class LigneBudgetComponent implements OnInit {
         if (res.success) {
           this.ligneBudgetsSource = res.data;
           this.lignesBudgetsFiltered = [...this.ligneBudgetsSource];
-          this.rebuildGroupedData();
           this.totalPages = res.totalPages;
         }
       },
@@ -608,29 +588,6 @@ export class LigneBudgetComponent implements OnInit {
     });
   }
 
-  private rebuildGroupedData(): void {
-    const map = new Map<
-      string,
-      { budget: BudgetModel; lignes: LigneBudgetModel[] }
-    >();
-
-    for (const ligne of this.lignesBudgetsFiltered) {
-      if (!ligne.budget) continue;
-
-      const idBudget = ligne.budget.idbudget;
-
-      if (!map.has(idBudget)) {
-        map.set(idBudget, {
-          budget: ligne.budget,
-          lignes: [],
-        });
-      }
-
-      map.get(idBudget)!.lignes.push(ligne);
-    }
-
-    this.ligneBudgetsGrouped = Array.from(map.values());
-  }
 
   onBudgetChange(event: any) {
     const id = event.target.value;
@@ -995,11 +952,40 @@ export class LigneBudgetComponent implements OnInit {
     this.updateMontantsSelonValidation();
   }
 
-  private hasExistingLines(budgetId: string, deptId: string): boolean {
-    return this.ligneBudgets.some(
-      (l) => l.idbudget === budgetId && l.iddepartement === deptId
+  selectedBudgetId: string | null = null;
+
+  onClickAfficher(): void {
+    // Sécurité : aucun budget sélectionné
+    if (!this.selectedBudgetId) {
+      this.ligneBudgetsGrouped = [];
+      return;
+    }
+
+    const budget = this.budgets.find(
+      b => b.idbudget === this.selectedBudgetId
     );
+
+    if (!budget) {
+      this.ligneBudgetsGrouped = [];
+      return;
+    }
+
+    this.selectedBudget = budget;
+
+    // ✅ UTILISER LA BONNE SOURCE
+    const lignes = this.ligneBudgetsSource.filter(
+      l => l.idbudget === budget.idbudget
+    );
+
+    this.ligneBudgetsGrouped = [
+      {
+        budget,
+        lignes
+      }
+    ];
   }
+
+
 
   private propagateMontantsOnValidationOpen(): void {
     if (!this.selectedBudget) return;
@@ -1584,8 +1570,8 @@ export class LigneBudgetComponent implements OnInit {
       comment: commentaire
     }
 
-    console.log("Data:", data);
     this.loading = true;
+
 
     // 👉 appel API rejet budget
     this.budgetservice.validationBudget(id, data).subscribe({
