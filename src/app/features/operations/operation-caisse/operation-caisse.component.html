@@ -184,11 +184,6 @@
             <div class="card-body">
                 <div>
                     <div class="table-responsive table-card">
-                        @if (loading) {
-                        <div class="text-center py-4">
-                            <div class="spinner-border text-info"></div>
-                        </div>
-                        }
                         <table class="table align-middle table-nowrap table-container table-custom table-compact" id="invoiceTable">
                             <thead class="text-muted">
                                 <tr>
@@ -240,11 +235,19 @@
                                         </td>
                                     </tr>
                                 }
+                                <tr *ngIf="loading">
+                                    <td colspan="8">
+                                        <div class="text-center py-4">
+                                            <div class="spinner-border text-info"></div>
+                                            <h6 class="mt-2">Chargement...</h6>
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
-                        <div class="" *ngIf="operations.length == 0">
+                        <div class="" *ngIf="operations.length == 0 && !loading">
                             <div class="text-center">
-                                <h5 class="mt-2">Désolé! Aucune opération trouvé</h5>
+                                <h6 class="mt-2">Désolé! Aucune opération trouvé</h6>
                                 <p class="text-muted mb-0">Désole il n' y aucune donnée dans cette base</p>
                             </div>
                         </div>
@@ -454,21 +457,27 @@
                                             <table class="table table-borderless table-sm table-nowrap align-middle mb-0">
                                                 <tbody>
                                                     <tr class="border-top border-top-dashed">
+                                                        <th scope="row">Taux appliqué</th>
+                                                        <td>
+                                                            <input type="text" formControlName="tauxoperation" class="form-control form-control-sm bg-light border-0" id="cart-total" placeholder="0.00"/>
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="border-top border-top-dashed">
                                                         <th scope="row">Total opération</th>
                                                         <td>
-                                                            <input type="text" formControlName="montant" class="form-control form-control-sm bg-light border-0" id="cart-total" placeholder="$0.00" readonly />
+                                                            <input type="text" formControlName="montant" class="form-control form-control-sm bg-light border-0" placeholder="0.00" readonly />
                                                         </td>
                                                     </tr>
                                                     <tr class="border-top border-top-dashed">
                                                         <th scope="row">Total référentiel</th>
                                                         <td>
-                                                            <input type="text" formControlName="montantRefglobal" class="form-control form-control-sm bg-light border-0" id="cart-total" placeholder="$0.00" readonly />
+                                                            <input type="text" formControlName="montantRefglobal" class="form-control form-control-sm bg-light border-0" placeholder="0.00" readonly />
                                                         </td>
                                                     </tr>
                                                     <tr>
                                                         <th scope="row">Total reporting</th>
                                                         <td style="width:150px;">
-                                                            <input type="text" class="form-control form-control-sm bg-light border-0" id="cart-subtotal" placeholder="$0.00" readonly />
+                                                            <input type="text" class="form-control form-control-sm bg-light border-0" placeholder="0.00" readonly />
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -493,25 +502,44 @@
                                                     @for(c of caisses.controls; track $index){
                                                         <tr [formGroup]="c" class="caisse-row">
                                                             <td>
-                                                                <span> <strong> {{ c.get('caisse')?.value }} </strong> </span>
-                                                                <input type="hidden" formControlName="idcaisse">
+                                                                <div class="cell-wrapper">
+                                                                    <span> <strong> {{ c.get('caisse')?.value }} </strong> </span>
+                                                                    <input type="hidden" formControlName="idcaisse">
+                                                                    <div class="error-slot">&nbsp;</div>
+                                                                </div>
                                                             </td>
                                                             <td>
-                                                                <span> {{ c.get('devisecaisse')?.value }} </span>
+                                                                <div class="cell-wrapper">
+                                                                    <span> {{ c.get('devisecaisse')?.value }} </span>
+                                                                    <div class="error-slot">&nbsp;</div>
+                                                                </div>
                                                             </td>
                                                             <td>
-                                                                <input formControlName="solde" type="text" class="form-control form-control-sm bg-success-subtle border-0"  readonly/>
+                                                                <div class="cell-wrapper">
+                                                                    <input formControlName="solde" type="text" class="form-control form-control-sm bg-success-subtle border-0"  readonly/>
+                                                                    <div class="error-slot">&nbsp;</div>
+                                                                </div>
                                                             </td>
                                                             <td>
-                                                                <input type="text" formControlName="montantcaisse" class="form-control form-control-sm bg-light border-0"  placeholder="000.000"/>
+                                                                <div class="cell-wrapper">
+                                                                    <input type="text" formControlName="montantcaisse" [ngClass]="{'bg-danger-subtle': c.get('montantcaisse')?.errors?.['soldeInsuffisant']}" class="form-control form-control-sm bg-light border-0"  placeholder="000.000"/>
+                                                                    <div class="text-danger small error-slot" [class.visible]="c.get('montantcaisse')?.errors?.['soldeInsuffisant']">
+                                                                        Solde insuffisant
+                                                                    </div>
+                                                                </div>
                                                             </td>
                                                             <td>
-                                                                <input type="text" formControlName="taux" class="form-control form-control-sm bg-light border-0"/>
+                                                                <div class="cell-wrapper">
+                                                                    <input type="text" formControlName="taux" class="form-control form-control-sm bg-light border-0"/>
+                                                                    <div class="error-slot">&nbsp;</div>
+                                                                </div>
                                                             </td>
                                                             <td>
-                                                                <input type="text" formControlName="montantref" [ngClass]="{'bg-danger-subtle': c.get('montantcaisse')?.errors?.['depassementMontant']}" class="form-control form-control-sm bg-light border-0"  readonly/>
-                                                                <div class="text-danger small error-slot" [class.visible]="c.get('montantcaisse')?.errors?.['depassementMontant']">
-                                                                    Montant dépassé
+                                                                <div class="cell-wrapper">
+                                                                    <input type="text" formControlName="montantref" [ngClass]="{'bg-danger-subtle': c.get('montantcaisse')?.errors?.['depassementMontant']}" class="form-control form-control-sm bg-light border-0"  readonly/>
+                                                                    <div class="text-danger small error-slot" [class.visible]="c.get('montantcaisse')?.errors?.['depassementMontant']">
+                                                                        Montant dépassé
+                                                                    </div>
                                                                 </div>
                                                             </td>
                                                         </tr>

@@ -24,6 +24,7 @@ import { DemandeService } from '../../demande/services/demande.service';
 import { AffectationNatureCentreService } from '../../donnee_base/services/affectationnaturecentre.service';
 import { devisemodel } from '../../donnee_base/donnee_base/model/devise.model';
 import { deviseservice } from '../../donnee_base/donnee_base/service/devise.service';
+import { tauxdevisemodel } from '../../donnee_base/donnee_base/model/tauxdevise.model';
 
 @Component({
   selector: 'app-operation-caisse',
@@ -57,6 +58,10 @@ export class OperationCaisseComponent implements OnInit{
   checkAllRow : any;
   error : string = "";
 
+  //Le taux de devises
+  tauxdevise : tauxdevisemodel = new tauxdevisemodel();
+  taux : any;
+
   //Changement titre modal
   actionModal: string = "create";
 
@@ -89,6 +94,8 @@ export class OperationCaisseComponent implements OnInit{
   //Message suppression
   msgSup: string = "";
   titleMsg: string ="";
+
+  private tauxConversionTransaction = 1;
 
   //Element à supprimer 
   deleteOperation: any = null;
@@ -173,6 +180,7 @@ export class OperationCaisseComponent implements OnInit{
 
   //Recuperer toutes les opérations
   getAllOperations(){
+    this.loading = true;
     this.params = {
       page: this.currentPage,
       limit: this.limit,
@@ -185,8 +193,13 @@ export class OperationCaisseComponent implements OnInit{
         if(res.success){
           this.operations = res.data.data;
           this.totalPages = res.data.totalPages;
+          this.loading = false;
         }
-      }
+      },
+      error : (err) => {
+        this.loading = false;
+        this.toastr.error(err.error.message);
+      },
     });
   }
 
@@ -475,6 +488,11 @@ export class OperationCaisseComponent implements OnInit{
     }).format(montant ?? 0);
   }
 
+  parseCFA(valeur: string | null | undefined): number {
+    if (!valeur) return 0;
+    return Number(valeur.replace(/[^\d]/g, ''));
+  }
+
   get user(){
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
@@ -499,6 +517,7 @@ export class OperationCaisseComponent implements OnInit{
       site : [this.user.idsite ?? null],
       societe : [this.user.idsociete ?? null],
       montant: [0],
+      tauxoperation: [1],
       montantRefglobal: [0],
       caisses : this.fb.array([])
     })
@@ -667,7 +686,7 @@ export class OperationCaisseComponent implements OnInit{
     this.operationForm.patchValue({ montant: total });
   }
 
-  //selectionner une instance dans une liste
+  //selectionner une instance dans une liste 
   handleSelectOne(operation: operationModel, actif: any) {
     const index = this.objectsSelected.findIndex(
       (el) => el.idoperation == operation.idoperation
@@ -706,7 +725,6 @@ export class OperationCaisseComponent implements OnInit{
     return this.caisseuserservice.getCaissesUserPeriode(payload).pipe(
       tap(res => {
         const periodes = res?.data ?? [];
-        // this.caisseperiodes = periodes;
         const caissesArray = this.operationForm.get('caisses') as FormArray;
         caissesArray.clear();
         periodes.forEach((p: any) => {
@@ -716,7 +734,7 @@ export class OperationCaisseComponent implements OnInit{
             statut: [p.periode?.statut ?? null],
             devisecaisse: [p.devise?.code ?? null],
             iddevisecaisse: [p.devise?.iddevise ?? null],
-            solde: [this.formatNumber(p.solde?.montant ?? 0)],
+            solde: [this.formatCFA(p.solde?.montant ?? 0)],
             montantcaisse: [0, [Validators.required, Validators.min(0)]],
             montantref: [0],
             taux: [p.solde?.taux ?? 1],
@@ -904,6 +922,9 @@ export class OperationCaisseComponent implements OnInit{
 
     ligne.get("montantligne")?.valueChanges.subscribe(() => {
       this.updateTotalMontant();
+
+      //Calcul montant ref aussi
+      this.updateMontantRefGlobal();
     });
 
     this.lignes.push(ligne);
@@ -1095,60 +1116,136 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   //Récuperer le taux de la devise transaction vers la devise du référentiel
-  // Si la devise de transaction est égale à l'un des devises de caisse aussi
-  private getTauxDeviseTransaction(): number {
-    const deviseTransaction = this.operationForm.get('devise')?.value;
+  getderniertaux (payload: any){
+    this.service.tauxrecent(payload).subscribe({
+      next : (res) => {
+         if(res.success){
+            this.tauxdevise = res.data;
+            if(!this.tauxdevise){
+              this.tauxConversionTransaction = 1;
+              this.toastr.warning("Pas de taux recent trouvé");
+            }else{
+              this.tauxConversionTransaction = this.tauxdevise.coefficient;
+            }
+            this.patchTauxTransaction(this.tauxConversionTransaction);
+            this.updateMontantRefGlobal();
+         }else{
+          this.toastr.error("Erreur de récuperation du taux récent", res);
+         }
+      },
+      error: (err) => {
+        //this.toastr.error("Erreur backend", err.error.message)
+      }
+    });
+  }
 
-    const caisseConversion = this.caisses.controls.find(c =>
-      c.get('iddevisecaisse')?.value === deviseTransaction
+  //Charger le dernier taux
+  loadLastdeviseTaux(iddevise: any){
+    const datePivot = this.operationForm.get('dateoperation')?.value;
+    const devises = {
+      iddeviseorigine: iddevise,
+      iddevisedestination : this.user.devise_ref_id,
+      datepiece : datePivot
+    };
+
+    this.getderniertaux(devises);
+  }
+
+  // Si la devise de transaction est égale à l'une des devises de caisse aussi
+  private getTauxDeviseTransaction(deviseTransaction : any) {
+    const deviseReference = this.user.devise_ref_id;
+
+    if (deviseTransaction === deviseReference) {
+      this.tauxConversionTransaction = 1;
+      this.patchTauxTransaction(this.tauxConversionTransaction);
+      return;
+    }
+
+    //Récupérer la caisse qui a la même devise que la devise de transaction
+    const caisseConversion = this.caisses.controls.filter(c =>
+      c.get('iddevisecaisse')?.value !== deviseTransaction
     );
 
-    return caisseConversion
-      ? parseFloat(caisseConversion.get('taux')?.value) || 1
-      : 1;
+    if(caisseConversion.length != 0){
+      caisseConversion.forEach(c => {
+        this.tauxConversionTransaction = parseFloat(c.get('taux')?.value) || 1;
+      });
+    }
+
+    //Charger le taux
+    this.loadLastdeviseTaux(deviseTransaction);
   }
 
   applyAutoCalcul(caisseFG: FormGroup) {
+    const soldeCtrl = caisseFG.get('solde');
     const montantCtrl = caisseFG.get('montantcaisse');
-    const devisecaisseCtrl = caisseFG.get('iddevisecaisse');
+    const devisecaisseCtrl = caisseFG.get('devisecaisse');
+    const iddevisecaisseCtrl = caisseFG.get('iddevisecaisse');
     const tauxCtrl = caisseFG.get('taux');
     const refCtrl = caisseFG.get('montantref');
     const devTransactionCtrl = this.operationForm.get('devise');
     const deviseReference = this.user?.devise_ref_id;
 
-    if (!montantCtrl || !tauxCtrl || !refCtrl) return;
+    if (!montantCtrl || !tauxCtrl || !refCtrl || !soldeCtrl) return;
 
     const updateMontantRef = () => {
       const deviseTransaction = devTransactionCtrl?.value;
       const montant = parseFloat(montantCtrl.value) || 0;
       const taux = parseFloat(tauxCtrl.value) || 1;
+      const solde = this.parseCFA(soldeCtrl.value) || 0;
   
       const montantRef = montant * taux;
       refCtrl.setValue(montantRef, { emitEvent: false });
 
       if (deviseTransaction === deviseReference) {
-        // même devise → pas de conversion
+        // même devise → pas de convedeviseReferencersion
         this.operationForm.patchValue(
           { montantRefglobal: this.totalLignes },
           { emitEvent: false }
         );
       } else {
         // utiliser le taux de la caisse correspondant à la devise transaction
-        const tauxConversion = this.getTauxDeviseTransaction();
-        const montantRefGlobal = this.totalLignes * tauxConversion;
-
-        this.operationForm.patchValue(
-          { montantRefglobal: montantRefGlobal },
-          { emitEvent: false }
-        );
+        this.getTauxDeviseTransaction(deviseTransaction);
       }
 
       const maxMontantRef = this.operationForm.get('montantRefglobal')?.value || 0;
+
+      //Si le solde caisse devient inférieur au montant saisie
+      if (montant > solde) {
+        montantCtrl.setErrors({
+          ...(montantCtrl.errors || {}),
+          soldeInsuffisant: true
+        });
+
+        this.operationForm.setErrors({
+          ...(this.operationForm.errors || {}),
+          soldeCaisseInsuffisant: true
+        });
+
+        refCtrl.setValue(0, { emitEvent: false });
+        return;
+      }
+
+      // Nettoyage erreur solde insuffisant
+      if (montantCtrl.hasError('soldeInsuffisant')) {
+        const errors = { ...(montantCtrl.errors || {}) };
+        delete errors['soldeInsuffisant'];
+        Object.keys(errors).length
+          ? montantCtrl.setErrors(errors)
+          : montantCtrl.setErrors(null);
+      }
+
+      // Nettoyage erreur globale solde
+      if (this.operationForm.hasError('soldeCaisseInsuffisant')) {
+        const formErrors = { ...(this.operationForm.errors || {}) };
+        delete formErrors['soldeCaisseInsuffisant'];
+        Object.keys(formErrors).length
+          ? this.operationForm.setErrors(formErrors)
+          : this.operationForm.setErrors(null);
+      }
+
       //contrôle référentiel paiement dépasse référentiel global
       if (montantRef > maxMontantRef) {
-        // montantCtrl.setErrors({ depassementMontant: true });
-        // refCtrl.setValue(montantRef, { emitEvent: false });
-        // return;
         montantCtrl.setErrors({ depassementMontant: true });
         this.operationForm.setErrors({
           ...(this.operationForm.errors || {}),
@@ -1160,7 +1257,7 @@ export class OperationCaisseComponent implements OnInit{
       }
 
       // contrôle dépassement montant total
-      if (this.isCaisseOverTotal(montantRef, caisseFG)) {
+      if (this.isCaisseOverTotal(montantRef, caisseFG, maxMontantRef)) {
         montantCtrl.setErrors({ depassement: true });
         refCtrl.setValue(0, { emitEvent: false });
         return;
@@ -1205,6 +1302,25 @@ export class OperationCaisseComponent implements OnInit{
     return max - total;
   }
 
+  //Modification du taux de devise de la caisse référentiel
+  updateTauxCaisse(caisseFG: FormGroup, devise: any){
+
+    //Récupérer la ou les caisses dont la devise egale à la devise de référence
+    const caisseConversion = this.caisses.controls.find(c =>
+      c.get('iddevisecaisse')?.value !== devise
+    );
+
+    if (caisseConversion) {
+      //recuperer celle dont la devise
+      const tauxCtrl = caisseConversion.get('taux');
+      if(!tauxCtrl) return;
+      tauxCtrl.setValue(this.tauxConversionTransaction, { emitEvent: false });
+
+      this.updateMontantRefGlobal();
+      return;
+    }
+  }
+
   //La somme de toutes les lignes opérations
   get totalLignes(): number {
     return this.lignes.controls.reduce((sum, l) => {
@@ -1241,14 +1357,14 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   //Empêcher le dépassement par caisse
-  isCaisseOverTotal(montantRef: number, currentCaisse: FormGroup): boolean {
+  isCaisseOverTotal(montantRef: number, currentCaisse: FormGroup, montantGl: number): boolean {
     const totalAutresCaisses = this.caisses.controls
       .filter(c => c !== currentCaisse)
       .reduce((sum, c) => {
         return sum + (parseFloat(c.get('montantref')?.value) || 0);
       }, 0);
 
-    return (totalAutresCaisses + montantRef) > this.totalLignes;
+    return (totalAutresCaisses + montantRef) > montantGl;
   }
 
   finaliserModal(){
@@ -1269,7 +1385,15 @@ export class OperationCaisseComponent implements OnInit{
     caisseFG.get('montantref')?.setValue(montant * taux, { emitEvent: false });
   }
 
-  // Recuperer la devise
+  //Centraliser le chargement du taux
+  private patchTauxTransaction(taux: number) {
+    this.operationForm.patchValue(
+      { tauxoperation: taux },
+      { emitEvent: true }
+    );
+  }
+
+  // Création de modal d'enregistrement des opérations
   modalCreate(){
     this.isUpdated = true;
     this.actionModal = "create";
@@ -1294,10 +1418,17 @@ export class OperationCaisseComponent implements OnInit{
             //Verrouiller tout le formulaire
             this.operationForm.disable({ emitEvent: false });
             //Champs autorisés
+            this.operationForm.get('libelle')?.enable({ emitEvent: false });
             this.operationForm.get('demande')?.enable({ emitEvent: false });
             this.operationForm.get('caisses')?.enable({ emitEvent: false });
           }
         });
+
+        // Filtrer la devise de transaction pour ramener le taux
+        this.operationForm.get('devise')?.valueChanges.subscribe(devise => {
+          this.getTauxDeviseTransaction(devise);
+        });
+
         // Filtrer les natures quand typepaiement change
         this.operationForm.get("typepaiement")?.valueChanges.subscribe(type => {
           this.onTypePaiementChange(type);
@@ -1418,6 +1549,14 @@ export class OperationCaisseComponent implements OnInit{
     this.caisses.controls.forEach((caisseFG: any) => {
       this.applyAutoCalcul(caisseFG);
     });
+  }
+
+  private updateMontantRefGlobal() {
+    const montantGlobal = this.totalLignes * this.tauxConversionTransaction;
+    this.operationForm.patchValue(
+      { montantRefglobal: montantGlobal },
+      { emitEvent: false }
+    );
   }
 
 }
