@@ -50,7 +50,6 @@ export class LigneBudgetComponent implements OnInit {
   departements: departementmodel[] = [];
   appartenanceDepartement: departementmodel[] = [];
   ligneBudget: LigneBudgetModel = new LigneBudgetModel();
-  lignesBudgetsFiltered: LigneBudgetModel[] = [];
   msgErros: string = '';
   loading: Boolean = false;
   ligneBudgetForm: FormGroup = this.fb.group({});
@@ -254,7 +253,7 @@ export class LigneBudgetComponent implements OnInit {
     });
   }
 
-  // 
+  //
   isValidateur(): boolean {
     return this.validateursBudget.some(u => u.idutilisateur === this.user.idutilisateur && u.decision === 'en attente')
   }
@@ -571,14 +570,13 @@ export class LigneBudgetComponent implements OnInit {
   getAllLigneBudgets() {
     this.params = {
       page: this.currentPage,
-      limit: this.limit,
+      limit: 1000000000,
     };
 
     this.lignebudgetservice.getAll(this.params).subscribe({
       next: (res: any) => {
         if (res.success) {
           this.ligneBudgetsSource = res.data;
-          this.lignesBudgetsFiltered = [...this.ligneBudgetsSource];
           this.totalPages = res.totalPages;
         }
       },
@@ -769,8 +767,6 @@ export class LigneBudgetComponent implements OnInit {
       this.loadNatureGrid(idDept);
     }
   }
-
-
 
   // ajoutons un ligne à chaque clic
   addNextNature() {
@@ -972,7 +968,8 @@ export class LigneBudgetComponent implements OnInit {
 
     this.selectedBudget = budget;
 
-    // ✅ UTILISER LA BONNE SOURCE
+    console.log("Before this.ligneBudgetsSource:", this.ligneBudgetsSource)
+
     const lignes = this.ligneBudgetsSource.filter(
       l => l.idbudget === budget.idbudget
     );
@@ -983,6 +980,8 @@ export class LigneBudgetComponent implements OnInit {
         lignes
       }
     ];
+
+    console.log("Budget & lignes:", this.ligneBudgetsGrouped);
   }
 
 

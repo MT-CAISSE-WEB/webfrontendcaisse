@@ -173,7 +173,11 @@ export class BudgetComponent implements OnInit {
   }
 
   getAllLigneBudgetaire() {
-    this.lignebudgetservice.getAll().subscribe({
+     this.params = {
+      page: this.currentPage,
+      limit: 1000000000,
+    };
+    this.lignebudgetservice.getAll(this.params).subscribe({
       next: (res: any) => {
         if (res.success) {
           this.lignesBudgetaires = res.data;

@@ -246,10 +246,13 @@
                       >
                       <option [ngValue]="null">-- Sélectionner --</option>
                       @for(item of budgets; track $index) {
-                      <option [value]="item.idbudget">
-                        {{ item.codebudget }} - {{ item.libelle }}
-                      </option>
-                      }
+                         @if(item.valide !== 1){
+                          <option [value]="item.idbudget">
+                            {{ item.codebudget }} - {{ item.libelle }}
+                          </option>
+                          }
+                        }
+
                     </select>
                     <div class="invalid-feedback">{{ msgErros }}</div>
                   </div>
