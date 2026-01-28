@@ -25,7 +25,14 @@
                         <div class="d-flex gap-1 flex-wrap">
                             <button type="button" class="btn btn-sm btn-primary" (click)="resetForm()">
                                 <i class="ri-refresh-fill align-bottom me-1"></i>
-                                renitialiser</button>
+                                renitialiser
+                            </button>
+                            <button type="button" class="btn btn-success btn-sm" (click)="exportToExcel()">
+                                 Exporter vers Excel
+                            </button>
+                            <button class="btn btn-primary" (click)="soumettre()">
+                                <i class="ri-save-line"></i> Recherche
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -50,14 +57,26 @@
                         </div>
                         <div class="col-lg-2 col-sm-6">
                             <div class="mb-3">
+                                <label class="form-label">Budget</label>
+                                <select
+                                    class="form-select form-select-sm bg-light {{ isValidField('budget')}}"
+                                    formControlName="budget">
+                                    <option value="">-- Sélectionner budget --</option>
+                                    @for(item of budgets; track $index){
+                                        <option value="{{ item.idbudget }}">{{ item.codebudget }} - {{ item.libelle }} </option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-2 col-sm-6">
+                            <div class="mb-3">
                                 <label class="form-label">Département</label>
                                 <select
                                     class="form-select form-select-sm bg-light {{ isValidField('departement')}}"
                                     formControlName="departement">
-                                    <option value>-- Sélectionner --</option>
-                                    @for (item of departements; track $index){
-                                    <option
-                                        [value]="item.iddepartement">{{item.libelle}}</option>
+                                    <option value="">-- Sélectionner departement --</option>
+                                    @for(item of departementUser; track $index){
+                                        <option value="{{ item.iddepartement! }}">{{ item.codedept! }} - {{ item.libelle! }} </option>
                                     }
                                 </select>
                             </div>
@@ -68,40 +87,66 @@
                                 <select
                                     class="form-select form-select-sm bg-light {{ isValidField('nature')}}" formControlName="nature">
                                     <option value>-- Sélectionner --</option>
-                                    @for (item of natureoperations; track $index){
-                                    <option [value]="item.idnature">{{item.libelle}}</option>
-                                    }
+                                    @for(item of naturesBydepartements; track $index){
+                                    <option value="{{item.idnature}}"> {{item.libelle}} </option>
+                                }
                                 </select>
                             </div>
                         </div>
-                        <div class="col-lg-2 col-sm-6">
+                        <!-- <div class="col-lg-2 col-sm-6 pt-4">
                             <button class="btn btn-primary" (click)="soumettre()">
-                            <i class="ri-save-line"></i> Recherche
+                                <i class="ri-save-line"></i> Recherche
                             </button>
-                        </div>
+                        </div> -->
                     </div>
-
-                
 
                     <!-- ==================== STEP 2 : LIGNES ==================== -->
                     <div class="row g-3">
                         <div class="table-responsive">
-                            <table class="table table-sm table-borderless table-nowrap mb-0">
+                            <table id="exportTable" class="table table-sm table-borderless table-nowrap mb-0">
                                 <thead class="align-middle">
                                     <tr class="table-active">
-                                        <th>Code budget</th>
-                                        <th>Code demande</th>
-                                        <th>Libellé demande</th>
-                                        <th>Date demande</th>
-                                        <th>Département</th>
-                                        <th>Nature d'opération</th>
-                                        <th>Montant</th>
-                                        <th>Devise</th>
+
+                                    <!-- COLONNE ACTION -->
+                                    <!-- <th style="width: 40px;" class="text-center">
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                                                title="Actions">⋮
+                                                <i class="ri-more-2-vertical"></i>
+                                            </button>
+
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a class="dropdown-item" (click)="exportToExcel()">
+                                                        <i class="ri-file-excel-2-line text-success me-2"></i>
+                                                        Exporter vers Excel
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" (click)="exportToCSV()">
+                                                        <i class="ri-file-text-line text-primary me-2"></i>
+                                                        Exporter vers CSV
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </th> -->
+
+                                    <th>Code budget</th>
+                                    <th>Code demande</th>
+                                    <th>Libellé demande</th>
+                                    <th>Date demande</th>
+                                    <th>Département</th>
+                                    <th>Nature d'opération</th>
+                                    <th>Montant</th>
+                                    <th>Devise</th>
                                     </tr>
                                 </thead>
+
                                 <tbody class="list form-check-all">
                                 @for (item of evolutionbudget; track $index){
                                     <tr>
+                                        <td></td>
                                         <td class="codebudget">{{item.codebudget}}</td>
                                         <td class="codedemande">
                                             <a [routerLink]="['/app/demande_decaissement/edit', item.iddemande]">
@@ -109,7 +154,7 @@
                                             </a>
                                         </td>
                                         <td class="libelle">{{item.libelle_demande}}</td>
-                                        <td class="datedemande">{{item.datedemande | date : "dd-MM-yyyy"}}</td>
+                                        <td class="datedemande">{{item.datedemande | date : "dd/MM/yyyy"}}</td>
                                         <td class="departement">{{item.libelle_dept}}</td>
                                         <td class="nature">{{item.nature}}</td>
                                         <td class="montant">{{item.montantdemande}}</td>

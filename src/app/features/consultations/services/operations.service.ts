@@ -7,7 +7,7 @@ import { Injectable } from "@angular/core";
 @Injectable({
   providedIn: 'root'
 })
-export class ConsultationService {
+export class ConsultationOpService {
     url : string = 'consultation';
 
     constructor(private http: HttpClient) {}
@@ -48,7 +48,7 @@ export class ConsultationService {
    * get paiement
    * @param params
    */
-    getAllpayment(): Observable<QueryResultModel> {
-        return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/allpayment');
+    getAllpayment(params: any): Observable<QueryResultModel> {
+        return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/allpayment', {params});
     }
 }

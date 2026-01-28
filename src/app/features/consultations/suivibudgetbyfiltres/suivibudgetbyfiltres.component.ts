@@ -2,27 +2,22 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { catchError, finalize, of, switchMap } from 'rxjs';
-import { natureoperationModel } from '../../donnee_base/models/natureoperation.model';
-import { tiersModel } from '../../donnee_base/models/tiers.model';
-import { centreanalytiqueModel } from '../../donnee_base/models/centreanalytique.model';
-import { NatureoperationService } from '../../donnee_base/services/natureoperation.service';
-import { CentreAnalytiqueService } from '../../donnee_base/services/centreanalytique.service';
-import { TiersService } from '../../donnee_base/services/tiers.service';
 import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.contantes';
 import { utilisateurdepartementservice } from '../../administration/service/userdepartement.service';
 import { affectationdepartementnatureModel } from '../../donnee_base/models/affectationdepartementnature.model';
 import { AffectationDepartementNatureService } from '../../donnee_base/services/affectationdepartementnature.service';
-import { affectationnaturecentreModel } from '../../donnee_base/models/affectationnaturecentre.model';
-import { AffectationNatureCentreService } from '../../donnee_base/services/affectationnaturecentre.service';
 import { devisemodel } from '../../donnee_base/donnee_base/model/devise.model';
 import { deviseservice } from '../../donnee_base/donnee_base/service/devise.service';
 import { SuiviBudgetByFiltresService } from '../services/suivibudgetbyfiltres.service';
 import { BudgetService } from '../../budgets/services/budget.service';
-import { departementmodel } from '../../structure/model/departement.model';
-import { departementservice } from '../../structure/service/departement.service';
+import { BudgetModel } from '../../budgets/models/budget.model';
+
 import { RouterModule } from '@angular/router';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+
 
 
 @Component({
@@ -46,6 +41,8 @@ export class SuiviBudgetByFiltresComponent implements OnInit {
 
   iddemande: any = "0";
 
+  //Liste des départements de l'utilisateurs
+  departementUser: any = [];
 
   //Liste des natures des départements
   naturesBydepartements: any[] = [];
@@ -58,48 +55,54 @@ export class SuiviBudgetByFiltresComponent implements OnInit {
 
   //Liste des natures filtrées
   naturesFiltrees: any[] = [];
-  natureoperations : natureoperationModel[] = [];
-  departements : departementmodel[] = [];
-  filtredepartement : departementmodel[] = [];
-
-  //Liste des tiers
-  tiers : tiersModel[] = [];
 
   //TITRE ET BOUTON RETOUR
   url: string = "";
 
-  //Liste des centres analytiques
-  centres : centreanalytiqueModel[] = [];
-
   evolutionbudget : any[] = [];
 
+  currentPage: number = 1;
+
+  filteredBudgets: BudgetModel[] = [];
+  params: any = {};
+  budgets: BudgetModel[] = [];
+  
+
+  
 
 
-  constructor(private natureoperationservice: NatureoperationService, private router : Router, private ds:deviseservice,
-    private centreanalytiqueservice: CentreAnalytiqueService, private AffectationDepartementNatureService: AffectationDepartementNatureService,
-    private tiersservice: TiersService, private toastr : ToastrService, private activatedRoute: ActivatedRoute,
-    private AffectationNatureCentreService: AffectationNatureCentreService,
+
+  constructor(private router : Router, private ds:deviseservice,
+     private AffectationDepartementNatureService: AffectationDepartementNatureService,
+     private toastr : ToastrService, private activatedRoute: ActivatedRoute,
     private SuiviBudgetByFiltre : SuiviBudgetByFiltresService,
     private budgetservice : BudgetService,
-    private dp : departementservice){}
+    private userdepartement: utilisateurdepartementservice){}
 
 
   ngOnInit(): void {
     //initialiser le formulaire 
     this.initForm();
-    //Charger les natures opérations
+
     //Afficher toutes les devises
     this.getalldevises();
-    //charger les centres analytiques
-    this.getAllcentres();
-    //charger les tiers
-    this.getAllTiers();
 
-    this.getAllNatureoperations();
+    this.getBudgetsAnnuels();
+    this.getAllBudgets();
+
+    //Charger les départements de l'user
+    this.getDepartementOfUser();
+
+    this.parametreForm.get('departement')?.valueChanges.subscribe(dept => {
+      if(dept){
+        //filtrer sur la natures des opérations
+        this.getallAffectationNatures(dept);
+      }
+    });
+
     this.getAllEvolBudget();
-    this.getalldepartements();
-    this.soumettre()
 
+    this.soumettre();
   }
 
 
@@ -108,6 +111,7 @@ export class SuiviBudgetByFiltresComponent implements OnInit {
     this.parametreForm = this.fb.group({
       datedebut: ['', Validators.required],
       datefin: [''],
+      budget: ['', Validators.required],
       nature: ['', Validators.required],
       departement: ['', Validators.required],
     });
@@ -121,22 +125,7 @@ export class SuiviBudgetByFiltresComponent implements OnInit {
     });
   }
 
-
-
-  getAllEvolBudget() {
-    console.log(this.parametreForm);
-    this.SuiviBudgetByFiltre.getEvolBudget(this.parametreForm).subscribe({
-      next: (res) => {
-        if (res.success) {
-          this.evolutionbudget = res.data;
-
-          console.log(this.evolutionbudget);
-        }
-      }
-    });
-  }
-
-  //Récupérer les devise
+  //Récupérer les devises
   getalldevises (){
     const params = {
       page: 1,
@@ -151,36 +140,41 @@ export class SuiviBudgetByFiltresComponent implements OnInit {
     });
   }
 
-
-  get user(){
-    return JSON.parse(localStorage.getItem('user') || '{}');
+  getBudgetsAnnuels() {
+    return this.filteredBudgets.filter((b) => b.typebudget === 'Annuel');
   }
 
-  getalldepartements (){
-    this.dp.getAll().subscribe({
-      next : (res) => {
-         if(res.success){
-            this.departements = res.data;
-            this.filtredepartement = res.data;
-         }
-      }
+  getAllBudgets() {
+    this.params = {
+      page: this.currentPage,
+      limit: this.getBudgetsAnnuels().length,
+    };
+    this.budgetservice.getAll(this.params).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.budgets = res.data;
+          console.log(this.budgets)
+        }
+      },
+      error: (err: any) => {
+        this.msgErros = err.error.error;
+      },
     });
   }
 
-
-  //Recuperer les natures opérations
-  getAllNatureoperations(){
-    this.natureoperationservice.getAll().subscribe({
+  //Récuperer le departement de l'utilisateur
+  getDepartementOfUser(){
+    this.userdepartement.getutilisateurdepartement(this.user.idutilisateur).subscribe({
       next : (res) => {
         if(res.success){
-          this.natureoperations = (res.data || []).filter(
-            (n: any) => n.actif === 1
-          );
+          this.departementUser = res.data[0];
         }
+      },
+      error: (err) => {
+        this.toastr.error(err.error.message)
       }
     });
   }
-
 
   //Affectation natures departements
   getallAffectationNatures(iddepartement: string) {
@@ -197,52 +191,31 @@ export class SuiviBudgetByFiltresComponent implements OnInit {
   }
 
 
-  //Affectation natures centre
-  getallAffectationCentres(idnature: string) {
-    this.AffectationNatureCentreService.getAll(idnature).subscribe({
+  getAllEvolBudget() {
+    console.log(this.parametreForm);
+    this.SuiviBudgetByFiltre.getEvolBudget(this.parametreForm).subscribe({
       next: (res) => {
         if (res.success) {
-          this.centresBynatures = (res.data.centresaffectes || []).filter(
-            (n: any) => n.actif === 1
-          );
+          this.evolutionbudget = res.data;
+
         }
       }
     });
   }
 
+  get user(){
+    return JSON.parse(localStorage.getItem('user') || '{}');
+  }
 
   //Recuperer le departement selectionné
   get departement() {
-    return this.parametreForm.get("departement")?.value;
+    return this.parametreForm.get("iddepartement")?.value;
   }
 
-
-  //Recupérer les centres analytiques
-  getAllcentres(){
-    this.centreanalytiqueservice.getAll().subscribe({
-      next : (res) => {
-        if(res.success){
-          this.centres = (res.data || []).filter(
-            (n: any) => n.actif === 1
-          )
-        }
-      }
-    });
+  get form() {
+    return this.parametreForm.controls;
   }
 
-
-  //Recupérer les tiers
-  getAllTiers(){
-    this.tiersservice.getAll().subscribe({
-      next : (res) => {
-        if(res.success){
-          this.tiers = (res.data || []).filter(
-            (n: any) => n.actif === 1
-          )
-        }
-      }
-    });
-  }
 
   // Enregistrer les affectations
   soumettre() {
@@ -263,7 +236,7 @@ export class SuiviBudgetByFiltresComponent implements OnInit {
           console.error(err);
         }
       });
-    }
+  }
 
 
   resetForm(){
@@ -278,7 +251,7 @@ export class SuiviBudgetByFiltresComponent implements OnInit {
     });
   }
 
-    //validation required
+  //validation required
   isValidField(label: string): string {
     let status: string = "";
     this.form[label].valid && this.form[label].touched ? status = 'is-valid' :
@@ -286,8 +259,50 @@ export class SuiviBudgetByFiltresComponent implements OnInit {
     return status;
   }
 
-  get form() {
-    return this.parametreForm.controls;
+  exportToExcel(): void {
+  const element = document.getElementById('exportTable');
+
+  if (!element) {
+    console.error('Table non trouvée');
+    return;
   }
+
+  const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
+  const workbook: XLSX.WorkBook = {
+    Sheets: { 'Evolution Budget': worksheet },
+    SheetNames: ['Evolution Budget']
+  };
+
+  const excelBuffer: any = XLSX.write(workbook, {
+    bookType: 'xlsx',
+    type: 'array'
+  });
+
+  const data: Blob = new Blob(
+    [excelBuffer],
+    { type: 'application/octet-stream' }
+  );
+
+  saveAs(data, `Evolution_budget_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.xlsx`);
+}
+
+exportToCSV(): void {
+  const element = document.getElementById('exportTable');
+
+  if (!element) {
+    console.error('Table non trouvée');
+    return;
+  }
+
+  const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
+  const csv = XLSX.utils.sheet_to_csv(worksheet);
+
+  const blob = new Blob([csv], {
+    type: 'text/csv;charset=utf-8;'
+  });
+
+  saveAs(blob, `evolution_budget_${new Date().getTime()}.csv`);
+}
+
 
 }

@@ -7,19 +7,16 @@ import { Injectable } from "@angular/core";
 @Injectable({
   providedIn: 'root'
 })
-export class SuiviBudgetService {
-    url : string = 'suivibudget' ;
+export class ConsultationService {
+    url : string = 'suivibudget';
 
     constructor(private http: HttpClient) {}
 
     /**
-   * get All
+   * get evolution globale budget
    * @param params
    */
-    // getEvolBudget (params : any): Observable<QueryResultModel> {
-    //     return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url+ {params});
-    // }
-    getEvolBudget (): Observable<QueryResultModel> {
-        return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url);
+    getEvolBudget(data: any): Observable<QueryResultModel> {
+        return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/evol', data);
     }
 }

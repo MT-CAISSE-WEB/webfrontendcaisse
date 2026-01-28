@@ -581,7 +581,7 @@
                             <button *ngIf="actionModal != 'create'" type="button" class="btn btn-sm btn-primary" (click)="printRecu()">
                                 <i class="ri-file-download-line align-bottom me-1"></i> imprimer
                             </button>
-                            <button type="submit" class="btn btn-sm btn-success" (click)="onSubmit()" [disabled]="operationForm.invalid || operationForm.errors?.['totalCaisseDepasse']">
+                            <button type="submit" *ngIf="actionModal == 'create'" class="btn btn-sm btn-success" (click)="onSubmit()" [disabled]="operationForm.invalid || operationForm.errors?.['totalCaisseDepasse']">
                                 {{ actionModal === "create" ? 'enregistrer' : 'modifier'}}
                             </button>
                         </div>

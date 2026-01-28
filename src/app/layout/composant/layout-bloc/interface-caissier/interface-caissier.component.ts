@@ -8,7 +8,7 @@ import { ToastrService } from 'ngx-toastr';
 import { OperationService } from '../../../../features/operations/service/operation.service';
 import { AffectationCaisseModel } from '../../../../features/caisse_journal/models/affectationcaisse.model';
 import { AffectationCaisseService } from '../../../../features/caisse_journal/services/affectationcaisse.service';
-import { ConsultationService } from '../../../../features/consultations/services/operations.service';
+import { ConsultationOpService } from '../../../../features/consultations/services/operations.service';
 import { APP_ROOT_OPERATION_GENERAL } from '../../../../_core/routes/frontend.root';
 
 @Component({
@@ -35,11 +35,25 @@ export class InterfaceCaissierComponent implements OnInit{
   limitL: number = 6;
   limitH: number = 6;
 
+  //Valeurs des operations
+  operationGlobal: any[] = [];
+  totalEncaissementGlobal = 0;
+  totalDecaissementGlobal = 0;
+
+  totalEncaissementJour = 0;
+  totalDecaissementJour = 0;
+
+  pourcentageEncaissementJour = 0;
+  pourcentageDecaissementJour = 0;
+
   //Liste de caisse utilisateur
   caissesUser: AffectationCaisseModel[] = [];
   loadingCaisses: boolean = false;
   loadingHistory: boolean = false;
   loadingLast: boolean = false;
+
+  //Caisse du caissier
+  caissesDuCaissier: any[] = [];
 
   opLast: any = [];
   opHistory : any = [];
@@ -47,7 +61,7 @@ export class InterfaceCaissierComponent implements OnInit{
   params : any = {};
 
   constructor(private caisseservice: CaisseService,private caisseStatusService: CaissePeriodeService,
-      private caisseuserservice: AffectationCaisseService, private toastr : ToastrService, private service: ConsultationService){}
+      private caisseuserservice: AffectationCaisseService, private toastr : ToastrService, private service: ConsultationOpService){}
 
 
   ngOnInit(): void {
@@ -55,8 +69,6 @@ export class InterfaceCaissierComponent implements OnInit{
     this.getcaissesPeriodes();
     //Charger les caisses du caissier et ses soldes
     this.getCaisseUser();
-    //Chargement des paiements de caisses
-    // this.getAllpayment();
   }
 
   //Récuperer les soldes
@@ -84,8 +96,11 @@ export class InterfaceCaissierComponent implements OnInit{
         if(res.success){
           this.caissesUser = res.data || [];
           if(this.caissesUser.length > 0){
-            const caisse_ = this.caissesUser.map(c => c.idcaisse);
-            this.params.caisses = caisse_;
+            this.caissesDuCaissier = this.caissesUser.map(c => c.idcaisse);
+            this.params.caisses = this.caissesDuCaissier;
+
+            //Chargement des paiements de caisses
+            this.getAllOp();
           }
           this.getSoldeCaisse();
           //Get data 
@@ -97,6 +112,13 @@ export class InterfaceCaissierComponent implements OnInit{
         this.toastr.error(err.error.message);
       }
     });
+  }
+
+  //Filter les operations de la caisse du caissier
+  filtrerOperationsDuCaissier(operations: any[], caissesDuCaissier: any[]): any[] {
+    return operations.filter(op =>
+      caissesDuCaissier.includes(op.idcaisse)
+    );
   }
 
   getSolde(item: any): number {
@@ -194,15 +216,56 @@ export class InterfaceCaissierComponent implements OnInit{
     });
   }
 
-  getAllpayment(){
-    this.service.getAllpayment().subscribe({
+  getAllOp(){
+    const params = {}
+    this.service.getAllpayment(params).subscribe({
       next : (res) => {
-        console.log(res);
+        if(res.success){
+          this.operationGlobal = res.data.data || [];
+          if(this.operationGlobal.length != 0) this.calculerIndicateurs() ;
+        }
       },
       error : (err) => {
         this.loadingLast = true ;
       }
     });
+  }
+
+  //Calcul des indicateurs
+  calculerIndicateurs() {
+    const jour = this.formatDateInput(new Date(this.caisseperiodes[0].dernierePeriode.dateperiode));
+
+    //Filtrer les operations du caissier
+    const operations = this.filtrerOperationsDuCaissier(this.operationGlobal, this.caissesDuCaissier);
+
+    //Totaux globaux
+    this.totalEncaissementGlobal = operations.reduce(
+      (sum, o) => sum + o.encaissement, 0
+    );
+
+    this.totalDecaissementGlobal = operations.reduce(
+      (sum, o) => sum + o.decaissement, 0
+    );
+
+    //Totaux du jour
+    this.totalEncaissementJour = operations
+      .filter(o => o.dateoperation.startsWith(jour))
+      .reduce((sum, o) => sum + o.encaissement, 0);
+
+    this.totalDecaissementJour = operations
+      .filter(o => o.dateoperation.startsWith(jour))
+      .reduce((sum, o) => sum + o.decaissement, 0);
+
+    //Pourcentages
+    this.pourcentageEncaissementJour =
+      this.totalEncaissementGlobal > 0
+        ? (this.totalEncaissementJour / this.totalEncaissementGlobal) * 100
+        : 0;
+
+    this.pourcentageDecaissementJour =
+      this.totalDecaissementGlobal > 0
+        ? (this.totalDecaissementJour / this.totalDecaissementGlobal) * 100
+        : 0;
   }
 
   getHistoryOperation(data : any){

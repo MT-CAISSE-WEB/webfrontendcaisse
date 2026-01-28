@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AffectationCaisseModel } from '../../caisse_journal/models/affectationcaisse.model';
-import { ConsultationService } from '../services/operations.service';
+import { ConsultationOpService } from '../services/operations.service';
 import { AffectationCaisseService } from '../../caisse_journal/services/affectationcaisse.service';
 import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.contantes';
@@ -34,7 +34,7 @@ export class OperationDetailComponent implements OnInit {
   // Nombre d'éléments par page
   totalPages: number = 0;
 
-  constructor(private service: ConsultationService, private caisseuserservice: AffectationCaisseService){}
+  constructor(private service: ConsultationOpService, private caisseuserservice: AffectationCaisseService){}
   
   ngOnInit(): void {
     //Initialisation du formulaire

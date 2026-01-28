@@ -3,20 +3,25 @@
     <div class="col-xl-4 col-md-6">
         <!-- card -->
         <div class="card card-animate">
-            <div class="card-body">
+            @if(loadingCaisses){
+                <div class="text-center py-4">
+                    <div class="spinner-border text-info"></div>
+                </div>
+            }
+            <div class="card-body" *ngIf="!loadingCaisses">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1 overflow-hidden">
                         <p class="text-uppercase fw-medium text-muted text-truncate mb-0"> Total encaissement</p>
                     </div>
                     <div class="flex-shrink-0">
                         <h5 class="text-success fs-14 mb-0">
-                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i> +16.24 %
+                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i>{{ pourcentageEncaissementJour | number:'1.0-2'  }} %
                         </h5>
                     </div>
                 </div>
                 <div class="d-flex align-items-end justify-content-between mt-4">
                     <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4">$<span class="counter-value" data-target="559.25">0</span>k </h4>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="559.25">{{ formatCFA(totalEncaissementJour)}}</span> {{ user.devise_ref_code}}</h4>
                         <a [routerLink]="root_operation"  class="text-decoration-underline">Voir plus</a>
                     </div>
                     <div class="avatar-sm flex-shrink-0">
@@ -32,7 +37,13 @@
     <div class="col-xl-4 col-md-6">
         <!-- card -->
         <div class="card card-animate">
-            <div class="card-body">
+            @if(loadingCaisses){
+                <div class="text-center py-4">
+                    <div class="spinner-border text-info"></div>
+                    <h6>Chargement ...</h6>
+                </div>
+            }
+            <div class="card-body" *ngIf="!loadingCaisses">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1 overflow-hidden">
                         <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Demandes</p>
@@ -45,7 +56,7 @@
                 </div>
                 <div class="d-flex align-items-end justify-content-between mt-4">
                     <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="36894">0</span></h4>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="36894">36 000</span>{{ user.devise_ref_code}}</h4>
                         <a href="#" class="text-decoration-underline">Voir plus</a>
                     </div>
                     <div class="avatar-sm flex-shrink-0">
@@ -61,20 +72,26 @@
     <div class="col-xl-4 col-md-6">
         <!-- card -->
         <div class="card card-animate">
-            <div class="card-body">
+            @if(loadingCaisses){
+                <div class="text-center py-4">
+                    <div class="spinner-border text-info"></div>
+                    <h6>Chargement ...</h6>
+                </div>
+            }
+            <div class="card-body" *ngIf="!loadingCaisses">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1 overflow-hidden">
                         <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Total DECAISSEMENT</p>
                     </div>
                     <div class="flex-shrink-0">
                         <h5 class="text-success fs-14 mb-0">
-                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i> +29.08 %
+                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i>{{ pourcentageDecaissementJour | number:'1.0-2' }} %
                         </h5>
                     </div>
                 </div>
                 <div class="d-flex align-items-end justify-content-between mt-4">
                     <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="183.35">0</span>M </h4>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="183.35">{{ formatCFA(totalDecaissementJour)}}  </span> {{ user.devise_ref_code}}</h4>
                         <a [routerLink]="root_operation" class="text-decoration-underline">Voir plus</a>
                     </div>
                     <div class="avatar-sm flex-shrink-0">
@@ -87,8 +104,6 @@
         </div><!-- end card -->
     </div><!-- end col -->
 </div> <!-- end row-->
-
-
 
 <div class="row">
     @for(item of caisseSolde; track $index){

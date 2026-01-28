@@ -1,18 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SuivibudgetComponent } from './suivibudget.component';
+import { SuiviBudgetComponent } from './suivibudget.component';
 
-describe('SuivibudgetComponent', () => {
-  let component: SuivibudgetComponent;
-  let fixture: ComponentFixture<SuivibudgetComponent>;
-
+describe('SuiviBudgetComponent', () => {
+  let component: SuiviBudgetComponent;
+  let fixture: ComponentFixture<SuiviBudgetComponent>;
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SuivibudgetComponent]
+      imports: [SuiviBudgetComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(SuivibudgetComponent);
+    fixture = TestBed.createComponent(SuiviBudgetComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

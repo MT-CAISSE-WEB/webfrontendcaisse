@@ -105,12 +105,12 @@
                           <li class="list-inline-item">
                               <div class="d-flex gap-1 align-items-center">
                                   <div class="dropdown">
-                                      <button class="btn btn-link text-muted p-1 mt-n2 py-0 text-decoration-none fs-15" (click)="prepareValidation(item)" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                      <button class="btn btn-link text-muted p-1 mt-n2 py-0 text-decoration-none fs-15" (click)="loadValidateurs(item)" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                           <i class=" bx bx-dots-vertical-rounded"></i>
                                       </button>
 
                                       <div class="dropdown-menu dropdown-menu-end">
-                                          <a *ngIf="item.circuitExist! == 1" class="dropdown-item" data-bs-toggle="modal" (click)="openValidationModal(item)" [attr.data-bs-target]="'#validationModal' + $index"><i class="ri-eye-fill align-bottom me-2 text-muted"></i>Validation</a>
+                                          <a *ngIf="item.circuitExist! == 1 && isValidateur()" class="dropdown-item" data-bs-toggle="modal" (click)="openValidationModal(item)" [attr.data-bs-target]="'#validationModal' + $index"><i class="ri-eye-fill align-bottom me-2 text-muted"></i>Validation</a>
                                           <a *ngIf="item.circuitExist! == 1" class="dropdown-item" data-bs-toggle="modal" (click)="openValidateur(item)" [attr.data-bs-target]="'#historiqueModal'"><i class="ri-pencil-fill align-bottom me-2 text-muted"></i>Historique de validation</a>
                                           <a class="dropdown-item" data-bs-toggle="modal" (click)="openDetail(item)" [attr.data-bs-target]="'#detailBudget'"><i class="ri-currency-fill align-bottom me-2 text-muted"></i>Detail budget</a>
                                           <div class="dropdown-divider"></div>
@@ -295,7 +295,9 @@
                                 <td *ngIf="v.commentaire"> {{ v.commentaire }} </td>
                                 <td *ngIf="!v.commentaire"> aucun commentaire </td>
                                 <td *ngIf="!v.datevalidation"> aucune </td>
-                                <td *ngIf="v.datevalidation"> {{ formatDateFR(v.datevalidation!)}} </td>
+                                <td *ngIf="v.datevalidation">
+                                   {{ v.datevalidation! ? (v.datevalidation | date: 'dd-MM-yyyy HH:mm') : '-'}}
+                                  </td>
                               </tr>
                               <tr *ngIf="validateurs.length === 0">
                                 <td colspan="6" class="text-center text-muted">

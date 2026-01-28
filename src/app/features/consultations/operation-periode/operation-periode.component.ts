@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ConsultationService } from '../services/operations.service';
+import { ConsultationOpService } from '../services/operations.service';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.contantes';
@@ -30,7 +30,7 @@ export class OperationPeriodeComponent implements OnInit {
   msgSup: string = "";
   titleMsg: string ="";
 
-  constructor(private service: ConsultationService, private caisseuserservice: AffectationCaisseService){}
+  constructor(private service: ConsultationOpService, private caisseuserservice: AffectationCaisseService){}
 
   ngOnInit(): void {
     //Initialisation du formulaire

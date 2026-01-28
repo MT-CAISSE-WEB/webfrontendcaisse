@@ -1,6 +1,6 @@
 table{
     font-size: 10px;
 }
-td, th{
-    width: auto;
+th{
+    width: 200px;
 }

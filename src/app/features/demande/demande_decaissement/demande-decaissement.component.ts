@@ -328,9 +328,6 @@ export class DemandeDecaissementComponent implements OnInit {
   }
 
   prepareValidation(item: any) {
-    // éviter les appels multiples
-    if (item._validationLoaded) return;
-  
     this.validateurs = []; // reset
     this.service.get_validateurs(item.iddemande).subscribe({
       next: (res) => {
@@ -355,13 +352,20 @@ export class DemandeDecaissementComponent implements OnInit {
     return total === 0 || total == null ? this.demandeMontant : total;
   }
 
+  isValidateur(): boolean {
+    return this.validateurs.some(u => u.idutilisateur === this.user.idutilisateur && u.decision === 'en attente')
+  }
+
+  isRejected(): boolean {
+    return this.validateurs.some(u => u.decision === "rejete")
+  }
+
   // Recharger toutes les demandes a valider par l'utilisateur
   loadDemandeAvalide() {
     this.service.avalider(this.user.idutilisateur).subscribe({
       next : (res) => {
         if(res.success){
           this.demandesValide = res.data;
-          console.log("Demande a valider", this.demandesValide);
         }else{
           this.toastr.error("Aucune demande a valider");
         }
@@ -374,21 +378,15 @@ export class DemandeDecaissementComponent implements OnInit {
 
   openValidateur(_object: any){
     this.validateurs = []; // reset
-    this.loadValidateurs(_object.iddemande);
+    this.loadValidateurs(_object);
   }
 
   //Recharger tous les validateurs d'une demande
-  loadValidateurs(iddemande: string){
-    this.service.get_validateurs(iddemande).subscribe({
+  loadValidateurs(demande: any){
+    this.service.get_validateurs(demande.iddemande).subscribe({
       next : (res) => {
         if(res.success){
           this.validateurs = res.data;
-          console.log(this.validateurs)
-          // Vérifier si l'utilisateur connecté est dans la liste
-          this.canValidateUser = this.validateurs.some(
-            (v: any) => v.idutilisateur === this.user.idutilisateur
-          );
-          console.log(this.canValidateUser);
         }else{
           this.canValidateUser = false;
           this.toastr.error("Cette demande n'a pas de validateur");

@@ -13,11 +13,12 @@ import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.c
 import { OperationService } from '../../../features/operations/service/operation.service';
 import { ToastrService } from 'ngx-toastr';
 import { InterfaceCaissierComponent } from "../layout-bloc/interface-caissier/interface-caissier.component";
+import { InterfaceUserComponent } from "../layout-bloc/interface-user/interface-user.component";
 
 @Component({
   selector: 'app-layout-content',
   standalone: true,
-  imports: [RouterModule, CommonModule, FormsModule, ReactiveFormsModule, InterfaceCaissierComponent],
+  imports: [RouterModule, CommonModule, FormsModule, ReactiveFormsModule, InterfaceCaissierComponent, InterfaceUserComponent],
   templateUrl: './layout-content.component.html',
   styleUrl: './layout-content.component.css'
 })
