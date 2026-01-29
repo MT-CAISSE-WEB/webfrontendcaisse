@@ -1211,7 +1211,7 @@ export class OperationCaisseComponent implements OnInit{
       const maxMontantRef = this.operationForm.get('montantRefglobal')?.value || 0;
 
       //Si le solde caisse devient inférieur au montant saisie
-      if (montant > solde) {
+      if (this.typePaiement == 'decaissement' && montant > solde) {
         montantCtrl.setErrors({
           ...(montantCtrl.errors || {}),
           soldeInsuffisant: true
