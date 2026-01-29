@@ -45,16 +45,16 @@ export class LayoutContentComponent implements OnInit{
   ){}
 
   ngOnInit(): void {
-    //Ramener les soldes de caisses 
-    this.getSoldeCaisse();
-    //récuperer les caisses de l'utilisateur
     this.caisseperiodeForm = this.fb.group({
-      dateperiode: [''],   //
-      caisses: this.fb.array([])
-    });
+        dateperiode: [''],   //
+        caisses: this.fb.array([])
+      });
 
     //Charger les caisses de l'utilisateur 
     this.getCaisseUser();
+
+    //Ramener les soldes de caisses 
+    this.getSoldeCaisse();
   }
 
   get user(){
@@ -67,6 +67,11 @@ export class LayoutContentComponent implements OnInit{
       next : (res) => {
         if(res.success){
           this.caisseperiodes = res.data;
+          if(this.caisseperiodes.length != 0){
+            this.caisseperiodeForm.patchValue({
+              dateperiode : this.formatDateInput(new Date(this.caisseperiodes[0].dernierePeriode.dateperiode))
+            });
+          }
           this.initForm();
           this.loadingCaisses = false;
         }else{
@@ -114,12 +119,17 @@ export class LayoutContentComponent implements OnInit{
     });
   }
 
+  formatDateInput(date: Date): string {
+    return date.toISOString().split('T')[0];
+  }
+
   //Récuperer les soldes
   getSoldeCaisse(){
     this.operationservice.getSoldeCaisse().subscribe({
       next : (res) => {
         if(res.success){
           this.caisseSolde = res.data;
+          console.log(this.caisseperiodes[0].dernierePeriode?.dateperiode);
         }
       }
     });
@@ -146,6 +156,12 @@ export class LayoutContentComponent implements OnInit{
     );
   }
 
+  reloadPage() {
+    setTimeout(() => {
+      window.location.reload();
+    }, 300);
+  }
+
   openCaisseUser(){
     /** Check formulaire */
     this.msgErros = '';
@@ -168,6 +184,8 @@ export class LayoutContentComponent implements OnInit{
     } else {
       this.openCaisse(this.user.idutilisateur, _caisse.caisses);    // Journée fermée → ouvrir
     }
+
+    this.reloadPage();
   }
 
   closeCaisse(iduser : string, caisses: any) {

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { natureoperationModel } from '../models/natureoperation.model';
 import { NatureoperationService } from '../services/natureoperation.service';
 import { CommonModule } from '@angular/common';
@@ -55,6 +55,8 @@ export class NatureoperationComponent implements OnInit{
 
   comptes : plancomptableModel[] = [];
 
+  ImportForm : FormGroup = this.fb.group({})
+
 
   constructor(private natureoperationservice: NatureoperationService, 
     private plancomptableservice: PlancomptableService,
@@ -70,6 +72,9 @@ export class NatureoperationComponent implements OnInit{
       this.initForm();
       this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("cette nature d'operation");
       this.titleMsg = TITLE_DELETE;
+
+      //Initialiser le formulaire du fichier d'import
+      this.initImportForm();
   }
 
   getAllNatureoperations(){
@@ -390,11 +395,30 @@ export class NatureoperationComponent implements OnInit{
   //Importation du plan comptable
   importNatureOperation(event: any){
     const file = event.target.files[0];
+
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      this.ImportForm.patchValue({ file });
+      this.ImportForm.get('file')?.updateValueAndValidity();
+    }
+  }
+
+  //Création du formulaire d'importation
+  initImportForm(): void{
+    this.ImportForm = this.fb.group({
+      file : [null, [Validators.required]],
+    })
+  }
+
+  submitImportFile(input: HTMLInputElement): void {
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+    const file = input.files[0];
     const info = {
       idsociete : this.user.idsociete,
-      // idcompte : this.user.idcompte,
       createdby : this.user.codeutilisateur
-
     }
 
     this.natureoperationservice.importNatureOperation(file, info).subscribe({
@@ -415,4 +439,5 @@ export class NatureoperationComponent implements OnInit{
       }
     })
   }
+
 }

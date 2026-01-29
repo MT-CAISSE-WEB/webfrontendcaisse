@@ -11,8 +11,9 @@ import { AffectationCaisseModel } from '../../../features/caisse_journal/models/
 import { AffectationCaisseService } from '../../../features/caisse_journal/services/affectationcaisse.service';
 import { ToastrService } from 'ngx-toastr';
 import { APP_ROOT_PARAMETREPAGE_PARAMETRE } from '../../../_core/routes/frontend.root';
-import { RouterLink, RouterModule } from '@angular/router';
+import { Route, Router, RouterLink, RouterModule } from '@angular/router';
 import { OperationService } from '../../../features/operations/service/operation.service';
+import { LoaderService } from '../../../_core/utils/loaders.service';
 
 @Component({
   selector: 'app-layout-header',
@@ -40,7 +41,7 @@ export class LayoutHeaderComponent implements OnInit {
 
   caissesStatuses: { [id: string]: string } = {};
 
-  constructor(private caisseuserservice: AffectationCaisseService, private caisseservice: CaisseService,
+  constructor(private caisseuserservice: AffectationCaisseService, private caisseservice: CaisseService, private router: Router, private loader: LoaderService,
     private caisseStatusService: CaissePeriodeService, private caisseService: CaisseService, private toastr : ToastrService,){}
 
   ngOnInit(): void {
@@ -95,6 +96,12 @@ export class LayoutHeaderComponent implements OnInit {
     });
   }
 
+  reloadPage() {
+    setTimeout(() => {
+      window.location.reload();
+    }, 300);
+  }
+
   //Récuperer les soldes
   getSoldeCaisse(){
     this.caisseService.getSolde().subscribe({
@@ -134,6 +141,24 @@ export class LayoutHeaderComponent implements OnInit {
     }
 
     return 'text-muted';
+  }
+
+  getCaisseClass(item: FormArray<FormGroup<any>>): string {
+    const nbr = item.length;
+
+    if (nbr == 1){
+      return 'col-xl-12 col-md-12';
+    }
+
+    if (nbr == 2){
+      return 'col-xl-6 col-md-6 col-sm-6';
+    }
+
+    if (nbr > 2){
+      return 'col-xl-4 col-md-4';
+    }
+
+    return 'col-xl-3 col-md-6';
   }
 
   //Récuperer les caisses périodes
@@ -195,6 +220,9 @@ export class LayoutHeaderComponent implements OnInit {
     } else {
       this.openCaisse(this.user.idutilisateur, _caisse.caisses);    // Journée fermée → ouvrir
     }
+
+    //Chargement de la page
+    this.reloadPage()
   }
 
   openCaisse(iduser: string, caisses: any){
@@ -202,14 +230,16 @@ export class LayoutHeaderComponent implements OnInit {
       next: (res) => {
         if (res.success) {
           this.error = "Caisse ouverte";
+          this.toastr.info("Ouverture de la journée")
         } else {
-          this.error = "Erreur de modification";
+          this.toastr.error("Erreur serveur des données")
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Modification échec";
         this.loading = false;
+        this.toastr.error("Erreur serveur des données", err.error.message)
       }
     })
   }
@@ -248,7 +278,7 @@ export class LayoutHeaderComponent implements OnInit {
   closeCaisse(iduser : string, caisses: any) {
     this.caisseservice.close(iduser, caisses).subscribe({
       next: (res) => {
-        this.error = res.success ? "Caisse clôturée" : "Erreur de clôture";
+        res.success ? this.toastr.info("Fermeture de la journée") : this.toastr.error("Erreur serveur de données");
         this.loading = false;
       },
       error: (err) => {

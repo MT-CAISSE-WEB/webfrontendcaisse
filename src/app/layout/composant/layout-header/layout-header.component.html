@@ -122,7 +122,7 @@
                                     @if (caissesArray.length > 0) {
                                         <div class="row g-3">
                                             @for (group of caissesArray.controls; track group){
-                                                <div class="col-sm-4 col-md-6" [formGroup]="group">
+                                                <div [ngClass]="getCaisseClass(caissesArray)" [formGroup]="group">
                                                     <div class="text-center empty-cart" id="empty-cart">
                                                         <div class="avatar-md mx-auto my-3">
                                                             <div class="avatar-title bg-info-subtle text-info fs-36 rounded-circle">
@@ -131,7 +131,7 @@
                                                         </div>
                                                         <input type="hidden" formControlName="idperiode"/>
                                                         <input type="hidden" formControlName="idcaisse"/>
-                                                        <span class="mb-3">{{ group.value.caisse?.libelle }}  {{ group.value.caisse?.codedevise }}</span>
+                                                        <span class="mb-3">{{ group.value.caisse?.libelle }}  {{ group.value.caisse?.codedevise }}</span> <br>
                                                         <span class="badge bg-info w-md mb-3">{{ group.value.statut }}</span>
                                                         <input type="hidden" formControlName="statut"/>
                                                         <input type="hidden" formControlName="dateperiode"/>
