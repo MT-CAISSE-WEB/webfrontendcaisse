@@ -15,7 +15,8 @@ import { APP, APP_DONNEE_BASE_DEVISE, APP_AFF_NATURE_CENTRE_DONNEE_BASE,
     APP_SUIVIBUDGETFILTRE_CONSULTATION, 
     APP_OPERATIONPERIODE_CONSULTATION,
     APP_OPERATIONDETAILS_CONSULTATION,
-    APP_PARAMETREPAGE_PARAMETRE} from './_core/routes/frontend.root';
+    APP_PARAMETREPAGE_PARAMETRE,
+    APP_OPERATION_GENERAL_JUSTIFIER} from './_core/routes/frontend.root';
 
 import { LayoutMainComponent } from './layout/layout-main/layout-main.component';
 import { LayoutContentComponent } from './layout/composant/layout-content/layout-content.component';
@@ -55,6 +56,7 @@ import { operationModel } from './features/operations/model/operation.model';
 import { OperationPeriodeComponent } from './features/consultations/operation-periode/operation-periode.component';
 import { OperationDetailComponent } from './features/consultations/operation-detail/operation-detail.component';
 import { ParametrePageComponent } from './features/paramètres/parametre-page/parametre-page.component';
+import { OprationJustifieeComponent } from './features/operations/opration-justifiee/opration-justifiee.component';
 
 export const routes: Routes = [
   {
@@ -102,6 +104,10 @@ export const routes: Routes = [
       {
           path : APP_OPERATION_GENERAL,
           component: OperationCaisseComponent,
+      },
+      {
+          path: APP_OPERATION_GENERAL_JUSTIFIER,
+          component: OprationJustifieeComponent 
       },
       {
           path : APP_STRUCTURE_SOCIETE,

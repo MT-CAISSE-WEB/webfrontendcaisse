@@ -211,6 +211,7 @@
                                         <td class="numero"><a href="#" class="fw-medium link-primary">{{ item.codeoperation }}</a></td>
                                         <td class="typepaiement text-success" *ngIf="item.caisses[0].codtypeoperation == 'encaissement'"> {{ item.caisses[0].codtypeoperation}} <i class="ri-arrow-right-up-line fs-13 align-middle"></i> </td>
                                         <td class="typepaiement text-warning" *ngIf="item.caisses[0].codtypeoperation == 'decaissement'"> {{ item.caisses[0].codtypeoperation}} <i class="ri-arrow-right-down-line fs-13 align-middle"></i> </td>
+                                        <td class="typepaiement text-primary" *ngIf="item.caisses[0].codtypeoperation == 'decaissementaj'"> decaissement à justifier <i class="ri-arrow-right-down-line fs-13 align-middle"></i> </td>
                                         <td class="montant text-center"> {{ formatCFA(item.montant) }} </td>
                                         <td class="devise"> {{ item.devise.codedevise }} </td>
                                         <td class="text-muted text-uppercase fs-11"> {{ formatDateFR(item.dateoperation) }}</td>
@@ -345,12 +346,13 @@
                         </div>
                         <!--end col-->
                         <div class="col-lg-3 col-sm-6">
-                            <label for="choices-payment-status">Paiement type</label>
+                            <label for="choices-payment-status">Opération type</label>
                             <div class="input-light">
                                 <select class="form-select form-select-sm bg-light border-0" data-choices data-choices-search-false id="choices-payment-status" formControlName="typepaiement">
-                                    <option value="">Type paiement</option>
+                                    <option value="">Type opération</option>
                                     <option value="encaissement">encaissement</option>
                                     <option value="decaissement">decaissement</option>
+                                    <option value="decaissementaj">decaissement à justifier</option>
                                 </select>
                                 <div class="invalid-feedback">{{ msgErros }}</div>
                             </div>

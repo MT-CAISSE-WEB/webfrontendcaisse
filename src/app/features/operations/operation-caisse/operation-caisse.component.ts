@@ -72,6 +72,9 @@ export class OperationCaisseComponent implements OnInit{
   //Bouton active / inactive
   isUpdated: boolean = true;
 
+  //Demande selectionnée
+  isSelectedDemande: boolean = false;
+
   //Liste de caisse utilisateur
   caissesUser: AffectationCaisseModel[] = [];
 
@@ -658,11 +661,25 @@ export class OperationCaisseComponent implements OnInit{
     }
 
     const cleanType = type.toLowerCase().trim();
-
-    this.naturesFiltrees = this.natureoperations.filter(n =>
-      n.typeoperation?.toLowerCase().trim() === cleanType 
-    );
-    //&& n.demandedecaissement === 0
+    if(this.isSelectedDemande){
+      this.naturesFiltrees = [...this.natureoperations];
+    }else{
+      this.naturesFiltrees = this.natureoperations.filter(n => {
+        //Cas encaissement / décaissement normal
+        if (cleanType !== 'decaissementaj') {
+          return (
+            n.typeoperation?.toLowerCase().trim() === cleanType &&
+            n.demandedecaissement === 0
+          );
+        }
+        //Cas décaissement avec ajustement
+        return (
+          n.typeoperation?.toLowerCase().trim() === 'decaissement' &&
+          n.decajustifier === 1 && n.demandedecaissement === 0
+        );
+      });
+    }
+    
   }
 
   get caisses(): FormArray<FormGroup> {
@@ -1211,7 +1228,7 @@ export class OperationCaisseComponent implements OnInit{
       const maxMontantRef = this.operationForm.get('montantRefglobal')?.value || 0;
 
       //Si le solde caisse devient inférieur au montant saisie
-      if (this.typePaiement == 'decaissement' && montant > solde) {
+      if (this.typePaiement != 'encaissement' && montant > solde) {
         montantCtrl.setErrors({
           ...(montantCtrl.errors || {}),
           soldeInsuffisant: true
@@ -1494,6 +1511,7 @@ export class OperationCaisseComponent implements OnInit{
     this.service.getEntete(iddemande).subscribe({
       next: (res) => {
         if(res.success){
+          this.isSelectedDemande = true;
           this.fillFormFromDemande(res.data);
         }else{
           this.loadingModal = false;

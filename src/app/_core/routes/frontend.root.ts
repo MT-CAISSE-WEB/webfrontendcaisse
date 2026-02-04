@@ -102,6 +102,10 @@ export const APP_OPERATION = "operation";
 export const APP_OPERATION_GENERAL = APP_GENERAL + "/" + APP_OPERATION;
 export const APP_ROOT_OPERATION_GENERAL = APP_ROOT + "/" + APP_OPERATION_GENERAL;
 
+//Route des operations a justifier
+export const APP_OPERATION_GENERAL_JUSTIFIER = APP_GENERAL + "/" + APP_OPERATION + "/" + "ajustifiee";
+export const APP_ROOT_OPERATION_GENERAL_JUSITIFIER = APP_ROOT + "/" + APP_OPERATION_GENERAL_JUSTIFIER;
+
 
 // RICHARD
 //Route Plan comptable
