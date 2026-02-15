@@ -160,7 +160,7 @@
                 </div>
             </div><!-- end card header -->
             <div class="card-body">
-                <div class="table-responsive table-card">
+                <div class="table-responsive table-card table-container">
                     @if (loadingLast) {
                         <div class="text-center py-4">
                             <div class="spinner-border text-info"></div>
@@ -196,6 +196,11 @@
                                     <td *ngIf="item.typeoperation == 'decaissement'">
                                         <h6 class="text-danger fs-13 mb-0">
                                             <i class="mdi mdi-trending-down align-middle me-1"></i> {{ item.typeoperation!}} 
+                                        </h6>
+                                    </td>
+                                    <td *ngIf="item.typeoperation == 'decaissementaj'">
+                                        <h6 class="text-danger fs-13 mb-0">
+                                            <i class="mdi mdi-trending-down align-middle me-1"></i> decaissement à justifier 
                                         </h6>
                                     </td>
                                     <td class="text-muted text-end"> {{ formatCFA(item.montant!)}}  {{ item.devise! }}</td>
@@ -246,7 +251,7 @@
             <div class="card-header align-items-center d-flex">
                 <h4 class="card-title mb-0 flex-grow-1">Historique du jour</h4>
             </div><!-- end card header -->
-            <div class="card-body p-0">
+            <div class="card-body p-0 table-container">
                 <div class="d-flex flex-column" style="height: 390px;">
                     @if (loadingHistory) {
                         <div class="text-center py-4">

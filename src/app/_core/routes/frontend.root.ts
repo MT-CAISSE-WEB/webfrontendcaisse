@@ -8,6 +8,7 @@ export const APP_STRUCTURE = "structure";
 export const APP_GENERAL = "general";
 export const APP_CONSULTATION = "consultations";
 export const APP_PARAMETRE = "paramètres";
+export const APP_COMPTABILISATION = "comptabilisations";
 export const APP_ROOT_CAISSE_JOURNAL = APP_ROOT + "/" + APP_CAISSE_JOURNAL;
 export const APP_ROOT_DONNEE_BASE = APP_ROOT + "/" + APP_DONNEE_BASE;
 export const APP_ROOT_GENERAL = APP_ROOT + "/" + APP_GENERAL;
@@ -15,6 +16,7 @@ export const APP_ROOT_STRUCTURE = APP_ROOT + "/"+APP_STRUCTURE;
 export const APP_ROOT_ADMINISTRATION = APP_ROOT + "/"+APP_ADMINISTRATION;
 export const APP_ROOT_CONSULTATION = APP_ROOT + "/"+APP_CONSULTATION;
 export const APP_ROOT_PARAMETRE = APP_ROOT + "/" + APP_PARAMETRE;
+export const APP_ROOT_COMPTABILISATION = APP_ROOT + "/" + APP_COMPTABILISATION;
 
 
 export const APP_DEPARTEMENT = "departement";

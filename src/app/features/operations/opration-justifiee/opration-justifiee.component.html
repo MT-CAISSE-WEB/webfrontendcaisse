@@ -221,7 +221,7 @@
                                                 
                                                 <td class="text-end">
                                                     <div>
-                                                        <input type="text" formControlName="montantligne" class="form-control form-control-sm bg-light border-0 product-line-price" id="productPrice-1" placeholder="00.000" required/>
+                                                        <input type="text" formControlName="montantdetail" class="form-control form-control-sm bg-light border-0 product-line-price" id="productPrice-1" placeholder="00.000" required/>
                                                     </div>
                                                 </td>
                                                 <td class="product-removal align-right">
@@ -250,7 +250,7 @@
                         </div>
                         <div class="card-body border border-dashed border-start-0 border-end-0">
                             <div class="table-responsive">
-                                <table class="table table-sm table-borderless table-nowrap mb-0">
+                                <table class="table table-hover table-sm table-borderless table-nowrap mb-0">
                                     <colgroup>
                                         <col style="width: 10%">
                                         <col style="width: 60%">
@@ -264,10 +264,20 @@
                                         </tr>
                                     </thead>
                                     <tbody id="newlink">
-                                        <tr>
-                                            <th scope="row" class="product-id"></th>
-                                            <td class="text-start"></td>
-                                            <td class="text-end"></td>
+                                        @for(piece of justificatifFiltered; track piece.idjustificatifoperation){
+                                            <tr style="cursor:pointer" (click)="fillTableLigneJustificatif(piece)">
+                                                <th scope="row" class="product-id">{{$index + 1 }}</th>
+                                                <td class="text-start"> {{piece.codejustificatif}} </td>
+                                                <td class="text-end"> {{piece.montantjustificatif}} </td>
+                                            </tr>
+                                        }
+                                        <tr *ngIf="loadingPiece">
+                                            <td colspan="3">
+                                                <div class="text-center py-4">
+                                                    <div class="spinner-border text-info"></div>
+                                                    <h6 class="mt-2">Chargement...</h6>
+                                                </div>
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>

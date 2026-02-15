@@ -17,6 +17,7 @@ import { map, Observable, tap } from 'rxjs';
 import { AffectationCaisseService } from '../../caisse_journal/services/affectationcaisse.service';
 import { DemandeService } from '../../demande/services/demande.service';
 import { JustificatifService } from '../service/justificatif.service';
+import { detailJustificatifModel, JustificatifModel } from '../model/justificatif.model';
 
 @Component({
   selector: 'app-opration-justifiee',
@@ -47,6 +48,16 @@ export class OprationJustifieeComponent implements OnInit{
   //Le taux de devises
   tauxdevise : tauxdevisemodel = new tauxdevisemodel();
   taux : any;
+
+  //Les datas justificatifs
+  justificatifPieces : JustificatifModel[] = [];
+  justificatif : JustificatifModel = new JustificatifModel();
+  justificatifFiltered : JustificatifModel[] = [];
+  loadingPiece = false;
+
+  //Les datas details justificatifs
+  justificatifDetail : detailJustificatifModel[] = [];
+  justificatifDetailFiltered : detailJustificatifModel[] = [];
 
   private tauxConversionTransaction = 1;
 
@@ -93,6 +104,8 @@ export class OprationJustifieeComponent implements OnInit{
       if(op){
         const operation_ = this.operations.find(el => el.idoperation === op);
         this.fillFormFromOperation(operation_);
+        //Justificatif 
+        this.fillTableJustificatif(operation_);
       }
       });
 
@@ -145,8 +158,74 @@ export class OprationJustifieeComponent implements OnInit{
     this.updateTotalMontant();
   }
 
+  //Remplir le tableau les pièces jsutificatives
+  fillTableJustificatif(op: any){
+    this.loadingPiece = true;
+    const params = {};
+    this.justificatifservice.getJustificatifs(params).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.justificatifPieces = res.data;
+          this.justificatifFiltered = this.justificatifPieces.filter(el => el.operation.idoperation == op.idoperation);
+          this.loadingPiece = false;
+        }
+      },
+      error : (err)  => {
+        console.log(err);
+        this.loadingPiece = false;
+      },
+    })
+  }
+
   formatDateForInput(date: string) {
     return date ? date.substring(0, 10) : "";
+  }
+
+  //Remplir les lignes details de la piece justificative
+  fillTableLigneJustificatif(piece: any){
+    const params = {};
+    this.justificatifservice.getdetailsJustificatif(params).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.justificatifDetail = res.data;
+          this.justificatifDetailFiltered = this.justificatifDetail.filter(el => el.idjustificatif == piece.idjustificatifoperation);
+          const _object = {
+            justificatif : piece,
+            details : this.justificatifDetailFiltered
+          }
+          this.dispatchDetail(_object);
+        }
+      },
+      error : (err)  => {
+        console.log(err);
+      },
+    })
+  }
+
+  dispatchDetail(_object: any){
+    // Patch des champs simples
+    this.operationForm.patchValue({
+      tauxoperation       : _object.justificatif.taux,
+      devisejustificatif        : _object.justificatif.iddevise,
+      commentaire          : _object.justificatif.commentaire,
+      datejustificatif : this.formatDateForInput(_object.justificatif.date),
+    });
+
+    this.lignes.clear();
+    _object.details.forEach((l: any) => {
+      const ligneGroup = this.fb.group({
+        idligne: [l.iddetailsjustificatifoperation ?? null],
+        idnature: [l.idnature ?? null, Validators.required],
+        idcentreanalytique: [{ value: l.idcentreanalytique, disabled: true }],
+        idtiers: [{ value: l.idtiers ?? null, disabled: true }],
+        montantdetail: [{ value: l.montantdetail ?? "", disabled: false }, Validators.required],
+
+        //centres propres à la ligne
+        centres: this.fb.control<any[]>([])
+      });
+
+      this.lignes.push(ligneGroup);
+    });
   }
 
   //Charger le dernier taux
@@ -232,7 +311,7 @@ export class OprationJustifieeComponent implements OnInit{
   //La somme de toutes les lignes opérations
   get totalLignes(): number {
     return this.lignes.controls.reduce((sum, l) => {
-      return sum + (parseFloat(l.get('montantligne')?.value) || 0);
+      return sum + (parseFloat(l.get('montantdetail')?.value) || 0);
     }, 0);
   }
 
@@ -290,7 +369,7 @@ export class OprationJustifieeComponent implements OnInit{
     let total = 0;
 
     this.lignes.controls.forEach((ctrl: any) => {
-      const val = parseFloat(ctrl.get("montantligne")?.value || 0);
+      const val = parseFloat(ctrl.get("montantdetail")?.value || 0);
       total += isNaN(val) ? 0 : val;
     });
 
@@ -309,10 +388,10 @@ export class OprationJustifieeComponent implements OnInit{
   //Ajouter la ligne dans le tableau
   addLine() {
     const ligne = this.fb.group({
-      idnature : [{ value: "", disabled: false }, [Validators.required]],
-      idcentreanalytique: [{ value: "", disabled: true }, ],
-      idtiers: [{ value: "", disabled: true }, ],
-      montantligne: [{ value: "", disabled: true }, [Validators.required]],
+      idnature : [{ value: null, disabled: false }, [Validators.required]],
+      idcentreanalytique: [{ value: null, disabled: true }, ],
+      idtiers: [{ value: null, disabled: true }, ],
+      montantdetail: [{ value: "", disabled: true }, [Validators.required]],
       //CENTRES PAR LIGNE
       centres: this.fb.control<any[]>([])
     });
@@ -321,14 +400,14 @@ export class OprationJustifieeComponent implements OnInit{
       if (!natureId) {
         ligne.get("idcentreanalytique")?.disable();
         ligne.get("idtiers")?.disable();
-        ligne.get("montantligne")?.disable();
+        ligne.get("montantdetail")?.disable();
         ligne.get('centres')?.setValue([]);
         return;
       }
 
       // Champs de base
       ligne.get("idcentreanalytique")?.enable();
-      ligne.get("montantligne")?.enable();
+      ligne.get("montantdetail")?.enable();
 
       //charger centres POUR CETTE LIGNE
       this.loadCentresForLigne(ligne, natureId, true, '');
@@ -336,7 +415,7 @@ export class OprationJustifieeComponent implements OnInit{
       this.handleNatureChange(ligne, natureId);
     });
 
-    ligne.get("montantligne")?.valueChanges.subscribe(() => {
+    ligne.get("montantdetail")?.valueChanges.subscribe(() => {
       this.updateTotalMontant();
 
       //Calcul montant ref aussi
@@ -727,11 +806,13 @@ export class OprationJustifieeComponent implements OnInit{
       ...formValue,
     };
 
-    const _justificatif = {
-      codejustificatif : "",
+    const montanttotal = this.totalLignes * formValue.tauxoperation
+
+    const _justificatif: any =  {
       idoperation : formValue.operation,
       iddevise : formValue.devisejustificatif,
       datejustificatif : formValue.datejustificatif,
+      montantjustificatif: montanttotal,
       taux : formValue.tauxoperation,
       commentaire : formValue.commentaire,
       details : _operation.lignes,
@@ -740,13 +821,13 @@ export class OprationJustifieeComponent implements OnInit{
       createdby : _operation.createdby,
       retour_caisse : formValue.retourcaisse,
       caisses : _operation.caisses
-    }
+    };
 
     console.log(_justificatif);
 
     /** 3. choices action */
-    // if(this.actionModal == "create")this.create(_operation);
-    // else this.update(_operation);
+    if(this.actionModal == "create")this.create(_justificatif);
+    else this.update(_operation);
   }
 
   //Enregistrement de données
@@ -766,6 +847,7 @@ export class OprationJustifieeComponent implements OnInit{
       },
       error: (err) => {
         this.loading = false;
+        console.log("Erreur backend")
         this.toastr.error(err.error.message);
       }
     })

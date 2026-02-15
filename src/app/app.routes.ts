@@ -16,7 +16,8 @@ import { APP, APP_DONNEE_BASE_DEVISE, APP_AFF_NATURE_CENTRE_DONNEE_BASE,
     APP_OPERATIONPERIODE_CONSULTATION,
     APP_OPERATIONDETAILS_CONSULTATION,
     APP_PARAMETREPAGE_PARAMETRE,
-    APP_OPERATION_GENERAL_JUSTIFIER} from './_core/routes/frontend.root';
+    APP_OPERATION_GENERAL_JUSTIFIER,
+    APP_COMPTABILISATION} from './_core/routes/frontend.root';
 
 import { LayoutMainComponent } from './layout/layout-main/layout-main.component';
 import { LayoutContentComponent } from './layout/composant/layout-content/layout-content.component';
@@ -57,6 +58,7 @@ import { OperationPeriodeComponent } from './features/consultations/operation-pe
 import { OperationDetailComponent } from './features/consultations/operation-detail/operation-detail.component';
 import { ParametrePageComponent } from './features/paramètres/parametre-page/parametre-page.component';
 import { OprationJustifieeComponent } from './features/operations/opration-justifiee/opration-justifiee.component';
+import { ComptabilisationComponent } from './features/consultations/comptabilisation/comptabilisation.component';
 
 export const routes: Routes = [
   {
@@ -222,6 +224,10 @@ export const routes: Routes = [
       {
           path : APP_PARAMETREPAGE_PARAMETRE,
           component: ParametrePageComponent
+      },
+      {
+          path : APP_COMPTABILISATION,
+          component: ComptabilisationComponent
       },
     ]
   }
