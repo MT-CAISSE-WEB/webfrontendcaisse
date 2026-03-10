@@ -23,6 +23,7 @@
                         <h5 class="card-title mb-0 flex-grow-1">{{title}}</h5>
                         <div class="flex-shrink-0">
                             <div class="d-flex gap-2 flex-wrap">
+                                <button class="btn btn-sm btn-warning" (click)="reset()"><i class="ri-save-bin-2-line"></i>rénitialiser</button>
                                 <button class="btn btn-sm btn-primary"><i class="ri-save-bin-2-line"></i>charger</button>
                                 <button type="submit" (click)="onSubmit()" [disabled]="operationForm.invalid" class="btn btn-sm btn-success"><i class="ri-add-line align-bottom me-1"></i>enregistrer</button>
                             </div>
@@ -84,14 +85,25 @@
 
                         <div class="col-lg-3 col-sm-3">
                             <label for="invoicenoInput">Montant référentiel</label>
-                            <input type="text" formControlName="montantRefglobal" class="form-control form-control-sm bg-light border-0"  placeholder="" readonly="readonly" />
+                            <!-- <input type="text" formControlName="montantRefglobal" class="form-control form-control-sm bg-light border-0"  placeholder="" readonly="readonly" />
+                            <div class="invalid-feedback">{{ msgErros }}</div> -->
+                            <div class="input-group input-group-sm mb-2">
+                                <input type="text" formControlName="montantRefglobal" 
+                                class="form-control form-control-sm bg-light border-0" placeholder="" readonly="readonly" >
+                                <label class="input-group-text">  {{ user.devise_rep_code }}</label>
+                            </div>
                             <div class="invalid-feedback">{{ msgErros }}</div>
                         </div>
                         <!--end col-->
 
                         <div class="col-lg-3 col-sm-3">
                             <label for="invoicenoInput">Reste à payer réf</label>
-                            <input type="text" formControlName="resteapayerref" class="form-control form-control-sm bg-light border-0"  placeholder="" readonly="readonly" />
+                            <!-- <input type="text" formControlName="resteapayerref" class="form-control form-control-sm bg-light border-0"  placeholder="" readonly="readonly" /> -->
+                            <div class="input-group input-group-sm mb-2">
+                                <input type="text" formControlName="resteapayerref" 
+                                class="form-control form-control-sm bg-light border-0" placeholder="" readonly="readonly" >
+                                <label class="input-group-text">  {{ user.devise_rep_code }}</label>
+                            </div>
                             <div class="invalid-feedback">{{ msgErros }}</div>
                         </div>
                         <!--end col-->
@@ -131,6 +143,14 @@
                                     <div>
                                         <label for="date-field">Taux</label>
                                         <input type="texte" formControlName="tauxoperation" class="form-control form-control-sm bg-light border-0 {{ isValidField('tauxoperation')}}" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date" required>
+                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3 col-sm-4">
+                                    <div>
+                                        <label for="date-field">Taux inverse</label>
+                                        <input type="texte" formControlName="tauxoperationinverse" class="form-control form-control-sm bg-light border-0 {{ isValidField('tauxoperationinverse')}}" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date">
                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                     </div>
                                 </div>

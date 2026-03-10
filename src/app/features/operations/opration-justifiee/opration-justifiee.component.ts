@@ -40,10 +40,13 @@ export class OprationJustifieeComponent implements OnInit{
 
   loadingModal = false;
   montantTotaligne: number = 0;
+  totalpieceJustificative: number = 0;
+  totalpieceJustificativeRef: number = 0;
 
   operations : operationModel[] = [];
   operationsFiltrees : operationModel[] = [];
   operation : operationModel = new operationModel();
+  ope : any;
 
   //Le taux de devises
   tauxdevise : tauxdevisemodel = new tauxdevisemodel();
@@ -101,12 +104,10 @@ export class OprationJustifieeComponent implements OnInit{
       this.titleMsg = TITLE_DELETE;
 
       this.operationForm.get('operation')?.valueChanges.subscribe(op => {
-      if(op){
-        const operation_ = this.operations.find(el => el.idoperation === op);
-        this.fillFormFromOperation(operation_);
-        //Justificatif 
-        this.fillTableJustificatif(operation_);
-      }
+        if(op){
+          this.ope = this.operations.find(el => el.idoperation === op);
+          this.fillFormFromOperation(this.ope);
+        }
       });
 
       //A la selectionner de la devise
@@ -155,7 +156,10 @@ export class OprationJustifieeComponent implements OnInit{
       montantRefglobal: totalCaissesOperation
     });
 
-    this.updateTotalMontant();
+    //Ramener les pieces Justificatives 
+    this.fillTableJustificatif(op);
+    //Charger tous les details des justificatifs
+    this.getDetailJustificatifPiece();
   }
 
   //Remplir le tableau les pièces jsutificatives
@@ -171,10 +175,19 @@ export class OprationJustifieeComponent implements OnInit{
         }
       },
       error : (err)  => {
-        console.log(err);
+        this.toastr.error("Erreur backend", err.error.message)
         this.loadingPiece = false;
       },
     })
+  }
+
+  //Total justificatif en montant référentiel
+  getTotalJustificatifRef(): number {
+    return this.justificatifFiltered.reduce((total, item) => {
+      const montant = item.montantjustificatif ?? 0;
+      const taux = item.taux ?? 1;
+      return total + (montant * taux);
+    }, 0);
   }
 
   formatDateForInput(date: string) {
@@ -183,21 +196,30 @@ export class OprationJustifieeComponent implements OnInit{
 
   //Remplir les lignes details de la piece justificative
   fillTableLigneJustificatif(piece: any){
+    this.getDetailJustificatifPiece();
+    this.justificatifDetailFiltered = this.justificatifDetail.filter(el => el.idjustificatif == piece.idjustificatifoperation);
+    const _object = {
+      justificatif : piece,
+      details : this.justificatifDetailFiltered
+    }
+    this.dispatchDetail(_object);
+  }
+
+  //Remplir les lignes details de la piece justificative
+  getDetailJustificatifPiece(){
     const params = {};
     this.justificatifservice.getdetailsJustificatif(params).subscribe({
       next : (res) => {
         if(res.success){
           this.justificatifDetail = res.data;
-          this.justificatifDetailFiltered = this.justificatifDetail.filter(el => el.idjustificatif == piece.idjustificatifoperation);
-          const _object = {
-            justificatif : piece,
-            details : this.justificatifDetailFiltered
-          }
-          this.dispatchDetail(_object);
+          this.totalpieceJustificative = this.getTotalOperation(this.ope, 'detail');
+          this.totalpieceJustificativeRef = this.getTotalOperation(this.ope, 'ref');
+          //Calculer les montants
+          this.updateTotalMontant();
         }
       },
       error : (err)  => {
-        console.log(err);
+        this.toastr.error("Erreur backend", err.error.message);
       },
     })
   }
@@ -228,6 +250,33 @@ export class OprationJustifieeComponent implements OnInit{
     });
   }
 
+  //Calcul de des totaux d'une piece
+  calculateOperationTotals(operation: any): { totalDetail: number, totalRef: number } {
+    let totalDetail = 0;
+    let totalRef = 0;
+
+    // boucle sur les justificatifs de l'opération
+    const justificatifs = this.justificatifPieces.filter(j => j.operation.idoperation === operation.idoperation);
+    justificatifs.forEach(just => {
+
+      // récupérer les détails du justificatif
+      const details = this.justificatifDetail.filter(d => d.idjustificatif === just.idjustificatifoperation);
+      details.forEach(det => {
+        totalDetail += Number(det.montantdetail) || 0;
+        totalRef += Number(det.montantref) || 0;
+      });
+
+    });
+
+    return { totalDetail, totalRef };
+  }
+
+  //Calcul des ici
+  getTotalOperation(op: any, field: 'detail' | 'ref'): number {
+    const totals = this.calculateOperationTotals(op);
+    return field === 'detail' ? totals.totalDetail : totals.totalRef;
+  }
+
   //Charger le dernier taux
   loadLastdeviseTaux(devise: any){
     const datePivot = this.operationForm.get('datejustificatif')?.value;
@@ -256,7 +305,7 @@ export class OprationJustifieeComponent implements OnInit{
          }
       },
       error: (err) => {
-        this.toastr.error("Erreur backend", err.error.message)
+        this.toastr.error("Erreur api", err.error.message)
       }
     });
   }
@@ -277,10 +326,16 @@ export class OprationJustifieeComponent implements OnInit{
       resteapayerref: [0],
       resteapayeroperation: [0],
       tauxoperation: [1],
+      tauxoperationinverse: [1],
       montantRefglobal: [0],
       montantoperation: [0],
       caisses: this.fb.array([]),
     })
+  }
+
+  //Rénitialiser le formulaire
+  reset(){
+    this.operationForm.reset();
   }
 
   get user(){
@@ -376,13 +431,27 @@ export class OprationJustifieeComponent implements OnInit{
     const taux = parseFloat(this.operationForm.get("tauxoperation")?.value || 1);
     this.montantTotaligne = total;
     const montantoperation = parseFloat(this.operationForm.get('montantoperation')?.value || 0);
-    const c = montantoperation - total;
+    const c = montantoperation - total - this.totalpieceJustificative;
     const montantreferentiel = parseFloat(this.operationForm.get('montantRefglobal')?.value || 0);
     const mtenref = this.montantTotaligne * taux;
-    const d = montantreferentiel - mtenref;
+    const d = montantreferentiel - mtenref - this.totalpieceJustificativeRef;
 
-    this.operationForm.patchValue({ resteapayeroperation: c });
-    this.operationForm.patchValue({ resteapayerref: d });
+    if(c < 0){
+      this.operationForm.patchValue({ resteapayeroperation: 0 });
+    }else{
+      this.operationForm.patchValue({ resteapayeroperation: c });
+    }
+
+    if(d < 0 ){
+      this.operationForm.patchValue({ resteapayerref: 0 });
+    }else{
+      this.operationForm.patchValue({ resteapayerref: d });
+    }
+
+    // if(mtenref > d){
+    //   this.operationForm.disabled;
+    //   this.toastr.warning("Montant supérieur au montant à payer");
+    // }
   }
 
   //Ajouter la ligne dans le tableau
@@ -822,8 +891,6 @@ export class OprationJustifieeComponent implements OnInit{
       retour_caisse : formValue.retourcaisse,
       caisses : _operation.caisses
     };
-
-    console.log(_justificatif);
 
     /** 3. choices action */
     if(this.actionModal == "create")this.create(_justificatif);
