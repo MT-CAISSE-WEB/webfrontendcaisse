@@ -18,7 +18,8 @@ import { APP, APP_DONNEE_BASE_DEVISE, APP_AFF_NATURE_CENTRE_DONNEE_BASE,
     APP_PARAMETREPAGE_PARAMETRE,
     APP_OPERATION_GENERAL_JUSTIFIER,
     APP_COMPTABILISATION, APP_DECAISSEMENTAJUSTIFIER,
-    APP_DECAISSEMENTAJUSTIFIER_CONSULTATION} from './_core/routes/frontend.root';
+    APP_DECAISSEMENTAJUSTIFIER_CONSULTATION,
+    APP_STATSAFFDEPTNATURE_CONSULTATION} from './_core/routes/frontend.root';
 
 import { LayoutMainComponent } from './layout/layout-main/layout-main.component';
 import { LayoutContentComponent } from './layout/composant/layout-content/layout-content.component';
@@ -61,6 +62,7 @@ import { ParametrePageComponent } from './features/paramètres/parametre-page/pa
 import { OprationJustifieeComponent } from './features/operations/opration-justifiee/opration-justifiee.component';
 import { ComptabilisationComponent } from './features/consultations/comptabilisation/comptabilisation.component';
 import { DecaissementJustifierComponent } from './features/consultations/decaissement-justifier/decaissement-justifier.component';
+import { NatureOperationByDepartementComponent } from './features/consultations/nature-par-departement/nature-par-departement.component';
 
 export const routes: Routes = [
   {
@@ -230,6 +232,10 @@ export const routes: Routes = [
       {
           path : APP_COMPTABILISATION,
           component: ComptabilisationComponent
+      },
+      {
+        path: APP_STATSAFFDEPTNATURE_CONSULTATION,
+        component: NatureOperationByDepartementComponent,
       },
       {
           path : APP_DECAISSEMENTAJUSTIFIER_CONSULTATION,

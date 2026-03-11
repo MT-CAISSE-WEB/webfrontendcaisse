@@ -18,7 +18,8 @@ import { APP_ROOT,APP_ROOT_DONNEE_BASE_DEVISE,
   APP_ROOT_OPERATIONDETAILS_CONSULTATION,
   APP_ROOT_OPERATION_GENERAL_JUSITIFIER,
   APP_ROOT_COMPTABILISATION,
-  APP_ROOT_DECAISSEMENTAJUSTIFIER_CONSULTATION} from '../../../_core/routes/frontend.root';
+  APP_ROOT_DECAISSEMENTAJUSTIFIER_CONSULTATION,
+  APP_ROOT_STATSAFFDEPTNATURE_CONSULTATION} from '../../../_core/routes/frontend.root';
 
 import { RouterLink, RouterModule, RouterOutlet } from "@angular/router";
 
@@ -60,4 +61,5 @@ export class LayoutMenuComponent {
   root_operationjustifiee = APP_ROOT_OPERATION_GENERAL_JUSITIFIER;
   root_comptabilisation = APP_ROOT_COMPTABILISATION;
   root_decaissementjustifiee = APP_ROOT_DECAISSEMENTAJUSTIFIER_CONSULTATION;
+  root_nature_operation_departement = APP_ROOT_STATSAFFDEPTNATURE_CONSULTATION;
 }
