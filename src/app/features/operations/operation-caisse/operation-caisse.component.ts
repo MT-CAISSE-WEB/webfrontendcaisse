@@ -189,7 +189,7 @@ export class OperationCaisseComponent implements OnInit{
       limit: this.limit,
       search: '',
       date: '',
-      status: '',
+      user: this.user.idutilisateur,
     };
     this.operationservice.getAll(this.params).subscribe({
       next : (res) => {

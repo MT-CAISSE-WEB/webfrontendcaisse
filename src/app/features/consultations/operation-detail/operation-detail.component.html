@@ -91,6 +91,7 @@
                         <table class="table table-striped align-middle text-nowrap" id="invoiceTable">
                             <thead class="">
                                 <tr>
+                                    <th scope="col" class="sort text-uppercase" data-sort="site">Site</th>
                                     <th scope="col" class="sort text-uppercase" data-sort="numero">Numero pièce</th>
                                     <th scope="col" class="sort text-uppercase" data-sort="date">Date operation</th>
                                     <th scope="col" class="sort text-uppercase" data-sort="nature">Nature operation</th>
@@ -103,6 +104,7 @@
                             <tbody>
                                 @for(item of op; track $index){
                                     <tr>
+                                        <td> {{item?.site}} </td>
                                         <td> {{item?.piece}} </td>
                                         <td> {{item?.date_operation | date:'dd/MM/yyyy'}} </td>
                                         <td> {{item?.nature_operation }} </td> 

@@ -52,7 +52,9 @@ export class OperationPeriodeComponent implements OnInit {
     this.searchForm = this.fb.group({
       caisse: [''],
       datedebut: ['', Validators.required],
-      datefin: ['', Validators.required]
+      datefin: ['', Validators.required],
+      typeentitesociete: [this.user.typeentitesociete],
+      idsite: [this.user.idsite]
     });
   }
 

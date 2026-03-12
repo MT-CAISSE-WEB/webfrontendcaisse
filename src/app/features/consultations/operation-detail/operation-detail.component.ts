@@ -57,10 +57,16 @@ export class OperationDetailComponent implements OnInit {
       centre: [''],
       tiers: [''],
       datedebut: [''],
-      datefin: ['']
+      datefin: [''],
+      typeentitesociete: [this.user.typeentitesociete],
+      idsite: [this.user.idsite]
     });
   }
 
+  //Utilisateur connecté
+  get user(){
+    return JSON.parse(localStorage.getItem('user') || '{}');
+  }
 
   //Recharger la page
   changePage(page: number) {
@@ -70,6 +76,7 @@ export class OperationDetailComponent implements OnInit {
   search(data : any){
     this.service.getDetailoperation(data).subscribe({
       next : (res) => {
+        console.log(res);
         this.op = res.data;
       },
       error : (err) => {}
@@ -89,6 +96,7 @@ export class OperationDetailComponent implements OnInit {
 
     /** 2. prepare data */
     const formValue = this.searchForm.value;
+    console.log(formValue);
     this.search(formValue);
   }
 
