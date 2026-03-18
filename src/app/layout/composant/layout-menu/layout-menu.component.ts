@@ -22,10 +22,11 @@ import { APP_ROOT,APP_ROOT_DONNEE_BASE_DEVISE,
   APP_ROOT_STATSAFFDEPTNATURE_CONSULTATION} from '../../../_core/routes/frontend.root';
 
 import { RouterLink, RouterModule, RouterOutlet } from "@angular/router";
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-layout-menu',
-  imports: [RouterLink, RouterModule],
+  imports: [RouterLink, RouterModule, CommonModule],
   templateUrl: './layout-menu.component.html',
   styleUrl: './layout-menu.component.css'
 })
@@ -62,4 +63,96 @@ export class LayoutMenuComponent {
   root_comptabilisation = APP_ROOT_COMPTABILISATION;
   root_decaissementjustifiee = APP_ROOT_DECAISSEMENTAJUSTIFIER_CONSULTATION;
   root_nature_operation_departement = APP_ROOT_STATSAFFDEPTNATURE_CONSULTATION;
+
+  admin : boolean =false;
+  supervisor : boolean=false;
+  caissier : boolean = false;
+  comptable : boolean = false; 
+  superadmin : boolean = false;
+  demandeur : boolean = false;
+
+  isuperadmin (): boolean {
+      if (typeof window !== 'undefined') {
+            const user =JSON.parse(localStorage.getItem('user') || '{}') ;
+        for (let index = 0; index < user.roles.length; index++) {
+            const element = user.roles[index];
+            if (element['code'] ==='00')
+                {
+                    this.superadmin = true;  
+                }
+        }
+    }
+     return this.superadmin;
+  }
+
+  isadmin(): boolean {
+      if (typeof window !== 'undefined') {
+            const user =JSON.parse(localStorage.getItem('user') || '{}') ;
+        for (let index = 0; index < user.roles.length; index++) {
+            const element = user.roles[index];
+            if (element['code'] ==='01')
+                {
+                    this.admin = true;  
+                }
+        }
+    }
+     return this.admin;
+  }
+
+  issuperviseur (): boolean {
+      if (typeof window !== 'undefined') {
+            const user =JSON.parse(localStorage.getItem('user') || '{}') ;
+        for (let index = 0; index < user.roles.length; index++) {
+            const element = user.roles[index];
+            if (element['code'] ==='02')
+                {
+                    this.supervisor = true;  
+                }
+        }
+    }
+     return this.supervisor;
+  }
+
+  iscomptable (): boolean {
+      if (typeof window !== 'undefined') {
+            const user =JSON.parse(localStorage.getItem('user') || '{}') ;
+        for (let index = 0; index < user.roles.length; index++) {
+            const element = user.roles[index];
+            if (element['code'] ==='03')
+                {
+                    this.comptable = true;  
+                }
+        }
+    }
+     return this.comptable;
+  }
+
+  iscaissier (): boolean {
+      if (typeof window !== 'undefined') {
+            const user =JSON.parse(localStorage.getItem('user') || '{}') ;
+        for (let index = 0; index < user.roles.length; index++) {
+            const element = user.roles[index];
+            if (element['code'] ==='04')
+                {
+                    this.caissier = true;  
+                }
+        }
+    }
+     return  this.caissier;
+  }
+
+  isdemandeur (): boolean {
+      if (typeof window !== 'undefined') {
+            const user =JSON.parse(localStorage.getItem('user') || '{}') ;
+        for (let index = 0; index < user.roles.length; index++) {
+            const element = user.roles[index];
+            if (element['code'] ==='05')
+                {
+                    this.demandeur = true;  
+                }
+        }
+    }
+     return this.demandeur;
+  }
+
 }

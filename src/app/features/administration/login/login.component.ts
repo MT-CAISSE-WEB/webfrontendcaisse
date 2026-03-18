@@ -47,9 +47,6 @@ export class LoginComponent {
         this.errormsg = err.error?.msg || "Identifiants incorrects";
       }
     })
-  }
-  
-
- 
+  } 
 }
 

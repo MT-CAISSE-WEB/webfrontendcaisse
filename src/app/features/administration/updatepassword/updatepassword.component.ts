@@ -26,7 +26,7 @@ ngOnInit() {
   );
 }
 
-constructor(private fb:FormBuilder, private toastr : ToastrService,private us:userservice,private router : Router){}
+constructor(private fb:FormBuilder,private toast: ToastrService,private us:userservice,private router : Router){}
 get user(){
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
@@ -59,11 +59,11 @@ onSubmit() {
     next: (res) => {
       this.loading = false;
       this.passwordForm.reset();
-      this.toastr.success(res.message);
+      this.toast.success(res.message);
     },
     error: (err) => {
       this.loading = false;
-      this.toastr.error(err.error.message);
+      this.toast.error(err.error.message);
     }
   });
 }
