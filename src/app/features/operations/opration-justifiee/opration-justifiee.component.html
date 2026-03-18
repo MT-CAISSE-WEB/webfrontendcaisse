@@ -285,7 +285,7 @@
                                     </thead>
                                     <tbody id="newlink">
                                         @for(piece of justificatifFiltered; track piece.idjustificatifoperation){
-                                            <tr style="cursor:pointer" (click)="fillTableLigneJustificatif(piece)">
+                                            <tr style="cursor:pointer" (click)="selectJustificatif(piece)">
                                                 <th scope="row" class="product-id">{{$index + 1 }}</th>
                                                 <td class="text-start"> {{piece.codejustificatif}} </td>
                                                 <td class="text-end"> {{piece.montantjustificatif}} </td>

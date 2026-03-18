@@ -46,26 +46,51 @@
                         </div>
                         <!--end col-->
                         <div class="col-xxl-3 col-sm-4">
-                            <div class="input-light">
-                                <select class="form-select form-select-sm" formControlName="nature">
-                                    <option value="" selected>Selectionner une nature</option>
-                                    <option value="">Toutes les natures</option>
-                                    <option value="all">Comptabilisé</option>
-                                </select>
-                            </div>
+                            <app-custom-field-select
+                                mode="backend"
+                                formControlName="nature"
+                                valueField="idnature"
+                                codeField="codenature"
+                                labelField="libelle"
+                                [columns]="columnsnature"
+                                placeholder="Rechercher une nature operation..."
+                                (loadData)="searchNature($event)"
+                                (valueChange)="onSelectNature($event)"
+                                [data]="natureoperationsFiltered">
+                            </app-custom-field-select>
                         </div>
                         <!--end col-->
                         <div class="col-xxl-3 col-sm-4">
-                            <div class="input-light">
-                                <select class="form-select form-select-sm" formControlName="centre">
-                                    <option value="" selected>Selectionner un centre analytique</option>
-                                    <option value="">Tous les centres analytiques</option>
-                                    <option value="all">Comptabilisé</option>
-                                </select>
-                            </div>
+                            <app-custom-field-select
+                                mode="backend"
+                                formControlName="centre"
+                                valueField="idcentreanalytique"
+                                codeField="codecentreanalytique"
+                                labelField="libelle"
+                                [columns]="columnscentre"
+                                placeholder="Rechercher un centre analytique..."
+                                (loadData)="searchCentre($event)"
+                                (valueChange)="onSelectCentre($event)"
+                                [data]="centresFiltered">
+                            </app-custom-field-select>
                         </div>
                         <!--end col-->
                         <div class="col-xxl-3 col-sm-4">
+                            <app-custom-field-select
+                                mode="backend"
+                                formControlName="tiers"
+                                valueField="idtiers"
+                                codeField="codetiers"
+                                labelField="designation"
+                                [columns]="columnstiers"
+                                placeholder="Rechercher un tiers..."
+                                (loadData)="searchTiers($event)"
+                                (valueChange)="onSelectTiers($event)"
+                                [data]="filteredTiers">
+                            </app-custom-field-select>
+                        </div>
+
+                        <!-- <div class="col-xxl-3 col-sm-4">
                             <div class="input-light">
                                 <select class="form-select form-select-sm" formControlName="tiers">
                                     <option value="" selected>Selectionner un tiers</option>
@@ -73,7 +98,7 @@
                                     <option value="all">Comptabilisé</option>
                                 </select>
                             </div>
-                        </div>
+                        </div> -->
                         <!--end col-->
                     </div>
                     <!--end row-->

@@ -237,7 +237,8 @@ export class InterfaceCaissierComponent implements OnInit{
 
     //Filtrer les operations du caissier
     const operations = this.filtrerOperationsDuCaissier(this.operationGlobal, this.caissesDuCaissier);
-
+    console.log(operations);
+    
     //Totaux globaux
     this.totalEncaissementGlobal = operations.reduce(
       (sum, o) => sum + o.encaissement, 0

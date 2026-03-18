@@ -1,14 +1,22 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AffectationCaisseModel } from '../../caisse_journal/models/affectationcaisse.model';
 import { ConsultationOpService } from '../services/operations.service';
 import { AffectationCaisseService } from '../../caisse_journal/services/affectationcaisse.service';
 import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.contantes';
+import { tiersModel } from '../../donnee_base/models/tiers.model';
+import { TiersService } from '../../donnee_base/services/tiers.service';
+import { CustomFieldSelectComponent } from '../../../_core/custom/custom-field-select/custom-field-select.component';
+import { COLUMNS_CENTRE, COLUMNS_NATURE, COLUMNS_TIERS } from '../../../_core/constantes/tableau.data';
+import { natureoperationModel } from '../../donnee_base/models/natureoperation.model';
+import { NatureoperationService } from '../../donnee_base/services/natureoperation.service';
+import { centreanalytiqueModel } from '../../donnee_base/models/centreanalytique.model';
+import { CentreAnalytiqueService } from '../../donnee_base/services/centreanalytique.service';
 
 @Component({
   selector: 'app-operation-detail',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, CustomFieldSelectComponent],
   templateUrl: './operation-detail.component.html',
   styleUrl: './operation-detail.component.css'
 })
@@ -26,6 +34,31 @@ export class OperationDetailComponent implements OnInit {
   //Liste de caisse utilisateur
   caissesUser: AffectationCaisseModel[] = [];
 
+  // tiers sélectionné
+  selectedTiers: any = null;
+
+  // Nature sélectionné
+  selectedNature: any = null;
+
+  // Centre sélectionné
+  selectedCentre: any = null;
+
+  columnstiers: any[] = COLUMNS_TIERS;
+  columnsnature: any[] = COLUMNS_NATURE;
+  columnscentre: any[] = COLUMNS_CENTRE;
+
+  tiersControl = new FormControl('');
+  tiers : tiersModel[] = [];
+  filteredTiers : tiersModel[] = [];
+  natureoperations : natureoperationModel[] = [];
+  natureoperationsFiltered : natureoperationModel[] = [];
+  centres : centreanalytiqueModel[] = [];
+  centresFiltered : centreanalytiqueModel[] = [];
+
+  page = 0;
+  limit = 20;
+  searchs = '';
+
   //Message suppression
   msgSup: string = "";
   titleMsg: string ="";
@@ -34,17 +67,37 @@ export class OperationDetailComponent implements OnInit {
   // Nombre d'éléments par page
   totalPages: number = 0;
 
-  constructor(private service: ConsultationOpService, private caisseuserservice: AffectationCaisseService){}
+  // @ViewChild('select') select!: CustomFieldSelectComponent;
+
+  constructor(private centreanalytiqueservice: CentreAnalytiqueService, private natureoperationservice: NatureoperationService, private tiersservice: TiersService, 
+    private service: ConsultationOpService, private caisseuserservice: AffectationCaisseService){}
   
   ngOnInit(): void {
     //Initialisation du formulaire
     this.initSearchForm();
 
-    // Liste des éléments
-    //this.getJournalpaiement();
+    this.tiersservice.getAll().subscribe(res => {
+      if(res.success){
+        this.tiers = res.data;
+        this.filteredTiers = [...this.tiers];
+      }
+    });
 
-    //Liste des caisses de user
-    //this.getCaisseUser();
+    this.natureoperationservice.getAll().subscribe({
+      next : (res) => {
+        if(res.success){
+          this.natureoperations = res.data;
+          this.natureoperationsFiltered = [...this.natureoperations];
+        }}
+    });
+
+    this.centreanalytiqueservice.getAll().subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.centres = res.data;
+          this.centresFiltered = [...this.centres];
+      }}
+    });
   }
 
   //Initialiser le formulaire de recherche
@@ -68,6 +121,51 @@ export class OperationDetailComponent implements OnInit {
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
+  onSearch(event:any){
+    this.searchs = event.term;
+    this.page = 0;
+    this.tiers = [];
+    //this.loadTiers();
+  }
+
+  //Chargement plus
+  loadMore(){
+    this.page++;
+    //this.loadTiers();
+  }
+
+  onAutocompleteOpen() {
+    this.page = 0; // reset pagination quand l'autocomplete s'ouvre
+    this.searchTiers('');
+  }
+
+  //Chargement du tiers
+  searchTiers(event: any){
+    const search = event.search || '';
+    this.filteredTiers = this.tiers.filter(t =>
+      t.designation?.toLowerCase().includes((search).toLowerCase()) ||
+      t.codetiers?.toLowerCase().includes((search).toLowerCase())
+    );
+  }
+
+  //Chargement des natures
+  searchNature(event: any){
+    const search = event.search || '';
+    this.natureoperationsFiltered = this.natureoperations.filter(t =>
+      t.libelle?.toLowerCase().includes((search).toLowerCase()) ||
+      t.codenature?.toLowerCase().includes((search).toLowerCase())
+    );
+  }
+
+  //Chargement du centre analytique
+  searchCentre(event: any){
+    const search = event.search || '';
+    this.centresFiltered = this.centres.filter(t =>
+      t.codecentreanalytique?.toLowerCase().includes((search).toLowerCase()) ||
+      t.libelle?.toLowerCase().includes((search).toLowerCase())
+    );
+  }
+
   //Recharger la page
   changePage(page: number) {
     this.currentPage = page;
@@ -76,7 +174,6 @@ export class OperationDetailComponent implements OnInit {
   search(data : any){
     this.service.getDetailoperation(data).subscribe({
       next : (res) => {
-        console.log(res);
         this.op = res.data;
       },
       error : (err) => {}
@@ -95,9 +192,23 @@ export class OperationDetailComponent implements OnInit {
     }
 
     /** 2. prepare data */
-    const formValue = this.searchForm.value;
-    console.log(formValue);
+    const formValue = {
+      ...this.searchForm.value,
+    };
+    
     this.search(formValue);
+  }
+
+  onSelectTiers(tiers:any){
+    this.selectedTiers = tiers;
+  }
+
+  onSelectNature(nature: any){
+    this.selectedNature = nature;
+  }
+
+  onSelectCentre(centre: any){
+    this.selectedCentre = centre;
   }
 
 }

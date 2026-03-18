@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DemandeService } from '../services/demande.service';
-import { catchError, finalize, of, switchMap } from 'rxjs';
 import { natureoperationModel } from '../../donnee_base/models/natureoperation.model';
 import { tiersModel } from '../../donnee_base/models/tiers.model';
 import { centreanalytiqueModel } from '../../donnee_base/models/centreanalytique.model';
@@ -23,10 +22,12 @@ import { deviseservice } from '../../donnee_base/donnee_base/service/devise.serv
 import { tauxdevisemodel } from '../../donnee_base/donnee_base/model/tauxdevise.model';
 import { tauxdeviseservice } from '../../donnee_base/donnee_base/service/tauxdevise.service';
 import { departementservice } from '../../structure/service/departement.service';
+import { CustomFieldSelectComponent } from '../../../_core/custom/custom-field-select/custom-field-select.component';
+import { COLUMNS_DEPARTEMENT } from '../../../_core/constantes/tableau.data';
 
 @Component({
   selector: 'app-edit-demande',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, CustomFieldSelectComponent],
   templateUrl: './edit-demande.component.html',
   styleUrl: './edit-demande.component.css'
 })
@@ -53,6 +54,8 @@ export class EditDemandeComponent implements OnInit {
 
   //Liste des départements de l'utilisateurs
   departementUser: any = [];
+  departementUserFiltered: any = [];
+  columnscentre: any[] = COLUMNS_DEPARTEMENT;
   //Liste des natures des départements
   naturesBydepartements: any[] = [];
   //Liste des centres analytiques des natures opérations
@@ -90,6 +93,15 @@ export class EditDemandeComponent implements OnInit {
     //initialiser le formulaire 
     this.initForm();
     this.title = 'Création';
+    //Charger les départements de l'user
+    this.loadDepartementsByUser();
+    //Afficher toutes les devises
+    this.getalldevises();
+    //charger les centres analytiques
+    this.getAllcentres();
+    //charger les tiers
+    this.getAllTiers();
+
     this.activatedRoute.paramMap.subscribe(params =>{
       const id= params.get("id");
       this.iddemande = id;
@@ -98,14 +110,6 @@ export class EditDemandeComponent implements OnInit {
         this.loading = false;
       }
     });
-     //Charger les départements de l'user
-    this.loadDepartementsByUser();
-    //Afficher toutes les devises
-    this.getalldevises();
-    //charger les centres analytiques
-    this.getAllcentres();
-    //charger les tiers
-    this.getAllTiers();
 
     this.demandeForm.get('departement')?.valueChanges.subscribe(dept => {
       if(dept){
@@ -252,6 +256,14 @@ export class EditDemandeComponent implements OnInit {
       next : (res) => {
         if(res.success){
           this.departementUser = res.data[0];
+          this.departementUserFiltered = [...this.departementUser];
+          
+          // Après avoir chargé les données
+          setTimeout(() => {
+            this.demandeForm.patchValue({
+              departement: this.demande?.iddepartement
+            });
+          });
         }
       },
       error: (err) => {
@@ -698,5 +710,15 @@ export class EditDemandeComponent implements OnInit {
       }
     })
   }
+
+  //Chargement des natures
+  searchDepartement(event: any){
+    const search = event.search || '';
+    this.departementUserFiltered = this.departementUser.filter((t: { codedept: string; libelle: string; }) =>
+      t.codedept?.toLowerCase().includes((search).toLowerCase()) ||
+      t.libelle?.toLowerCase().includes((search).toLowerCase())
+    );
+  }
+
 
 }

@@ -51,47 +51,47 @@
             </div>
 
             <!-- Modal -->
-                  <div class="modal fade" id="importcsv" tabindex="-1" aria-hidden="true">
-                      <div class="modal-dialog modal-dialog-centered">
-                          <div class="modal-content">
-                            <div class="modal-header p-3 bg-info-subtle">
-                              <h5>Import des données via CSV</h5>
-                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+            <div class="modal fade" id="importcsv" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                    <div class="modal-header p-3 bg-info-subtle">
+                        <h5>Import des données via CSV</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+                    </div>
+                    <form [formGroup]="ImportForm">
+                        <div class="modal-body text-center">
+
+                        <!-- Décision -->
+                        <div class="d-flex flex-column align-items-center gap-3 mt-3">
+                            <input type="file" #fileInput class="form-control form-control-sm" formControlName="file" accept=".csv" />
+                        </div>
+
+                        <div *ngIf="ImportForm.get('file')?.invalid && ImportForm.get('file')?.touched" class="text-danger mt-1">
+                            <div *ngIf="ImportForm.get('file')?.errors?.['required']">
+                                Le fichier est obligatoire
                             </div>
-                            <form [formGroup]="ImportForm">
-                              <div class="modal-body text-center">
 
-                                <!-- Décision -->
-                                <div class="d-flex flex-column align-items-center gap-3 mt-3">
-                                  <input type="file" #fileInput class="form-control form-control-sm" formControlName="file" accept=".csv" />
-                                </div>
+                            <div *ngIf="ImportForm.get('file')?.errors?.['invalidFileType']">
+                                Seuls les fichiers CSV sont autorisés
+                            </div>
+                        </div>
+                        </div>
 
-                                <div *ngIf="ImportForm.get('file')?.invalid && ImportForm.get('file')?.touched" class="text-danger mt-1">
-                                    <div *ngIf="ImportForm.get('file')?.errors?.['required']">
-                                        Le fichier est obligatoire
-                                    </div>
+                        <div class="modal-footer">
+                        <div class="hstack gap-2 justify-content-end">
+                            <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">
+                            Annuler
+                            </button>
 
-                                    <div *ngIf="ImportForm.get('file')?.errors?.['invalidFileType']">
-                                        Seuls les fichiers CSV sont autorisés
-                                    </div>
-                                </div>
-                              </div>
-
-                              <div class="modal-footer">
-                                <div class="hstack gap-2 justify-content-end">
-                                  <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">
-                                    Annuler
-                                  </button>
-
-                                  <button type="button" (click)="submitImportFile(fileInput)" class="btn btn-sm btn-success" [disabled]="ImportForm.invalid" data-bs-dismiss="modal">
-                                    importer
-                                  </button>
-                                </div>
-                              </div>
-                            </form>
-                          </div>
-                      </div>
-                  </div>
+                            <button type="button" (click)="submitImportFile(fileInput)" class="btn btn-sm btn-success" [disabled]="ImportForm.invalid" data-bs-dismiss="modal">
+                            importer
+                            </button>
+                        </div>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            </div>
 
             <div class="card-body pt-0">
                 <div>

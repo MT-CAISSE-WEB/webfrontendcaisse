@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { APP_ROOT_OPERATION_GENERAL } from '../../../_core/routes/frontend.root';
-import { RouterLink, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { caissePeriodeModel } from '../../../features/caisse_journal/models/periodecaisse.model';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AffectationCaisseModel } from '../../../features/caisse_journal/models/affectationcaisse.model';
@@ -14,19 +14,21 @@ import { OperationService } from '../../../features/operations/service/operation
 import { ToastrService } from 'ngx-toastr';
 import { InterfaceCaissierComponent } from "../layout-bloc/interface-caissier/interface-caissier.component";
 import { InterfaceUserComponent } from "../layout-bloc/interface-user/interface-user.component";
+import { DENOMINATION_BILLETAGE } from '../../../_core/constantes/tableau.data';
+import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-layout-content',
   standalone: true,
-  imports: [RouterModule, CommonModule, FormsModule, ReactiveFormsModule, InterfaceCaissierComponent, InterfaceUserComponent],
+  imports: [RouterModule, CommonModule, FormsModule, ReactiveFormsModule, InterfaceCaissierComponent, InterfaceUserComponent, NgbModalModule],
   templateUrl: './layout-content.component.html',
   styleUrl: './layout-content.component.css'
 })
 export class LayoutContentComponent implements OnInit{
   root_operation = APP_ROOT_OPERATION_GENERAL;
   caisseperiodes : any[] = [];
-  fb: FormBuilder = new FormBuilder();
-  caisseperiodeForm : FormGroup = this.fb.group({});
+  //fb: FormBuilder = new FormBuilder();
+  caisseperiodeForm : any;
   msgErros: string = "";
   error: string = "";
   loading: boolean = false;
@@ -37,24 +39,38 @@ export class LayoutContentComponent implements OnInit{
   class : string = "";
   dateInput: string = "";
 
+  billetageForm!: FormGroup;
+
+  denominations: any = DENOMINATION_BILLETAGE;
+  modalRef: any;
+
   //Caisse solde
   caisseSolde : any = [];
 
-  constructor(private caisseuserservice: AffectationCaisseService, private caisseservice: CaisseService,private caisseStatusService: CaissePeriodeService,
-    private operationservice: OperationService, private toastr : ToastrService
+  activeTab = 0;
+  billetageValidated: boolean = false; // pour savoir si le billetage est validé
+  validatedCaisseIndex: number | null = null; // indice de la caisse validée
+  billetageValidatedIndexes: number[] = []; // indices des caisses validées
+
+  constructor(private fb: FormBuilder, private modalService: NgbModal, private caisseuserservice: AffectationCaisseService, private caisseservice: CaisseService,private caisseStatusService: CaissePeriodeService,
+    private toastr : ToastrService
   ){}
 
   ngOnInit(): void {
     this.caisseperiodeForm = this.fb.group({
         dateperiode: [''],   //
         caisses: this.fb.array([])
-      });
+    });
+
+    this.billetageForm = this.fb.group({
+      caissesBillet: this.fb.array([])
+    });
 
     //Charger les caisses de l'utilisateur 
     this.getCaisseUser();
 
     //Ramener les soldes de caisses 
-    this.getSoldeCaisse();
+    // this.getSoldeCaisse();
   }
 
   get user(){
@@ -92,6 +108,8 @@ export class LayoutContentComponent implements OnInit{
           this.caissesUser = res.data;
           if (this.caissesUser.length > 0) {
             this.getcaissesPeriodes();
+            //Charger les soldes
+            this.getSoldeCaisse();
           }else {
             this.loadingCaisses = false;
             this.toastr.warning("Aucune caisse affectée à l\'utilisateur");
@@ -125,11 +143,13 @@ export class LayoutContentComponent implements OnInit{
 
   //Récuperer les soldes
   getSoldeCaisse(){
-    this.operationservice.getSoldeCaisse().subscribe({
+    this.caisseservice.getSolde().subscribe({
       next : (res) => {
         if(res.success){
           this.caisseSolde = res.data;
-          console.log(this.caisseperiodes[0].dernierePeriode?.dateperiode);
+          this.caisseSolde = this.caisseSolde.filter((cs: any) =>
+              this.caissesUser.some(cu => cu.idcaisse === cs.idcaisse)
+          );
         }
       }
     });
@@ -180,7 +200,10 @@ export class LayoutContentComponent implements OnInit{
     };
 
     if (this.isJourneeOuverte()) {
-      this.closeCaisse(this.user.idutilisateur, _caisse.caisses);   // Journée ouverte → fermer
+      // ouvrir le billetage avant clôture
+      // this.openBilletageModal();
+
+      //this.closeCaisse(this.user.idutilisateur, _caisse.caisses);   // Journée ouverte → fermer
     } else {
       this.openCaisse(this.user.idutilisateur, _caisse.caisses);    // Journée fermée → ouvrir
     }
@@ -259,6 +282,145 @@ export class LayoutContentComponent implements OnInit{
 
   formatDateForInput(date: string) {
     return date ? date.substring(0, 10) : "";
+  }
+
+  initBilletageForm(caisses:any[]){
+    const caissesArray = this.billetageForm.get('caissesBillet') as FormArray;
+    caissesArray.clear();
+
+    caisses.forEach(c=>{
+      const deviseData = this.denominations[c.caisse.codedevise];
+      const billetsArray = this.fb.array<FormGroup>([]);
+      const piecesArray = this.fb.array<FormGroup>([]);
+
+      // Billets
+      deviseData.billets.forEach((v:number)=>{
+        billetsArray.push( this.fb.group({ valeur:[v], quantite:[0] }));
+      });
+
+      // Pièces
+      deviseData.pieces.forEach((v:number)=>{
+        piecesArray.push( this.fb.group({ valeur:[v], quantite:[0] }) );
+      });
+
+      caissesArray.push(
+        this.fb.group({
+          idperiode:[c.idperiode],
+          idcaisse:[c.idcaisse],
+          caisse:[c.caisse.codecaisse],
+          devise:[c.caisse.codedevise],
+          billets:billetsArray,
+          pieces:piecesArray,
+          totalPhysique:[0],
+          ecart:[0]
+      }))
+    });
+  }
+
+  get caissesBilletArray():FormArray{
+    return this.billetageForm.get('caissesBillet') as FormArray;
+  }
+
+  getBillets(i:number):FormArray{
+    return this.caissesBilletArray.at(i).get('billets') as FormArray;
+  }
+
+  getPieces(i:number):FormArray{
+    return this.caissesBilletArray.at(i).get('pieces') as FormArray;
+  }
+
+  getTotalCaisse(index:number){
+    let billets = this.getBillets(index).value;
+    return billets.reduce((sum:any,b:any)=> {
+      return sum + (b.valeur * b.quantite); },0
+    );
+  }
+
+  openBilletageModal(content:any){
+    const caisses = this.caisseperiodeForm.value.caisses;
+    this.initBilletageForm(caisses);
+    this.modalRef = this.modalService.open(content,{
+      size:'lg',
+      backdrop:'static',
+      centered:true
+    });
+  }
+
+  getTotalBillets(i:number){
+    const billets = this.getBillets(i).value;
+    return billets.reduce((sum:any,b:any)=> sum + (b.valeur * b.quantite),0);
+  }
+
+  getTotalPieces(i:number){
+    const pieces = this.getPieces(i).value;
+    return pieces.reduce((sum:any,p:any)=> sum + (p.valeur * p.quantite),0);
+  }
+
+  getTotalPhysique(i:number){
+    return this.getTotalBillets(i) + this.getTotalPieces(i);
+  }
+
+  selectTab(i:number){
+    this.activeTab = i;
+  }
+
+  // Valider une caisse
+  validateBilletage(i: number) {
+    if (!this.billetageValidatedIndexes.includes(i)) {
+      this.billetageValidatedIndexes.push(i);
+    }
+
+    // IMPORTANT
+    this.billetageValidated = true;
+    this.validatedCaisseIndex = i;
+    const totalPhysique = this.getTotalPhysique(i);
+    const caisseId = this.caissesBilletArray.at(i).value.idcaisse;
+    const soldeCaisse = this.caisseSolde.find(
+      (s: any) => s.idcaisse === caisseId
+    );
+    const totalAttendu = soldeCaisse ? this.getSolde(soldeCaisse) || 0 : 0;
+    const ecart = totalPhysique - totalAttendu;
+    (this.caissesBilletArray.at(i) as FormGroup).patchValue({
+      ecart: ecart,
+      totalPhysique: totalPhysique
+    });
+  }
+
+  // Soumettre toutes les caisses validées
+  submitBilletage() {
+    const caissesToSubmit = this.caissesBilletArray.controls.filter((_, i) => this.billetageValidatedIndexes.includes(i)).map(c => c.value);
+    console.log(caissesToSubmit);
+    // fermer le modal
+    if(this.modalRef){
+      this.modalRef.close();
+    }
+  }
+
+  // Annuler le billetage
+  cancelBilletage() {
+    this.billetageValidatedIndexes = [];
+    // remettre les quantités à 0 si besoin
+    this.caissesBilletArray.controls.forEach(c => {
+      (c.get('billets') as FormArray).controls.forEach(b => b.patchValue({ quantite: 0 }));
+      (c.get('pieces') as FormArray).controls.forEach(p => p.patchValue({ quantite: 0 }));
+      c.patchValue({ ecart: 0 });
+    });
+    this.activeTab = 0;
+  }
+
+  formatCFA(montant: number | null | undefined): string {
+    return new Intl.NumberFormat('fr-FR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(montant ?? 0);
+  }
+
+  getSolde(item: any): number {
+    return (Number(item?.soldeinitialisation) || 0) + (Number(item?.solde) || 0);
+  }
+
+  calculSolde(item: any): string {
+    return this.formatCFA(this.getSolde(item));
   }
 
 }

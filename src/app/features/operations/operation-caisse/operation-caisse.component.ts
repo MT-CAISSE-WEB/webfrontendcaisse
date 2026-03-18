@@ -334,7 +334,7 @@ export class OperationCaisseComponent implements OnInit{
       limit: 100,
       search: '',
       date: '',
-      status: '',
+      user: this.user.idutilisateur,
     };
     this.service.getAllEntetes(params).subscribe({
       next : (res) => {
@@ -398,7 +398,7 @@ export class OperationCaisseComponent implements OnInit{
     const jour = this.toDateOnly(datePeiordeJour);
   
     const decaissements = this.stats.filter((op: any) =>
-      op.codtypeoperation === 'decaissement' &&
+      op.codtypeoperation !== 'encaissement' &&
       this.toDateOnly(op.dateperiode) === jour
     );
 

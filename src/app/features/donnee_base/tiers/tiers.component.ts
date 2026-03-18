@@ -173,7 +173,6 @@ export class TiersComponent implements OnInit{
     else this.objectsSelected = [];
   }
 
-
   //Soumission du formulaire
   onSubmit(){
     /** Check formulaire */

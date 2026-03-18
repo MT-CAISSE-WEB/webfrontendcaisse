@@ -21,6 +21,7 @@ export class JustificatifModel extends MainModel{
     iddevise: string = "";
     idtiers: string = "";
     taux: number = 0;
+    tuaxinverse: number = 0;
     date: string = "";
     montantjustificatif: number = 0;
     commentaire: string = "";

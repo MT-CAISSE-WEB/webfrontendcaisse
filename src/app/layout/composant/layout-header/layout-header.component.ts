@@ -14,10 +14,12 @@ import { APP_ROOT_PARAMETREPAGE_PARAMETRE } from '../../../_core/routes/frontend
 import { Route, Router, RouterLink, RouterModule } from '@angular/router';
 import { OperationService } from '../../../features/operations/service/operation.service';
 import { LoaderService } from '../../../_core/utils/loaders.service';
+import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
+import { BilletageModalComponent } from '../../../features/operations/billetage-modal/billetage-modal.component';
 
 @Component({
   selector: 'app-layout-header',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, RouterModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, RouterModule, NgbModalModule],
   templateUrl: './layout-header.component.html',
   styleUrl: './layout-header.component.css'
 })
@@ -41,7 +43,7 @@ export class LayoutHeaderComponent implements OnInit {
 
   caissesStatuses: { [id: string]: string } = {};
 
-  constructor(private caisseuserservice: AffectationCaisseService, private caisseservice: CaisseService, private router: Router, private loader: LoaderService,
+  constructor(private modalService: NgbModal, private caisseuserservice: AffectationCaisseService, private caisseservice: CaisseService, private router: Router, private loader: LoaderService,
     private caisseStatusService: CaissePeriodeService, private caisseService: CaisseService, private toastr : ToastrService,){}
 
   ngOnInit(): void {
@@ -79,7 +81,6 @@ export class LayoutHeaderComponent implements OnInit {
         if(res.success){
           this.caissesUser = res.data;
           if (this.caissesUser.length > 0) {
-            //this.getCaissesPerdiodes();
             this.getcaissesPeriodes();
             //Charger les soldes
             this.getSoldeCaisse();
@@ -216,13 +217,13 @@ export class LayoutHeaderComponent implements OnInit {
     };
 
     if (this.isJourneeOuverte()) {
-      this.closeCaisse(this.user.idutilisateur, _caisse.caisses);   // Journée ouverte → fermer
+      this.openBilletageModal();
+      //this.closeCaisse(this.user.idutilisateur, _caisse.caisses);   // Journée ouverte → fermer
     } else {
-      this.openCaisse(this.user.idutilisateur, _caisse.caisses);    // Journée fermée → ouvrir
+      this.openCaisse(this.user.idutilisateur, _caisse.caisses);
+      //Chargement de la page
+      this.reloadPage()    // Journée fermée → ouvrir
     }
-
-    //Chargement de la page
-    this.reloadPage()
   }
 
   openCaisse(iduser: string, caisses: any){
@@ -329,4 +330,20 @@ export class LayoutHeaderComponent implements OnInit {
 
     return `${dayShort} ${day} ${month} ${year}`;
   }
+
+  openBilletageModal(){
+    const modalRef = this.modalService.open(BilletageModalComponent,{
+      size:'lg',
+      backdrop:'static',
+      centered:true
+    });
+
+    modalRef.componentInstance.caisses = this.caisseperiodeForm.value.caisses;
+    modalRef.componentInstance.caisseSolde = this.caisseSolde;
+
+    modalRef.result.then((result)=>{
+      console.log("Billetage reçu", result);
+    });
+  }
+
 }

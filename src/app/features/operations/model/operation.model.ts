@@ -10,6 +10,7 @@ export class operationModel extends MainModel{
     devise : any;
     site : any;
     montant : number = 0;
+    taux: number = 1 ;
     dateoperation: string = "";
     societe :  any;
     typepaiement : string = ""
