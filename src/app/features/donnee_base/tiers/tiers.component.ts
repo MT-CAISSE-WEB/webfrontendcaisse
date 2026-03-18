@@ -1,0 +1,382 @@
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { tiersModel } from '../models/tiers.model';
+import { TiersService } from '../services/tiers.service';
+import { CommonModule } from '@angular/common';
+import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
+import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
+
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+
+
+// ADD-INS
+declare var $: any;
+
+@Component({
+  selector: 'app-tiers',
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  templateUrl: './tiers.component.html',
+  styleUrl: './tiers.component.css' 
+})
+
+export class TiersComponent implements OnInit{
+  title = "Gestion des Tiers";
+  params : any = {};
+  breadCrumbs : any = {};
+  fb: FormBuilder = new FormBuilder();
+  tiers : tiersModel[] = [];
+  tier : tiersModel = new tiersModel();
+  msgErros : string = "";
+  loading: Boolean = false;
+  tiersForm : FormGroup = this.fb.group({})
+
+  //Faire le check selection **********
+  objectsSelected : tiersModel[] = [];
+  selectedItems : any[] = [];
+  // Détermine si toutes les lignes sont selectionnées
+  checkAllRow : any;
+  error : string = "";
+
+  //Changement titre modal
+  actionModal: string = "create";
+
+  //Message suppression
+  msgSup: string = "";
+  titleMsg: string ="";
+
+  //Element à supprimer 
+  deleteTiers: any = null;
+
+
+  constructor(private tiersservice: TiersService,
+              private router: Router
+            , private toastr : ToastrService
+          ){}
+
+  ngOnInit(): void {
+      //Afficher tous les tiers
+      this.getAllTiers();
+      //Initialisation du formulaire
+      this.initForm();
+      this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("ce tiers");
+      this.titleMsg = TITLE_DELETE;
+  }
+
+  getAllTiers(){
+    this.tiersservice.getAll().subscribe({
+      next : (res) => {
+        if(res.success){
+          this.tiers = res.data;
+
+          const table = $('#dataTable').DataTable();
+          table.destroy();
+
+          setTimeout(() => $('#dataTable').DataTable({
+            language: {
+            search: "Rechercher :",
+            lengthMenu: "Afficher _MENU_ éléments",
+            info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+            infoEmpty: "Affichage de 0 à 0 sur 0 élément",
+            infoFiltered: "(filtré de _MAX_ éléments au total)",
+            loadingRecords: "Chargement...",
+            processing: "Traitement...",
+            zeroRecords: "Aucun élément correspondant trouvé",
+            emptyTable: "Aucune donnée disponible dans le tableau",
+            paginate: {
+              first: "Premier",
+              previous: "Précédent",
+              next: "Suivant",
+              last: "Dernier"
+            },
+            aria: {
+              sortAscending: ": activer pour trier la colonne par ordre croissant",
+              sortDescending: ": activer pour trier la colonne par ordre décroissant"
+            }
+          },
+            responsive: true,
+            ordering: true,
+            lengthMenu: [
+                [10, 25, 50, 100, 250, 500, -1],
+                [10, 25, 50, 100, 250, 500, "Tous"]
+              ]
+
+          }), 0);
+        }
+      }
+    });
+  }
+
+  get user(){
+    return JSON.parse(localStorage.getItem('user') || '{}');
+  }
+
+  //création du formulaire
+  initForm(): void{
+    this.tiersForm = this.fb.group({
+      codetiers : ["", [Validators.required]],
+      designation : ["", [Validators.required]],
+      typetiers : ["", [Validators.required]],
+      idsociete : [this.user.idsociete, [Validators.required]],
+      actif : [true],
+      createdby : [this.user.codeutilisateur],
+      updatedby : [this.user.codeutilisateur]
+    })
+  }
+
+  get form() {
+    return this.tiersForm.controls;
+  }
+
+  dispatchTiers(_object: tiersModel){
+    const status = _object.actif === 1;
+    this.tiersForm.patchValue({
+      codetiers : _object.codetiers,
+      designation : _object.designation,
+      typetiers : _object.typetiers,
+      idsociete : _object.idsociete,
+      codesociete : _object.societe.societe_codesociete,
+      raisonsociale : _object.societe.societe_raisonsociale,
+      actif : status
+    })
+  }
+
+  //validation required
+  isValidField(label: string): string {
+    let status: string = "";
+    this.form[label].valid && this.form[label].touched ? status = 'is-valid' :
+      this.form[label].invalid && this.form[label].touched ? status = 'is-invalid' : status = '';
+    return status;
+  }
+
+  //vérifie si _id est inclus dans un tableau d'IDs stocké
+  isChecked(_id: string) {
+    const ids: string[] = this.objectsSelected.map((el) => el.idtiers);
+    return ids.includes(_id);
+  }
+
+  //selectionner une instance dans une liste
+  handleSelectOne(tier: tiersModel, actif: any) {
+    const index = this.objectsSelected.findIndex(
+      (el) => el.idtiers == tier.idtiers
+    );
+    if (index == -1 && actif) this.objectsSelected.push(tier);
+    if (index != -1 && !actif) this.objectsSelected.splice(index, 1);
+    this.checkAllRow = this.objectsSelected?.length == this.tiers?.length;
+  }
+
+  //Sélection/ Désélection de tous les éléments
+  handleSelectAll($event: any) {
+    this.checkAllRow = $event;
+    if (this.checkAllRow) this.objectsSelected = this.tiers.slice();
+    else this.objectsSelected = [];
+  }
+
+
+  //Soumission du formulaire
+  onSubmit(){
+    /** Check formulaire */
+    this.msgErros = '';
+    const controls = this.tiersForm.controls;
+    if (this.tiersForm.invalid) {
+      Object.keys(controls).forEach(controlName => controls[controlName].markAsTouched());
+      this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
+      return;
+    }
+
+    /** 2. prepare data */
+    const formValue = this.tiersForm.value;
+
+    const _tiers: tiersModel = {
+      ...this.tier,
+      ...formValue,
+      actif: formValue.actif ? 1 : 0,
+       
+    };
+
+    /** 3. choices action */
+    if(this.actionModal == "create")this.create(_tiers);
+    else this.update(_tiers);
+    // if (!_tiers.idtiers) this.create(_tiers);
+    // else this.update(_tiers);
+  }
+
+  //Enregistrement de données
+  create(_tiers: tiersModel) {
+    const {idtiers, ...dataToSend} = _tiers;
+    this.loading = true;
+    this.tiersservice.create(dataToSend).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.closeModal('showModal');
+          this.getAllTiers();
+          this.toastr.success('Fiche créée');
+        } else {
+          this.error = "Erreur de création";
+          this.toastr.error(this.error);
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = "Echec de création";
+        this.loading = false;
+        this.toastr.error(this.error);
+      }
+    })
+  }
+
+  //Modification de données
+  update(_tiers: tiersModel){
+    this.tiersservice.update(_tiers).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.closeModal('showModal');
+          this.getAllTiers();
+          this.toastr.success('Fiche modifée');
+        } else {
+          this.error = "Erreur de modification";
+          this.toastr.error(this.error);
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = "Echec de modification";
+        this.loading = false;
+        this.toastr.error(this.error);
+      }
+    })
+  }
+
+  closeModal(modal: string){
+    const modalEl = document.getElementById(modal);
+    modalEl?.classList.remove('show');
+    modalEl?.setAttribute('aria-hidden', 'true');
+    (document.querySelector('.modal-backdrop') as HTMLElement)?.remove();
+  }
+
+  modalCreate(){
+    this.actionModal = "create";
+    this.initForm();
+  }
+
+  modalUpdate(_object: tiersModel){
+    this.tier = _object;
+    this.actionModal = "update";
+    this.tiersForm.reset();
+    this.dispatchTiers(_object);
+  }
+
+  modalDelete(item: tiersModel){
+    this.deleteTiers = item;
+  }
+
+  deleteConfirmed(){
+    if(!this.deleteTiers) return ;
+    this.tiersservice.delete(this.deleteTiers.idtiers).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.closeModal('delete');
+          this.getAllTiers();
+          this.toastr.success('Fiche supprimée');
+        } else {
+          this.error = "Erreur de Suppression";
+          this.toastr.error(this.error);
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = "Suppression échec";
+        this.loading = false;
+        this.toastr.error(this.error);
+      }
+    })
+  }
+
+  // Suppression multiple
+  deleteMultiple(){
+    for (let i = 0; i < this.objectsSelected.length; i++) {
+      this.tiersservice.delete(this.objectsSelected[i].idtiers).subscribe({})
+    }
+    this.getAllTiers();
+    this.toastr.success('Fiches supprimées');
+  }
+
+
+  exportToExcel(): void {
+    const element = document.getElementById('dataTable');
+  
+    if (!element) {
+      console.error('Table non trouvée');
+      return;
+    }
+  
+    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
+    const workbook: XLSX.WorkBook = {
+      Sheets: { 'Evolution Budget': worksheet },
+      SheetNames: ['Evolution Budget']
+    };
+  
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array'
+    });
+  
+    const data: Blob = new Blob(
+      [excelBuffer],
+      { type: 'application/octet-stream' }
+    );
+  
+    saveAs(data, `Liste_Tiers_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.xlsx`);
+  }
+    
+  exportToCSV(): void {
+    const element = document.getElementById('dataTable');
+  
+    if (!element) {
+      console.error('Table non trouvée');
+      return;
+    }
+  
+    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
+    
+    // 🔥 forcer le séparateur ;
+    const csv = XLSX.utils.sheet_to_csv(worksheet, {
+      FS: ';'
+    });
+  
+    const blob = new Blob([csv], {
+      type: 'text/csv;charset=utf-8;'
+    });
+
+    saveAs(blob, `Liste_Tiers_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.csv`);
+  }
+
+    //Importation des tiers
+  importTiers(event: any){
+    const file = event.target.files[0];
+    const info = {
+      idsociete : this.user.idsociete,
+      createdby : this.user.codeutilisateur
+
+    }
+
+    this.tiersservice.importTiers(file, info).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.getAllTiers();
+          this.toastr.success('Importation effectuée avec succès');
+        } else {
+          this.error = "Echec de l'importation";
+          this.toastr.error(this.error);
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = "Echec de l'importation";
+        this.loading = false;
+        this.toastr.error(err);
+      }
+    })
+  }
+}

@@ -1,0 +1,45 @@
+tr.selected {
+  background-color: #d9edf7; /* bleu clair */
+}
+
+#natureselected:hover {
+  background-color: #f0f8ff; /* bleu très clair */
+  cursor: pointer;
+  color: #000;
+  border: 1px solid #007bff;
+}
+
+#select-row:hover {
+  background-color: #f0f8ff; /* bleu très clair */
+  cursor: pointer;
+  color: #000;
+  border: 1px solid #007bff;
+}
+
+.input:hover {
+  cursor: pointer;
+}
+
+.input:checked {
+  background-color: #d9edf7; /* bleu clair */
+}
+
+#save-btn:hover {
+  background-color: #00b368; /* bleu plus foncé */
+  border-color: #008535;
+}
+
+
+#non-affectees {
+  background-color: #f6c8c8; /* rouge clair */
+  border-radius: 6px;
+  padding-top: 6px;
+  color: #000;
+}
+
+#affectees {
+  background-color: #c8f6d1; /* vert clair */
+  border-radius: 6px;
+  padding-top: 6px;
+  color: #000;
+}

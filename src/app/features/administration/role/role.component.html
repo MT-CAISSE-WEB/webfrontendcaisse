@@ -1,0 +1,273 @@
+<!-- ================= PAGE TITLE ================= -->
+<div class="row">
+  <div class="col-12">
+    <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+      <h4 class="mb-sm-0">Rôles & Permissions</h4>
+      <div class="page-title-right">
+        <ol class="breadcrumb m-0">
+          <li class="breadcrumb-item">
+            <a href="javascript:void(0);">Administration</a>
+          </li>
+          <li class="breadcrumb-item active">Rôles & Permissions</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= CONTENT ================= -->
+<div class="container-fluid">
+
+  <div class="row">
+
+    <!-- ================= LEFT COLUMN ================= -->
+    <div class="col-lg-8">
+
+      <!-- ===== ROLES CARD ===== -->
+      <div class="card mb-4">
+        <div class="card-body">
+
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="card-title mb-0">Rôles</h4>
+            <button class="btn btn-primary" (click)="addRole()">+</button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-centered table-nowrap">
+              <thead class="table-light">
+                <tr>
+                  <th>#</th>
+                  <th>Code</th>
+                  <th>Libellé</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+
+                <!-- ADD ROLE -->
+                <tr *ngIf="addingRole">
+                  <td>#</td>
+                  <td>
+                    <input class="form-control form-control-sm"
+                           [(ngModel)]="role.code"
+                           placeholder="Code" />
+                  </td>
+                  <td>
+                    <input class="form-control form-control-sm"
+                           [(ngModel)]="role.libelle"
+                           placeholder="Libellé" />
+                  </td>
+                  <td>
+                    <a class="action-icon text-success me-2"
+                       (click)="saveRole()">
+                      <i class="ri-check-line fs-16"></i>
+                    </a>
+                    <a class="action-icon text-danger"
+                       (click)="cancelRole()">
+                      <i class="ri-close-line fs-16"></i>
+                    </a>
+                  </td>
+                </tr>
+
+                <!-- ROLES LIST -->
+                <tr *ngFor="let r of roles; let i = index"  
+                [class.table-active]="selectedRole?.idrole === r.idrole"
+                class="role-row">
+
+                  <!-- VIEW MODE -->
+                  <ng-container *ngIf="editingRoleCode !== r.code">
+                    <td  (click)="selectRole(r)">{{ i + 1 }}</td>
+                    <td  (click)="selectRole(r)" >{{ r.code }}</td>
+                    <td  (click)="selectRole(r)">{{ r.libelle }}</td>
+                    <td>
+                      <a class="action-icon me-2"
+                         (click)="startEdit(r)">
+                        <i class="ri-pencil-line"></i>
+                      </a>
+
+                      <a class="action-icon text-danger me-2"
+                         (click)="deleteRole(r.idrole)">
+                        <i class="ri-delete-bin-line"></i>
+                      </a>
+
+                      <a class="action-icon text-primary"
+                         title="Gérer permissions"
+                         (click)="selectRole(r)">
+                        <i class="ri-shield-keyhole-line"></i>
+                      </a>
+                    </td>
+                  </ng-container>
+
+                  <!-- EDIT MODE -->
+                  <ng-container *ngIf="editingRoleCode === r.code">
+                    <td>{{ i + 1 }}</td>
+                    <td>
+                      <input class="form-control form-control-sm"
+                             [(ngModel)]="role.code"
+                             disabled />
+                    </td>
+                    <td>
+                      <input class="form-control form-control-sm"
+                             [(ngModel)]="role.libelle" />
+                    </td>
+                    <td>
+                      <a class="action-icon text-success me-2"
+                         (click)="saveEdit()">
+                        <i class="ri-check-line fs-16"></i>
+                      </a>
+                      <a class="action-icon text-danger"
+                         (click)="cancelEdit()">
+                        <i class="ri-close-line fs-16"></i>
+                      </a>
+                    </td>
+                  </ng-container>
+
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ===== PERMISSIONS CARD ===== -->
+      <div class="card">
+        <div class="card-body">
+
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="card-title mb-0">Permissions</h4>
+            <button class="btn btn-success" (click)="addPermissions()">+</button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-centered table-nowrap">
+              <thead class="table-light">
+                <tr>
+                  <th>#</th>
+                  <th>Code</th>
+                  <th>Description</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+
+                <!-- ADD PERMISSION -->
+                <tr *ngIf="addingPermission">
+                  <td>#</td>
+                  <td>
+                    <input class="form-control form-control-sm"
+                           [(ngModel)]="permission.code" />
+                  </td>
+                  <td>
+                    <input class="form-control form-control-sm"
+                           [(ngModel)]="permission.description" />
+                  </td>
+                  <td>
+                    <a class="action-icon text-success me-2"
+                       (click)="savePermission()">
+                      <i class="ri-check-line fs-16"></i>
+                    </a>
+                    <a class="action-icon text-danger"
+                       (click)="cancelPermission()">
+                      <i class="ri-close-line fs-16"></i>
+                    </a>
+                  </td>
+                </tr>
+
+                <!-- PERMISSIONS LIST -->
+                <tr *ngFor="let p of permissions; let i = index">
+
+                  <ng-container *ngIf="editingPermissionCode !== p.code">
+                    <td>{{ i + 1 }}</td>
+                    <td>{{ p.code }}</td>
+                    <td>{{ p.description }}</td>
+                    <td>
+                      <a class="action-icon me-2"
+                         (click)="startEditPermission(p)">
+                        <i class="ri-pencil-line"></i>
+                      </a>
+                      <a class="action-icon text-danger"
+                         (click)="deletePermission(p.idpermission)">
+                        <i class="ri-delete-bin-line"></i>
+                      </a>
+                    </td>
+                  </ng-container>
+
+                  <ng-container *ngIf="editingPermissionCode === p.code">
+                    <td>{{ i + 1 }}</td>
+                    <td>
+                      <input class="form-control form-control-sm"
+                             [(ngModel)]="permission.code"
+                             disabled />
+                    </td>
+                    <td>
+                      <input class="form-control form-control-sm"
+                             [(ngModel)]="permission.description" />
+                    </td>
+                    <td>
+                      <a class="action-icon text-success me-2"
+                         (click)="saveEditPermission()">
+                        <i class="ri-check-line fs-16"></i>
+                      </a>
+                      <a class="action-icon text-danger"
+                         (click)="cancelEditPermission()">
+                        <i class="ri-close-line fs-16"></i>
+                      </a>
+                    </td>
+                  </ng-container>
+
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================= RIGHT COLUMN ================= -->
+    <div class="col-lg-4">
+
+      <div class="card sticky-top" style="top: 80px;"
+           *ngIf="selectedRole">
+        <div class="card-body">
+
+          <h5 class="card-title">Permissions du rôle</h5>
+          <span class="badge bg-primary mb-3">
+            {{ selectedRole.libelle }}
+          </span>
+
+          <div class="mt-3">
+            <div *ngFor="let p of permissions" class="form-check mb-2">
+              <input class="form-check-input"
+                     type="checkbox"
+                     [checked]="rolePermissions.includes(p.idpermission.toString())"
+                     (change)="togglePermission(p.idpermission, $event)" />
+              <label class="form-check-label">
+                 {{ p.description }}
+              </label>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div *ngIf="!selectedRole"
+           class="text-muted text-center mt-5">
+        Sélectionnez un rôle pour gérer ses permissions
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+
+
+
+

@@ -1,0 +1,306 @@
+
+<div class="row">
+    <div class="col-xl-4 col-md-6">
+        <!-- card -->
+        <div class="card card-animate">
+            @if(loadingCaisses){
+                <div class="text-center py-4">
+                    <div class="spinner-border text-info"></div>
+                </div>
+            }
+            <div class="card-body" *ngIf="!loadingCaisses">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0"> Total encaissement</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-success fs-14 mb-0">
+                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i>{{ pourcentageEncaissementJour | number:'1.0-2'  }} %
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="559.25">{{ formatCFA(totalEncaissementJour)}}</span> {{ user.devise_ref_code}}</h4>
+                        <a [routerLink]="root_operation"  class="text-decoration-underline">Voir plus</a>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-success-subtle rounded fs-3">
+                            <i class="bx bx-dollar-circle text-success"></i>
+                        </span>
+                    </div>
+                </div>
+            </div><!-- end card body -->
+        </div><!-- end card -->
+    </div><!-- end col -->
+
+    <div class="col-xl-4 col-md-6">
+        <!-- card -->
+        <div class="card card-animate">
+            @if(loadingCaisses){
+                <div class="text-center py-4">
+                    <div class="spinner-border text-info"></div>
+                    <h6>Chargement ...</h6>
+                </div>
+            }
+            <div class="card-body" *ngIf="!loadingCaisses">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Demandes</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-danger fs-14 mb-0">
+                            <i class="ri-arrow-right-down-line fs-13 align-middle"></i> -3.57 %
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="36894">36 000</span>{{ user.devise_ref_code}}</h4>
+                        <a href="#" class="text-decoration-underline">Voir plus</a>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-info-subtle rounded fs-3">
+                            <i class="bx bx-shopping-bag text-info"></i>
+                        </span>
+                    </div>
+                </div>
+            </div><!-- end card body -->
+        </div><!-- end card -->
+    </div><!-- end col -->
+
+    <div class="col-xl-4 col-md-6">
+        <!-- card -->
+        <div class="card card-animate">
+            @if(loadingCaisses){
+                <div class="text-center py-4">
+                    <div class="spinner-border text-info"></div>
+                    <h6>Chargement ...</h6>
+                </div>
+            }
+            <div class="card-body" *ngIf="!loadingCaisses">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Total DECAISSEMENT</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-success fs-14 mb-0">
+                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i>{{ pourcentageDecaissementJour | number:'1.0-2' }} %
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="183.35">{{ formatCFA(totalDecaissementJour)}}  </span> {{ user.devise_ref_code}}</h4>
+                        <a [routerLink]="root_operation" class="text-decoration-underline">Voir plus</a>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-warning-subtle rounded fs-3">
+                            <i class="bx bx-user-circle text-warning"></i>
+                        </span>
+                    </div>
+                </div>
+            </div><!-- end card body -->
+        </div><!-- end card -->
+    </div><!-- end col -->
+</div> <!-- end row-->
+
+<div class="row">
+    @for(item of caisseSolde; track $index){
+        <div [ngClass]="getCaisseClass(caisseSolde)">
+            <div class="card card-height-100">
+                <div class="card-body">
+                    <div class="float-end">
+                        <div class="dropdown card-header-dropdown">
+                            <a class="text-reset dropdown-btn" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="text-muted fs-18"><i class="mdi mdi-dots-vertical align-middle"></i></span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <a class="dropdown-item" href="#">Aujourd'hui</a>
+                                <a class="dropdown-item" href="#">Hier</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-sm flex-shrink-0">
+                            <span class="avatar-title bg-info-subtle rounded fs-3">
+                                <i [ngClass]="getSoldeClass(item)"></i>
+                            </span>
+                        </div>
+                        <div class="flex-grow-1 ps-3">
+                            <h5 class="text-muted text-uppercase fs-13 mb-0">Solde {{ item.libelle!}}</h5>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-1">
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-0"> {{ calculSolde(item!) }} <span class="counter-value"> {{ item.codedevise!}} </span> </h4>
+                        <p class="mt-4 mb-0 text-muted"><span class="badge bg-danger-subtle text-danger mb-0 me-1"> <i class="ri-arrow-down-line align-middle"></i> {{ item.decaissement! || 0}} </span> sorties de caisse</p>
+                        <p class="mt-4 mb-0 text-muted"><span class="badge bg-success-subtle text-success mb-0"> <i class="ri-arrow-up-line align-middle"></i> {{ calculEntree(item) }} </span> entrées de caisse</p>
+                    </div>
+                </div>
+            </div>
+        </div><!--end col-->
+    } 
+</div>
+
+<div class="row">
+    <div class="col-xl-7">
+        <div class="card card-height">
+            <div class="card-header align-items-center d-flex">
+                <h4 class="card-title mb-0 flex-grow-1">Dernières opérations de caisses</h4>
+                <div class="flex-shrink-0 ms-2">
+                    <div class="dropdown card-header-dropdown">
+                        <a class="btn btn-soft-primary btn-sm" role="button" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Obtenir rapport<i class="mdi mdi-chevron-down align-middle ms-1"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item" href="#">Télécharger rapport</a>
+                            <a class="dropdown-item" href="#">Exporter vers excel</a>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- end card header -->
+            <div class="card-body">
+                <div class="table-responsive table-card">
+                    @if (loadingLast) {
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-info"></div>
+                        </div>
+                    }
+                    <table class="table table-hover table-borderless table-centered align-middle table-nowrap mb-0">
+                        <thead class="text-muted bg-light-subtle">
+                            <tr>
+                                <th>Piece</th>
+                                <th>Montant piece</th>
+                                <th>Type opération</th>
+                                <th>Montant payé</th>
+                                <th>Montant réf</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead><!-- end thead -->
+                        <tbody>
+                            @for(item of opLast; track $index){
+                                <tr class="fs-12">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div>
+                                                <h6 class="fs-12 mb-0">{{item.piece!}}</h6>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted text-end">{{ formatCFA(item.montantop!)}}</td>
+                                    <td *ngIf="item.typeoperation == 'encaissement'">
+                                        <h6 class="text-success fs-13 mb-0">
+                                            <i class="mdi mdi-trending-up align-middle me-1"></i> {{ item.typeoperation!}} 
+                                        </h6>
+                                    </td>
+                                    <td *ngIf="item.typeoperation == 'decaissement'">
+                                        <h6 class="text-danger fs-13 mb-0">
+                                            <i class="mdi mdi-trending-down align-middle me-1"></i> {{ item.typeoperation!}} 
+                                        </h6>
+                                    </td>
+                                    <td class="text-muted text-end"> {{ formatCFA(item.montant!)}}  {{ item.devise! }}</td>
+                                    <td class="text-muted text-end"> {{ formatCFA(item.montant_ref) }} {{user.devise_ref_code}}</td>
+                                    <td class="text-muted text-uppercase"> {{ formatDateFR(item.date!) }} </td>
+                                </tr><!-- end -->
+                            }
+                            <tr class="fs-12">
+                                <td colspan="3"></td>
+                                <td col="2">
+                                    <div class="d-flex justify-content-end">
+                                        <div class="pagination-wrap">
+                                            <ul class="pagination pagination-separated pagination-sm mb-0 justify-content-center">
+                                                <li class="page-item" [class.disabled]="currentPageL == 1">
+                                                    <a href="javascript:void(0)" class="page-link" (click)="currentPageL > 1 && changePageLast(currentPageL - 1)">←</a>
+                                                </li>
+
+                                                <li class="page-item">
+                                                    <a href="javascript:void(0)" class="page-link"> Page {{currentPageL}} / {{totalPagesL}}</a>
+                                                </li>
+                                                
+                                                <li class="page-item" [class.disabled]="currentPageL == totalPagesL">
+                                                    <a href="javascript:void(0)" class="page-link" (click)="currentPageL < totalPagesL && changePageLast(currentPageL + 1)">→</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody><!-- end tbody -->
+                    </table><!-- end table -->
+                    <div class="noresult" *ngIf="opLast.length == 0">
+                         <div class="text-center"> 
+                            <i class="ri-inbox-2-line fs-1 text-muted"></i>
+                            <h6 class="mt-2">Aucune donnée disponible</h6>
+                            <p class="text-muted mb-0">
+                                Désolé pas de donnée trouvée dans la base de donnée
+                            </p>
+                         </div>
+                    </div>
+                </div><!-- end tbody -->
+            </div><!-- end cardbody -->
+        </div><!-- end card -->
+    </div><!-- end col -->
+
+    <div class="col-xl-5">
+        <div class="card card-height">
+            <div class="card-header align-items-center d-flex">
+                <h4 class="card-title mb-0 flex-grow-1">Historique du jour</h4>
+            </div><!-- end card header -->
+            <div class="card-body p-0">
+                <div class="d-flex flex-column" style="height: 390px;">
+                    @if (loadingHistory) {
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-info"></div>
+                        </div>
+                    }
+                    <div class="p-3 flex-grow-1 d-flex flex-column" *ngIf="opHistory.length != 0">
+                        @for(item of opHistory; track $index){
+                            <h6 class="text-muted text-uppercase mb-3 mt-4 fs-11">{{ formatDateFR(item.date!) }}</h6>
+
+                            @for(e of item.operations!; track e.piece){
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-xs flex-shrink-0">
+                                        <span class="avatar-title bg-light rounded-circle">
+                                            <i class="icon-dual-warning icon-sm"></i>
+                                        </span>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="fs-14 mb-1">{{e.piece!}}</h6>
+                                        <p class="text-muted fs-12 mb-0" *ngIf="e.typeoperation == 'decaissement'">
+                                            <i class="mdi mdi-circle-medium text-warning fs-15 align-middle"></i> {{e.libelle!}}
+                                        </p>
+
+                                        <p class="text-muted fs-12 mb-0" *ngIf="e.typeoperation == 'encaissement'">
+                                            <i class="mdi mdi-circle-medium text-success fs-15 align-middle"></i> {{e.libelle!}}
+                                        </p>
+                                    </div>
+                                    <div class="flex-shrink-0 text-end">
+                                        <h6 class="mb-1 text-muted" *ngIf="e.typeoperation == 'decaissement'">- {{ formatCFA(e.montant!)}} <span class="text-uppercase ms-1">{{ e.devise! }}</span></h6>
+                                        <p class="text-warning fs-13 mb-0" *ngIf="e.typeoperation == 'decaissement'">- {{ formatCFA(e.montant_ref) }} {{user.devise_ref_code}}</p>
+
+                                        <h6 class="mb-1 text-success" *ngIf="e.typeoperation == 'encaissement'">+ {{ formatCFA(e.montant!)}} <span class="text-uppercase ms-1">{{ e.devise! }}</span></h6>
+                                        <p class="text-success fs-13 mb-0" *ngIf="e.typeoperation == 'encaissement'">+ {{ formatCFA(e.montant_ref) }} {{user.devise_ref_code}} </p>
+                                    </div>
+                                </div><!-- end -->
+                            }
+
+                        }
+
+                        <div class="mt-auto text-center">
+                            <a href="javascript:void(0);" class="text-muted text-decoration-underline">Voir plus</a>
+                        </div>
+                    </div>
+                    <div *ngIf="opHistory.length == 0">
+                         <div class="text-center"> 
+                            <i class="ri-inbox-2-line fs-1 text-muted"></i>
+                            <h6 class="mt-2">Aucune donnée disponible</h6>
+                            <p class="text-muted mb-0">
+                                Désolé pas de donnée trouvée dans la base de donnée
+                            </p>
+                         </div>
+                    </div>
+                </div>
+            </div><!-- end cardbody -->
+        </div><!-- end card -->
+    </div><!-- end col -->
+</div><!-- end row -->

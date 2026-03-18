@@ -1,0 +1,22 @@
+.table-scroll {
+    max-height: 250px;      /* hauteur du tableau */
+    overflow-y: auto;       /* scroll vertical */
+    overflow-x: hidden;
+}
+
+.table-wrapper {
+    width: 98%;
+    margin: 0 auto;   /* centre horizontalement */
+}
+
+@media (max-width: 992px) {
+    .table-wrapper {
+        width: 100%;
+        margin: 0;    /* plein écran sur mobile */
+    }
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(113, 140, 180, 0.08); /* bleu Bootstrap */
+    cursor: pointer;
+}

@@ -1,0 +1,21 @@
+<!-- toast.component.html -->
+<div class="toast-alert-container">
+  <div
+    *ngFor="let toast of toasts"
+    class="alert alert-top-border alert-dismissible fade show"
+    [ngClass]="getAlertClass(toast.type)"
+    role="alert"
+  >
+    <i [ngClass]="getIconClass(toast.type)" class="me-3 align-middle fs-16"></i>
+    <strong>{{ getTitle(toast.type) }}</strong>
+    <div class="row">
+         {{ toast.message }}
+    </div>
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="remove(toast.id!)"
+    ></button>
+  </div>
+</div>

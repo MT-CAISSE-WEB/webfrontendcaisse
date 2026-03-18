@@ -1,0 +1,685 @@
+<!-- start page title -->
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">{{title}}</h4>
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Générales</a></li>
+                    <li class="breadcrumb-item active">{{title}}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end page title -->
+
+<div class="row">
+    <div class="col-xl-3 col-md-6">
+        <!-- card -->
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <p class="text-uppercase fw-medium text-muted mb-0">Décaissement</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-success fs-14 mb-0">
+                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i> +89.24 %
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value">{{ formatCFA(totalDecaissementJour) || 0 }}</span> {{ user.devise_ref_code }} </h4>
+                        <span class="badge bg-warning me-1">{{ formatCFA(nbrDecaissementJour) || 0 }}</span> <span class="text-muted">Décaissement</span>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-light rounded fs-3">
+                            <i data-feather="file-text" class="text-success icon-dual-success"></i>
+                        </span>
+                    </div>
+                </div>
+            </div><!-- end card body -->
+        </div><!-- end card -->
+    </div><!-- end col -->
+ 
+    <div class="col-xl-3 col-md-6">
+        <!-- card -->
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <p class="text-uppercase fw-medium text-muted mb-0">Plus couteux</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-danger fs-14 mb-0">
+                            <i class="ri-arrow-right-down-line fs-13 align-middle"></i> +8.09 %
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="maxDecaissementJour?.montant || 0 ">{{ formatCFA(maxDecaissementJour?.montantref ) || 0 }}</span> {{ user.devise_ref_code }}</h4>
+                        <span class="badge bg-warning me-1"> {{ formatCFA(maxDecaissementJour?.montant) || 0 }} </span> <span class="text-muted text-small">{{ maxDecaissementJour?.devise?.codedevise }}</span>
+                        <!-- <span class="badge bg-warning me-1">2</span> <span class="text-muted">Nature operation</span> -->
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-light rounded fs-3">
+                            <i data-feather="check-square" class="text-success icon-dual-success"></i>
+                        </span>
+                    </div>
+                </div>
+            </div><!-- end card body -->
+        </div><!-- end card -->
+    </div><!-- end col -->
+
+    <div class="col-xl-3 col-md-6">
+        <!-- card -->
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <p class="text-uppercase fw-medium text-muted mb-0">Moins couteux</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-danger fs-14 mb-0">
+                            <i class="ri-arrow-right-down-line fs-13 align-middle"></i> +9.01 %
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="136.98">{{ formatCFA(minDecaissementJour?.montantref ) || 0 }}</span> {{ user.devise_ref_code }}</h4>
+                        <span class="badge bg-warning me-1">{{ formatCFA(minDecaissementJour?.montant) || 0 }}</span> <span class="text-muted">{{ minDecaissementJour?.devise?.codedevise }}</span>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-light rounded fs-3">
+                            <i data-feather="clock" class="text-success icon-dual-success"></i>
+                        </span>
+                    </div>
+                </div>
+            </div><!-- end card body -->
+        </div><!-- end card -->
+    </div><!-- end col -->
+
+    <div class="col-xl-3 col-md-6">
+        <!-- card -->
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <p class="text-uppercase fw-medium text-muted mb-0">Demandes</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-success fs-14 mb-0">
+                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i> +7.55 %
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="84.20">1400</span></h4>
+                        <span class="badge bg-warning me-1">5</span> <span class="text-muted">Départements</span>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-light rounded fs-3">
+                            <i data-feather="x-octagon" class="text-success icon-dual-success"></i>
+                        </span>
+                    </div>
+                </div>
+            </div><!-- end card body -->
+        </div><!-- end card -->
+    </div><!-- end col -->
+</div> <!-- end row-->
+
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card" id="">
+            <div class="card-header border-0">
+                <div class="d-flex align-items-center">
+                    <h5 class="card-title mb-0 flex-grow-1">{{title}}</h5>
+                    <div class="flex-shrink-0">
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-sm btn-primary"><i class="ri-delete-bin-2-line"></i></button>
+                            <button class="btn btn-sm btn-danger" [disabled]="!isAnyOpen" data-bs-toggle="modal" (click)="modalCreate()" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1"></i>nouvelle operation</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body bg-light-subtle border border-dashed border-start-0 border-end-0">
+                <form [formGroup]="searchForm">
+                    <div class="row g-3">
+                        <div class="col-xxl-5 col-sm-12">
+                            <div class="search-box search-box-sm">
+                                <input type="text" class="form-control form-control-sm search bg-light border-light" formControlName="search" placeholder="rechercher par numero, montant et devise...">
+                                <i class="ri-search-line search-icon"></i>
+                            </div>
+                        </div>
+                        <!--end col-->
+                        <div class="col-xxl-3 col-sm-4">
+                            <input type="date" formControlName="date" class="form-control form-control-sm bg-light border-light" id="datepicker-range" placeholder="Selectionner date">
+                        </div>
+                        <!--end col-->
+                        <div class="col-xxl-3 col-sm-4">
+                            <div class="input-light">
+                                <select class="form-control form-control-sm" formControlName="status" id="idStatus">
+                                    <option value="" selected>Tous</option>
+                                    <option value="all">Comptabilisé</option>
+                                    <option value="Unpaid">Non comptabilisé</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!--end col-->
+                        <div class="col-xxl-1 col-sm-4">
+                            <button type="button" class="btn btn-sm btn-primary w-100">
+                            <i class="ri-equalizer-fill me-1 align-bottom"></i>filtrer</button>
+                        </div>
+                        <!--end col-->
+                    </div>
+                    <!--end row-->
+                </form>
+            </div>
+            <div class="card-body">
+                <div>
+                    <div class="table-responsive table-card">
+                        <table class="table align-middle table-nowrap table-container table-custom table-compact" id="invoiceTable">
+                            <thead class="text-muted">
+                                <tr>
+                                    <th scope="col" style="width: 50px;">
+                                        <div class="form-check form-check-sm">
+                                            <input class="form-check-input" type="checkbox" id="checkAll" value="option">
+                                        </div>
+                                    </th>
+                                    <th class="sort text-uppercase" data-sort="invoice_id">numero</th>
+                                    <th class="sort text-uppercase" data-sort="type">operation</th>
+                                    <th class="sort text-uppercase" data-sort="invoice_amount">Montant</th>
+                                    <th class="sort text-uppercase" data-sort="status">Devise</th>
+                                    <th class="sort text-uppercase" data-sort="date">Date</th>
+                                    <th class="sort text-uppercase" data-sort="action">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="list form-check-all" id="invoice-list-data">
+                                @for (item of operations; track $index){
+                                    <tr class="fs-12"> 
+                                        <th scope="row">
+                                            <div class="form-check">
+                                                <input class="form-check-input" [checked]="isChecked(item.idoperation)" [(ngModel)]="selectedItems[$index]" (ngModelChange)="handleSelectOne(item, $event)" type="checkbox" name="itemGroup_{{ $index }}">
+                                            </div>
+                                        </th>
+                                        <td class="numero"><a href="#" class="fw-medium link-primary">{{ item.codeoperation }}</a></td>
+                                        <td class="typepaiement text-success" *ngIf="item.caisses[0].codtypeoperation == 'encaissement'"> {{ item.caisses[0].codtypeoperation}} <i class="ri-arrow-right-up-line fs-13 align-middle"></i> </td>
+                                        <td class="typepaiement text-warning" *ngIf="item.caisses[0].codtypeoperation == 'decaissement'"> {{ item.caisses[0].codtypeoperation}} <i class="ri-arrow-right-down-line fs-13 align-middle"></i> </td>
+                                        <td class="typepaiement text-primary" *ngIf="item.caisses[0].codtypeoperation == 'decaissementaj'"> decaissement à justifier <i class="ri-arrow-right-down-line fs-13 align-middle"></i> </td>
+                                        <td class="montant text-center"> {{ formatCFA(item.montant) }} </td>
+                                        <td class="devise"> {{ item.devise.codedevise }} </td>
+                                        <td class="text-muted text-uppercase fs-11"> {{ formatDateFR(item.dateoperation) }}</td>
+                                        <td>
+                                            <ul class="list-inline hstack gap-2 mb-0">
+                                                <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="View">
+                                                    <a href="#editModal" data-bs-toggle="modal" (click)="modalEdit(item)" class="text-primary d-inline-block">
+                                                        <i class="ri-eye-fill fs-16"></i>
+                                                    </a>
+                                                </li>
+                                                <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
+                                                    <a href="#showModal" data-bs-toggle="modal" (click)="modalUpdate(item)" class="text-primary d-inline-block edit-item-btn">
+                                                        <i class="ri-pencil-fill fs-16"></i>
+                                                    </a>
+                                                </li>
+                                                <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
+                                                    <a class="text-danger d-inline-block remove-item-btn"  data-bs-toggle="modal" (click)="modalDelete(item)" href="#deleteOrder">
+                                                        <i class="ri-delete-bin-5-fill fs-16"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                }
+                                <tr *ngIf="loading">
+                                    <td colspan="8">
+                                        <div class="text-center py-4">
+                                            <div class="spinner-border text-info"></div>
+                                            <h6 class="mt-2">Chargement...</h6>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="" *ngIf="operations.length == 0 && !loading">
+                            <div class="text-center">
+                                <h6 class="mt-2">Désolé! Aucune opération trouvé</h6>
+                                <p class="text-muted mb-0">Désole il n' y aucune donnée dans cette base</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end mt-3">
+                        <div class="pagination-wrap hstack gap-2">
+                            <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
+                                Précédent
+                            </button>
+                            <ul class="pagination listjs-pagination mb-0"> Page {{currentPage}} / {{totalPages}} </ul>
+                            <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)" class="btn btn-sm btn-soft-primary pagination-next">
+                                Suivant
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal -->
+                <div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-body p-5 text-center">
+                                <div class="mt-4 text-center">
+                                    <h4>{{titleMsg}}</h4>
+                                    <p class="text-muted fs-15 mb-4">{{msgSup}}</p>
+                                    <div class="hstack gap-2 justify-content-center remove">
+                                        <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> annuler</button>
+                                        <button class="btn btn-sm btn-danger" (click)="deleteConfirmed()" id="delete-record">Oui, supprimer</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--end modal -->
+            </div>
+        </div>
+    </div>
+    <!--end col-->
+</div>
+<!--end row-->
+
+
+<div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0">
+            <div class="modal-header p-3 bg-info-subtle">
+                <h5 class="modal-title" id="exampleModalLabel">{{ actionModal === "create" ? 'Création' : 'Modification'}} {{title}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+            </div>
+            <form [formGroup]="operationForm">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-lg-12 col-sm-12">
+                            <label for="invoicenoInput">Demande à decaisser</label>
+                            <div class="input-light">
+                                <select formControlName="demande" class="form-select form-select-sm bg-light border-0 {{ isValidField('demande')}}">
+                                    <option value=""> ---- choisir une demande à decaisser ----</option>
+                                    @for(item of entetesDmd; track $index){
+                                        <option value="{{item.iddemande!}}"> demande - {{item.codedemande! }} -  du  - {{ formatDateFR(item.datedemande!) }} - de - {{ formatNumber(getTotalDemande(item))}} - {{ item.devise!.codedevise }} </option>
+                                    }
+                                </select>
+                                <div class="invalid-feedback">{{ msgErros }}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-sm-6">
+                            <label for="invoicenoInput">Numero operation</label>
+                            <input type="text" formControlName="codeoperation" class="form-control form-control-sm bg-light border-0"  placeholder="" readonly="readonly" />
+                            <div class="invalid-feedback">{{ msgErros }}</div>
+                        </div>
+                        <!--end col-->
+                        
+                        <div class="col-lg-3 col-sm-6">
+                            <div>
+                                <label for="date-field">Date</label>
+                                <input type="date" formControlName="dateoperation" class="form-control form-control-sm bg-light border-0 {{ isValidField('dateoperation')}}" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date" required>
+                                <div class="invalid-feedback">{{ msgErros }}</div>
+                            </div>
+                        </div>
+                        <!--end col-->
+                        <div class="col-lg-3 col-sm-6">
+                            <div>
+                                <label for="choices-payment-status">Devise</label>
+                                <div class="input-light">
+                                    <select formControlName="devise" class="form-select form-select-sm bg-light border-0 {{ isValidField('devise')}}" required>
+                                        <option value="">choisir la devise</option>
+                                        @for (item of devises; track $index){
+                                            <option value="{{item.iddevise}}">{{item.codedevise}}</option>
+                                        }
+                                    </select>
+                                    <div class="invalid-feedback">{{ msgErros }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--end col-->
+                        <div class="col-lg-3 col-sm-6">
+                            <label for="choices-payment-status">Opération type</label>
+                            <div class="input-light">
+                                <select class="form-select form-select-sm bg-light border-0" data-choices data-choices-search-false id="choices-payment-status" formControlName="typepaiement">
+                                    <option value="">Type opération</option>
+                                    <option value="encaissement">encaissement</option>
+                                    <option value="decaissement">decaissement</option>
+                                    <option value="decaissementaj">decaissement à justifier</option>
+                                </select>
+                                <div class="invalid-feedback">{{ msgErros }}</div>
+                            </div>
+                        </div>
+                        <!--end col-->
+                    </div>
+                    <!--end row-->
+
+                    <!-- Tableau detail-->
+                     <div class="p-4">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-borderless table-nowrap mb-0">
+                                <colgroup>
+                                    <col style="width: 05%">
+                                    <col style="width: 30%">
+                                    <col style="width: 25%">
+                                    <col style="width: 25%">
+                                    <col style="width: 10%">
+                                    <col style="width: 05%">
+                                </colgroup>
+                                <thead class="align-middle">
+                                    <tr class="table-active">
+                                        <th scope="col" style="width: 15px;">N°</th>
+                                        <th scope="col">
+                                            Nature opération
+                                        </th>
+                                        <th scope="col">
+                                            Centre analytique
+                                        </th>
+                                        <th scope="col" style="width: 120px;">
+                                            Tiers
+                                        </th>
+                                        <th scope="col" class="text-end" style="width: 150px;">Montant</th>
+                                        <th scope="col" class="text-end" style="width: 105px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="newlink">
+                                    <!-- 2. Lignes dynamiques ajoutées -->
+                                     @for (ligne of lignes.controls; track $index) {
+                                        <tr class="product" [formGroup]="ligne">
+                                            <th scope="row" class="product-id">{{$index + 1 }}</th>
+                                            <td class="text-start">
+                                                <div class="mb-2">
+                                                    <div class="input-light">
+                                                        <select class="form-select form-select-sm bg-light border-0" formControlName="natureop" required>
+                                                            <option value="" selected>Choisir nature operation</option>
+                                                            @for(item of naturesFiltrees; track $index){
+                                                                <option value="{{item.idnature}}"> {{item.libelle}} </option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="invalid-feedback">{{ msgErros }}</div>
+                                                </div>
+                                            </td>
+                                            <td class="text-start">
+                                                <div class="mb-2">
+                                                    <div class="input-light">
+                                                        <select formControlName="centre" (mousedown)="protectionField(ligne, 'centre')" class="form-select form-select-sm bg-light border-0">
+                                                            <option value="" selected>Choisir centre analytique</option>
+                                                            <option *ngFor="let c of ligne.get('centres')?.value" [value]="c.idcentreanalytique">
+                                                                    {{ c.libelle }}
+                                                            </option>
+                                                        </select>
+                                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="input-light">
+                                                    <select formControlName="tiers" (mousedown)="protectionField(ligne, 'tiers')" class="form-select form-select-sm bg-light border-0">
+                                                        <option value="" selected>Choisir tiers</option>
+                                                        @for(item of tiers; track $index){
+                                                            <option value="{{item.idtiers}}"> {{item.designation}} </option>
+                                                        }
+                                                    </select>
+                                                    <div class="invalid-feedback">{{ msgErros }}</div>
+                                                </div>
+                                            </td>
+                                            <td class="text-end">
+                                                <div>
+                                                    <input type="text" formControlName="montantligne" (mousedown)="protectionField(ligne, 'montantligne')" class="form-control form-control-sm bg-light border-0 product-line-price" id="productPrice-1" placeholder="00.000" required/>
+                                                </div>
+                                            </td>
+                                            <td class="product-removal align-right">
+                                                <button type="button" [disabled]="!isUpdated" class="btn btn-sm btn-soft-danger" (click)="removeLine($index)"><i class="ri-delete-bin-2-line align-bottom"></i></button>
+                                            </td>
+                                        </tr>
+                                     }
+                                    <tr class="mb-2"></tr>
+                                </tbody>
+                                <tbody>
+                                    <tr id="newForm" style="display: none;"><td class="d-none" colspan="5"><p>ajouter</p></td></tr>
+                                    <tr>
+                                        <td colspan="5">
+                                            <button type="button" [disabled]="!typePaiement && !isUpdated" class="btn btn-sm btn-soft-secondary fw-medium" (click)="addLine()"><i class="ri-add-fill me-1 align-bottom"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-top border-top-dashed mt-3">
+                                        <td colspan="3">
+                                            <textarea class="form-control form-control-sm bg-light border-0" formControlName="libelle" rows="4" placeholder="commentaire">
+                                            </textarea>
+                                        </td>
+                                        <td colspan="3" class="p-0">
+                                            <table class="table table-borderless table-sm table-nowrap align-middle mb-0">
+                                                <tbody>
+                                                    <tr class="border-top border-top-dashed">
+                                                        <th scope="row">Taux appliqué</th>
+                                                        <td>
+                                                            <input type="text" formControlName="tauxoperation" class="form-control form-control-sm bg-light border-0" id="cart-total" placeholder="0.00"/>
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="border-top border-top-dashed">
+                                                        <th scope="row">Total opération</th>
+                                                        <td>
+                                                            <input type="text" formControlName="montant" class="form-control form-control-sm bg-light border-0" placeholder="0.00" readonly />
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="border-top border-top-dashed">
+                                                        <th scope="row">Total référentiel</th>
+                                                        <td>
+                                                            <input type="text" formControlName="montantRefglobal" class="form-control form-control-sm bg-light border-0" placeholder="0.00" readonly />
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Total reporting</th>
+                                                        <td style="width:150px;">
+                                                            <input type="text" class="form-control form-control-sm bg-light border-0" placeholder="0.00" readonly />
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <!--end table-->
+                                        </td>
+                                    </tr>
+                                    <tr class="border-top border-top-dashed mt-2">
+                                        <td colspan="5" class="p-1">
+                                            <table class="table table-borderless table-sm table-nowrap align-middle mb-0">
+                                                <thead class="align-middle">
+                                                    <tr>
+                                                        <th scope="col"> Caisse </th>
+                                                        <th scope="col"></th>
+                                                        <th scope="col"> Solde </th>
+                                                        <th scope="col"> Montant </th>
+                                                        <th scope="col"> Taux </th>
+                                                        <th scope="col"> Montant ref. </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody *ngIf="!loadingModal; else loader">
+                                                    @for(c of caisses.controls; track $index){
+                                                        <tr [formGroup]="c" class="caisse-row">
+                                                            <td>
+                                                                <div class="cell-wrapper">
+                                                                    <span> <strong> {{ c.get('caisse')?.value }} </strong> </span>
+                                                                    <input type="hidden" formControlName="idcaisse">
+                                                                    <div class="error-slot">&nbsp;</div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="cell-wrapper">
+                                                                    <span> {{ c.get('devisecaisse')?.value }} </span>
+                                                                    <div class="error-slot">&nbsp;</div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="cell-wrapper">
+                                                                    <input formControlName="solde" type="text" class="form-control form-control-sm bg-success-subtle border-0"  readonly/>
+                                                                    <div class="error-slot">&nbsp;</div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="cell-wrapper">
+                                                                    <input type="text" formControlName="montantcaisse" [ngClass]="{'bg-danger-subtle': c.get('montantcaisse')?.errors?.['soldeInsuffisant']}" class="form-control form-control-sm bg-light border-0"  placeholder="000.000"/>
+                                                                    <div class="text-danger small error-slot" [class.visible]="c.get('montantcaisse')?.errors?.['soldeInsuffisant']">
+                                                                        Solde insuffisant
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="cell-wrapper">
+                                                                    <input type="text" formControlName="taux" class="form-control form-control-sm bg-light border-0"/>
+                                                                    <div class="error-slot">&nbsp;</div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="cell-wrapper">
+                                                                    <input type="text" formControlName="montantref" [ngClass]="{'bg-danger-subtle': c.get('montantcaisse')?.errors?.['depassementMontant']}" class="form-control form-control-sm bg-light border-0"  readonly/>
+                                                                    <div class="text-danger small error-slot" [class.visible]="c.get('montantcaisse')?.errors?.['depassementMontant']">
+                                                                        Montant dépassé
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                    <tr>
+                                                        <td colspan="6" class="text-end text-muted small">
+                                                            Reste à répartir : {{ resteARepartir | number:'1.0-2' }}
+                                                        </td>
+                                                    </tr>
+                                                    <tr *ngIf="operationForm.errors?.['totalCaisseDepasse']">
+                                                        <td colspan="6" class="text-danger small">
+                                                            Le total des caisses ne doit pas dépasser le montant total de l’opération.
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                                <ng-template #loader>
+                                                    <div class="text-center p-4">
+                                                        <div class="spinner-border text-info"></div>
+                                                        <p>Chargement des périodes...</p>
+                                                    </div>
+                                                </ng-template>
+                                            </table>
+                                        </td>
+                                        <td colspan="1" class="p-0">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <!--end table-->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="hstack gap-2 justify-content-end">
+                        <!-- <button type="button" class="btn btn-sm btn-warning" (click)="toggleCaisses()"> {{ showCaisses ? 'Masquer caisses' : 'Mes caisses' }} </button> -->
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
+                            <button *ngIf="actionModal != 'create'" type="button" class="btn btn-sm btn-primary" (click)="printRecu()">
+                                <i class="ri-file-download-line align-bottom me-1"></i> imprimer
+                            </button>
+                            <button type="submit" *ngIf="actionModal == 'create'" class="btn btn-sm btn-success" (click)="onSubmit()" [disabled]="operationForm.invalid || operationForm.errors?.['totalCaisseDepasse']">
+                                {{ actionModal === "create" ? 'enregistrer' : 'modifier'}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0">
+            <div class="modal-header p-3 bg-info-subtle">
+                <h5 class="modal-title" id="exampleModalLabel">Details {{title}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+            </div>
+
+            <div class="modal-body" *ngIf="operationdetail as op">
+                <div class="row gx-lg-5">
+                    <div class="col-xl-12">
+                        <div class="mt-xl-0 mt-5">
+                            <div class="d-flex">
+                                <div class="flex-grow-1">
+                                    <h5>{{ op.codeoperation }}</h5>
+                                    <div class="hstack gap-3 flex-wrap">
+                                        <div class="text-primary d-block">Demande :  </div>
+                                        <div class="vr"></div>
+                                        <div class="text-muted">type : <span class="text-body fw-medium"> {{ op.caisses[0]?.codtypeoperation }} </span></div>
+                                        <div class="vr"></div>
+                                        <div class="text-muted">Date : <span class="text-body fw-medium"> {{ formatDateFR(op.dateoperation || '') }} </span></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-lg-3 col-sm-6">
+                                    <div class="p-2 border border-dashed rounded">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm me-2">
+                                                <div class="avatar-title rounded bg-transparent text-success fs-24">
+                                                    <i class="ri-money-dollar-circle-fill"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <p class="text-muted mb-1">Total :</p>
+                                                <h5 class="mb-0">{{ op.montant }} {{ op.devise?.codedevise }}</h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="product-content mt-5">
+                                <h5 class="fs-14 mb-3">Natures opérations </h5>
+                                <div class="tab-content border border-top-0 p-4" id="nav-tabContent">
+                                    <div class="tab-pane fade show active" id="nav-speci" role="tabpanel" aria-labelledby="nav-speci-tab">
+                                        <div class="table-responsive">
+                                            <table class="table mb-0">
+                                                <thead class="align-middle">
+                                                    <tr class="table-active">
+                                                        <th scope="col"> Nature operation</th>
+                                                        <th scope="col"> Centre analytique</th>
+                                                        <th scope="col"> Tiers </th>
+                                                        <th scope="col"> Montant </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @for(item of op.lignes; track $index){
+                                                        <tr>
+                                                            <td> {{ item.nature?.libelle }} </td>
+                                                            <td> {{ item.centre?.libelle }} </td>
+                                                            <td> {{ item.tiers?.designation }} </td>
+                                                            <td> {{ item.montantoperation }} </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <div class="hstack gap-2 justify-content-end">
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
