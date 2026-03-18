@@ -37,6 +37,9 @@ export class LayoutHeaderComponent implements OnInit {
   //Liste des routes
   root_parametre = APP_ROOT_PARAMETREPAGE_PARAMETRE;
 
+  // Change password
+  root_changepassword = 'app/administration/changepassword';
+
   //Liste de caisse utilisateur
   caissesUser: AffectationCaisseModel[] = [];
   loadingCaisses = false;

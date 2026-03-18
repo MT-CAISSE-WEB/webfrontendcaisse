@@ -63,6 +63,7 @@ import { OprationJustifieeComponent } from './features/operations/opration-justi
 import { ComptabilisationComponent } from './features/consultations/comptabilisation/comptabilisation.component';
 import { DecaissementJustifierComponent } from './features/consultations/decaissement-justifier/decaissement-justifier.component';
 import { NatureOperationByDepartementComponent } from './features/consultations/nature-par-departement/nature-par-departement.component';
+import { UpdatepasswordComponent } from './features/administration/updatepassword/updatepassword.component';
 
 export const routes: Routes = [
   {
@@ -82,6 +83,10 @@ export const routes: Routes = [
       {
         path : '',
         component: LayoutContentComponent
+      },
+      {
+        path : "app/administration/changepassword",
+        component : UpdatepasswordComponent
       },
       {
         path : APP_STRUCTURE_DEPARTEMENT,
