@@ -86,13 +86,13 @@
 
             <div class="col-lg-4 col-sm-4">
               <div class="mb-3 bg-light">
-                <!-- <select class="form-select form-select-sm bg-light" formControlName="departement">
+                <select class="form-select form-select-sm bg-light" formControlName="departement">
                   <option value="">-- Sélectionner departement --</option>
-                  @for(item of departementUser; track $index){
+                  @for(item of departementUserFiltered; track $index){
                     <option value="{{item.iddepartement! }}">{{item.codedept! }} - {{ item.libelle! }} </option>
                   }
-                </select> -->
-                <app-custom-field-select #searchInput
+                </select>
+                <!-- <app-custom-field-select #searchInput
                     mode="backend"
                     formControlName="departement"
                     labelField="libelle"
@@ -100,7 +100,7 @@
                     placeholder="Selectionner un département..."
                     (loadData)="searchDepartement($event)"
                     [data]="departementUserFiltered">
-                </app-custom-field-select>
+                </app-custom-field-select> -->
               </div>
             </div>
 

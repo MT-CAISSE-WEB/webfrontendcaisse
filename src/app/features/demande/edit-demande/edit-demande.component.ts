@@ -24,10 +24,9 @@ import { tauxdeviseservice } from '../../donnee_base/donnee_base/service/tauxdev
 import { departementservice } from '../../structure/service/departement.service';
 import { CustomFieldSelectComponent } from '../../../_core/custom/custom-field-select/custom-field-select.component';
 import { COLUMNS_DEPARTEMENT } from '../../../_core/constantes/tableau.data';
-
 @Component({
   selector: 'app-edit-demande',
-  imports: [ReactiveFormsModule, CommonModule, CustomFieldSelectComponent],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './edit-demande.component.html',
   styleUrl: './edit-demande.component.css'
 })
@@ -94,7 +93,8 @@ export class EditDemandeComponent implements OnInit {
     this.initForm();
     this.title = 'Création';
     //Charger les départements de l'user
-    this.loadDepartementsByUser();
+    //this.loadDepartementsByUser();
+    this.getDepartementOfUser();
     //Afficher toutes les devises
     this.getalldevises();
     //charger les centres analytiques
@@ -251,19 +251,29 @@ export class EditDemandeComponent implements OnInit {
   }
 
   //Récuperer le departement de l'utilisateur
+  // getDepartementOfUser(){
+  //   this.userdepartement.getutilisateurdepartement(this.user.idutilisateur).subscribe({
+  //     next : (res) => {
+  //       if(res.success){
+  //         this.departementUser = res.data[0];
+  //         console.log(this.departementUser);
+  //         // this.departementUserFiltered = [...this.departementUser];
+  //       }
+  //     },
+  //     error: (err) => {
+  //       this.toastr.error(err.error.message)
+  //     }
+  //   });
+  // }
+
   getDepartementOfUser(){
     this.userdepartement.getutilisateurdepartement(this.user.idutilisateur).subscribe({
       next : (res) => {
         if(res.success){
           this.departementUser = res.data[0];
-          this.departementUserFiltered = [...this.departementUser];
-          
-          // Après avoir chargé les données
-          setTimeout(() => {
-            this.demandeForm.patchValue({
-              departement: this.demande?.iddepartement
-            });
-          });
+
+          //ensuite charger tous les départements
+          this.getalldepartements();
         }
       },
       error: (err) => {
@@ -272,13 +282,51 @@ export class EditDemandeComponent implements OnInit {
     });
   }
 
+
   //Tous les departements
+  // getalldepartements (){
+  //   this.dp.getAll().subscribe({
+  //     next : (res) => {
+  //        if(res.success){
+  //           const depsUser = res.data;
+  //           if (this.user?.typeentitesite === 1 || this.user?.typeentitesociete === 1) {
+  //             //Afficher seulment this.departementUser
+  //           }else{
+  //             //filtrer dans this.departementUser tous les objets qui ont iddepartment dans depsUser
+  //           }
+  //        }
+  //     }
+  //   });
+  // }
+
   getalldepartements (){
     this.dp.getAll().subscribe({
       next : (res) => {
-         if(res.success){
-            this.departementUser = res.data;
-         }
+        if(res.success){
+          const allDepartements = res.data;
+          //CAS 1 : ADMIN SOCIETE → tout afficher
+          if (this.user?.typeentitesociete === 1) {
+            this.departementUserFiltered = allDepartements;
+          }
+
+          //CAS 2 : ADMIN SITE → filtrer par site
+          else if (this.user?.typeentitesite === 1) {
+            this.departementUserFiltered = allDepartements.filter(
+              (dep:any) => dep.idsite === this.user.idsite
+            );
+          }
+
+          //CAS 3 : UTILISATEUR NORMAL → filtrer par ses départements
+          else {
+            const userIds = new Set(
+              this.departementUser.map((d:any) => d.iddepartement)
+            );
+
+            this.departementUserFiltered = allDepartements.filter(
+              (dep:any) => userIds.has(dep.iddepartement)
+            );
+          }
+        }
       }
     });
   }

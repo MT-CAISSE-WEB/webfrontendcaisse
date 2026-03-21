@@ -347,7 +347,7 @@
 
                   <div class="mb-3">
                     <label class="form-label form-label-sm" for="">Type de budget</label>
-                    <select class="form-select form-control form-control-sm {{
+                    <select class="form-select form-select-sm {{
                         isValidField('typebudget')
                       }}" aria-label="Default select example" id="typebudget-field" formControlName="typebudget">
                       <option [ngValue]="null">-- Sélectionner --</option>
@@ -360,7 +360,7 @@
                   @if (budgetForm.value.typebudget === "Mensuel") {
                   <div class="mb-3">
                     <label for="idbudgetparent-field" class="form-label form-label-sm">Budget Parent</label>
-                    <select class="form-select form-control form-control-sm" aria-label="Default select example"
+                    <select class="form-select form-select-sm" aria-label="Default select example"
                       id="idbudgetparent" formControlName="idbudgetparent" (change)="onSelectionChange($event)">
                       <option [ngValue]="null">-- Sélectionner --</option>
                       @for (item of budgets; track $index){ @if(item.typebudget
@@ -386,7 +386,7 @@
                       Entité
                     </label>
 
-                    <select id="entite-field" class="form-select form-control form-control-sm {{
+                    <select id="entite-field" class="form-select form-select-sm {{
                         isValidField('entite')
                       }}" formControlName="entite">
                       <option [ngValue]="null">-- Sélectionner --</option>
@@ -425,6 +425,7 @@
                       <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                     </div>
                   </div>
+
                   <div class="mb-3">
                     <div>
                       <label for="datefin_field" class="form-label mb-0">Date fin</label>
@@ -466,6 +467,7 @@
 
                     <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                   </div>
+
                   <div class="mb-3">
                     <label class="form-label form-label-sm" [hidden]="true" for="">Site</label>
                     <input type="text" id="idsite-field" class="form-control form-control-sm {{
@@ -473,6 +475,7 @@
                       }}" formControlName="idsite" [value]="user.idsite" [hidden]="true" />
                     <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                   </div>
+
                   <div class="mb-3">
                     <label class="form-label form-label-sm" for="" [hidden]="true">Société</label>
                     <input type="text" id="idsociete-field" class="form-control form-control-sm {{
@@ -488,6 +491,7 @@
                       <label class="form-check-label" for="flexSwitchCheckChecked">Actif</label>
                     </div>
                   </div>
+
                   <div *ngIf="msgErros" class="alert alert-danger mt-2">
                     {{ msgErros }}
                   </div>
@@ -506,6 +510,7 @@
                     <!-- <button type="button" class="btn btn-success" id="edit-btn">Update</button> -->
                   </div>
                 </div>
+
               </form>
             </div>
           </div>
@@ -600,6 +605,7 @@
           </div>
         </div>
         <!--end modal -->
+
         <!-- Modal visionnage des validateurs -->
         <div class="modal fade" id="lignesBudgetairesModal" tabindex="-1" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered modal-xl">
