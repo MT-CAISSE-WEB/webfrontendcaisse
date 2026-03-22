@@ -112,9 +112,109 @@
             </div>
 
             <div class="row g-3">
+                <div class="col-lg-6 col-sm-6">
+                    <div class="card" id="">
+                        <div class="card-header border-0">
+                            <div class="d-flex align-items-center">
+                                <h5 class="card-title mb-0 flex-grow-1">Retour en caisses</h5>
+                            </div>
+                        </div>
+                        <div class="card-body border border-dashed border-start-0 border-end-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm table-borderless table-nowrap mb-0">
+                                    <colgroup>
+                                        <col style="width: 10%">
+                                        <col style="width: 30%">
+                                        <col style="width: 30%">
+                                        <col style="width: 30%">
+                                    </colgroup>
+                                    <thead class="align-middle">
+                                        <tr class="table-active">
+                                            <th scope="col" style="width: 15px;">N°</th>
+                                            <th scope="col">Piece</th>
+                                            <th scope="col">Caisse</th>
+                                            <th scope="col" class="text-end" style="width: 150px;">Montant</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="newlink">
+                                        @for(piece of ope?.caisses; track piece.idtypeoperation){
+                                            <tr *ngIf="piece.codtypeoperation == 'encaissement'" style="cursor:pointer" 
+                                            (click)="selectRetour(piece)" [class.table-active]="selectedRetour === piece">
+                                                <th scope="row" class="product-id">{{$index + 1 }}</th>
+                                                <td class="text-start"> {{ope.codeoperation}} </td>
+                                                <td class="text-start"> {{piece.caisse.codecaisse}} </td>
+                                                <td class="text-end"> {{piece.montant}} {{piece.caisse.devise}}</td>
+                                            </tr>
+                                        }
+                                        <tr *ngIf="loadingPiece">
+                                            <td colspan="3">
+                                                <div class="text-center py-4">
+                                                    <div class="spinner-border text-info"></div>
+                                                    <h6 class="mt-2">Chargement...</h6>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-sm-6">
+                    <div class="card" id="">
+                        <div class="card-header border-0">
+                            <div class="d-flex align-items-right">
+                                <h5 class="card-title mb-0 flex-grow-1">Pièces Justificatifs</h5>
+                            </div>
+                        </div>
+                        <div class="card-body border border-dashed border-start-0 border-end-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm table-borderless table-nowrap mb-0">
+                                    <colgroup>
+                                        <col style="width: 10%">
+                                        <col style="width: 60%">
+                                        <col style="width: 30%">
+                                    </colgroup>
+                                    <thead class="align-middle">
+                                        <tr class="table-active">
+                                            <th scope="col" style="width: 15px;">N°</th>
+                                            <th scope="col">Piece</th>
+                                            <th scope="col" class="text-end" style="width: 150px;">Montant</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="newlink">
+                                        @for(piece of justificatifFiltered; track piece.idjustificatifoperation){
+                                            <tr style="cursor:pointer" (click)="selectJustificatif(piece)">
+                                                <th scope="row" class="product-id">{{$index + 1 }}</th>
+                                                <td class="text-start"> {{piece.codejustificatif}} </td>
+                                                <td class="text-end"> {{piece.montantjustificatif}} {{piece.devise.codedevise}}</td>
+                                            </tr>
+                                        }
+                                        <tr *ngIf="loadingPiece">
+                                            <td colspan="3">
+                                                <div class="text-center py-4">
+                                                    <div class="spinner-border text-info"></div>
+                                                    <h6 class="mt-2">Chargement...</h6>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
                 <div class="col-lg-12 col-sm-12">
                     <div class="card" id="">
                         <div class="card-header border-0">
+                            <div class="d-flex align-items-center">
+                                <h5 class="card-title mb-0 flex-grow-1">Enregistrer justificatif</h5>
+                            </div>
+                        </div>
+                        <div class="card-body border border-dashed border-start-0 border-end-0">
                             <div class="row g-3">
                                 <div class="col-lg-3 col-sm-4">
                                     <div>
@@ -168,7 +268,7 @@
             </div>
 
             <div class="row g-3">
-                <div class="col-lg-8 col-sm-8">
+                <div class="col-lg-12 col-sm-12">
                     <div class="card" id="">
                         <div class="card-header border-0">
                             <div class="d-flex align-items-center">
@@ -261,50 +361,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4 col-sm-4">
-                    <div class="card" id="">
-                        <div class="card-header border-0">
-                            <div class="d-flex align-items-right">
-                                <h5 class="card-title mb-0 flex-grow-1">Pièces Justificatifs</h5>
-                            </div>
-                        </div>
-                        <div class="card-body border border-dashed border-start-0 border-end-0">
-                            <div class="table-responsive">
-                                <table class="table table-hover table-sm table-borderless table-nowrap mb-0">
-                                    <colgroup>
-                                        <col style="width: 10%">
-                                        <col style="width: 60%">
-                                        <col style="width: 30%">
-                                    </colgroup>
-                                    <thead class="align-middle">
-                                        <tr class="table-active">
-                                            <th scope="col" style="width: 15px;">N°</th>
-                                            <th scope="col">Piece</th>
-                                            <th scope="col" class="text-end" style="width: 150px;">Montant</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="newlink">
-                                        @for(piece of justificatifFiltered; track piece.idjustificatifoperation){
-                                            <tr style="cursor:pointer" (click)="selectJustificatif(piece)">
-                                                <th scope="row" class="product-id">{{$index + 1 }}</th>
-                                                <td class="text-start"> {{piece.codejustificatif}} </td>
-                                                <td class="text-end"> {{piece.montantjustificatif}} </td>
-                                            </tr>
-                                        }
-                                        <tr *ngIf="loadingPiece">
-                                            <td colspan="3">
-                                                <div class="text-center py-4">
-                                                    <div class="spinner-border text-info"></div>
-                                                    <h6 class="mt-2">Chargement...</h6>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <div class="row g-3">
@@ -359,7 +415,7 @@
                                                 </td>
                                                 <td>
                                                     <div class="cell-wrapper">
-                                                        <input type="text" formControlName="montantcaisse" [ngClass]="{'bg-danger-subtle': c.get('montantcaisse')?.errors?.['soldeInsuffisant']}" class="form-control form-control-sm bg-light border-0"  placeholder="000.000"/>
+                                                        <input type="text" formControlName="montantcaisse" [readonly]="selectedRetour" [ngClass]="{'bg-danger-subtle': c.get('montantcaisse')?.errors?.['soldeInsuffisant']}" class="form-control form-control-sm bg-light border-0"  placeholder="000.000"/>
                                                         <div class="text-danger small error-slot" [class.visible]="c.get('montantcaisse')?.errors?.['soldeInsuffisant']">
                                                             Solde insuffisant
                                                         </div>

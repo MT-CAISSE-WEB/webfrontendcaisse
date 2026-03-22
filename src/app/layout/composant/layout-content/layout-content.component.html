@@ -207,7 +207,7 @@
 
             <!-- Soumettre toutes les caisses validées -->
             <button type="button" class="btn btn-success btn-sm"
-                    *ngIf="billetageValidatedIndexes.length > 0"
+                    *ngIf="billetageValidatedIndexes.length > 0" [disabled]="loading"
                     (click)="submitBilletage()">
                 OK
             </button>

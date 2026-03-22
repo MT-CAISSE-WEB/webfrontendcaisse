@@ -91,8 +91,8 @@ export class BudgetComponent implements OnInit {
     private circuitvalidationservice: circuitvalidationservice,
     private budgetPrevisionService: BudgetPrevisionService,
     private lignebudgetservice: LigneBudgetService,
-    private router: Router
-  ) { }
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
     //Initialisation du formulaire
@@ -117,11 +117,18 @@ export class BudgetComponent implements OnInit {
       next: (res: any) => {
         if (res.success) {
           const lesbudgets = res.data as BudgetModel[];
-          this.budgets = lesbudgets.filter(
-            (b) =>
-              b.idsite === this.user.idsite &&
-              b.idsociete === this.user.idsociete
-          );
+          if (this.user.typeentitesociete === 1) {
+            this.budgets = lesbudgets.filter(
+              (b) => b.idsociete === this.user.idsociete,
+            );
+          } else {
+            this.budgets = lesbudgets.filter(
+              (b) =>
+                b.idsite === this.user.idsite &&
+                b.idsociete === this.user.idsociete,
+            );
+          }
+
           this.applyStatusFilter(this.currentStatusFilter);
           this.filteredBudgets = [...this.budgets];
           this.applyFilters();
@@ -141,13 +148,13 @@ export class BudgetComponent implements OnInit {
   lignesByBudget: LigneBudgetModel[] = [];
 
   // Afficher les lignes budgétaires du budget
-  onClickAfficherLignesBudgetaire(budget: BudgetModel): void{
-    if(!budget) return
-    this.selectedBudget = budget
+  onClickAfficherLignesBudgetaire(budget: BudgetModel): void {
+    if (!budget) return;
+    this.selectedBudget = budget;
     const lignes = this.lignesBudgetaires.filter(
-      l => l.idbudget === budget.idbudget
+      (l) => l.idbudget === budget.idbudget,
     );
-    this.lignesByBudget = lignes
+    this.lignesByBudget = lignes;
   }
 
   getAllCircuits() {
@@ -162,7 +169,7 @@ export class BudgetComponent implements OnInit {
               c.idsite === this.user.idsite &&
               c.idsociete === this.user.idsociete &&
               c.typeaction.toLocaleLowerCase() === 'budget' &&
-              c.typeentite.toLocaleLowerCase() === 'site'
+              c.typeentite.toLocaleLowerCase() === 'site',
           );
         }
       },
@@ -173,7 +180,7 @@ export class BudgetComponent implements OnInit {
   }
 
   getAllLigneBudgetaire() {
-     this.params = {
+    this.params = {
       page: this.currentPage,
       limit: 1000000000,
     };
@@ -202,7 +209,7 @@ export class BudgetComponent implements OnInit {
     this.selectedBudgetForLignes = budget;
 
     this.lignesBudgetDuBudget = this.lignesBudgetaires.filter(
-      (l) => l.idbudget === budget.idbudget
+      (l) => l.idbudget === budget.idbudget,
     );
 
     const modal = document.getElementById('modalLignesBudget');
@@ -228,18 +235,18 @@ export class BudgetComponent implements OnInit {
 
   getBudgetsMensuels(parentId: string): BudgetModel[] {
     return this.filteredBudgets.filter(
-      (b) => b.typebudget === 'Mensuel' && b.idbudgetparent === parentId
+      (b) => b.typebudget === 'Mensuel' && b.idbudgetparent === parentId,
     );
   }
   get totalActifs(): number {
     return this.budgets.filter(
-      (b) => b.actif === 1 && b.typebudget === 'Annuel'
+      (b) => b.actif === 1 && b.typebudget === 'Annuel',
     ).length;
   }
 
   get totalInactifs(): number {
     return this.budgets.filter(
-      (b) => b.actif === 0 && b.typebudget === 'Annuel'
+      (b) => b.actif === 0 && b.typebudget === 'Annuel',
     ).length;
   }
 
@@ -273,19 +280,19 @@ export class BudgetComponent implements OnInit {
       const matched = this.budgets.filter(
         (b) =>
           b.codebudget?.toLowerCase().includes(term) ||
-          b.libelle?.toLowerCase().includes(term)
+          b.libelle?.toLowerCase().includes(term),
       );
 
       // IDs des budgets annuels trouvés
       const parentIds = new Set(
-        matched.filter((b) => b.typebudget === 'Annuel').map((b) => b.idbudget)
+        matched.filter((b) => b.typebudget === 'Annuel').map((b) => b.idbudget),
       );
 
       // Appliquer la recherche en incluant les mensuels liés
       result = this.budgets.filter(
         (b) =>
           matched.includes(b) ||
-          (b.idbudgetparent && parentIds.has(b.idbudgetparent))
+          (b.idbudgetparent && parentIds.has(b.idbudgetparent)),
       );
     }
 
@@ -307,13 +314,13 @@ export class BudgetComponent implements OnInit {
     switch (status) {
       case 'ACTIF':
         parents = this.budgets.filter(
-          (b) => b.actif === 1 && b.typebudget === 'Annuel'
+          (b) => b.actif === 1 && b.typebudget === 'Annuel',
         );
         break;
 
       case 'INACTIF':
         parents = this.budgets.filter(
-          (b) => b.actif === 0 && b.typebudget === 'Annuel'
+          (b) => b.actif === 0 && b.typebudget === 'Annuel',
         );
         break;
 
@@ -327,7 +334,7 @@ export class BudgetComponent implements OnInit {
     this.filteredBudgets = this.budgets.filter(
       (b) =>
         parentIds.has(b.idbudget) ||
-        (b.idbudgetparent && parentIds.has(b.idbudgetparent))
+        (b.idbudgetparent && parentIds.has(b.idbudgetparent)),
     );
 
     // Reset sélection
@@ -337,21 +344,21 @@ export class BudgetComponent implements OnInit {
   }
 
   get hasAnnualBudgets(): boolean {
-  return this.filteredBudgets.some(b => b.typebudget === 'Annuel');
-}
+    return this.filteredBudgets.some((b) => b.typebudget === 'Annuel');
+  }
 
   getPrevisionAnnuel(budget: BudgetModel): number {
     return this.budgetPrevisionService.calculPrevisionBudgetAnnuel(
       budget,
       this.budgets,
-      this.lignesBudgetaires
+      this.lignesBudgetaires,
     );
   }
 
   getPrevisionMensuel(budget: BudgetModel): number {
     return this.budgetPrevisionService.calculPrevisionBudget(
       budget,
-      this.lignesBudgetaires
+      this.lignesBudgetaires,
     );
   }
 
@@ -376,7 +383,7 @@ export class BudgetComponent implements OnInit {
       },
       {
         validators: this.budgetDateValidator(() => this.selectedBudgetParent),
-      }
+      },
     );
 
     // Désactivation et masquage du circuit de validation
@@ -444,7 +451,7 @@ export class BudgetComponent implements OnInit {
   //selectionner une instance dans une liste
   handleSelectOne(budget: BudgetModel, actif: any) {
     const index = this.objectsSelected.findIndex(
-      (el) => el.idbudget == budget.idbudget
+      (el) => el.idbudget == budget.idbudget,
     );
     if (index == -1 && actif) this.objectsSelected.push(budget);
     if (index != -1 && !actif) this.objectsSelected.splice(index, 1);
@@ -556,7 +563,7 @@ export class BudgetComponent implements OnInit {
         const lastDayOfMonth = new Date(
           start.getFullYear(),
           start.getMonth() + 1,
-          0
+          0,
         ).getDate();
 
         if (!sameMonth || end.getDate() !== lastDayOfMonth) {
@@ -716,7 +723,7 @@ export class BudgetComponent implements OnInit {
     const selectedId = (event.target as HTMLSelectElement).value;
 
     this.selectedBudgetParent = this.budgets.find(
-      (b) => b.idbudget === selectedId
+      (b) => b.idbudget === selectedId,
     );
 
     const entiteCtrl = this.budgetForm.get('entite');
@@ -745,7 +752,7 @@ export class BudgetComponent implements OnInit {
     const controls = this.budgetForm.controls;
     if (this.budgetForm.invalid) {
       Object.keys(controls).forEach((controlName) =>
-        controls[controlName].markAsTouched()
+        controls[controlName].markAsTouched(),
       );
       this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
       return;
@@ -754,7 +761,8 @@ export class BudgetComponent implements OnInit {
     /** 2. prepare data */
     const formValue = this.budgetForm.getRawValue();
 
-    this.budget.idcircuitvalidation = this.circuitValidation?.idcircuitvalidation as string;
+    this.budget.idcircuitvalidation = this.circuitValidation
+      ?.idcircuitvalidation as string;
     this.budget.idsite = this.user?.idsite as string;
     this.budget.idsociete = this.user?.idsociete as string;
     this.budget.datevalidedept = null;
@@ -857,7 +865,7 @@ export class BudgetComponent implements OnInit {
     this.budgetForm.reset();
 
     this.selectedBudgetParent = this.budgets.find(
-      (b) => b.idbudget === _object.idbudgetparent
+      (b) => b.idbudget === _object.idbudgetparent,
     );
 
     this.dispatchBudget(_object);

@@ -57,7 +57,6 @@ export class LigneBudgetComponent implements OnInit {
   availableNatures: natureoperationModel[] = [];
   motifs: Motif[] = [];
 
-
   // Définissez des propriétés de pagination
   currentPage: number = 1;
   // Nombre d'éléments par page
@@ -91,7 +90,6 @@ export class LigneBudgetComponent implements OnInit {
   selectedBudget?: BudgetModel;
   selectedDept?: departementmodel;
 
-
   // MODE DE SAISIE
   modeSaisie = '';
 
@@ -111,7 +109,6 @@ export class LigneBudgetComponent implements OnInit {
     montantSociete: number;
   }> = [];
 
-
   constructor(
     private lignebudgetservice: LigneBudgetService,
     private budgetservice: BudgetService,
@@ -120,8 +117,8 @@ export class LigneBudgetComponent implements OnInit {
     private utilisateurdepartementservice: utilisateurdepartementservice,
     private motifservice: MotifService,
     private toastr: ToastrService,
-    private router: Router
-  ) { }
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
     //Afficher toutes les lignes budgétaires
@@ -160,7 +157,6 @@ export class LigneBudgetComponent implements OnInit {
     montantDept: number;
     montantSite: number;
     montantSociete: number;
-
   }> = [];
 
   validateursBudget: ValidateursBudget[] = [];
@@ -174,8 +170,7 @@ export class LigneBudgetComponent implements OnInit {
 
     // Utilisateur SITE peut saisir tant que site non validé
     return !(
-      this.user.typeentitesite === 1 &&
-      this.selectedBudget.validesite !== 1
+      this.user.typeentitesite === 1 && this.selectedBudget.validesite !== 1
     );
   }
 
@@ -184,15 +179,16 @@ export class LigneBudgetComponent implements OnInit {
 
     // Utilisateur SOCIETE peut saisir seulement si site validé
     return !(
-      this.user.typeentitesociete === 1 &&
-      this.selectedBudget.validesite === 1
+      this.user.typeentitesociete === 1 && this.selectedBudget.validesite === 1
     );
   }
 
   motifOfBudgetRejected?: string;
 
   getMotifLibelle(id: string) {
-    this.motifOfBudgetRejected = this.motifs.find(m => m.idmotif === id)?.libellemotif
+    this.motifOfBudgetRejected = this.motifs.find(
+      (m) => m.idmotif === id,
+    )?.libellemotif;
   }
 
   // Obtenir la liste de tous les motifs
@@ -214,13 +210,14 @@ export class LigneBudgetComponent implements OnInit {
 
   // Obtenir tous les validateurs du budget
   getAllValidateursBudget(idbudget: string) {
-
     this.budgetservice.getValidateursBudget(idbudget).subscribe({
-
       next: (res: any) => {
         if (res.success) {
           this.validateursBudget = res.data as ValidateursBudget[];
-          this.getMotifLibelle(this.validateursBudget.find(v => v.decision === 'rejete')?.idmotif as string)
+          this.getMotifLibelle(
+            this.validateursBudget.find((v) => v.decision === 'rejete')
+              ?.idmotif as string,
+          );
         }
       },
       error: (err) => {
@@ -230,7 +227,6 @@ export class LigneBudgetComponent implements OnInit {
     });
   }
 
-
   // Obtenir la liste de tous les budgets
   getAllBudgets() {
     this.params = { page: 1, limit: 1000 };
@@ -239,11 +235,17 @@ export class LigneBudgetComponent implements OnInit {
       next: (res: any) => {
         if (res.success) {
           const lesbudgets = res.data as BudgetModel[];
-          this.budgets = lesbudgets.filter(
-            (b) =>
-              b.idsite === this.user.idsite &&
-              b.idsociete === this.user.idsociete
-          );
+          if (this.user.typeentitesociete === 1) {
+            this.budgets = lesbudgets.filter(
+              (b) => b.idsociete === this.user.idsociete,
+            );
+          } else {
+            this.budgets = lesbudgets.filter(
+              (b) =>
+                b.idsite === this.user.idsite &&
+                b.idsociete === this.user.idsociete,
+            );
+          }
         }
       },
       error: (err) => {
@@ -255,11 +257,15 @@ export class LigneBudgetComponent implements OnInit {
 
   //
   isValidateur(): boolean {
-    return this.validateursBudget.some(u => u.idutilisateur === this.user.idutilisateur && u.decision === 'en attente')
+    return this.validateursBudget.some(
+      (u) =>
+        u.idutilisateur === this.user.idutilisateur &&
+        u.decision === 'en attente',
+    );
   }
 
   isRejected(): boolean {
-    return this.validateursBudget.some(u => u.decision === "rejete")
+    return this.validateursBudget.some((u) => u.decision === 'rejete');
   }
 
   groupLigneBudgetsByBudget() {
@@ -309,11 +315,11 @@ export class LigneBudgetComponent implements OnInit {
             const userDepartements: any[] = res.data[0];
 
             const allowedIds = new Set(
-              userDepartements.map((item) => item.iddepartement)
+              userDepartements.map((item) => item.iddepartement),
             );
             // Filtrage du tableau complet
             const filteredDepartments = this.departements.filter((dept) =>
-              allowedIds.has(dept.iddepartement)
+              allowedIds.has(dept.iddepartement),
             );
             this.appartenanceDepartement = filteredDepartments;
 
@@ -330,8 +336,6 @@ export class LigneBudgetComponent implements OnInit {
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
-
-
   // onSelectionDepartementChange(event: Event) {
   //   const id = (event.target as HTMLSelectElement).value;
   //   this.selectedDept = this.departements.find((d) => d.iddepartement === id);
@@ -341,9 +345,7 @@ export class LigneBudgetComponent implements OnInit {
     const id = (event.target as HTMLSelectElement).value;
 
     // 1. Département sélectionné
-    this.selectedDept = this.departements.find(
-      d => d.iddepartement === id
-    );
+    this.selectedDept = this.departements.find((d) => d.iddepartement === id);
 
     if (!this.selectedDept) {
       this.resetNatureSaisie();
@@ -371,7 +373,7 @@ export class LigneBudgetComponent implements OnInit {
 
     // Charger les natures du département
     this.allNatures = this.naturesSource.filter(
-      n => n.iddepartement === idDept
+      (n) => n.iddepartement === idDept,
     );
 
     // Reset
@@ -380,7 +382,7 @@ export class LigneBudgetComponent implements OnInit {
 
     // Mode ALL → on ajoute tout automatiquement
     if (this.modeSaisie === 'ALL') {
-      this.allNatures.forEach(nature => {
+      this.allNatures.forEach((nature) => {
         this.addNatureToGrid(nature);
       });
     }
@@ -394,7 +396,7 @@ export class LigneBudgetComponent implements OnInit {
     if (!this.selectedNatureId) return;
 
     const index = this.availableNatures.findIndex(
-      n => n.idnature === this.selectedNatureId
+      (n) => n.idnature === this.selectedNatureId,
     );
 
     if (index === -1) return;
@@ -406,7 +408,7 @@ export class LigneBudgetComponent implements OnInit {
       montantDept: 0,
       montantSite: 0,
       montantSociete: 0,
-    }
+    };
 
     this.natureGrid.push(ligne);
 
@@ -424,7 +426,6 @@ export class LigneBudgetComponent implements OnInit {
       (line.montantSociete ?? 0) > 0
     );
   }
-
 
   validateCurrentStep() {
     if (!this.selectedBudget || !this.selectedDept) return;
@@ -468,12 +469,6 @@ export class LigneBudgetComponent implements OnInit {
     ];
   }
 
-
-
-
-
-
-
   private addNatureToGrid(nature: any) {
     const idDept = this.ligneBudgetForm.getRawValue().iddepartement;
 
@@ -486,10 +481,10 @@ export class LigneBudgetComponent implements OnInit {
     } as any;
 
     const existing = this.ligneBudgetsSource.find(
-      l =>
+      (l) =>
         l.idbudget === this.selectedBudget!.idbudget &&
         l.iddepartement === idDept &&
-        l.idnature === nature.idnature
+        l.idnature === nature.idnature,
     );
 
     if (existing) {
@@ -501,7 +496,6 @@ export class LigneBudgetComponent implements OnInit {
 
     this.natureGrid.push(ligne);
   }
-
 
   onSelectionChange(event: Event) {
     const id = (event.target as HTMLSelectElement).value;
@@ -586,7 +580,6 @@ export class LigneBudgetComponent implements OnInit {
     });
   }
 
-
   onBudgetChange(event: any) {
     const id = event.target.value;
     this.selectedBudget = this.budgets.find((b) => b.idbudget === id);
@@ -628,7 +621,13 @@ export class LigneBudgetComponent implements OnInit {
   //   });
   // }
 
-  stepNatures: Array<{ idnature: string; libelle: string; montantDept: number; montantSite: number; montantSociete: number }> = [];
+  stepNatures: Array<{
+    idnature: string;
+    libelle: string;
+    montantDept: number;
+    montantSite: number;
+    montantSociete: number;
+  }> = [];
 
   loadNextNature() {
     if (this.currentNatureIndex >= this.stepNatures.length) return;
@@ -700,13 +699,17 @@ export class LigneBudgetComponent implements OnInit {
         const allNatures = res.data.naturesaffectes;
 
         const existingLines = this.ligneBudgetsSource.filter(
-          l => l.idbudget === this.selectedBudget!.idbudget && l.iddepartement === idDepartement
+          (l) =>
+            l.idbudget === this.selectedBudget!.idbudget &&
+            l.iddepartement === idDepartement,
         );
 
         if (this.modeSaisie === 'ALL') {
           // 🔵 Mode complet : afficher toutes les natures + montants
           this.natureGrid = allNatures.map((n: any) => {
-            const existing = existingLines.find(l => l.idnature === n.idnature);
+            const existing = existingLines.find(
+              (l) => l.idnature === n.idnature,
+            );
             return {
               idnature: existing?.idnature ?? n.idnature ?? '', // <-- fix TS
               libelle: n.libelle,
@@ -721,9 +724,9 @@ export class LigneBudgetComponent implements OnInit {
         }
 
         // 🟢 Mode STEP : lignes existantes
-        const usedIds = new Set(existingLines.map(l => l.idnature));
+        const usedIds = new Set(existingLines.map((l) => l.idnature));
 
-        this.natureGrid = existingLines.map(l => ({
+        this.natureGrid = existingLines.map((l) => ({
           idnature: l.idnature!, // assurance non-null
           libelle: l.nature_operation?.libelle ?? '',
           idbudgetdepartementnature: l.idbudgetdepartementnature,
@@ -733,12 +736,12 @@ export class LigneBudgetComponent implements OnInit {
         }));
 
         // natures encore disponibles pour ajout
-        this.availableNatures = allNatures.filter((n: any) => !usedIds.has(n.idnature));
+        this.availableNatures = allNatures.filter(
+          (n: any) => !usedIds.has(n.idnature),
+        );
       },
     });
   }
-
-
 
   // Nature choisie par l'utilisateur
   selectedNatureId: string | null = null;
@@ -757,7 +760,6 @@ export class LigneBudgetComponent implements OnInit {
       montantSociete: 0,
     });
   }
-
 
   setMode(mode: 'ALL' | 'STEP') {
     this.modeSaisie = mode;
@@ -796,7 +798,7 @@ export class LigneBudgetComponent implements OnInit {
       (l) =>
         l.idbudget === this.selectedBudget!.idbudget &&
         l.iddepartement === idDept &&
-        l.idnature === nature.idnature
+        l.idnature === nature.idnature,
     );
 
     if (existing) {
@@ -811,8 +813,6 @@ export class LigneBudgetComponent implements OnInit {
     this.updateMontantsSelonValidation();
     this.currentNatureIndex++;
   }
-
-
 
   // prefillNatureGrid() {
   //   if (!this.selectedBudget) return;
@@ -927,7 +927,7 @@ export class LigneBudgetComponent implements OnInit {
         (l) =>
           l.idbudget === this.selectedBudget!.idbudget &&
           l.iddepartement === idDept &&
-          l.idnature === ligne.idnature
+          l.idnature === ligne.idnature,
       );
 
       if (lignesExistantes.length > 0) {
@@ -943,7 +943,7 @@ export class LigneBudgetComponent implements OnInit {
         ligne.montantSite = 0;
         ligne.montantSociete = 0;
       }
-    })
+    });
 
     this.updateMontantsSelonValidation();
   }
@@ -958,7 +958,7 @@ export class LigneBudgetComponent implements OnInit {
     }
 
     const budget = this.budgets.find(
-      b => b.idbudget === this.selectedBudgetId
+      (b) => b.idbudget === this.selectedBudgetId,
     );
 
     if (!budget) {
@@ -968,23 +968,21 @@ export class LigneBudgetComponent implements OnInit {
 
     this.selectedBudget = budget;
 
-    console.log("Before this.ligneBudgetsSource:", this.ligneBudgetsSource)
+    console.log('Before this.ligneBudgetsSource:', this.ligneBudgetsSource);
 
     const lignes = this.ligneBudgetsSource.filter(
-      l => l.idbudget === budget.idbudget
+      (l) => l.idbudget === budget.idbudget,
     );
 
     this.ligneBudgetsGrouped = [
       {
         budget,
-        lignes
-      }
+        lignes,
+      },
     ];
 
-    console.log("Budget & lignes:", this.ligneBudgetsGrouped);
+    console.log('Budget & lignes:', this.ligneBudgetsGrouped);
   }
-
-
 
   private propagateMontantsOnValidationOpen(): void {
     if (!this.selectedBudget) return;
@@ -1008,10 +1006,6 @@ export class LigneBudgetComponent implements OnInit {
     });
   }
 
-
-
-
-
   updateMontantsSelonValidation() {
     if (!this.selectedBudget) return;
     const vDept = this.selectedBudget.validedept === 1;
@@ -1030,7 +1024,7 @@ export class LigneBudgetComponent implements OnInit {
   onMontantChange(
     ligne: any,
     field: 'montantDept' | 'montantSite' | 'montantSociete',
-    value: number
+    value: number,
   ) {
     ligne[field] = value;
     if (
@@ -1085,7 +1079,7 @@ export class LigneBudgetComponent implements OnInit {
   //vérifie si _id est inclus dans un tableau d'IDs stocké
   isChecked(_id: string) {
     const ids: string[] = this.objectsSelected.map(
-      (el) => el.idbudgetdepartementnature
+      (el) => el.idbudgetdepartementnature,
     );
     return ids.includes(_id);
   }
@@ -1094,7 +1088,7 @@ export class LigneBudgetComponent implements OnInit {
   handleSelectOne(ligneBudget: LigneBudgetModel, actif: any) {
     const index = this.objectsSelected.findIndex(
       (el) =>
-        el.idbudgetdepartementnature == ligneBudget.idbudgetdepartementnature
+        el.idbudgetdepartementnature == ligneBudget.idbudgetdepartementnature,
     );
     if (index == -1 && actif) this.objectsSelected.push(ligneBudget);
     if (index != -1 && !actif) this.objectsSelected.splice(index, 1);
@@ -1207,10 +1201,10 @@ export class LigneBudgetComponent implements OnInit {
     this.msgErros = '';
 
     const lignes = this.ligneBudgetsSource.filter(
-      l => l.idbudget === budget.idbudget
+      (l) => l.idbudget === budget.idbudget,
     );
 
-    this.validationLines = lignes.map(l => ({
+    this.validationLines = lignes.map((l) => ({
       idbudgetdepartementnature: l.idbudgetdepartementnature,
       iddepartement: l.iddepartement,
       idnature: l.idnature,
@@ -1248,7 +1242,6 @@ export class LigneBudgetComponent implements OnInit {
     // ✅ force le refresh dans la vue (très important avec modals Bootstrap)
     this.validationLines = [...this.validationLines];
   }
-
 
   private updateMontantsBudgetFromValidationModal() {
     if (!this.selectedBudget) return;
@@ -1304,14 +1297,11 @@ export class LigneBudgetComponent implements OnInit {
         this.msgErros =
           err?.error?.error ||
           err?.error?.message ||
-          "Erreur lors de la mise à jour des montants";
+          'Erreur lors de la mise à jour des montants';
         this.toastr.error(this.msgErros);
       },
     });
   }
-
-
-
 
   onSubmit() {
     this.msgErros = '';
@@ -1335,7 +1325,7 @@ export class LigneBudgetComponent implements OnInit {
     this.loading = true;
 
     const toCreate = this.natureGrid.filter(
-      (l) => !l.idbudgetdepartementnature
+      (l) => !l.idbudgetdepartementnature,
     );
     const toUpdate = this.natureGrid.filter((l) => l.idbudgetdepartementnature);
 
@@ -1352,8 +1342,8 @@ export class LigneBudgetComponent implements OnInit {
             montantprevisionsite: l.montantSite ?? 0,
             montantprevisionsociete: l.montantSociete ?? 0,
             createdby: 'MAF',
-          }))
-        )
+          })),
+        ),
       );
     }
 
@@ -1371,8 +1361,8 @@ export class LigneBudgetComponent implements OnInit {
             montantprevisionsociete: l.montantSociete ?? 0,
 
             updatedby: 'MAF',
-          }))
-        )
+          })),
+        ),
       );
     }
 
@@ -1381,9 +1371,11 @@ export class LigneBudgetComponent implements OnInit {
         this.getAllLigneBudgets();
         // this.resetAfterSubmit();
         this.loading = false;
-        if (this.actionModal === 'update') this.closeModal('showModal')
+        if (this.actionModal === 'update') this.closeModal('showModal');
       },
-      error: (err) => { this.msgErros = err.error?.error || 'Erreur serveur' },
+      error: (err) => {
+        this.msgErros = err.error?.error || 'Erreur serveur';
+      },
     });
 
     // ============================
@@ -1392,7 +1384,7 @@ export class LigneBudgetComponent implements OnInit {
     if (this.selectedBudget.entite === 'Site') {
       if (this.ligneBudgetForm.invalid) {
         Object.values(this.ligneBudgetForm.controls).forEach((c) =>
-          c.markAsTouched()
+          c.markAsTouched(),
         );
         this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
         return;
@@ -1415,7 +1407,7 @@ export class LigneBudgetComponent implements OnInit {
           this.getAllLigneBudgets();
           // this.resetAfterSubmit();
           this.loading = false;
-          if (this.actionModal === 'update') this.closeModal('showModal')
+          if (this.actionModal === 'update') this.closeModal('showModal');
         },
         error: (err) => {
           this.msgErros = err.error?.error || 'Erreur serveur';
@@ -1477,10 +1469,10 @@ export class LigneBudgetComponent implements OnInit {
     const data = {
       idbudget: id,
       iduser: this.user.idutilisateur,
-      decision: "accepter",
+      decision: 'accepter',
       motif: null,
-      comment: null
-    }
+      comment: null,
+    };
 
     this.loading = true;
     this.budgetservice.validationBudget(id, data).subscribe({
@@ -1489,7 +1481,7 @@ export class LigneBudgetComponent implements OnInit {
           this.getAllBudgets();
           this.getAllLigneBudgets();
           this.toastr.success('Décision enrégistrée');
-          this.closeModal('validateBudgetModal')
+          this.closeModal('validateBudgetModal');
         } else {
           this.msgErros = 'Erreur lors de la validation';
           this.toastr.error('Erreur lors de la validation');
@@ -1549,7 +1541,7 @@ export class LigneBudgetComponent implements OnInit {
   onRejectClick() {
     if (!this.selectedBudget) return;
     this.showRejectComment = true;
-    this.confirmRejectBudget(this.selectedBudget!.idbudget)
+    this.confirmRejectBudget(this.selectedBudget!.idbudget);
   }
 
   confirmRejectBudget(id: string) {
@@ -1564,13 +1556,12 @@ export class LigneBudgetComponent implements OnInit {
     const data = {
       idbudget: id,
       iduser: this.user.idutilisateur,
-      decision: "refuser",
+      decision: 'refuser',
       motif: motifId,
-      comment: commentaire
-    }
+      comment: commentaire,
+    };
 
     this.loading = true;
-
 
     // 👉 appel API rejet budget
     this.budgetservice.validationBudget(id, data).subscribe({
@@ -1579,7 +1570,7 @@ export class LigneBudgetComponent implements OnInit {
           this.getAllBudgets();
           this.getAllLigneBudgets();
           this.toastr.error('Décision de refus enrégistrée');
-          this.closeModal('validateBudgetModal')
+          this.closeModal('validateBudgetModal');
         } else {
           this.msgErros = 'Erreur lors du refus du budget';
           this.toastr.error('Erreur lors du refus du budget');
@@ -1589,7 +1580,9 @@ export class LigneBudgetComponent implements OnInit {
 
       error: (err: any) => {
         this.msgErros = err.error.message;
-        this.toastr.error(err.error.message ?? 'Erreur lors du refus du budget');
+        this.toastr.error(
+          err.error.message ?? 'Erreur lors du refus du budget',
+        );
         this.loading = false;
       },
     });
@@ -1608,7 +1601,6 @@ export class LigneBudgetComponent implements OnInit {
     this.closeModal('validateBudgetModal');
   }
 
-
   onValidateClick() {
     if (!this.selectedBudget) return;
 
@@ -1618,18 +1610,16 @@ export class LigneBudgetComponent implements OnInit {
     this.resetAfterSubmit();
   }
 
-
   modalUpdate(ligne: LigneBudgetModel) {
     this.actionModal = 'update';
 
-    this.modeSaisie = 'ALL'
+    this.modeSaisie = 'ALL';
     this.ligneBudgetForm.reset();
     this.msgErros = '';
 
-
     // Sélection du budget
     this.selectedBudget = this.budgets.find(
-      (b) => b.idbudget === ligne.idbudget
+      (b) => b.idbudget === ligne.idbudget,
     );
 
     if (!this.selectedBudget) return;

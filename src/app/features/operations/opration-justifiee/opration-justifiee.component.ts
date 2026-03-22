@@ -83,6 +83,8 @@ export class OprationJustifieeComponent implements OnInit{
   isUpdated: boolean = true;
   error: string = "";
 
+  selectedRetour: any = null;
+
    constructor(private calculService: OperationCalculService, private validatorService: OperationValidatorService, private caisseRegleService: CaisseRegleService,
     private natureoperationservice: NatureoperationService, private tiersservice: TiersService, private toastr : ToastrService,
     private AffectationNatureCentreService: AffectationNatureCentreService, private operationservice: OperationService,
@@ -209,6 +211,7 @@ export class OprationJustifieeComponent implements OnInit{
   clearCaisses(): void {
     const caissesArray = this.operationForm.get('caisses') as FormArray;
     caissesArray.clear();
+    this.selectedRetour = null;
   }
 
   /**
@@ -390,7 +393,12 @@ export class OprationJustifieeComponent implements OnInit{
       const operation = this.operations.find(op => op.idoperation === opId);
       if(!operation) return;
 
-      const totalcaissemontantref = operation.caisses?.reduce((sum: any, caisse: any) => sum + (parseFloat(caisse.montantref) || 0),0) || 0;
+      const totalcaissemontantref = operation.caisses?.reduce((sum: number, caisse: any) => {
+        if (caisse.codtypeoperation === 'decaissementaj') {
+          return sum + (parseFloat(caisse.montantref) || 0);
+        }
+        return sum;
+      }, 0) || 0;
 
       //Remplir le formulaire avec les valeurs de l'opération
       this.operationForm.patchValue({
@@ -411,23 +419,68 @@ export class OprationJustifieeComponent implements OnInit{
       if (value) {
         // ON
         this.showCaisses = true;
-        this.loadCaissesForm().subscribe({
-          next: () => {
-            // recalcul automatique
-            this.caisses.controls.forEach((caisseFG: any) => {
-              this.applyAutoCalcul(caisseFG);
-            });
-          },
-          error: () => {
-            this.loadingModal = false;
-          }
-        });
+
+        const caissesForm = this.operationForm.get('caisses') as FormArray;
+        if (!caissesForm || caissesForm.length === 0) {
+          this.loadCaissesForm().subscribe({
+            next: () => {
+              this.caisses.controls.forEach((caisseFG: any) => {
+                this.applyAutoCalcul(caisseFG);
+              });
+            },
+            error: () => {
+              this.loadingModal = false;
+            }
+          });
+        }
       } else {
         // OFF
         this.showCaisses = false;
         this.clearCaisses();
       }
     });
+  }
+
+  fillCaisseFromRetour(piece: any) {
+    const caissesForm = this.operationForm.get('caisses') as FormArray;
+
+    const caisseForm = caissesForm.controls.find(
+      (c: any) => c.value.idcaisse === piece.idcaisse
+    );
+
+    if (!caisseForm) {
+      console.warn('Aucune caisse correspondante trouvée');
+      return;
+    }
+
+    const montant = parseFloat(piece.montant) || 0;
+    const taux = parseFloat(piece.taux) || 1;
+
+    caisseForm.patchValue({
+      montantcaisse: montant,
+      taux: taux,
+      montantref: montant * taux
+    });
+
+    console.log('Caisse mise à jour:', caisseForm.value);
+  }
+
+  selectRetour(piece: any) {
+    const caissesForm = this.operationForm.get('caisses') as FormArray;
+    this.selectedRetour = piece;
+    this.operationForm.get('retourcaisse')?.setValue(true);
+    // sécurité : si les caisses ne sont pas encore chargées
+    if (!caissesForm || caissesForm.length === 0) {
+      console.warn('Caisses non chargées, chargement en cours...');
+
+      this.loadCaissesForm().subscribe(() => {
+        this.fillCaisseFromRetour(piece);
+      });
+      return;
+    }
+
+    //si déjà chargé
+    this.fillCaisseFromRetour(piece);
   }
 
   //A la selection de la devise de justificatif
@@ -529,7 +582,6 @@ export class OprationJustifieeComponent implements OnInit{
   //API des détails des pièces justificatives
   getDetailJustificatifPiece(operation: any){
     this.ope = operation;
-
     this.justificatifservice.getdetailsJustificatif({}).pipe(
       switchMap((res: any) => {
 
@@ -546,30 +598,52 @@ export class OprationJustifieeComponent implements OnInit{
           this.justificatifPieces = res.data;
           this.justificatifFiltered =
           this.justificatifPieces.filter(j => j.operation.idoperation === operation.idoperation);
-
+          
           /**
          * Calcul des totaux existants
          */
           this.totalpieceJustificative = this.calculService.getTotalOperation(operation,'detail', this.justificatifPieces, this.justificatifDetail, this.user.devise_ref_id);
           this.totalpieceJustificativeRef = this.calculService.getTotalOperation(operation, 'ref', this.justificatifPieces, this.justificatifDetail, this.user.devise_ref_id);
 
+          const totalcaissemontantref = operation.caisses?.reduce((sum: number, caisse: any) => {
+            if (caisse.codtypeoperation === 'decaissementaj') {
+              return sum + (parseFloat(caisse.montantref) || 0);
+            }
+            return sum;
+          }, 0) || 0;
           
           /**
-         * Calcul reste à payer
-         */
-          const resteOperation =
-          this.calculService.calculateResteOperation(
-            operation.montant,
-            this.totalpieceJustificative 
-          );
+           * Calcul des retours de caisse
+           */
+          const totalRetours = operation.caisses?.reduce((sum: number, caisse: any) => {
+            if (caisse.codtypeoperation === 'encaissement') {
+              return sum + (parseFloat(caisse.montant) || 0);
+            }
+            return sum;
+          }, 0) || 0;
 
-          const totalcaissemontantref = operation.caisses?.reduce((sum: any, caisse: any) => sum + (parseFloat(caisse.montantref) || 0),0) || 0;
+          const totalRetoursRef = operation.caisses?.reduce((sum: number, caisse: any) => {
+            if (caisse.codtypeoperation === 'encaissement') {
+              return sum + (parseFloat(caisse.montantref) || 0);
+            }
+            return sum;
+          }, 0) || 0;
+
+          /**
+           * Calcul reste
+           */
+          const resteOperation =
+            this.calculService.calculateResteOperation(
+              operation.montant,
+              this.totalpieceJustificative + totalRetours
+            );
 
           const resteRef =
-          this.calculService.calculateResteRef(
-            totalcaissemontantref,
-            this.totalpieceJustificativeRef
-          );
+            this.calculService.calculateResteRef(
+              totalcaissemontantref,
+              this.totalpieceJustificativeRef + totalRetoursRef
+            );
+
 
           this.operationForm.patchValue({
             resteapayeroperation: resteOperation,
@@ -1099,234 +1173,5 @@ export class OprationJustifieeComponent implements OnInit{
     })
   }
 
-
-
-  // applyAutoCalcul(caisseFG: FormGroup) {
-  //   const soldeCtrl = caisseFG.get('solde');
-  //   const montantCtrl = caisseFG.get('montantcaisse');
-  //   const devisecaisseCtrl = caisseFG.get('devisecaisse');
-  //   const iddevisecaisseCtrl = caisseFG.get('iddevisecaisse');
-  //   const tauxCtrl = caisseFG.get('taux');
-  //   const refCtrl = caisseFG.get('montantref');
-  //   const devTransactionCtrl = this.operationForm.get('devisejustificatif');
-  //   const deviseReference = this.user?.devise_ref_id;
-
-  //   if (!montantCtrl || !tauxCtrl || !refCtrl || !soldeCtrl) return;
-
-  //   const updateMontantRef = () => {
-  //     const deviseTransaction = devTransactionCtrl?.value;
-  //     const montant = parseFloat(montantCtrl.value) || 0;
-  //     const taux = parseFloat(tauxCtrl.value) || 1;
-  //     const solde = this.parseCFA(soldeCtrl.value) || 0;
-  
-  //     const montantRef = montant * taux;
-  //     refCtrl.setValue(montantRef, { emitEvent: false });
-
-  //     if (deviseTransaction === deviseReference) {
-  //       // même devise → pas de convedeviseReferencersion
-  //       // this.operationForm.patchValue(
-  //       //   { montantRefglobal: this.totalLignes },
-  //       //   { emitEvent: false }
-  //       // );
-  //     } else {
-  //       // utiliser le taux de la caisse correspondant à la devise transaction
-  //       this.getTauxDeviseTransaction(deviseTransaction);
-  //     }
-
-  //     const montantglobal = this.operationForm.get('montantRefglobal')?.value || 0;
-
-  //     //Si le solde caisse devient inférieur au montant saisie
-  //     if (montant > solde) {
-  //       montantCtrl.setErrors({
-  //         ...(montantCtrl.errors || {}),
-  //         soldeInsuffisant: true
-  //       });
-
-  //       this.operationForm.setErrors({
-  //         ...(this.operationForm.errors || {}),
-  //         soldeCaisseInsuffisant: true
-  //       });
-
-  //       refCtrl.setValue(0, { emitEvent: false });
-  //       return;
-  //     }
-
-  //     // Nettoyage erreur solde insuffisant
-  //     if (montantCtrl.hasError('soldeInsuffisant')) {
-  //       const errors = { ...(montantCtrl.errors || {}) };
-  //       delete errors['soldeInsuffisant'];
-  //       Object.keys(errors).length
-  //         ? montantCtrl.setErrors(errors)
-  //         : montantCtrl.setErrors(null);
-  //     }
-
-  //     // Nettoyage erreur globale solde
-  //     if (this.operationForm.hasError('soldeCaisseInsuffisant')) {
-  //       const formErrors = { ...(this.operationForm.errors || {}) };
-  //       delete formErrors['soldeCaisseInsuffisant'];
-  //       Object.keys(formErrors).length
-  //         ? this.operationForm.setErrors(formErrors)
-  //         : this.operationForm.setErrors(null);
-  //     }
-
-  //     //contrôle référentiel paiement dépasse référentiel global
-  //     if (montantRef > montantglobal) {
-  //       montantCtrl.setErrors({ depassementMontant: true });
-  //       this.operationForm.setErrors({
-  //         ...(this.operationForm.errors || {}),
-  //         totalCaisseDepasse: true
-  //       });
-
-  //       refCtrl.setValue(montantRef, { emitEvent: false });
-  //       return;
-  //     }
-
-  //     // contrôle dépassement montant total
-  //     if (this.isCaisseOverTotal(montantRef, caisseFG, montantglobal)) {
-  //       montantCtrl.setErrors({ depassement: true });
-  //       refCtrl.setValue(0, { emitEvent: false });
-  //       return;
-  //     }
-
-  //     //OK → retirer l’erreur
-  //     if (montantCtrl.hasError('depassementMontant')) {
-  //       const errors = montantCtrl.errors;
-  //       delete errors?.['depassementMontant'];
-  //       Object.keys(errors || {}).length
-  //         ? montantCtrl.setErrors(errors)
-  //         : montantCtrl.setErrors(null);
-  //     }
-
-  //     // Nettoyage erreur globale
-  //     if (this.operationForm.hasError('totalCaisseDepasse')) {
-  //       const formErrors = { ...(this.operationForm.errors || {}) };
-  //       delete formErrors['totalCaisseDepasse'];
-  //       Object.keys(formErrors).length
-  //         ? this.operationForm.setErrors(formErrors)
-  //         : this.operationForm.setErrors(null);
-  //     }
-
-  //     refCtrl.setValue(montantRef, { emitEvent: false });
-
-  //     //contrôle global après chaque saisie
-  //     this.controlTotalCaisses(montantglobal);
-  //   };
-
-  //   montantCtrl.valueChanges.subscribe(updateMontantRef);
-  //   tauxCtrl.valueChanges.subscribe(updateMontantRef);
-
-  //   //Calcul initial (pour UPDATE)
-  //   updateMontantRef();
-  // }
-
-  //Empêcher le dépassement par caisse
-  // isCaisseOverTotal(montantRef: number, currentCaisse: FormGroup, montantGl: number): boolean {
-  //   const totalAutresCaisses = this.caisses.controls
-  //     .filter(c => c !== currentCaisse)
-  //     .reduce((sum, c) => {
-  //       return sum + (parseFloat(c.get('montantref')?.value) || 0);
-  //     }, 0);
-
-  //   return (totalAutresCaisses + montantRef) > montantGl;
-  // }
-
-  // controlTotalCaisses(maxMontantRef: number) {
-  //   const totalRef = this.caisses.controls.reduce((sum, c) =>
-  //     sum + (parseFloat(c.get('montantref')?.value) || 0), 0
-  //   );
-
-  //   if (totalRef > maxMontantRef) {
-  //     this.operationForm.setErrors({
-  //       ...(this.operationForm.errors || {}),
-  //       totalCaisseDepasse: true
-  //     });
-  //   } else {
-  //     if (this.operationForm.errors?.['totalCaisseDepasse']) {
-  //       const errors = { ...this.operationForm.errors };
-  //       delete errors['totalCaisseDepasse'];
-  //       Object.keys(errors).length
-  //         ? this.operationForm.setErrors(errors)
-  //         : this.operationForm.setErrors(null);
-  //     }
-  //   }
-  // }
-
-  
-
-  // onSubmit(){
-  //   this.msgErros = '';
-  //   const controls = this.operationForm.controls;
-
-  //   if (this.operationForm.invalid) {
-  //     Object.keys(controls).forEach(controlName => controls[controlName].markAsTouched());
-  //     this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
-  //     this.toastr.warning(this.msgErros);
-  //     return;
-  //   }
-
-  //   const formValue = this.operationForm.getRawValue();
-
-  //   const montantoperation = parseFloat(formValue.montantoperation || 0);
-  //   const montantRef = parseFloat(formValue.montantRefglobal || 0);
-
-  //   const totalLignes = this.totalLignes;
-  //   const totalJustificatif = this.totalpieceJustificative;
-
-  //   const totalLignesRef = totalLignes * formValue.tauxoperation;
-  //   const totalJustificatifRef = this.totalpieceJustificativeRef;
-
-  //   /**
-  //    * CONTROLE 1
-  //    * Total lignes + justificatifs ne doit pas dépasser l'opération
-  //    */
-  //   if ((totalLignes + totalJustificatif) > montantoperation) {
-  //     this.toastr.error("Le total des lignes dépasse le montant de l'opération.");
-  //     return;
-  //   }
-
-  //   /**
-  //    * CONTROLE 2
-  //    * Total référentiel
-  //    */
-  //   if ((totalLignesRef + totalJustificatifRef) > montantRef) {
-  //     this.toastr.error("Le montant référentiel dépasse le montant de l'opération.");
-  //     return;
-  //   }
-
-  //   /**
-  //    * CONTROLE 3
-  //    * Vérifier les caisses si retour caisse activé
-  //    */
-  //   if (formValue.retourcaisse && this.totalCaisses > montantRef) {
-  //     this.toastr.error("Le total des montants caisse dépasse le montant référentiel.");
-  //     return;
-  //   }
-
-  //   /** PREPARATION DATA */
-  //   const _operation: operationModel = {
-  //     ...this.operation,
-  //     ...formValue,
-  //   };
-
-  //   const montanttotal = this.totalLignes * formValue.tauxoperation;
-
-  //   const _justificatif: any = {
-  //     idoperation : formValue.operation,
-  //     iddevise : formValue.devisejustificatif,
-  //     datejustificatif : formValue.datejustificatif,
-  //     montantjustificatif: montanttotal,
-  //     taux : formValue.tauxoperation,
-  //     commentaire : formValue.commentaire,
-  //     details : _operation.lignes,
-  //     idsite : formValue.site,
-  //     idsociete : formValue.societe,
-  //     createdby : _operation.createdby,
-  //     retour_caisse : formValue.retourcaisse,
-  //     caisses : _operation.caisses
-  //   };
-
-  //   if(this.actionModal == "create") this.create(_justificatif);
-  //   else this.update(_operation);
-  // }
   
 }

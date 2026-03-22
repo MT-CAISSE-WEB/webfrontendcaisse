@@ -182,65 +182,6 @@ export class LayoutContentComponent implements OnInit{
     }, 300);
   }
 
-  openCaisseUser(){
-    /** Check formulaire */
-    this.msgErros = '';
-    const controls = this.caisseperiodeForm.controls;
-    if (this.caisseperiodeForm.invalid) {
-      Object.keys(controls).forEach(controlName => controls[controlName].markAsTouched());
-      this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
-      return;
-    }
-
-    /** 2. prepare data */
-    const formValue = this.caisseperiodeForm.value;
-
-    const _caisse = {
-      ...formValue,
-    };
-
-    if (this.isJourneeOuverte()) {
-      // ouvrir le billetage avant clôture
-      // this.openBilletageModal();
-
-      //this.closeCaisse(this.user.idutilisateur, _caisse.caisses);   // Journée ouverte → fermer
-    } else {
-      this.openCaisse(this.user.idutilisateur, _caisse.caisses);    // Journée fermée → ouvrir
-    }
-
-    this.reloadPage();
-  }
-
-  closeCaisse(iduser : string, caisses: any) {
-    this.caisseservice.close(iduser, caisses).subscribe({
-      next: (res) => {
-        this.error = res.success ? "Caisse clôturée" : "Erreur de clôture";
-        this.loading = false;
-      },
-      error: (err) => {
-        this.loading = false;
-        this.toastr.error(err.error.message);
-      }
-    });
-  }
-
-  openCaisse(iduser: string, caisses: any){
-    this.caisseservice.open(iduser, caisses).subscribe({
-      next: (res) => {
-        if (res.success) {
-          this.error = "Caisse ouverte";
-        } else {
-          this.error = "Erreur de modification";
-        }
-        this.loading = false;
-      },
-      error: (err) => {
-        this.error = "Modification échec";
-        this.loading = false;
-      }
-    })
-  }
-
   checkSameDatePeriodes() {
     if (!this.caisseperiodes || this.caisseperiodes.length === 0) return null;
     const firstDate = this.caisseperiodes[0].dateperiode;
@@ -386,14 +327,142 @@ export class LayoutContentComponent implements OnInit{
     });
   }
 
+  openCaisseUser(){
+    /** Check formulaire */
+    this.msgErros = '';
+    const controls = this.caisseperiodeForm.controls;
+    if (this.caisseperiodeForm.invalid) {
+      Object.keys(controls).forEach(controlName => controls[controlName].markAsTouched());
+      this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
+      return;
+    }
+
+    /** 2. prepare data */
+    const formValue = this.caisseperiodeForm.value;
+
+    const _caisse = {
+      ...formValue,
+    };
+
+    if (this.isJourneeOuverte()) {
+      //this.openBilletageModal(this.modalBilletage); //
+    } else {
+      this.openCaisse(this.user.idutilisateur, _caisse.caisses);
+    }
+
+    this.reloadPage();
+  }
+
+  openCaisse(iduser: string, caisses: any){
+    this.caisseservice.open(iduser, caisses).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.error = "Caisse ouverte";
+        } else {
+          this.error = "Erreur de modification";
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = "Modification échec";
+        this.loading = false;
+      }
+    })
+  }
+
+  closeCaisse(iduser : string, caisses: any) {
+    this.caisseservice.close(iduser, caisses).subscribe({
+      next: (res) => {
+        this.error = res.success ? "Caisse clôturée" : "Erreur de clôture";
+        this.loading = false;
+      },
+      error: (err) => {
+        this.loading = false;
+        this.toastr.error(err.error.message);
+      }
+    });
+  }
+
   // Soumettre toutes les caisses validées
   submitBilletage() {
     const caissesToSubmit = this.caissesBilletArray.controls.filter((_, i) => this.billetageValidatedIndexes.includes(i)).map(c => c.value);
-    console.log(caissesToSubmit);
-    // fermer le modal
-    if(this.modalRef){
-      this.modalRef.close();
+    if (caissesToSubmit.length === 0) {
+      this.toastr.warning("Aucune caisse validée");
+      return;
     }
+
+    this.caisseBilletage(caissesToSubmit);
+  }
+
+  caisseBilletage(data: any) {
+    this.loading = true;
+    this.caisseservice.createBilletage(data).subscribe({
+      next: (res) => {
+        if (res.success) {
+          const formValue = this.caisseperiodeForm.value;
+          // const _caisse = { ...formValue };
+
+          const caissesEnrichies = formValue.caisses.map((c: any) => {
+            const caisseBillet = this.caissesBilletArray.controls.find(
+              (cb: any) => cb.value.idcaisse === c.idcaisse)?.value;
+
+            return {
+              ...c,
+              montantphysique: caisseBillet ? this.getTotalPhysiqueById(c.idcaisse) : 0,
+              ecart: caisseBillet?.ecart ?? 0
+            };
+          });
+
+          const _caisse = {
+            ...formValue,
+            caisses: caissesEnrichies
+          };
+
+          //ensuite clôturer
+          this.closeCaisseAfterBilletage(_caisse.caisses);
+
+        } else {
+          this.loading = false;
+          this.toastr.error("Erreur lors du billetage");
+        }
+      },
+      error: (err) => {
+        this.loading = false;
+        this.toastr.error(err.error.message);
+      }
+    });
+  }
+
+  getTotalPhysiqueById(idcaisse: string) {
+    const index = this.caissesBilletArray.controls.findIndex(
+      (c: any) => c.value.idcaisse === idcaisse
+    );
+
+    return index !== -1 ? this.getTotalPhysique(index) : 0;
+  }
+
+  closeCaisseAfterBilletage(caisses: any) {
+    this.caisseservice.close(this.user.idutilisateur, caisses).subscribe({
+      next: (res) => {
+        this.loading = false;
+        if (res.success) {
+          this.toastr.success("Caisse clôturée avec succès");
+
+          //fermer modal ici (AU BON MOMENT)
+          if (this.modalRef) {
+            this.modalRef.close();
+          }
+
+          this.reloadPage();
+        } else {
+          this.toastr.error("Erreur de clôture");
+        }
+      },
+      error: (err) => {
+        this.loading = false;
+        this.toastr.error(err.error.message);
+      }
+    });
   }
 
   // Annuler le billetage
