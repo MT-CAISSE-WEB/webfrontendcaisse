@@ -65,10 +65,22 @@ export class CentreanalytiqueComponent implements OnInit{
  * @param centreanalytiqueservice - Service du centre analytique
  * @param router - Router pour la navigation
  */
+
+
+  ImportForm : FormGroup = this.fb.group({})
+
+  // Ajout pour fonctions de recherche et pagination
+  filteredData: any[] = [];
+  paginatedData: any[] = [];
+  searchTerm: string = '';
+  currentPage: number = 1;
+  pageSize: number = 15;
+  totalPages: number = 1;
+
+
   constructor(private centreanalytiqueservice: CentreAnalytiqueService,
               private router: Router
-            , private toastr : ToastrService
-          ){}
+            , private toastr : ToastrService){}
 
   ngOnInit(): void {
     //Afficher tous les centres
@@ -77,6 +89,9 @@ export class CentreanalytiqueComponent implements OnInit{
     this.initForm();
     this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("ce centre analytique");
     this.titleMsg = TITLE_DELETE;
+
+    //Initialiser le formulaire du fichier d'import
+    this.initImportForm();
 }
 
   getAllcentres() {
@@ -84,53 +99,16 @@ export class CentreanalytiqueComponent implements OnInit{
       next: (res) => {
         if (res.success) {
           this.centres = res.data;
-
-          const table = $('#dataTable').DataTable();
-          table.destroy();
-
-          setTimeout(() => $('#dataTable').DataTable({
-            language: {
-            search: "Rechercher :",
-            lengthMenu: "Afficher _MENU_ éléments",
-            info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
-            infoEmpty: "Affichage de 0 à 0 sur 0 élément",
-            infoFiltered: "(filtré de _MAX_ éléments au total)",
-            loadingRecords: "Chargement...",
-            processing: "Traitement...",
-            zeroRecords: "Aucun élément correspondant trouvé",
-            emptyTable: "Aucune donnée disponible dans le tableau",
-            paginate: {
-              first: "Premier",
-              previous: "Précédent",
-              next: "Suivant",
-              last: "Dernier"
-            },
-            aria: {
-              sortAscending: ": activer pour trier la colonne par ordre croissant",
-              sortDescending: ": activer pour trier la colonne par ordre décroissant"
-            }
-          },
-            responsive: true,
-            ordering: true,
-            lengthMenu: [
-                [10, 25, 50, 100, 250, 500, -1],
-                [10, 25, 50, 100, 250, 500, "Tous"]
-              ]
-
-          }), 0);
-
-          // $('#dataTable').DataTable().destroy()
+          this.filteredData = [...this.centres];
+          this.updatePagination();
         }
       }
     });
   }
 
-
   get user(){
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
-
-
 
   //Création du formulaire
   initForm(): void{
@@ -167,26 +145,34 @@ export class CentreanalytiqueComponent implements OnInit{
   }
 
   //vérifie si _id est inclus dans un tableau d'IDs stocké
-  isChecked(_id: string) {
-    const ids: string[] = this.objectsSelected.map((el) => el.idcentreanalytique);
-    return ids.includes(_id);
+  isChecked(id: string): boolean {
+    return this.selectedItems.some(x => x.idnature === id);
   }
 
-  //selectionner une instance dans une liste
-  handleSelectOne(centre: centreanalytiqueModel, actif: any) {
-    const index = this.objectsSelected.findIndex(
-      (el) => el.idcentreanalytique == centre.idcentreanalytique
-    );
-    if (index == -1 && actif) this.objectsSelected.push(centre);
-    if (index != -1 && !actif) this.objectsSelected.splice(index, 1);
-    this.checkAllRow = this.objectsSelected?.length == this.centres?.length;
+  handleSelectOne(item: any, event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+
+    if (checked) {
+      if (!this.selectedItems.some(x => x.idnature === item.idnature)) {
+        this.selectedItems.push(item);
+      }
+    } else {
+      this.selectedItems = this.selectedItems.filter(
+        x => x.idnature !== item.idnature
+      );
+    }
   }
 
   //Sélection/ Désélection de tous les éléments
-  handleSelectAll($event: any) {
-    this.checkAllRow = $event;
-    if (this.checkAllRow) this.objectsSelected = this.centres.slice();
-    else this.objectsSelected = [];
+  handleSelectAll(event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.checkAllRow = checked;
+
+    if (checked) {
+      this.objectsSelected = [...this.paginatedData]; // toutes les données filtrées
+    } else {
+      this.objectsSelected = [];
+    }
   }
 
 
@@ -282,6 +268,13 @@ export class CentreanalytiqueComponent implements OnInit{
     this.dispatchcentres(_object);
   }
 
+  modalview(_object: centreanalytiqueModel){
+    this.centre = _object;
+    this.actionModal = "view";
+    this.centreanalytiqueForm.reset();
+    this.dispatchcentres(_object);
+  }
+
   modalDelete(item: centreanalytiqueModel){
     this.deletecentre = item;
   }
@@ -309,7 +302,6 @@ export class CentreanalytiqueComponent implements OnInit{
     })
   }
 
-
   deleteMultiple(){
     for (let i = 0; i < this.objectsSelected.length; i++) {
       this.centreanalytiqueservice.delete(this.objectsSelected[i].idcentreanalytique).subscribe({})
@@ -317,7 +309,6 @@ export class CentreanalytiqueComponent implements OnInit{
     this.toastr.success('Fiches supprimées');
     this.getAllcentres();
   }
-
 
   exportToExcel(): void {
     const element = document.getElementById('dataTable');
@@ -369,14 +360,36 @@ export class CentreanalytiqueComponent implements OnInit{
     this.toastr.success('Fiches exportées avec succès');
   }
   
-  //Importation du plan comptable
+  //Importation
   importCentre(event: any){
     const file = event.target.files[0];
+
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      this.ImportForm.patchValue({ file });
+      this.ImportForm.get('file')?.updateValueAndValidity();
+    }
+  }
+
+  //Création du formulaire d'importation
+  initImportForm(): void{
+    this.ImportForm = this.fb.group({
+      file : [null, [Validators.required]],
+    })
+  }
+
+  submitImportFile(input: HTMLInputElement): void {
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+    const file = input.files[0];
     const info = {
       idsociete : this.user.idsociete,
       createdby : this.user.codeutilisateur
     }
-    
+    console.log(info.createdby)
+
     this.centreanalytiqueservice.importCentreAnalytique(file, info).subscribe({
       next: (res) => {
         if (res.success) {
@@ -395,4 +408,50 @@ export class CentreanalytiqueComponent implements OnInit{
       }
     })
   }
+
+  // 🔎 Filtrer (Affectees)
+  applyFilter() {
+    const term = this.searchTerm.toLowerCase();
+
+    this.filteredData = this.centres.filter(item =>
+      item.codecentreanalytique?.toLowerCase().includes(term) ||
+      item.libelle?.toLowerCase().includes(term)
+    );
+
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  // 📄 Pagination
+  updatePagination() {
+    this.totalPages = Math.ceil(this.filteredData.length / this.pageSize);
+
+    const start = (this.currentPage - 1) * this.pageSize;
+    const end = start + this.pageSize;
+
+    this.paginatedData = this.filteredData.slice(start, end);
+
+    console.log('Données paginées :', this.paginatedData);
+  }
+
+  // ▶ Page suivante
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+    }
+  }
+
+  // ◀ Page précédente
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
+  }
+
+  actualiser(): void {
+    this.getAllcentres();
+  }
+
 }

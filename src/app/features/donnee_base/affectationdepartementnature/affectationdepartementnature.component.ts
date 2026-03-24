@@ -9,6 +9,8 @@ import { Router } from '@angular/router';
 
 import { departementmodel } from '../../structure/model/departement.model';
 import { departementservice } from '../../structure/service/departement.service';
+import { ToastrService } from 'ngx-toastr';
+
 
 // ADD-INS
 declare var $: any;
@@ -51,12 +53,26 @@ export class AffectationDepartementNatureComponent implements OnInit{
   selectedRight: any[] = [];
   departementForm!: FormGroup;
 
-  
+
+  // Ajout pour fonctions de recherche et pagination
+  filteredData: any[] = [];
+  paginatedData: any[] = [];
+  searchTerm: string = '';
+
+  filteredDataNA: any[] = [];
+  paginatedDataNA: any[] = [];
+  searchTermNA: string = '';
+
+  currentPage: number = 1;
+  currentPageNA: number = 1;
+  pageSize: number = 15;
+  totalPages: number = 1;
 
 
   constructor( private AffectationDepartementNatureService: AffectationDepartementNatureService,
     private departementservice: departementservice,
-    private router: Router) {}
+    private router: Router
+  , private toastr : ToastrService) {}
 
 
   ngOnInit(): void {
@@ -98,6 +114,13 @@ export class AffectationDepartementNatureComponent implements OnInit{
         if (res.success) {
           this.affectees = res.data.naturesaffectes;
           this.nonAffectees = res.data.naturesnonaffectes;
+
+          // Ajout pour fonctions de recherche et pagination
+          this.filteredData = [...this.affectees];
+          this.updatePagination();
+
+          this.filteredDataNA = [...this.nonAffectees];
+          this.updatePaginationNA();
         }
       }
     });
@@ -107,108 +130,146 @@ export class AffectationDepartementNatureComponent implements OnInit{
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
-
-  toggleLeft(item: any, event: Event) {
+  toggleSelection(list: any[], item: any, event: Event): any[] {
     const checked = (event.target as HTMLInputElement).checked;
 
     if (checked) {
-      this.selectedLeft.push(item);
-    } else {
-      this.selectedLeft = this.selectedLeft.filter(
-        x => x.idnature !== item.idnature
-      );
-    }
-  }
-
-
-  toggleRight(item: any, event: Event) {
-    const checked = (event.target as HTMLInputElement).checked;
-
-    if (checked) {
-      this.selectedRight.push(item);
-    } else {
-      this.selectedRight = this.selectedRight.filter(
-        x => x.idnature !== item.idnature
-      );
-    }
-  }
-
-
-// Ajouter et retirer des affectations
-// ------------------------------------
-// Ajouter des natures d'opérations au département
-  add() {
-    this.selectedLeft.forEach(item => {
-
-      // éviter les doublons
-      if (!this.affectees.some(a => a.idnature === item.idnature)) {
-        this.affectees = [...this.affectees, item];
+      // éviter doublon
+      if (!list.some(x => x.idnature === item.idnature)) {
+        return [...list, item];
       }
+      return list;
+    } else {
+      return list.filter(x => x.idnature !== item.idnature);
+    }
+  }
 
-      this.nonAffectees = this.nonAffectees
-        .filter(x => x.idnature !== item.idnature);
-    });
+  toggleLeft(item: any, event: Event): void {
+    this.selectedLeft = this.toggleSelection(this.selectedLeft, item, event);
+  }
 
+  toggleRight(item: any, event: Event): void {
+    this.selectedRight = this.toggleSelection(this.selectedRight, item, event);
+  }
+
+  add(): void {
+    if (!this.selectedLeft.length) return;
+
+    const idsExistants = new Set(this.affectees.map(a => a.idnature));
+
+    // Filtrer les nouveaux éléments à ajouter
+    const nouveaux = this.selectedLeft.filter(item => !idsExistants.has(item.idnature));
+
+    // Ajouter en une seule fois
+    this.affectees = [...this.affectees, ...nouveaux];
+
+    // Retirer UNIQUEMENT ceux réellement ajoutés
+    const idsAjoutes = new Set(nouveaux.map(i => i.idnature));
+    this.nonAffectees = this.nonAffectees.filter(x => !idsAjoutes.has(x.idnature));
+
+    // Reset sélection
     this.selectedLeft = [];
+
+    // 🔎 Mise à jour pagination DROITE
+    this.filteredData = [...this.affectees];
+    this.currentPage = 1;
+    this.updatePagination();
+
+    // 🔎 Mise à jour pagination GAUCHE
+    this.filteredDataNA = [...this.nonAffectees];
+    this.currentPageNA = 1;
+    this.updatePaginationNA();
   }
 
+// Retirer des natures d'opérations au département
+  remove(): void {
 
-// Retirer des centres analytiques de la nature d'opération
-  remove() {
-    this.selectedRight.forEach(item => {
+    if (!this.selectedRight.length) return;
 
-      if (!this.nonAffectees.some(n => n.idnature === item.idnature)) {
-        this.nonAffectees = [...this.nonAffectees, item];
-      }
+    const idsExistants = new Set(this.nonAffectees.map(n => n.idnature));
 
-      this.affectees = this.affectees
-        .filter(x => x.idnature !== item.idnature);
-    });
+    // Nouveaux éléments à remettre à gauche
+    const nouveaux = this.selectedRight.filter(item => !idsExistants.has(item.idnature));
 
+    // Ajouter à gauche
+    this.nonAffectees = [...this.nonAffectees, ...nouveaux];
+
+    // Supprimer UNIQUEMENT ceux réellement déplacés
+    const idsSupprimes = new Set(nouveaux.map(i => i.idnature));
+    this.affectees = this.affectees.filter(x => !idsSupprimes.has(x.idnature));
+
+    // Reset sélection
     this.selectedRight = [];
+
+    // 🔎 Mise à jour pagination DROITE
+    this.filteredData = [...this.affectees];
+    this.currentPage = 1;
+    this.updatePagination();
+
+    // 🔎 Mise à jour pagination GAUCHE
+    this.filteredDataNA = [...this.nonAffectees];
+    this.currentPageNA = 1;
+    this.updatePaginationNA();
   }
 
 
 // Ajouter toutes les natures d'opérations au département
-// Déplace toutes les natures d'opérations non affectées vers affectees
-  addAll() {
-    this.nonAffectees.forEach(item => {
-      // Évite les doublons
-      if (!this.affectees.some(a => a.idnature === item.idnature)) {
-        this.affectees.push(item);
-      }
-    });
+  addAll(): void {
 
-    // Vide la liste non affectée
+    // Utiliser un Set pour éviter les doublons (plus performant)
+    const idsExistants = new Set(this.affectees.map(a => a.idnature));
+
+    const nouveaux = this.nonAffectees.filter(item => !idsExistants.has(item.idnature));
+
+    // Ajouter uniquement les nouveaux
+    this.affectees = [...this.affectees, ...nouveaux];
+
+    // Vider la liste non affectée
     this.nonAffectees = [];
 
-    // Vider la sélection si besoin
+    // Réinitialiser les sélections
     this.selectedLeft = [];
     this.selectedRight = [];
+
+    // 🔎 Mettre à jour la recherche + pagination
+    this.filteredData = [...this.affectees];
+    this.filteredDataNA = [...this.nonAffectees];
+    this.currentPage = 1;
+    this.updatePagination();
+    this.updatePaginationNA();
   }
 
 // Déplace toutes les natures d'opérations affectées vers nonAffectees
-  removeAll() {
-    this.affectees.forEach(item => {
-      if (!this.nonAffectees.some(n => n.idnature === item.idnature)) {
-        this.nonAffectees.push(item);
-      }
-    });
+  removeAll(): void {
+    // Set pour éviter les doublons
+    const idsExistants = new Set(this.nonAffectees.map(n => n.idnature));
 
-    // Vide la liste affectée
+    const nouveaux = this.affectees.filter(item => !idsExistants.has(item.idnature));
+
+    // Ajouter dans non affectées
+    this.nonAffectees = [...this.nonAffectees, ...nouveaux];
+    this.filteredDataNA = [...this.nonAffectees];
+
+    this.updatePaginationNA();
+
+    // Vider la liste affectée
     this.affectees = [];
 
-    // Vider la sélection
+    // Réinitialiser les sélections
     this.selectedLeft = [];
     this.selectedRight = [];
+
+    // 🔎 Mise à jour pagination + recherche
+    this.filteredData = [];
+    this.paginatedData = [];
+    this.currentPage = 1;
+    this.totalPages = 1;
   }
 
 
 // Enregistrer les affectations
   save() {
     const iddepartement = this.departementForm.get('iddepartement')?.value;
-
-    console.log(iddepartement);
 
     if (!iddepartement) {
       return;
@@ -221,14 +282,108 @@ export class AffectationDepartementNatureComponent implements OnInit{
       .subscribe({
         next: (res) => {
           if (res.success) {
-            console.log('Affectations enregistrées');
+            this.toastr.success('Affectations enregistrées avec succès');
             this.getallAffectations(iddepartement);
           }
         },
         error: (err) => {
           console.error(err);
+          this.toastr.error('Erreur lors de l\'enregistrement des affectations');
         }
       });
   }
 
+  // Ajout pour fonctions de recherche et pagination
+
+    // 🔎 Filtrer (Non affectées)
+  applyFilterNA() {
+    const term = this.searchTermNA.toLowerCase();
+
+    this.filteredDataNA = this.nonAffectees.filter(item =>
+      item.codenature?.toLowerCase().includes(term) ||
+      item.libelle?.toLowerCase().includes(term)
+    );
+
+    this.currentPage = 1;
+    this.updatePaginationNA();
+  }
+
+  // 📄 Pagination
+  updatePaginationNA() {
+    this.totalPages = Math.ceil(this.filteredDataNA.length / this.pageSize);
+
+    const start = (this.currentPage - 1) * this.pageSize;
+    const end = start + this.pageSize;
+
+    this.paginatedDataNA = this.filteredDataNA.slice(start, end);
+  }
+
+  // ▶ Page suivante
+  nextPageNA() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePaginationNA();
+    }
+  }
+
+  // ◀ Page précédente
+  prevPageNA() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePaginationNA();
+    }
+  }
+
+  // 🔎 Filtrer (Affectees)
+  applyFilter() {
+    const term = this.searchTerm.toLowerCase();
+
+    this.filteredData = this.affectees.filter(item =>
+      item.codenature?.toLowerCase().includes(term) ||
+      item.libelle?.toLowerCase().includes(term)
+    );
+
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  // 📄 Pagination
+  updatePagination() {
+    this.totalPages = Math.ceil(this.filteredData.length / this.pageSize);
+
+    const start = (this.currentPage - 1) * this.pageSize;
+    const end = start + this.pageSize;
+
+    this.paginatedData = this.filteredData.slice(start, end);
+  }
+
+  // ▶ Page suivante
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+    }
+  }
+
+  // ◀ Page précédente
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
+  }
+
+  abandonner(): void {
+    const iddepartement = this.departementForm.get('iddepartement')?.value;
+    this.getallAffectations(iddepartement);
+  }
+
+  actualiser(): void {
+    this.getAllDepartements();
+    this.paginatedDataNA = [];
+    this.paginatedData = [];
+    this.selectedLeft = [];
+    this.selectedRight = [];
+    this.departementForm.reset();
+  }
 }

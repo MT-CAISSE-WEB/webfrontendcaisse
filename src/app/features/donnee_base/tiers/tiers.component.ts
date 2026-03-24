@@ -49,6 +49,16 @@ export class TiersComponent implements OnInit{
   //Element à supprimer 
   deleteTiers: any = null;
 
+  ImportForm : FormGroup = this.fb.group({})
+
+  // Ajout pour fonctions de recherche et pagination
+  filteredData: any[] = [];
+  paginatedData: any[] = [];
+  searchTerm: string = '';
+  currentPage: number = 1;
+  pageSize: number = 15;
+  totalPages: number = 1;
+
 
   constructor(private tiersservice: TiersService,
               private router: Router
@@ -69,40 +79,8 @@ export class TiersComponent implements OnInit{
       next : (res) => {
         if(res.success){
           this.tiers = res.data;
-
-          const table = $('#dataTable').DataTable();
-          table.destroy();
-
-          setTimeout(() => $('#dataTable').DataTable({
-            language: {
-            search: "Rechercher :",
-            lengthMenu: "Afficher _MENU_ éléments",
-            info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
-            infoEmpty: "Affichage de 0 à 0 sur 0 élément",
-            infoFiltered: "(filtré de _MAX_ éléments au total)",
-            loadingRecords: "Chargement...",
-            processing: "Traitement...",
-            zeroRecords: "Aucun élément correspondant trouvé",
-            emptyTable: "Aucune donnée disponible dans le tableau",
-            paginate: {
-              first: "Premier",
-              previous: "Précédent",
-              next: "Suivant",
-              last: "Dernier"
-            },
-            aria: {
-              sortAscending: ": activer pour trier la colonne par ordre croissant",
-              sortDescending: ": activer pour trier la colonne par ordre décroissant"
-            }
-          },
-            responsive: true,
-            ordering: true,
-            lengthMenu: [
-                [10, 25, 50, 100, 250, 500, -1],
-                [10, 25, 50, 100, 250, 500, "Tous"]
-              ]
-
-          }), 0);
+          this.filteredData = [...this.tiers];
+          this.updatePagination();
         }
       }
     });
@@ -151,27 +129,35 @@ export class TiersComponent implements OnInit{
   }
 
   //vérifie si _id est inclus dans un tableau d'IDs stocké
-  isChecked(_id: string) {
-    const ids: string[] = this.objectsSelected.map((el) => el.idtiers);
-    return ids.includes(_id);
+  isChecked(id: string): boolean {
+    return this.selectedItems.some(x => x.idcompte === id);
   }
 
-  //selectionner une instance dans une liste
-  handleSelectOne(tier: tiersModel, actif: any) {
-    const index = this.objectsSelected.findIndex(
-      (el) => el.idtiers == tier.idtiers
-    );
-    if (index == -1 && actif) this.objectsSelected.push(tier);
-    if (index != -1 && !actif) this.objectsSelected.splice(index, 1);
-    this.checkAllRow = this.objectsSelected?.length == this.tiers?.length;
+  handleSelectOne(item: any, event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+
+    if (checked) {
+      if (!this.selectedItems.some(x => x.idcompte === item.idcompte)) {
+        this.selectedItems.push(item);
+      }
+    } else {
+      this.selectedItems = this.selectedItems.filter(
+        x => x.idcompte !== item.idcompte
+      );
+    }
   }
 
-  //Sélection/ Désélection de tous les éléments
-  handleSelectAll($event: any) {
-    this.checkAllRow = $event;
-    if (this.checkAllRow) this.objectsSelected = this.tiers.slice();
-    else this.objectsSelected = [];
+  handleSelectAll(event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.checkAllRow = checked;
+
+    if (checked) {
+      this.objectsSelected = [...this.paginatedData]; // toutes les données filtrées
+    } else {
+      this.objectsSelected = [];
+    }
   }
+
 
   //Soumission du formulaire
   onSubmit(){
@@ -266,6 +252,13 @@ export class TiersComponent implements OnInit{
     this.dispatchTiers(_object);
   }
 
+  modalview(_object: tiersModel){
+    this.tier = _object;
+    this.actionModal = "view";
+    this.tiersForm.reset();
+    this.dispatchTiers(_object);
+  }
+
   modalDelete(item: tiersModel){
     this.deleteTiers = item;
   }
@@ -351,31 +344,98 @@ export class TiersComponent implements OnInit{
     saveAs(blob, `Liste_Tiers_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.csv`);
   }
 
-    //Importation des tiers
+  //Importation des tiers
   importTiers(event: any){
     const file = event.target.files[0];
+
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      this.ImportForm.patchValue({ file });
+      this.ImportForm.get('file')?.updateValueAndValidity();
+    }
+  }
+  
+  //Création du formulaire d'importation
+  initImportForm(): void{
+    this.ImportForm = this.fb.group({
+      file : [null, [Validators.required]],
+    })
+  }
+
+  submitImportFile(input: HTMLInputElement): void {
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+    const file = input.files[0];
     const info = {
       idsociete : this.user.idsociete,
       createdby : this.user.codeutilisateur
-
     }
+    console.log(info.createdby)
 
-    this.tiersservice.importTiers(file, info).subscribe({
-      next: (res) => {
-        if (res.success) {
-          this.getAllTiers();
-          this.toastr.success('Importation effectuée avec succès');
-        } else {
-          this.error = "Echec de l'importation";
-          this.toastr.error(this.error);
-        }
-        this.loading = false;
-      },
-      error: (err) => {
+  this.tiersservice.importTiers(file, info).subscribe({
+    next: (res) => {
+      if (res.success) {
+        this.getAllTiers();
+        this.toastr.success('Importation effectuée avec succès');
+      } else {
         this.error = "Echec de l'importation";
-        this.loading = false;
-        this.toastr.error(err);
+        this.toastr.error(this.error);
       }
-    })
+      this.loading = false;
+    },
+    error: (err) => {
+      this.error = "Echec de l'importation";
+      this.loading = false;
+      this.toastr.error(err);
+    }
+  })
+  }
+  
+  
+  // 🔎 Filtrer (Affectees)
+  applyFilter() {
+    const term = this.searchTerm.toLowerCase();
+
+    this.filteredData = this.tiers.filter(item =>
+      item.codetiers?.toLowerCase().includes(term) ||
+      item.designation?.toLowerCase().includes(term)
+    );
+
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  // 📄 Pagination
+  updatePagination() {
+    this.totalPages = Math.ceil(this.filteredData.length / this.pageSize);
+
+    const start = (this.currentPage - 1) * this.pageSize;
+    const end = start + this.pageSize;
+
+    this.paginatedData = this.filteredData.slice(start, end);
+
+    console.log('Données paginées :', this.paginatedData);
+  }
+
+  // ▶ Page suivante
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+    }
+  }
+
+  // ◀ Page précédente
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
+  }
+
+  actualiser(): void {
+    this.getAllTiers();
   }
 }

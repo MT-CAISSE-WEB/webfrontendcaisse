@@ -68,7 +68,6 @@ export class DecaissementJustifierComponent implements OnInit {
   }
 
   search(data : any){
-    console.log(data)
     this.service.getAlldecaissemenaj(data).subscribe({
       next : (res) => {
         this.op = res.data;
