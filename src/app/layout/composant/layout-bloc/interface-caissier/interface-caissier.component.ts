@@ -9,7 +9,7 @@ import { OperationService } from '../../../../features/operations/service/operat
 import { AffectationCaisseModel } from '../../../../features/caisse_journal/models/affectationcaisse.model';
 import { AffectationCaisseService } from '../../../../features/caisse_journal/services/affectationcaisse.service';
 import { ConsultationOpService } from '../../../../features/consultations/services/operations.service';
-import { APP_ROOT_OPERATION_GENERAL } from '../../../../_core/routes/frontend.root';
+import { APP_ROOT_DMD_DECAISSEMENT, APP_ROOT_OPERATION_GENERAL } from '../../../../_core/routes/frontend.root';
 
 @Component({
   selector: 'app-interface-caissier',
@@ -20,6 +20,7 @@ import { APP_ROOT_OPERATION_GENERAL } from '../../../../_core/routes/frontend.ro
 })
 export class InterfaceCaissierComponent implements OnInit{
   root_operation = APP_ROOT_OPERATION_GENERAL;
+  root_demande_decaissement = APP_ROOT_DMD_DECAISSEMENT;
   caisseSolde : any;
   msgErros: string = "";
   error: string = "";
@@ -39,12 +40,14 @@ export class InterfaceCaissierComponent implements OnInit{
   operationGlobal: any[] = [];
   totalEncaissementGlobal = 0;
   totalDecaissementGlobal = 0;
+  totalDemandesPayeesJour = 0;
 
   totalEncaissementJour = 0;
   totalDecaissementJour = 0;
 
   pourcentageEncaissementJour = 0;
   pourcentageDecaissementJour = 0;
+  ratioDemandesJour = 0;
 
   //Liste de caisse utilisateur
   caissesUser: AffectationCaisseModel[] = [];
@@ -206,27 +209,37 @@ export class InterfaceCaissierComponent implements OnInit{
     this.loadingLast = true ;
     this.service.getLastOperation(data).subscribe({
       next : (res) => {
-        this.opLast = res.data.data;
-        this.totalPagesL = res.data.totalPages;
-        this.loadingLast = false;
+        if(res.success){
+          this.opLast = res.data.data;
+          this.totalPagesL = res.data.totalPages;
+          this.loadingLast = false;
+        }else{
+          this.loadingLast = false;
+        }
       },
       error : (err) => {
-        this.loadingLast = true ;
+        console.log(err);
+        this.loadingLast = false ;
       }
     });
   }
 
   getAllOp(){
+    this.loadingLast = true;
     const params = {}
     this.service.getAllpayment(params).subscribe({
       next : (res) => {
         if(res.success){
           this.operationGlobal = res.data.data || [];
           if(this.operationGlobal.length != 0) this.calculerIndicateurs() ;
+          this.loadingLast = false ;
+        }else{
+          this.loadingLast = false ;
         }
       },
       error : (err) => {
-        this.loadingLast = true ;
+        console.log(err)
+        this.loadingLast = false ;
       }
     });
   }
@@ -237,8 +250,53 @@ export class InterfaceCaissierComponent implements OnInit{
 
     //Filtrer les operations du caissier
     const operations = this.filtrerOperationsDuCaissier(this.operationGlobal, this.caissesDuCaissier);
-    console.log(operations);
     
+    // Filtrer les opérations du jour
+    const operationsJour = operations.filter(o =>
+      o.dateoperation.startsWith(jour)
+    );
+
+    // Grouper par demande
+    const demandesMap = new Map<string, number>();
+
+    const demandesGlobalMap = new Map<string, number>();
+
+    operationsJour.forEach(o => {
+      if (!o.iddemande) return;
+
+      const montant = o.decaissement || 0;
+      if (demandesMap.has(o.iddemande)) {
+        demandesMap.set(
+          o.iddemande,
+          demandesMap.get(o.iddemande)! + montant
+        );
+      } else {
+        demandesMap.set(o.iddemande, montant);
+      }
+    });
+
+    operations.forEach(o => {
+      if (!o.iddemande) return;
+
+      const montant = o.decaissement || 0;
+
+      if (demandesGlobalMap.has(o.iddemande)) {
+        demandesGlobalMap.set(
+          o.iddemande,
+          demandesGlobalMap.get(o.iddemande)! + montant
+        );
+      } else {
+        demandesGlobalMap.set(o.iddemande, montant);
+      }
+    });
+
+    const totalDemandesGlobal = Array.from(demandesGlobalMap.values())
+      .reduce((sum, m) => sum + m, 0);
+
+    //Total des demandes payées
+    this.totalDemandesPayeesJour = Array.from(demandesMap.values())
+      .reduce((sum, m) => sum + m, 0);
+
     //Totaux globaux
     this.totalEncaissementGlobal = operations.reduce(
       (sum, o) => sum + o.encaissement, 0
@@ -266,6 +324,11 @@ export class InterfaceCaissierComponent implements OnInit{
     this.pourcentageDecaissementJour =
       this.totalDecaissementGlobal > 0
         ? (this.totalDecaissementJour / this.totalDecaissementGlobal) * 100
+        : 0;
+
+    this.ratioDemandesJour =
+      totalDemandesGlobal > 0
+        ? (this.totalDemandesPayeesJour / totalDemandesGlobal) * 100
         : 0;
   }
 

@@ -19,7 +19,8 @@ import { APP, APP_DONNEE_BASE_DEVISE, APP_AFF_NATURE_CENTRE_DONNEE_BASE,
     APP_OPERATION_GENERAL_JUSTIFIER,
     APP_COMPTABILISATION, APP_DECAISSEMENTAJUSTIFIER,
     APP_DECAISSEMENTAJUSTIFIER_CONSULTATION,
-    APP_STATSAFFDEPTNATURE_CONSULTATION} from './_core/routes/frontend.root';
+    APP_STATSAFFDEPTNATURE_CONSULTATION,
+    APP_DETAILDEAMNDE_CONSULTATION} from './_core/routes/frontend.root';
 
 import { LayoutMainComponent } from './layout/layout-main/layout-main.component';
 import { LayoutContentComponent } from './layout/composant/layout-content/layout-content.component';
@@ -64,6 +65,7 @@ import { ComptabilisationComponent } from './features/consultations/comptabilisa
 import { DecaissementJustifierComponent } from './features/consultations/decaissement-justifier/decaissement-justifier.component';
 import { NatureOperationByDepartementComponent } from './features/consultations/nature-par-departement/nature-par-departement.component';
 import { UpdatepasswordComponent } from './features/administration/updatepassword/updatepassword.component';
+import { DemandeDetailComponent } from './features/consultations/demande-detail/demande-detail.component';
 
 export const routes: Routes = [
   {
@@ -246,6 +248,10 @@ export const routes: Routes = [
           path : APP_DECAISSEMENTAJUSTIFIER_CONSULTATION,
           component: DecaissementJustifierComponent
       },
+      {
+          path : APP_DETAILDEAMNDE_CONSULTATION,
+          component: DemandeDetailComponent
+      }
     ]
   }
 ];

@@ -19,4 +19,12 @@ export class ConsultationDecaissementaj {
     getAlldecaissemenaj(data: any): Observable<QueryResultModel> {
         return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/decaissement_justificatif', data);
     }
+
+    /**
+   * get demande by user
+   * @param params
+   */
+    getdemandeByuser(_data: any): Observable<QueryResultModel> {
+        return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/demandes/user', _data);
+    }
 }

@@ -2,3 +2,12 @@
     max-height: 350px;
     overflow-y: auto;    
 }
+
+.row {
+  display: flex;
+  align-items: stretch;
+}
+
+.card.card-height {
+  height: 95%;
+}

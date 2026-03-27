@@ -19,7 +19,8 @@ import { APP_ROOT,APP_ROOT_DONNEE_BASE_DEVISE,
   APP_ROOT_OPERATION_GENERAL_JUSITIFIER,
   APP_ROOT_COMPTABILISATION,
   APP_ROOT_DECAISSEMENTAJUSTIFIER_CONSULTATION,
-  APP_ROOT_STATSAFFDEPTNATURE_CONSULTATION} from '../../../_core/routes/frontend.root';
+  APP_ROOT_STATSAFFDEPTNATURE_CONSULTATION,
+  APP_ROOT_DETAILDEAMNDE_CONSULTATION} from '../../../_core/routes/frontend.root';
 
 import { RouterLink, RouterModule, RouterOutlet } from "@angular/router";
 import { CommonModule } from '@angular/common';
@@ -63,6 +64,7 @@ export class LayoutMenuComponent {
   root_comptabilisation = APP_ROOT_COMPTABILISATION;
   root_decaissementjustifiee = APP_ROOT_DECAISSEMENTAJUSTIFIER_CONSULTATION;
   root_nature_operation_departement = APP_ROOT_STATSAFFDEPTNATURE_CONSULTATION;
+  root_detail_demande = APP_ROOT_DETAILDEAMNDE_CONSULTATION;
 
   admin : boolean =false;
   supervisor : boolean=false;

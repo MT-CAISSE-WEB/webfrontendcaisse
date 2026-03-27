@@ -106,24 +106,19 @@
             </form>
 
             <div class="card-body">
-                <div class="table-scroll">
-                    @if (loading) {
-                        <div class="text-center py-4">
-                            <div class="spinner-border text-info"></div>
-                        </div>
-                    }
+                <div>
                     <div class="table-responsive table-card">
-                        <table class="table table-striped align-middle text-nowrap" id="invoiceTable">
-                            <thead class="">
-                                <tr>
-                                    <th scope="col" class="sort text-uppercase" data-sort="site">Site</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="numero">Numero pièce</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="date">Date operation</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="nature">Nature operation</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="centre">Centre analytique</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="tiers">Tiers</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="tiers">Montant</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="devise">Devise</th>
+                        <table class="table table-hover table-nowrap align-middle table-scroll table-container table-custom table-compact" id="invoiceTable">
+                            <thead class="text-muted table-light">
+                                <tr class="text-uppercase">
+                                    <th scope="col" data-sort="site">Site</th>
+                                    <th scope="col" data-sort="numero">Numero pièce</th>
+                                    <th scope="col" data-sort="date">Date operation</th>
+                                    <th scope="col" data-sort="nature">Nature operation</th>
+                                    <th scope="col" data-sort="centre">Centre analytique</th>
+                                    <th scope="col" data-sort="tiers">Tiers</th>
+                                    <th scope="col" data-sort="tiers">Montant</th>
+                                    <th scope="col" data-sort="devise">Devise</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -139,6 +134,14 @@
                                         <td> {{item?.devise }} </td>
                                     </tr>
                                 }
+                                <tr *ngIf="loading">
+                                    <td colspan="8">
+                                        <div class="text-center py-4">
+                                            <div class="spinner-border text-info"></div>
+                                            <h6 class="mt-2">Chargement...</h6>
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                         <div class="" *ngIf="op?.length == 0">

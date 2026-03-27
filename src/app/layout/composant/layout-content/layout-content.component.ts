@@ -16,11 +16,13 @@ import { InterfaceCaissierComponent } from "../layout-bloc/interface-caissier/in
 import { InterfaceUserComponent } from "../layout-bloc/interface-user/interface-user.component";
 import { DENOMINATION_BILLETAGE } from '../../../_core/constantes/tableau.data';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
+import { InterfaceDemandeUserComponent } from '../layout-bloc/interface-demande-user/interface-demande-user.component';
 
 @Component({
   selector: 'app-layout-content',
   standalone: true,
-  imports: [RouterModule, CommonModule, FormsModule, ReactiveFormsModule, InterfaceCaissierComponent, InterfaceUserComponent, NgbModalModule],
+  imports: [RouterModule, CommonModule, FormsModule, ReactiveFormsModule, InterfaceCaissierComponent, 
+    InterfaceUserComponent, NgbModalModule, InterfaceDemandeUserComponent],
   templateUrl: './layout-content.component.html',
   styleUrl: './layout-content.component.css'
 })
