@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { QueryResultModel } from '../../../_core/models/query-result.model';
 import { URL_LOCAL } from '../../../_core/routes/backend.root';
@@ -12,7 +12,17 @@ export class StatsDemandeByStatusService {
 
   constructor(private http: HttpClient) {}
 
-  getDemandesParStatut(): Observable<QueryResultModel> {
-    return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url);
+  getDemandesParStatut(
+    idsociete: string,
+    idsite?: string,
+  ): Observable<QueryResultModel> {
+    let params = new HttpParams().set('idsociete', idsociete);
+
+    if (idsite) {
+      params = params.set('idsite', idsite);
+    }
+    return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url, {
+      params,
+    });
   }
 }
