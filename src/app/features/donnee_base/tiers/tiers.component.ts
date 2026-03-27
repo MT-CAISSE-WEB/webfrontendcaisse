@@ -22,7 +22,7 @@ declare var $: any;
 })
 
 export class TiersComponent implements OnInit{
-  title = "Gestion des Tiers";
+  title = "Tiers";
   params : any = {};
   breadCrumbs : any = {};
   fb: FormBuilder = new FormBuilder();
@@ -438,4 +438,35 @@ export class TiersComponent implements OnInit{
   actualiser(): void {
     this.getAllTiers();
   }
+
+  exportData = {
+  debut: null,
+  fin: null,
+  typetiers: null,
+  format: 'excel'
+};
+
+  exporter() {
+    this.tiersservice.exportTiers(this.exportData).subscribe({
+      next: (blob: Blob) => {
+
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+
+        a.download = this.exportData.format === 'pdf'
+          ? 'Liste_Tiers.pdf'
+          : 'Liste_Tiers.xlsx';
+
+        a.click();
+
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.toastr.error("Erreur export");
+      }
+    });
+  }
+
 }

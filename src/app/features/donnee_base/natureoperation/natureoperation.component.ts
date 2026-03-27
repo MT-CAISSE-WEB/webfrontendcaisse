@@ -26,7 +26,7 @@ declare var $: any;
 })
 
 export class NatureoperationComponent implements OnInit{
-  title = "Gestion des natures d'operations";
+  title = "Natures d'operations";
   params : any = {};
   breadCrumbs : any = {};
   fb: FormBuilder = new FormBuilder();
@@ -327,55 +327,7 @@ export class NatureoperationComponent implements OnInit{
     this.getAllNatureoperations();
   }
   
-  exportToExcel(): void {
-    const element = document.getElementById('dataTable');
   
-    if (!element) {
-      console.error('Table non trouvée');
-      return;
-    }
-  
-    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
-    const workbook: XLSX.WorkBook = {
-      Sheets: { 'Nature operation': worksheet },
-      SheetNames: ['Nature operation']
-    };
-  
-    const excelBuffer: any = XLSX.write(workbook, {
-      bookType: 'xlsx',
-      type: 'array'
-    });
-  
-    const data: Blob = new Blob(
-      [excelBuffer],
-      { type: 'application/octet-stream' }
-    );
-  
-    saveAs(data, `Nature_operation_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.xlsx`);
-  }
-    
-  exportToCSV(): void {
-    const element = document.getElementById('dataTable');
-  
-    if (!element) {
-      console.error('Table non trouvée');
-      return;
-    }
-  
-    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
-    
-    // 🔥 forcer le séparateur ;
-    const csv = XLSX.utils.sheet_to_csv(worksheet, {
-      FS: ';'
-    });
-  
-    const blob = new Blob([csv], {
-      type: 'text/csv;charset=utf-8;'
-    });
-
-    saveAs(blob, `nature_operation_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.csv`);
-  }
-
   //Importation
   importNatureOperation(event: any){
     const file = event.target.files[0];
@@ -470,4 +422,35 @@ export class NatureoperationComponent implements OnInit{
   actualiser(): void {
     this.getAllNatureoperations();
   }
+
+
+  exportData = {
+    debut: null,
+    fin: null,
+    format: 'excel'
+  };
+  
+  exporter() {
+    this.natureoperationservice.exportNatures(this.exportData).subscribe({
+      next: (blob: Blob) => {
+
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+
+        a.download = this.exportData.format === 'pdf'
+          ? 'Liste_natures.pdf'
+          : 'Liste_natures.xlsx';
+
+        a.click();
+
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.toastr.error("Erreur export");
+      }
+    });
+  }
+
 }

@@ -1,43 +1,48 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { centreanalytiqueModel } from '../models/centreanalytique.model';
-import { CentreAnalytiqueService } from '../services/centreanalytique.service';
+import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { banqueModel } from '../models/banque.model';
+import { BanqueService } from '../services/banque.service';
 import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
 
-import { DataTablesModule } from 'angular-datatables';
-import { Subject } from 'rxjs';
+import { PlancomptableService } from '../services/plancomptable.service';
+import { plancomptableModel } from '../models/plancomptable.model';
+
+import { sitemodel } from '../../structure/model/site.model';
+import { siteservice } from '../../structure/service/site.service';
+import { deviseservice } from '../donnee_base/service/devise.service';
 
 import { ToastrService } from 'ngx-toastr';
 
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { devisemodel } from '../donnee_base/model/devise.model';
+
 
 // ADD-INS
 declare var $: any;
 
 @Component({
-  selector: 'app-centreanalytique',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, DataTablesModule],
-  templateUrl: './centreanalytique.component.html',
-  styleUrl: './centreanalytique.component.css'
+  selector: 'app-banque',
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  templateUrl: './banque.component.html',
+  styleUrl: './banque.component.css' 
 })
 
-export class CentreanalytiqueComponent implements OnInit{
-  title = "Centres analytiques";
+export class BanqueComponent implements OnInit{
+  title = "Banques";
   params : any = {};
   breadCrumbs : any = {};
   fb: FormBuilder = new FormBuilder();
-  centres : centreanalytiqueModel[] = [];
-  centre : centreanalytiqueModel = new centreanalytiqueModel();
+  banques : banqueModel[] = [];
+  banque : banqueModel = new banqueModel();
   msgErros : string = "";
   loading: Boolean = false;
-  centreanalytiqueForm : FormGroup = this.fb.group({});
-
+  banqueForm : FormGroup = this.fb.group({})
 
   //Faire le check selection **********
-  objectsSelected : centreanalytiqueModel[] = [];
+  objectsSelected : banqueModel[] = [];
   selectedItems : any[] = [];
   // Détermine si toutes les lignes sont selectionnées
   checkAllRow : any;
@@ -51,22 +56,12 @@ export class CentreanalytiqueComponent implements OnInit{
   titleMsg: string ="";
 
   //Element à supprimer 
-  deletecentre: any = null;
+  deletebanque : any = null;
 
-  // dtOptions: DataTables.Settings = {};
-  dtOptions: any = {};
-
-  dtTrigger: Subject<any> = new Subject<any>(); 
-
-
-
-/**
- * Constructor
- * @param centreanalytiqueservice - Service du centre analytique
- * @param router - Router pour la navigation
- */
-
-
+  comptes : plancomptableModel[] = [];
+  sites : sitemodel[] = [];
+  devises : devisemodel[] = [];
+ 
   ImportForm : FormGroup = this.fb.group({})
 
   // Ajout pour fonctions de recherche et pagination
@@ -78,29 +73,68 @@ export class CentreanalytiqueComponent implements OnInit{
   totalPages: number = 1;
 
 
-  constructor(private centreanalytiqueservice: CentreAnalytiqueService,
-              private router: Router
-            , private toastr : ToastrService){}
+  constructor(private banqueservice: BanqueService, 
+    private plancomptableservice: PlancomptableService
+              , private router: Router
+              , private toastr : ToastrService
+              , private site : siteservice,
+              private deviseservice : deviseservice
+            ){}
 
   ngOnInit(): void {
-    //Afficher tous les centres
-    this.getAllcentres();
-    //Initialisation du formulaire
-    this.initForm();
-    this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("ce centre analytique");
-    this.titleMsg = TITLE_DELETE;
+      //Afficher tous les banques
+      this.getAllbanques();
+      this.getAllComptes();
+      this.getAllSites();
+      this.getAllDevises();
+      //Initialisation du formulaire
+      this.initForm();
+      this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("cette banque");
+      this.titleMsg = TITLE_DELETE;
 
-    //Initialiser le formulaire du fichier d'import
-    this.initImportForm();
-}
+      //Initialiser le formulaire du fichier d'import
+      this.initImportForm();
+  }
 
-  getAllcentres() {
-    this.centreanalytiqueservice.getAll().subscribe({
-      next: (res) => {
-        if (res.success) {
-          this.centres = res.data;
-          this.filteredData = [...this.centres];
+  getAllbanques(){
+    this.banqueservice.getAll().subscribe({
+      next : (res) => {
+        if(res.success){
+          this.banques = res.data;
+          this.filteredData = [...this.banques];
           this.updatePagination();
+        }
+      }
+    });
+  }
+
+  getAllComptes(){
+    this.plancomptableservice.getAll().subscribe({
+      next : (res) => {
+        if(res.success){
+          this.comptes = res.data;
+          // Filter les comptes commençant par 52
+          this.comptes = this.comptes.filter(compte => compte.numcompte.startsWith('52'));
+        }
+      }
+    });
+  }
+
+  getAllSites(){
+    this.site.getAll().subscribe({
+      next : (res) => {
+        if(res.success){
+          this.sites = res.data;
+        }
+      }
+    });
+  }
+
+  getAllDevises(){
+    this.deviseservice.getAll().subscribe({
+      next : (res) => {
+        if(res.success){
+          this.devises = res.data;
         }
       }
     });
@@ -110,12 +144,21 @@ export class CentreanalytiqueComponent implements OnInit{
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
-  //Création du formulaire
+
+  //création du formulaire
   initForm(): void{
-    this.centreanalytiqueForm = this.fb.group({
-      codecentreanalytique : ["", [Validators.required]],
+    this.banqueForm = this.fb.group({
+      codebanque : ["", [Validators.required]],
       libelle : ["", [Validators.required]],
+      numerocompte : ["", [Validators.required]],
+      iban : ["", [Validators.required]],
+      swift : ["", [Validators.required]],
+      solde_initial : [0, [Validators.required]],
+      solde_actuel : [0, [Validators.required]],
       idsociete : [this.user.idsociete, [Validators.required]],
+      idsite : ["", [Validators.required]],
+      idcompte : ["", [Validators.required]],
+      iddevise : ["", [Validators.required]],
       actif : [true],
       createdby : [this.user.codeutilisateur],
       updatedby : [this.user.codeutilisateur]
@@ -123,15 +166,25 @@ export class CentreanalytiqueComponent implements OnInit{
   }
 
   get form() {
-    return this.centreanalytiqueForm.controls;
+    return this.banqueForm.controls;
   }
 
-  dispatchcentres(_object: centreanalytiqueModel){
+  dispatchbanques(_object: banqueModel){
     const status = _object.actif === 1;
-    this.centreanalytiqueForm.patchValue({
-      codecentreanalytique : _object.codecentreanalytique,
+    this.banqueForm.patchValue({
+      codebanque : _object.codebanque,
       libelle : _object.libelle,
+      numerocompte : _object.numerocompte,
+      iban : _object.iban,
+      swift : _object.swift,
+      solde_initial : _object.solde_initial,
+      solde_actuel : _object.solde_actuel,
       idsociete: _object.idsociete,
+      idsite : _object.idsite,
+      idcompte : _object.idcompte,
+      iddevise : _object.iddevise,
+      numcompte : _object.compte.compte_numcompte,
+      libellecompte : _object.compte.compte_libelle,
       actif : status
     })
   }
@@ -146,19 +199,19 @@ export class CentreanalytiqueComponent implements OnInit{
 
   //vérifie si _id est inclus dans un tableau d'IDs stocké
   isChecked(id: string): boolean {
-    return this.selectedItems.some(x => x.idnature === id);
+    return this.selectedItems.some(x => x.idbanque === id);
   }
 
   handleSelectOne(item: any, event: Event): void {
     const checked = (event.target as HTMLInputElement).checked;
 
     if (checked) {
-      if (!this.selectedItems.some(x => x.idnature === item.idnature)) {
+      if (!this.selectedItems.some(x => x.idbanque === item.idbanque)) {
         this.selectedItems.push(item);
       }
     } else {
       this.selectedItems = this.selectedItems.filter(
-        x => x.idnature !== item.idnature
+        x => x.idbanque !== item.idbanque
       );
     }
   }
@@ -180,39 +233,40 @@ export class CentreanalytiqueComponent implements OnInit{
   onSubmit(){
     /** Check formulaire */
     this.msgErros = '';
-    const controls = this.centreanalytiqueForm.controls;
-    if (this.centreanalytiqueForm.invalid) {
+    const controls = this.banqueForm.controls;
+    if (this.banqueForm.invalid) {
       Object.keys(controls).forEach(controlName => controls[controlName].markAsTouched());
       this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
       return;
     }
 
     /** 2. prepare data */
-    const formValue = this.centreanalytiqueForm.value;
+    const formValue = this.banqueForm.value;
 
-    const _centres: centreanalytiqueModel = {
-      ...this.centre,
+    const _banques: banqueModel = {
+      ...this.banque,
       ...formValue,
-      actif: formValue.actif ? 1 : 0  
+      actif: formValue.actif ? 1 : 0,
     };
 
     /** 3. choices action */
-    if(this.actionModal == "create")this.create(_centres);
-    else this.update(_centres);
-    // if (!_centres.idcentreanalytiques) this.create(_centres);
-    // else this.update(_centres);
+    if(this.actionModal == "create")
+      this.create(_banques);
+    else 
+      this.update(_banques);
   }
 
   //Enregistrement de données
-  create(_centres: centreanalytiqueModel) {
-    const {idcentreanalytique, ...dataToSend} = _centres;
+  create(_banques: banqueModel) {
+    const {idbanque, ...dataToSend} = _banques;
     this.loading = true;
-    this.centreanalytiqueservice.create(dataToSend).subscribe({
+      console.log(dataToSend);
+    this.banqueservice.create(dataToSend).subscribe({
       next: (res) => {
         if (res.success) {
           this.closeModal('showModal');
-          this.getAllcentres();
-          this.toastr.success("Fiche créée");
+          this.getAllbanques();
+          this.toastr.success('Fiche créée avec succès');
         } else {
           this.error = "Erreur de création";
           this.toastr.error(this.error);
@@ -222,19 +276,19 @@ export class CentreanalytiqueComponent implements OnInit{
       error: (err) => {
         this.error = "Echec de création";
         this.loading = false;
-        this.toastr.error(this.error);
+        this.toastr.error(err);
       }
     })
   }
 
   //Modification de données
-  update(_centres: centreanalytiqueModel){
-    this.centreanalytiqueservice.update(_centres).subscribe({
+  update(_banques: banqueModel){
+    this.banqueservice.update(_banques).subscribe({
       next: (res) => {
         if (res.success) {
           this.closeModal('showModal');
-          this.getAllcentres();
-          this.toastr.success("Fiche modifiée");
+          this.getAllbanques();
+          this.toastr.success('Fiche modifée avec succès');
         } else {
           this.error = "Erreur de modification";
           this.toastr.error(this.error);
@@ -261,32 +315,33 @@ export class CentreanalytiqueComponent implements OnInit{
     this.initForm();
   }
 
-  modalUpdate(_object: centreanalytiqueModel){
-    this.centre = _object;
+  modalUpdate(_object: banqueModel){
+    this.banque = _object;
     this.actionModal = "update";
-    this.centreanalytiqueForm.reset();
-    this.dispatchcentres(_object);
+    this.banqueForm.reset();
+    this.dispatchbanques(_object);
   }
 
-  modalview(_object: centreanalytiqueModel){
-    this.centre = _object;
+  modalview(_object: banqueModel){
+    this.banque = _object;
     this.actionModal = "view";
-    this.centreanalytiqueForm.reset();
-    this.dispatchcentres(_object);
+    this.banqueForm.reset();
+    this.dispatchbanques(_object);
   }
 
-  modalDelete(item: centreanalytiqueModel){
-    this.deletecentre = item;
+
+  modalDelete(item: banqueModel){
+    this.deletebanque = item;
   }
 
   deleteConfirmed(){
-    if(!this.deletecentre) return ;
-    this.centreanalytiqueservice.delete(this.deletecentre.idcentreanalytique).subscribe({
+    if(!this.deletebanque) return ;
+    this.banqueservice.delete(this.deletebanque.idbanque).subscribe({
       next: (res) => {
         if (res.success) {
           this.closeModal('delete');
-          this.getAllcentres();
-          this.toastr.success('Fiche supprimée');
+          this.getAllbanques();
+          this.toastr.success('Fiche supprimée avec succès');
         } else {
           this.error = "Erreur de Suppression";
           this.toastr.error(this.error);
@@ -297,71 +352,21 @@ export class CentreanalytiqueComponent implements OnInit{
         this.error = "Suppression échec";
         this.loading = false;
         this.toastr.error(this.error);
-
       }
     })
   }
-
+  
   deleteMultiple(){
     for (let i = 0; i < this.objectsSelected.length; i++) {
-      this.centreanalytiqueservice.delete(this.objectsSelected[i].idcentreanalytique).subscribe({})
+      this.banqueservice.delete(this.objectsSelected[i].idbanque).subscribe({})
     }
     this.toastr.success('Fiches supprimées');
-    this.getAllcentres();
+    this.getAllbanques();
   }
-
-  exportToExcel(): void {
-    const element = document.getElementById('dataTable');
   
-    if (!element) {
-      console.error('Table non trouvée');
-      return;
-    }
-  
-    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
-    const workbook: XLSX.WorkBook = {
-      Sheets: { 'Evolution Budget': worksheet },
-      SheetNames: ['Evolution Budget']
-    };
-  
-    const excelBuffer: any = XLSX.write(workbook, {
-      bookType: 'xlsx',
-      type: 'array'
-    });
-  
-    const data: Blob = new Blob(
-      [excelBuffer],
-      { type: 'application/octet-stream' }
-    );
-  
-    saveAs(data, `Evolution_budget_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.xlsx`);
-  }
-      
-  exportToCSV(): void {
-    const element = document.getElementById('dataTable');
-  
-    if (!element) {
-      console.error('Table non trouvée');
-      return;
-    }
-  
-    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
-    
-    // forcer le séparateur ;
-    const csv = XLSX.utils.sheet_to_csv(worksheet, {
-      FS: ';'
-    });
-  
-    const blob = new Blob([csv], {
-      type: 'text/csv;charset=utf-8;'
-    });
-
-    saveAs(blob, `centres_analytiques_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.csv`);
-    this.toastr.success('Fiches exportées avec succès');
-  }
   
   //Importation
-  importCentre(event: any){
+  importbanque(event: any){
     const file = event.target.files[0];
 
     const input = event.target as HTMLInputElement;
@@ -390,10 +395,10 @@ export class CentreanalytiqueComponent implements OnInit{
     }
     console.log(info.createdby)
 
-    this.centreanalytiqueservice.importCentreAnalytique(file, info).subscribe({
+    this.banqueservice.importBanques(file, info).subscribe({
       next: (res) => {
         if (res.success) {
-          this.getAllcentres();
+          this.getAllbanques();
           this.toastr.success('Importation effectuée avec succès');
         } else {
           this.error = "Echec de l'importation";
@@ -409,12 +414,13 @@ export class CentreanalytiqueComponent implements OnInit{
     })
   }
 
+
   // 🔎 Filtrer (Affectees)
   applyFilter() {
     const term = this.searchTerm.toLowerCase();
 
-    this.filteredData = this.centres.filter(item =>
-      item.codecentreanalytique?.toLowerCase().includes(term) ||
+    this.filteredData = this.banques.filter(item =>
+      item.codebanque?.toLowerCase().includes(term) ||
       item.libelle?.toLowerCase().includes(term)
     );
 
@@ -451,7 +457,7 @@ export class CentreanalytiqueComponent implements OnInit{
   }
 
   actualiser(): void {
-    this.getAllcentres();
+    this.getAllbanques();
   }
 
 
@@ -459,10 +465,10 @@ export class CentreanalytiqueComponent implements OnInit{
     debut: null,
     fin: null,
     format: 'excel'
-};
-
+  };
+  
   exporter() {
-    this.centreanalytiqueservice.exportCentres(this.exportData).subscribe({
+    this.banqueservice.exportBanques(this.exportData).subscribe({
       next: (blob: Blob) => {
 
         const url = window.URL.createObjectURL(blob);
@@ -471,8 +477,8 @@ export class CentreanalytiqueComponent implements OnInit{
         a.href = url;
 
         a.download = this.exportData.format === 'pdf'
-          ? 'centres_analytiques.pdf'
-          : 'centres_analytiques.xlsx';
+          ? 'Liste_banques.pdf'
+          : 'Liste_banques.xlsx';
 
         a.click();
 
@@ -483,4 +489,5 @@ export class CentreanalytiqueComponent implements OnInit{
       }
     });
   }
+
 }

@@ -94,7 +94,6 @@ export class PlancomptableComponent implements OnInit{
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
-
   //Création du formulaire
   initForm(): void{
     this.plancomptableForm = this.fb.group({
@@ -287,6 +286,7 @@ export class PlancomptableComponent implements OnInit{
       next: (res) => {
         if (res.success) {
           this.closeModal('delete');
+          this.toastr.success('Fiche supprimée');
           this.getAllComptes();
         } else {
           this.error = "Erreur de Suppression";
@@ -294,6 +294,7 @@ export class PlancomptableComponent implements OnInit{
         this.loading = false;
       },
       error: (err) => {
+        this.toastr.error('Erreur lors de la suppression');
         this.error = "Suppression échec";
         this.loading = false;
       }
@@ -306,55 +307,6 @@ export class PlancomptableComponent implements OnInit{
     }
     this.toastr.success('Fiches supprimées');
     this.getAllComptes();
-  }
-  
-  exportToExcel(): void {
-    const element = document.getElementById('dataTable');
-  
-    if (!element) {
-      console.error('Table non trouvée');
-      return;
-    }
-  
-    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
-    const workbook: XLSX.WorkBook = {
-      Sheets: { 'Evolution Budget': worksheet },
-      SheetNames: ['Evolution Budget']
-    };
-  
-    const excelBuffer: any = XLSX.write(workbook, {
-      bookType: 'xlsx',
-      type: 'array'
-    });
-  
-    const data: Blob = new Blob(
-      [excelBuffer],
-      { type: 'application/octet-stream' }
-    );
-  
-    saveAs(data, `Evolution_budget_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.xlsx`);
-  }
-    
-  exportToCSV(): void {
-    const element = document.getElementById('dataTable');
-  
-    if (!element) {
-      console.error('Table non trouvée');
-      return;
-    }
-  
-    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
-    
-    // 🔥 forcer le séparateur ;
-    const csv = XLSX.utils.sheet_to_csv(worksheet, {
-      FS: ';'
-    });
-  
-    const blob = new Blob([csv], {
-      type: 'text/csv;charset=utf-8;'
-    });
-
-    saveAs(blob, `plan_comptable_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.csv`);
   }
 
     //Importation
@@ -457,17 +409,7 @@ export class PlancomptableComponent implements OnInit{
   format: 'excel'
 };
 
-  data = {
-    debut: this.exportData.debut || null,
-    fin: this.exportData.fin || null,
-    format: this.exportData.format
-  };
-
   exporter() {
-    // if (this.data.debut && this.data.fin && this.data.debut > this.data.fin) {
-    //   this.toastr.error("Compte début doit être inférieur au compte fin");
-    //   return;
-    // }
     this.plancomptableservice.exportComptes(this.exportData).subscribe({
       next: (blob: Blob) => {
 

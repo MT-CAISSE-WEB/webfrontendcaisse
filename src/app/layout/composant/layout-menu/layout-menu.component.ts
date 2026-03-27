@@ -20,7 +20,8 @@ import { APP_ROOT,APP_ROOT_DONNEE_BASE_DEVISE,
   APP_ROOT_COMPTABILISATION,
   APP_ROOT_DECAISSEMENTAJUSTIFIER_CONSULTATION,
   APP_ROOT_STATSAFFDEPTNATURE_CONSULTATION,
-  APP_ROOT_DETAILDEAMNDE_CONSULTATION} from '../../../_core/routes/frontend.root';
+  APP_ROOT_DETAILDEAMNDE_CONSULTATION,
+  APP_ROOT_BANQUE_DONNEE_BASE} from '../../../_core/routes/frontend.root';
 
 import { RouterLink, RouterModule, RouterOutlet } from "@angular/router";
 import { CommonModule } from '@angular/common';
@@ -32,6 +33,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './layout-menu.component.css'
 })
 export class LayoutMenuComponent {
+  root_banque = APP_ROOT_BANQUE_DONNEE_BASE;
   root_taux = APP_ROOT_TAUX_DONNEE_BASE;
   root_tiers = APP_ROOT_TIERS_DONNEE_BASE;
   root_centre_analytique = APP_ROOT_CENTRE_ANALYTIQUE_DONNEE_BASE;

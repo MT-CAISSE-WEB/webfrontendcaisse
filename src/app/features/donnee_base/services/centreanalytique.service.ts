@@ -62,12 +62,19 @@ export class CentreAnalytiqueService {
     );
   }
 
-    importCentreAnalytique(file: File, _object: any): Observable<any> {
+  importCentreAnalytique(file: File, _object: any): Observable<any> {
     const formData: FormData = new FormData();
     formData.append('file', file, file.name);
     formData.append('idsociete', _object.idsociete);
     formData.append('createdby', _object.createdby);
     return this.http.post<any>(URL_LOCAL.baseUrl + this.url + '/import', formData);
+  }
+
+  exportCentres(data: any) {
+    return this.http.post(URL_LOCAL.baseUrl + this.url + '/export',
+      data,
+      { responseType: 'blob' }
+    );
   }
 
 }

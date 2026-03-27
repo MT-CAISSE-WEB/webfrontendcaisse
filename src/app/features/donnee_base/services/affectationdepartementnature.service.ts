@@ -34,4 +34,12 @@ export class AffectationDepartementNatureService {
     );
   }
 
+
+  exportAffectations(data: any) {
+    return this.http.post(URL_LOCAL.baseUrl + this.url + '/export',
+      data,
+      { responseType: 'blob' }
+    );
+  }
+
 }

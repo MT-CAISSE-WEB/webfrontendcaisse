@@ -37,7 +37,7 @@
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end">
                                     <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#importcsv">Importer csv</a>
-                                    <a class="dropdown-item" href="#" (click)="exportToCSV()">Exporter csv</a>
+                                    <a class="dropdown-item" href="#" data-bs-target="#exportModal" data-bs-toggle="modal">Extraire</a>
                                 </div>
                             </div>
                         </div>
@@ -84,6 +84,67 @@
                         </div>
                         </div>
                     </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="exportModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Exporter les tiers</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- Plage -->
+                           <div class="mb-3">
+                                <label>Tiers début</label>
+                                <select class="form-select form-select-sm" [(ngModel)]="exportData.debut" name="debut">
+                                    <option value="">-- Tous --</option>
+                                    <option *ngFor="let n of tiers" [value]="n.codetiers">
+                                        {{ n.codetiers }} - {{ n.designation }}
+                                    </option>
+                                </select>
+                            </div>
+
+                           <div class="mb-3">
+                                <label>Tiers fin</label>
+                                <select class="form-select form-select-sm" [(ngModel)]="exportData.fin" name="fin">
+                                    <option value="">-- Tous --</option>
+                                    <option *ngFor="let n of tiers" [value]="n.codetiers">
+                                        {{ n.codetiers }} - {{ n.designation }}
+                                    </option>
+                                </select>
+                            </div>
+
+                           <div class="mb-3">
+                                <label>Type</label>
+                                <select class="form-select form-select-sm" [(ngModel)]="exportData.typetiers" name="typetiers">
+                                    <option value="">-- Tous --</option>
+                                    <option value="Client">Client</option>
+                                    <option value="Fournisseur">Fournisseur</option>
+                                    <option value="Divers">Divers</option>
+                                    <option value="Salarié">Salarié</option>
+                                </select>
+                            </div>
+
+                            <!-- Format -->
+                            <div class="mb-3">
+                                <label>Format</label>
+                                <select class="form-select" [(ngModel)]="exportData.format">
+                                    <option value="excel">Excel</option>
+                                    <option value="pdf">PDF</option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                            <button class="btn btn-primary" (click)="exporter()">Exporter</button>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -222,7 +283,6 @@
                                             <option value="Fournisseur">Fournisseur</option>
                                             <option value="Divers">Divers</option>
                                             <option value="Salarié">Salarié</option>
-
                                         </select>
 
                                         <div class="invalid-feedback">{{ msgErros }}</div>

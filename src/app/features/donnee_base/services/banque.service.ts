@@ -1,4 +1,5 @@
 import { HttpClient } from "@angular/common/http";
+import { APP_BANQUE_DONNEE_BASE } from "../../../_core/routes/frontend.root";
 import { Observable } from "rxjs";
 import { QueryResultModel } from "../../../_core/models/query-result.model";
 import { URL_LOCAL } from "../../../_core/routes/backend.root";
@@ -7,8 +8,8 @@ import { Injectable } from "@angular/core";
 @Injectable({
   providedIn: 'root'
 })
-export class TiersService {
-    url : string = 'tiers' ;
+export class BanqueService {
+    url : string = 'banque' ;
 
     constructor(private http: HttpClient) {}
 
@@ -38,7 +39,7 @@ export class TiersService {
    */
   update(_object: any): Observable<any> {
     return this.http.put<any>(
-      URL_LOCAL.baseUrl + this.url + "/update/" + _object.idtiers,
+      URL_LOCAL.baseUrl + this.url + "/update/" + _object.idbanque,
       _object
     );
   }
@@ -64,7 +65,7 @@ export class TiersService {
     );
   }
 
-  importTiers(file: File, _object: any): Observable<any> {
+  importBanques(file: File, _object: any): Observable<any> {
     const formData: FormData = new FormData();
     formData.append('file', file, file.name);
     formData.append('idsociete', _object.idsociete);
@@ -72,10 +73,12 @@ export class TiersService {
     return this.http.post<any>(URL_LOCAL.baseUrl + this.url + '/import', formData);
   }
 
-  exportTiers(data: any) {
+
+  exportBanques(data: any) {
     return this.http.post(URL_LOCAL.baseUrl + this.url + '/export',
       data,
       { responseType: 'blob' }
     );
   }
+
 }

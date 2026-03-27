@@ -95,28 +95,28 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">Exporter les natures d'opération</h5>
+                            <h5 class="modal-title">Exporter les banques</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
 
                         <div class="modal-body">
                             <!-- Plage -->
                            <div class="mb-3">
-                                <label>Nature début</label>
+                                <label>banque début</label>
                                 <select class="form-select form-select-sm" [(ngModel)]="exportData.debut" name="debut">
                                     <option value="">-- Tous --</option>
-                                    <option *ngFor="let n of natureoperations" [value]="n.codenature">
-                                        {{ n.codenature }} - {{ n.libelle }}
+                                    <option *ngFor="let n of banques" [value]="n.codebanque">
+                                        {{ n.codebanque }} - {{ n.libelle }}
                                     </option>
                                 </select>
                             </div>
 
                            <div class="mb-3">
-                                <label>Nature fin</label>
+                                <label>banque fin</label>
                                 <select class="form-select form-select-sm" [(ngModel)]="exportData.fin" name="fin">
                                     <option value="">-- Tous --</option>
-                                    <option *ngFor="let n of natureoperations" [value]="n.codenature">
-                                        {{ n.codenature }} - {{ n.libelle }}
+                                    <option *ngFor="let n of banques" [value]="n.codebanque">
+                                        {{ n.codebanque }} - {{ n.libelle }}
                                     </option>                                    
                                 </select>
                             </div>
@@ -146,7 +146,7 @@
                     <div class="col-12">
                         <!-- 🔎 Recherche -->
                         <input type="text"  class="form-control form-control-sm mb-2" 
-                         placeholder="Rechercher numéro ou libellé..."
+                         placeholder="Rechercher..."
                             [(ngModel)]="searchTerm"
                             (input)="applyFilter()"
                         />
@@ -163,10 +163,11 @@
                                         </th>
                                         <th>Code</th>
                                         <th>Libelle</th>
-                                        <!-- <th>Dec. à justifier</th> -->
-                                        <!-- <th>Imputation tiers</th> -->
-                                        <th>Aut. demande</th>
-                                        <th>Type opération</th>
+                                        <!-- <th>N° Compte bancaire</th>
+                                        <th>IBAN</th>
+                                        <th>SWIFT</th>
+                                        <th>Solde initial</th>
+                                        <th>Solde actuel</th> -->
                                         <th>Compte</th>
                                         <th>Statut</th>
                                         <th>Action</th>
@@ -184,21 +185,14 @@
                                                 >
                                             </div>
                                         </th>
-                                        <td class="code"><a href="#" class="fw-medium link-primary">{{item.codenature}}</a></td>
+                                        <td class="code"><a href="#" class="fw-medium link-primary">{{item.codebanque}}</a></td>
                                         <td class="libelle">{{item.libelle}}</td>
-                                        <!-- <td class="decajustifier">
-                                            <span *ngIf="item.decajustifier == 1"> Oui </span>
-                                            <span *ngIf="item.decajustifier == 0"> Non </span>
-                                        </td>
-                                        <td class="imputationtiers">
-                                            <span *ngIf="item.imputationtiers == 1"> Oui </span>
-                                            <span *ngIf="item.imputationtiers == 0"> Non </span>
-                                        </td> -->
-                                        <td class="demandec">
-                                            <span *ngIf="item.demandedecaissement == 1"> Oui </span>
-                                            <span *ngIf="item.demandedecaissement == 0"> Non </span>
-                                        </td>
-                                        <td class="typeoperation">{{item.typeoperation}}</td>
+                                        <!-- <td class="numerocompte">{{item.numerocompte}}</td>
+                                        <td class="iban">{{item.iban}}</td>
+                                        <td class="swift">{{item.swift}}</td>
+                                        <td class="solde_initial">{{item.solde_initial}}</td>
+                                        <td class="solde_actuel">{{item.solde_actuel}}</td> -->
+
                                         <td class="compte">{{item.compte?.numcompte}}</td>
 
                                         <td class="status">
@@ -259,56 +253,78 @@
                     </div>
                 </div>
 
-                <!-- Création d'une nouvelle nature d'opération OK -->
+                <!-- Création d'une nouvelle banque d'opération OK -->
                 <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header bg-light p-3">
-                                <h5 class="modal-title" id="exampleModalLabel">{{ actionModal === "create" ? 'Créer' : 'Modifier'}} une nature d'opération</h5>
+                                <h5 class="modal-title" id="exampleModalLabel">{{ actionModal === "create" ? 'Créer' : 'Modifier'}} une banque d'opération</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
                             </div>
                             
-                            <form [formGroup]="natureoperationForm">
+                            <form [formGroup]="banqueForm">
                                 <div class="modal-body">
                                     <input type="hidden" id="id-field"/>
 
-                                    <div class="mb-3" id="modal-id">
-                                        <label for="orderId" class="form-label form-label-sm">Code</label>
-                                        <input type="text" id="orderId" class="form-control form-control-sm {{ isValidField('codenature')}}" formControlName="codenature" placeholder="" required maxlength="10"/>
+                                    <div class="row">
+                                        <div class="col-md-3 col-sm-3">
+                                            <div class="mb-3" id="modal-id">
+                                                <label for="orderId" class="form-label form-label-sm">Code</label>
+                                                <input type="text" id="orderId" class="form-control form-control-sm {{ isValidField('codebanque')}}" formControlName="codebanque" placeholder="" required maxlength="5"/>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-9 col-sm-9">
+                                            <div class="mb-3">
+                                                <label for="customername-field" class="form-label form-label-sm">Libellé</label>
+                                                <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('libelle')}}" formControlName="libelle" placeholder="Libellé banque"/>
+                                                <div class="invalid-feedback">{{ msgErros }}</div>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div class="mb-3">
-                                        <label for="customername-field" class="form-label form-label-sm">Libellé</label>
-                                        <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('libelle')}}" formControlName="libelle" placeholder="Libellé nature"/>
-                                        <div class="invalid-feedback">{{ msgErros }}</div>
+
+
+                                    <div class="row">
+                                        <div class="col-md-7 col-sm-7">
+                                            <div class="mb-3">
+                                                <label for="customername-field" class="form-label form-label-sm">N° Compte bancaire</label>
+                                                <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('numerocompte')}}" formControlName="numerocompte" placeholder="XXXX XXXX XXXX XXXX"/>
+                                                <div class="invalid-feedback">{{ msgErros }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5 col-sm-5">
+                                            <div class="mb-3">
+                                                <label for="customername-field" class="form-label form-label-sm">Devise</label>
+                                                <div class="input-light">
+                                                    <select id="customername-field" class="form-control form-control-sm" formControlName="iddevise">
+                                                        <option value="">-- Sélectionner --</option>
+                                                        @for ( item of devises; track $index ) {
+                                                        <option [value]="item.iddevise">{{ item.codedevise }} - {{ item.intitule }}</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                                <div class="invalid-feedback">{{ msgErros }}</div>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div class="mb-3 form-check">
-                                        <input type="checkbox" id="decajustifier" class="form-check-input {{ isValidField('decajustifier') }}" formControlName="decajustifier">
-                                        <label for="decajustifier" class="form-check-label form-label-sm">Décaissement à justifier</label>
-                                        <div class="invalid-feedback">{{ msgErros }}</div>
-                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6">
+                                            <div class="mb-3">
+                                                <label for="customername-field" class="form-label form-label-sm">IBAN</label>
+                                                <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('iban')}}" formControlName="iban" placeholder="IBAN"/>
+                                                <div class="invalid-feedback">{{ msgErros }}</div>
+                                            </div>
+                                        </div>
 
-                                    <div class="mb-3 form-check">
-                                        <input type="checkbox" id="imputationtiers" class="form-check-input {{ isValidField('imputationtiers') }}" formControlName="imputationtiers">
-                                        <label for="imputationtiers" class="form-check-label form-label-sm">Imputation tiers</label>
-                                        <div class="invalid-feedback">{{ msgErros }}</div>
-                                    </div>
-
-                                    <div class="mb-3 form-check">
-                                        <input type="checkbox" id="demandedecaissement" class="form-check-input {{ isValidField('demandedecaissement') }}" formControlName="demandedecaissement">
-                                        <label for="demandedecaissement" class="form-check-label form-label-sm">Demande de décaissement</label>
-                                        <div class="invalid-feedback">{{ msgErros }}</div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="customername-field" class="form-label form-label-sm">Type opération</label>
-                                        <select id="customername-field" class="form-control form-control-sm {{ isValidField('typeoperation') }}" formControlName="typeoperation">
-                                            <option value="">-- Sélectionner --</option>
-                                            <option value="Encaissement">Encaissement</option>
-                                            <option value="Decaissement">Décaissement</option>
-                                        </select>
-                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                        <div class="col-md-6 col-sm-6">
+                                            <div class="mb-3">
+                                                <label for="customername-field" class="form-label form-label-sm">SWIFT</label>
+                                                <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('swift')}}" formControlName="swift" placeholder="SWIFT"/>
+                                                <div class="invalid-feedback">{{ msgErros }}</div>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div class="mb-3">
@@ -316,17 +332,55 @@
                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                     </div>
 
-                                    <div class="mb-3">
-                                        <label for="customername-field" class="form-label form-label-sm">Compte</label>
-                                        <div class="input-light">
-                                            <select id="customername-field" class="form-control form-control-sm" formControlName="idcompte">
-                                                <option value="">-- Sélectionner --</option>
-                                                @for ( item of comptes; track $index ) {
-                                                <option [value]="item.idcompte">{{ item.numcompte }} - {{ item.libelle }}</option>
-                                                }
-                                            </select>
+                                    <div class="row">
+                                        <div class="col-md-4 col-sm-4">
+                                            <div class="mb-3" id="modal-id">
+                                                <label for="orderId" class="form-label form-label-sm">Solde initial</label>
+                                                <input type="text" formControlName="solde_initial" class="form-control form-control-sm bg-light border-0 {{ isValidField('solde_initial')}}"  placeholder=""/>
+                                                <div class="invalid-feedback">{{ msgErros }}</div>
+                                            </div>
                                         </div>
-                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                        <div class="col-md-4 col-sm-4">
+                                            <div class="mb-3" id="modal-id">
+                                                <div class="mb-3" id="modal-id">
+                                                    <label for="orderId" class="form-label form-label-sm">Solde actuel</label>
+                                                    <input type="text" formControlName="solde_actuel" class="form-control form-control-sm bg-light border-0 {{ isValidField('solde_actuel')}}"  placeholder=""/>
+                                                    <div class="invalid-feedback">{{ msgErros }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6">
+                                            <div class="mb-3">
+                                                <label for="customername-field" class="form-label form-label-sm">Compte</label>
+                                                <div class="input-light">
+                                                    <select id="customername-field" class="form-control form-control-sm" formControlName="idcompte">
+                                                        <option value="">-- Sélectionner --</option>
+                                                        @for ( item of comptes; track $index ) {
+                                                        <option [value]="item.idcompte">{{ item.numcompte }} - {{ item.libelle }}</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                                <div class="invalid-feedback">{{ msgErros }}</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6 col-sm-6">
+                                            <div class="mb-3">
+                                                <label for="customername-field" class="form-label form-label-sm">Site</label>
+                                                <div class="input-light">
+                                                    <select id="customername-field" class="form-control form-control-sm" formControlName="idsite">
+                                                        <option value="">-- Sélectionner --</option>
+                                                        @for ( item of sites; track $index ) {
+                                                        <option [value]="item.idsite">{{ item.codesite }} - {{ item.libelle }}</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                                <div class="invalid-feedback">{{ msgErros }}</div>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div class="mb-3">
@@ -357,7 +411,7 @@
                         <div class="modal-content">
                             <div class="modal-body p-5 text-center">
                                 <div class="mt-4 text-center">
-                                    <h4>{{titleMsg}} de {{deleteNatureoperation?.codenature}} : {{deleteNatureoperation?.libelle}}</h4>
+                                    <h4>{{titleMsg}} de {{deletebanque?.codebanque}} : {{deletebanque?.libelle}}</h4>
                                     <p class="text-muted fs-15 mb-4">{{msgSup}}</p>
                                     <div class="hstack gap-2 justify-content-center remove">
                                         <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal">

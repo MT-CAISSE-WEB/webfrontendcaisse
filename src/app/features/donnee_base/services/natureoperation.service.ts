@@ -73,4 +73,12 @@ export class NatureoperationService {
     return this.http.post<any>(URL_LOCAL.baseUrl + this.url + '/import', formData);
   }
 
+
+  exportNatures(data: any) {
+    return this.http.post(URL_LOCAL.baseUrl + this.url + '/export',
+      data,
+      { responseType: 'blob' }
+    );
+  }
+
 }

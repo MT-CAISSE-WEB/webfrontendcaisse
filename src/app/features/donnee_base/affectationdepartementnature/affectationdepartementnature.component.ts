@@ -386,4 +386,35 @@ export class AffectationDepartementNatureComponent implements OnInit{
     this.selectedRight = [];
     this.departementForm.reset();
   }
+
+
+  exportData = {
+    debut: null,
+    fin: null,
+    format: 'excel'
+};
+
+  exporter() {
+    this.AffectationDepartementNatureService.exportAffectations(this.exportData).subscribe({
+      next: (blob: Blob) => {
+
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+
+        a.download = this.exportData.format === 'pdf'
+          ? 'Liste_banques.pdf'
+          : 'Liste_banques.xlsx';
+
+        a.click();
+
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.toastr.error("Erreur export");
+      }
+    });
+  }
+
 }
