@@ -7,20 +7,17 @@ import { Injectable } from '@angular/core';
 @Injectable({
   providedIn: 'root',
 })
-export class StatsbudgetValideService {
-  url: string = 'statsbudget/budget-valide';
+export class MouvementsCaisseService {
+  url: string = 'mouvements-caisse/caisse-mensuelle';
 
   constructor(private http: HttpClient) {}
 
-  getBudgetValide(
+  getMouvementsCaisse(
     idsociete: string,
-    idsite?: string,
+    idsite: string,
   ): Observable<QueryResultModel> {
     let params = new HttpParams().set('idsociete', idsociete);
-
-    if (idsite) {
-      params = params.set('idsite', idsite);
-    }
+    params = params.set('idsite', idsite);
 
     return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url, {
       params,

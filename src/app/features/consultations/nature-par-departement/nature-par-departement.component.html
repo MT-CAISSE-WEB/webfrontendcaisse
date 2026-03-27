@@ -29,7 +29,7 @@
         <div class="row">
           <div echarts [options]="options"></div>
         </div>
-        <div class="row">
+        <div class="row align-items-center">
           <div class="col-md-6">
             <div
               echarts
@@ -38,27 +38,53 @@
             ></div>
           </div>
           <div class="col-md-6">
-            <div
-              echarts
-              [options]="chartmontantbyDept"
-              style="height: 400px"
-            ></div>
+            @if (montantByDeptTab.length === 0) {
+              <div class="text-center">
+                <h4 class="mt-2 fw-bold">Montant par département</h4>
+                Aucune donnée disponible pour cette année
+              </div>
+            } @else {
+              <div
+                echarts
+                [options]="chartmontantbyDept"
+                style="height: 400px"
+              ></div>
+            }
           </div>
         </div>
-        <div class="row">
+        <div class="row" style="margin-top: 50px">
           <div class="col-md-6">
-            <div
-              echarts
-              [options]="chartBudgetAnnuel"
-              style="height: 400px"
-            ></div>
+            @if (budgetAnnuelValideTab.length === 0) {
+              <div class="text-center" style="height: 400px">
+                <h4 class="mt-2 fw-bold">Budget annuel {{ anneeCourante }}</h4>
+                Aucune donnée disponible pour cette année
+              </div>
+            } @else {
+              <div
+                echarts
+                [options]="chartBudgetAnnuel"
+                style="height: 400px"
+              ></div>
+            }
           </div>
           <div class="col-md-6">
-            <div
-              echarts
-              [options]="chartBudgetMensuel"
-              style="height: 400px"
-            ></div>
+            @if (budgetMensuelValideTab.length === 0) {
+              <div class="text-center" style="height: 400px">
+                <h4 class="mt-2 fw-bold">Budgets mensuels</h4>
+                Aucune donnée disponible pour cette année
+              </div>
+            } @else {
+              <div
+                echarts
+                [options]="chartBudgetMensuel"
+                style="height: 400px"
+              ></div>
+            }
+          </div>
+        </div>
+        <div class="row mt-5">
+          <div *ngFor="let option of chartCaisseOptions" class="mb-5">
+            <div echarts [options]="option" class="h-400"></div>
           </div>
         </div>
       </div>

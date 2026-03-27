@@ -7,6 +7,7 @@ import { NgxEchartsDirective } from 'ngx-echarts';
 import { StatsDemandeByStatusService } from '../services/demandebystatus.service';
 import { StatsbudgetValideService } from '../services/budgetvalide.service';
 import { StatsMontantbyDeptService } from '../services/montantByDept.service';
+import { MouvementsCaisseService } from '../services/mouvementcaisse.service';
 
 @Component({
   selector: 'app-nature-par-departement',
@@ -34,6 +35,12 @@ export class NatureOperationByDepartementComponent implements OnInit {
   chartBudgetAnnuel: any = {};
   chartmontantbyDept: any = {};
   chartBudgetMensuel: any = {};
+  chartCaisseOptions: any[] = [];
+  montantByDeptTab: any = [];
+  budgetAnnuelValideTab: any = [];
+  budgetMensuelValideTab: any = [];
+  anneeCourante: number = new Date().getFullYear();
+
   options: any = {};
 
   constructor(
@@ -41,13 +48,15 @@ export class NatureOperationByDepartementComponent implements OnInit {
     private statsDemandeByStatusService: StatsDemandeByStatusService,
     private statsbudgetValideService: StatsbudgetValideService,
     private statsMontantbyDeptService: StatsMontantbyDeptService,
+    private statsMouvementsCaisseService: MouvementsCaisseService,
   ) {}
 
   ngOnInit(): void {
     this.getAllStatsDeptNature();
     this.loadStatsDemandeParStatus();
-    this.loadBudgetAnnuel(this.user.idsociete);
+    this.loadBudgetAnnuel();
     this.loadMontantByDept();
+    this.loadStatsMouvementsCaisse();
   }
 
   // récupération du current user
@@ -58,333 +67,486 @@ export class NatureOperationByDepartementComponent implements OnInit {
   getAllStatsDeptNature() {
     this.loading = true;
 
-    this.statsDeptNaureService.getStatsDeptNature().subscribe({
-      next: (res: any) => {
-        if (res.success) {
-          this.statsDeptNature = res.data as ConsultationStatsDeptNatureModel[];
+    this.statsDeptNaureService
+      .getStatsDeptNature(this.user.idsociete, this.user.idsite)
+      .subscribe({
+        next: (res: any) => {
+          console.log('mvts caisse:', res);
+          if (res.success) {
+            this.statsDeptNature =
+              res.data as ConsultationStatsDeptNatureModel[];
 
-          this.departement = [];
-          this.totalNbreNatures = [];
-          this.naturesUtilisees = [];
-          this.tauxConsommation = [];
-          this.naturesAffectees = [];
-          this.naturesUtiliseesLibelle = [];
+            this.departement = [];
+            this.totalNbreNatures = [];
+            this.naturesUtilisees = [];
+            this.tauxConsommation = [];
+            this.naturesAffectees = [];
+            this.naturesUtiliseesLibelle = [];
 
-          this.statsDeptNature.forEach(
-            (item: ConsultationStatsDeptNatureModel) => {
-              this.departement.push(item.libelle);
-              this.totalNbreNatures.push(Number(item.totalNatures));
-              this.naturesUtilisees.push(Number(item.naturesUtilisees));
-              this.tauxConsommation.push(Number(item.tauxConsommation));
-              this.naturesAffectees.push(item.naturesAffectees);
-              this.naturesUtiliseesLibelle.push(item.naturesUtiliseesLibelle);
-            },
-          );
+            this.statsDeptNature.forEach(
+              (item: ConsultationStatsDeptNatureModel) => {
+                this.departement.push(item.libelle);
+                this.totalNbreNatures.push(Number(item.totalNatures));
+                this.naturesUtilisees.push(Number(item.naturesUtilisees));
+                this.tauxConsommation.push(Number(item.tauxConsommation));
+                this.naturesAffectees.push(item.naturesAffectees);
+                this.naturesUtiliseesLibelle.push(item.naturesUtiliseesLibelle);
+              },
+            );
 
-          this.options = {
-            title: { text: 'Taux de consommation des natures par département' },
+            this.options = {
+              title: {
+                text: 'Taux de consommation des natures par département',
+              },
 
-            tooltip: {
-              trigger: 'axis',
-            },
+              tooltip: {
+                trigger: 'axis',
+              },
 
-            legend: {
-              data: [
-                'Nbre natures affectées',
-                'Nbre natures utilisées',
-                'Taux (%)',
+              legend: {
+                data: [
+                  'Nbre natures affectées',
+                  'Nbre natures utilisées',
+                  'Taux (%)',
+                ],
+              },
+
+              grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true,
+              },
+
+              xAxis: {
+                type: 'category',
+                data: this.departement,
+              },
+
+              yAxis: [
+                {
+                  type: 'value',
+                  name: 'Nombre',
+                },
+                {
+                  type: 'value',
+                  name: 'Taux (%)',
+                  min: 0,
+                  max: 100,
+                },
               ],
-            },
 
-            grid: {
-              left: '3%',
-              right: '4%',
-              bottom: '3%',
-              containLabel: true,
-            },
+              series: [
+                {
+                  name: 'Nbre natures affectées',
+                  type: 'bar',
+                  data: this.totalNbreNatures,
+                },
+                {
+                  name: 'Nbre natures utilisées',
+                  type: 'bar',
+                  data: this.naturesUtilisees,
+                },
+                {
+                  name: 'Taux (%)',
+                  type: 'line',
+                  yAxisIndex: 1,
+                  data: this.tauxConsommation,
+                },
+              ],
+            };
 
-            xAxis: {
-              type: 'category',
-              data: this.departement,
-            },
+            this.loading = false;
+          }
+        },
 
-            yAxis: [
-              {
-                type: 'value',
-                name: 'Nombre',
-              },
-              {
-                type: 'value',
-                name: 'Taux (%)',
-                min: 0,
-                max: 100,
-              },
-            ],
-
-            series: [
-              {
-                name: 'Nbre natures affectées',
-                type: 'bar',
-                data: this.totalNbreNatures,
-              },
-              {
-                name: 'Nbre natures utilisées',
-                type: 'bar',
-                data: this.naturesUtilisees,
-              },
-              {
-                name: 'Natures affectées',
-                type: 'bar',
-                data: this.naturesAffectees,
-              },
-              {
-                name: 'Natures utilisées',
-                type: 'bar',
-                data: this.naturesUtiliseesLibelle,
-              },
-              {
-                name: 'Taux (%)',
-                type: 'line',
-                yAxisIndex: 1,
-                data: this.tauxConsommation,
-              },
-            ],
-          };
-
+        error: (err: any) => {
+          this.msgErros = err.error?.error;
           this.loading = false;
-        }
-      },
-      error: (err: any) => {
-        this.msgErros = err.error?.error;
-        this.loading = false;
-      },
-    });
+        },
+      });
   }
 
   // Stats des demandes par statut
   loadStatsDemandeParStatus() {
-    this.statsDemandeByStatusService.getDemandesParStatut().subscribe({
-      next: (res: any) => {
-        if (res.success) {
-          const data = res.data.map((item: any) => {
-            let color = '#605DF5';
-            if (item.libelleStatut === 'rejeté') {
-              color = '#D94021'; // rouge foncé
-            }
+    let idsite: string | undefined = undefined;
 
-            return {
-              name: item.typedemande + ' (' + item.libelleStatut + ')',
-              value: parseInt(item.total),
-              itemStyle: { color: color },
-            };
-          });
+    /**
+     * PRIORITÉ : SOCIÉTÉ
+     * si l'utilisateur est au niveau société
+     * on ignore complètement le site
+     */
+    if (this.user.typeentitesociete !== 1) {
+      /**
+       * utilisateur limité au site
+       */
+      if (this.user.typeentitesite === 1) {
+        idsite = this.user.idsite;
+      }
+    }
+    this.statsDemandeByStatusService
+      .getDemandesParStatut(this.user.idsociete, idsite)
+      .subscribe({
+        next: (res: any) => {
+          if (res.success) {
+            const data = res.data.map((item: any) => {
+              let color = '#605DF5';
+              if (item.libelleStatut === 'rejeté') {
+                color = '#D94021'; // rouge foncé
+              } else {
+                color = '#FFA500'; // orange
+              }
 
-          this.chartDmdByStatusOption = {
-            title: {
-              text: 'Demandes par statut',
-            },
-            tooltip: {
-              trigger: 'item',
-              formatter: '{a} <br/>{b} : {c} ({d}%)',
-            },
-            legend: {
-              bottom: 0,
-            },
-            toolbox: {
-              show: true,
-              feature: {
-                mark: { show: true },
-                dataView: { show: true, readOnly: false },
-                restore: { show: true },
-                saveAsImage: { show: true },
+              return {
+                name: item.typedemande + ' (' + item.libelleStatut + ')',
+                value: parseInt(item.total),
+                itemStyle: { color: color },
+              };
+            });
+
+            this.chartDmdByStatusOption = {
+              title: {
+                text: 'Demandes par statut',
               },
-            },
-            series: [
-              {
-                name: 'Demandes',
-                type: 'pie',
-                radius: [20, 140],
-                center: ['25%', '50%'],
-                roseType: 'radius',
-                itemStyle: {
-                  borderRadius: 5,
+              tooltip: {
+                trigger: 'item',
+                formatter: '{a} <br/>{b} : {c} ({d}%)',
+              },
+              legend: {
+                bottom: 0,
+              },
+              toolbox: {
+                show: true,
+                feature: {
+                  mark: { show: true },
+                  dataView: { show: true, readOnly: false },
+                  restore: { show: true },
+                  saveAsImage: { show: true },
                 },
-                label: {
-                  show: false,
-                },
-                emphasis: {
-                  label: {
-                    show: true,
+              },
+              series: [
+                {
+                  name: 'Demandes',
+                  type: 'pie',
+                  radius: [20, 140],
+                  center: ['25%', '50%'],
+                  roseType: 'radius',
+                  itemStyle: {
+                    borderRadius: 5,
                   },
+                  label: {
+                    show: false,
+                  },
+                  emphasis: {
+                    label: {
+                      show: true,
+                    },
+                  },
+                  data: data,
                 },
-                data: data,
+              ],
+            };
+          }
+        },
+        error: (err: any) => {
+          this.msgErros = err.error.error;
+          console.log(this.msgErros);
+        },
+      });
+  }
+
+  // Mouvements caisse
+  loadStatsMouvementsCaisse() {
+    this.statsMouvementsCaisseService
+      .getMouvementsCaisse(this.user.idsociete, this.user.idsite)
+      .subscribe({
+        next: (res: any) => {
+          if (res.success) {
+            const stats = res.data;
+
+            /**
+             * 🔥 Grouper par caisse
+             */
+            const groupedByCaisse: any = {};
+
+            stats.forEach((item: any) => {
+              if (!groupedByCaisse[item.idcaisse]) {
+                groupedByCaisse[item.idcaisse] = {
+                  libelle: item.libellecaisse,
+                  jours: [],
+                  entrees: [],
+                  sorties: [],
+                  soldes: [],
+                };
+              }
+
+              groupedByCaisse[item.idcaisse].jours.push(item.jour);
+              groupedByCaisse[item.idcaisse].entrees.push(
+                parseFloat(item.total_entrees),
+              );
+              groupedByCaisse[item.idcaisse].sorties.push(
+                parseFloat(item.total_sorties),
+              );
+              groupedByCaisse[item.idcaisse].soldes.push(
+                parseFloat(item.solde_reel),
+              );
+            });
+
+            /**
+             * 🔥 Construire les graphes
+             */
+            this.chartCaisseOptions = Object.keys(groupedByCaisse).map(
+              (key: any) => {
+                const caisse = groupedByCaisse[key];
+
+                return {
+                  title: {
+                    text: `Mouvements - ${caisse.libelle}`,
+                    left: 'center',
+                  },
+                  tooltip: {
+                    trigger: 'axis',
+                  },
+                  legend: {
+                    top: 30,
+                  },
+                  toolbox: {
+                    show: true,
+                    feature: {
+                      saveAsImage: { show: true },
+                    },
+                  },
+                  xAxis: {
+                    type: 'category',
+                    name: 'Jour',
+                    data: caisse.jours,
+                  },
+                  yAxis: {
+                    type: 'value',
+                    name: 'Montant',
+                  },
+                  series: [
+                    {
+                      name: 'Encaissement',
+                      type: 'bar',
+                      data: caisse.entrees,
+                    },
+                    {
+                      name: 'Décaissement',
+                      type: 'bar',
+                      data: caisse.sorties,
+                    },
+                    {
+                      name: 'Solde',
+                      type: 'line',
+                      data: caisse.soldes,
+                    },
+                  ],
+                };
               },
-            ],
-          };
-        }
-      },
-      error: (err: any) => {
-        this.msgErros = err.error.error;
-        console.log(this.msgErros);
-      },
-    });
+            );
+          }
+        },
+        error: (err: any) => {
+          this.msgErros = err.error?.error;
+          console.log(this.msgErros);
+        },
+      });
   }
 
   // Stats des demandes par statut
-  loadBudgetAnnuel(idsociete: string) {
-    this.statsbudgetValideService.getBudgetValide(idsociete).subscribe({
-      next: (res: any) => {
-        if (res.success) {
-          const totaux = res.data.totaux_annuels;
+  loadBudgetAnnuel() {
+    let idsite: string | undefined = undefined;
 
-          const previsionnel = Number(totaux.total_previsionnel);
-          const consomme = Number(totaux.total_consomme);
-          const restant = previsionnel - consomme;
-          const taux = Number(totaux.taux_consommation_annuel);
-          const devise = this.user.devise_ref_code;
+    /**
+     * PRIORITÉ : SOCIÉTÉ
+     * si l'utilisateur est au niveau société
+     * on ignore complètement le site
+     */
+    if (this.user.typeentitesociete !== 1) {
+      /**
+       * utilisateur limité au site
+       */
+      if (this.user.typeentitesite === 1) {
+        idsite = this.user.idsite;
+      }
+    }
+    this.statsbudgetValideService
+      .getBudgetValide(this.user.idsociete, idsite)
+      .subscribe({
+        next: (res: any) => {
+          if (res.success) {
+            const totaux = res.data.totaux_annuels;
+            this.budgetAnnuelValideTab = totaux;
 
-          const mois = res.data.budgets_mensuels.map((m: any) => m.mois_nom);
-          const tauxMensuel = res.data.budgets_mensuels.map(
-            (m: any) => m.taux_consommation,
-          );
+            const previsionnel = Number(totaux.total_previsionnel);
+            const consomme = Number(totaux.total_consomme);
+            const restant = previsionnel - consomme;
+            const taux = Number(totaux.taux_consommation_annuel);
+            const devise = this.user.devise_ref_code;
 
-          this.chartBudgetMensuel = {
-            title: { text: 'Taux mensuel (%)' },
-            tooltip: { trigger: 'axis' },
-            xAxis: { type: 'category', data: mois },
-            yAxis: { type: 'value', max: 100 },
-            series: [
-              {
-                type: 'bar',
-                data: tauxMensuel,
-              },
-            ],
-          };
+            const mois = res.data.budgets_mensuels.map((m: any) => m.mois_nom);
+            this.budgetMensuelValideTab = mois;
+            const tauxMensuel = res.data.budgets_mensuels.map(
+              (m: any) => m.taux_consommation,
+            );
 
-          this.chartBudgetAnnuel = {
-            title: {
-              text: `Consommation annuelle ${res.data.annee}`,
-              left: 'center',
-            },
-
-            tooltip: {
-              trigger: 'item',
-              formatter: (params: any) => {
-                const value = params.value.toLocaleString('fr-FR');
-                return `${params.name}<br/>${value}`;
-              },
-            },
-
-            legend: {
-              bottom: 0,
-            },
-
-            series: [
-              {
-                name: 'Budget annuel',
-                type: 'pie',
-                radius: ['50%', '75%'], // Donut
-
-                label: {
-                  formatter: '{b}\n{d}%',
+            this.chartBudgetMensuel = {
+              title: { text: 'Taux mensuel (%)' },
+              tooltip: { trigger: 'axis' },
+              xAxis: { type: 'category', data: mois },
+              yAxis: { type: 'value', max: 100 },
+              series: [
+                {
+                  type: 'bar',
+                  data: tauxMensuel,
                 },
+              ],
+            };
 
-                data: [
-                  {
-                    name: 'Consommé',
-                    value: consomme,
-                    itemStyle: { color: '#28a745' }, // vert
-                    tooltip: {
-                      trigger: 'item',
-                      formatter: (params: any) => {
-                        return `${params.value} ${devise}`;
+            this.chartBudgetAnnuel = {
+              title: {
+                text: `Consommation annuelle ${res.data.annee}`,
+                left: 'center',
+              },
+
+              tooltip: {
+                trigger: 'item',
+                formatter: (params: any) => {
+                  const value = params.value.toLocaleString('fr-FR');
+                  return `${params.name}<br/>${value}`;
+                },
+              },
+
+              legend: {
+                bottom: 0,
+              },
+
+              series: [
+                {
+                  name: 'Budget annuel',
+                  type: 'pie',
+                  radius: ['50%', '75%'], // Donut
+
+                  label: {
+                    formatter: '{b}\n{d}%',
+                  },
+
+                  data: [
+                    {
+                      name: 'Consommé',
+                      value: consomme,
+                      itemStyle: { color: '#28a745' }, // vert
+                      tooltip: {
+                        trigger: 'item',
+                        formatter: (params: any) => {
+                          return `${params.value} ${devise}`;
+                        },
                       },
                     },
-                  },
-                  {
-                    name: 'Restant',
-                    value: restant,
-                    itemStyle: { color: '#dc3545' }, // rouge
-                    tooltip: {
-                      trigger: 'item',
-                      formatter: (params: any) => {
-                        return `${params.value} ${devise}`;
+                    {
+                      name: 'Restant',
+                      value: restant,
+                      itemStyle: { color: '#dc3545' }, // rouge
+                      tooltip: {
+                        trigger: 'item',
+                        formatter: (params: any) => {
+                          return `${params.value} ${devise}`;
+                        },
                       },
                     },
-                  },
-                ],
-              },
-            ],
+                  ],
+                },
+              ],
 
-            graphic: {
-              type: 'text',
-              left: 'center',
-              top: 'middle',
-              style: {
-                text: `${taux}%`,
-                fontSize: 22,
-                fontWeight: 'bold',
+              graphic: {
+                type: 'text',
+                left: 'center',
+                top: 'middle',
+                style: {
+                  text: `${taux}%`,
+                  fontSize: 22,
+                  fontWeight: 'bold',
+                },
               },
-            },
-          };
-        }
-      },
+            };
+          }
+        },
 
-      error: (err: any) => {
-        this.msgErros = err.error.error;
-        console.error(err);
-      },
-    });
+        error: (err: any) => {
+          this.msgErros = err.error.error;
+          console.error(err);
+        },
+      });
   }
 
   // Stats des montants par département
   loadMontantByDept() {
-    this.statsMontantbyDeptService.getMontantByDept().subscribe({
-      next: (res: any) => {
-        if (res.success) {
-          const data = res.data.map((item: any) => ({
-            name: item.libelleDepartement,
-            value: parseInt(item.total),
-          }));
+    let idsite: string | undefined = undefined;
 
-          const devise = this.user.devise_ref_code;
+    /**
+     * PRIORITÉ : SOCIÉTÉ
+     * si l'utilisateur est au niveau société
+     * on ignore complètement le site
+     */
+    if (this.user.typeentitesociete !== 1) {
+      /**
+       * utilisateur limité au site
+       */
+      if (this.user.typeentitesite === 1) {
+        idsite = this.user.idsite;
+      }
+    }
+    this.statsMontantbyDeptService
+      .getMontantByDept(this.user.idsociete, idsite)
+      .subscribe({
+        next: (res: any) => {
+          if (res.success) {
+            const data = res.data.map((item: any) => ({
+              name: item.libelleDepartement,
+              value: parseInt(item.total),
+            }));
 
-          this.chartmontantbyDept = {
-            title: { text: 'Montants par département' },
-            tooltip: {
-              trigger: 'item',
-              formatter: (params: any) => {
-                return `${params.name}: ${params.value} ${devise} (${params.percent}%)`;
+            this.montantByDeptTab = data;
+
+            const devise = this.user.devise_ref_code;
+
+            this.chartmontantbyDept = {
+              title: { text: 'Montants par département' },
+              tooltip: {
+                trigger: 'item',
+                formatter: (params: any) => {
+                  return `${params.name}: ${params.value} ${devise} (${params.percent}%)`;
+                },
               },
-            },
-            legend: { bottom: 0 },
-            series: [
-              {
-                name: 'Montant',
-                type: 'pie',
-                radius: ['40%', '70%'],
-                center: ['50%', '70%'],
-                startAngle: 180,
-                endAngle: 360,
-                label: {
-                  show: true,
-                  formatter: (params: any) => {
-                    return `${params.name}: ${params.value} ${devise}`;
+              legend: { bottom: 0 },
+              series: [
+                {
+                  name: 'Montant',
+                  type: 'pie',
+                  radius: ['40%', '70%'],
+                  center: ['50%', '70%'],
+                  startAngle: 180,
+                  endAngle: 360,
+                  label: {
+                    show: true,
+                    formatter: (params: any) => {
+                      return `${params.name}: ${params.value} ${devise}`;
+                    },
                   },
+                  emphasis: {
+                    label: { show: true, fontSize: 13, fontWeight: 'bold' },
+                  },
+                  data: data,
                 },
-                emphasis: {
-                  label: { show: true, fontSize: 13, fontWeight: 'bold' },
-                },
-                data: data,
-              },
-            ],
-          };
-        }
-      },
-      error: (err: any) => {
-        this.msgErros = err.error.error;
-        console.log(this.msgErros);
-      },
-    });
+              ],
+            };
+          }
+        },
+        error: (err: any) => {
+          this.msgErros = err.error.error;
+          console.log(this.msgErros);
+        },
+      });
   }
 }
