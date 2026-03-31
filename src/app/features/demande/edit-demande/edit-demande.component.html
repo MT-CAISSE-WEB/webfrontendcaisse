@@ -27,7 +27,7 @@
               <button type="button" class="btn btn-sm btn-soft-info"> <i class="ri-file-download-line align-bottom me-1"></i> import </button>
               <button type="button" class="btn btn-sm btn-info"> <i class="ri-refresh-fill align-bottom me-1"></i>actualiser </button>
               <button type="button" class="btn btn-sm btn-success" (click)="submit()"> <i class="bx bx-comment-check align-bottom me-1"></i> enregistrer</button>
-              <button type="button" class="btn btn-sm btn-primary" (click)="resetForm()"> <i class="ri-add-fill align-bottom me-1"></i></button>
+              <button *ngIf="title === 'Création'" type="button" class="btn btn-sm btn-primary" (click)="resetForm()"> <i class="ri-add-fill align-bottom me-1"></i></button>
             </div>
           </div>
         </div>
@@ -64,9 +64,6 @@
                 <select class="form-select form-select-sm bg-light {{ isValidField('typedemande')}}" formControlName="typedemande">
                   <option value="">-- Sélectionner --</option>
                   <option value="decaissement">Décaissement</option>
-                  <option value="approvisionnement">
-                    Approvisionnement
-                  </option>
                 </select>
               </div>
             </div>
@@ -84,24 +81,18 @@
               </div>
             </div>
 
-            <div class="col-lg-4 col-sm-4">
-              <div class="mb-3 bg-light">
-                <select class="form-select form-select-sm bg-light" formControlName="departement">
-                  <option value="">-- Sélectionner departement --</option>
-                  @for(item of departementUserFiltered; track $index){
-                    <option value="{{item.iddepartement! }}">{{item.codedept! }} - {{ item.libelle! }} </option>
-                  }
-                </select>
-                <!-- <app-custom-field-select #searchInput
-                    mode="backend"
-                    formControlName="departement"
-                    labelField="libelle"
-                    [columns]="columnscentre"
-                    placeholder="Selectionner un département..."
-                    (loadData)="searchDepartement($event)"
-                    [data]="departementUserFiltered">
-                </app-custom-field-select> -->
-              </div>
+            <div class="col-xxl-3 col-sm-4">
+                <div class="mb-3 bg-light">
+                    <input type="text" placeholder="Selectionner le departement" formControlName="departement"
+                            [matAutocomplete]="autoDepartement" class="form-select form-select-sm bg-light">
+                    <mat-autocomplete #autoDepartement="matAutocomplete" [displayWith]="displayDepartement" panelClass="small-autocomplete">
+                        @for (departement of filteredDepartements | async; track departement.iddepartement!) {
+                            <mat-option [value]="departement">
+                                {{departement.libelle!}}
+                            </mat-option>
+                        }
+                    </mat-autocomplete>
+                </div>
             </div>
 
             <div class="col-lg-2 col-sm-2">
@@ -110,15 +101,6 @@
                 <input type="number" class="form-control form-control-sm bg-light" formControlName="taux"/>
               </div>
             </div>
-
-            <!-- <div class="col-lg-2 col-sm-4">
-              <div class="mb-3">
-                <span *ngIf="demande.statut! == '0'" class="badge bg-primary-subtle text-primary"> non valide </span>
-                <span *ngIf="demande.statut! == '0'" class="badge bg-info-subtle text-info"> en cours </span>
-                <span *ngIf="demande.statut! == '0'" class="badge bg-dark-subtle text-body"> rejetée </span>
-                <span *ngIf="demande.statut! == '0'" class="badge bg-success-subtle text-success"> validée </span>
-              </div>
-            </div> -->
             
           </div>
 
@@ -156,36 +138,46 @@
                         <th scope="row" class="product-id">{{$index + 1}}</th>
                         <td class="text-start">
                           <div class="input-light">
-                            <select class="form-control form-control-sm bg-light border-0" formControlName="natureop" required>
-                                <option value="" selected>Choisir nature operation</option>
-                                @for(item of naturesBydepartements; track $index){
-                                    <option value="{{item.idnature}}"> {{item.libelle}} </option>
+                              <input type="text" formControlName="natureop" placeholder="Selectionner nature opération"
+                                    [matAutocomplete]="autoNature" class="form-control form-control-sm bg-light">
+
+                              <mat-autocomplete #autoNature="matAutocomplete" [displayWith]="displayNature">
+                                @for(item of ligneFilteredMap.get($index)?.natures | async; track item.idnature){
+                                  <mat-option [value]="item">
+                                    {{item.libelle}}
+                                  </mat-option>
                                 }
-                            </select>
+                              </mat-autocomplete>
+                              <div class="invalid-feedback">{{ msgErros }}</div>
                           </div>
                         </td>
                         <td class="text-start">
                           <div class="input-light">
-                            <select formControlName="centre" class="form-control form-control-sm bg-light border-0">
-                                <option value="" selected>Choisir centre analytique</option>
-                                <option *ngFor="let c of ligne.get('centres')?.value" [value]="c.idcentreanalytique">
-                                  {{ c.libelle }}
-                                </option>
-                                <!-- @for(item of centresBynatures; track $index){
-                                    <option value="{{item.idcentreanalytique}}"> {{item.libelle}} </option>
-                                } -->
-                            </select>
+                              <input type="text" formControlName="centre" placeholder="Selectionner centre analytique"
+                                      [matAutocomplete]="autoCentre" class="form-control form-control-sm bg-light">
+
+                                <mat-autocomplete #autoCentre="matAutocomplete" [displayWith]="displayCentre">
+                                  @for(item of ligneFilteredMap.get($index)?.centres | async; track item.idcentreanalytique){
+                                    <mat-option [value]="item">
+                                      {{item.libelle}}
+                                    </mat-option>
+                                  }
+                                </mat-autocomplete>
                             <div class="invalid-feedback">{{ msgErros }}</div>
                           </div>
                         </td>
                         <td class="text-start">
                           <div class="input-light">
-                            <select formControlName="tiers" class="form-control form-control-sm bg-light border-0">
-                                <option value="" selected>Choisir tiers</option>
-                                @for(item of tiers; track $index){
-                                    <option value="{{item.idtiers}}"> {{item.designation}} </option>
-                                }
-                            </select>
+                              <input type="text" formControlName="tiers" placeholder="Selectionner tiers"
+                                      [matAutocomplete]="autoTiers" class="form-control form-control-sm bg-light">
+
+                                <mat-autocomplete #autoTiers="matAutocomplete" [displayWith]="displayTiers">
+                                  @for(item of ligneFilteredMap.get($index)?.tiers | async; track item.idtiers){
+                                    <mat-option [value]="item">
+                                      {{item.designation}}
+                                    </mat-option>
+                                  }
+                                </mat-autocomplete>
                             <div class="invalid-feedback">{{ msgErros }}</div>
                           </div>
                         </td>

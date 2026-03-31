@@ -85,3 +85,13 @@
   /* valeur UX optimale */
   vertical-align: middle;
 }
+
+::ng-deep .small-autocomplete .mat-mdc-option {
+  font-size: 12px;
+  min-height: 30px;
+  line-height: 30px;
+}
+
+::ng-deep .small-autocomplete .mat-mdc-option .mdc-list-item__primary-text {
+  font-size: 12px;
+}

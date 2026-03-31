@@ -179,34 +179,36 @@
                         </thead><!-- end thead -->
                         <tbody>
                             @for(item of opLast; track $index){
-                                <tr class="fs-12">
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div>
-                                                <h6 class="fs-12 mb-0">{{item.piece!}}</h6>
+                                @for(element of item.caisses!; track element.codecaisse){
+                                    <tr class="fs-12">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div>
+                                                    <h6 class="fs-12 mb-0">{{item.piece!}}</h6>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td class="text-muted text-end">{{ formatCFA(item.montantop!)}}</td>
-                                    <td *ngIf="item.typeoperation == 'encaissement'">
-                                        <h6 class="text-success fs-13 mb-0">
-                                            <i class="mdi mdi-trending-up align-middle me-1"></i> {{ item.typeoperation!}} 
-                                        </h6>
-                                    </td>
-                                    <td *ngIf="item.typeoperation == 'decaissement'">
-                                        <h6 class="text-danger fs-13 mb-0">
-                                            <i class="mdi mdi-trending-down align-middle me-1"></i> {{ item.typeoperation!}} 
-                                        </h6>
-                                    </td>
-                                    <td *ngIf="item.typeoperation == 'decaissementaj'">
-                                        <h6 class="text-danger fs-13 mb-0">
-                                            <i class="mdi mdi-trending-down align-middle me-1"></i> decaissement à justifier 
-                                        </h6>
-                                    </td>
-                                    <td class="text-muted text-end"> {{ formatCFA(item.montant!)}}  {{ item.devise! }}</td>
-                                    <td class="text-muted text-end"> {{ formatCFA(item.montant_ref) }} {{user.devise_ref_code}}</td>
-                                    <td class="text-muted text-uppercase"> {{ formatDateFR(item.date!) }} </td>
-                                </tr><!-- end -->
+                                        </td>
+                                        <td class="text-muted text-end">{{ formatCFA(item.montantop!)}}  {{ item.deviseop! }}</td>
+                                        <td *ngIf="item.typeoperation == 'encaissement'">
+                                            <h6 class="text-success fs-13 mb-0">
+                                                <i class="mdi mdi-trending-up align-middle me-1"></i> {{ item.typeoperation!}} 
+                                            </h6>
+                                        </td>
+                                        <td *ngIf="item.typeoperation == 'decaissement'">
+                                            <h6 class="text-danger fs-13 mb-0">
+                                                <i class="mdi mdi-trending-down align-middle me-1"></i> {{ item.typeoperation!}} 
+                                            </h6>
+                                        </td>
+                                        <td *ngIf="item.typeoperation == 'decaissementaj'">
+                                            <h6 class="text-danger fs-13 mb-0">
+                                                <i class="mdi mdi-trending-down align-middle me-1"></i> decaissement à justifier 
+                                            </h6>
+                                        </td>
+                                        <td class="text-muted text-end"> {{ formatCFA(element.montant!)}}  {{ element.devise! }}</td>
+                                        <td class="text-muted text-end"> {{ formatCFA(element.montant_ref) }} {{user.devise_ref_code}}</td>
+                                        <td class="text-muted text-uppercase"> {{ formatDateFR(item.date!) }} </td>
+                                    </tr><!-- end -->
+                                }
                             }
                             
                         </tbody><!-- end tbody -->
@@ -279,11 +281,11 @@
                                         </p>
                                     </div>
                                     <div class="flex-shrink-0 text-end">
-                                        <h6 class="mb-1 text-muted" *ngIf="e.typeoperation == 'decaissement'">- {{ formatCFA(e.montant!)}} <span class="text-uppercase ms-1">{{ e.devise! }}</span></h6>
-                                        <p class="text-warning fs-13 mb-0" *ngIf="e.typeoperation == 'decaissement'">- {{ formatCFA(e.montant_ref) }} {{user.devise_ref_code}}</p>
+                                        <h6 class="mb-1 text-muted" *ngIf="e.typeoperation == 'decaissement'"></h6>
+                                        <p class="text-warning fs-13 mb-0" *ngIf="e.typeoperation == 'decaissement'">- {{ formatCFA(e.montant!)}} <span class="text-uppercase ms-1">{{ e.deviseop! }}</span> </p>
 
-                                        <h6 class="mb-1 text-success" *ngIf="e.typeoperation == 'encaissement'">+ {{ formatCFA(e.montant!)}} <span class="text-uppercase ms-1">{{ e.devise! }}</span></h6>
-                                        <p class="text-success fs-13 mb-0" *ngIf="e.typeoperation == 'encaissement'">+ {{ formatCFA(e.montant_ref) }} {{user.devise_ref_code}} </p>
+                                        <h6 class="mb-1 text-success" *ngIf="e.typeoperation == 'encaissement'"></h6>
+                                        <p class="text-success fs-13 mb-0" *ngIf="e.typeoperation == 'encaissement'">+ {{ formatCFA(e.montant!)}} <span class="text-uppercase ms-1">{{ e.deviseop! }}</span></p>
                                     </div>
                                 </div><!-- end -->
                             }

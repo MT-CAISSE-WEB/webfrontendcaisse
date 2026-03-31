@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ConsultationStatsDeptNatureService } from '../services/statsDeptnaure.service';
@@ -8,6 +8,8 @@ import { StatsDemandeByStatusService } from '../services/demandebystatus.service
 import { StatsbudgetValideService } from '../services/budgetvalide.service';
 import { StatsMontantbyDeptService } from '../services/montantByDept.service';
 import { MouvementsCaisseService } from '../services/mouvementcaisse.service';
+import { TopNatureOPService } from '../services/topNatureOP.service';
+import { TopCentreAnalytiqueService } from '../services/topCentreAnalytique.service';
 
 @Component({
   selector: 'app-nature-par-departement',
@@ -40,6 +42,11 @@ export class NatureOperationByDepartementComponent implements OnInit {
   budgetAnnuelValideTab: any = [];
   budgetMensuelValideTab: any = [];
   anneeCourante: number = new Date().getFullYear();
+  chartTopNatures: any;
+  topNaturesTab: any[] = [];
+
+  chartTopCentres: any;
+  topCentresTab: any[] = [];
 
   options: any = {};
 
@@ -49,6 +56,8 @@ export class NatureOperationByDepartementComponent implements OnInit {
     private statsbudgetValideService: StatsbudgetValideService,
     private statsMontantbyDeptService: StatsMontantbyDeptService,
     private statsMouvementsCaisseService: MouvementsCaisseService,
+    private statsTopNatureOPService: TopNatureOPService,
+    private statsTopCentreAnalytiqueService: TopCentreAnalytiqueService,
   ) {}
 
   ngOnInit(): void {
@@ -57,6 +66,8 @@ export class NatureOperationByDepartementComponent implements OnInit {
     this.loadBudgetAnnuel();
     this.loadMontantByDept();
     this.loadStatsMouvementsCaisse();
+    this.loadTopNatures();
+    this.loadTopCentres();
   }
 
   // récupération du current user
@@ -71,7 +82,6 @@ export class NatureOperationByDepartementComponent implements OnInit {
       .getStatsDeptNature(this.user.idsociete, this.user.idsite)
       .subscribe({
         next: (res: any) => {
-          console.log('mvts caisse:', res);
           if (res.success) {
             this.statsDeptNature =
               res.data as ConsultationStatsDeptNatureModel[];
@@ -193,8 +203,12 @@ export class NatureOperationByDepartementComponent implements OnInit {
               let color = '#605DF5';
               if (item.libelleStatut === 'rejeté') {
                 color = '#D94021'; // rouge foncé
+              } else if (item.libelleStatut === 'en attente') {
+                color = '#FFC107'; // jaune
+              } else if (item.libelleStatut === 'accepté') {
+                color = '#28A745'; // vert
               } else {
-                color = '#FFA500'; // orange
+                color = '#605DF5'; // orange
               }
 
               return {
@@ -250,7 +264,6 @@ export class NatureOperationByDepartementComponent implements OnInit {
         },
         error: (err: any) => {
           this.msgErros = err.error.error;
-          console.log(this.msgErros);
         },
       });
   }
@@ -273,6 +286,7 @@ export class NatureOperationByDepartementComponent implements OnInit {
               if (!groupedByCaisse[item.idcaisse]) {
                 groupedByCaisse[item.idcaisse] = {
                   libelle: item.libellecaisse,
+                  periode: item.periode,
                   jours: [],
                   entrees: [],
                   sorties: [],
@@ -301,7 +315,7 @@ export class NatureOperationByDepartementComponent implements OnInit {
 
                 return {
                   title: {
-                    text: `Mouvements - ${caisse.libelle}`,
+                    text: `Mouvements - ${caisse.libelle} (${caisse.periode})`,
                     left: 'center',
                   },
                   tooltip: {
@@ -349,7 +363,6 @@ export class NatureOperationByDepartementComponent implements OnInit {
         },
         error: (err: any) => {
           this.msgErros = err.error?.error;
-          console.log(this.msgErros);
         },
       });
   }
@@ -475,7 +488,6 @@ export class NatureOperationByDepartementComponent implements OnInit {
 
         error: (err: any) => {
           this.msgErros = err.error.error;
-          console.error(err);
         },
       });
   }
@@ -545,8 +557,216 @@ export class NatureOperationByDepartementComponent implements OnInit {
         },
         error: (err: any) => {
           this.msgErros = err.error.error;
-          console.log(this.msgErros);
         },
       });
+  }
+
+  loadTopNatures() {
+    this.statsTopNatureOPService
+      .getTopNatures(this.user.idsociete, this.user.idsite)
+      .subscribe({
+        next: (res: any) => {
+          if (res.success) {
+            const data = res.data.map((item: any) => ({
+              name: item.libelle,
+              value: item.total_utilisations,
+            }));
+
+            this.topNaturesTab = data;
+
+            this.buildChartTopNatures(data);
+          }
+        },
+        error: (err: any) => {
+          console.error(err);
+        },
+      });
+  }
+
+  buildChartTopNatures(data: any[]) {
+    if (!data || data.length === 0) {
+      this.chartTopNatures = {
+        title: {
+          text: 'Aucune donnée disponible',
+          left: 'center',
+          top: 'center',
+        },
+      };
+      return;
+    }
+    this.chartTopNatures = {
+      title: {
+        text: "Top 10 Natures d'opération les plus utilisées",
+        left: 'center',
+        top: 10,
+      },
+
+      tooltip: {
+        trigger: 'item',
+        formatter: (params: any) => {
+          return `
+          <b>${params.name}</b><br/>
+          Utilisations: ${params.value}<br/>
+          (${params.percent}%)
+        `;
+        },
+      },
+
+      legend: {
+        orient: 'horizontal',
+        bottom: 0,
+      },
+
+      color: [
+        '#3b82f6', // bleu
+        '#10b981', // vert
+        '#f59e0b', // orange
+        '#ef4444', // rouge
+        '#8b5cf6', // violet
+        '#14b8a6', // teal
+        '#f97316', // deep orange
+        '#6366f1',
+        '#22c55e',
+        '#eab308',
+      ],
+
+      series: [
+        {
+          name: 'Utilisations',
+          type: 'pie',
+
+          radius: ['45%', '75%'], // donut
+          center: ['50%', '60%'],
+
+          avoidLabelOverlap: true,
+
+          label: {
+            show: true,
+            formatter: (params: any) => {
+              return `${params.name}\n${params.value}`;
+            },
+          },
+
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: 14,
+              fontWeight: 'bold',
+            },
+          },
+
+          labelLine: {
+            show: true,
+          },
+
+          data: data,
+        },
+      ],
+    };
+  }
+
+  // top 10 centres analytique
+  loadTopCentres() {
+    this.statsTopCentreAnalytiqueService
+      .getTopCentres(this.user.idsociete, this.user.idsite)
+      .subscribe({
+        next: (res: any) => {
+          if (res.success) {
+            const data = res.data.map((item: any) => ({
+              name: item.libelle,
+              value: item.total_utilisations,
+            }));
+
+            this.topCentresTab = data;
+
+            this.buildChartTopCentres(data);
+          }
+        },
+        error: (err: any) => {
+          console.error(err);
+        },
+      });
+  }
+
+  buildChartTopCentres(data: any[]) {
+    if (!data || data.length === 0) {
+      this.chartTopCentres = {
+        title: {
+          text: 'Aucune donnée disponible',
+          left: 'center',
+          top: 'center',
+        },
+      };
+      return;
+    }
+    this.chartTopCentres = {
+      title: {
+        text: 'Top 10 centres les plus utilisés',
+        left: 'center',
+        top: 10,
+      },
+
+      tooltip: {
+        trigger: 'item',
+        formatter: (params: any) => {
+          return `
+          <b>${params.name}</b><br/>
+          Utilisations: ${params.value}<br/>
+          (${params.percent}%)
+        `;
+        },
+      },
+
+      legend: {
+        orient: 'horizontal',
+        bottom: 0,
+      },
+
+      color: [
+        '#3b82f6', // bleu
+        '#10b981', // vert
+        '#f59e0b', // orange
+        '#ef4444', // rouge
+        '#8b5cf6', // violet
+        '#14b8a6', // teal
+        '#f97316', // deep orange
+        '#6366f1',
+        '#22c55e',
+        '#eab308',
+      ],
+
+      series: [
+        {
+          name: 'Utilisations',
+          type: 'pie',
+
+          radius: ['45%', '75%'], // donut
+          center: ['50%', '60%'],
+
+          avoidLabelOverlap: true,
+
+          label: {
+            show: true,
+            formatter: (params: any) => {
+              return `${params.name}\n${params.value}`;
+            },
+          },
+
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: 14,
+              fontWeight: 'bold',
+            },
+          },
+
+          labelLine: {
+            show: true,
+          },
+
+          data: data,
+        },
+      ],
+    };
   }
 }
