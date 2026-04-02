@@ -370,7 +370,7 @@ export class BudgetComponent implements OnInit {
         libelle: ['', [Validators.required]],
         datedebut: ['', [Validators.required]],
         typebudget: ['', [Validators.required]],
-        entite: ['', [Validators.required]],
+        entite: [''],
         datefin: ['', [Validators.required]],
         idbudgetparent: [''],
         idsite: [this.user.idsite ?? null],
@@ -380,6 +380,7 @@ export class BudgetComponent implements OnInit {
         ],
         // createdby
         actif: [false],
+        isanalytique: [false],
       },
       {
         validators: this.budgetDateValidator(() => this.selectedBudgetParent),
@@ -403,6 +404,7 @@ export class BudgetComponent implements OnInit {
     this.budgetForm.patchValue({
       codebudget: _object.codebudget,
       libelle: _object.libelle,
+      isanalytique: _object.isanalytique,
       datedebut: this.formatDateForInput(_object.datedebut),
       typebudget: _object.typebudget,
       datefin: this.formatDateForInput(_object.datefin),
@@ -780,6 +782,7 @@ export class BudgetComponent implements OnInit {
       datedebut: formValue.datedebut,
       datefin: formValue.datefin,
       actif: formValue.actif ? 1 : 0,
+      isanalytique: formValue.isanalytique ? 1 : 0,
     };
 
     /** 3. choices action */
@@ -795,10 +798,9 @@ export class BudgetComponent implements OnInit {
         idsite: _budget.idsite,
         idsociete: _budget.idsociete,
         actif: formValue.actif,
+        isanalytique: formValue.isanalytique,
       });
     }
-    // if (!_journal.idjournal) this.create(_journal);
-    // else this.update(_journal);
   }
 
   //Enregistrement de données
@@ -852,10 +854,12 @@ export class BudgetComponent implements OnInit {
     modalEl?.classList.remove('show');
     modalEl?.setAttribute('aria-hidden', 'true');
     (document.querySelector('.modal-backdrop') as HTMLElement)?.remove();
+    this.selectedBudget = undefined;
   }
 
   modalCreate() {
     this.actionModal = 'create';
+    this.selectedBudget = undefined;
     this.initForm();
   }
 
@@ -868,13 +872,16 @@ export class BudgetComponent implements OnInit {
       (b) => b.idbudget === _object.idbudgetparent,
     );
 
-    this.dispatchBudget(_object);
+    this.selectedBudget = _object;
 
+    this.dispatchBudget(_object);
     /* 🔒 Désactivation */
     this.budgetForm.get('codebudget')?.disable({ emitEvent: false });
     this.budgetForm.get('typebudget')?.disable({ emitEvent: false });
     // Désactivation et masquage du circuit de validation
     this.budgetForm.get('idcircuitvalidation')?.disable({ emitEvent: false });
+    // Désactivation du paramètre analytique
+    this.budgetForm.get('isanalytique')?.disable({ emitEvent: false });
 
     this.budgetForm.markAllAsTouched();
     this.budgetForm.updateValueAndValidity();

@@ -29,6 +29,8 @@ import { MotifService } from '../services/motif.service';
 import { Motif } from '../models/motif.model';
 import { ValidateursBudget } from '../models/validateursbudget.model';
 import { ToastrService } from 'ngx-toastr';
+import { CentreAnalytiqueService } from '../../donnee_base/services/centreanalytique.service';
+import { centreanalytiqueModel } from '../../donnee_base/models/centreanalytique.model';
 
 @Component({
   selector: 'app-ligne-budget',
@@ -54,8 +56,9 @@ export class LigneBudgetComponent implements OnInit {
   loading: Boolean = false;
   ligneBudgetForm: FormGroup = this.fb.group({});
 
-  availableNatures: natureoperationModel[] = [];
+  availableNatures: any[] = [];
   motifs: Motif[] = [];
+  centreAnalytiques: centreanalytiqueModel[] = [];
 
   // Définissez des propriétés de pagination
   currentPage: number = 1;
@@ -92,9 +95,7 @@ export class LigneBudgetComponent implements OnInit {
 
   // MODE DE SAISIE
   modeSaisie = '';
-
   // Gestion progressive des natures
-
   allNatures: Array<{
     idnature: string;
     libelle: string;
@@ -104,6 +105,7 @@ export class LigneBudgetComponent implements OnInit {
   validationLines: Array<{
     departement: string;
     nature: string;
+    centre: string;
     montantDept: number;
     montantSite: number;
     montantSociete: number;
@@ -118,6 +120,7 @@ export class LigneBudgetComponent implements OnInit {
     private motifservice: MotifService,
     private toastr: ToastrService,
     private router: Router,
+    private centreAnalytiqueService: CentreAnalytiqueService,
   ) {}
 
   ngOnInit(): void {
@@ -130,6 +133,7 @@ export class LigneBudgetComponent implements OnInit {
     this.getAllLigneBudgets();
     this.getUserDepartement();
     this.getAllMotifs();
+    this.getAllCentreAnalytique();
 
     //Initialisation du formulaire
     this.initForm();
@@ -148,18 +152,97 @@ export class LigneBudgetComponent implements OnInit {
   }> = [];
 
   natureGrid: Array<{
-    idnature: string;
+    idnature: string | null;
     libelle: string;
 
     // ID de la ligne budgétaire existante (si présente)
     idbudgetdepartementnature?: string;
-
+    idcentreanalytique?: string | null;
+    iddepartement?: string | null;
     montantDept: number;
     montantSite: number;
     montantSociete: number;
   }> = [];
 
   validateursBudget: ValidateursBudget[] = [];
+
+  // Vérification si budget isanalytique
+  isAnalytique(): boolean {
+    return this.selectedBudget?.isanalytique === 1;
+  }
+
+  //
+
+  loadCentreAnalytiqueGrid() {
+    if (!this.selectedBudget) return;
+
+    const existingLines = this.ligneBudgetsSource.filter(
+      (l) => l.idbudget === this.selectedBudget!.idbudget,
+    );
+
+    console.log('existingLines', existingLines);
+
+    if (this.modeSaisie === 'ALL') {
+      this.natureGrid = this.centreAnalytiques.map((c) => {
+        const existing = existingLines.find(
+          (l) => l.idcentreanalytique === c.idcentreanalytique,
+        );
+
+        return {
+          idnature: null,
+          idcentreanalytique: c.idcentreanalytique,
+          libelle: c.libelle,
+          idbudgetdepartementnature: existing?.idbudgetdepartementnature,
+
+          montantDept: existing?.montantprevisiondept ?? 0,
+          montantSite: existing?.montantprevisionsite ?? 0,
+          montantSociete: existing?.montantprevisionsociete ?? 0,
+        };
+      });
+
+      return;
+    }
+
+    // MODE STEP
+    const usedIds = new Set(existingLines.map((l) => l.idcentreanalytique));
+
+    this.natureGrid = existingLines.map((l) => ({
+      idnature: null,
+      idcentreanalytique: l.idcentreanalytique,
+      iddepartement: null,
+      libelle: this.centreAnalytiques.find(
+        (c) => c.idcentreanalytique === l.idcentreanalytique,
+      )?.libelle as string,
+
+      idbudgetdepartementnature: l.idbudgetdepartementnature,
+
+      montantDept: l.montantprevisiondept ?? 0,
+      montantSite: l.montantprevisionsite ?? 0,
+      montantSociete: l.montantprevisionsociete ?? 0,
+    }));
+
+    this.availableNatures = this.centreAnalytiques
+      .filter((c) => !usedIds.has(c.idcentreanalytique))
+      .map((c) => ({
+        idcentreanalytique: c.idcentreanalytique, // ⚠️ on réutilise le champ
+        libelle: c.libelle,
+        iddepartement: '',
+      }));
+  }
+  getAllCentreAnalytique() {
+    this.centreAnalytiqueService.getAll().subscribe({
+      next: (res: any) => {
+        console.log('centres:', res);
+        if (res.success) {
+          this.centreAnalytiques = res.data as centreanalytiqueModel[];
+        }
+      },
+      error: (err) => {
+        console.error('Erreur récupération motifs', err);
+        this.msgErros = err.error.error;
+      },
+    });
+  }
 
   isDeptReadonly(): boolean {
     return true; // toujours grisé
@@ -237,13 +320,14 @@ export class LigneBudgetComponent implements OnInit {
           const lesbudgets = res.data as BudgetModel[];
           if (this.user.typeentitesociete === 1) {
             this.budgets = lesbudgets.filter(
-              (b) => b.idsociete === this.user.idsociete,
+              (b) => b.idsociete === this.user.idsociete && b.valide === 0,
             );
           } else {
             this.budgets = lesbudgets.filter(
               (b) =>
                 b.idsite === this.user.idsite &&
-                b.idsociete === this.user.idsociete,
+                b.idsociete === this.user.idsociete &&
+                b.valide === 0,
             );
           }
         }
@@ -314,6 +398,8 @@ export class LigneBudgetComponent implements OnInit {
           if (res.success) {
             const userDepartements: any[] = res.data[0];
 
+            console.log('Departements utilisateurs:', userDepartements);
+
             const allowedIds = new Set(
               userDepartements.map((item) => item.iddepartement),
             );
@@ -323,7 +409,10 @@ export class LigneBudgetComponent implements OnInit {
             );
             this.appartenanceDepartement = filteredDepartments;
 
-            console.log(filteredDepartments);
+            console.log(
+              'Departements utilisateurs filtrés:',
+              filteredDepartments,
+            );
           }
         },
         error: (err: any) => {
@@ -365,6 +454,7 @@ export class LigneBudgetComponent implements OnInit {
     this.allNatures = [];
     this.natureGrid = [];
     this.selectedNatureId = null;
+    this.selectedCentreId = null;
   }
 
   onDepartementChange(event?: any) {
@@ -379,6 +469,7 @@ export class LigneBudgetComponent implements OnInit {
     // Reset
     this.natureGrid = [];
     this.selectedNatureId = null;
+    this.selectedCentreId = null;
 
     // Mode ALL → on ajoute tout automatiquement
     if (this.modeSaisie === 'ALL') {
@@ -393,26 +484,48 @@ export class LigneBudgetComponent implements OnInit {
   }
 
   addSelectedNature() {
-    if (!this.selectedNatureId) return;
+    if (!this.isAnalytique() && !this.selectedNatureId) {
+      return;
+    }
 
-    const index = this.availableNatures.findIndex(
-      (n) => n.idnature === this.selectedNatureId,
-    );
+    let index: number;
+    if (this.isAnalytique()) {
+      index = this.availableNatures.findIndex(
+        (n) => n.idcentreanalytique === this.selectedCentreId,
+      );
+    } else {
+      index = this.availableNatures.findIndex(
+        (n) => n.idnature === this.selectedNatureId,
+      );
+    }
 
     if (index === -1) return;
+    let ligne: any = {};
 
     const nature = this.availableNatures.splice(index, 1)[0];
-    const ligne = {
-      idnature: nature.idnature,
-      libelle: nature.libelle,
-      montantDept: 0,
-      montantSite: 0,
-      montantSociete: 0,
-    };
-
+    if (this.isAnalytique()) {
+      ligne = {
+        idcentreanalytique: nature.idcentreanalytique,
+        libelle: nature.libelle,
+        iddepartement: null,
+        montantDept: 0,
+        montantSite: 0,
+        montantSociete: 0,
+      };
+    } else {
+      ligne = {
+        idnature: nature.idnature,
+        libelle: nature.libelle,
+        iddepartement: nature.iddepartement,
+        montantDept: 0,
+        montantSite: 0,
+        montantSociete: 0,
+      };
+    }
     this.natureGrid.push(ligne);
 
     this.selectedNatureId = null;
+    this.selectedCentreId = null;
   }
 
   canValidateCurrentLine(): boolean {
@@ -531,6 +644,8 @@ export class LigneBudgetComponent implements OnInit {
         ?.updateValueAndValidity();
 
       this.natureGrid = [];
+      this.modeSaisie = '';
+      this.availableNatures = [];
     } else {
       // Budget Département
       this.ligneBudgetForm
@@ -570,7 +685,15 @@ export class LigneBudgetComponent implements OnInit {
     this.lignebudgetservice.getAll(this.params).subscribe({
       next: (res: any) => {
         if (res.success) {
-          this.ligneBudgetsSource = res.data;
+          this.ligneBudgetsSource = [...res.data]; // 🔥 IMMUTABILITÉ
+
+          this.groupLigneBudgetsByBudget();
+
+          // 🔥 SI un budget est sélectionné → recalcul auto
+          if (this.selectedBudgetId) {
+            this.onClickAfficher();
+          }
+
           this.totalPages = res.totalPages;
         }
       },
@@ -586,40 +709,6 @@ export class LigneBudgetComponent implements OnInit {
     this.natureGrid = [];
     this.ligneBudgetForm.patchValue({ iddepartement: '' });
   }
-
-  // onDepartementChange(event: any) {
-  //   const idDept = event.target.value;
-  //   this.onSelectionDepartementChange(event);
-
-  //   // Reset STRICT
-  //   this.natureGrid = [];
-
-  //   if (!idDept || !this.selectedBudget) return;
-
-  //   this.loadNatureGrid(idDept);
-  // }
-
-  // loadNatureGrid(idDepartement: string) {
-  //   if (!idDepartement) return;
-  //   this.affectationService.getAll(idDepartement).subscribe({
-  //     next: (res: any) => {
-  //       if (res.success) {
-  //         this.natureGrid = res.data.naturesaffectes
-  //           .sort((a: natureoperationModel, b: natureoperationModel) =>
-  //             a.libelle.localeCompare(b.libelle)
-  //           )
-  //           .map((item: natureoperationModel) => ({
-  //             idnature: item.idnature,
-  //             libelle: item.libelle,
-  //             montantDept: 0,
-  //             montantSite: 0,
-  //             montantSociete: 0,
-  //           }));
-  //         this.prefillNatureGrid();
-  //       }
-  //     },
-  //   });
-  // }
 
   stepNatures: Array<{
     idnature: string;
@@ -645,52 +734,123 @@ export class LigneBudgetComponent implements OnInit {
     this.loadNextNature();
   }
 
-  // au cas où
-  // loadNatureGrid(idDepartement: string) {
-  //   if (!idDepartement || !this.selectedBudget) return;
+  // Nature pour site
+  loadNaturesForSite() {
+    if (!this.selectedBudget) return;
 
-  //   this.natureGrid = [];
-  //   this.currentNatureIndex = 0;
+    // 1. départements du site de l'utilisateur
+    const siteDepartements = this.departements.filter(
+      (d) => d.idsite === this.user.idsite,
+    );
 
-  //   this.affectationService.getAll(idDepartement).subscribe({
-  //     next: (res: any) => {
-  //       if (!res.success) return;
+    // 2. départements autorisés pour l'utilisateur
+    const userDeptIds = new Set(
+      this.appartenanceDepartement.map((d) => d.iddepartement),
+    );
 
-  //       this.allNatures = res.data.naturesaffectes.sort((a: any, b: any) =>
-  //         a.libelle.localeCompare(b.libelle)
-  //       );
+    const filteredDepartements = siteDepartements.filter((d) =>
+      userDeptIds.has(d.iddepartement),
+    );
 
-  //       if (this.modeSaisie === 'ALL') {
-  //         this.natureGrid = this.allNatures.map((n: any) => ({
-  //           idnature: n.idnature,
-  //           libelle: n.libelle,
-  //           idbudgetdepartementnature: undefined,
-  //           montantDept: 0,
-  //           montantSite: 0,
-  //           montantSociete: 0,
-  //         }));
-  //         this.prefillNatureGrid();
-  //       } else {
-  //         // STEP mode → table vide au départ
-  //         this.stepNatures = this.allNatures.map((n: any) => ({
-  //           idnature: n.idnature,
-  //           libelle: n.libelle,
-  //           idbudgetdepartementnature: undefined,
-  //           montantDept: 0,
-  //           montantSite: 0,
-  //           montantSociete: 0,
-  //         }));
-  //         this.loadNextNature(); // optionnel : charge la 1ère si tu veux
-  //       }
-  //     },
-  //   });
-  // }
+    if (filteredDepartements.length === 0) {
+      this.natureGrid = [];
+      this.availableNatures = [];
+      return;
+    }
+
+    // 3. appel API pour chaque département
+    const requests = filteredDepartements.map((dep) =>
+      this.affectationService.getAll(dep.iddepartement),
+    );
+
+    forkJoin(requests).subscribe({
+      next: (responses: any[]) => {
+        let allNatures: any[] = [];
+
+        responses.forEach((res, index) => {
+          if (res.success) {
+            const depId = filteredDepartements[index].iddepartement;
+
+            const mapped = res.data.naturesaffectes.map((n: any) => ({
+              idnature: n.idnature,
+              libelle: n.libelle,
+              iddepartement: depId, // ⚠️ CRUCIAL
+            }));
+
+            allNatures.push(...mapped);
+          }
+        });
+
+        // 🔥 supprimer doublons
+        const uniqueMap = new Map();
+        allNatures.forEach((n) => {
+          if (!uniqueMap.has(n.idnature)) {
+            uniqueMap.set(n.idnature, n);
+          }
+        });
+
+        this.allNatures = Array.from(uniqueMap.values());
+
+        this.initNatureGridForSite();
+      },
+    });
+  }
+
+  initNatureGridForSite() {
+    if (!this.selectedBudget) return;
+
+    const existingLines = this.ligneBudgetsSource.filter(
+      (l) => l.idbudget === this.selectedBudget!.idbudget,
+    );
+
+    if (this.modeSaisie === 'ALL') {
+      this.natureGrid = this.allNatures.map((n) => {
+        const existing = existingLines.find((l) => l.idnature === n.idnature);
+
+        return {
+          idnature: n.idnature,
+          libelle: n.libelle,
+          iddepartement: n.iddepartement, // ⚠️ important
+          idbudgetdepartementnature: existing?.idbudgetdepartementnature,
+          montantDept: 0,
+          montantSite: existing?.montantprevisionsite ?? 0,
+          montantSociete: existing?.montantprevisionsociete ?? 0,
+        };
+      });
+
+      return;
+    }
+
+    // STEP
+    const usedIds = new Set(existingLines.map((l) => l.idnature));
+
+    this.natureGrid = existingLines.map((l) => ({
+      idnature: l.idnature!,
+      libelle: l.nature_operation?.libelle ?? '',
+      iddepartement: l.iddepartement,
+      idbudgetdepartementnature: l.idbudgetdepartementnature,
+      montantDept: 0,
+      montantSite: l.montantprevisionsite ?? 0,
+      montantSociete: l.montantprevisionsociete ?? 0,
+    }));
+
+    this.availableNatures = this.allNatures
+      .filter((n) => !usedIds.has(n.idnature))
+      .map((n) => ({
+        ...new natureoperationModel(),
+        idnature: n.idnature,
+        libelle: n.libelle,
+        iddepartement: n.iddepartement,
+      }));
+  }
+
   loadNatureGrid(idDepartement: string) {
     if (!this.selectedBudget || !idDepartement) return;
 
     this.natureGrid = [];
     this.availableNatures = [];
     this.selectedNatureId = null;
+    this.selectedCentreId = null;
 
     this.affectationService.getAll(idDepartement).subscribe({
       next: (res: any) => {
@@ -745,31 +905,26 @@ export class LigneBudgetComponent implements OnInit {
 
   // Nature choisie par l'utilisateur
   selectedNatureId: string | null = null;
-
-  addEmptyLine() {
-    if (this.availableNatures.length === 0) return;
-
-    const nature = this.availableNatures.shift()!;
-
-    this.natureGrid.push({
-      idnature: nature.idnature,
-      libelle: nature.libelle,
-      idbudgetdepartementnature: undefined,
-      montantDept: 0,
-      montantSite: 0,
-      montantSociete: 0,
-    });
-  }
+  selectedCentreId: string | null = null;
 
   setMode(mode: 'ALL' | 'STEP') {
     this.modeSaisie = mode;
 
-    const idDept = this.ligneBudgetForm.getRawValue().iddepartement;
-    if (idDept) {
-      this.loadNatureGrid(idDept);
+    if (this.isAnalytique()) {
+      this.loadCentreAnalytiqueGrid();
+      return;
+    }
+
+    if (this.selectedBudget?.entite === 'Département') {
+      const idDept = this.ligneBudgetForm.getRawValue().iddepartement;
+      if (idDept) this.loadNatureGrid(idDept);
+    }
+
+    // ✅ NOUVEAU
+    if (this.selectedBudget?.entite === 'Site') {
+      this.loadNaturesForSite();
     }
   }
-
   // ajoutons un ligne à chaque clic
   addNextNature() {
     if (
@@ -785,6 +940,7 @@ export class LigneBudgetComponent implements OnInit {
     const nouvelleLigne = {
       idnature: nature.idnature,
       libelle: nature.libelle,
+      iddepartement: nature.iddepartement,
       idbudgetdepartementnature: '', // optionnelle
       montantDept: 0,
       montantSite: 0,
@@ -813,107 +969,6 @@ export class LigneBudgetComponent implements OnInit {
     this.updateMontantsSelonValidation();
     this.currentNatureIndex++;
   }
-
-  // prefillNatureGrid() {
-  //   if (!this.selectedBudget) return;
-
-  //   const idDept = this.ligneBudgetForm.value.iddepartement;
-
-  //   this.natureGrid.forEach((ligne) => {
-  //     const existing = this.ligneBudgets.find(
-  //       (l) =>
-  //         l.idbudget === this.selectedBudget!.idbudget &&
-  //         l.iddepartement === idDept &&
-  //         l.idnature === ligne.idnature
-  //     );
-
-  //     if (existing) {
-  //       ligne.montantDept = existing.montantprevisiondept ?? 0;
-  //       ligne.montantSite = existing.montantprevisionsite ?? 0;
-  //       ligne.montantSociete = existing.montantprevisionsociete ?? 0;
-  //     } else {
-  //       // Reset explicite (évite toute pollution mémoire)
-  //       ligne.montantDept = 0;
-  //       ligne.montantSite = 0;
-  //       ligne.montantSociete = 0;
-  //     }
-  //   });
-
-  //   this.updateMontantsSelonValidation();
-  // }
-
-  // prefillNatureGrid() {
-  //   if (!this.selectedBudget) return;
-
-  //   const idDept = this.ligneBudgetForm.value.iddepartement;
-
-  //   this.natureGrid.forEach((ligne) => {
-  //     const existing = this.ligneBudgets.find(
-  //       (l) =>
-  //         l.idbudget === this.selectedBudget!.idbudget &&
-  //         l.iddepartement === idDept &&
-  //         l.idnature === ligne.idnature
-  //     );
-
-  //     if (existing) {
-  //       ligne.idbudgetdepartementnature = existing.idbudgetdepartementnature;
-
-  //       ligne.montantDept = existing.montantprevisiondept ?? 0;
-  //       ligne.montantSite = existing.montantprevisionsite ?? 0;
-  //       ligne.montantSociete = existing.montantprevisionsociete ?? 0;
-  //     } else {
-  //       // IMPORTANT : reset si aucune ligne existante
-  //       ligne.idbudgetdepartementnature = undefined;
-  //       ligne.montantDept = 0;
-  //       ligne.montantSite = 0;
-  //       ligne.montantSociete = 0;
-  //     }
-  //   });
-  // }
-
-  // prefillNatureGrid() {
-  //   if (!this.selectedBudget) return;
-
-  //   const idDept = this.ligneBudgetForm.value.iddepartement;
-
-  //   this.natureGrid.forEach((ligne) => {
-  //     const lignesExistantes = this.ligneBudgets.filter(
-  //       (l) =>
-  //         l.idbudget === this.selectedBudget!.idbudget &&
-  //         l.iddepartement === idDept &&
-  //         l.idnature === ligne.idnature
-  //     );
-
-  //     if (lignesExistantes.length > 0) {
-  //       ligne.idbudgetdepartementnature =
-  //         lignesExistantes[
-  //           lignesExistantes.length - 1
-  //         ].idbudgetdepartementnature;
-
-  //       ligne.montantDept = lignesExistantes.reduce(
-  //         (sum, l) => sum + (l.montantprevisiondept ?? 0),
-  //         0
-  //       );
-
-  //       ligne.montantSite = lignesExistantes.reduce(
-  //         (sum, l) => sum + (l.montantprevisionsite ?? 0),
-  //         0
-  //       );
-
-  //       ligne.montantSociete = lignesExistantes.reduce(
-  //         (sum, l) => sum + (l.montantprevisionsociete ?? 0),
-  //         0
-  //       );
-  //     } else {
-  //       ligne.idbudgetdepartementnature = undefined;
-  //       ligne.montantDept = 0;
-  //       ligne.montantSite = 0;
-  //       ligne.montantSociete = 0;
-  //     }
-  //   });
-
-  //   this.updateMontantsSelonValidation();
-  // }
 
   prefillNatureGrid() {
     if (!this.selectedBudget) return;
@@ -968,8 +1023,6 @@ export class LigneBudgetComponent implements OnInit {
 
     this.selectedBudget = budget;
 
-    console.log('Before this.ligneBudgetsSource:', this.ligneBudgetsSource);
-
     const lignes = this.ligneBudgetsSource.filter(
       (l) => l.idbudget === budget.idbudget,
     );
@@ -977,11 +1030,9 @@ export class LigneBudgetComponent implements OnInit {
     this.ligneBudgetsGrouped = [
       {
         budget,
-        lignes,
+        lignes: [...lignes],
       },
     ];
-
-    console.log('Budget & lignes:', this.ligneBudgetsGrouped);
   }
 
   private propagateMontantsOnValidationOpen(): void {
@@ -1110,62 +1161,6 @@ export class LigneBudgetComponent implements OnInit {
     this.getAllLigneBudgets(); // recharge les données
   }
 
-  //Soumission du formulaire
-
-  // onSubmit() {
-  //   this.msgErros = '';
-
-  //   const formValue = this.ligneBudgetForm.value;
-
-  //   // ============================
-  //   // MODE GRILLE (prioritaire)
-  //   // ============================
-  //   if (
-  //     this.natureGrid?.length > 0 &&
-  //     this.selectedBudget &&
-  //     formValue.iddepartement
-  //   ) {
-  //     const payload = this.natureGrid.map((l) => ({
-  //       idbudget: this.selectedBudget!.idbudget,
-  //       iddepartement: formValue.iddepartement,
-  //       idnature: l.idnature,
-  //       montantprevisiondept: l.montantDept || 0,
-  //       montantprevisionsite: l.montantSite || 0,
-  //       montantprevisionsociete: l.montantSociete || 0,
-  //       createdby: 'MAF',
-  //     }));
-
-  //     this.lignebudgetservice.createMultiple(payload).subscribe({
-  //       next: () => {
-  //         this.getAllLigneBudgets();
-  //         this.resetAfterSubmit();
-  //       },
-  //       error: (err) => (this.msgErros = err.error?.error || 'Erreur serveur'),
-  //     });
-
-  //     return;
-  //   }
-
-  //   // ============================
-  //   // MODE MODAL (une seule ligne)
-  //   // ============================
-  //   if (this.ligneBudgetForm.invalid) {
-  //     Object.values(this.ligneBudgetForm.controls).forEach((c) =>
-  //       c.markAsTouched()
-  //     );
-  //     this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
-  //     return;
-  //   }
-
-  //   const ligne: LigneBudgetModel = {
-  //     ...this.ligneBudget,
-  //     ...formValue,
-  //     createdby: 'MAF',
-  //   };
-
-  //   this.actionModal === 'create' ? this.create(ligne) : this.update(ligne);
-  // }
-
   private lockBudgetAndDepartement(): void {
     this.ligneBudgetForm.get('idbudget')?.disable({ emitEvent: false });
     this.ligneBudgetForm.get('iddepartement')?.disable({ emitEvent: false });
@@ -1206,12 +1201,12 @@ export class LigneBudgetComponent implements OnInit {
 
     this.validationLines = lignes.map((l) => ({
       idbudgetdepartementnature: l.idbudgetdepartementnature,
-      iddepartement: l.iddepartement,
-      idnature: l.idnature,
-
+      iddepartement: l.iddepartement ?? null,
+      idnature: l.idnature ?? null,
+      idcentreanalytique: this.isAnalytique() ? l.idcentreanalytique : null,
       departement: l.departement?.libelle ?? '-',
       nature: l.nature_operation?.libelle ?? '-',
-
+      centre: l.centre_analytique?.libelle ?? '-',
       montantDept: Number(l.montantprevisiondept ?? 0),
       montantSite: Number(l.montantprevisionsite ?? 0),
       montantSociete: Number(l.montantprevisionsociete ?? 0),
@@ -1230,6 +1225,7 @@ export class LigneBudgetComponent implements OnInit {
         idcircuitvalidation: budget.idcircuitvalidation,
         idsite: budget.idsite,
         idsociete: budget.idsociete,
+        isanalytique: budget.isanalytique,
         actif: budget.actif,
         validedept: 1,
         datevalidedept: new Date(),
@@ -1254,6 +1250,7 @@ export class LigneBudgetComponent implements OnInit {
         idbudget: this.selectedBudget!.idbudget,
         iddepartement: l.iddepartement,
         idnature: l.idnature,
+        idcentreanalytique: l.idcentreanalytique,
 
         // ✅ On push les montants de la modale
         montantprevisiondept: Number(l.montantDept ?? 0),
@@ -1262,6 +1259,8 @@ export class LigneBudgetComponent implements OnInit {
 
         updatedby: this.user.nom + ' ' + this.user.prenom,
       }));
+
+    console.log('Data to validate:', payload);
 
     if (payload.length === 0) return;
 
@@ -1305,7 +1304,6 @@ export class LigneBudgetComponent implements OnInit {
 
   onSubmit() {
     this.msgErros = '';
-    const formValue = this.ligneBudgetForm.getRawValue();
 
     if (!this.selectedBudget) {
       this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
@@ -1314,19 +1312,32 @@ export class LigneBudgetComponent implements OnInit {
 
     if (
       this.selectedBudget.entite === 'Département' &&
-      !formValue.iddepartement
+      !this.ligneBudgetForm.getRawValue().iddepartement
     ) {
       this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
       return;
     }
 
-    // Payload commun
+    if (this.selectedBudget.isanalytique === 1) {
+      return this.handleSubmitAnalytique();
+    }
 
-    this.loading = true;
+    if (this.selectedBudget.entite === 'Site') {
+      return this.handleSubmitSite();
+    }
 
+    if (this.selectedBudget.entite === 'Département') {
+      return this.handleSubmitDepartement();
+    }
+  }
+
+  private buildRequests(
+    getPayload: (l: any, type: 'create' | 'update') => any,
+  ) {
     const toCreate = this.natureGrid.filter(
       (l) => !l.idbudgetdepartementnature,
     );
+
     const toUpdate = this.natureGrid.filter((l) => l.idbudgetdepartementnature);
 
     const requests$ = [];
@@ -1334,15 +1345,7 @@ export class LigneBudgetComponent implements OnInit {
     if (toCreate.length) {
       requests$.push(
         this.lignebudgetservice.createMultiple(
-          toCreate.map((l) => ({
-            idbudget: this.selectedBudget!.idbudget,
-            iddepartement: formValue.iddepartement,
-            idnature: l.idnature,
-            montantprevisiondept: l.montantDept ?? 0,
-            montantprevisionsite: l.montantSite ?? 0,
-            montantprevisionsociete: l.montantSociete ?? 0,
-            createdby: 'MAF',
-          })),
+          toCreate.map((l) => getPayload(l, 'create')),
         ),
       );
     }
@@ -1350,73 +1353,107 @@ export class LigneBudgetComponent implements OnInit {
     if (toUpdate.length) {
       requests$.push(
         this.lignebudgetservice.updateMultiple(
-          toUpdate.map((l) => ({
-            idbudgetdepartementnature: l.idbudgetdepartementnature!,
-            idbudget: this.selectedBudget!.idbudget,
-            iddepartement: formValue.iddepartement,
-            idnature: l.idnature,
-
-            montantprevisiondept: l.montantDept ?? 0,
-            montantprevisionsite: l.montantSite ?? 0,
-            montantprevisionsociete: l.montantSociete ?? 0,
-
-            updatedby: 'MAF',
-          })),
+          toUpdate.map((l) => getPayload(l, 'update')),
         ),
       );
+    }
+
+    return requests$;
+  }
+
+  handleSubmitAnalytique() {
+    this.loading = true;
+    const requests$ = this.buildRequests((l, type) => ({
+      idbudgetdepartementnature:
+        type === 'update' ? l.idbudgetdepartementnature : undefined,
+      idcentreanalytique: l.idcentreanalytique,
+
+      idbudget: this.selectedBudget!.idbudget,
+      iddepartement: null,
+      idnature: null,
+
+      montantprevisiondept: l.montantDept ?? 0,
+      montantprevisionsite: l.montantSite ?? 0,
+      montantprevisionsociete: l.montantSociete ?? 0,
+
+      ...(type === 'create'
+        ? { createdby: this.user.nom + ' ' + this.user.prenom }
+        : { updatedby: this.user.nom + ' ' + this.user.prenom }),
+    }));
+
+    this.executeRequests(requests$);
+  }
+
+  private handleSubmitSite() {
+    this.loading = true;
+
+    const requests$ = this.buildRequests((l, type) => ({
+      idbudgetdepartementnature:
+        type === 'update' ? l.idbudgetdepartementnature : undefined,
+      idcentreanalytique: null,
+
+      idbudget: this.selectedBudget!.idbudget,
+      iddepartement: l.iddepartement, // ✅ SOURCE GRID
+      idnature: l.idnature,
+
+      montantprevisiondept: 0,
+      montantprevisionsite: l.montantSite ?? 0,
+      montantprevisionsociete: l.montantSociete ?? 0,
+
+      ...(type === 'create'
+        ? { createdby: this.user.nom + ' ' + this.user.prenom }
+        : { updatedby: this.user.nom + ' ' + this.user.prenom }),
+    }));
+
+    this.executeRequests(requests$);
+  }
+
+  private handleSubmitDepartement() {
+    const formValue = this.ligneBudgetForm.getRawValue();
+
+    this.loading = true;
+
+    const requests$ = this.buildRequests((l, type) => ({
+      idbudgetdepartementnature:
+        type === 'update' ? l.idbudgetdepartementnature : undefined,
+      idcentreanalytique: null,
+
+      idbudget: this.selectedBudget!.idbudget,
+      iddepartement: formValue.iddepartement, // ✅ FORMULAIRE
+      idnature: l.idnature,
+
+      montantprevisiondept: l.montantDept ?? 0,
+      montantprevisionsite: l.montantSite ?? 0,
+      montantprevisionsociete: l.montantSociete ?? 0,
+
+      ...(type === 'create'
+        ? { createdby: this.user.nom + ' ' + this.user.prenom }
+        : { updatedby: this.user.nom + ' ' + this.user.prenom }),
+    }));
+
+    this.executeRequests(requests$);
+  }
+
+  private executeRequests(requests$: any[]) {
+    if (!requests$.length) {
+      this.loading = false;
+      return;
     }
 
     forkJoin(requests$).subscribe({
       next: () => {
         this.getAllLigneBudgets();
-        // this.resetAfterSubmit();
         this.loading = false;
-        if (this.actionModal === 'update') this.closeModal('showModal');
+
+        if (this.actionModal === 'update') {
+          this.closeModal('showModal');
+        }
       },
       error: (err) => {
         this.msgErros = err.error?.error || 'Erreur serveur';
+        this.loading = false;
       },
     });
-
-    // ============================
-    // CAS BUDGET ENTITÉ SITE
-    // ============================
-    if (this.selectedBudget.entite === 'Site') {
-      if (this.ligneBudgetForm.invalid) {
-        Object.values(this.ligneBudgetForm.controls).forEach((c) =>
-          c.markAsTouched(),
-        );
-        this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
-        return;
-      }
-
-      const payload = {
-        idbudget: this.selectedBudget.idbudget,
-        iddepartement: null,
-        idnature: null,
-        montantprevisiondept: formValue.montantprevisiondept ?? 0,
-        montantprevisionsite: formValue.montantprevisionsite ?? 0,
-        montantprevisionsociete: formValue.montantprevisionsociete ?? 0,
-        createdby: 'MAF',
-      };
-
-      this.loading = true;
-
-      this.lignebudgetservice.create(payload).subscribe({
-        next: () => {
-          this.getAllLigneBudgets();
-          // this.resetAfterSubmit();
-          this.loading = false;
-          if (this.actionModal === 'update') this.closeModal('showModal');
-        },
-        error: (err) => {
-          this.msgErros = err.error?.error || 'Erreur serveur';
-          this.loading = false;
-        },
-      });
-
-      return;
-    }
   }
 
   resetAfterSubmit(modalId: string = 'showModal') {
@@ -1499,7 +1536,7 @@ export class LigneBudgetComponent implements OnInit {
 
   //Modification de données
   update(_ligneBudget: any) {
-    _ligneBudget.updatedby = 'admin';
+    _ligneBudget.updatedby = this.user.nom + ' ' + this.user.prenom;
     this.lignebudgetservice.update(_ligneBudget).subscribe({
       next: (res: any) => {
         if (res.success) {
@@ -1612,7 +1649,6 @@ export class LigneBudgetComponent implements OnInit {
 
   modalUpdate(ligne: LigneBudgetModel) {
     this.actionModal = 'update';
-
     this.modeSaisie = 'ALL';
     this.ligneBudgetForm.reset();
     this.msgErros = '';
@@ -1625,7 +1661,7 @@ export class LigneBudgetComponent implements OnInit {
     if (!this.selectedBudget) return;
 
     // ============================
-    // CAS BUDGET ENTITÉ DÉPARTEMENT
+    // CAS DÉPARTEMENT (OK chez toi)
     // ============================
     if (this.selectedBudget.entite === 'Département') {
       this.ligneBudgetForm.patchValue({
@@ -1634,30 +1670,71 @@ export class LigneBudgetComponent implements OnInit {
       });
 
       this.lockBudgetAndDepartement();
-
-      // IMPORTANT : on ne reset plus après
       this.natureGrid = [];
 
-      // Ceci déclenche prefillNatureGrid()
       this.loadNatureGrid(ligne.iddepartement!);
-
       return;
     }
 
     // ============================
-    // CAS BUDGET ENTITÉ SITE
+    // CAS SITE (CORRIGÉ)
     // ============================
-    this.ligneBudget = ligne;
 
     this.ligneBudgetForm.patchValue({
       idbudget: ligne.idbudget,
-      iddepartement: ligne.iddepartement,
-      montantprevisiondept: ligne.montantprevisiondept,
-      montantprevisionsite: ligne.montantprevisionsite,
-      montantprevisionsociete: ligne.montantprevisionsociete,
     });
 
     this.lockBudgetAndDepartement();
+    if (this.selectedBudget?.entite === 'Site') {
+      // 🔥 IMPORTANT : reconstruire la grille
+      this.prefillNatureGridForSite(ligne.idbudget);
+      return;
+    }
+
+    if (this.isAnalytique()) {
+      this.prefillNatureGridAnalytique(ligne.idbudget);
+      return;
+    }
+  }
+
+  prefillNatureGridForSite(idbudget: string) {
+    // 🔥 lignes existantes venant de ta table affichée
+    const existingLines = this.ligneBudgetsGrouped
+      .flatMap((g) => g.lignes)
+      .filter((l) => l.idbudget === idbudget);
+
+    this.natureGrid = existingLines.map((l) => ({
+      idnature: l.idnature as string,
+      libelle: l.nature_operation?.libelle || '—',
+
+      idbudgetdepartementnature: l.idbudgetdepartementnature,
+      iddepartement: l.iddepartement ?? null,
+
+      // on reprend EXACTEMENT les valeurs existantes
+      montantDept: 0, // pas utilisé pour Site
+      montantSite: l.montantprevisionsite,
+      montantSociete: l.montantprevisionsociete,
+    }));
+  }
+
+  prefillNatureGridAnalytique(idbudget: string) {
+    // 🔥 lignes existantes venant de ta table affichée
+    const existingLines = this.ligneBudgetsGrouped
+      .flatMap((g) => g.lignes)
+      .filter((l) => l.idbudget === idbudget);
+
+    this.natureGrid = existingLines.map((l) => ({
+      idnature: null,
+      libelle: l.centre_analytique?.libelle || '—',
+      idcentreanalytique: l.centre_analytique?.idcentreanalytique,
+      idbudgetdepartementnature: l.idbudgetdepartementnature,
+      iddepartement: null,
+
+      // on reprend EXACTEMENT les valeurs existantes
+      montantDept: l.montantprevisiondept,
+      montantSite: l.montantprevisionsite,
+      montantSociete: l.montantprevisionsociete,
+    }));
   }
 
   // loader(){

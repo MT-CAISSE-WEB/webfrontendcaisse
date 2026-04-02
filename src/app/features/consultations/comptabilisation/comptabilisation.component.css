@@ -1,0 +1,77 @@
+.table-hover tbody tr:hover {
+    background-color: rgba(113, 140, 180, 0.08); /* bleu Bootstrap */
+    cursor: pointer;
+}
+
+.table-scroll {
+    max-height: 400px;      /* hauteur du tableau */
+    overflow-y: auto;       /* scroll vertical */
+    overflow-x: hidden;
+}
+
+
+.table-container {
+  max-width: 100%;
+  overflow-x: auto;
+  /* Pour activer le défilement horizontal */
+  overflow-y: auto;
+  /* Pour activer le défilement vertical si nécessaire */
+  max-height: 400px;
+  /* Limite la hauteur de la table, ajuste selon les besoins */
+}
+
+.table-custom th {
+  white-space: nowrap;
+  /* Empêche les libellés de se casser en plusieurs lignes */
+  /* text-align: center; */
+}
+
+.button-custom:hover {
+  background-color: #218838;
+}
+
+.table-custom {
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.table-light {
+  background-color: #f8f9fa;
+}
+
+/* .table th, .table td {
+    padding: 1rem 0.75rem;
+  } */
+
+.table-bordered {
+  border: 1px solid #dee2e6;
+}
+
+
+.table-compact td {
+  padding: 0.25rem 0.5rem;
+  /* valeur UX optimale */
+  vertical-align: middle;
+}
+
+/* Réduire hauteur globale */
+::ng-deep .mat-mdc-form-field {
+  height: 40px;
+}
+
+/* Réduire le champ interne */
+::ng-deep .mat-mdc-text-field-wrapper {
+  height: 40px;
+  padding: 0 8px;
+}
+
+/* Input plus compact */
+::ng-deep .mat-mdc-input-element {
+  font-size: 12px;
+  padding: 4px 0;
+}
+
+/* Label plus petit */
+::ng-deep .mat-mdc-floating-label {
+  font-size: 12px;
+}

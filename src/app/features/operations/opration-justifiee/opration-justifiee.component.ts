@@ -45,6 +45,8 @@ export class OprationJustifieeComponent implements OnInit{
   montantTotaligne: number = 0;
   totalpieceJustificative: number = 0;
   totalpieceJustificativeRef: number = 0;
+  totalEncaissements: number = 0;
+  totalEncaissementsRef: number = 0;
 
   operations : operationModel[] = [];
   operationsFiltrees : operationModel[] = [];
@@ -70,6 +72,24 @@ export class OprationJustifieeComponent implements OnInit{
   showCaisses: Boolean = false;
   caisseperiodes : any[] = [];
   loadingCaisses: boolean = false;
+  loadingGlobal: boolean = true;
+  private loadingRequestsCount = 0;
+
+  /**
+   * GESTION DU LOADING GLOBAL
+   */
+  private startLoading() {
+    this.loadingRequestsCount++;
+    this.loadingGlobal = true;
+  }
+
+  private stopLoading() {
+    this.loadingRequestsCount--;
+    if (this.loadingRequestsCount <= 0) {
+      this.loadingRequestsCount = 0;
+      this.loadingGlobal = false;
+    }
+  }
 
   natureoperations : natureoperationModel[] = [];
   //Liste des tiers
@@ -85,6 +105,11 @@ export class OprationJustifieeComponent implements OnInit{
 
   selectedRetour: any = null;
 
+  // États pour le contrôle dynamique des devises
+  tauxDevises: { [key: string]: number } = {}; // Cache des taux par devise
+  devisesImpliquees: Set<string> = new Set(); // Ensemble des devises utilisées
+  loadingTaux: boolean = false;
+
    constructor(private calculService: OperationCalculService, private validatorService: OperationValidatorService, private caisseRegleService: CaisseRegleService,
     private natureoperationservice: NatureoperationService, private tiersservice: TiersService, private toastr : ToastrService,
     private AffectationNatureCentreService: AffectationNatureCentreService, private operationservice: OperationService,
@@ -92,6 +117,9 @@ export class OprationJustifieeComponent implements OnInit{
    ){}
 
    ngOnInit(): void {
+     // Démarrer le loading global (dépend seulement des opérations)
+     this.loadingGlobal = true;
+
      // Initialiser un formulaire
      this.initForm();
     //Recuperer la devise
@@ -247,53 +275,65 @@ export class OprationJustifieeComponent implements OnInit{
   updateTotalsAndValidate(){
     const deviseOp = this.operationForm.get('deviseoperation')?.value;
     const deviseJust = this.operationForm.get('devisejustificatif')?.value;
-
-    const taux = this.operationForm.get('tauxoperation')?.value || 1;
+    const deviseRef = this.user.devise_ref_id;
 
     const montantOperation = this.operationForm.get('montantoperation')?.value || 0;
     const montantRef = this.operationForm.get('montantRefglobal')?.value || 0;
 
-    //total lignes (devise justificatif)
+    // Total des lignes en devise justificatif
     const totalLignes = this.calculService.getTotalLignes(this.lignes);
 
-    //conversion vers référentiel
-    const totalLignesRef = this.calculService.convertToRef(totalLignes, taux);
+    // Conversion du total des lignes vers devise de référence
+    const totalLignesRef = this.convertirVersReference(totalLignes, deviseJust);
 
-    //conversion vers devise opération si nécessaire
+    // Conversion du total des lignes vers devise opération si nécessaire
     let totalLignesOperation = totalLignes;
-
     if (deviseJust !== deviseOp) {
-      totalLignesOperation = this.user.devise_ref_id === deviseOp ? totalLignesRef : totalLignesRef / taux;
+      totalLignesOperation = this.convertirDepuisReference(totalLignesRef, deviseOp);
     }
 
-    //totaux globaux
-    const totalGlobal = totalLignesOperation + (this.totalpieceJustificative || 0);
-    const totalGlobalRef = totalLignesRef + (this.totalpieceJustificativeRef || 0);
+    // Calcul des justificatifs existants en devise de référence
+    const justificatifsExistantsRef = this.calculService.getTotalOperation(
+      this.ope, 'ref', this.justificatifPieces, this.justificatifDetail, deviseRef
+    );
 
-    //reste
-    const resteOperation = montantOperation - totalGlobal;
+    // Calcul des encaissements en devise de référence
+    let encaissementsRef = 0;
+    if (this.ope?.caisses) {
+      encaissementsRef = this.ope.caisses
+        .filter((caisse: any) => caisse.codtypeoperation === 'encaissement')
+        .reduce((sum: number, caisse: any) => {
+          const montantEncaissement = parseFloat(caisse.montantref) || 0;
+          return sum + montantEncaissement; // Déjà en devise de référence
+        }, 0);
+    }
+
+    // Totaux globaux (justificatifs existants + lignes actuelles + encaissements)
+    const totalGlobalRef = totalLignesRef + justificatifsExistantsRef + encaissementsRef;
+    const totalGlobalOperation = this.convertirDepuisReference(totalGlobalRef, deviseOp);
+
+    // Reste à payer = montant à justifier - total déjà justifié/encaissé
+    const resteOperation = montantOperation - totalGlobalOperation;
     const resteRef = montantRef - totalGlobalRef;
 
-    //update form
+    // Update form
     this.operationForm.patchValue({
       resteapayeroperation: Math.max(0, resteOperation),
       resteapayerref: Math.max(0, resteRef)
     }, { emitEvent: false });
 
-    //dépassement opération
+    // Validation des dépassements
     if (resteOperation < 0) {
       this.toastr.error("Dépassement montant opération");
       this.resetLastMontant();
       return;
     }
 
-    //dépassement référentiel
     if (resteRef < 0) {
       this.toastr.error("Dépassement montant référentiel");
       this.resetLastMontant();
       return;
     }
-
   }
 
   // updateTotalsAndValidate(){
@@ -391,6 +431,7 @@ export class OprationJustifieeComponent implements OnInit{
 
       //Trouver l'opération sélectionnée
       const operation = this.operations.find(op => op.idoperation === opId);
+      console.log(operation);
       if(!operation) return;
 
       const totalcaissemontantref = operation.caisses?.reduce((sum: number, caisse: any) => {
@@ -410,6 +451,9 @@ export class OprationJustifieeComponent implements OnInit{
 
       //Charger les details
       this.getDetailJustificatifPiece(operation);
+
+      // Déclencher la gestion dynamique des devises
+      this.gererDevisesDynamiquement();
     });
   }
 
@@ -461,8 +505,6 @@ export class OprationJustifieeComponent implements OnInit{
       taux: taux,
       montantref: montant * taux
     });
-
-    console.log('Caisse mise à jour:', caisseForm.value);
   }
 
   selectRetour(piece: any) {
@@ -488,12 +530,8 @@ export class OprationJustifieeComponent implements OnInit{
     //A la selectionner de la devise
     this.operationForm.get('devisejustificatif')?.valueChanges.subscribe(devise => {
       if(devise){
-        if (devise === this.user.devise_ref_id) {
-          this.operationForm.patchValue({ tauxoperation: 1 });
-          return;
-        }
-        //Charger sur le dernier taux
-        this.loadLastdeviseTaux(devise);
+        // Déclencher la gestion dynamique des devises
+        this.gererDevisesDynamiquement();
       }
     });
   }
@@ -581,6 +619,7 @@ export class OprationJustifieeComponent implements OnInit{
 
   //API des détails des pièces justificatives
   getDetailJustificatifPiece(operation: any){
+    this.loadingPiece = true;
     this.ope = operation;
     this.justificatifservice.getdetailsJustificatif({}).pipe(
       switchMap((res: any) => {
@@ -600,49 +639,39 @@ export class OprationJustifieeComponent implements OnInit{
           this.justificatifPieces.filter(j => j.operation.idoperation === operation.idoperation);
           
           /**
-         * Calcul des totaux existants
-         */
+           * Calcul des totaux existants (SEULEMENT les justificatifs, pas les encaissements)
+           * Conversion automatique vers devise de référence
+           */
           this.totalpieceJustificative = this.calculService.getTotalOperation(operation,'detail', this.justificatifPieces, this.justificatifDetail, this.user.devise_ref_id);
           this.totalpieceJustificativeRef = this.calculService.getTotalOperation(operation, 'ref', this.justificatifPieces, this.justificatifDetail, this.user.devise_ref_id);
 
-          const totalcaissemontantref = operation.caisses?.reduce((sum: number, caisse: any) => {
-            if (caisse.codtypeoperation === 'decaissementaj') {
-              return sum + (parseFloat(caisse.montantref) || 0);
-            }
-            return sum;
-          }, 0) || 0;
-          
           /**
-           * Calcul des retours de caisse
+           * Calcul des retours de caisse (encaissements) - Ces montants RÉDUISENT le reste à payer
+           * Conversion automatique vers devise de référence
            */
-          const totalRetours = operation.caisses?.reduce((sum: number, caisse: any) => {
+          this.totalEncaissements = operation.caisses?.reduce((sum: number, caisse: any) => {
             if (caisse.codtypeoperation === 'encaissement') {
-              return sum + (parseFloat(caisse.montant) || 0);
+              const montantEncaissement = parseFloat(caisse.montant) || 0;
+              return sum + this.convertirVersReference(montantEncaissement, caisse.devise?.iddevise);
             }
             return sum;
           }, 0) || 0;
 
-          const totalRetoursRef = operation.caisses?.reduce((sum: number, caisse: any) => {
+          this.totalEncaissementsRef = operation.caisses?.reduce((sum: number, caisse: any) => {
             if (caisse.codtypeoperation === 'encaissement') {
-              return sum + (parseFloat(caisse.montantref) || 0);
+              const montantEncaissementRef = parseFloat(caisse.montantref) || 0;
+              return sum + montantEncaissementRef; // Déjà en devise de référence
             }
             return sum;
           }, 0) || 0;
 
           /**
-           * Calcul reste
+           * Calcul reste : Montant opération - Justificatifs existants - Encaissements
+           * Tous les calculs sont maintenant en devise de référence
            */
-          const resteOperation =
-            this.calculService.calculateResteOperation(
-              operation.montant,
-              this.totalpieceJustificative + totalRetours
-            );
-
-          const resteRef =
-            this.calculService.calculateResteRef(
-              totalcaissemontantref,
-              this.totalpieceJustificativeRef + totalRetoursRef
-            );
+          const montantOperationRef = this.convertirVersReference(operation.montant, operation.devise?.iddevise);
+          const resteRef = montantOperationRef - this.totalpieceJustificativeRef - this.totalEncaissementsRef;
+          const resteOperation = this.convertirDepuisReference(resteRef, operation.devise?.iddevise);
 
 
           this.operationForm.patchValue({
@@ -657,6 +686,7 @@ export class OprationJustifieeComponent implements OnInit{
         }
       },
       error: (err) => {
+        this.loadingPiece = false;
         this.toastr.error("Erreur backend");
       }
     });
@@ -746,6 +776,7 @@ export class OprationJustifieeComponent implements OnInit{
       },
       error : (err) => {
         console.log(err);
+        this.loadingCaisses = false;
         this.toastr.error(err.error.message);
       }
     });
@@ -769,14 +800,21 @@ export class OprationJustifieeComponent implements OnInit{
             this.operationsFiltrees = this.operations.filter(op =>
               op.caisses?.some(caisse =>
                 caisse.codtypeoperation?.toLowerCase().includes('decaissementaj')
-              )
+              ) &&
+              op.justifiee <= 1 
             );
           }
           this.loading = false;
+          // Fin du loading global - dépend seulement des opérations
+          this.loadingGlobal = false;
+          
+          // Restaurer l'opération sélectionnée après rechargement (pour création justificatif)
+          this.restoreSelectedOperation();
         }
       },
       error : (err) => {
         this.loading = false;
+        this.loadingGlobal = false;
         this.toastr.error(err.error.message);
       },
     });
@@ -791,6 +829,9 @@ export class OprationJustifieeComponent implements OnInit{
             (n: any) => n.actif === 1
           );
         }
+      },
+      error: (err) => {
+        this.toastr.error("Erreur lors du chargement des natures d'opérations");
       }
     });
   }
@@ -804,6 +845,9 @@ export class OprationJustifieeComponent implements OnInit{
             (n: any) => n.actif === 1
           )
         }
+      },
+      error: (err) => {
+        this.toastr.error("Erreur lors du chargement des tiers");
       }
     });
   }
@@ -819,6 +863,9 @@ export class OprationJustifieeComponent implements OnInit{
          if(res.success){
             this.devises = res.data;
          }
+      },
+      error: (err) => {
+        this.toastr.error("Erreur lors du chargement des devises");
       }
     });
   }
@@ -1137,8 +1184,14 @@ export class OprationJustifieeComponent implements OnInit{
     this.justificatifservice.create(dataToSend).subscribe({
       next: (res) => {
         if (res.success) {
-          //this.reloadData();
           this.toastr.success('Justificatif enregistrée avec succès');
+          // Stocker l'ID de l'opération sélectionnée avant rechargement
+          const selectedOperationId = this.operationForm.get('operation')?.value;
+          if (selectedOperationId) {
+            localStorage.setItem('selectedOperationId', selectedOperationId.toString());
+          }
+          // Recharger la page
+          window.location.reload();
         } else {
           this.error = "Erreur de création";
           this.toastr.error(this.error);
@@ -1173,5 +1226,183 @@ export class OprationJustifieeComponent implements OnInit{
     })
   }
 
+  /**
+   * RESTAURER L'OPERATION SELECTIONNEE APRES RECHARGEMENT
+   */
+  restoreSelectedOperation() {
+    const selectedOperationId = localStorage.getItem('selectedOperationId');
+    if (selectedOperationId) {
+      // Attendre que les opérations soient chargées
+      const checkOperationsLoaded = () => {
+        if (this.operationsFiltrees.length > 0) {
+          const operationToSelect = this.operationsFiltrees.find(op => op.idoperation == selectedOperationId);
+          if (operationToSelect) {
+            this.operationForm.patchValue({
+              operation: operationToSelect.idoperation
+            });
+            // Le subscribe de selectOperation() se déclenchera automatiquement
+          }
+          // Nettoyer le localStorage
+          localStorage.removeItem('selectedOperationId');
+        } else {
+          // Réessayer dans 100ms si les opérations ne sont pas encore chargées
+          setTimeout(checkOperationsLoaded, 100);
+        }
+      };
+      checkOperationsLoaded();
+    }
+  }
+
+  /**
+   * GESTION DYNAMIQUE DES DEVISES
+   * Détecte et gère automatiquement toutes les devises impliquées
+   */
+  private gererDevisesDynamiquement() {
+    // Collecter toutes les devises impliquées
+    this.collecterDevisesImpliquees();
+
+    // Charger les taux manquants de manière asynchrone
+    this.chargerTauxManquants().then(() => {
+      // Mettre à jour les calculs une fois les taux chargés
+      this.updateTotalsAndValidate();
+    }).catch(() => {
+      // En cas d'erreur, utiliser les taux par défaut et continuer
+      this.updateTotalsAndValidate();
+    });
+  }
+
+  /**
+   * COLLECTER TOUTES LES DEVISES IMPLIQUEES
+   */
+  private collecterDevisesImpliquees() {
+    this.devisesImpliquees.clear();
+
+    // Devise de l'opération sélectionnée
+    const operationSelectionnee = this.operationsFiltrees.find(op =>
+      op.idoperation == this.operationForm.get('operation')?.value
+    );
+    if (operationSelectionnee?.devise?.iddevise) {
+      this.devisesImpliquees.add(operationSelectionnee.devise.iddevise);
+    }
+
+    // Devise du justificatif
+    const deviseJustificatif = this.operationForm.get('devisejustificatif')?.value;
+    if (deviseJustificatif) {
+      this.devisesImpliquees.add(deviseJustificatif);
+    }
+
+    // Devise de référence utilisateur (toujours incluse)
+    this.devisesImpliquees.add(this.user.devise_ref_id);
+
+    // Devises des caisses (encaissements/décaissements)
+    if (operationSelectionnee?.caisses) {
+      operationSelectionnee.caisses.forEach((caisse: any) => {
+        if (caisse.devise?.iddevise) {
+          this.devisesImpliquees.add(caisse.devise.iddevise);
+        }
+      });
+    }
+
+    // Devises des justificatifs existants
+    if (this.justificatifPieces) {
+      this.justificatifPieces.forEach(piece => {
+        if (piece.devise?.iddevise) {
+          this.devisesImpliquees.add(piece.devise.iddevise);
+        }
+      });
+    }
+  }
+
+  /**
+   * CHARGER LES TAUX MANQUANTS
+   */
+  private chargerTauxManquants(): Promise<void> {
+    return new Promise((resolve) => {
+      const datePivot = this.operationForm.get('datejustificatif')?.value;
+      const deviseRef = this.user.devise_ref_id;
+
+      const tauxACharger: string[] = [];
+
+      // Identifier les taux manquants
+      this.devisesImpliquees.forEach(deviseId => {
+        if (deviseId !== deviseRef && !this.tauxDevises[deviseId]) {
+          tauxACharger.push(deviseId);
+        }
+      });
+
+      if (tauxACharger.length === 0) {
+        resolve();
+        return;
+      }
+
+      this.loadingTaux = true;
+
+      // Charger tous les taux manquants en parallèle
+      const promises = tauxACharger.map(deviseId =>
+        this.chargerTauxDevise(deviseId, deviseRef, datePivot)
+      );
+
+      Promise.all(promises).then(() => {
+        this.loadingTaux = false;
+        resolve();
+      }).catch(() => {
+        this.loadingTaux = false;
+        resolve(); // Résoudre même en cas d'erreur
+      });
+    });
+  }
+
+  /**
+   * CHARGER UN TAUX SPECIFIQUE
+   */
+  private async chargerTauxDevise(deviseOrigine: string, deviseDestination: string, datePivot: string): Promise<void> {
+    return new Promise((resolve) => {
+      const payload = {
+        iddeviseorigine: deviseOrigine,
+        iddevisedestination: deviseDestination,
+        datepiece: datePivot
+      };
+
+      this.service.tauxrecent(payload).subscribe({
+        next: (res) => {
+          if (res.success && res.data) {
+            this.tauxDevises[deviseOrigine] = res.data.coefficient;
+          } else {
+            // Taux par défaut si non trouvé
+            this.tauxDevises[deviseOrigine] = 1;
+          }
+          resolve();
+        },
+        error: () => {
+          this.tauxDevises[deviseOrigine] = 1; // Taux par défaut
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
+   * CONVERTIR UN MONTANT VERS LA DEVISE DE REFERENCE
+   */
+  convertirVersReference(montant: number, deviseOrigine: string): number {
+    if (!deviseOrigine || deviseOrigine === this.user.devise_ref_id) {
+      return montant;
+    }
+
+    const taux = this.tauxDevises[deviseOrigine] || 1;
+    return montant * taux;
+  }
+
+  /**
+   * CONVERTIR UN MONTANT DEPUIS LA DEVISE DE REFERENCE
+   */
+  convertirDepuisReference(montantRef: number, deviseDestination: string): number {
+    if (!deviseDestination || deviseDestination === this.user.devise_ref_id) {
+      return montantRef;
+    }
+
+    const taux = this.tauxDevises[deviseDestination] || 1;
+    return montantRef / taux;
+  }
   
 }

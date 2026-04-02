@@ -22,33 +22,113 @@
                     <h5 class="card-title mb-0 flex-grow-1">{{title}}</h5>
                     <div class="flex-shrink-0">
                         <div class="d-flex gap-2 flex-wrap">
-                            <button class="btn btn-sm btn-soft-secondary"><i class="ri-add-line align-bottom me-1"></i>extraire</button>
+                            <button class="btn btn-sm btn-primary" style="min-width:120px; margin-right:8px;"><i class="ri-add-line align-bottom me-1"></i>Extraire</button>
+                            <button type="button" class="btn btn-sm btn-primary" style="min-width:120px; margin-right:8px;" data-bs-toggle="modal" data-bs-target="#criteriaModal">
+                                <i class="ri-filter-2-line align-bottom me-1"></i>Critères
+                            </button>
                         </div>
                     </div>
+                </div>
+
+                <!-- Modal Critères -->
+                <div class="modal fade" id="criteriaModal" tabindex="-1" aria-labelledby="criteriaModalLabel" aria-hidden="true">
+                  <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="criteriaModalLabel">Filtrer par critères</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                      </div>
+                      <div class="modal-body">
+                        <form [formGroup]="criteriaForm" (ngSubmit)="applyCriteria()">
+                          <div class="row g-3">
+                            <div class="col-md-6">
+                              <label class="form-label">Date début</label>
+                              <input type="date" class="form-control form-control-sm" formControlName="datedebut" />
+                            </div>
+                            <div class="col-md-6">
+                              <label class="form-label">Date fin</label>
+                              <input type="date" class="form-control form-control-sm" formControlName="datefin" />
+                            </div>
+
+                            <div class="col-xxl-6 col-sm-6">
+                                <div class="mb-3 bg-light">
+                                    <input type="text" placeholder="Selectionner le site" formControlName="site"
+                                            [matAutocomplete]="autoSite" class="form-select form-select-sm bg-light">
+                                    <mat-autocomplete #autoSite="matAutocomplete" [displayWith]="displaySite" panelClass="small-autocomplete">
+                                        @for (s of filteredSites | async ; track s.idsite!) {
+                                            <mat-option [value]="s">
+                                                {{s.libelle!}}
+                                            </mat-option>
+                                        }
+                                    </mat-autocomplete>
+                                </div>
+                            </div>
+
+                            <div class="col-xxl-6 col-sm-6">
+                                <div class="mb-3 bg-light">
+                                    <input type="text" placeholder="Selectionner le journal" formControlName="journal"
+                                            [matAutocomplete]="autoJournal" class="form-select form-select-sm bg-light">
+                                    <mat-autocomplete #autoJournal="matAutocomplete" [displayWith]="displayJournal" panelClass="small-autocomplete">
+                                        @for (j of filteredJournaux | async; track j.idjournal!) {
+                                            <mat-option [value]="j">
+                                                {{j.designation!}}
+                                            </mat-option>
+                                        }
+                                    </mat-autocomplete>
+                                </div>
+                            </div>
+                        
+                            <div class="col-md-12">
+                              <label class="form-label d-block">Écritures définitives</label>
+                              <mat-radio-group formControlName="ecrituresdefinitives" class="d-flex gap-3">
+                                <mat-radio-button value="all" class="me-2">Tous</mat-radio-button>
+                                <mat-radio-button value="yes" class="me-2">Oui</mat-radio-button>
+                                <mat-radio-button value="no">Non</mat-radio-button>
+                              </mat-radio-group>
+                            </div>
+
+                          </div>
+                          <div class="mt-3 d-flex justify-content-end">
+                            <button type="button" class="btn btn-sm btn-light me-2" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-sm btn-primary">Appliquer</button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
                 </div>
             </div>
 
             <div class="card-body">
                 <div class="table-scroll">
                     <div class="table-responsive table-card">
-                        <table class="table table-striped align-middle text-nowrap" id="invoiceTable">
-                            <thead class="">
+                        <table class="table table-striped align-middle table-nowrap text-nowrap table-container table-custom table-compact">
+                            <thead class="text-muted">
                                 <tr>
-                                    <th scope="col" class="sort text-uppercase" data-sort="numero">Numero ecriture</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="journal">Journal</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="date">Date</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="type">Type</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="libelle">Libelle</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="tiers">Tiers</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="sens">Sens</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="montant">Montant</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="devise">Devise</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="montant">Montant</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="centre">Centre ana.</th>
+                                    <th class="sort text-uppercase" data-sort="site">Site</th>
+                                    <th class="sort text-uppercase" data-sort="document">N° piece</th>
+                                    <th class="sort text-uppercase" data-sort="numero">N° ecriture</th>
+                                    <th class="sort text-uppercase" data-sort="journal">Journal</th>
+                                    <th class="sort text-uppercase" data-sort="date">Date</th>
+                                    <th class="sort text-uppercase" data-sort="type">Type</th>
+                                    <th class="sort text-uppercase" data-sort="compte">Compte</th>
+                                    <th class="sort text-uppercase" data-sort="tiers">Tiers</th>
+                                    <th class="sort text-uppercase" data-sort="libelle">Libelle</th>
+                                    <th class="sort text-uppercase" data-sort="debit">Debit</th>
+                                    <th class="sort text-uppercase" data-sort="credit">Credit</th>
+                                    <th class="sort text-uppercase" data-sort="montant">Montant</th>
+                                    <th class="sort text-uppercase" data-sort="devise">Devise</th>
+                                    <th class="sort text-uppercase" data-sort="montant">Montant</th>
+                                    <th class="sort text-uppercase" data-sort="centre">Centre ana.</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="list form-check-all">
                                 <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
                                     <td></td>
                                     <td></td>
                                     <td></td>
@@ -63,6 +143,10 @@
                                 </tr>
                             </tbody>
                         </table>
+                        <div class="text-center">
+                            <h6 class="mt-2">Désolé! Aucune écriture trouvé</h6>
+                            <p class="text-muted mb-0">Désole il n' y aucune donnée dans cette base</p>
+                        </div>
                     </div>
                 </div>
             </div>

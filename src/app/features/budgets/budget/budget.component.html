@@ -1,7 +1,9 @@
 <!-- start page title -->
 <div class="row">
   <div class="col-12">
-    <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+    <div
+      class="page-title-box d-sm-flex align-items-center justify-content-between"
+    >
       <h4 class="mb-sm-0">{{ title }}</h4>
       <div class="page-title-right">
         <ol class="breadcrumb m-0">
@@ -23,14 +25,24 @@
         <div class="row align-items-center gy-3">
           <div class="col-sm-auto">
             <div class="d-flex gap-1 flex-wrap">
-              <button type="button" class="btn btn-sm btn-soft-success" data-bs-toggle="modal" (click)="modalCreate()"
-                id="create-btn" data-bs-target="#showModal">
+              <button
+                type="button"
+                class="btn btn-sm btn-soft-success"
+                data-bs-toggle="modal"
+                (click)="modalCreate()"
+                id="create-btn"
+                data-bs-target="#showModal"
+              >
                 <i class="ri-add-line align-bottom me-1"></i>créer
               </button>
               <button type="button" class="btn btn-sm btn-soft-info">
                 <i class="ri-file-download-line align-bottom me-1"></i> import
               </button>
-              <button class="btn btn-sm btn-soft-danger" [disabled]="!checkAllRow" onClick="deleteMultiple()">
+              <button
+                class="btn btn-sm btn-soft-danger"
+                [disabled]="!checkAllRow"
+                onClick="deleteMultiple()"
+              >
                 <i class="ri-delete-bin-2-line"></i>
               </button>
               <button type="button" class="btn btn-sm btn-info">
@@ -45,9 +57,14 @@
           <div class="row g-3">
             <div class="col-xxl-5 col-sm-6">
               <div class="search-box">
-                <input type="text" class="form-control form-control-sm search"
-                  placeholder="rechercher par code, libelle..." [(ngModel)]="searchTerm"
-                  (ngModelChange)="applyFilters()" [ngModelOptions]="{ standalone: true }" />
+                <input
+                  type="text"
+                  class="form-control form-control-sm search"
+                  placeholder="rechercher par code, libelle..."
+                  [(ngModel)]="searchTerm"
+                  (ngModelChange)="applyFilters()"
+                  [ngModelOptions]="{ standalone: true }"
+                />
                 <i class="ri-search-line search-icon"></i>
               </div>
             </div>
@@ -56,8 +73,13 @@
             <!--end col-->
             <div class="col-xxl-2 col-sm-4">
               <div>
-                <select class="form-control form-control-sm" data-choices data-choices-search-false
-                  name="choices-single-default" id="idStatus">
+                <select
+                  class="form-control form-control-sm"
+                  data-choices
+                  data-choices-search-false
+                  name="choices-single-default"
+                  id="idStatus"
+                >
                   <option value="">Status</option>
                   <option value="all" selected>tous</option>
                   <option value="Pending">Actif</option>
@@ -70,7 +92,11 @@
             <!--end col-->
             <div class="col-xxl-1 col-sm-2">
               <div>
-                <button type="button" class="btn btn-sm btn-primary w-100" onclick="SearchData();">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-primary w-100"
+                  onclick="SearchData()"
+                >
                   <i class="ri-equalizer-fill me-1 align-bottom"></i>
                   Filtrer
                 </button>
@@ -83,29 +109,53 @@
       </div>
       <div class="card-body pt-0">
         <div>
-          <ul class="nav nav-tabs nav-tabs-custom nav-success mb-3" role="tablist">
+          <ul
+            class="nav nav-tabs nav-tabs-custom nav-success mb-3"
+            role="tablist"
+          >
             <li class="nav-item">
-              <a class="nav-link active All py-3" [class.active]="currentStatusFilter === 'ALL'"
-                (click)="applyStatusFilter('ALL')" data-bs-toggle="tab" id="All" href="#home1" role="tab"
-                aria-selected="true">
+              <a
+                class="nav-link active All py-3"
+                [class.active]="currentStatusFilter === 'ALL'"
+                (click)="applyStatusFilter('ALL')"
+                data-bs-toggle="tab"
+                id="All"
+                href="#home1"
+                role="tab"
+                aria-selected="true"
+              >
                 <i class="ri-store-2-fill me-1 align-bottom"></i> Tous
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link py-3 Delivered" [class.active]="currentStatusFilter === 'ACTIF'"
-                (click)="applyStatusFilter('ACTIF')" data-bs-toggle="tab" id="Delivered" href="#delivered" role="tab"
-                aria-selected="false">
+              <a
+                class="nav-link py-3 Delivered"
+                [class.active]="currentStatusFilter === 'ACTIF'"
+                (click)="applyStatusFilter('ACTIF')"
+                data-bs-toggle="tab"
+                id="Delivered"
+                href="#delivered"
+                role="tab"
+                aria-selected="false"
+              >
                 <i class="ri-checkbox-circle-line me-1 align-bottom"></i> Actif
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link py-3 Pickups" [class.active]="currentStatusFilter === 'INACTIF'"
-                (click)="applyStatusFilter('INACTIF')" data-bs-toggle="tab" id="Pickups" href="#pickups" role="tab"
-                aria-selected="false">
+              <a
+                class="nav-link py-3 Pickups"
+                [class.active]="currentStatusFilter === 'INACTIF'"
+                (click)="applyStatusFilter('INACTIF')"
+                data-bs-toggle="tab"
+                id="Pickups"
+                href="#pickups"
+                role="tab"
+                aria-selected="false"
+              >
                 <i class="ri-truck-line me-1 align-bottom"></i> Inactif
                 <span class="badge bg-danger align-middle ms-1">{{
                   totalInactifs
-                  }}</span>
+                }}</span>
               </a>
             </li>
           </ul>
@@ -116,13 +166,19 @@
                 <tr class="text-uppercase">
                   <th scope="col" style="width: 25px">
                     <div class="form-check">
-                      <input class="form-check-input" type="checkbox" [(ngModel)]="checkAllRow" id="checkAll"
-                        (ngModelChange)="handleSelectAll($event)" />
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        [(ngModel)]="checkAllRow"
+                        id="checkAll"
+                        (ngModelChange)="handleSelectAll($event)"
+                      />
                     </div>
                   </th>
                   <th class="sort" data-sort="id">Code</th>
                   <th class="sort" data-sort="id">Libellé</th>
                   <th class="sort" data-sort="customer_name">Entité</th>
+                  <th class="sort" data-sort="customer_name">Analytique</th>
                   <th class="sort" data-sort="customer_name">Date début</th>
                   <th class="sort" data-sort="customer_name">Date fin</th>
                   <th class="sort" data-sort="status">Status</th>
@@ -131,170 +187,250 @@
                 </tr>
               </thead>
               <tbody class="list form-check-all">
-                @if (hasAnnualBudgets) { @for (item of
-                getBudgetsAnnuels(); track item.idbudget) {
-
-                <!-- 🔹 LIGNE BUDGET ANNUEL -->
-                <tr class="table-primary-subtle fw-semibold">
-                  <td>
-                    <button class="btn btn-sm btn-link p-0" (click)="toggleExpand(item.idbudget)">
-                      <i class="ri-arrow-right-s-line fs-16"
-                        [class.ri-arrow-down-s-line]="isExpanded[item.idbudget]"></i>
-                    </button>
-                  </td>
-
-                  <td>
-                    {{ item.codebudget }}
-                  </td>
-
-                  <td>{{ item.libelle }}</td>
-                  <td>{{ item.entite }}</td>
-                  <td>{{ item.datedebut | date : "dd-MM-yyyy" }}</td>
-                  <td>{{ item.datefin | date : "dd-MM-yyyy" }}</td>
-
-                  <td>
-                    <span class="badge" [ngClass]="
-                        item.actif
-                          ? 'bg-success-subtle text-success'
-                          : 'bg-danger-subtle text-danger'
-                      ">
-                      {{ item.actif ? "Actif" : "Inactif" }}
-                    </span>
-                  </td>
-
-                  <td class="fw-bold text-end">
-                    {{ getPrevisionAnnuel(item) | number : "1.0-0" }}
-                  </td>
-
-                  <td>
-                    <div class="d-flex align-items-center gap-2">
-                      <!-- Bouton modifier -->
-                      <a class="text-primary" href="#showModal" data-bs-toggle="modal" (click)="modalUpdate(item)">
-                        <i class="ri-pencil-fill"></i>
-                      </a>
-
-                      <!-- Bouton supprimer -->
-                      <a *ngIf="getBudgetsMensuels(item.idbudget).length === 0" class="text-danger"
-                        (click)="modalDelete(item)" data-bs-toggle="modal" href="#deleteOrder">
-                        <i class="ri-delete-bin-5-fill"></i>
-                      </a>
-
-                      <!-- Menu contextuel -->
-                      <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="dropdown"
-                          aria-expanded="false">
-                          <i class="ri-more-2-fill"></i>
+                @if (hasAnnualBudgets) {
+                  @for (item of getBudgetsAnnuels(); track item.idbudget) {
+                    <!-- 🔹 LIGNE BUDGET ANNUEL -->
+                    <tr class="table-primary-subtle fw-semibold">
+                      <td>
+                        <button
+                          class="btn btn-sm btn-link p-0"
+                          (click)="toggleExpand(item.idbudget)"
+                        >
+                          <i
+                            class="ri-arrow-right-s-line fs-16"
+                            [class.ri-arrow-down-s-line]="
+                              isExpanded[item.idbudget]
+                            "
+                          ></i>
                         </button>
+                      </td>
 
-                        <ul class="dropdown-menu dropdown-menu-end">
-                          <li>
-                            <a class="dropdown-item" href="#lignesBudgetairesModal" data-bs-toggle="modal"
-                              (click)="onClickAfficherLignesBudgetaire(item)">
-                              <i class="ri-time-line me-2"></i>
-                              Consulter les lignes budgétaires
-                            </a>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </td>
+                      <td>
+                        {{ item.codebudget }}
+                      </td>
 
+                      <td>{{ item.libelle }}</td>
+                      <td>{{ item.entite ? item.entite : "-" }}</td>
+                      <td>
+                        <span
+                          class="badge"
+                          [ngClass]="
+                            item.isanalytique === 1
+                              ? 'bg-success-subtle text-success'
+                              : 'bg-danger-subtle text-danger'
+                          "
+                        >
+                          {{ item.isanalytique ? "Oui" : "Non" }}
+                        </span>
+                      </td>
+                      <td>{{ item.datedebut | date: "dd-MM-yyyy" }}</td>
+                      <td>{{ item.datefin | date: "dd-MM-yyyy" }}</td>
 
-                </tr>
+                      <td>
+                        <span
+                          class="badge"
+                          [ngClass]="
+                            item.actif
+                              ? 'bg-success-subtle text-success'
+                              : 'bg-danger-subtle text-danger'
+                          "
+                        >
+                          {{ item.actif ? "Actif" : "Inactif" }}
+                        </span>
+                      </td>
 
-                <!-- 🔸 LIGNES BUDGETS MENSUELS -->
-                @if (isExpanded[item.idbudget]) {
-                <tr>
-                  <td colspan="9" class="bg-light">
-                    <table class="table table-sm table-borderless mb-0">
-                      <thead class="text-muted">
-                        <tr>
-                          <th>Code</th>
-                          <th>Libellé</th>
-                          <th>Période</th>
-                          <th>Prévision</th>
-                          <th>Status</th>
-                          <th class="text-end">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @for (child of getBudgetsMensuels(item.idbudget); track
-                        child.idbudget) {
-                        <tr>
-                          <td>{{ child.codebudget }}</td>
-                          <td>{{ child.libelle }}</td>
-                          <td>
-                            {{ child.datedebut | date : "MMM yyyy" }}
-                          </td>
-                          <td class="text-end">
-                            {{ getPrevisionMensuel(child) | number : "1.0-0" }}
-                          </td>
-                          <td>
-                            <span class="badge" [ngClass]="
-                                child.actif
-                                  ? 'bg-success-subtle text-success'
-                                  : 'bg-danger-subtle text-danger'
-                              ">
-                              {{ child.actif ? "Actif" : "Inactif" }}
-                            </span>
-                          </td>
-                          <td class="text-end">
-                            <div class="d-flex justify-content-end align-items-center gap-2">
-                              <!-- Modifier -->
-                              <a href="#showModal" data-bs-toggle="modal" (click)="modalUpdate(child)"
-                                class="text-primary">
-                                <i class="ri-pencil-fill"></i>
-                              </a>
+                      <td class="fw-bold text-end">
+                        {{ getPrevisionAnnuel(item) | number: "1.0-0" }}
+                      </td>
 
-                              <!-- Supprimer -->
-                              <a class="text-danger" (click)="modalDelete(child)" data-bs-toggle="modal"
-                                href="#deleteOrder">
-                                <i class="ri-delete-bin-5-fill"></i>
-                              </a>
+                      <td>
+                        <div class="d-flex align-items-center gap-2">
+                          <!-- Bouton modifier -->
+                          <a
+                            class="text-primary"
+                            href="#showModal"
+                            data-bs-toggle="modal"
+                            (click)="modalUpdate(item)"
+                          >
+                            <i class="ri-pencil-fill"></i>
+                          </a>
 
-                              <!-- Menu contextuel -->
-                              <div class="dropdown">
-                                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="dropdown"
-                                  aria-expanded="false">
-                                  <i class="ri-more-2-fill"></i>
-                                </button>
+                          <!-- Bouton supprimer -->
+                          <a
+                            *ngIf="
+                              getBudgetsMensuels(item.idbudget).length === 0
+                            "
+                            class="text-danger"
+                            (click)="modalDelete(item)"
+                            data-bs-toggle="modal"
+                            href="#deleteOrder"
+                          >
+                            <i class="ri-delete-bin-5-fill"></i>
+                          </a>
 
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                  <li>
-                                    <a class="dropdown-item" href="#lignesBudgetairesModal" data-bs-toggle="modal"
-                                      (click)="onClickAfficherLignesBudgetaire(child)">
-                                      <i class="ri-time-line me-2"></i>
-                                      Consulter les lignes budgétaires
-                                    </a>
-                                  </li>
-                                </ul>
-                              </div>
-                            </div>
-                          </td>
+                          <!-- Menu contextuel -->
+                          <div class="dropdown">
+                            <button
+                              class="btn btn-sm btn-outline-primary"
+                              type="button"
+                              data-bs-toggle="dropdown"
+                              aria-expanded="false"
+                            >
+                              <i class="ri-more-2-fill"></i>
+                            </button>
 
-                        </tr>
-                        } @if (getBudgetsMensuels(item.idbudget).length === 0) {
-                        <tr>
-                          <td colspan="5" class="text-center text-muted py-2">
-                            Aucun budget mensuel rattaché
-                          </td>
-                        </tr>
-                        }
-                      </tbody>
-                    </table>
-                  </td>
-                </tr>
-                } } } @else {
-                <tr>
-                  <td colspan="9" class="text-center py-5">
-                    <i class="ri-inbox-2-line fs-1 text-muted"></i>
-                    <h6 class="mt-2">Aucun budget annuel disponible</h6>
-                    <p class="text-muted mb-0">
-                      Créez un budget annuel pour pouvoir y rattacher des
-                      budgets mensuels.
-                    </p>
-                  </td>
-                </tr>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                              <li>
+                                <a
+                                  class="dropdown-item"
+                                  href="#lignesBudgetairesModal"
+                                  data-bs-toggle="modal"
+                                  (click)="
+                                    onClickAfficherLignesBudgetaire(item)
+                                  "
+                                >
+                                  <i class="ri-time-line me-2"></i>
+                                  Consulter les lignes budgétaires
+                                </a>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+
+                    <!-- 🔸 LIGNES BUDGETS MENSUELS -->
+                    @if (isExpanded[item.idbudget]) {
+                      <tr>
+                        <td colspan="9" class="bg-light">
+                          <table class="table table-sm table-borderless mb-0">
+                            <thead class="text-muted">
+                              <tr>
+                                <th>Code</th>
+                                <th>Libellé</th>
+                                <th>Période</th>
+                                <th>Prévision</th>
+                                <th>Status</th>
+                                <th class="text-end">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              @for (
+                                child of getBudgetsMensuels(item.idbudget);
+                                track child.idbudget
+                              ) {
+                                <tr>
+                                  <td>{{ child.codebudget }}</td>
+                                  <td>{{ child.libelle }}</td>
+                                  <td>
+                                    {{ child.datedebut | date: "MMM yyyy" }}
+                                  </td>
+                                  <td class="text-end">
+                                    {{
+                                      getPrevisionMensuel(child)
+                                        | number: "1.0-0"
+                                    }}
+                                  </td>
+                                  <td>
+                                    <span
+                                      class="badge"
+                                      [ngClass]="
+                                        child.actif
+                                          ? 'bg-success-subtle text-success'
+                                          : 'bg-danger-subtle text-danger'
+                                      "
+                                    >
+                                      {{ child.actif ? "Actif" : "Inactif" }}
+                                    </span>
+                                  </td>
+                                  <td class="text-end">
+                                    <div
+                                      class="d-flex justify-content-end align-items-center gap-2"
+                                    >
+                                      <!-- Modifier -->
+                                      <a
+                                        href="#showModal"
+                                        data-bs-toggle="modal"
+                                        (click)="modalUpdate(child)"
+                                        class="text-primary"
+                                      >
+                                        <i class="ri-pencil-fill"></i>
+                                      </a>
+
+                                      <!-- Supprimer -->
+                                      <a
+                                        class="text-danger"
+                                        (click)="modalDelete(child)"
+                                        data-bs-toggle="modal"
+                                        href="#deleteOrder"
+                                      >
+                                        <i class="ri-delete-bin-5-fill"></i>
+                                      </a>
+
+                                      <!-- Menu contextuel -->
+                                      <div class="dropdown">
+                                        <button
+                                          class="btn btn-sm btn-outline-primary"
+                                          type="button"
+                                          data-bs-toggle="dropdown"
+                                          aria-expanded="false"
+                                        >
+                                          <i class="ri-more-2-fill"></i>
+                                        </button>
+
+                                        <ul
+                                          class="dropdown-menu dropdown-menu-end"
+                                        >
+                                          <li>
+                                            <a
+                                              class="dropdown-item"
+                                              href="#lignesBudgetairesModal"
+                                              data-bs-toggle="modal"
+                                              (click)="
+                                                onClickAfficherLignesBudgetaire(
+                                                  child
+                                                )
+                                              "
+                                            >
+                                              <i class="ri-time-line me-2"></i>
+                                              Consulter les lignes budgétaires
+                                            </a>
+                                          </li>
+                                        </ul>
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              }
+                              @if (
+                                getBudgetsMensuels(item.idbudget).length === 0
+                              ) {
+                                <tr>
+                                  <td
+                                    colspan="5"
+                                    class="text-center text-muted py-2"
+                                  >
+                                    Aucun budget mensuel rattaché
+                                  </td>
+                                </tr>
+                              }
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    }
+                  }
+                } @else {
+                  <tr>
+                    <td colspan="9" class="text-center py-5">
+                      <i class="ri-inbox-2-line fs-1 text-muted"></i>
+                      <h6 class="mt-2">Aucun budget annuel disponible</h6>
+                      <p class="text-muted mb-0">
+                        Créez un budget annuel pour pouvoir y rattacher des
+                        budgets mensuels.
+                      </p>
+                    </td>
+                  </tr>
                 }
               </tbody>
             </table>
@@ -310,20 +446,32 @@
           </div>
           <div class="d-flex justify-content-end">
             <div class="pagination-wrap hstack gap-2">
-              <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)"
-                class="btn btn-sm btn-soft-primary pagination-prev">
+              <button
+                [disabled]="currentPage == 1"
+                (click)="changePage(currentPage - 1)"
+                class="btn btn-sm btn-soft-primary pagination-prev"
+              >
                 Précédent
               </button>
               <ul class="pagination listjs-pagination mb-0"></ul>
-              <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)"
-                class="btn btn-sm btn-soft-primary pagination-next">
+              <button
+                [disabled]="currentPage == totalPages"
+                (click)="changePage(currentPage + 1)"
+                class="btn btn-sm btn-soft-primary pagination-next"
+              >
                 Suivant
               </button>
             </div>
           </div>
         </div>
 
-        <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div
+          class="modal fade"
+          id="showModal"
+          tabindex="-1"
+          aria-labelledby="exampleModalLabel"
+          aria-hidden="true"
+        >
           <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
               <div class="modal-header bg-light p-3">
@@ -331,25 +479,47 @@
                   {{ actionModal === "create" ? "Création" : "Modification" }}
                   Budget
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                  id="close-modal"></button>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                  id="close-modal"
+                  (click)="closeModal('showModal')"
+                ></button>
               </div>
               <form [formGroup]="budgetForm">
                 <div class="modal-body">
                   <input type="hidden" id="id-field" />
 
                   <div class="mb-3" id="modal-id">
-                    <label for="orderId" class="form-label form-label-sm">Code</label>
-                    <input type="text" id="orderId" class="form-control form-control-sm {{
+                    <label for="orderId" class="form-label form-label-sm"
+                      >Code</label
+                    >
+                    <input
+                      type="text"
+                      id="orderId"
+                      class="form-control form-control-sm {{
                         isValidField('codebudget')
-                      }}" formControlName="codebudget" placeholder="" required />
+                      }}"
+                      formControlName="codebudget"
+                      placeholder=""
+                      required
+                    />
                   </div>
 
                   <div class="mb-3">
-                    <label class="form-label form-label-sm" for="">Type de budget</label>
-                    <select class="form-select form-control form-control-sm {{
+                    <label class="form-label form-label-sm" for=""
+                      >Type de budget</label
+                    >
+                    <select
+                      class="form-select form-control form-control-sm {{
                         isValidField('typebudget')
-                      }}" aria-label="Default select example" id="typebudget-field" formControlName="typebudget">
+                      }}"
+                      aria-label="Default select example"
+                      id="typebudget-field"
+                      formControlName="typebudget"
+                    >
                       <option [ngValue]="null">-- Sélectionner --</option>
                       <option value="Annuel">Annuel</option>
                       <option value="Mensuel">Mensuel</option>
@@ -358,67 +528,148 @@
                   </div>
 
                   @if (budgetForm.value.typebudget === "Mensuel") {
-                  <div class="mb-3">
-                    <label for="idbudgetparent-field" class="form-label form-label-sm">Budget Parent</label>
-                    <select class="form-select form-control form-control-sm" aria-label="Default select example"
-                      id="idbudgetparent" formControlName="idbudgetparent" (change)="onSelectionChange($event)">
-                      <option [ngValue]="null">-- Sélectionner --</option>
-                      @for (item of budgets; track $index){ @if(item.typebudget
-                      === "Annuel") {
-                      <option [value]="item.idbudget">
-                        {{ item.codebudget }} - {{ item.libelle }}
-                      </option>
-                      } }
-                    </select>
-                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
-                  </div>
+                    <div class="mb-3">
+                      <label
+                        for="idbudgetparent-field"
+                        class="form-label form-label-sm"
+                        >Budget Parent</label
+                      >
+                      <select
+                        class="form-select form-control form-control-sm"
+                        aria-label="Default select example"
+                        id="idbudgetparent"
+                        formControlName="idbudgetparent"
+                        (change)="onSelectionChange($event)"
+                      >
+                        <option [ngValue]="null">-- Sélectionner --</option>
+                        @for (item of budgets; track $index) {
+                          @if (item.typebudget === "Annuel") {
+                            <option [value]="item.idbudget">
+                              {{ item.codebudget }} - {{ item.libelle }}
+                            </option>
+                          }
+                        }
+                      </select>
+                      <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
+                    </div>
                   }
 
                   <div class="mb-3" id="modal-id">
-                    <label for="libellebudgetId" class="form-label form-label-sm">Libellé</label>
-                    <input type="text" id="libellebudgetId" class="form-control form-control-sm {{
+                    <label
+                      for="libellebudgetId"
+                      class="form-label form-label-sm"
+                      >Libellé</label
+                    >
+                    <input
+                      type="text"
+                      id="libellebudgetId"
+                      class="form-control form-control-sm {{
                         isValidField('libelle')
-                      }}" formControlName="libelle" placeholder="" required />
+                      }}"
+                      formControlName="libelle"
+                      placeholder=""
+                      required
+                    />
                   </div>
 
-                  <div class="mb-3">
-                    <label class="form-label form-label-sm" for="entite-field">
-                      Entité
-                    </label>
-
-                    <select id="entite-field" class="form-select form-control form-control-sm {{
-                        isValidField('entite')
-                      }}" formControlName="entite">
-                      <option [ngValue]="null">-- Sélectionner --</option>
-
-                      <option value="Département">Département</option>
-                      <option value="Site">Site</option>
-                    </select>
-
-                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
+                  <div
+                    class="mb-3 d-flex align-items-center justify-content-between p-2 border rounded bg-light-subtle shadow-sm"
+                  >
+                    <div class="d-flex align-items-center">
+                      <i class="ri-settings-4-line me-2 text-primary fs-18"></i>
+                      <div>
+                        <h6 class="mb-0 fs-13">Gestion analytique</h6>
+                        <small class="text-muted"
+                          >Gérer les lignes budgétaires analytiquement ?</small
+                        >
+                      </div>
+                    </div>
+                    <div class="form-check form-switch form-switch-md">
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        id="customSwitchEntite"
+                        formControlName="isanalytique"
+                        role="switch"
+                      />
+                      <label
+                        class="form-check-label"
+                        for="customSwitchEntite"
+                      ></label>
+                    </div>
                   </div>
+
+                  @if (
+                    budgetForm.value.isanalytique === false ||
+                    (selectedBudget &&
+                      (selectedBudget.isanalytique === 0 ||
+                        selectedBudget.isanalytique === null))
+                  ) {
+                    <div class="mb-3">
+                      <label
+                        class="form-label form-label-sm"
+                        for="entite-field"
+                      >
+                        Entité
+                      </label>
+
+                      <select
+                        id="entite-field"
+                        class="form-select form-control form-control-sm {{
+                          isValidField('entite')
+                        }}"
+                        formControlName="entite"
+                      >
+                        <option [ngValue]="null">-- Sélectionner --</option>
+
+                        <option value="Département">Département</option>
+                        <option value="Site">Site</option>
+                      </select>
+
+                      <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
+                    </div>
+                  }
 
                   <div class="mb-3">
                     <div>
-                      <label for="datedebut_field" class="form-label mb-0">Date début</label>
-                      <input type="date" id="datedebut_field" class="form-control form-control-sm {{
+                      <label for="datedebut_field" class="form-label mb-0"
+                        >Date début</label
+                      >
+                      <input
+                        type="date"
+                        id="datedebut_field"
+                        class="form-control form-control-sm {{
                           isValidField('datedebut')
-                        }}" formControlName="datedebut" />
+                        }}"
+                        formControlName="datedebut"
+                      />
 
-                      <div class="invalid-feedback" *ngIf="hasError('datedebut', 'invalidMonthRange')">
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datedebut', 'invalidMonthRange')"
+                      >
                         Le budget mensuel doit couvrir un mois complet.
                       </div>
 
-                      <div class="invalid-feedback" *ngIf="hasError('datedebut', 'outOfParentRange')">
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datedebut', 'outOfParentRange')"
+                      >
                         La date de début est hors de la période du budget
                         parent.
                       </div>
 
-                      <div class="invalid-feedback" *ngIf="hasError('datedebut', 'duplicateMonthlyBudget')">
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datedebut', 'duplicateMonthlyBudget')"
+                      >
                         Un budget mensuel existe déjà pour ce mois.
                       </div>
 
-                      <div class="invalid-feedback" *ngIf="hasError('datedebut', 'invalidAnnualStartDate')">
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datedebut', 'invalidAnnualStartDate')"
+                      >
                         Pour un budget annuel, la date de début doit être le
                         01/01 de l'année.
                       </div>
@@ -427,28 +678,50 @@
                   </div>
                   <div class="mb-3">
                     <div>
-                      <label for="datefin_field" class="form-label mb-0">Date fin</label>
-                      <input type="date" id="datefin_field" class="form-control form-control-sm {{
+                      <label for="datefin_field" class="form-label mb-0"
+                        >Date fin</label
+                      >
+                      <input
+                        type="date"
+                        id="datefin_field"
+                        class="form-control form-control-sm {{
                           isValidField('datefin')
-                        }}" formControlName="datefin" />
-                      <div class="invalid-feedback" *ngIf="hasError('datefin', 'startAfterEnd')">
+                        }}"
+                        formControlName="datefin"
+                      />
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datefin', 'startAfterEnd')"
+                      >
                         La date de fin doit être postérieure à la date de début.
                       </div>
 
-                      <div class="invalid-feedback" *ngIf="hasError('datefin', 'invalidMonthRange')">
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datefin', 'invalidMonthRange')"
+                      >
                         La date de fin doit correspondre au dernier jour du
                         mois.
                       </div>
 
-                      <div class="invalid-feedback" *ngIf="hasError('datefin', 'outOfParentRange')">
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datefin', 'outOfParentRange')"
+                      >
                         La date de fin est hors de la période du budget parent.
                       </div>
 
-                      <div class="invalid-feedback" *ngIf="hasError('datefin', 'duplicateMonthlyBudget')">
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datefin', 'duplicateMonthlyBudget')"
+                      >
                         Un budget mensuel existe déjà pour cette période.
                       </div>
 
-                      <div class="invalid-feedback" *ngIf="hasError('datefin', 'invalidAnnualEndDate')">
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datefin', 'invalidAnnualEndDate')"
+                      >
                         Pour un budget annuel, la date de fin doit être le 31/12
                         de la même année.
                       </div>
@@ -457,35 +730,80 @@
                   </div>
 
                   <div class="mb-3">
-                    <label class="form-label form-label-sm" for="idcircuitvalidation-field" [hidden]="true">Circuit de
-                      validation</label>
-                    <input type="text" id="idcircuitvalidation-field" class="form-control form-control-sm {{
+                    <label
+                      class="form-label form-label-sm"
+                      for="idcircuitvalidation-field"
+                      [hidden]="true"
+                      >Circuit de validation</label
+                    >
+                    <input
+                      type="text"
+                      id="idcircuitvalidation-field"
+                      class="form-control form-control-sm {{
                         isValidField('idcircuitvalidation')
-                      }}" formControlName="idcircuitvalidation" [value]="circuitValidation?.idcircuitvalidation"
-                      [hidden]="true" />
+                      }}"
+                      formControlName="idcircuitvalidation"
+                      [value]="circuitValidation?.idcircuitvalidation"
+                      [hidden]="true"
+                    />
 
                     <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                   </div>
                   <div class="mb-3">
-                    <label class="form-label form-label-sm" [hidden]="true" for="">Site</label>
-                    <input type="text" id="idsite-field" class="form-control form-control-sm {{
+                    <label
+                      class="form-label form-label-sm"
+                      [hidden]="true"
+                      for=""
+                      >Site</label
+                    >
+                    <input
+                      type="text"
+                      id="idsite-field"
+                      class="form-control form-control-sm {{
                         isValidField('idsite')
-                      }}" formControlName="idsite" [value]="user.idsite" [hidden]="true" />
+                      }}"
+                      formControlName="idsite"
+                      [value]="user.idsite"
+                      [hidden]="true"
+                    />
                     <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                   </div>
                   <div class="mb-3">
-                    <label class="form-label form-label-sm" for="" [hidden]="true">Société</label>
-                    <input type="text" id="idsociete-field" class="form-control form-control-sm {{
+                    <label
+                      class="form-label form-label-sm"
+                      for=""
+                      [hidden]="true"
+                      >Société</label
+                    >
+                    <input
+                      type="text"
+                      id="idsociete-field"
+                      class="form-control form-control-sm {{
                         isValidField('idsociete')
-                      }}" formControlName="idsociete" [value]="user.idsociete" [hidden]="true" />
+                      }}"
+                      formControlName="idsociete"
+                      [value]="user.idsociete"
+                      [hidden]="true"
+                    />
                     <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                   </div>
 
                   <div class="mb-3">
                     <div class="form-check form-switch">
-                      <input class="form-check-input" type="checkbox" role="switch" value="1" formControlName="actif"
-                        id="flexSwitchCheckChecked" checked />
-                      <label class="form-check-label" for="flexSwitchCheckChecked">Actif</label>
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        value="1"
+                        formControlName="actif"
+                        id="flexSwitchCheckChecked"
+                        checked
+                      />
+                      <label
+                        class="form-check-label"
+                        for="flexSwitchCheckChecked"
+                        >Actif</label
+                      >
                     </div>
                   </div>
                   <div *ngIf="msgErros" class="alert alert-danger mt-2">
@@ -495,12 +813,21 @@
 
                 <div class="modal-footer">
                   <div class="hstack gap-2 justify-content-end">
-                    <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-light"
+                      data-bs-dismiss="modal"
+                    >
                       Fermer
                     </button>
-                    <button type="submit" class="btn btn-sm btn-success" id="add-btn" (click)="onSubmit()">
+                    <button
+                      type="submit"
+                      class="btn btn-sm btn-success"
+                      id="add-btn"
+                      (click)="onSubmit()"
+                    >
                       {{
-                      actionModal === "create" ? "Enregistrer" : "Modifier"
+                        actionModal === "create" ? "Enregistrer" : "Modifier"
                       }}
                     </button>
                     <!-- <button type="button" class="btn btn-success" id="edit-btn">Update</button> -->
@@ -512,22 +839,25 @@
         </div>
 
         <div class="modal fade" id="modalLignesBudget" tabindex="-1">
-          <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+          <div
+            class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"
+          >
             <div class="modal-content shadow-lg rounded-4">
-
               <!-- HEADER -->
               <div class="modal-header bg-light">
                 <div>
-                  <h5 class="modal-title mb-0">
-                    Lignes budgétaires
-                  </h5>
+                  <h5 class="modal-title mb-0">Lignes budgétaires</h5>
                   <small class="text-muted">
                     {{ selectedBudgetForLignes?.codebudget }} —
                     {{ selectedBudgetForLignes?.libelle }}
                   </small>
                 </div>
 
-                <button type="button" class="btn-close" (click)="closeLignesBudgetModal()"></button>
+                <button
+                  type="button"
+                  class="btn-close"
+                  (click)="closeLignesBudgetModal()"
+                ></button>
               </div>
 
               <!-- BODY -->
@@ -546,13 +876,13 @@
                     <tr *ngFor="let l of lignesBudgetDuBudget">
                       <td>{{ l.nature_operation?.libelle }}</td>
                       <td class="text-end fw-semibold">
-                        {{ l.montantprevisiondept | number:'1.0-0' }}
+                        {{ l.montantprevisiondept | number: "1.0-0" }}
                       </td>
                       <td class="text-end">
-                        {{ l.montantprevisionsite | number:'1.0-0' }}
+                        {{ l.montantprevisionsite | number: "1.0-0" }}
                       </td>
                       <td class="text-end">
-                        {{ l.montantprevisionsociete | number:'1.0-0' }}
+                        {{ l.montantprevisionsociete | number: "1.0-0" }}
                       </td>
                     </tr>
 
@@ -567,18 +897,24 @@
 
               <!-- FOOTER -->
               <div class="modal-footer bg-light">
-                <button class="btn btn-outline-secondary" (click)="closeLignesBudgetModal()">
+                <button
+                  class="btn btn-outline-secondary"
+                  (click)="closeLignesBudgetModal()"
+                >
                   Fermer
                 </button>
               </div>
-
             </div>
           </div>
         </div>
 
-
         <!-- Modal -->
-        <div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
+        <div
+          class="modal fade flip"
+          id="deleteOrder"
+          tabindex="-1"
+          aria-hidden="true"
+        >
           <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
               <div class="modal-body p-5 text-center">
@@ -586,11 +922,18 @@
                   <h4>{{ titleMsg }}</h4>
                   <p class="text-muted fs-15 mb-4">{{ msgSup }}</p>
                   <div class="hstack gap-2 justify-content-center remove">
-                    <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none"
-                      id="deleteRecord-close" data-bs-dismiss="modal">
+                    <button
+                      class="btn btn-sm btn-link link-success fw-medium text-decoration-none"
+                      id="deleteRecord-close"
+                      data-bs-dismiss="modal"
+                    >
                       <i class="ri-close-line me-1 align-middle"></i> annuler
                     </button>
-                    <button class="btn btn-sm btn-danger" (click)="deleteConfirmed()" id="delete-record">
+                    <button
+                      class="btn btn-sm btn-danger"
+                      (click)="deleteConfirmed()"
+                      id="delete-record"
+                    >
                       Oui, supprimer
                     </button>
                   </div>
@@ -601,24 +944,36 @@
         </div>
         <!--end modal -->
         <!-- Modal visionnage des validateurs -->
-        <div class="modal fade" id="lignesBudgetairesModal" tabindex="-1" aria-hidden="true">
+        <div
+          class="modal fade"
+          id="lignesBudgetairesModal"
+          tabindex="-1"
+          aria-hidden="true"
+        >
           <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
-
               <!-- HEADER -->
               <div class="modal-header bg-light p-3">
                 <h5 class="modal-title">
-                  Lignes budgétaire du budget: {{ selectedBudget?.codebudget }} - {{ selectedBudget?.libelle }}
+                  Lignes budgétaire du budget:
+                  {{ selectedBudget?.codebudget }} -
+                  {{ selectedBudget?.libelle }}
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                  (click)="closeModal('lignesBudgetairesModal')"></button>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  (click)="closeModal('lignesBudgetairesModal')"
+                ></button>
               </div>
 
               <!-- BODY -->
               <div class="modal-body">
                 <!-- TABLE -->
                 <div class="table-responsive">
-                  <table class="table table-bordered table-striped align-middle table-compact">
+                  <table
+                    class="table table-bordered table-striped align-middle table-compact"
+                  >
                     <thead class="table-light">
                       <tr>
                         <th style="width: 50px">#</th>
@@ -637,17 +992,23 @@
                         <td>{{ ligne.departement?.libelle }}</td>
                         <td>{{ ligne.nature_operation?.libelle }}</td>
 
-
                         <td>
-                          {{ ligne.montantprevisiondept | number : "1.0-0" : "fr" }}
+                          {{
+                            ligne.montantprevisiondept | number: "1.0-0" : "fr"
+                          }}
                         </td>
 
                         <td>
-                          {{ ligne.montantprevisionsite | number : "1.0-0" : "fr" }}
+                          {{
+                            ligne.montantprevisionsite | number: "1.0-0" : "fr"
+                          }}
                         </td>
 
                         <td>
-                          {{ ligne.montantprevisionsociete | number : "1.0-0" : "fr" }}
+                          {{
+                            ligne.montantprevisionsociete
+                              | number: "1.0-0" : "fr"
+                          }}
                         </td>
                       </tr>
                       <tr *ngIf="lignesByBudget.length === 0">
@@ -662,7 +1023,6 @@
                 <div *ngIf="msgErros" class="alert alert-danger mt-2">
                   {{ msgErros }}
                 </div>
-
               </div>
             </div>
           </div>

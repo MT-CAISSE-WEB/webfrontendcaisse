@@ -6,6 +6,7 @@ export class BudgetModel extends MainModel {
   libelle: string = '';
   idbudgetparent: string | null = null;
   typebudget: string = '';
+  isanalytique: Number | null = 0;
   entite: string = '';
   datedebut: string = '';
   datefin: string = '';

@@ -25,42 +25,23 @@
                                 <i class="ri-add-line align-bottom me-1"></i>créer
                             </button>
                             <button type="button" class="btn btn-sm btn-soft-info"><i class="ri-file-download-line align-bottom me-1"></i> import</button>
-                            <button title ="button" class="btn btn-sm btn-soft-danger" [disabled]="!checkAllRow" onClick="deleteMultiple()"><i class="ri-delete-bin-2-line"></i></button>
-                            <button type="button" class="btn btn-sm btn-info" (click)="rafreshpage()"> <i class="ri-refresh-fill align-bottom me-1"></i>actualiser</button>
+                            <button type="button" class="btn btn-sm btn-soft-danger" [disabled]="objectsSelected.length === 0" (click)="deleteMultiple()" title="Supprimer la sélection">
+                                <i class="ri-delete-bin-2-line"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-info" (click)="refreshData()" title="Actualiser les données">
+                                <i class="ri-refresh-fill align-bottom me-1"></i>actualiser
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="card-body border border-dashed border-end-0 border-start-0">
+            <div class="card-body border border-dashed border-end-0 border-start-0 bg-light">
                 <form [formGroup]="searchForm">
                     <div class="row g-3">
                         <div class="col-xxl-12 col-sm-12">
                             <div class="search-box">
                                 <input type="text" class="form-control form-control-sm search" formControlName="search" placeholder="rechercher par code, libelle...">
                                 <i class="ri-search-line search-icon"></i>
-                            </div>
-                        </div>
-                        <!--end col-->
-    
-                        <!--end col-->
-                        <div class="col-xxl-2 col-sm-4">
-                            <div>
-                                <select title="Status" class="form-control form-control-sm" data-choices data-choices-search-false name="choices-single-default" id="idStatus">
-                                    <option value="">Status</option>
-                                    <option value="all" selected>tous</option>
-                                    <option value="Pending">Actif</option>
-                                    <option value="Pending">Inactif</option>
-                                </select>
-                            </div>
-                        </div>
-                        <!--end col-->
-                        
-                        <!--end col-->
-                        <div class="col-xxl-1 col-sm-2">
-                            <div>
-                                <button type="button" class="btn btn-sm btn-primary w-100" onclick="SearchData();"> <i class="ri-equalizer-fill me-1 align-bottom"></i>
-                                    Filtrer
-                                </button>
                             </div>
                         </div>
                         <!--end col-->
@@ -72,24 +53,32 @@
                 <div>
                     <ul class="nav nav-tabs nav-tabs-custom nav-success mb-3" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active All py-3" data-bs-toggle="tab" id="All" (click)="setStatus('')"  role="tab" aria-selected="true">
-                                <i class="ri-store-2-fill me-1 align-bottom"></i> Tous
+                            <a class="nav-link active All py-3" data-bs-toggle="tab" id="All" (click)="filterByStatus('')" role="tab" aria-selected="true">
+                                <i class="ri-store-2-fill me-1 align-bottom"></i> Tous <span class="badge bg-secondary ms-1">{{getStatusCount('')}}</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link py-3 Delivered" data-bs-toggle="tab" id="Delivered" (click)="setStatus(1)" role="tab" aria-selected="false">
-                                <i class="ri-checkbox-circle-line me-1 align-bottom"></i> Actif
+                            <a class="nav-link py-3 Delivered" data-bs-toggle="tab" id="Delivered" (click)="filterByStatus(1)" role="tab" aria-selected="false">
+                                <i class="ri-checkbox-circle-line me-1 align-bottom"></i> Actif <span class="badge bg-success ms-1">{{getStatusCount(1)}}</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link py-3 Pickups" data-bs-toggle="tab" id="Pickups" (click)="setStatus(0)" role="tab" aria-selected="false">
-                                <i class="ri-truck-line me-1 align-bottom"></i> Inactif 
+                            <a class="nav-link py-3 Pickups" data-bs-toggle="tab" id="Pickups" (click)="filterByStatus(0)" role="tab" aria-selected="false">
+                                <i class="ri-truck-line me-1 align-bottom"></i> Inactif <span class="badge bg-danger ms-1">{{getStatusCount(0)}}</span>
                             </a>
                         </li>
                     </ul>
 
                     <div class="table-responsive table-card mb-1">
-                        <table class="table table-nowrap align-middle" id="orderTable">
+                        <!-- Loading indicator -->
+                        <div *ngIf="loading" class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Chargement...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Chargement des données...</p>
+                        </div>
+                        
+                        <table class="table table-nowrap table-container table-custom table-compact align-middle" id="orderTable" *ngIf="!loading">
                             <thead class="text-muted table-light">
                                 <tr class="text-uppercase">
                                     <th scope="col" style="width: 25px;">
@@ -130,7 +119,7 @@
                                                 </a>
                                             </li>
                                             <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
-                                                <a class="text-danger d-inline-block remove-item-btn" (click)="modalDelete(item)" data-bs-toggle="modal" href="#deleteOrder">
+                                                <a class="text-danger d-inline-block remove-item-btn" (click)="deleteJournalItem(item)">
                                                     <i class="ri-delete-bin-5-fill fs-16"></i>
                                                 </a>
                                             </li>

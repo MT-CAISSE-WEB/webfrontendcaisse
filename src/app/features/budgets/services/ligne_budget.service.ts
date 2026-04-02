@@ -10,6 +10,7 @@ export interface LigneBudgetBulkUpdateDto {
   idbudget: string;
   iddepartement: string;
   idnature: string;
+  idcentreanalytique: string;
 
   montantprevisiondept: number;
   montantprevisionsite: number;
@@ -44,7 +45,7 @@ export class LigneBudgetService {
   create(_object: any): Observable<any> {
     return this.http.post<any>(
       URL_LOCAL.baseUrl + this.url + '/create',
-      _object
+      _object,
     );
   }
 
@@ -58,7 +59,7 @@ export class LigneBudgetService {
         this.url +
         '/update/' +
         _object.idbudgetdepartementnature,
-      _object
+      _object,
     );
   }
 
@@ -68,7 +69,7 @@ export class LigneBudgetService {
    */
   delete(id: string): Observable<any> {
     return this.http.delete<any>(
-      URL_LOCAL.baseUrl + this.url + '/delete/' + id
+      URL_LOCAL.baseUrl + this.url + '/delete/' + id,
     );
   }
 
@@ -87,7 +88,7 @@ export class LigneBudgetService {
   updateMultiple(payload: LigneBudgetBulkUpdateDto[]): Observable<any> {
     return this.http.put(
       `${URL_LOCAL.baseUrl}${this.url}/bulk-update`,
-      payload
+      payload,
     );
   }
 }
