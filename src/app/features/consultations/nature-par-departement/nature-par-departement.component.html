@@ -84,7 +84,7 @@
         </div>
         <div class="row mt-5">
           <div *ngFor="let option of chartCaisseOptions" class="mb-5">
-            <div echarts [options]="option" class="h-400"></div>
+            <div echarts [options]="option" class="h-800"></div>
           </div>
         </div>
         <div class="row" style="margin-top: 50px">
@@ -92,6 +92,22 @@
         </div>
         <div class="row" style="margin-top: 50px">
           <div echarts [options]="chartTopCentres" style="height: 400px"></div>
+        </div>
+        <div class="row" style="margin-top: 50px">
+          <div class="col-md-6">
+            <div
+              echarts
+              [options]="chartTopMontantNature"
+              style="height: 400px"
+            ></div>
+          </div>
+          <div class="col-md-6">
+            <div
+              echarts
+              [options]="chartTopMontantCentre"
+              style="height: 400px"
+            ></div>
+          </div>
         </div>
       </div>
     </div>

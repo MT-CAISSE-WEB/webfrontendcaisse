@@ -62,8 +62,8 @@ export class LigneBudgetComponent implements OnInit {
 
   // Définissez des propriétés de pagination
   currentPage: number = 1;
-  // Nombre d'éléments par page
   totalPages: number = 0;
+  totalItems: number = 0;
   limit: number = 5;
 
   //Faire le check selection **********
@@ -104,6 +104,7 @@ export class LigneBudgetComponent implements OnInit {
   currentNatureIndex: number = 0;
   validationLines: Array<{
     departement: string;
+    code: string;
     nature: string;
     centre: string;
     montantDept: number;
@@ -127,6 +128,8 @@ export class LigneBudgetComponent implements OnInit {
     //Afficher toutes les lignes budgétaires
 
     this.ligneBudgetsGrouped = [];
+    // A l'affichage de l'inteface la table est vide
+    this.paginatedLignes = null;
     this.selectedBudgetId = null;
     this.getAllBudgets();
     this.getAllDepartements();
@@ -159,6 +162,7 @@ export class LigneBudgetComponent implements OnInit {
     idbudgetdepartementnature?: string;
     idcentreanalytique?: string | null;
     iddepartement?: string | null;
+    codecentreanalytique?: string | null;
     montantDept: number;
     montantSite: number;
     montantSociete: number;
@@ -171,6 +175,8 @@ export class LigneBudgetComponent implements OnInit {
     return this.selectedBudget?.isanalytique === 1;
   }
 
+  budget?: BudgetModel;
+
   //
 
   loadCentreAnalytiqueGrid() {
@@ -179,8 +185,6 @@ export class LigneBudgetComponent implements OnInit {
     const existingLines = this.ligneBudgetsSource.filter(
       (l) => l.idbudget === this.selectedBudget!.idbudget,
     );
-
-    console.log('existingLines', existingLines);
 
     if (this.modeSaisie === 'ALL') {
       this.natureGrid = this.centreAnalytiques.map((c) => {
@@ -193,6 +197,7 @@ export class LigneBudgetComponent implements OnInit {
           idcentreanalytique: c.idcentreanalytique,
           libelle: c.libelle,
           idbudgetdepartementnature: existing?.idbudgetdepartementnature,
+          codecentreanalytique: c.codecentreanalytique,
 
           montantDept: existing?.montantprevisiondept ?? 0,
           montantSite: existing?.montantprevisionsite ?? 0,
@@ -215,6 +220,7 @@ export class LigneBudgetComponent implements OnInit {
       )?.libelle as string,
 
       idbudgetdepartementnature: l.idbudgetdepartementnature,
+      codecentreanalytique: l.centre_analytique?.codecentreanalytique,
 
       montantDept: l.montantprevisiondept ?? 0,
       montantSite: l.montantprevisionsite ?? 0,
@@ -225,6 +231,7 @@ export class LigneBudgetComponent implements OnInit {
       .filter((c) => !usedIds.has(c.idcentreanalytique))
       .map((c) => ({
         idcentreanalytique: c.idcentreanalytique, // ⚠️ on réutilise le champ
+        codecentreanalytique: c.codecentreanalytique,
         libelle: c.libelle,
         iddepartement: '',
       }));
@@ -232,7 +239,6 @@ export class LigneBudgetComponent implements OnInit {
   getAllCentreAnalytique() {
     this.centreAnalytiqueService.getAll().subscribe({
       next: (res: any) => {
-        console.log('centres:', res);
         if (res.success) {
           this.centreAnalytiques = res.data as centreanalytiqueModel[];
         }
@@ -320,14 +326,13 @@ export class LigneBudgetComponent implements OnInit {
           const lesbudgets = res.data as BudgetModel[];
           if (this.user.typeentitesociete === 1) {
             this.budgets = lesbudgets.filter(
-              (b) => b.idsociete === this.user.idsociete && b.valide === 0,
+              (b) => b.idsociete === this.user.idsociete,
             );
           } else {
             this.budgets = lesbudgets.filter(
               (b) =>
                 b.idsite === this.user.idsite &&
-                b.idsociete === this.user.idsociete &&
-                b.valide === 0,
+                b.idsociete === this.user.idsociete,
             );
           }
         }
@@ -398,8 +403,6 @@ export class LigneBudgetComponent implements OnInit {
           if (res.success) {
             const userDepartements: any[] = res.data[0];
 
-            console.log('Departements utilisateurs:', userDepartements);
-
             const allowedIds = new Set(
               userDepartements.map((item) => item.iddepartement),
             );
@@ -408,11 +411,6 @@ export class LigneBudgetComponent implements OnInit {
               allowedIds.has(dept.iddepartement),
             );
             this.appartenanceDepartement = filteredDepartments;
-
-            console.log(
-              'Departements utilisateurs filtrés:',
-              filteredDepartments,
-            );
           }
         },
         error: (err: any) => {
@@ -507,6 +505,7 @@ export class LigneBudgetComponent implements OnInit {
       ligne = {
         idcentreanalytique: nature.idcentreanalytique,
         libelle: nature.libelle,
+        codecentreanalytique: nature.codecentreanalytique,
         iddepartement: null,
         montantDept: 0,
         montantSite: 0,
@@ -674,6 +673,30 @@ export class LigneBudgetComponent implements OnInit {
         .get('montantprevisionsociete')
         ?.updateValueAndValidity();
     }
+  }
+
+  paginatedLignes: any = {};
+
+  getLigneBudgetsByBudget() {
+    this.loading = true;
+    this.lignebudgetservice
+      .getByBudget(this.selectedBudgetId!, this.limit, this.currentPage)
+      .subscribe({
+        next: (res: any) => {
+          if (res.success) {
+            this.paginatedLignes = res.data;
+            this.totalItems = res.data.pagination.totalItems;
+            this.totalPages = res.data.pagination.totalPages;
+            this.currentPage = res.data.pagination.currentPage;
+            this.selectedBudget = res.data.budget;
+          }
+          this.loading = false;
+        },
+        error: (err: any) => {
+          this.msgErros = err.error.error;
+          this.loading = false;
+        },
+      });
   }
 
   getAllLigneBudgets() {
@@ -1009,6 +1032,9 @@ export class LigneBudgetComponent implements OnInit {
     // Sécurité : aucun budget sélectionné
     if (!this.selectedBudgetId) {
       this.ligneBudgetsGrouped = [];
+      this.paginatedLignes = null;
+      this.totalPages = 0;
+      this.totalItems = 0;
       return;
     }
 
@@ -1018,6 +1044,7 @@ export class LigneBudgetComponent implements OnInit {
 
     if (!budget) {
       this.ligneBudgetsGrouped = [];
+      this.paginatedLignes = null;
       return;
     }
 
@@ -1033,7 +1060,11 @@ export class LigneBudgetComponent implements OnInit {
         lignes: [...lignes],
       },
     ];
+    this.currentPage = 1;
+    this.getLigneBudgetsByBudget();
   }
+
+  Math = Math;
 
   private propagateMontantsOnValidationOpen(): void {
     if (!this.selectedBudget) return;
@@ -1154,11 +1185,88 @@ export class LigneBudgetComponent implements OnInit {
     else this.objectsSelected = [];
   }
 
-  //Recharger la page
+  //Changer la page
   changePage(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+
     this.currentPage = page;
-    this.getAllBudgets();
-    this.getAllLigneBudgets(); // recharge les données
+    this.getLigneBudgetsByBudget(); // Recharger avec la nouvelle page
+
+    if (this.paginatedLignes !== null) {
+      this.paginatedLignes.lignes.forEach((line: LigneBudgetModel) => {
+        this.ligneBudgetsSource.push({
+          idbudget: line.idbudget,
+          iddepartement:
+            line.budget?.entite === 'Département' ? line.iddepartement : null,
+          idnature: line.idnature ? line.idnature : null,
+          idcentreanalytique: line.idcentreanalytique
+            ? line.idcentreanalytique
+            : null,
+          montantprevisiondept: line.montantprevisiondept,
+          montantprevisionsite: line.montantprevisionsite,
+          montantprevisionsociete: line.montantprevisionsociete,
+          nature_operation: { libelle: line.nature_operation?.libelle ?? '-' },
+          centre_analytique: {
+            libelle: line.centre_analytique?.libelle ?? '-',
+          },
+        } as LigneBudgetModel);
+      });
+    }
+
+    // Scroll vers le haut de la table
+    setTimeout(() => {
+      const tableElement = document.querySelector('.table-responsive');
+      if (tableElement) {
+        tableElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  }
+
+  // Méthode pour changer le nombre d'éléments par page
+  onLimitChange(newLimit: number) {
+    this.limit = newLimit;
+    this.currentPage = 1; // Reset à la première page
+    this.getLigneBudgetsByBudget();
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxVisible = 5;
+
+    if (this.totalPages <= maxVisible) {
+      for (let i = 1; i <= this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      let start = Math.max(1, this.currentPage - 2);
+      let end = Math.min(this.totalPages, start + maxVisible - 1);
+
+      if (end - start < maxVisible - 1) {
+        start = Math.max(1, end - maxVisible + 1);
+      }
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      // Ajouter la première page si pas dans la plage
+      if (start > 1) {
+        pages.unshift(1);
+        if (start > 2) {
+          pages.splice(1, 0, -1); // -1 pour les points de suspension
+        }
+      }
+
+      // Ajouter la dernière page si pas dans la plage
+      if (end < this.totalPages) {
+        if (end < this.totalPages - 1) {
+          pages.push(-1); // points de suspension
+        }
+        pages.push(this.totalPages);
+      }
+    }
+
+    return pages;
   }
 
   private lockBudgetAndDepartement(): void {
@@ -1204,6 +1312,7 @@ export class LigneBudgetComponent implements OnInit {
       iddepartement: l.iddepartement ?? null,
       idnature: l.idnature ?? null,
       idcentreanalytique: this.isAnalytique() ? l.idcentreanalytique : null,
+      code: l.centre_analytique?.codecentreanalytique ?? '-',
       departement: l.departement?.libelle ?? '-',
       nature: l.nature_operation?.libelle ?? '-',
       centre: l.centre_analytique?.libelle ?? '-',
@@ -1259,8 +1368,6 @@ export class LigneBudgetComponent implements OnInit {
 
         updatedby: this.user.nom + ' ' + this.user.prenom,
       }));
-
-    console.log('Data to validate:', payload);
 
     if (payload.length === 0) return;
 
@@ -1565,15 +1672,9 @@ export class LigneBudgetComponent implements OnInit {
   modalCreate() {
     this.actionModal = 'create';
     this.unlockBudgetAndDepartement();
+    // this.selectedBudget = undefined;
     this.initForm();
   }
-
-  // modalUpdate(_object: LigneBudgetModel) {
-  //   this.ligneBudget = _object;
-  //   this.actionModal = 'update';
-  //   this.ligneBudgetForm.reset();
-  //   this.dispatchLigneBudget(_object);
-  // }
 
   onRejectClick() {
     if (!this.selectedBudget) return;
@@ -1645,6 +1746,10 @@ export class LigneBudgetComponent implements OnInit {
     // budgetService.validateBudget(this.selectedBudget.idbudget)
 
     this.resetAfterSubmit();
+  }
+
+  resetModeSaisie() {
+    this.modeSaisie = '';
   }
 
   modalUpdate(ligne: LigneBudgetModel) {
@@ -1719,7 +1824,16 @@ export class LigneBudgetComponent implements OnInit {
 
   prefillNatureGridAnalytique(idbudget: string) {
     // 🔥 lignes existantes venant de ta table affichée
-    const existingLines = this.ligneBudgetsGrouped
+
+    if (this.paginatedLignes === null) return;
+
+    const tab = [];
+    tab.push({
+      budget: this.paginatedLignes.budget,
+      lignes: this.paginatedLignes.lignes,
+    });
+
+    const existingLines = tab
       .flatMap((g) => g.lignes)
       .filter((l) => l.idbudget === idbudget);
 
@@ -1727,6 +1841,7 @@ export class LigneBudgetComponent implements OnInit {
       idnature: null,
       libelle: l.centre_analytique?.libelle || '—',
       idcentreanalytique: l.centre_analytique?.idcentreanalytique,
+      codecentreanalytique: l.centre_analytique?.codecentreanalytique,
       idbudgetdepartementnature: l.idbudgetdepartementnature,
       iddepartement: null,
 
@@ -1751,7 +1866,6 @@ export class LigneBudgetComponent implements OnInit {
       .delete(this.deleteLigneBudget.idbudgetdepartementnature)
       .subscribe({
         next: (res: any) => {
-          console.log('Suppression:', res);
           if (res.success) {
             this.deleteLigneBudget = null;
             this.closeModal('deleteOrder');

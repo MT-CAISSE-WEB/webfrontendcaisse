@@ -499,6 +499,7 @@ export class BudgetComponent implements OnInit {
         'outOfParentRange',
         'duplicateMonthlyBudget',
         'invalidAnnualStartDate',
+        'duplicateAnnualBudget',
       ]);
 
       resetErrors(endCtrl, [
@@ -507,6 +508,7 @@ export class BudgetComponent implements OnInit {
         'outOfParentRange',
         'duplicateMonthlyBudget',
         'invalidAnnualEndDate',
+        'duplicateAnnualBudget',
       ]);
 
       if (!startCtrl.value || !endCtrl.value) return null;
@@ -548,6 +550,39 @@ export class BudgetComponent implements OnInit {
           endCtrl.setErrors({
             ...endCtrl.errors,
             invalidAnnualEndDate: true,
+          });
+        }
+
+        /* ==========================
+ 🔒 CONTRÔLE UNICITÉ ANNUEL PAR SITE
+ ========================== */
+        const currentYear = start.getFullYear();
+
+        const duplicateAnnual = this.budgets.some((b) => {
+          if (
+            b.typebudget !== 'Annuel' ||
+            b.idbudget === this.budget?.idbudget // exclusion en mode édition
+          ) {
+            return false;
+          }
+
+          const bYear = new Date(b.datedebut).getFullYear();
+
+          return (
+            bYear === currentYear &&
+            b.idsite === this.budgetForm.get('idsite')?.value
+          );
+        });
+
+        if (duplicateAnnual) {
+          startCtrl.setErrors({
+            ...startCtrl.errors,
+            duplicateAnnualBudget: true,
+          });
+
+          endCtrl.setErrors({
+            ...endCtrl.errors,
+            duplicateAnnualBudget: true,
           });
         }
 
@@ -640,86 +675,6 @@ export class BudgetComponent implements OnInit {
     };
   }
 
-  // budgetDateValidator(getParent: () => BudgetModel | undefined): ValidatorFn {
-  //   return (group: AbstractControl): ValidationErrors | null => {
-  //     const startCtrl = group.get('datedebut');
-  //     const endCtrl = group.get('datefin');
-  //     const typeCtrl = group.get('typebudget');
-
-  //     if (!startCtrl || !endCtrl || !typeCtrl) return null;
-
-  //     const clearError = (ctrl: AbstractControl, key: string) => {
-  //       if (!ctrl.errors) return;
-  //       const { [key]: _, ...rest } = ctrl.errors;
-  //       ctrl.setErrors(Object.keys(rest).length ? rest : null);
-  //     };
-
-  //     clearError(startCtrl, 'startAfterEnd');
-  //     clearError(endCtrl, 'startAfterEnd');
-  //     clearError(endCtrl, 'invalidMonthRange');
-  //     clearError(startCtrl, 'outOfParentRange');
-  //     clearError(endCtrl, 'outOfParentRange');
-
-  //     if (!startCtrl.value || !endCtrl.value) return null;
-
-  //     const start = new Date(startCtrl.value);
-  //     const end = new Date(endCtrl.value);
-
-  //     /* ==========================
-  //    1️⃣ DATE DÉBUT < DATE FIN
-  //    ========================== */
-  //     if (start >= end) {
-  //       endCtrl.setErrors({
-  //         ...endCtrl.errors,
-  //         startAfterEnd: true,
-  //       });
-  //       return { startAfterEnd: true };
-  //     }
-
-  //     /* ==========================
-  //    2️⃣ VALIDATION MENSUELLE
-  //    ========================== */
-  //     if (typeCtrl.value === 'Mensuel') {
-  //       const sameMonth =
-  //         start.getMonth() === end.getMonth() &&
-  //         start.getFullYear() === end.getFullYear();
-
-  //       const lastDayOfMonth = new Date(
-  //         start.getFullYear(),
-  //         start.getMonth() + 1,
-  //         0
-  //       ).getDate();
-
-  //       if (!sameMonth || end.getDate() !== lastDayOfMonth) {
-  //         endCtrl.setErrors({
-  //           ...endCtrl.errors,
-  //           invalidMonthRange: true,
-  //         });
-  //         return { invalidMonthRange: true };
-  //       }
-  //     }
-
-  //     /* ==========================
-  //    3️⃣ VALIDATION PARENT STRICTE
-  //    ========================== */
-  //     const parent = getParent();
-  //     if (parent && typeCtrl.value === 'Mensuel') {
-  //       const parentStart = new Date(parent.datedebut);
-  //       const parentEnd = new Date(parent.datefin);
-
-  //       if (!(start >= parentStart && end <= parentEnd)) {
-  //         endCtrl.setErrors({
-  //           ...endCtrl.errors,
-  //           outOfParentRange: true,
-  //         });
-  //         return { outOfParentRange: true };
-  //       }
-  //     }
-
-  //     return null;
-  //   };
-  // }
-
   // choix du budget parent
   onSelectionChange(event: Event) {
     const selectedId = (event.target as HTMLSelectElement).value;
@@ -729,13 +684,20 @@ export class BudgetComponent implements OnInit {
     );
 
     const entiteCtrl = this.budgetForm.get('entite');
+    const analytiqueCtrl = this.budgetForm.get('isanalytique');
 
     if (!this.selectedBudgetParent) {
       entiteCtrl?.reset(null);
       entiteCtrl?.enable({ emitEvent: false });
+
+      analytiqueCtrl?.reset(null);
+      analytiqueCtrl?.enable({ emitEvent: false });
     } else {
       entiteCtrl?.setValue(this.selectedBudgetParent.entite);
       entiteCtrl?.disable({ emitEvent: false });
+
+      analytiqueCtrl?.setValue(this.selectedBudgetParent.isanalytique);
+      analytiqueCtrl?.disable({ emitEvent: false });
     }
 
     this.budgetForm.updateValueAndValidity({

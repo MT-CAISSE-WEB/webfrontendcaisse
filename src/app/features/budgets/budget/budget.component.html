@@ -179,10 +179,12 @@
                   <th class="sort" data-sort="id">Libellé</th>
                   <th class="sort" data-sort="customer_name">Entité</th>
                   <th class="sort" data-sort="customer_name">Analytique</th>
+                  <th class="sort" data-sort="customer_name">Validé</th>
                   <th class="sort" data-sort="customer_name">Date début</th>
                   <th class="sort" data-sort="customer_name">Date fin</th>
                   <th class="sort" data-sort="status">Status</th>
                   <th class="sort" data-sort="status">Prévision</th>
+                  <th class="sort" data-sort="status">Devise</th>
                   <th class="sort" data-sort="city">Action</th>
                 </tr>
               </thead>
@@ -223,6 +225,18 @@
                           {{ item.isanalytique ? "Oui" : "Non" }}
                         </span>
                       </td>
+                      <td>
+                        <span
+                          class="badge"
+                          [ngClass]="
+                            item.valide === 1
+                              ? 'bg-success-subtle text-success'
+                              : 'bg-danger-subtle text-danger'
+                          "
+                        >
+                          {{ item.valide ? "Oui" : "Non" }}
+                        </span>
+                      </td>
                       <td>{{ item.datedebut | date: "dd-MM-yyyy" }}</td>
                       <td>{{ item.datefin | date: "dd-MM-yyyy" }}</td>
 
@@ -242,7 +256,9 @@
                       <td class="fw-bold text-end">
                         {{ getPrevisionAnnuel(item) | number: "1.0-0" }}
                       </td>
-
+                      <td class="fw-bold text-end">
+                        {{ user.devise_ref_code }}
+                      </td>
                       <td>
                         <div class="d-flex align-items-center gap-2">
                           <!-- Bouton modifier -->
@@ -673,6 +689,13 @@
                         Pour un budget annuel, la date de début doit être le
                         01/01 de l'année.
                       </div>
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datedebut', 'duplicateAnnualBudget')"
+                      >
+                        Un budget annuel existe déjà pour ce site pour cette
+                        année.
+                      </div>
                       <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                     </div>
                   </div>
@@ -724,6 +747,13 @@
                       >
                         Pour un budget annuel, la date de fin doit être le 31/12
                         de la même année.
+                      </div>
+                      <div
+                        class="invalid-feedback"
+                        *ngIf="hasError('datefin', 'duplicateAnnualBudget')"
+                      >
+                        Un budget annuel existe déjà pour ce site pour cette
+                        année.
                       </div>
                       <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
                     </div>
@@ -977,9 +1007,25 @@
                     <thead class="table-light">
                       <tr>
                         <th style="width: 50px">#</th>
-                        <th>Département</th>
-                        <th>Nature d'opération</th>
-                        <th>Prévision Département</th>
+                        <th *ngIf="selectedBudget?.entite === 'Département'">
+                          Département
+                        </th>
+                        <th *ngIf="selectedBudget?.isanalytique === 1">Code</th>
+                        <th>
+                          {{
+                            selectedBudget?.isanalytique === 1
+                              ? "Centre analytique"
+                              : "Nature d'opération"
+                          }}
+                        </th>
+                        <th
+                          *ngIf="
+                            selectedBudget?.entite === 'Département' ||
+                            selectedBudget?.isanalytique === 1
+                          "
+                        >
+                          Prévision Département
+                        </th>
                         <th>Prévision Site</th>
                         <th>Prévision Société</th>
                       </tr>
@@ -989,10 +1035,26 @@
                       <tr *ngFor="let ligne of lignesByBudget; let i = index">
                         <td class="text-center">{{ i + 1 }}</td>
 
-                        <td>{{ ligne.departement?.libelle }}</td>
-                        <td>{{ ligne.nature_operation?.libelle }}</td>
-
+                        <td *ngIf="selectedBudget?.entite === 'Département'">
+                          {{ ligne.departement?.libelle }}
+                        </td>
+                        <td *ngIf="selectedBudget?.isanalytique === 1">
+                          {{ ligne.centre_analytique?.codecentreanalytique }}
+                        </td>
                         <td>
+                          {{
+                            selectedBudget?.isanalytique
+                              ? ligne.centre_analytique?.libelle
+                              : ligne.nature_operation?.libelle
+                          }}
+                        </td>
+
+                        <td
+                          *ngIf="
+                            selectedBudget?.entite === 'Département' ||
+                            selectedBudget?.isanalytique === 1
+                          "
+                        >
                           {{
                             ligne.montantprevisiondept | number: "1.0-0" : "fr"
                           }}

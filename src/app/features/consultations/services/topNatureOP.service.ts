@@ -14,11 +14,13 @@ export class TopNatureOPService {
 
   getTopNatures(
     idsociete: string,
-    idsite: string,
+    idsite?: string,
   ): Observable<QueryResultModel> {
     let params = new HttpParams().set('idsociete', idsociete);
-    params = params.set('idsite', idsite);
 
+    if (idsite) {
+      params = params.set('idsite', idsite);
+    }
     return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url, {
       params,
     });

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 // import { APP_JOURNAL_CAISSE_JOURNAL } from "../../../_core/routes/frontend.root";
 import { Observable } from 'rxjs';
 import { QueryResultModel } from '../../../_core/models/query-result.model';
@@ -89,6 +89,24 @@ export class LigneBudgetService {
     return this.http.put(
       `${URL_LOCAL.baseUrl}${this.url}/bulk-update`,
       payload,
+    );
+  }
+
+  getByBudget(
+    idBudget: string,
+    limit?: number,
+    page?: number,
+  ): Observable<any> {
+    let params = new HttpParams();
+    if (limit && page) {
+      params = params.set('limit', limit);
+      params = params.set('page', page);
+    }
+    return this.http.get<any>(
+      URL_LOCAL.baseUrl + this.url + '/budget/' + idBudget,
+      {
+        params,
+      },
     );
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ConsultationStatsDeptNatureService } from '../services/statsDeptnaure.service';
@@ -10,6 +10,8 @@ import { StatsMontantbyDeptService } from '../services/montantByDept.service';
 import { MouvementsCaisseService } from '../services/mouvementcaisse.service';
 import { TopNatureOPService } from '../services/topNatureOP.service';
 import { TopCentreAnalytiqueService } from '../services/topCentreAnalytique.service';
+import { TopMontantNatureOPService } from '../services/topMontantNatureOP.service';
+import { TopMontantCentreAnalytiqueService } from '../services/topMontantCentre.service';
 
 @Component({
   selector: 'app-nature-par-departement',
@@ -44,6 +46,8 @@ export class NatureOperationByDepartementComponent implements OnInit {
   anneeCourante: number = new Date().getFullYear();
   chartTopNatures: any;
   topNaturesTab: any[] = [];
+  chartTopMontantNature: any = {};
+  chartTopMontantCentre: any = {};
 
   chartTopCentres: any;
   topCentresTab: any[] = [];
@@ -58,6 +62,8 @@ export class NatureOperationByDepartementComponent implements OnInit {
     private statsMouvementsCaisseService: MouvementsCaisseService,
     private statsTopNatureOPService: TopNatureOPService,
     private statsTopCentreAnalytiqueService: TopCentreAnalytiqueService,
+    private statsTopMontantNatureOPService: TopMontantNatureOPService,
+    private statsTopMontantCentreAnalytiqueService: TopMontantCentreAnalytiqueService,
   ) {}
 
   ngOnInit(): void {
@@ -68,6 +74,8 @@ export class NatureOperationByDepartementComponent implements OnInit {
     this.loadStatsMouvementsCaisse();
     this.loadTopNatures();
     this.loadTopCentres();
+    this.loadTopMontantNatureOP();
+    this.loadTopMontantCentreAnalytique();
   }
 
   // récupération du current user
@@ -269,53 +277,175 @@ export class NatureOperationByDepartementComponent implements OnInit {
   }
 
   // Mouvements caisse
+  // loadStatsMouvementsCaisse() {
+  //   this.statsMouvementsCaisseService
+  //     .getMouvementsCaisse(this.user.idsociete, this.user.idsite)
+  //     .subscribe({
+  //       next: (res: any) => {
+  //         if (res.success) {
+  //           const stats = res.data;
+
+  //           /**
+  //            * 🔥 Grouper par caisse
+  //            */
+  //           const groupedByCaisse: any = {};
+
+  //           stats.forEach((item: any) => {
+  //             if (!groupedByCaisse[item.idcaisse]) {
+  //               groupedByCaisse[item.idcaisse] = {
+  //                 libelle: item.libellecaisse,
+  //                 periode: item.periode,
+  //                 jours: [],
+  //                 entrees: [],
+  //                 sorties: [],
+  //                 soldes: [],
+  //               };
+  //             }
+
+  //             groupedByCaisse[item.idcaisse].jours.push(item.jour);
+  //             groupedByCaisse[item.idcaisse].entrees.push(
+  //               parseFloat(item.total_entrees),
+  //             );
+  //             groupedByCaisse[item.idcaisse].sorties.push(
+  //               parseFloat(item.total_sorties),
+  //             );
+  //             groupedByCaisse[item.idcaisse].soldes.push(
+  //               parseFloat(item.solde_reel),
+  //             );
+  //           });
+
+  //           /**
+  //            * 🔥 Construire les graphes
+  //            */
+  //           this.chartCaisseOptions = Object.keys(groupedByCaisse).map(
+  //             (key: any) => {
+  //               const caisse = groupedByCaisse[key];
+
+  //               return {
+  //                 title: {
+  //                   text: `Mouvements - ${caisse.libelle} (${caisse.periode})`,
+  //                   left: 'center',
+  //                 },
+  //                 tooltip: {
+  //                   trigger: 'axis',
+  //                 },
+  //                 legend: {
+  //                   top: 30,
+  //                 },
+  //                 toolbox: {
+  //                   show: true,
+  //                   feature: {
+  //                     saveAsImage: { show: true },
+  //                   },
+  //                 },
+  //                 xAxis: {
+  //                   type: 'category',
+  //                   name: 'Jour',
+  //                   data: caisse.jours,
+  //                 },
+  //                 yAxis: {
+  //                   type: 'value',
+  //                   name: 'Montant',
+  //                 },
+  //                 series: [
+  //                   {
+  //                     name: 'Encaissement',
+  //                     type: 'bar',
+  //                     data: caisse.entrees,
+  //                   },
+  //                   {
+  //                     name: 'Décaissement',
+  //                     type: 'bar',
+  //                     data: caisse.sorties,
+  //                   },
+  //                   {
+  //                     name: 'Solde',
+  //                     type: 'line',
+  //                     data: caisse.soldes,
+  //                   },
+  //                 ],
+  //               };
+  //             },
+  //           );
+  //         }
+  //       },
+  //       error: (err: any) => {
+  //         this.msgErros = err.error?.error;
+  //       },
+  //     });
+  // }
   loadStatsMouvementsCaisse() {
+    let idsite: string | undefined = undefined;
+
+    /**
+     * PRIORITÉ : SOCIÉTÉ
+     * si l'utilisateur est au niveau société
+     * on ignore complètement le site
+     */
+    if (this.user.typeentitesociete !== 1) {
+      /**
+       * utilisateur limité au site
+       */
+      if (this.user.typeentitesite === 1) {
+        idsite = this.user.idsite;
+      }
+    }
     this.statsMouvementsCaisseService
-      .getMouvementsCaisse(this.user.idsociete, this.user.idsite)
+      .getMouvementsCaisse(this.user.idsociete, idsite)
       .subscribe({
         next: (res: any) => {
           if (res.success) {
             const stats = res.data;
 
-            /**
-             * 🔥 Grouper par caisse
-             */
             const groupedByCaisse: any = {};
+
+            // ✅ Format date SAFE (évite décalage timezone)
+            const formatDate = (date: string) => {
+              if (!date) return '';
+              return date.substring(8, 10) + '/' + date.substring(5, 7);
+            };
+
+            // ✅ Sécurisation nombre
+            const toNumber = (val: any) => Number(val) || 0;
 
             stats.forEach((item: any) => {
               if (!groupedByCaisse[item.idcaisse]) {
                 groupedByCaisse[item.idcaisse] = {
                   libelle: item.libellecaisse,
-                  periode: item.periode,
-                  jours: [],
-                  entrees: [],
-                  sorties: [],
-                  soldes: [],
+                  data: [],
                 };
               }
 
-              groupedByCaisse[item.idcaisse].jours.push(item.jour);
-              groupedByCaisse[item.idcaisse].entrees.push(
-                parseFloat(item.total_entrees),
-              );
-              groupedByCaisse[item.idcaisse].sorties.push(
-                parseFloat(item.total_sorties),
-              );
-              groupedByCaisse[item.idcaisse].soldes.push(
-                parseFloat(item.solde_reel),
-              );
+              groupedByCaisse[item.idcaisse].data.push({
+                jourRaw: item.jour,
+                jour: formatDate(item.jour),
+                entree: toNumber(item.total_entrees),
+                sortie: toNumber(item.total_sorties),
+                solde: toNumber(item.solde),
+              });
             });
 
-            /**
-             * 🔥 Construire les graphes
-             */
             this.chartCaisseOptions = Object.keys(groupedByCaisse).map(
               (key: any) => {
                 const caisse = groupedByCaisse[key];
 
+                // ✅ Tri sécurisé par date
+                caisse.data.sort(
+                  (a: any, b: any) =>
+                    new Date(a.jourRaw).getTime() -
+                    new Date(b.jourRaw).getTime(),
+                );
+
+                const jours = caisse.data.map((d: any) => d.jour);
+                const entrees = caisse.data.map((d: any) => d.entree);
+                const sorties = caisse.data.map((d: any) => d.sortie);
+                const soldes = caisse.data.map((d: any) => d.solde);
+
+                const periode = `${jours[0]} → ${jours[jours.length - 1]}`;
+
                 return {
                   title: {
-                    text: `Mouvements - ${caisse.libelle} (${caisse.periode})`,
+                    text: `Mouvements - ${caisse.libelle} (${periode})`,
                     left: 'center',
                   },
                   tooltip: {
@@ -333,7 +463,7 @@ export class NatureOperationByDepartementComponent implements OnInit {
                   xAxis: {
                     type: 'category',
                     name: 'Jour',
-                    data: caisse.jours,
+                    data: jours,
                   },
                   yAxis: {
                     type: 'value',
@@ -343,17 +473,20 @@ export class NatureOperationByDepartementComponent implements OnInit {
                     {
                       name: 'Encaissement',
                       type: 'bar',
-                      data: caisse.entrees,
+                      data: entrees,
                     },
                     {
                       name: 'Décaissement',
                       type: 'bar',
-                      data: caisse.sorties,
+                      data: sorties,
                     },
                     {
                       name: 'Solde',
                       type: 'line',
-                      data: caisse.soldes,
+                      smooth: true,
+                      connectNulls: true,
+                      areaStyle: {}, // 🔥 visuel pro
+                      data: soldes,
                     },
                   ],
                 };
@@ -562,8 +695,23 @@ export class NatureOperationByDepartementComponent implements OnInit {
   }
 
   loadTopNatures() {
+    let idsite: string | undefined = undefined;
+
+    /**
+     * PRIORITÉ : SOCIÉTÉ
+     * si l'utilisateur est au niveau société
+     * on ignore complètement le site
+     */
+    if (this.user.typeentitesociete !== 1) {
+      /**
+       * utilisateur limité au site
+       */
+      if (this.user.typeentitesite === 1) {
+        idsite = this.user.idsite;
+      }
+    }
     this.statsTopNatureOPService
-      .getTopNatures(this.user.idsociete, this.user.idsite)
+      .getTopNatures(this.user.idsociete, idsite)
       .subscribe({
         next: (res: any) => {
           if (res.success) {
@@ -667,8 +815,23 @@ export class NatureOperationByDepartementComponent implements OnInit {
 
   // top 10 centres analytique
   loadTopCentres() {
+    let idsite: string | undefined = undefined;
+
+    /**
+     * PRIORITÉ : SOCIÉTÉ
+     * si l'utilisateur est au niveau société
+     * on ignore complètement le site
+     */
+    if (this.user.typeentitesociete !== 1) {
+      /**
+       * utilisateur limité au site
+       */
+      if (this.user.typeentitesite === 1) {
+        idsite = this.user.idsite;
+      }
+    }
     this.statsTopCentreAnalytiqueService
-      .getTopCentres(this.user.idsociete, this.user.idsite)
+      .getTopCentres(this.user.idsociete, idsite)
       .subscribe({
         next: (res: any) => {
           if (res.success) {
@@ -768,5 +931,159 @@ export class NatureOperationByDepartementComponent implements OnInit {
         },
       ],
     };
+  }
+
+  loadTopMontantNatureOP() {
+    let idsite: string | undefined = undefined;
+
+    /**
+     * PRIORITÉ : SOCIÉTÉ
+     * si l'utilisateur est au niveau société
+     * on ignore complètement le site
+     */
+    if (this.user.typeentitesociete !== 1) {
+      /**
+       * utilisateur limité au site
+       */
+      if (this.user.typeentitesite === 1) {
+        idsite = this.user.idsite;
+      }
+    }
+    this.statsTopMontantNatureOPService
+      .getTopMontantNatures(this.user.idsociete, idsite)
+      .subscribe({
+        next: (res: any) => {
+          if (res.success) {
+            const data = res.data.map((item: any) => ({
+              name: item.libelle,
+              value: parseInt(item.total_montant),
+            }));
+
+            if (!data || data.length === 0) {
+              this.chartTopMontantNature = {
+                title: {
+                  text: 'Aucune donnée disponible',
+                  left: 'center',
+                  top: 'center',
+                },
+              };
+              return;
+            }
+
+            const devise = this.user.devise_ref_code;
+
+            this.chartTopMontantNature = {
+              title: { text: 'Top 10 natures opération par montant' },
+              tooltip: {
+                trigger: 'item',
+                formatter: (params: any) => {
+                  return `${params.name}: ${params.value} ${devise} (${params.percent}%)`;
+                },
+              },
+              legend: { bottom: 0 },
+              series: [
+                {
+                  name: 'Montant',
+                  type: 'pie',
+                  radius: ['40%', '70%'],
+                  center: ['50%', '70%'],
+                  startAngle: 180,
+                  endAngle: 360,
+                  label: {
+                    show: true,
+                    formatter: (params: any) => {
+                      return `${params.name}: ${params.value} ${devise}`;
+                    },
+                  },
+                  emphasis: {
+                    label: { show: true, fontSize: 13, fontWeight: 'bold' },
+                  },
+                  data: data,
+                },
+              ],
+            };
+          }
+        },
+        error: (err: any) => {
+          this.msgErros = err.error.error;
+        },
+      });
+  }
+
+  loadTopMontantCentreAnalytique() {
+    let idsite: string | undefined = undefined;
+
+    /**
+     * PRIORITÉ : SOCIÉTÉ
+     * si l'utilisateur est au niveau société
+     * on ignore complètement le site
+     */
+    if (this.user.typeentitesociete !== 1) {
+      /**
+       * utilisateur limité au site
+       */
+      if (this.user.typeentitesite === 1) {
+        idsite = this.user.idsite;
+      }
+    }
+    this.statsTopMontantCentreAnalytiqueService
+      .getTopMontantCentre(this.user.idsociete, idsite)
+      .subscribe({
+        next: (res: any) => {
+          if (res.success) {
+            const data = res.data.map((item: any) => ({
+              name: item.libelle,
+              value: parseInt(item.total_montant),
+            }));
+
+            if (!data || data.length === 0) {
+              this.chartTopMontantNature = {
+                title: {
+                  text: 'Aucune donnée disponible',
+                  left: 'center',
+                  top: 'center',
+                },
+              };
+              return;
+            }
+
+            const devise = this.user.devise_ref_code;
+
+            this.chartTopMontantCentre = {
+              title: { text: 'Top 10 centres analytiques par montant' },
+              tooltip: {
+                trigger: 'item',
+                formatter: (params: any) => {
+                  return `${params.name}: ${params.value} ${devise} (${params.percent}%)`;
+                },
+              },
+              legend: { bottom: 0 },
+              series: [
+                {
+                  name: 'Montant',
+                  type: 'pie',
+                  radius: ['40%', '70%'],
+                  center: ['50%', '70%'],
+                  startAngle: 180,
+                  endAngle: 360,
+                  label: {
+                    show: true,
+                    formatter: (params: any) => {
+                      return `${params.name}: ${params.value} ${devise}`;
+                    },
+                  },
+                  emphasis: {
+                    label: { show: true, fontSize: 13, fontWeight: 'bold' },
+                  },
+                  data: data,
+                },
+              ],
+            };
+          }
+        },
+        error: (err: any) => {
+          this.msgErros = err.error.error;
+        },
+      });
   }
 }
