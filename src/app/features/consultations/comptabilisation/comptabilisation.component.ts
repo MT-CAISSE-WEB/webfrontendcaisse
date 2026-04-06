@@ -13,6 +13,9 @@ import { journalModel } from '../../caisse_journal/models/journal.model';
 import { JournalService } from '../../caisse_journal/services/journal.service';
 import { Observable } from 'rxjs/internal/Observable';
 import { map, startWith } from 'rxjs';
+import { OperationService } from '../../operations/service/operation.service';
+import { operationModel } from '../../operations/model/operation.model';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-comptabilisation',
@@ -31,6 +34,12 @@ export class ComptabilisationComponent implements OnInit{
   msgSup: string = "";
   titleMsg: string ="";
 
+  // Définissez des propriétés de pagination
+  currentPage: number = 1;
+  // Nombre d'éléments par page
+  totalPages: number = 0;
+  limit: number = 4000;
+
   // Données pour les selects/autocomplete
   sites : sitemodel[] = [];
   site : sitemodel = new sitemodel();
@@ -43,7 +52,14 @@ export class ComptabilisationComponent implements OnInit{
   //Formulaire de recherche
   criteriaForm : FormGroup = this.fb.group({});
 
-  constructor(private journalservice: JournalService, private st:siteservice, private service: ComptabilisationService){}
+  //Formulaire de recherche
+  comptabiliteForm : FormGroup = this.fb.group({});
+
+  operations : operationModel[] = [];
+
+  constructor(private journalservice: JournalService, private st:siteservice, private service: ComptabilisationService, private operationservice: OperationService,
+    private toastr : ToastrService
+  ){}
 
   ngOnInit(): void {
     // Formulaire de critères
@@ -55,22 +71,36 @@ export class ComptabilisationComponent implements OnInit{
       ecrituresdefinitives: ['all']
     });
 
+    // Formulaire de Comptabilisation
+    this.comptabiliteForm = this.fb.group({
+      datedebut: [''],
+      datefin: [''],
+      operation: [''],
+      journal: [''],
+    });
+
     //Récupérer les données pour les selects/autocomplete
     this.getallsites();
     //Récupérer les données pour les selects/autocomplete
     this.getalljournals();  
+    //Récupérer toutes les opérations
+    this.getAllOperations();
 
     // Initialiser les observables de filtrage
     this.filteredSites = this.criteriaForm.get('site')!.valueChanges.pipe(
       startWith(''),
-      map(value => this._filterSite(value))
+      map(value => {
+        return this._filterSite(value)
+      })
     );
+
     // Initialiser les observables de filtrage
     this.filteredJournaux = this.criteriaForm.get('journal')!.valueChanges.pipe(
       startWith(''),
-      map(value => this._filterJournal(value))
+      map(value => {
+        return this._filterJournal(value)
+      })
     );
-
   }
 
   search(data : any){
@@ -82,11 +112,16 @@ export class ComptabilisationComponent implements OnInit{
     });
   }
 
+  get user(){
+    return JSON.parse(localStorage.getItem('user') || '{}');
+  }
+
   getallsites (){
     this.st.getAll().subscribe({
       next : (res) => {
          if(res.success){
             this.sites = res.data;
+            //this.criteriaForm.get('site')?.setValue(this.criteriaForm.get('site')?.value ?? '', { emitEvent: true });
          }
       }
     });
@@ -96,7 +131,7 @@ export class ComptabilisationComponent implements OnInit{
     this.journalservice.getAll().subscribe({
       next : (res) => {
          if(res.success){
-            this.journaux = res.data;
+            this.journaux = res.data.data;
          }
       }
     });
@@ -125,23 +160,23 @@ export class ComptabilisationComponent implements OnInit{
   displaySite(site: any): string {
     if (!site) return '';
 
-    if (typeof site === 'number') {
-      const found = this.sites.find((s: any) => s.id === site);
+    if (typeof site === 'number' || typeof site === 'string') {
+      const found = this.sites.find((s: any) => s.idsite === site);
       return found ? found.libelle : '';
     }
 
-    return typeof site === 'string' ? site : site.libelle;
+    return site.libelle;
   }
 
   displayJournal(journal: any): string {
     if (!journal) return '';
 
-    if (typeof journal === 'number') {
-      const found = this.journaux.find((s: any) => s.id === journal);
+    if (typeof journal === 'number' || typeof journal === 'string') {
+      const found = this.journaux.find((s: any) => s.idjournal === journal);
       return found ? found.designation : '';
     }
 
-    return typeof journal === 'string' ? journal : journal.designation;
+    return journal.designation;
   }
 
   // Applique les critères et déclenche la recherche
@@ -151,7 +186,7 @@ export class ComptabilisationComponent implements OnInit{
       Object.values(this.criteriaForm.controls).forEach(control => control.markAsTouched());
       return;
     }
-
+    
     const criteria = this.criteriaForm.value;
     this.search(criteria);
 
@@ -161,6 +196,70 @@ export class ComptabilisationComponent implements OnInit{
       const modalInstance = (window as any).bootstrap?.Modal?.getInstance(modalEl);
       if (modalInstance) modalInstance.hide();
     }
+  }
+
+  // Generer les écritures
+  applyComptability(): void {
+    if (this.comptabiliteForm.invalid) {
+      this.msgErros = 'Veuillez renseigner correctement les critères.';
+      Object.values(this.comptabiliteForm.controls).forEach(control => control.markAsTouched());
+      return;
+    }
+    
+    const ecritures = this.comptabiliteForm.value;
+    this.generate(ecritures);
+
+    // Fermer le modal si bootstrap est utilisé
+    const modalEl = document.getElementById('comptabiliteModal');
+    if (modalEl) {
+      const modalInstance = (window as any).bootstrap?.Modal?.getInstance(modalEl);
+      if (modalInstance) modalInstance.hide();
+    }
+  }
+
+  generate(data: any){
+    console.log(data);
+    this.service.generateEcriture(data).subscribe({
+      next : (res) => {
+        console.log(res);
+        if(res.success){
+          this.toastr.success("Ecritures générées avec succès");
+        }
+      },
+      error : (err) => {
+        this.toastr.error("Une erreur s'est produite lors de la génération des écritures", err);
+      }
+    });
+  }
+
+  //Recuperer toutes les opérations
+  getAllOperations(){
+    this.loading = true;
+    const params = {
+      page: this.currentPage,
+      limit: this.limit,
+      search: '',
+      date: '',
+      user: this.user.idutilisateur,
+    };
+    this.operationservice.getAll(params).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.operations = res.data.data;
+          this.loading = false;
+        }
+      },
+      error : (err) => {
+        this.loading = false;
+      },
+    });
+  }
+
+  formatCFA(montant: number | null | undefined): string {
+    return new Intl.NumberFormat('fr-FR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(montant ?? 0);
   }
 
 }

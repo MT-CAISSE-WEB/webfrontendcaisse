@@ -22,7 +22,10 @@
                     <h5 class="card-title mb-0 flex-grow-1">{{title}}</h5>
                     <div class="flex-shrink-0">
                         <div class="d-flex gap-2 flex-wrap">
-                            <button class="btn btn-sm btn-primary" style="min-width:120px; margin-right:8px;"><i class="ri-add-line align-bottom me-1"></i>Extraire</button>
+                            <button class="btn btn-sm btn-info" style="min-width:120px; margin-right:8px;"><i class="ri-add-line align-bottom me-1"></i>Extraire</button>
+                            <button type="button" class="btn btn-sm btn-secondary" style="min-width:120px; margin-right:8px;" data-bs-toggle="modal" data-bs-target="#comptabiliteModal">
+                                <i class="ri-funds-box-fill align-bottom me-1"></i>Comptabiliser
+                            </button>
                             <button type="button" class="btn btn-sm btn-primary" style="min-width:120px; margin-right:8px;" data-bs-toggle="modal" data-bs-target="#criteriaModal">
                                 <i class="ri-filter-2-line align-bottom me-1"></i>Critères
                             </button>
@@ -30,9 +33,71 @@
                     </div>
                 </div>
 
+                <!-- Modal Comptabilite -->
+                <div class="modal fade" id="comptabiliteModal" tabindex="-1" aria-labelledby="comptabiliteModalLabel" aria-hidden="true">
+                  <div class="modal-dialog modal-md modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="comptabiliteModalLabel">Comptabiliser les operations</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                      </div>
+                      <div class="modal-body">
+                        <form [formGroup]="comptabiliteForm" (ngSubmit)="applyComptability()">
+                          <div class="row g-3">
+                            <div class="col-md-6">
+                              <label class="form-label">Date début</label>
+                              <input type="date" class="form-control form-control-sm" formControlName="datedebut" />
+                            </div>
+                            <div class="col-md-6">
+                              <label class="form-label">Date fin</label>
+                              <input type="date" class="form-control form-control-sm" formControlName="datefin" />
+                            </div>
+
+                            <div class="col-xxl-6 col-sm-6">
+                                <div class="mb-3 bg-light">
+                                    <div class="mb-2">
+                                        <div class="input-light">
+                                            <select class="form-select form-select-sm bg-light border-0" formControlName="operation">
+                                                <option value="" selected>Selectionner l'operation à comptabiliser</option>
+                                                @for(item of operations; track $index){
+                                                    <option value="{{item.idoperation}}"> {{item.codeoperation}} -- | | -- {{ formatCFA(item.montant)}} {{ item.devise.codedevise }} </option>
+                                                }
+                                            </select>
+                                        </div>
+                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-xxl-6 col-sm-6">
+                                <div class="mb-3 bg-light">
+                                    <div class="mb-2">
+                                        <div class="input-light">
+                                            <select class="form-select form-select-sm bg-light border-0" formControlName="journal">
+                                                <option value="" selected>Choisir le journal</option>
+                                                @for(item of journaux; track $index){
+                                                    <option value="{{item.idjournal}}"> {{item.designation}} </option>
+                                                }
+                                            </select>
+                                        </div>
+                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                          </div>
+                          <div class="mt-3 d-flex justify-content-end">
+                            <button type="button" class="btn btn-sm btn-light me-2" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-sm btn-primary">generer les écritures</button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Modal Critères -->
                 <div class="modal fade" id="criteriaModal" tabindex="-1" aria-labelledby="criteriaModalLabel" aria-hidden="true">
-                  <div class="modal-dialog modal-lg modal-dialog-centered">
+                  <div class="modal-dialog modal-md modal-dialog-centered">
                     <div class="modal-content">
                       <div class="modal-header">
                         <h5 class="modal-title" id="criteriaModalLabel">Filtrer par critères</h5>
@@ -52,38 +117,42 @@
 
                             <div class="col-xxl-6 col-sm-6">
                                 <div class="mb-3 bg-light">
-                                    <input type="text" placeholder="Selectionner le site" formControlName="site"
-                                            [matAutocomplete]="autoSite" class="form-select form-select-sm bg-light">
-                                    <mat-autocomplete #autoSite="matAutocomplete" [displayWith]="displaySite" panelClass="small-autocomplete">
-                                        @for (s of filteredSites | async ; track s.idsite!) {
-                                            <mat-option [value]="s">
-                                                {{s.libelle!}}
-                                            </mat-option>
-                                        }
-                                    </mat-autocomplete>
+                                    <div class="mb-2">
+                                        <div class="input-light">
+                                            <select class="form-select form-select-sm bg-light border-0" formControlName="site">
+                                                <option value="" selected>Choisir le site</option>
+                                                @for(item of sites; track $index){
+                                                    <option value="{{item.idsite}}"> {{item.libelle}} </option>
+                                                }
+                                            </select>
+                                        </div>
+                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="col-xxl-6 col-sm-6">
                                 <div class="mb-3 bg-light">
-                                    <input type="text" placeholder="Selectionner le journal" formControlName="journal"
-                                            [matAutocomplete]="autoJournal" class="form-select form-select-sm bg-light">
-                                    <mat-autocomplete #autoJournal="matAutocomplete" [displayWith]="displayJournal" panelClass="small-autocomplete">
-                                        @for (j of filteredJournaux | async; track j.idjournal!) {
-                                            <mat-option [value]="j">
-                                                {{j.designation!}}
-                                            </mat-option>
-                                        }
-                                    </mat-autocomplete>
+                                    <div class="mb-2">
+                                        <div class="input-light">
+                                            <select class="form-select form-select-sm bg-light border-0" formControlName="journal">
+                                                <option value="" selected>Choisir le journal</option>
+                                                @for(item of journaux; track $index){
+                                                    <option value="{{item.idjournal}}"> {{item.designation}} </option>
+                                                }
+                                            </select>
+                                        </div>
+                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                    </div>
                                 </div>
                             </div>
                         
                             <div class="col-md-12">
                               <label class="form-label d-block">Écritures définitives</label>
                               <mat-radio-group formControlName="ecrituresdefinitives" class="d-flex gap-3">
-                                <mat-radio-button value="all" class="me-2">Tous</mat-radio-button>
-                                <mat-radio-button value="yes" class="me-2">Oui</mat-radio-button>
-                                <mat-radio-button value="no">Non</mat-radio-button>
+                                <mat-radio-button value="tous" class="me-2">Tous</mat-radio-button>
+                                <mat-radio-button value="oui" class="me-2">Oui</mat-radio-button>
+                                <mat-radio-button value="non">Non</mat-radio-button>
                               </mat-radio-group>
                             </div>
 

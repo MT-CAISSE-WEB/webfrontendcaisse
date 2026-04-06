@@ -431,7 +431,6 @@ export class OprationJustifieeComponent implements OnInit{
 
       //Trouver l'opération sélectionnée
       const operation = this.operations.find(op => op.idoperation === opId);
-      console.log(operation);
       if(!operation) return;
 
       const totalcaissemontantref = operation.caisses?.reduce((sum: number, caisse: any) => {
@@ -532,6 +531,8 @@ export class OprationJustifieeComponent implements OnInit{
       if(devise){
         // Déclencher la gestion dynamique des devises
         this.gererDevisesDynamiquement();
+        //Charger le dernier taux
+        this.loadLastdeviseTaux(devise);
       }
     });
   }
@@ -623,7 +624,6 @@ export class OprationJustifieeComponent implements OnInit{
     this.ope = operation;
     this.justificatifservice.getdetailsJustificatif({}).pipe(
       switchMap((res: any) => {
-
         if(res.success){
           this.justificatifDetail = res.data;
         }
@@ -637,7 +637,7 @@ export class OprationJustifieeComponent implements OnInit{
           this.justificatifPieces = res.data;
           this.justificatifFiltered =
           this.justificatifPieces.filter(j => j.operation.idoperation === operation.idoperation);
-          
+      
           /**
            * Calcul des totaux existants (SEULEMENT les justificatifs, pas les encaissements)
            * Conversion automatique vers devise de référence
@@ -664,7 +664,7 @@ export class OprationJustifieeComponent implements OnInit{
             }
             return sum;
           }, 0) || 0;
-
+        
           /**
            * Calcul reste : Montant opération - Justificatifs existants - Encaissements
            * Tous les calculs sont maintenant en devise de référence
@@ -672,7 +672,6 @@ export class OprationJustifieeComponent implements OnInit{
           const montantOperationRef = this.convertirVersReference(operation.montant, operation.devise?.iddevise);
           const resteRef = montantOperationRef - this.totalpieceJustificativeRef - this.totalEncaissementsRef;
           const resteOperation = this.convertirDepuisReference(resteRef, operation.devise?.iddevise);
-
 
           this.operationForm.patchValue({
             resteapayeroperation: resteOperation,
@@ -753,7 +752,7 @@ export class OprationJustifieeComponent implements OnInit{
     });
   }
 
-  // //validation required
+  //validation required
   isValidField(label: string): string {
     let status: string = "";
     this.form[label].valid && this.form[label].touched ? status = 'is-valid' :

@@ -799,6 +799,7 @@ export class OperationCaisseComponent implements OnInit{
       site          : _object.site.idsite,
       typepaiement  : _object.caisses[0].codtypeoperation,
       montant       : _object.montant,
+      tauxoperation : _object.tauxoperation || 1,
       dateoperation : this.formatDateForInput(_object.dateoperation),
       societe       : _object.societe.idsociete,
     });

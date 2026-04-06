@@ -75,3 +75,11 @@
 ::ng-deep .mat-mdc-floating-label {
   font-size: 12px;
 }
+
+.cdk-overlay-container {
+  z-index: 2000 !important;
+}
+
+.small-autocomplete {
+  z-index: 2000 !important;
+}

@@ -37,4 +37,12 @@ export class ComptabilisationService {
         return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/ecriture');
     }
 
+     /**
+   * get generate ecriture
+   * @param params
+   */
+    generateEcriture(_data: any): Observable<QueryResultModel> {
+        return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/' + _data.operation, _data);
+    }
+
 }
