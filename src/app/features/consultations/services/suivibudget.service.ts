@@ -17,6 +17,6 @@ export class ConsultationService {
    * @param params
    */
     getEvolBudget(data: any): Observable<QueryResultModel> {
-        return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/evol', data);
+        return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/evolution', data);
     }
 }

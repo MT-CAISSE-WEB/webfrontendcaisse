@@ -52,7 +52,7 @@ export class CustomFieldSelectComponent implements OnInit, ControlValueAccessor,
 
   /* PAGINATION */
   page: number = 1;
-  pageSize: number = 3;
+  pageSize: number = 5;
   totalPages: number = 0;
 
   /* UI */

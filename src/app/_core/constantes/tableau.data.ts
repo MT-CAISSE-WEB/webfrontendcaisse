@@ -22,6 +22,12 @@ export const COLUMNS_DEPARTEMENT = [
     {field:'libelle', label:'--Selecctionner departement--'}
 ];
 
+export const COLUMNS_BUDGET = [
+    {field:'idbudget', label:'Id', key:true },
+    // {field:'codecentreanalytique', label:'code'},
+    {field:'libelle', label:'--Selecctionner budget--'}
+];
+
 
 export const DENOMINATION_BILLETAGE: any = {
   CDF: {

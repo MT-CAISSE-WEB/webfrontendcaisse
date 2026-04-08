@@ -33,11 +33,11 @@
                 </div>
                 <div class="card-body bg-light-subtle border border-dashed border-start-0 border-end-0">
                     <div class="row g-4">
-                        <div class="col-xxl-3 col-sm-3">
+                        <!-- <div class="col-xxl-3 col-sm-3">
                             <div class="input-light">
                                 <label class="form-label">Budget</label>
                                 <select class="form-select form-select-sm {{ isValidField('idbudget')}}" 
-                                formControlName="idbudget">
+                                    formControlName="idbudget">
                                     <option value="" selected>-- Selectionner --</option>
                                     @for (item of budgets; track $index){
                                     <option
@@ -45,9 +45,23 @@
                                     }
                                 </select>
                             </div>
+                        </div> -->
+                        <div class="col-xxl-3 col-sm-4">
+                            <app-custom-field-select
+                                mode="backend"
+                                formControlName="idbudget"
+                                valueField="idbudget"
+                                codeField="codebudget"
+                                labelField="libelle"
+                                [columns]="columnsbudget"
+                                placeholder="Rechercher un budget..."
+                                (loadData)="searchBudget($event)"
+                                (valueChange)="onSelectBudget($event)"
+                                [data]="filteredBudgets">
+                            </app-custom-field-select>
                         </div>
 
-                        <div class="col-xxl-3 col-sm-3">
+                        <!-- <div class="col-xxl-3 col-sm-3">
                             <div class="input-light">
                                 <label class="form-label">Département</label>
                                 <select class="form-select form-select-sm {{ isValidField('iddepartement')}}" 
@@ -59,9 +73,24 @@
                                     }
                                 </select>
                             </div>
+                        </div> -->
+
+                        <div class="col-xxl-3 col-sm-4">
+                            <app-custom-field-select
+                                mode="backend"
+                                formControlName="iddepartement"
+                                valueField="iddepartement"
+                                codeField="codedept"
+                                labelField="libelle"
+                                [columns]="columnsdepartement"
+                                placeholder="Rechercher un département..."
+                                (loadData)="searchDepartement($event)"
+                                (valueChange)="onSelectDepartement($event)"
+                                [data]="filtredepartement">
+                            </app-custom-field-select>
                         </div>
 
-                        <div class="col-xxl-3 col-sm-3">
+                        <!-- <div class="col-xxl-3 col-sm-3">
                             <div class="input-light">
                                 <label class="form-label">Nature d'opération</label>
                                 <select class="form-select form-select-sm {{ isValidField('idnature')}}" 
@@ -73,14 +102,42 @@
                                     }
                                 </select>
                             </div>
+                        </div> -->
+
+                        <div class="col-xxl-3 col-sm-4">
+                            <app-custom-field-select
+                                mode="backend"
+                                formControlName="idnature"
+                                valueField="idnature"
+                                codeField="codenature"
+                                labelField="libelle"
+                                [columns]="columnsnature"
+                                placeholder="Rechercher une nature operation..."
+                                (loadData)="searchNature($event)"
+                                (valueChange)="onSelectNature($event)"
+                                [data]="natureoperationsFiltered">
+                            </app-custom-field-select>
                         </div>
 
-                        <div class="col-xxl-3 col-sm-3 pt-3">
-                            <div class="input-light">
-                                <button class="btn btn-primary" (click)="soumettre()">
+                        <div class="col-xxl-3 col-sm-4" *ngIf="isanalytique == 1">
+                            <app-custom-field-select
+                                mode="backend"
+                                formControlName="centre"
+                                valueField="idcentreanalytique"
+                                codeField="codecentreanalytique"
+                                labelField="libelle"
+                                [columns]="columnscentre"
+                                placeholder="Rechercher un centre analytique..."
+                                (loadData)="searchCentre($event)"
+                                (valueChange)="onSelectCentre($event)"
+                                [data]="centresFiltered">
+                            </app-custom-field-select>
+                        </div>
+
+                        <div class="col-xxl-3 col-sm-3">
+                            <button class="btn btn-sm btn-primary" (click)="onSubmit()">
                                 <i class="ri-save-line"></i> Recherche
-                                </button>
-                            </div>
+                            </button>
                         </div>
                     </div>            
                 </div>
@@ -99,13 +156,15 @@
                             <thead class="">
                                 <tr>
                                     <th>Code budget</th>
-                                    <th>Libellé Budget</th>
+                                    <!-- <th>Libellé Budget</th> -->
                                     <th>Date début</th>
                                     <th>Date fin</th>
-                                    <th>Code département</th>
-                                    <th>Libellé département</th>
-                                    <th>Code nature</th>
-                                    <th>Libellé nature</th>
+                                    <th *ngIf="isanalytique == 0">Code département</th>
+                                    <th *ngIf="isanalytique == 0">Libellé département</th>
+                                    <th *ngIf="isanalytique == 0">Code nature</th>
+                                    <th *ngIf="isanalytique == 0">Libellé nature</th>
+                                    <th *ngIf="isanalytique == 1">Code centre</th>
+                                    <th *ngIf="isanalytique == 1">Libellé centre</th>
                                     <th>Prévision</th>
                                     <th>Pré-engagé</th>
                                     <th>Engagé</th>
@@ -118,19 +177,20 @@
                                 @for (item of evolutionbudget; track $index) {
                                 <tr>
                                     <td class="code"><a href="#" class="fw-medium link-primary">{{item.codebudget}}</a></td>
-                                    <td class="designation">{{item.libellebudget}}</td>
+                                    <!-- <td class="designation">{{item.libellebudget}}</td> -->
                                     <td class="typetiers">{{item.datedebut | date : "dd/MM/yyyy"}}</td>
                                     <td class="typetiers">{{item.datefin | date : "dd/MM/yyyy"}}</td>
-                                    <td class="typetiers">{{item.codedept}}</td>
-                                    <td class="typetiers">{{item.libelledept}}</td>
-                                    <td class="typetiers">{{item.codenature}}</td>
-                                    <td class="typetiers">{{item.libellenature}}</td>
+                                    <td *ngIf="isanalytique == 0" class="typetiers">{{item.codedept}}</td>
+                                    <td *ngIf="isanalytique == 0" class="typetiers">{{item.libelledept}}</td>
+                                    <td *ngIf="isanalytique == 0" class="typetiers">{{item.codenature}}</td>
+                                    <td *ngIf="isanalytique == 0" class="typetiers">{{item.libellenature}}</td>
+                                    <td *ngIf="isanalytique == 1" class="typetiers">{{item.codecentre}}</td>
+                                    <td *ngIf="isanalytique == 1" class="typetiers">{{item.libellecentre}}</td>
                                     <td class="typetiers">{{item.prevision}}</td>
                                     <td class="typetiers">{{item.preengage}}</td>
                                     <td class="typetiers">{{item.engage}}</td>
                                     <td class="typetiers">{{item.realise}}</td>
                                     <td class="typetiers">{{item.solde}}</td>
-
                                 </tr>
                                 }
                             </tbody>
@@ -144,11 +204,11 @@
                     </div>
                     <div class="d-flex justify-content-end mt-3">
                         <div class="pagination-wrap hstack gap-2">
-                            <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
+                            <button [disabled]="page == 1" (click)="changePageTotal(page - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
                                 Précédent
                             </button>
-                            <ul class="pagination listjs-pagination mb-0"> Page {{currentPage}} / {{totalPages}} </ul>
-                            <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)" class="btn btn-sm btn-soft-primary pagination-next">
+                            <ul class="pagination listjs-pagination mb-0"> Page {{page}} / {{totalPages}} </ul>
+                            <button [disabled]="page == totalPages" (click)="changePageTotal(page + 1)" class="btn btn-sm btn-soft-primary pagination-next">
                                 Suivant
                             </button>
                         </div>
