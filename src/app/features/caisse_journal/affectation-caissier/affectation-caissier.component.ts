@@ -10,6 +10,8 @@ import { AffectationCaisseService } from '../services/affectationcaisse.service'
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { utilisateurroleservice } from '../../administration/service/utilisateurrole.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-affectation-caissier',
@@ -67,7 +69,11 @@ export class AffectationCaissierComponent implements OnInit{
     page: 1
   };
 
-  constructor(private router : Router, private usercaisseservice : AffectationCaisseService,private caisseservice: CaisseService, private us: userservice){}
+  userRoles: number[] = []; 
+
+  constructor(private router : Router, private usercaisseservice : AffectationCaisseService,private caisseservice: CaisseService, private us: userservice,
+    private ur:utilisateurroleservice,
+  ){}
 
   ngOnInit(): void{
     //Formulaire de recherche
@@ -79,7 +85,7 @@ export class AffectationCaissierComponent implements OnInit{
     //Récupérer toutes les caisses
     this.getAllcaisses();
     //Obtenir les utilisateurs
-    this.getallusers();
+    //this.getallusers();
     //Formulaire
     // this.filterCaissesForAllRows();
 
@@ -94,6 +100,8 @@ export class AffectationCaissierComponent implements OnInit{
     this.searchForm.valueChanges
       .pipe(debounceTime(400),distinctUntilChanged()).subscribe(values => {
       this.applyFilters(values);});
+
+    this.loadUsersWithRole3();
   }
 
   //Initialiser le formulaire de recherche
@@ -102,6 +110,23 @@ export class AffectationCaissierComponent implements OnInit{
       search: [''],
       date: [''],
       status: ['']
+    });
+  }
+
+  getRolesUser(user: usermodel){
+    this.ur.getutilisateurroles(user.idutilisateur)
+      .subscribe(res => {
+        this.userRoles = res.data[0].map((r: any) => r.idrole);
+      });
+  }
+
+  getAllUsersRoles() {
+    this.ur.getAll()
+      .subscribe(res => {
+        if(res.success){
+          this.userRoles = res.data.filter((ur: any) => ur.idrole === 3);
+          console.log(this.userRoles);
+        }
     });
   }
 
@@ -374,6 +399,26 @@ export class AffectationCaissierComponent implements OnInit{
     if (index == -1 && actif) this.objectsSelected.push(usercaisse);
     if (index != -1 && !actif) this.objectsSelected.splice(index, 1);
     this.checkAllRow = this.objectsSelected?.length == this.caisses?.length;
+  }
+
+  //Obtenir les utilisateurs avec filtre rôle = 4
+  loadUsersWithRole3() {
+    forkJoin({
+      users: this.us.getAll(),
+      roles: this.ur.getAll()
+    }).subscribe(({ users, roles }) => {
+
+      if (users.success && roles.success) {
+        const filteredRoles = roles.data.filter((ur: any) => ur.idrole === 3);
+        const userIds = new Set(
+          filteredRoles.map((ur: any) => ur.idutilisateur)
+        );
+
+        this.users = users.data.filter((user: usermodel) => 
+          userIds.has(user.idutilisateur)
+        );
+      }
+    });
   }
 
 }

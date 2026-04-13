@@ -8,6 +8,13 @@ import { MotifService } from '../services/motif.service';
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
 import { Compteur } from '../models/compteur.model';
 import { CompteurService } from '../services/compteur.service';
+import { journalModel } from '../../caisse_journal/models/journal.model';
+import { JournalService } from '../../caisse_journal/services/journal.service';
+import { url } from 'inspector';
+import { plancomptableModel } from '../../donnee_base/models/plancomptable.model';
+import { PlancomptableService } from '../../donnee_base/services/plancomptable.service';
+import { ParametreComptableService } from '../services/parametrecomptable.service';
+import { parametreComptableModel } from '../models/parametrecomptable.model';
 
 @Component({
   selector: 'app-parametre-page',
@@ -40,7 +47,6 @@ export class ParametrePageComponent implements OnInit {
   //Faire le check selection **********
   objectsSelected : motifModel[] = [];
   selectedItems : any[] = [];
-
   optionsSequence2: string[] = [];
 
   // Détermine si toutes les lignes sont selectionnées
@@ -54,10 +60,16 @@ export class ParametrePageComponent implements OnInit {
 
   //Element à supprimer
   deleteMotif: any = null;
-
   params : any = {};
+  journaux: journalModel[] = [];
+  comptes : plancomptableModel[] = [];
 
-  constructor(private router: Router, private toastr : ToastrService, private motifservice: MotifService, private compteurService : CompteurService) {}
+  paramForm : FormGroup = this.fb.group({});
+  currentParam: any;
+
+  constructor(private router: Router, private toastr : ToastrService, private motifservice: MotifService, private compteurService : CompteurService,
+    private journalservice: JournalService, private plancomptableservice: PlancomptableService, private serviceparametre: ParametreComptableService
+  ) {}
 
    ngOnInit(): void {
     //Récupérer tous les motifs
@@ -68,6 +80,14 @@ export class ParametrePageComponent implements OnInit {
     this.initForm();
     // Initialiser le formulaire du compteur
     this.initFormCompteur();
+    // Charger les journaux
+    this.getAllJournaux();
+    // Initialiser le formulaire de paramètre
+    this.initFormParametre();
+    // Charger les comptes comptables
+    this.getAllComptes();
+    // Charger les paramètres comptables
+    this.getParam();
 
     // Suppresion du motif
     this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("ce motif");
@@ -469,6 +489,99 @@ export class ParametrePageComponent implements OnInit {
         this.toastr.error(this.msgErros ?? 'Erreur lors de la suppression.');
         this.loading = false;
       },
+    });
+  }
+
+  //charger les journaux
+  getAllJournaux() {
+    this.loading = true; // Démarrer le chargement
+    this.params = {
+      page: 1,
+      limit: 50,
+      search:  '',
+    };
+    this.journalservice.getAll(this.params).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.journaux = res.data.data;
+        }
+        this.loading = false; // Arrêter le chargement
+      },
+      error: (err: any) => {
+        this.loading = false; // Arrêter le chargement même en cas d'erreur
+        this.error = 'Erreur lors du chargement des données';
+        this.toastr.error('Erreur lors du chargement des données.');
+      }
+    });
+  }
+
+  // initialiser le formulaire de paramètre
+  initFormParametre() {
+    this.paramForm = this.fb.group({
+      societe: [this.user.idsociete],
+      journal: [''],
+      compteintermediaire: [''],
+      url: ['']
+    });
+  }
+
+  // Charger les comptes comptables
+  getAllComptes(){
+    this.plancomptableservice.getAll().subscribe({
+      next : (res) => {
+        if(res.success){
+          this.comptes = res.data;
+        }
+      }
+    });
+  }
+
+  editParam(type: string) {
+    const value = this.paramForm.get(type)?.value;
+
+    if (!value) {
+      this.toastr.warning("Configuration inexistante. Contactez l'administrateur.");
+      return;
+    }
+
+    const payload = {
+      societe: this.paramForm.get('societe')?.value,
+      type: type,
+      value: value
+    };
+
+    this.saveParam(payload);
+  }
+
+  // Save paramètre comptable 
+  saveParam(payload: any) {
+    this.serviceparametre.save(payload).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.toastr.success('Paramètre comptable enregistré avec succès.');
+        }
+      }
+    });
+  }
+
+  // Get paramètre comptable
+  getParam() {
+    const payload = {
+      societe: this.paramForm.get('societe')?.value
+    };
+
+    return this.serviceparametre.getAll(payload).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          // Handle the retrieved parameter values
+          this.currentParam = res.data[0];
+          this.paramForm.patchValue({
+            journal: this.currentParam.journal.id,
+            compteintermediaire: this.currentParam.compte.id,
+            url: this.currentParam.url
+          });
+        }
+      }
     });
   }
 
