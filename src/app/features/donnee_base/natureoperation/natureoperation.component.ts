@@ -11,9 +11,6 @@ import { plancomptableModel } from '../models/plancomptable.model';
 
 import { ToastrService } from 'ngx-toastr';
 
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
-
 
 // ADD-INS
 declare var $: any;
@@ -107,6 +104,16 @@ export class NatureoperationComponent implements OnInit{
     });
   }
 
+  getOneNatureoperation(id: string){
+    this.natureoperationservice.getOne(id).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.natureoperation = res.data;
+        }
+      }
+    });
+  }
+
   get user(){
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
@@ -120,12 +127,12 @@ export class NatureoperationComponent implements OnInit{
       decajustifier : [false],
       imputationtiers : [false],
       demandedecaissement : [true],
-      typeoperation : ["", [Validators.required]],
+      typeoperation : ["Decaissement", [Validators.required]],
       idsociete : [this.user.idsociete, [Validators.required]],
       idcompte : ["", [Validators.required]],
       actif : [true],
-      createdby : [this.user.codeutilisateur],
-      updatedby : [this.user.codeutilisateur]
+      createdby : [this.user.prenom + " " + this.user.nom],
+      updatedby : [this.user.prenom + " " + this.user.nom]
     })
   }
 
@@ -353,16 +360,15 @@ export class NatureoperationComponent implements OnInit{
     }
     const file = input.files[0];
     const info = {
-      idsociete : this.user.idsociete,
-      createdby : this.user.codeutilisateur
+      idsociete : this.user.idsociete[0],
+      createdby : this.user.prenom + " " + this.user.nom
     }
-    console.log(info.createdby)
 
     this.natureoperationservice.importNatureOperation(file, info).subscribe({
       next: (res) => {
         if (res.success) {
-          this.getAllNatureoperations();
           this.toastr.success('Importation effectuée avec succès');
+          this.getAllNatureoperations();
         } else {
           this.error = "Echec de l'importation";
           this.toastr.error(this.error);

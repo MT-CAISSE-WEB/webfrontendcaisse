@@ -206,11 +206,9 @@
                           ></i>
                         </button>
                       </td>
-
                       <td>
                         {{ item.codebudget }}
                       </td>
-
                       <td>{{ item.libelle }}</td>
                       <td>{{ item.entite ? item.entite : "-" }}</td>
                       <td>
@@ -222,7 +220,7 @@
                               : 'bg-danger-subtle text-danger'
                           "
                         >
-                          {{ item.isanalytique ? "Oui" : "Non" }}
+                          {{ item.isanalytique === 1 ? "Oui" : "Non" }}
                         </span>
                       </td>
                       <td>
@@ -231,10 +229,18 @@
                           [ngClass]="
                             item.valide === 1
                               ? 'bg-success-subtle text-success'
-                              : 'bg-danger-subtle text-danger'
+                              : item.valide === 0
+                                ? 'bg-warning-subtle text-warning'
+                                : 'bg-danger-subtle text-danger'
                           "
                         >
-                          {{ item.valide ? "Oui" : "Non" }}
+                          {{
+                            item.valide === 1
+                              ? "Oui"
+                              : item.valide === 0
+                                ? "En cours"
+                                : "Non"
+                          }}
                         </span>
                       </td>
                       <td>{{ item.datedebut | date: "dd-MM-yyyy" }}</td>
@@ -244,12 +250,12 @@
                         <span
                           class="badge"
                           [ngClass]="
-                            item.actif
+                            item.actif === 1
                               ? 'bg-success-subtle text-success'
                               : 'bg-danger-subtle text-danger'
                           "
                         >
-                          {{ item.actif ? "Actif" : "Inactif" }}
+                          {{ item.actif === 1 ? "Actif" : "Inactif" }}
                         </span>
                       </td>
 
@@ -318,14 +324,19 @@
                     <!-- 🔸 LIGNES BUDGETS MENSUELS -->
                     @if (isExpanded[item.idbudget]) {
                       <tr>
-                        <td colspan="9" class="bg-light">
+                        <td colspan="12" class="bg-light">
                           <table class="table table-sm table-borderless mb-0">
                             <thead class="text-muted">
                               <tr>
+                                <th>#</th>
                                 <th>Code</th>
                                 <th>Libellé</th>
+                                <th>Entité</th>
+                                <th>Analytique</th>
+                                <th>Validé</th>
                                 <th>Période</th>
                                 <th>Prévision</th>
+                                <th>Devise</th>
                                 <th>Status</th>
                                 <th class="text-end">Action</th>
                               </tr>
@@ -333,11 +344,50 @@
                             <tbody>
                               @for (
                                 child of getBudgetsMensuels(item.idbudget);
-                                track child.idbudget
+                                track child.idbudget;
+                                let i = $index
                               ) {
                                 <tr>
+                                  <td>{{ i + 1 }}</td>
                                   <td>{{ child.codebudget }}</td>
                                   <td>{{ child.libelle }}</td>
+                                  <td>
+                                    {{ child.entite ? child.entite : "-" }}
+                                  </td>
+                                  <td>
+                                    <span
+                                      class="badge"
+                                      [ngClass]="
+                                        child.isanalytique === 1
+                                          ? 'bg-success-subtle text-success'
+                                          : 'bg-danger-subtle text-danger'
+                                      "
+                                    >
+                                      {{
+                                        child.isanalytique === 1 ? "Oui" : "Non"
+                                      }}
+                                    </span>
+                                  </td>
+                                  <td>
+                                    <span
+                                      class="badge"
+                                      [ngClass]="
+                                        child.valide === 1
+                                          ? 'bg-success-subtle text-success'
+                                          : child.valide === 0
+                                            ? 'bg-warning-subtle text-warning'
+                                            : 'bg-danger-subtle text-danger'
+                                      "
+                                    >
+                                      {{
+                                        child.valide === 1
+                                          ? "Oui"
+                                          : child.valide === 0
+                                            ? "En cours"
+                                            : "Non"
+                                      }}
+                                    </span>
+                                  </td>
                                   <td>
                                     {{ child.datedebut | date: "MMM yyyy" }}
                                   </td>
@@ -347,16 +397,19 @@
                                         | number: "1.0-0"
                                     }}
                                   </td>
+                                  <td>{{ user.devise_ref_code }}</td>
                                   <td>
                                     <span
                                       class="badge"
                                       [ngClass]="
-                                        child.actif
+                                        child.actif === 1
                                           ? 'bg-success-subtle text-success'
                                           : 'bg-danger-subtle text-danger'
                                       "
                                     >
-                                      {{ child.actif ? "Actif" : "Inactif" }}
+                                      {{
+                                        child.actif === 1 ? "Actif" : "Inactif"
+                                      }}
                                     </span>
                                   </td>
                                   <td class="text-end">

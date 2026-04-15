@@ -24,22 +24,27 @@ export class AffectationDepartementNatureService {
   }
 
 
-  /**
-   * @param id
-   */
-  saveAffectations(id: string, data: any): Observable<any> {
-    return this.http.post<any>(
-      URL_LOCAL.baseUrl + this.url + "/" + id,
-      data
-    );
+
+  saveAffectations(iddepartement: string, data: any, info: any): Observable<any> {
+    const payload = {idsNatures: data, info: info};
+    return this.http.post<any>(URL_LOCAL.baseUrl + this.url + "/" + iddepartement, payload);
   }
 
 
   exportAffectations(data: any) {
-    return this.http.post(URL_LOCAL.baseUrl + this.url + '/export',
+    return this.http.post(URL_LOCAL.baseUrl + this.url + '/export/departement',
       data,
       { responseType: 'blob' }
     );
+  }
+
+
+  import_affectations(file: File, info: any): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('idsociete', info.idsociete);
+    formData.append('createdby', info.createdby);
+    return this.http.post<any>(URL_LOCAL.baseUrl + this.url + '/import/departement', formData);
   }
 
 }

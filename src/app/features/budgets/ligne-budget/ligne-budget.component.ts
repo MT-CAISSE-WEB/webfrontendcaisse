@@ -236,7 +236,6 @@ export class LigneBudgetComponent implements OnInit {
         iddepartement: '',
       }));
   }
-  
   getAllCentreAnalytique() {
     this.centreAnalytiqueService.getAll().subscribe({
       next: (res: any) => {
@@ -327,13 +326,14 @@ export class LigneBudgetComponent implements OnInit {
           const lesbudgets = res.data as BudgetModel[];
           if (this.user.typeentitesociete === 1) {
             this.budgets = lesbudgets.filter(
-              (b) => b.idsociete === this.user.idsociete,
+              (b) => b.idsociete === this.user.idsociete && b.valide === 0,
             );
           } else {
             this.budgets = lesbudgets.filter(
               (b) =>
                 b.idsite === this.user.idsite &&
-                b.idsociete === this.user.idsociete,
+                b.idsociete === this.user.idsociete &&
+                b.valide === 0,
             );
           }
         }
@@ -1673,7 +1673,7 @@ export class LigneBudgetComponent implements OnInit {
   modalCreate() {
     this.actionModal = 'create';
     this.unlockBudgetAndDepartement();
-    // this.selectedBudget = undefined;
+    this.paginatedLignes = null;
     this.initForm();
   }
 

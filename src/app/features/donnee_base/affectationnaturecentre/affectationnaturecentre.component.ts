@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { natureoperationModel } from '../models/natureoperation.model';
 import { NatureoperationService } from '../services/natureoperation.service';
 import { ToastrService } from 'ngx-toastr';
+import { format } from 'node:path';
 
 // ADD-INS
 declare var $: any;
@@ -66,6 +67,17 @@ export class AffectationNatureCentreComponent implements OnInit{
   pageSize: number = 15;
   totalPages: number = 1;
 
+  ImportForm : FormGroup = this.fb.group({})
+
+  ExportForm : FormGroup = this.fb.group({})
+
+  selectedNatureCode: string = '';
+
+  exportData = {
+    debut: this.selectedNatureCode || '',
+    fin: this.selectedNatureCode || '',
+    format: 'excel'
+  };
 
   constructor( private AffectationNatureCentreService: AffectationNatureCentreService,
     private natureoperationservice: NatureoperationService,
@@ -77,7 +89,7 @@ export class AffectationNatureCentreComponent implements OnInit{
 
     this.natureoperationForm = this.fb.group({
       idnature : ["", Validators.required],
-      idsociete : [this.user.idsociete, [Validators.required]],
+      idsociete : [this.user.idsociete[0], [Validators.required]],
       idsCentres: [[]]
     });
 
@@ -87,13 +99,18 @@ export class AffectationNatureCentreComponent implements OnInit{
     this.natureoperationForm.get('idnature')?.valueChanges.subscribe(idnature => {
       if (idnature) {
         this.getallAffectations(idnature);
+        this.getOneNatureoperation(idnature);
       } else {
         this.affectees = [];
         this.nonAffectees = [];
       }
     });
-  }
 
+    
+    //Initialiser le formulaire du fichier d'import
+    this.initImportForm();
+
+  }
 
   getAllNatureoperations() {
     this.natureoperationservice.getAll().subscribe({
@@ -160,6 +177,11 @@ export class AffectationNatureCentreComponent implements OnInit{
   save() {
     const idnature = this.natureoperationForm.get('idnature')?.value;
 
+    const info = {
+      idsociete: this.user.idsociete[0],
+      createdby: this.user.prenom + ' ' + this.user.nom
+    }
+
     if (!idnature) {
       return;
     }
@@ -167,7 +189,7 @@ export class AffectationNatureCentreComponent implements OnInit{
     const idsCentres = this.affectees;
 
     this.AffectationNatureCentreService
-      .saveAffectations(idnature, idsCentres)
+      .saveAffectations(idnature, idsCentres, info)
       .subscribe({
         next: (res) => {
           if (res.success) {
@@ -388,6 +410,95 @@ export class AffectationNatureCentreComponent implements OnInit{
     this.selectedLeft = [];
     this.selectedRight = [];
     this.natureoperationForm.reset();
+  }
+
+
+  //Importation
+  importAffectation(event: any){
+    const file = event.target.files[0];
+
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      this.ImportForm.patchValue({ file });
+      this.ImportForm.get('file')?.updateValueAndValidity();
+    }
+  }
+
+  //Création du formulaire d'importation
+  initImportForm(): void{
+    this.ImportForm = this.fb.group({
+      file : [null, [Validators.required]],
+    })
+  }
+
+  submitImportFile(input: HTMLInputElement): void {
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+    const file = input.files[0];
+    const info = {
+      idsociete : this.user.idsociete[0],
+      createdby : this.user.prenom + " " + this.user.nom
+    };
+
+    this.AffectationNatureCentreService.import_affectations(file, info).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.toastr.success('Importation effectuée avec succès');
+        } else {
+          this.error = "Echec de l'importation";
+          this.toastr.error(this.error);
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = "Echec de l'importation";
+        this.loading = false;
+        this.toastr.error(err);
+      }
+    })
+  }
+
+
+  // OK
+  getOneNatureoperation(id: string){
+    this.natureoperationservice.getOne(id).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.selectedNatureCode = res.data.codenature;
+          this.exportData = {
+            debut: this.selectedNatureCode || '',
+            fin: this.selectedNatureCode || '',
+            format: 'excel'
+          };
+        }
+      }
+    });
+  }
+
+  // OK
+  exporter() {
+    this.AffectationNatureCentreService.exportAffectations(this.exportData).subscribe({
+      next: (blob: Blob) => {
+
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+
+        a.download = this.exportData.format === 'pdf'
+          ? 'Affectations_natures.pdf'
+          : 'Affectations_natures.xlsx';
+
+        a.click();
+
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.toastr.error("Erreur export");
+      }
+    });
   }
 
 }

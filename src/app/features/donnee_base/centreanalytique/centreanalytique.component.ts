@@ -117,8 +117,8 @@ export class CentreanalytiqueComponent implements OnInit{
       libelle : ["", [Validators.required]],
       idsociete : [this.user.idsociete, [Validators.required]],
       actif : [true],
-      createdby : [this.user.codeutilisateur],
-      updatedby : [this.user.codeutilisateur]
+      createdby : [this.user.prenom + " " + this.user.nom],
+      updatedby : [this.user.prenom + " " + this.user.nom]
     })
   }
 
@@ -385,10 +385,9 @@ export class CentreanalytiqueComponent implements OnInit{
     }
     const file = input.files[0];
     const info = {
-      idsociete : this.user.idsociete,
-      createdby : this.user.codeutilisateur
+      idsociete : this.user.idsociete[0],
+      createdby : this.user.prenom + " " + this.user.nom
     }
-    console.log(info.createdby)
 
     this.centreanalytiqueservice.importCentreAnalytique(file, info).subscribe({
       next: (res) => {

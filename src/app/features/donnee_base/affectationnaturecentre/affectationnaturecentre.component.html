@@ -19,16 +19,120 @@
         <div class="card" id="orderList">
             <div class="card-header border-0">
                 <div class="row align-items-center gy-3">
-                    <div class="col-sm-auto">
+                    <div class="col-sm-auto d-flex justify-content-between align-items-center">
                         <div class="d-flex gap-1 flex-wrap">
-                            <button type="button" class="btn btn-sm btn-soft-info"><i class="ri-file-download-line align-bottom me-1"></i> Import</button>
-                            <button class="btn btn-sm btn-info" (click)="actualiser()"><i class="ri-refresh-fill align-bottom me-1"></i>Actualiser</button>
+                            <button class="btn btn-sm btn-info" (click)="actualiser()">
+                                <i class="ri-refresh-fill align-bottom me-1"></i>Actualiser
+                            </button>
+                        </div>
+                        <div class="flex-shrink-0 ms-2">
+                            <div class="dropdown card-header-dropdown">
+                                <a class="btn btn-soft-primary btn-sm" role="button" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Télécharger<i class="mdi mdi-chevron-down align-middle ms-1"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#importcsv">Importer csv</a>
+                                    <a class="dropdown-item" href="#" data-bs-target="#exportModal" data-bs-toggle="modal">Extraire</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Modal -->
+            <div class="modal fade" id="importcsv" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                    <div class="modal-header p-3 bg-info-subtle">
+                        <h5>Import des données via CSV</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+                    </div>
+                    <form [formGroup]="ImportForm">
+                        <div class="modal-body text-center">
 
+                        <!-- Décision -->
+                        <div class="d-flex flex-column align-items-center gap-3 mt-3">
+                            <input type="file" #fileInput class="form-control form-control-sm" formControlName="file" accept=".csv" />
+                        </div>
+
+                        <div *ngIf="ImportForm.get('file')?.invalid && ImportForm.get('file')?.touched" class="text-danger mt-1">
+                            <div *ngIf="ImportForm.get('file')?.errors?.['required']">
+                                Le fichier est obligatoire
+                            </div>
+
+                            <div *ngIf="ImportForm.get('file')?.errors?.['invalidFileType']">
+                                Seuls les fichiers CSV sont autorisés
+                            </div>
+                        </div>
+                        </div>
+
+                        <div class="modal-footer">
+                        <div class="hstack gap-2 justify-content-end">
+                            <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">
+                            Annuler
+                            </button>
+
+                            <button type="button" (click)="submitImportFile(fileInput)" class="btn btn-sm btn-success" [disabled]="ImportForm.invalid" data-bs-dismiss="modal">
+                            importer
+                            </button>
+                        </div>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- export -->
+            <div class="modal fade" id="exportModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Exporter les affectations</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- Plage -->
+                            <div class="mb-3">
+                                <label>Nature début</label>
+                                <select class="form-select form-select-sm" [(ngModel)]="exportData.debut" name="debut">
+                                    <option value="">-- Tous --</option>
+                                    <option *ngFor="let n of natureoperations" [value]="n.codenature">
+                                        {{ n.codenature }} - {{ n.libelle }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label>Nature fin</label>
+                                <select class="form-select form-select-sm" [(ngModel)]="exportData.fin" name="fin">
+                                    <option value="">-- Tous --</option>
+                                    <option *ngFor="let n of natureoperations" [value]="n.codenature">
+                                        {{ n.codenature }} - {{ n.libelle }}
+                                    </option>                                    
+                                </select>
+                            </div>
+
+                            <!-- Format -->
+                            <div class="mb-3">
+                                <label>Format</label>
+                                <select class="form-select" [(ngModel)]="exportData.format" name="format">
+                                    <option value="excel">Excel</option>
+                                    <option value="pdf">PDF</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                            <button class="btn btn-primary" (click)="exporter()">Exporter</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
             <div class="card-body pt-0">
             
                 <!-- Selection d'un élément -->

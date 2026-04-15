@@ -151,17 +151,17 @@ export class BanqueComponent implements OnInit{
       codebanque : ["", [Validators.required]],
       libelle : ["", [Validators.required]],
       numerocompte : ["", [Validators.required]],
-      iban : ["", [Validators.required]],
-      swift : ["", [Validators.required]],
+      iban : [""],
+      swift : [""],
       solde_initial : [0, [Validators.required]],
       solde_actuel : [0, [Validators.required]],
       idsociete : [this.user.idsociete, [Validators.required]],
-      idsite : ["", [Validators.required]],
+      idsite : [""],
       idcompte : ["", [Validators.required]],
       iddevise : ["", [Validators.required]],
       actif : [true],
-      createdby : [this.user.codeutilisateur],
-      updatedby : [this.user.codeutilisateur]
+      createdby : [this.user.prenom + " " + this.user.nom],
+      updatedby : [this.user.prenom + " " + this.user.nom]
     })
   }
 
@@ -260,7 +260,6 @@ export class BanqueComponent implements OnInit{
   create(_banques: banqueModel) {
     const {idbanque, ...dataToSend} = _banques;
     this.loading = true;
-      console.log(dataToSend);
     this.banqueservice.create(dataToSend).subscribe({
       next: (res) => {
         if (res.success) {
@@ -329,7 +328,6 @@ export class BanqueComponent implements OnInit{
     this.dispatchbanques(_object);
   }
 
-
   modalDelete(item: banqueModel){
     this.deletebanque = item;
   }
@@ -390,10 +388,9 @@ export class BanqueComponent implements OnInit{
     }
     const file = input.files[0];
     const info = {
-      idsociete : this.user.idsociete,
-      createdby : this.user.codeutilisateur
+      idsociete : this.user.idsociete[0],
+      createdby : this.user.prenom + " " + this.user.nom
     }
-    console.log(info.createdby)
 
     this.banqueservice.importBanques(file, info).subscribe({
       next: (res) => {

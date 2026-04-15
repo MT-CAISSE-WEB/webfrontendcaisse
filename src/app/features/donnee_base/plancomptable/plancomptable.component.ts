@@ -90,9 +90,10 @@ export class PlancomptableComponent implements OnInit{
     });
   }
 
-    get user(){
+  get user(){
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
+
 
   //Création du formulaire
   initForm(): void{
@@ -105,8 +106,8 @@ export class PlancomptableComponent implements OnInit{
       suivibudgetairemensuel: [false],
       idsociete : [this.user.idsociete, [Validators.required]],
       actif : [true],
-      createdby : [this.user.codeutilisateur],
-      updatedby : [this.user.codeutilisateur]
+      createdby : [this.user.prenom + " " + this.user.nom],
+      updatedby : [this.user.prenom + " " + this.user.nom]
     })
   }
 
@@ -213,7 +214,6 @@ export class PlancomptableComponent implements OnInit{
           this.closeModal('showModal');
           this.getAllComptes();
           this.toastr.success('Fiche créée');
-
         } else {
           this.error = "Erreur de création";
           this.toastr.error(this.error);
@@ -334,10 +334,9 @@ export class PlancomptableComponent implements OnInit{
     }
     const file = input.files[0];
     const info = {
-      idsociete : this.user.idsociete,
-      createdby : this.user.codeutilisateur
+      idsociete : this.user.idsociete[0],
+      createdby : this.user.prenom + " " + this.user.nom
     }
-    console.log(info.createdby)
 
     this.plancomptableservice.importPlanComptable(file, info).subscribe({
       next: (res) => {

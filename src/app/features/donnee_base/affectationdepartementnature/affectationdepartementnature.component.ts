@@ -68,6 +68,19 @@ export class AffectationDepartementNatureComponent implements OnInit{
   pageSize: number = 15;
   totalPages: number = 1;
 
+  ImportForm : FormGroup = this.fb.group({})
+
+  ExportForm : FormGroup = this.fb.group({})
+
+  selectedDeptCode: string = '';
+
+  exportData = {
+    debut: this.selectedDeptCode || '',
+    fin: this.selectedDeptCode || '',
+    format: 'excel'
+  };
+
+
 
   constructor( private AffectationDepartementNatureService: AffectationDepartementNatureService,
     private departementservice: departementservice,
@@ -89,11 +102,15 @@ export class AffectationDepartementNatureComponent implements OnInit{
     this.departementForm.get('iddepartement')?.valueChanges.subscribe(iddepartement => {
       if (iddepartement) {
         this.getallAffectations(iddepartement);
+        this.getOneDepartement(iddepartement);
       } else {
         this.affectees = [];
         this.nonAffectees = [];
       }
     });
+
+    //Initialiser le formulaire du fichier d'import
+    this.initImportForm();
   }
 
 
@@ -271,6 +288,11 @@ export class AffectationDepartementNatureComponent implements OnInit{
   save() {
     const iddepartement = this.departementForm.get('iddepartement')?.value;
 
+    const info = {
+      idsociete: this.user.idsociete[0],
+      createdby: this.user.prenom + ' ' + this.user.nom
+    }
+
     if (!iddepartement) {
       return;
     }
@@ -278,7 +300,7 @@ export class AffectationDepartementNatureComponent implements OnInit{
     const idsNatures = this.affectees;
 
     this.AffectationDepartementNatureService
-      .saveAffectations(iddepartement, idsNatures)
+      .saveAffectations(iddepartement, idsNatures, info)
       .subscribe({
         next: (res) => {
           if (res.success) {
@@ -388,11 +410,68 @@ export class AffectationDepartementNatureComponent implements OnInit{
   }
 
 
-  exportData = {
-    debut: null,
-    fin: null,
-    format: 'excel'
-};
+  //Importation
+  importAffectation(event: any){
+    const file = event.target.files[0];
+
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      this.ImportForm.patchValue({ file });
+      this.ImportForm.get('file')?.updateValueAndValidity();
+    }
+  }
+
+  //Création du formulaire d'importation
+  initImportForm(): void{
+    this.ImportForm = this.fb.group({
+      file : [null, [Validators.required]],
+    })
+  }
+
+  submitImportFile(input: HTMLInputElement): void {
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+    const file = input.files[0];
+    const info = {
+      idsociete : this.user.idsociete[0],
+      createdby : this.user.prenom + " " + this.user.nom
+    };
+
+    this.AffectationDepartementNatureService.import_affectations(file, info).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.toastr.success('Importation effectuée avec succès');
+        } else {
+          this.error = "Echec de l'importation";
+          this.toastr.error(this.error);
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = "Echec de l'importation";
+        this.loading = false;
+        this.toastr.error(err);
+      }
+    })
+  }
+
+  // OK
+  getOneDepartement(id: string){
+    this.departementservice.getOne(id).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.selectedDeptCode = res.data.codedept;
+          this.exportData = {
+            debut: this.selectedDeptCode || '',
+            fin: this.selectedDeptCode || '',
+            format: 'excel'
+          };
+        }
+      }
+    });
+  }
 
   exporter() {
     this.AffectationDepartementNatureService.exportAffectations(this.exportData).subscribe({
@@ -404,8 +483,8 @@ export class AffectationDepartementNatureComponent implements OnInit{
         a.href = url;
 
         a.download = this.exportData.format === 'pdf'
-          ? 'Liste_banques.pdf'
-          : 'Liste_banques.xlsx';
+          ? 'Affectations_departements.pdf'
+          : 'Affectations_departements.xlsx';
 
         a.click();
 

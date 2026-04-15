@@ -97,6 +97,18 @@
                         </div>
 
                         <div class="modal-body">
+                            
+                           <div class="mb-3">
+                                <label>Type</label>
+                                <select class="form-select form-select-sm" [(ngModel)]="exportData.typetiers" name="typetiers">
+                                    <option value="">-- Tous --</option>
+                                    <option value="Client">Client</option>
+                                    <option value="Fournisseur">Fournisseur</option>
+                                    <option value="Divers">Divers</option>
+                                    <option value="Salarié">Salarié</option>
+                                </select>
+                            </div>
+                            
                             <!-- Plage -->
                            <div class="mb-3">
                                 <label>Tiers début</label>
@@ -115,17 +127,6 @@
                                     <option *ngFor="let n of tiers" [value]="n.codetiers">
                                         {{ n.codetiers }} - {{ n.designation }}
                                     </option>
-                                </select>
-                            </div>
-
-                           <div class="mb-3">
-                                <label>Type</label>
-                                <select class="form-select form-select-sm" [(ngModel)]="exportData.typetiers" name="typetiers">
-                                    <option value="">-- Tous --</option>
-                                    <option value="Client">Client</option>
-                                    <option value="Fournisseur">Fournisseur</option>
-                                    <option value="Divers">Divers</option>
-                                    <option value="Salarié">Salarié</option>
                                 </select>
                             </div>
 
