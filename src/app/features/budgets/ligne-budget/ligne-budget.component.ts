@@ -236,6 +236,7 @@ export class LigneBudgetComponent implements OnInit {
         iddepartement: '',
       }));
   }
+  
   getAllCentreAnalytique() {
     this.centreAnalytiqueService.getAll().subscribe({
       next: (res: any) => {

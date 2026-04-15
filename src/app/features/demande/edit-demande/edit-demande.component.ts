@@ -24,11 +24,15 @@ import { tauxdeviseservice } from '../../donnee_base/donnee_base/service/tauxdev
 import { departementservice } from '../../structure/service/departement.service';
 import { CustomFieldSelectComponent } from '../../../_core/custom/custom-field-select/custom-field-select.component';
 import { COLUMNS_DEPARTEMENT } from '../../../_core/constantes/tableau.data';
-import { combineLatest, map, Observable, startWith } from 'rxjs';
+import { combineLatest, map, Observable, startWith, switchMap } from 'rxjs';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { of } from 'rxjs';
+import { LigneBudgetModel } from '../../budgets/models/ligne_budget.model';
+import { BudgetService } from '../../budgets/services/budget.service';
+import { LigneBudgetService } from '../../budgets/services/ligne_budget.service';
+import { BudgetModel } from '../../budgets/models/budget.model';
 
 @Component({
   selector: 'app-edit-demande',
@@ -94,10 +98,21 @@ export class EditDemandeComponent implements OnInit {
   centresFiltrees: centreanalytiqueModel[] = [];
   filteredCentres: Observable<centreanalytiqueModel[]> = new Observable();
 
-  //Map to store ligne observables
-  ligneFilteredMap: Map<number, { natures: Observable<any[]>, tiers: Observable<any[]>, centres: Observable<any[]> }> = new Map();
+  // Liste des lignes budgetaires
+  ligneBudgets: LigneBudgetModel[] = [];
+  lignesFiltrees : LigneBudgetModel[] = [];
+  filteredLigneBudgets: Observable<LigneBudgetModel[]> = new Observable();
 
-  constructor(private service: DemandeService, private natureoperationservice: NatureoperationService, private router : Router, private ds:deviseservice, private ts: tauxdeviseservice,
+  //Map to store ligne observables
+  ligneFilteredMap: Map<number, { natures: Observable<any[]>, tiers: Observable<any[]>, centres: Observable<any[]>, codebudget: Observable<any[]> }> = new Map();
+
+  constructor(private service: DemandeService, 
+    private natureoperationservice: NatureoperationService,
+    private lignebudgetservice: LigneBudgetService,
+    private budgetservice: BudgetService, 
+    private router : Router, 
+    private ds:deviseservice, 
+    private ts: tauxdeviseservice,
     private centreanalytiqueservice: CentreAnalytiqueService, private userdepartement: utilisateurdepartementservice, private AffectationDepartementNatureService: AffectationDepartementNatureService,
     private tiersservice: TiersService, private dp : departementservice, private toastr : ToastrService, private activatedRoute: ActivatedRoute,private AffectationNatureCentreService: AffectationNatureCentreService){}
 
@@ -154,6 +169,13 @@ export class EditDemandeComponent implements OnInit {
 
   private _normalizeValue(value: string): string {
     return value.toLowerCase().replace(/\s/g, '');
+  }
+
+  private _filterCodeBudget(value: any): any[] {
+    const filterValue = this._normalizeValue(typeof value === 'string' ? value : value?.idnature || '');
+    return this.ligneBudgets.filter((option: any) =>
+      this._normalizeValue(option.idnature).includes(filterValue)
+    );
   }
 
   private _filterDepartement(value: any): any[] {
@@ -230,6 +252,17 @@ export class EditDemandeComponent implements OnInit {
     }
 
     return typeof centre === 'string' ? centre : centre.libelle;
+  }
+
+  displayLigne(ligne: any): string {
+    if (!ligne) return '';
+
+    if (typeof ligne === 'number') {
+      const found = this.ligneBudgets.find((l: any) => l.idbudgetdepartementnature === ligne);
+      return found ? found.idbudgetdepartementnature : '';
+    }
+
+    return typeof ligne === 'string' ? ligne : ligne.idbudgetdepartementnature;
   }
 
   get isReady(): boolean {
@@ -417,7 +450,6 @@ export class EditDemandeComponent implements OnInit {
     this.AffectationDepartementNatureService.getAll(iddepartement).subscribe({
       next: (res) => {
         if (res.success) {
-          //this.naturesBydepartements = res.data.naturesaffectes;
           this.naturesBydepartements = (res.data.naturesaffectes || []).filter(
             (n: any) => n.actif === 1
           );
@@ -575,13 +607,15 @@ export class EditDemandeComponent implements OnInit {
       natureop: [ligne?.natureoperation || '', Validators.required],
       centre: [{ value: ligne?.centreanalytique || null, disabled: true }, Validators.required],
       tiers: [{ value: ligne?.tiers || null, disabled: true }],
+      codebudget: [{ value: ligne?.codebudget || null, disabled: true }],
       montantdemande: [{ value: ligne?.montantdemande || 0, disabled: true }, Validators.required],
       details: this.fb.array([]),
       //CENTRES PAR LIGNE
       centres: this.fb.control<any[]>([]),
       filteredNatureoperations: this.fb.control<any[]>([]),
       filteredTiers: this.fb.control<any[]>([]),
-      filteredCentres: this.fb.control<any[]>([])
+      filteredCentres: this.fb.control<any[]>([]),
+      filteredCodebudget: this.fb.control<any[]>([])
     });
 
     // Filtrage NatureOperations pour cette ligne
@@ -602,12 +636,19 @@ export class EditDemandeComponent implements OnInit {
       map(value => this._filterCentre(value || '', ligneOf)) //passer la ligne
     );
 
+    // Filtrage LigneBudgets pour cette ligne
+    const filteredLigneBudgets = ligneOf.get('codebudget')!.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filterCodeBudget(value || '')) //passer la ligne
+    );
+
     // Store observables in the map for template access
     const ligneIndex = this.lignes.length;
     this.ligneFilteredMap.set(ligneIndex, {
       natures: filteredNatureoperations,
       tiers: filteredTiers,
-      centres: filteredCentres // vide pour l’instant
+      centres: filteredCentres, // vide pour l’instant
+      codebudget: filteredLigneBudgets // vide pour l’instant
     });
 
     //ÉCOUTE CORRECTE
@@ -615,6 +656,7 @@ export class EditDemandeComponent implements OnInit {
       if (!nature) {
         ligneOf.get('centre')?.disable();
         ligneOf.get('tiers')?.disable();
+        ligneOf.get('codebudget')?.disable();
         ligneOf.get('montantdemande')?.disable();
         ligneOf.patchValue({ centre: null });
         ligneOf.get('centres')?.setValue([]);
@@ -626,6 +668,20 @@ export class EditDemandeComponent implements OnInit {
 
       ligneOf.get('centre')?.enable();
       ligneOf.get('montantdemande')?.enable();
+
+      // Filtrer les natures pour cette ligne
+      this.getLignesBudgetParDate(new Date(this.demandeForm.get('datedemande')?.value), ligneOf).subscribe({
+        next: (lignes) => {
+          this.ligneBudgets = lignes;
+          if(nature.decajustifier === 0){
+            ligneOf.get('codebudget')?.setValue(this.ligneBudgets[0].idbudgetdepartementnature);
+          }
+        },
+        error: (err) => {
+          this.msgErros = err.message;
+          this.toastr.error(this.msgErros);
+        }
+      });
 
       //charger centres POUR CETTE LIGNE
       this.loadCentresForLigne(ligneOf, nature);
@@ -655,6 +711,13 @@ export class EditDemandeComponent implements OnInit {
       ligne.get('tiers')?.disable();
       ligne.get('tiers')?.reset();
     }
+
+    if(natures.decajustifier === 1){
+      ligne.get('codebudget')?.enable();
+    }else{
+      ligne.get('codebudget')?.disable();
+      ligne.get('codebudget')?.reset();
+    }
   }
 
   addLigne() {
@@ -675,25 +738,6 @@ export class EditDemandeComponent implements OnInit {
           // reset centre sélectionné
           ligne.get('centre')?.reset();
           this.centresFiltrees = centres;
-          console.log(this.centresFiltrees);
-
-          // // Créer l'Observable filtré après que les centres sont chargés
-          // const ligneIndex = this.lignes.controls.indexOf(ligne);
-          // const filteredCentres = ligne.get('centre')!.valueChanges.pipe(
-          //   startWith(''),
-          //   map(value => {
-          //     const filterValue = this._normalizeValue(typeof value === 'string' ? value : value?.libelle || '');
-          //     return (centres.value || []).filter(
-          //       (option: any) => this._normalizeValue(option.libelle).includes(filterValue)
-          //     );
-          //   })
-          // );
-
-          // const previous = this.ligneFilteredMap.get(ligneIndex) || { natures: of([]), tiers: of([]), centres: of([]) };
-          // this.ligneFilteredMap.set(ligneIndex, {
-          //   ...previous,
-          //   centres: filteredCentres
-          // });
         }
       }
     });
@@ -893,6 +937,93 @@ export class EditDemandeComponent implements OnInit {
     })
   }
 
+  getLignesBudgetParDate(date: Date, ligne: FormGroup): Observable<LigneBudgetModel[]> {
+    const params = {
+      page: 1,
+      limit: 10000,
+    };
+
+    return this.budgetservice.getAll(params).pipe(
+
+      map((res: any) => {
+        if (!res.success) {
+          this.toastr.error('Erreur API');
+          return null;
+        }
+
+        let budgets = res.data as BudgetModel[];
+
+        // 1. Filtrage société / site
+        budgets = budgets.filter(b =>
+          this.user.typeentitesociete === 1
+            ? b.idsociete === this.user.idsociete
+            : b.idsociete === this.user.idsociete &&
+              b.idsite === this.user.idsite
+        );
+
+        // 2. Actif + validé
+        budgets = budgets.filter(b => b.actif === 1 && b.valide === 1);
+
+        // 3. Filtrage date
+        const target = new Date(date).getTime();
+
+        budgets = budgets.filter(b => {
+          const debut = new Date(b.datedebut).getTime();
+          const fin = new Date(b.datefin).getTime();
+          return target >= debut && target <= fin;
+        });
+
+        if (!budgets.length) {
+          this.toastr.warning('Aucun budget trouvé pour cette date');
+          return null;
+        }
+
+        // 4. Priorité mensuel
+        const mensuels = budgets.filter(b => b.typebudget === 'Mensuel');
+        return mensuels.length ? mensuels[0] : budgets[0];
+      }),
+
+      switchMap((budget: BudgetModel | null) => {
+        if (!budget) return of([]);
+
+        return this.lignebudgetservice.getByBudget(budget.idbudget, 10000000, 1).pipe(
+
+          map((res: any) => {
+            if (!res.success) {
+              this.toastr.error('Erreur récupération codes budgetaires');
+              return [];
+            }
+
+            const lignes = res.data.lignes as LigneBudgetModel[];
+
+            //Analytique
+            if (budget.isanalytique === 1) {
+              const centre = ligne.get('centre')?.value;
+
+              return lignes.filter(l =>
+                l.idcentreanalytique === centre
+              );
+            }
+
+            //Nature
+            const departement = this.demandeForm.get('departement')?.value;
+            const nature = ligne.get('natureop')?.value;
+            
+            if(nature.decajustifier !== 1){
+              return lignes.filter(l =>
+                l.iddepartement === departement.iddepartement &&
+                l.idnature === nature.idnature
+              );
+            }
+            
+            return lignes.filter(l =>
+              l.iddepartement === departement.iddepartement
+            );
+          })
+        );
+      })
+    );
+  }
 
 }
 

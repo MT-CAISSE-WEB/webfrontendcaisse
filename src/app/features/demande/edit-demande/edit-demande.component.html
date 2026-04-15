@@ -110,9 +110,10 @@
               <table class="table table-sm table-borderless table-nowrap mb-0">
                 <colgroup>
                   <col style="width: 05%">
-                  <col style="width: 30%">
-                  <col style="width: 25%">
-                  <col style="width: 25%">
+                  <col style="width: 20%">
+                  <col style="width: 20%">
+                  <col style="width: 20%">
+                  <col style="width: 20%">
                   <col style="width: 10%">
                   <col style="width: 05%">
                 </colgroup>
@@ -125,8 +126,11 @@
                     <th scope="col">
                         Centre analytique
                     </th>
-                    <th scope="col" style="width: 120px;">
+                    <th scope="col">
                         Tiers
+                    </th>
+                    <th scope="col">
+                        Code budget
                     </th>
                     <th scope="col" class="text-end" style="width: 150px;">Montant</th>
                     <th scope="col" class="text-end" style="width: 105px;"></th>
@@ -175,6 +179,21 @@
                                   @for(item of ligneFilteredMap.get($index)?.tiers | async; track item.idtiers){
                                     <mat-option [value]="item">
                                       {{item.designation}}
+                                    </mat-option>
+                                  }
+                                </mat-autocomplete>
+                            <div class="invalid-feedback">{{ msgErros }}</div>
+                          </div>
+                        </td>
+                        <td class="text-start">
+                          <div class="input-light">
+                              <input type="text" formControlName="codebudget" placeholder="Selectionner code budget"
+                                      [matAutocomplete]="autoLigne" class="form-control form-control-sm bg-light">
+
+                                <mat-autocomplete #autoLigne="matAutocomplete" [displayWith]="displayLigne">
+                                  @for(item of ligneFilteredMap.get($index)?.codebudget | async; track item.idlignebudget){
+                                    <mat-option [value]="item">
+                                      {{item.libelle}}
                                     </mat-option>
                                   }
                                 </mat-autocomplete>
