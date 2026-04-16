@@ -1124,6 +1124,7 @@ export class LigneBudgetComponent implements OnInit {
   initForm(): void {
     this.ligneBudgetForm = this.fb.group({
       idbudget: ['', [Validators.required]],
+      codebudgetaire: ['', [Validators.required]],
       iddepartement: [''],
       // montantprevisiondept: [''],
       montantprevisionsite: ['', [Validators.required]],
@@ -1140,6 +1141,7 @@ export class LigneBudgetComponent implements OnInit {
   dispatchLigneBudget(_object: LigneBudgetModel) {
     this.ligneBudgetForm.patchValue({
       idbudget: _object.idbudget,
+      codebudgetaire: _object.codebudgetaire,
       iddepartement: _object.iddepartement,
       idnature: _object.idnature,
       montantprevisiondept: _object.montantprevisiondept,
@@ -1197,6 +1199,7 @@ export class LigneBudgetComponent implements OnInit {
       this.paginatedLignes.lignes.forEach((line: LigneBudgetModel) => {
         this.ligneBudgetsSource.push({
           idbudget: line.idbudget,
+          codebudgetaire: line.codebudgetaire,
           iddepartement:
             line.budget?.entite === 'Département' ? line.iddepartement : null,
           idnature: line.idnature ? line.idnature : null,
@@ -1310,6 +1313,7 @@ export class LigneBudgetComponent implements OnInit {
 
     this.validationLines = lignes.map((l) => ({
       idbudgetdepartementnature: l.idbudgetdepartementnature,
+      codebudgetaire: l.codebudgetaire,
       iddepartement: l.iddepartement ?? null,
       idnature: l.idnature ?? null,
       idcentreanalytique: this.isAnalytique() ? l.idcentreanalytique : null,
@@ -1357,6 +1361,7 @@ export class LigneBudgetComponent implements OnInit {
       .filter((l: any) => !!l.idbudgetdepartementnature)
       .map((l: any) => ({
         idbudgetdepartementnature: l.idbudgetdepartementnature,
+        codebudgetaire: l.codebudgetaire,
         idbudget: this.selectedBudget!.idbudget,
         iddepartement: l.iddepartement,
         idnature: l.idnature,
@@ -1475,6 +1480,7 @@ export class LigneBudgetComponent implements OnInit {
       idbudgetdepartementnature:
         type === 'update' ? l.idbudgetdepartementnature : undefined,
       idcentreanalytique: l.idcentreanalytique,
+      codebudgetaire: l.codebudgetaire,
 
       idbudget: this.selectedBudget!.idbudget,
       iddepartement: null,
@@ -1498,6 +1504,7 @@ export class LigneBudgetComponent implements OnInit {
     const requests$ = this.buildRequests((l, type) => ({
       idbudgetdepartementnature:
         type === 'update' ? l.idbudgetdepartementnature : undefined,
+      codebudgetaire: l.codebudgetaire,
       idcentreanalytique: null,
 
       idbudget: this.selectedBudget!.idbudget,
@@ -1524,6 +1531,7 @@ export class LigneBudgetComponent implements OnInit {
     const requests$ = this.buildRequests((l, type) => ({
       idbudgetdepartementnature:
         type === 'update' ? l.idbudgetdepartementnature : undefined,
+      codebudgetaire: l.codebudgetaire,
       idcentreanalytique: null,
 
       idbudget: this.selectedBudget!.idbudget,
@@ -1766,8 +1774,11 @@ export class LigneBudgetComponent implements OnInit {
 
     if (!this.selectedBudget) return;
 
+    // Bloquer le champ codebudgétaire
+    this.ligneBudgetForm.get('codebudgetaire')?.disable({ emitEvent: false });
+
     // ============================
-    // CAS DÉPARTEMENT (OK chez toi)
+    // CAS DÉPARTEMENT
     // ============================
     if (this.selectedBudget.entite === 'Département') {
       this.ligneBudgetForm.patchValue({

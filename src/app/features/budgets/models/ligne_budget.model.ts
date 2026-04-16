@@ -7,6 +7,7 @@ import { BudgetModel } from './budget.model';
 export class LigneBudgetModel extends MainModel {
   idbudgetdepartementnature: string = '';
   idbudget: string = '';
+  codebudgetaire: string = '';
   iddepartement: string | null = '';
   idnature: string | null = '';
   idcentreanalytique: string | null = '';

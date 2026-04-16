@@ -191,9 +191,9 @@
                                       [matAutocomplete]="autoLigne" class="form-control form-control-sm bg-light">
 
                                 <mat-autocomplete #autoLigne="matAutocomplete" [displayWith]="displayLigne">
-                                  @for(item of ligneFilteredMap.get($index)?.codebudget | async; track item.idlignebudget){
+                                  @for(item of ligneFilteredMap.get($index)?.codebudget | async; track item.idbudgetdepartementnature){
                                     <mat-option [value]="item">
-                                      {{item.libelle}}
+                                      {{item.nature_operation?.libelle}}
                                     </mat-option>
                                   }
                                 </mat-autocomplete>

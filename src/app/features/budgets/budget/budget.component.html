@@ -1060,6 +1060,7 @@
                     <thead class="table-light">
                       <tr>
                         <th style="width: 50px">#</th>
+                        <th>Code budgétaire</th>
                         <th *ngIf="selectedBudget?.entite === 'Département'">
                           Département
                         </th>
@@ -1087,7 +1088,7 @@
                     <tbody>
                       <tr *ngFor="let ligne of lignesByBudget; let i = index">
                         <td class="text-center">{{ i + 1 }}</td>
-
+                        <td>{{ ligne.codebudgetaire || "—" }}</td>
                         <td *ngIf="selectedBudget?.entite === 'Département'">
                           {{ ligne.departement?.libelle }}
                         </td>

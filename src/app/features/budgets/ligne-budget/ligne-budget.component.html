@@ -109,6 +109,7 @@
                       />
                     </div>
                   </th>
+                  <th class="sort" data-sort="id">Code budgétaire</th>
                   <th class="sort" data-sort="id">Budget</th>
                   <th
                     *ngIf="!isAnalytique()"
@@ -274,7 +275,7 @@
                           />
                         </div>
                       </th>
-
+                      <td>{{ paginatedLignes.codebudgetaire || "—" }}</td>
                       <td>{{ paginatedLignes.budget.codebudget }}</td>
                       <td
                         *ngIf="
@@ -439,7 +440,7 @@
           </div>
         </div>
 
-        <!-- Modal création/modification budget -->
+        <!-- Modal création/modification lignes du budget -->
         <div
           class="modal fade"
           id="showModal"
@@ -469,6 +470,22 @@
               <form [formGroup]="ligneBudgetForm">
                 <div class="modal-body">
                   <input type="hidden" id="id-field" />
+                  <div class="mb-3" id="modal-id">
+                    <label for="orderId" class="form-label form-label-sm"
+                      >Code budgétaire</label
+                    >
+                    <input
+                      type="text"
+                      id="codebudgetaire-field"
+                      class="form-control form-control-sm {{
+                        isValidField('codebudgetaire')
+                      }}"
+                      formControlName="codebudgetaire"
+                      placeholder="Code budgétaire"
+                      required
+                      [class.bg-light]="actionModal === 'update'"
+                    />
+                  </div>
                   <div class="mb-3" id="modal-id">
                     <label for="idbudget-field" class="form-label form-label-sm"
                       >Budget</label

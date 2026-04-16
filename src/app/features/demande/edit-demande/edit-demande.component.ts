@@ -261,8 +261,7 @@ export class EditDemandeComponent implements OnInit {
       const found = this.ligneBudgets.find((l: any) => l.idbudgetdepartementnature === ligne);
       return found ? found.idbudgetdepartementnature : '';
     }
-
-    return typeof ligne === 'string' ? ligne : ligne.idbudgetdepartementnature;
+    return typeof ligne === 'string' ? ligne : ligne.nature_operation?.libelle;
   }
 
   get isReady(): boolean {
@@ -605,9 +604,9 @@ export class EditDemandeComponent implements OnInit {
       idlignedemande: [ligne?.idlignedemande || null],
       numligne: [ligne?.numligne || null],
       natureop: [ligne?.natureoperation || '', Validators.required],
-      centre: [{ value: ligne?.centreanalytique || null, disabled: true }, Validators.required],
+      centre: [{ value: ligne?.centreanalytique || null, disabled: true }],
       tiers: [{ value: ligne?.tiers || null, disabled: true }],
-      codebudget: [{ value: ligne?.codebudget || null, disabled: true }],
+      codebudget: [{ value: ligne?.lignebudget || null, disabled: true }],
       montantdemande: [{ value: ligne?.montantdemande || 0, disabled: true }, Validators.required],
       details: this.fb.array([]),
       //CENTRES PAR LIGNE
@@ -673,8 +672,11 @@ export class EditDemandeComponent implements OnInit {
       this.getLignesBudgetParDate(new Date(this.demandeForm.get('datedemande')?.value), ligneOf).subscribe({
         next: (lignes) => {
           this.ligneBudgets = lignes;
-          if(nature.decajustifier === 0){
-            ligneOf.get('codebudget')?.setValue(this.ligneBudgets[0].idbudgetdepartementnature);
+
+          if(lignes[0].budget?.isanalytique !== 1){
+            if(nature.decajustifier === 0){
+              ligneOf.get('codebudget')?.setValue(this.ligneBudgets[0]);
+            }
           }
         },
         error: (err) => {
@@ -688,6 +690,12 @@ export class EditDemandeComponent implements OnInit {
 
       // règle métier tiers
       this.handleNatureChange(ligneOf, nature);
+    });
+
+    ligneOf.get('centre')?.valueChanges.subscribe(centre => {
+      if(this.ligneBudgets[0].budget?.isanalytique && this.ligneBudgets[0].budget?.isanalytique === 1){
+        ligneOf.get('codebudget')?.setValue(this.ligneBudgets[0]);
+      }
     });
 
     return ligneOf;
