@@ -71,6 +71,7 @@ export class DecaissementJustifierComponent implements OnInit {
     this.service.getAlldecaissemenaj(data).subscribe({
       next : (res) => {
         this.op = res.data;
+        console.log(this.op);
       },
       error : (err) => {}
     });

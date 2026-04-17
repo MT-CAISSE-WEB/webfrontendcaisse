@@ -150,7 +150,7 @@
                                 <button type="button" *ngIf="!isJourneeOuverte()" [disabled]="loadingCaisses || caissesArray.length === 0" (click)="openCaisseUser()" class="btn btn-sm btn-secondary text-center w-100" id="page-header-cart-dropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false">
                                     <i class="ri-lock-unlock-line align-middle me-1"></i> Ouvrir ma journée
                                 </button>
-                                <button type="button" *ngIf="isJourneeOuverte()" [disabled]="loadingCaisses || caissesArray.length === 0" (click)="openBilletageModal()" class="btn btn-sm btn-secondary text-center w-100" id="page-header-cart-dropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false">
+                                <button type="button" *ngIf="isJourneeOuverte()" [disabled]="loadingCaisses || caissesArray.length === 0" (click)="openBilletageModal()" class="btn btn-sm btn-secondary text-center w-100">
                                     <i class="ri-lock-line align-middle me-1"></i> Clôturer ma journée
                                 </button>
                             </div>

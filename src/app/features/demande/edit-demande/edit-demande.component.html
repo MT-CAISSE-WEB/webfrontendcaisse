@@ -193,7 +193,7 @@
                                 <mat-autocomplete #autoLigne="matAutocomplete" [displayWith]="displayLigne">
                                   @for(item of ligneFilteredMap.get($index)?.codebudget | async; track item.idbudgetdepartementnature){
                                     <mat-option [value]="item">
-                                      {{item.nature_operation?.libelle}}
+                                      {{item.codebudgetaire}}
                                     </mat-option>
                                   }
                                 </mat-autocomplete>

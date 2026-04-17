@@ -18,7 +18,8 @@ export class BilletageModalComponent implements OnInit {
 
   billetageForm!: FormGroup;
 
-  activeTab = 0;
+  activeTab: number = 0;
+  loading: boolean = false;
 
   denominations = DENOMINATION_BILLETAGE;
 
@@ -44,22 +45,19 @@ export class BilletageModalComponent implements OnInit {
   }
 
   getBillets(i: number): FormArray {
-    return this.caissesBilletArray.at(i).get('billets') as FormArray;
+    return this.caissesBilletArray.at(i)?.get('billets') as FormArray || this.fb.array([]);
   }
 
   getPieces(i: number): FormArray {
-    return this.caissesBilletArray.at(i).get('pieces') as FormArray;
+    return this.caissesBilletArray.at(i)?.get('pieces') as FormArray || this.fb.array([]);
   }
 
   initBilletageForm(caisses: any[]) {
-
     const caissesArray = this.caissesBilletArray;
     caissesArray.clear();
 
     caisses.forEach(c => {
-
       const deviseData = this.denominations[c.caisse.codedevise];
-
       const billetsArray = this.fb.array<FormGroup>([]);
       const piecesArray = this.fb.array<FormGroup>([]);
 
@@ -140,7 +138,6 @@ export class BilletageModalComponent implements OnInit {
     const caissesToSubmit = this.caissesBilletArray.controls
       .filter((_, i) => this.billetageValidatedIndexes.includes(i))
       .map(c => c.value);
-    console.log("Billetage envoyé :", caissesToSubmit);
     this.activeModal.close(caissesToSubmit);
   }
 

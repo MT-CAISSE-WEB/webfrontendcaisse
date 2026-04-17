@@ -70,9 +70,6 @@ export class LayoutContentComponent implements OnInit{
 
     //Charger les caisses de l'utilisateur 
     this.getCaisseUser();
-
-    //Ramener les soldes de caisses 
-    // this.getSoldeCaisse();
   }
 
   get user(){
@@ -402,8 +399,7 @@ export class LayoutContentComponent implements OnInit{
       next: (res) => {
         if (res.success) {
           const formValue = this.caisseperiodeForm.value;
-          // const _caisse = { ...formValue };
-
+          
           const caissesEnrichies = formValue.caisses.map((c: any) => {
             const caisseBillet = this.caissesBilletArray.controls.find(
               (cb: any) => cb.value.idcaisse === c.idcaisse)?.value;
@@ -467,7 +463,7 @@ export class LayoutContentComponent implements OnInit{
     });
   }
 
-  // Annuler le billetage
+  // Annuler le billetage 
   cancelBilletage() {
     this.billetageValidatedIndexes = [];
     // remettre les quantités à 0 si besoin

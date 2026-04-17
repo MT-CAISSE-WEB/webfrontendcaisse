@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ConsultationDecaissementaj } from '../../../../features/consultations/services/decaissementaj.service';
 import { EnteteDemande } from '../../../../features/demande/models/entete-demande.model';
+import { NaturePerDeptChartComponent } from "../../../../features/consultations/nature-par-departement/components/stats-nature-per-dept-chart/stats-nature-per-dept-chart.component";
 
 @Component({
   selector: 'app-interface-demande-user',

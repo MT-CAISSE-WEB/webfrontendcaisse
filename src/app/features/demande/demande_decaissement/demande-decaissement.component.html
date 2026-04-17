@@ -367,7 +367,9 @@
                                   <table class="table mb-0">
                                       <thead class="align-middle">
                                           <tr class="table-active">
-                                              <th scope="col"> Nature operation</th>
+                                              <th scope="col">Code budget</th>
+                                              <th scope="col" *ngIf="detailBudgets.budget?.isanalytique || detailBudgets.budget?.isanalytique === 1 ">Centre ana</th>
+                                              <th scope="col" *ngIf="!detailBudgets.budget?.isanalytique || detailBudgets.budget?.isanalytique !== 1">Nature operation</th>
                                               <th scope="col"> Prévision </th>
                                               <th scope="col"> Préengagé </th>
                                               <th scope="col"> Engagé </th>
@@ -379,7 +381,9 @@
                                       <tbody>
                                         @for(det of detailBudgets?.details; track $index){
                                           <tr>
-                                            <td class="text-start"> {{ det?.nature_lib }} </td>
+                                            <td class="text-start"> </td>
+                                            <td class="text-start" *ngIf="detailBudgets.budget?.isanalytique || detailBudgets.budget?.isanalytique === 1 "> {{ det?.centre_lib }} </td>
+                                            <td class="text-start" *ngIf="!detailBudgets.budget?.isanalytique || detailBudgets.budget?.isanalytique !== 1"> {{ det?.nature_lib }} </td>
                                             <td class="text-end"> {{ formatCFA(det?.prevision) }} </td>
                                             <td class="text-end"> {{ formatCFA(det?.preengage) }} </td>
                                             <td class="text-end"> {{ formatCFA(det?.engage) }} </td>

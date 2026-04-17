@@ -68,7 +68,7 @@
                                                     <td *ngIf="type.codtypeoperation == 'decaissementaj'"> décaissement à justifier</td>
                                                     <td *ngIf="type.codtypeoperation == 'encaissement'"> retour de caisse</td>
                                                     <td class="text-end">
-                                                        {{type.montant}} {{user.devise_ref_code}}
+                                                        {{type.montant}} {{type.codedevise}}
                                                     </td>
                                                     <td class="text-end">
                                                         {{type.montantref}} {{user.devise_ref_code}}
