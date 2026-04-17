@@ -163,6 +163,7 @@ export class LigneBudgetComponent implements OnInit {
     idcentreanalytique?: string | null;
     iddepartement?: string | null;
     codecentreanalytique?: string | null;
+    codebudgetaire: string;
     montantDept: number;
     montantSite: number;
     montantSociete: number;
@@ -197,8 +198,7 @@ export class LigneBudgetComponent implements OnInit {
           idcentreanalytique: c.idcentreanalytique,
           libelle: c.libelle,
           idbudgetdepartementnature: existing?.idbudgetdepartementnature,
-          codecentreanalytique: c.codecentreanalytique,
-
+          codebudgetaire: existing?.codebudgetaire as string,
           montantDept: existing?.montantprevisiondept ?? 0,
           montantSite: existing?.montantprevisionsite ?? 0,
           montantSociete: existing?.montantprevisionsociete ?? 0,
@@ -221,7 +221,7 @@ export class LigneBudgetComponent implements OnInit {
 
       idbudgetdepartementnature: l.idbudgetdepartementnature,
       codecentreanalytique: l.centre_analytique?.codecentreanalytique,
-
+      codebudgetaire: l.codebudgetaire,
       montantDept: l.montantprevisiondept ?? 0,
       montantSite: l.montantprevisionsite ?? 0,
       montantSociete: l.montantprevisionsociete ?? 0,
@@ -507,6 +507,7 @@ export class LigneBudgetComponent implements OnInit {
         idcentreanalytique: nature.idcentreanalytique,
         libelle: nature.libelle,
         codecentreanalytique: nature.codecentreanalytique,
+        codebudgetaire: '',
         iddepartement: null,
         montantDept: 0,
         montantSite: 0,
@@ -517,6 +518,7 @@ export class LigneBudgetComponent implements OnInit {
         idnature: nature.idnature,
         libelle: nature.libelle,
         iddepartement: nature.iddepartement,
+        codebudgetaire: '',
         montantDept: 0,
         montantSite: 0,
         montantSociete: 0,
@@ -575,6 +577,7 @@ export class LigneBudgetComponent implements OnInit {
       {
         idnature: line.idnature,
         libelle: line.libelle,
+        codebudgetaire: line.codebudgetaire,
         montantDept: line.montantDept,
         montantSite: line.montantSite,
         montantSociete: line.montantSociete,
@@ -588,6 +591,7 @@ export class LigneBudgetComponent implements OnInit {
     const ligne = {
       idnature: nature.idnature,
       libelle: nature.libelle,
+      codebudgetaire: '',
       montantDept: 0,
       montantSite: 0,
       montantSociete: 0,
@@ -602,11 +606,11 @@ export class LigneBudgetComponent implements OnInit {
 
     if (existing) {
       ligne.idbudgetdepartementnature = existing.idbudgetdepartementnature;
+      ligne.codebudgetaire = existing.codebudgetaire;
       ligne.montantDept = existing.montantprevisiondept ?? 0;
       ligne.montantSite = existing.montantprevisionsite ?? 0;
       ligne.montantSociete = existing.montantprevisionsociete ?? 0;
     }
-
     this.natureGrid.push(ligne);
   }
 
@@ -734,29 +738,29 @@ export class LigneBudgetComponent implements OnInit {
     this.ligneBudgetForm.patchValue({ iddepartement: '' });
   }
 
-  stepNatures: Array<{
-    idnature: string;
-    libelle: string;
-    montantDept: number;
-    montantSite: number;
-    montantSociete: number;
-  }> = [];
+  // stepNatures: Array<{
+  //   idnature: string;
+  //   libelle: string;
+  //   montantDept: number;
+  //   montantSite: number;
+  //   montantSociete: number;
+  // }> = [];
 
-  loadNextNature() {
-    if (this.currentNatureIndex >= this.stepNatures.length) return;
+  // loadNextNature() {
+  //   if (this.currentNatureIndex >= this.stepNatures.length) return;
 
-    const next = this.stepNatures[this.currentNatureIndex];
+  //   const next = this.stepNatures[this.currentNatureIndex];
 
-    // Ajouter la nature suivante à la grille
-    this.natureGrid.push(next);
+  //   // Ajouter la nature suivante à la grille
+  //   this.natureGrid.push(next);
 
-    this.prefillNatureGrid(); // si tu veux pré-remplir avec des valeurs existantes
-    this.currentNatureIndex++;
-  }
+  //   this.prefillNatureGrid(); // si tu veux pré-remplir avec des valeurs existantes
+  //   this.currentNatureIndex++;
+  // }
 
-  onClickNextNature() {
-    this.loadNextNature();
-  }
+  // onClickNextNature() {
+  //   this.loadNextNature();
+  // }
 
   // Nature pour site
   loadNaturesForSite() {
@@ -836,6 +840,7 @@ export class LigneBudgetComponent implements OnInit {
           libelle: n.libelle,
           iddepartement: n.iddepartement, // ⚠️ important
           idbudgetdepartementnature: existing?.idbudgetdepartementnature,
+          codebudgetaire: existing?.codebudgetaire as string,
           montantDept: 0,
           montantSite: existing?.montantprevisionsite ?? 0,
           montantSociete: existing?.montantprevisionsociete ?? 0,
@@ -853,6 +858,7 @@ export class LigneBudgetComponent implements OnInit {
       libelle: l.nature_operation?.libelle ?? '',
       iddepartement: l.iddepartement,
       idbudgetdepartementnature: l.idbudgetdepartementnature,
+      codebudgetaire: l.codebudgetaire,
       montantDept: 0,
       montantSite: l.montantprevisionsite ?? 0,
       montantSociete: l.montantprevisionsociete ?? 0,
@@ -898,6 +904,7 @@ export class LigneBudgetComponent implements OnInit {
               idnature: existing?.idnature ?? n.idnature ?? '', // <-- fix TS
               libelle: n.libelle,
               idbudgetdepartementnature: existing?.idbudgetdepartementnature,
+              codebudgetaire: existing?.codebudgetaire,
               montantDept: existing?.montantprevisiondept ?? 0,
               montantSite: existing?.montantprevisionsite ?? 0,
               montantSociete: existing?.montantprevisionsociete ?? 0,
@@ -914,6 +921,7 @@ export class LigneBudgetComponent implements OnInit {
           idnature: l.idnature!, // assurance non-null
           libelle: l.nature_operation?.libelle ?? '',
           idbudgetdepartementnature: l.idbudgetdepartementnature,
+          codebudgetaire: l.codebudgetaire ?? '',
           montantDept: l.montantprevisiondept ?? 0,
           montantSite: l.montantprevisionsite ?? 0,
           montantSociete: l.montantprevisionsociete ?? 0,
@@ -950,49 +958,49 @@ export class LigneBudgetComponent implements OnInit {
     }
   }
   // ajoutons un ligne à chaque clic
-  addNextNature() {
-    if (
-      this.currentNatureIndex >= this.allNatures.length ||
-      !this.selectedBudget
-    ) {
-      return;
-    }
+  // addNextNature() {
+  //   if (
+  //     this.currentNatureIndex >= this.allNatures.length ||
+  //     !this.selectedBudget
+  //   ) {
+  //     return;
+  //   }
 
-    const nature = this.allNatures[this.currentNatureIndex];
+  //   const nature = this.allNatures[this.currentNatureIndex];
 
-    // Nouvelle ligne conforme à ton type natureGrid
-    const nouvelleLigne = {
-      idnature: nature.idnature,
-      libelle: nature.libelle,
-      iddepartement: nature.iddepartement,
-      idbudgetdepartementnature: '', // optionnelle
-      montantDept: 0,
-      montantSite: 0,
-      montantSociete: 0,
-    };
+  //   // Nouvelle ligne conforme à ton type natureGrid
+  //   const nouvelleLigne = {
+  //     idnature: nature.idnature,
+  //     libelle: nature.libelle,
+  //     iddepartement: nature.iddepartement,
+  //     idbudgetdepartementnature: '', // optionnelle
+  //     montantDept: 0,
+  //     montantSite: 0,
+  //     montantSociete: 0,
+  //   };
 
-    // Préremplissage si une ligne existe déjà
-    const idDept = this.ligneBudgetForm.getRawValue().iddepartement;
+  //   // Préremplissage si une ligne existe déjà
+  //   const idDept = this.ligneBudgetForm.getRawValue().iddepartement;
 
-    const existing = this.ligneBudgetsSource.find(
-      (l) =>
-        l.idbudget === this.selectedBudget!.idbudget &&
-        l.iddepartement === idDept &&
-        l.idnature === nature.idnature,
-    );
+  //   const existing = this.ligneBudgetsSource.find(
+  //     (l) =>
+  //       l.idbudget === this.selectedBudget!.idbudget &&
+  //       l.iddepartement === idDept &&
+  //       l.idnature === nature.idnature,
+  //   );
 
-    if (existing) {
-      nouvelleLigne.idbudgetdepartementnature =
-        existing.idbudgetdepartementnature;
-      nouvelleLigne.montantDept = existing.montantprevisiondept ?? 0;
-      nouvelleLigne.montantSite = existing.montantprevisionsite ?? 0;
-      nouvelleLigne.montantSociete = existing.montantprevisionsociete ?? 0;
-    }
+  //   if (existing) {
+  //     nouvelleLigne.idbudgetdepartementnature =
+  //       existing.idbudgetdepartementnature;
+  //     nouvelleLigne.montantDept = existing.montantprevisiondept ?? 0;
+  //     nouvelleLigne.montantSite = existing.montantprevisionsite ?? 0;
+  //     nouvelleLigne.montantSociete = existing.montantprevisionsociete ?? 0;
+  //   }
 
-    this.natureGrid.push(nouvelleLigne);
-    this.updateMontantsSelonValidation();
-    this.currentNatureIndex++;
-  }
+  //   this.natureGrid.push(nouvelleLigne);
+  //   this.updateMontantsSelonValidation();
+  //   this.currentNatureIndex++;
+  // }
 
   prefillNatureGrid() {
     if (!this.selectedBudget) return;
@@ -1013,11 +1021,13 @@ export class LigneBudgetComponent implements OnInit {
         const last = lignesExistantes[lignesExistantes.length - 1];
 
         ligne.idbudgetdepartementnature = last.idbudgetdepartementnature;
+        ligne.codebudgetaire = last.codebudgetaire as string;
         ligne.montantDept = last.montantprevisiondept ?? 0;
         ligne.montantSite = last.montantprevisionsite ?? 0;
         ligne.montantSociete = last.montantprevisionsociete ?? 0;
       } else {
         ligne.idbudgetdepartementnature = undefined;
+        ligne.codebudgetaire = '';
         ligne.montantDept = 0;
         ligne.montantSite = 0;
         ligne.montantSociete = 0;
@@ -1124,7 +1134,6 @@ export class LigneBudgetComponent implements OnInit {
   initForm(): void {
     this.ligneBudgetForm = this.fb.group({
       idbudget: ['', [Validators.required]],
-      codebudgetaire: ['', [Validators.required]],
       iddepartement: [''],
       // montantprevisiondept: [''],
       montantprevisionsite: ['', [Validators.required]],
@@ -1500,7 +1509,6 @@ export class LigneBudgetComponent implements OnInit {
 
   private handleSubmitSite() {
     this.loading = true;
-
     const requests$ = this.buildRequests((l, type) => ({
       idbudgetdepartementnature:
         type === 'update' ? l.idbudgetdepartementnature : undefined,
@@ -1774,9 +1782,6 @@ export class LigneBudgetComponent implements OnInit {
 
     if (!this.selectedBudget) return;
 
-    // Bloquer le champ codebudgétaire
-    this.ligneBudgetForm.get('codebudgetaire')?.disable({ emitEvent: false });
-
     // ============================
     // CAS DÉPARTEMENT
     // ============================
@@ -1826,6 +1831,7 @@ export class LigneBudgetComponent implements OnInit {
 
       idbudgetdepartementnature: l.idbudgetdepartementnature,
       iddepartement: l.iddepartement ?? null,
+      codebudgetaire: l.codebudgetaire as string,
 
       // on reprend EXACTEMENT les valeurs existantes
       montantDept: 0, // pas utilisé pour Site
@@ -1856,7 +1862,7 @@ export class LigneBudgetComponent implements OnInit {
       codecentreanalytique: l.centre_analytique?.codecentreanalytique,
       idbudgetdepartementnature: l.idbudgetdepartementnature,
       iddepartement: null,
-
+      codebudgetaire: l.codebudgetaire as string,
       // on reprend EXACTEMENT les valeurs existantes
       montantDept: l.montantprevisiondept,
       montantSite: l.montantprevisionsite,
@@ -1883,6 +1889,7 @@ export class LigneBudgetComponent implements OnInit {
             this.closeModal('deleteOrder');
             this.getAllBudgets();
             this.getAllLigneBudgets();
+            this.selectedBudget = undefined;
           } else {
             this.msgErros = 'Erreur lors de la suppression';
           }

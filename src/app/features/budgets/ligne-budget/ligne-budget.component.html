@@ -58,7 +58,7 @@
             <div class="col-xxl-5 col-sm-6">
               <div class="search-box">
                 <select
-                  class="form-select form-select-sm"
+                  class="form-select"
                   name="budget"
                   [(ngModel)]="selectedBudgetId"
                   required
@@ -77,7 +77,7 @@
             <div class="col-xxl-1 col-sm-2">
               <button
                 type="submit"
-                class="btn btn-sm btn-primary"
+                class="btn btn-sm btn-primary py-2"
                 [disabled]="!selectedBudgetId"
               >
                 <i class="ri-equalizer-fill me-1 align-bottom"></i>
@@ -109,7 +109,6 @@
                       />
                     </div>
                   </th>
-                  <th class="sort" data-sort="id">Code budgétaire</th>
                   <th class="sort" data-sort="id">Budget</th>
                   <th
                     *ngIf="!isAnalytique()"
@@ -126,6 +125,7 @@
                         : "Nature opération"
                     }}
                   </th>
+                  <th class="sort" data-sort="id">Code budgétaire</th>
                   <th
                     *ngIf="
                       selectedBudget?.entite === 'Département' || isAnalytique()
@@ -275,7 +275,6 @@
                           />
                         </div>
                       </th>
-                      <td>{{ paginatedLignes.codebudgetaire || "—" }}</td>
                       <td>{{ paginatedLignes.budget.codebudget }}</td>
                       <td
                         *ngIf="
@@ -297,6 +296,7 @@
                             : item.nature_operation?.libelle || "—"
                         }}
                       </td>
+                      <td>{{ item.codebudgetaire || "—" }}</td>
                       <td
                         *ngIf="
                           selectedBudget?.entite === 'Département' ||
@@ -471,22 +471,6 @@
                 <div class="modal-body">
                   <input type="hidden" id="id-field" />
                   <div class="mb-3" id="modal-id">
-                    <label for="orderId" class="form-label form-label-sm"
-                      >Code budgétaire</label
-                    >
-                    <input
-                      type="text"
-                      id="codebudgetaire-field"
-                      class="form-control form-control-sm {{
-                        isValidField('codebudgetaire')
-                      }}"
-                      formControlName="codebudgetaire"
-                      placeholder="Code budgétaire"
-                      required
-                      [class.bg-light]="actionModal === 'update'"
-                    />
-                  </div>
-                  <div class="mb-3" id="modal-id">
                     <label for="idbudget-field" class="form-label form-label-sm"
                       >Budget</label
                     >
@@ -579,6 +563,7 @@
                                   : "Nature opération"
                               }}
                             </th>
+                            <th class="text-nowrap">Code budgétaire</th>
                             <th class="text-nowrap">
                               Montant prévision département
                             </th>
@@ -592,6 +577,16 @@
                           <tr *ngFor="let ligne of natureGrid; let i = index">
                             <td>{{ i + 1 }}</td>
                             <td class="text-nowrap">{{ ligne.libelle }}</td>
+                            <td>
+                              <input
+                                type="text"
+                                class="form-control form-control-sm input-custom"
+                                placeholder="Code budgétaire"
+                                [(ngModel)]="ligne.codebudgetaire"
+                                [ngModelOptions]="{ standalone: true }"
+                                [disabled]="actionModal === 'update'"
+                              />
+                            </td>
                             <td>
                               <input
                                 type="number"
@@ -727,6 +722,7 @@
                           <tr>
                             <th>#</th>
                             <th class="text-nowrap">Nature opération</th>
+                            <th class="text-nowrap">Code budgétaire</th>
                             <th class="text-nowrap">Montant prévision site</th>
                             <th class="text-nowrap">
                               Montant prévision société
@@ -747,6 +743,16 @@
                               <td class="text-nowrap">{{ ligne.libelle }}</td>
 
                               <!-- SITE -->
+                              <td>
+                                <input
+                                  type="text"
+                                  class="form-control form-control-sm input-custom"
+                                  placeholder="Code budgétaire"
+                                  [(ngModel)]="ligne.codebudgetaire"
+                                  [ngModelOptions]="{ standalone: true }"
+                                  [disabled]="actionModal === 'update'"
+                                />
+                              </td>
                               <td>
                                 <input
                                   type="number"
@@ -850,6 +856,7 @@
                                   : "Nature opération"
                               }}
                             </th>
+                            <th class="text-nowrap">Code budgétaire</th>
                             <th class="text-nowrap">
                               Montant prévision département
                             </th>
@@ -871,6 +878,16 @@
                                 {{ ligne.codecentreanalytique }}
                               </td>
                               <td class="text-nowrap">{{ ligne.libelle }}</td>
+                              <td>
+                                <input
+                                  type="text"
+                                  class="form-control form-control-sm input-custom"
+                                  placeholder="Code budgétaire"
+                                  [(ngModel)]="ligne.codebudgetaire"
+                                  [ngModelOptions]="{ standalone: true }"
+                                  [disabled]="actionModal === 'update'"
+                                />
+                              </td>
                               <td>
                                 <input
                                   type="number"
@@ -1351,6 +1368,7 @@
                       class="btn btn-sm btn-link link-success fw-medium text-decoration-none"
                       id="deleteRecord-close"
                       data-bs-dismiss="modal"
+                      (click)="resetModeSaisie()"
                     >
                       <i class="ri-close-line me-1 align-middle"></i> annuler
                     </button>

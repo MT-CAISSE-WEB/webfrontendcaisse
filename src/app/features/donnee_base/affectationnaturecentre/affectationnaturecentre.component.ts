@@ -89,7 +89,7 @@ export class AffectationNatureCentreComponent implements OnInit{
 
     this.natureoperationForm = this.fb.group({
       idnature : ["", Validators.required],
-      idsociete : [this.user.idsociete[0], [Validators.required]],
+      idsociete : [this.user.idsociete, [Validators.required]],
       idsCentres: [[]]
     });
 
@@ -178,7 +178,7 @@ export class AffectationNatureCentreComponent implements OnInit{
     const idnature = this.natureoperationForm.get('idnature')?.value;
 
     const info = {
-      idsociete: this.user.idsociete[0],
+      idsociete: this.user.idsociete,
       createdby: this.user.prenom + ' ' + this.user.nom
     }
 
@@ -438,7 +438,7 @@ export class AffectationNatureCentreComponent implements OnInit{
     }
     const file = input.files[0];
     const info = {
-      idsociete : this.user.idsociete[0],
+      idsociete : this.user.idsociete,
       createdby : this.user.prenom + " " + this.user.nom
     };
 

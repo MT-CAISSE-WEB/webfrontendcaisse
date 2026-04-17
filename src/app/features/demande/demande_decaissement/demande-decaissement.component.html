@@ -381,7 +381,7 @@
                                       <tbody>
                                         @for(det of detailBudgets?.details; track $index){
                                           <tr>
-                                            <td class="text-start"> </td>
+                                            <td class="text-start"> {{ det?.codebudgetaire }} </td>
                                             <td class="text-start" *ngIf="detailBudgets.budget?.isanalytique || detailBudgets.budget?.isanalytique === 1 "> {{ det?.centre_lib }} </td>
                                             <td class="text-start" *ngIf="!detailBudgets.budget?.isanalytique || detailBudgets.budget?.isanalytique !== 1"> {{ det?.nature_lib }} </td>
                                             <td class="text-end"> {{ formatCFA(det?.prevision) }} </td>

@@ -696,12 +696,9 @@ export class EditDemandeComponent implements OnInit {
         // Filtrer les natures pour cette ligne
         this.getLignesBudgetParDate(new Date(this.demandeForm.get('datedemande')?.value), ligneOf).subscribe({
           next: (lignes) => {
-            this.ligneBudgets = lignes;
-            const nature = ligneOf.get('natureop')?.value;
-            if(this.ligneBudgets[0].budget?.isanalytique === 1){
-              if(nature.decajustifier === 0){
-                ligneOf.get('codebudget')?.setValue(this.ligneBudgets[0]);
-              }
+            if(lignes[0].budget?.isanalytique === 1){
+              this.ligneBudgets = lignes;
+              ligneOf.get('codebudget')?.setValue(this.ligneBudgets[0])
             }
           },
           error: (err) => {
@@ -1036,7 +1033,7 @@ export class EditDemandeComponent implements OnInit {
                 l.idnature === nature.idnature
               );
             }
-            
+
             return lignes.filter(l =>
               l.iddepartement === departement.iddepartement
             );

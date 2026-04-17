@@ -422,6 +422,7 @@
                                         data-bs-toggle="modal"
                                         (click)="modalUpdate(child)"
                                         class="text-primary"
+                                        *ngIf="child.valide !== 1"
                                       >
                                         <i class="ri-pencil-fill"></i>
                                       </a>
@@ -432,6 +433,7 @@
                                         (click)="modalDelete(child)"
                                         data-bs-toggle="modal"
                                         href="#deleteOrder"
+                                        *ngIf="child.valide !== 1"
                                       >
                                         <i class="ri-delete-bin-5-fill"></i>
                                       </a>
