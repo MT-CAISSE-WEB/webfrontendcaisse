@@ -13,22 +13,18 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.contantes';
 import { EnteteDemande } from '../models/entete-demande.model';
 import { utilisateurdepartementservice } from '../../administration/service/userdepartement.service';
-import { affectationdepartementnatureModel } from '../../donnee_base/models/affectationdepartementnature.model';
 import { AffectationDepartementNatureService } from '../../donnee_base/services/affectationdepartementnature.service';
-import { affectationnaturecentreModel } from '../../donnee_base/models/affectationnaturecentre.model';
 import { AffectationNatureCentreService } from '../../donnee_base/services/affectationnaturecentre.service';
 import { devisemodel } from '../../donnee_base/donnee_base/model/devise.model';
 import { deviseservice } from '../../donnee_base/donnee_base/service/devise.service';
 import { tauxdevisemodel } from '../../donnee_base/donnee_base/model/tauxdevise.model';
 import { tauxdeviseservice } from '../../donnee_base/donnee_base/service/tauxdevise.service';
 import { departementservice } from '../../structure/service/departement.service';
-import { CustomFieldSelectComponent } from '../../../_core/custom/custom-field-select/custom-field-select.component';
 import { COLUMNS_DEPARTEMENT } from '../../../_core/constantes/tableau.data';
-import { combineLatest, map, Observable, startWith, switchMap } from 'rxjs';
+import { combineLatest, distinctUntilChanged, filter, map, Observable, shareReplay, startWith, switchMap } from 'rxjs';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { of } from 'rxjs';
 import { LigneBudgetModel } from '../../budgets/models/ligne_budget.model';
 import { BudgetService } from '../../budgets/services/budget.service';
 import { LigneBudgetService } from '../../budgets/services/ligne_budget.service';
@@ -103,6 +99,9 @@ export class EditDemandeComponent implements OnInit {
   lignesFiltrees : LigneBudgetModel[] = [];
   filteredLigneBudgets: Observable<LigneBudgetModel[]> = new Observable();
 
+  budgetGlobal!: BudgetModel;
+  lignesBudgetGlobales: LigneBudgetModel[] = [];
+
   //Map to store ligne observables
   ligneFilteredMap: Map<number, { natures: Observable<any[]>, tiers: Observable<any[]>, centres: Observable<any[]>, codebudget: Observable<any[]> }> = new Map();
 
@@ -142,6 +141,15 @@ export class EditDemandeComponent implements OnInit {
       }
     });
 
+    this.demandeForm.get('datedemande')?.valueChanges.pipe(
+      startWith(this.demandeForm.get('datedemande')?.value),
+      filter(date => !!date), // ignore null / vide
+      map(date => new Date(date)),
+      filter(date => !isNaN(date.getTime())), //garde seulement dates valides
+      distinctUntilChanged((a, b) => a.getTime() === b.getTime()),
+      switchMap(date => this.loadBudgetGlobal(date))
+    ).subscribe();
+
     //Initialiser les departements filtrées après la création du formulaire
     this.filteredDepartements  = this.demandeForm.get('departement')!.valueChanges.pipe(
       startWith(''),
@@ -165,15 +173,20 @@ export class EditDemandeComponent implements OnInit {
         this.loadLastdeviseTaux(devise);
       }
     });
+
   }
 
   private _normalizeValue(value: string): string {
     return value.toLowerCase().replace(/\s/g, '');
   }
 
-  private _filterCodeBudget(value: any): any[] {
-    const filterValue = this._normalizeValue(typeof value === 'string' ? value : value?.codebudgetaire || '');
-    return this.ligneBudgets.filter((option: any) =>
+  private _filterCodeBudget(value: any, ligne: FormGroup): any[] {
+    const filterValue = this._normalizeValue(
+      typeof value === 'string' ? value : value?.codebudgetaire || ''
+    );
+
+    const lignes = this.filterLignesBudget(ligne);
+    return lignes.filter(option =>
       this._normalizeValue(option.codebudgetaire).includes(filterValue)
     );
   }
@@ -203,10 +216,13 @@ export class EditDemandeComponent implements OnInit {
   }
 
   private _filterCentre(value: any, ligne: FormGroup): any[] {
-    const filterValue = this._normalizeValue(typeof value === 'string' ? value : value?.libelle || '');
+    const filterValue = this._normalizeValue(
+      typeof value === 'string' ? value : value?.libelle || ''
+    );
 
-    // Filtre les centres spécifiques à cette ligne
-    return this.centresFiltrees.filter((option: any) =>
+    const centres = ligne.get('centres')?.value || []; //PAR LIGNE
+
+    return centres.filter((option: any) =>
       this._normalizeValue(option.libelle).includes(filterValue)
     );
   }
@@ -254,15 +270,9 @@ export class EditDemandeComponent implements OnInit {
     return typeof centre === 'string' ? centre : centre.libelle;
   }
 
-  displayLigne(ligne: any): string {
-    if (!ligne) return '';
-
-    if (typeof ligne === 'number') {
-      const found = this.ligneBudgets.find((l: any) => l.idbudgetdepartementnature === ligne);
-      return found ? found.codebudgetaire : '';
-    }
-    return typeof ligne === 'string' ? ligne : ligne.codebudgetaire;
-  }
+  displayLigne = (ligne: any): string => {
+    return ligne?.codebudgetaire || '';
+  };
 
   get isReady(): boolean {
     return this.departementUserFiltered.length > 0 && !!this.demande;
@@ -356,7 +366,6 @@ export class EditDemandeComponent implements OnInit {
               {label: 'Modification de la demande', active: true}
             ];
             this.title = 'Modification';
-
             if(this.isReady){
               this.dispatchDemande();
             }
@@ -477,15 +486,19 @@ export class EditDemandeComponent implements OnInit {
         const centres = (res.data.centresaffectes || [])
           .filter((c: any) => c.actif === 1);
 
-        //stocker les centres dans la ligne
+        //stocker dans la ligne
         ligne.get('centres')?.setValue(centres);
 
-        //activer le champ centre
+        //IMPORTANT : MAJ du filtrage par ligne
+        this.centresFiltrees = centres;
+
+        // activer sans déclencher valueChanges
         ligne.get('centre')?.enable({ emitEvent: false });
 
-        //positionner le centre APRÈS chargement
+        //mettre l'objet complet (PAS juste l'id)
         if (centreId) {
-          ligne.get('centre')?.setValue(centreId, { emitEvent: false });
+          const selected = centres.find((c: { idcentreanalytique: string; }) => c.idcentreanalytique === centreId);
+          ligne.get('centre')?.setValue(selected || null, { emitEvent: false });
         }
       }
     });
@@ -606,7 +619,7 @@ export class EditDemandeComponent implements OnInit {
       natureop: [ligne?.natureoperation || '', Validators.required],
       centre: [{ value: ligne?.centreanalytique || null, disabled: true }],
       tiers: [{ value: ligne?.tiers || null, disabled: true }],
-      codebudget: [{ value: ligne?.lignebudget || null, disabled: true }],
+      codebudget: [{ value: ligne?.codebudget || null, disabled: true }],
       montantdemande: [{ value: ligne?.montantdemande || 0, disabled: true }, Validators.required],
       details: this.fb.array([]),
       //CENTRES PAR LIGNE
@@ -638,7 +651,7 @@ export class EditDemandeComponent implements OnInit {
     // Filtrage LigneBudgets pour cette ligne
     const filteredLigneBudgets = ligneOf.get('codebudget')!.valueChanges.pipe(
       startWith(''),
-      map(value => this._filterCodeBudget(value || '')) //passer la ligne
+      map(value => this._filterCodeBudget(value || '', ligneOf)) //passer la ligne
     );
 
     // Store observables in the map for template access
@@ -650,62 +663,33 @@ export class EditDemandeComponent implements OnInit {
       codebudget: filteredLigneBudgets // vide pour l’instant
     });
 
-    //ÉCOUTE CORRECTE
     ligneOf.get('natureop')?.valueChanges.subscribe(nature => {
-      if (!nature) {
-        ligneOf.get('centre')?.disable();
-        ligneOf.get('tiers')?.disable();
-        ligneOf.get('codebudget')?.disable();
-        ligneOf.get('montantdemande')?.disable();
-        ligneOf.patchValue({ centre: null });
-        ligneOf.get('centres')?.setValue([]);
-        ligneOf.get('filteredNatureoperations')?.setValue([]);
-        ligneOf.get('filteredTiers')?.setValue([]);
-        ligneOf.get('filteredCentres')?.setValue([]);
-        return;
-      }
+      // reset AVANT logique
+      ligneOf.get('codebudget')?.setValue(null, { emitEvent: false });
+
+      if (!nature) return;
 
       ligneOf.get('centre')?.enable();
       ligneOf.get('montantdemande')?.enable();
 
-      // Filtrer les natures pour cette ligne
-      this.getLignesBudgetParDate(new Date(this.demandeForm.get('datedemande')?.value), ligneOf).subscribe({
-        next: (lignes) => {
-          this.ligneBudgets = lignes;
-          if(lignes[0].budget?.isanalytique !== 1){
-            if(nature.decajustifier === 0){
-              ligneOf.get('codebudget')?.setValue(this.ligneBudgets[0]);
-            }
-          }
-        },
-        error: (err) => {
-          this.msgErros = err.message;
-          this.toastr.error(this.msgErros);
-        }
-      });
+      const lignes = this.filterLignesBudget(ligneOf);
+      if (!this.budgetGlobal?.isanalytique && nature.decajustifier === 0) {
+        ligneOf.get('codebudget')?.setValue(lignes[0] || null, { emitEvent: true });
+      }
 
-      //charger centres POUR CETTE LIGNE
+      //Charger les centres de chaque lignes
       this.loadCentresForLigne(ligneOf, nature);
 
-      // règle métier tiers
+      // Appliquer les règles métiers 
       this.handleNatureChange(ligneOf, nature);
     });
 
     ligneOf.get('centre')?.valueChanges.subscribe(centre => {
-      if(centre){
-        // Filtrer les natures pour cette ligne
-        this.getLignesBudgetParDate(new Date(this.demandeForm.get('datedemande')?.value), ligneOf).subscribe({
-          next: (lignes) => {
-            if(lignes[0].budget?.isanalytique === 1){
-              this.ligneBudgets = lignes;
-              ligneOf.get('codebudget')?.setValue(this.ligneBudgets[0])
-            }
-          },
-          error: (err) => {
-            this.msgErros = err.message;
-            this.toastr.error(this.msgErros);
-          }
-        });
+      if (!centre) return;
+
+      if (this.budgetGlobal?.isanalytique === 1) {
+        const lignes = this.filterLignesBudget(ligneOf);
+        ligneOf.get('codebudget')?.setValue(lignes[0] || null, { emitEvent: true });
       }
     });
 
@@ -735,7 +719,6 @@ export class EditDemandeComponent implements OnInit {
       ligne.get('codebudget')?.enable();
     }else{
       ligne.get('codebudget')?.disable();
-      ligne.get('codebudget')?.reset();
     }
   }
 
@@ -956,23 +939,13 @@ export class EditDemandeComponent implements OnInit {
     })
   }
 
-  getLignesBudgetParDate(date: Date, ligne: FormGroup): Observable<LigneBudgetModel[]> {
-    const params = {
-      page: 1,
-      limit: 10000,
-    };
-
+  // Charger les lignes du budget Globals
+  loadBudgetGlobal(date: Date): Observable<void> {
+    const params = { page: 1, limit: 10000 };
     return this.budgetservice.getAll(params).pipe(
-
       map((res: any) => {
-        if (!res.success) {
-          this.toastr.error('Erreur API');
-          return null;
-        }
-
         let budgets = res.data as BudgetModel[];
 
-        // 1. Filtrage société / site
         budgets = budgets.filter(b =>
           this.user.typeentitesociete === 1
             ? b.idsociete === this.user.idsociete
@@ -980,66 +953,55 @@ export class EditDemandeComponent implements OnInit {
               b.idsite === this.user.idsite
         );
 
-        // 2. Actif + validé
         budgets = budgets.filter(b => b.actif === 1 && b.valide === 1);
-
-        // 3. Filtrage date
         const target = new Date(date).getTime();
-
         budgets = budgets.filter(b => {
           const debut = new Date(b.datedebut).getTime();
           const fin = new Date(b.datefin).getTime();
           return target >= debut && target <= fin;
         });
 
-        if (!budgets.length) {
-          this.toastr.warning('Aucun budget trouvé pour cette date');
-          return null;
-        }
-
-        // 4. Priorité mensuel
         const mensuels = budgets.filter(b => b.typebudget === 'Mensuel');
-        return mensuels.length ? mensuels[0] : budgets[0];
+        this.budgetGlobal = mensuels.length ? mensuels[0] : budgets[0];
+
+        return this.budgetGlobal;
       }),
+      switchMap(budget =>
+        this.lignebudgetservice.getByBudget(budget.idbudget, 10000000, 1)
+      ),
+      map((res: any) => {
+        this.lignesBudgetGlobales = res.data.lignes || [];
+      }),
+      shareReplay(1)
+    );
+  }
 
-      switchMap((budget: BudgetModel | null) => {
-        if (!budget) return of([]);
+  // Filtre les lignes selon le budget
+  filterLignesBudget(ligne: FormGroup): LigneBudgetModel[] {
+    if (!this.lignesBudgetGlobales.length) return [];
 
-        return this.lignebudgetservice.getByBudget(budget.idbudget, 10000000, 1).pipe(
+    const nature = ligne.get('natureop')?.value;
+    const centre = ligne.get('centre')?.value;
+    const departement = this.demandeForm.get('departement')?.value;
 
-          map((res: any) => {
-            if (!res.success) {
-              this.toastr.error('Erreur récupération codes budgetaires');
-              return [];
-            }
+    //CAS DECAJUSTIFIER
+    if (nature?.decajustifier === 1) {
+      return this.lignesBudgetGlobales;
+    }
 
-            const lignes = res.data.lignes as LigneBudgetModel[];
-            //Analytique
-            if (budget.isanalytique === 1) {
-              const centre = ligne.get('centre')?.value;
-              
-              return lignes.filter(l =>
-                l.idcentreanalytique === centre.idcentreanalytique
-              );
-            }
+    //ANALYTIQUE
+    if (this.budgetGlobal?.isanalytique === 1) {
+      if (!centre) return [];
 
-            //Nature
-            const departement = this.demandeForm.get('departement')?.value;
-            const nature = ligne.get('natureop')?.value;
-            
-            if(nature.decajustifier !== 1){
-              return lignes.filter(l =>
-                l.iddepartement === departement.iddepartement &&
-                l.idnature === nature.idnature
-              );
-            }
+      return this.lignesBudgetGlobales.filter(l =>
+        l.idcentreanalytique === centre.idcentreanalytique
+      );
+    }
 
-            return lignes.filter(l =>
-              l.iddepartement === departement.iddepartement
-            );
-          })
-        );
-      })
+    //NON ANALYTIQUE
+    return this.lignesBudgetGlobales.filter(l =>
+      l.iddepartement === departement?.iddepartement &&
+      l.idnature === nature?.idnature
     );
   }
 

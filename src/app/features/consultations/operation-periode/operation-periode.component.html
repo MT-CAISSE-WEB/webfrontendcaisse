@@ -45,11 +45,11 @@
                                 </h2>
                                 <div [attr.id]="'accor_lefticonExamplecollapse' + $index" class="accordion-collapse collapse show" aria-labelledby="accordionlefticonExample1" data-bs-parent="#accordionlefticon">
                                     <div class="accordion-body">
-                                        <table class="table align-middle table-nowrap" id="invoiceTable">
+                                        <table class="table table-borderless table-sm align-middle mb-0" id="invoiceTable">
                                             @for(caisse of item.caisses; track $index){
                                                 <tr>
-                                                    <td colspan="2" class="p-2"><strong> {{ caisse?.codecaisse }} </strong> </td>
-                                                    <td colspan="3" class="p-2">Solde ouverture : <strong> {{caisse?.solde_ouverture}} {{ caisse?.devise }}</strong> </td>
+                                                    <td colspan="2" class="p-2"><strong> {{ caisse?.codecaisse }} - {{ caisse?.caisse }} </strong> </td>
+                                                    <td colspan="2" class="start p-2">Solde ouverture : <strong> {{caisse?.solde_ouverture}} {{ caisse?.devise }}</strong> </td>
                                                 </tr>
                                                 <tr>
                                                     <td>
@@ -71,22 +71,34 @@
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                                @for(element of caisse?.operations; track $index){
+                                                                @if(!caisse?.operations?.length){
                                                                     <tr>
-                                                                        <td>{{ caisse?.codecaisse }} - {{ caisse?.caisse }}</td>
-                                                                        <td class="text-end"> {{ element.typeoperation }} </td>
-                                                                        <td class="text-end"> {{ element.montant }} {{ caisse?.devise }}</td>
-                                                                        <td class="text-end"> {{ element.montant_ref }}  {{ user.devise_ref_code }}</td>
-                                                                        <td> {{ element.piece }} </td>
+                                                                        <td colspan="5" class="text-center text-muted">
+                                                                            Aucune opération
+                                                                        </td>
                                                                     </tr>
                                                                 }
-                                                            </tbody>
+
+                                                                @for(element of caisse?.operations; track element.idoperation){
+                                                                    <tr>
+                                                                        <td>{{ element.description || '-' }}</td>
+                                                                        <td class="text-end">{{ element.typeoperation || '-' }}</td>
+                                                                        <td class="text-end">
+                                                                            {{ element.montant | number:'1.0-2' }} {{ element.deviseop }}
+                                                                        </td>
+                                                                        <td class="text-end">
+                                                                            {{ element.montant_ref | number:'1.0-2' }} {{ user.devise_ref_code }}
+                                                                        </td>
+                                                                        <td>{{ element.piece || '-' }}</td>
+                                                                    </tr>
+                                                                }
+                                                                </tbody>
                                                         </table>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td colspan="2" class="p-2"> </td>
-                                                    <td colspan="3" class="p-2">Solde fermeture : <strong> {{ caisse?.solde_fermeture}}  {{ caisse?.devise }}</strong>  </td>
+                                                    <td colspan="2" class="start p-2">Solde fermeture : <strong> {{ caisse?.solde_fermeture}}  {{ caisse?.devise }}</strong>  </td>
                                                 </tr>
                                             }
                                         </table>

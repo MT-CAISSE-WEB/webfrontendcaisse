@@ -1452,6 +1452,14 @@ export class OperationCaisseComponent implements OnInit{
           this.onTypePaiementChange(type);
         });
 
+        // Recalcul des montants après le taux appliqué
+        this.operationForm.get("tauxoperation")?.valueChanges.subscribe(taux => {
+          const numericTaux = Number(taux);
+          if (!isNaN(numericTaux)) {
+            this.updateMontantRefGlobalchange(taux);
+          }
+        });
+
         // recalcul automatique
         this.caisses.controls.forEach((caisseFG: any) => {
           this.applyAutoCalcul(caisseFG);
@@ -1573,6 +1581,14 @@ export class OperationCaisseComponent implements OnInit{
 
   private updateMontantRefGlobal() {
     const montantGlobal = this.totalLignes * this.tauxConversionTransaction;
+    this.operationForm.patchValue(
+      { montantRefglobal: montantGlobal },
+      { emitEvent: false }
+    );
+  }
+
+  private updateMontantRefGlobalchange(taux: any) {
+    const montantGlobal = this.totalLignes * taux;
     this.operationForm.patchValue(
       { montantRefglobal: montantGlobal },
       { emitEvent: false }

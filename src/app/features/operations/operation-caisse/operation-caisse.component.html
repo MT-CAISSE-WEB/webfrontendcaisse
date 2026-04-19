@@ -108,9 +108,10 @@
                                                     </a>
                                                 </li>
                                                 <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
-                                                    <a class="text-danger d-inline-block remove-item-btn"  data-bs-toggle="modal" (click)="modalDelete(item)" href="#deleteOrder">
+                                                    <button type="button" class="btn btn-link text-danger p-0" data-bs-toggle="modal" data-bs-target="#deleteOrder"
+                                                        (click)="modalDelete(item)" title="Suppression" disabled>
                                                         <i class="ri-delete-bin-5-fill fs-16"></i>
-                                                    </a>
+                                                    </button>
                                                 </li>
                                             </ul>
                                         </td>
@@ -308,7 +309,7 @@
                                 <select formControlName="demande" class="form-select form-select-sm bg-light border-0 {{ isValidField('demande')}}">
                                     <option value=""> ---- choisir une demande à decaisser ----</option>
                                     @for(item of entetesDmd; track $index){
-                                        <option value="{{item.iddemande!}}"> demande - {{item.codedemande! }} -  du  - {{ formatDateFR(item.datedemande!) }} - de - {{ formatNumber(getTotalDemande(item))}} - {{ item.devise!.codedevise }} </option>
+                                        <option value="{{item.iddemande!}}"> demande - {{item.codedemande! }} -  du  - {{ formatDateFR(item.datedemande!) }} - de - {{ formatNumber(getTotalDemande(item))}} - {{ item.devise!.codedevise }} ----- {{ item.departement?.libelle }} </option>
                                     }
                                 </select>
                                 <div class="invalid-feedback">{{ msgErros }}</div>
@@ -474,12 +475,6 @@
                                                         <th scope="row">Total référentiel</th>
                                                         <td>
                                                             <input type="text" formControlName="montantRefglobal" class="form-control form-control-sm bg-light border-0" placeholder="0.00" readonly />
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th scope="row">Total reporting</th>
-                                                        <td style="width:150px;">
-                                                            <input type="text" class="form-control form-control-sm bg-light border-0" placeholder="0.00" readonly />
                                                         </td>
                                                     </tr>
                                                 </tbody>
