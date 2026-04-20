@@ -125,7 +125,7 @@
                                 <div class="mb-3 bg-light">
                                     <div class="mb-2">
                                         <div class="input-light">
-                                            <select class="form-select form-select-sm bg-light border-0" formControlName="site">
+                                            <select class="form-select form-select-sm bg-light border-0" formControlName="idsite">
                                                 <option value="" selected>Choisir le site</option>
                                                 @for(item of sites; track $index){
                                                     <option value="{{item.idsite}}"> {{item.libelle}} </option>
@@ -154,11 +154,10 @@
                             </div>
                         
                             <div class="col-md-12">
-                              <label class="form-label d-block">Écritures définitives</label>
+                              <label class="form-label d-block">Écritures validées</label>
                               <mat-radio-group formControlName="ecrituresdefinitives" class="d-flex gap-3">
-                                <mat-radio-button value="tous" class="me-2">Tous</mat-radio-button>
-                                <mat-radio-button value="oui" class="me-2">Oui</mat-radio-button>
-                                <mat-radio-button value="non">Non</mat-radio-button>
+                                <mat-radio-button value="validee" class="me-2">Oui</mat-radio-button>
+                                <mat-radio-button value="en attente">Non</mat-radio-button>
                               </mat-radio-group>
                             </div>
 

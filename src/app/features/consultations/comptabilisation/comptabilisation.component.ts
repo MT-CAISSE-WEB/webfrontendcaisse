@@ -86,9 +86,9 @@ export class ComptabilisationComponent implements OnInit{
     this.criteriaForm = this.fb.group({
       datedebut: [''],
       datefin: [''],
-      site: [''],
+      idsite: [''],
       journal: [''],
-      ecrituresdefinitives: ['all']
+      etat: ['en attente']
     });
 
     // Formulaire de Comptabilisation

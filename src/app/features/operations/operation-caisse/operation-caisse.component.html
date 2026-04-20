@@ -414,7 +414,7 @@
                                                         <select formControlName="centre" (mousedown)="protectionField(ligne, 'centre')" class="form-select form-select-sm bg-light border-0">
                                                             <option value="" selected>Choisir centre analytique</option>
                                                             <option *ngFor="let c of ligne.get('centres')?.value" [value]="c.idcentreanalytique">
-                                                                    {{ c.libelle }}
+                                                                    {{ c.codecentreanalytique }}
                                                             </option>
                                                         </select>
                                                         <div class="invalid-feedback">{{ msgErros }}</div>
@@ -543,7 +543,7 @@
                                                     }
                                                     <tr>
                                                         <td colspan="6" class="text-end text-muted small">
-                                                            Reste à répartir : {{ resteARepartir | number:'1.0-2' }}
+                                                            Reste à répartir : {{ resteARepartir | number:'1.0-2' }} {{ user.devise_ref_code }}
                                                         </td>
                                                     </tr>
                                                     <tr *ngIf="operationForm.errors?.['totalCaisseDepasse']">

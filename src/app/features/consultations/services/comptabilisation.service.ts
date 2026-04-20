@@ -3,6 +3,7 @@ import { Observable } from "rxjs";
 import { QueryResultModel } from "../../../_core/models/query-result.model";
 import { URL_LOCAL } from "../../../_core/routes/backend.root";
 import { Injectable } from "@angular/core";
+import { dataTool } from "echarts";
 
 @Injectable({
   providedIn: 'root'
@@ -34,7 +35,7 @@ export class ComptabilisationService {
    * @param params
    */
     getAllEcriture(_data: any): Observable<QueryResultModel> {
-        return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/Ecriture/LigneEcriture');
+        return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/Ecriture/LigneEcriture', _data);
     }
 
      /**
