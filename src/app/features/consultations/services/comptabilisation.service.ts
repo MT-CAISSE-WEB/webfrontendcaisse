@@ -30,11 +30,11 @@ export class ComptabilisationService {
     }
 
     /**
-   * get Historique
+   * get toutes les ecritures
    * @param params
    */
     getAllEcriture(_data: any): Observable<QueryResultModel> {
-        return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/ecriture');
+        return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/Ecriture/LigneEcriture');
     }
 
      /**

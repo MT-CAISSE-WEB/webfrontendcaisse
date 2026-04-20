@@ -3,6 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConsultationDecaissementaj } from '../services/decaissementaj.service';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.contantes';
+import { tiersModel } from '../../donnee_base/models/tiers.model';
+import { TiersService } from '../../donnee_base/services/tiers.service';
 
 @Component({
   selector: 'app-decaissement-justifier',
@@ -25,17 +27,23 @@ export class DecaissementJustifierComponent implements OnInit {
   msgSup: string = "";
   titleMsg: string ="";
 
-  constructor(private service: ConsultationDecaissementaj){}
+  tiers : tiersModel[] = [];
+
+  constructor(private service: ConsultationDecaissementaj, private tiersservice: TiersService){}
 
   ngOnInit(): void{
     //Initialisation du formulaire
     this.initSearchForm();
+
+    //Recharge des tiers
+    this.getAllTiers();
   }
 
   //Initialiser le formulaire de recherche
   initSearchForm() {
     this.searchForm = this.fb.group({
       typeoperation: ['decaissementaj'],
+      tiers: [null],
       codeoperation: [null],
       datedebut: [null],
       datefin: [null]
@@ -48,6 +56,16 @@ export class DecaissementJustifierComponent implements OnInit {
     modalEl?.classList.remove('show');
     modalEl?.setAttribute('aria-hidden', 'true');
     (document.querySelector('.modal-backdrop') as HTMLElement)?.remove();
+  }
+
+  getAllTiers(){
+    this.tiersservice.getAll().subscribe({
+      next : (res) => {
+        if(res.success){
+          this.tiers = res.data;
+        }
+      }
+    });
   }
 
   //Action submit
@@ -71,7 +89,6 @@ export class DecaissementJustifierComponent implements OnInit {
     this.service.getAlldecaissemenaj(data).subscribe({
       next : (res) => {
         this.op = res.data;
-        console.log(this.op);
       },
       error : (err) => {}
     });

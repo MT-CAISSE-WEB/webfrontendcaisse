@@ -22,7 +22,13 @@
                     <h5 class="card-title mb-0 flex-grow-1">{{title}}</h5>
                     <div class="flex-shrink-0">
                         <div class="d-flex gap-2 flex-wrap">
-                            <button class="btn btn-sm btn-info" style="min-width:120px; margin-right:8px;"><i class="ri-add-line align-bottom me-1"></i>Extraire</button>
+                            <div class="dropdown card-header-dropdown">
+                                <button class="btn btn-sm btn-info" style="min-width:120px; margin-right:8px;" data-bs-toggle="dropdown" data-bs-aria-haspopup="true" data-bs-aria-expanded="false"><i class="mdi mdi-chevron-down align-middle ms-1"></i>Extraire</button>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <a class="dropdown-item" href="#" (click)="exportExcel()">Extraire vers excel</a>
+                                    <a class="dropdown-item" href="#">Extraction X3</a>
+                                </div>
+                            </div>
                             <button type="button" class="btn btn-sm btn-secondary" style="min-width:120px; margin-right:8px;" data-bs-toggle="modal" data-bs-target="#comptabiliteModal">
                                 <i class="ri-funds-box-fill align-bottom me-1"></i>Comptabiliser
                             </button>
@@ -192,27 +198,30 @@
                                 </tr>
                             </thead>
                             <tbody class="list form-check-all">
-                                <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
+                                @for(piece of ecritures; track $index){
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td> {{ piece.numligne}} </td>
+                                        <td> {{ piece.journal}} </td>
+                                        <td> {{ formatDateFR(piece.date_operation) }} </td>
+                                        <td> {{ piece.typeecriture}} </td>
+                                        <td> {{ piece.compte }} </td>
+                                        <td> {{ piece.tiers }} </td>
+                                        <td> {{ piece.libelle}} </td>
+                                        <td> {{ piece.debit }} </td>
+                                        <td> {{ piece.credit }} </td>
+                                        <td> {{ piece.montant }} </td>
+                                        <td> {{ piece.devise }} </td>
+                                        <td></td>
+                                        <td> {{ piece.centreanalytique }}</td>
+                                        <td></td>
+                                    </tr>
+                                }
+                                
                             </tbody>
                         </table>
-                        <div class="text-center">
+                        <div *ngIf="!ecritures || ecritures.length == 0" class="text-center">
                             <h6 class="mt-2">Désolé! Aucune écriture trouvé</h6>
                             <p class="text-muted mb-0">Désole il n' y aucune donnée dans cette base</p>
                         </div>

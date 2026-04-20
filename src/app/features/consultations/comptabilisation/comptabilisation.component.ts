@@ -16,6 +16,7 @@ import { map, startWith } from 'rxjs';
 import { OperationService } from '../../operations/service/operation.service';
 import { operationModel } from '../../operations/model/operation.model';
 import { ToastrService } from 'ngx-toastr';
+import { ExcelService } from '../../../_core/services/exportExcel.service';
 
 @Component({
   selector: 'app-comptabilisation',
@@ -40,6 +41,24 @@ export class ComptabilisationComponent implements OnInit{
   totalPages: number = 0;
   limit: number = 4000;
 
+  tableau_Ecritures = [
+    { header: 'Site', field: ' ' },
+    { header: 'N° piece', field: '' },
+    { header: 'N° ecriture', field: 'numligne' },
+    { header: 'Journal', field: 'journal' },
+    { header: 'Date', field: 'numligne' },
+    { header: 'Type', field: 'typeecriture' },
+    { header: 'Compte', field: 'compte' },
+    { header: 'Tiers', field: 'tiers' },
+    { header: 'Libelle', field: 'libelle' },
+    { header: 'Debit', field: 'debit' },
+    { header: 'Credit', field: 'credit' },
+    { header: 'Montant', field: 'montant' },
+    { header: 'Devise', field: 'devise' },
+    { header: 'Montant', field: '' },
+    { header: 'Centre ana.', field: 'centreanalytique' }
+  ];
+
   // Données pour les selects/autocomplete
   sites : sitemodel[] = [];
   site : sitemodel = new sitemodel();
@@ -56,9 +75,10 @@ export class ComptabilisationComponent implements OnInit{
   comptabiliteForm : FormGroup = this.fb.group({});
 
   operations : operationModel[] = [];
+  ecritures : any[] = [];
 
   constructor(private journalservice: JournalService, private st:siteservice, private service: ComptabilisationService, private operationservice: OperationService,
-    private toastr : ToastrService
+    private toastr : ToastrService, private excelService : ExcelService
   ){}
 
   ngOnInit(): void {
@@ -104,11 +124,16 @@ export class ComptabilisationComponent implements OnInit{
   }
 
   search(data : any){
+    this.loading = true;
     this.service.getAllEcriture(data).subscribe({
       next : (res) => {
-        //this.op = res.data;
+        this.ecritures = res.data;
+        this.loading = false;
       },
-      error : (err) => {}
+      error : (err) => {
+        this.toastr.error(err);
+        this.loading = false;
+      }
     });
   }
 
@@ -179,6 +204,16 @@ export class ComptabilisationComponent implements OnInit{
     return journal.designation;
   }
 
+  //Rénitialiser le formulaire des critères
+  resetCriteriaForm(){
+    this.criteriaForm.reset();
+  }
+
+  //Rénitialiser le formulaire des critères
+  resetComptabiliteForm(){
+    this.comptabiliteForm.reset();
+  }
+
   // Applique les critères et déclenche la recherche
   applyCriteria(): void {
     if (this.criteriaForm.invalid) {
@@ -218,12 +253,12 @@ export class ComptabilisationComponent implements OnInit{
   }
 
   generate(data: any){
-    console.log(data);
     this.service.generateEcriture(data).subscribe({
       next : (res) => {
-        console.log(res);
         if(res.success){
           this.toastr.success("Ecritures générées avec succès");
+          // Recharger la page
+          window.location.reload();
         }
       },
       error : (err) => {
@@ -245,7 +280,10 @@ export class ComptabilisationComponent implements OnInit{
     this.operationservice.getAll(params).subscribe({
       next : (res) => {
         if(res.success){
-          this.operations = res.data.data;
+          //this.operations = res.data.data;
+          this.operations = res.data.data.filter((op: any) =>
+            !op.lignes?.every((l: any) => l.comptabilise === 1)
+          );
           this.loading = false;
         }
       },
@@ -260,6 +298,31 @@ export class ComptabilisationComponent implements OnInit{
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(montant ?? 0);
+  }
+
+  formatDateFR(dateInput: string | Date): string {
+    const date = new Date(dateInput);
+
+    const dayShort = new Intl.DateTimeFormat('fr-FR', { weekday: 'short' })
+      .format(date)
+      .replace('.', '');
+
+    const day = date.getDate();
+    const month = new Intl.DateTimeFormat('fr-FR', { month: 'short' })
+      .format(date)
+      .replace('.', '');
+
+    const year = date.getFullYear();
+
+    return `${day} ${month} ${year}`;
+  }
+
+  exportExcel() {
+    if(this.ecritures.length == 0){
+      this.toastr.warning("Aucune ecritures à exporter vers excel !")
+      return;
+    }
+    this.excelService.exportToExcel(this.ecritures, this.tableau_Ecritures, 'operations');
   }
 
 }

@@ -163,7 +163,7 @@
                                 <mat-autocomplete #autoCentre="matAutocomplete" [displayWith]="displayCentre">
                                   @for(item of ligneFilteredMap.get($index)?.centres | async; track item.idcentreanalytique){
                                     <mat-option [value]="item">
-                                      {{item.libelle}}
+                                      {{item.codecentreanalytique}} -- {{item.libelle}}
                                     </mat-option>
                                   }
                                 </mat-autocomplete>
