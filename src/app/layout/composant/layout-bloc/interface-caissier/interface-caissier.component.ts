@@ -10,6 +10,10 @@ import { AffectationCaisseModel } from '../../../../features/caisse_journal/mode
 import { AffectationCaisseService } from '../../../../features/caisse_journal/services/affectationcaisse.service';
 import { ConsultationOpService } from '../../../../features/consultations/services/operations.service';
 import { APP_ROOT_DMD_DECAISSEMENT, APP_ROOT_OPERATION_GENERAL } from '../../../../_core/routes/frontend.root';
+import { DemandeService } from '../../../../features/demande/services/demande.service';
+import { EnteteDemande } from '../../../../features/demande/models/entete-demande.model';
+
+
 
 @Component({
   selector: 'app-interface-caissier',
@@ -25,6 +29,7 @@ export class InterfaceCaissierComponent implements OnInit{
   msgErros: string = "";
   error: string = "";
   loading: boolean = false;
+  loadingDmd: boolean = false;
 
   // Définissez des propriétés de pagination
   currentPageL: number = 1;
@@ -63,8 +68,29 @@ export class InterfaceCaissierComponent implements OnInit{
   caisseperiodes : any[] = [];
   params : any = {};
 
+  // Définissez des propriétés de pagination
+  currentPage: number = 1;
+  // Nombre d'éléments par page
+  totalPages: number = 0;
+  limit: number = 10;
+
+  entetesDmd: EnteteDemande[] = [];
+
+  // tout sélectionné/désélectionné
+  allSelected = false;
+
+  objectsSelected : EnteteDemande[] = [];
+  selectedItems : any[] = [];
+
+  caissier : boolean = false;
+
   constructor(private caisseservice: CaisseService,private caisseStatusService: CaissePeriodeService,
-      private caisseuserservice: AffectationCaisseService, private toastr : ToastrService, private service: ConsultationOpService){}
+      private caisseuserservice: AffectationCaisseService
+      , private toastr : ToastrService
+      , private service: ConsultationOpService
+      , private demandeService: DemandeService,
+      
+    ){}
 
 
   ngOnInit(): void {
@@ -72,6 +98,8 @@ export class InterfaceCaissierComponent implements OnInit{
     this.getcaissesPeriodes();
     //Charger les caisses du caissier et ses soldes
     this.getCaisseUser();
+
+    this.loadAllDemandes();
   }
 
   //Récuperer les soldes
@@ -134,6 +162,7 @@ export class InterfaceCaissierComponent implements OnInit{
       next : (res) => {
         if(res.success){
           this.caisseperiodes = res.data;
+          console.log(this.caisseperiodes)
           if(this.caisseperiodes.length > 0){
             this.params.date = this.formatDateInput(new Date(this.caisseperiodes[0].dernierePeriode.dateperiode));
           }
@@ -141,7 +170,6 @@ export class InterfaceCaissierComponent implements OnInit{
         }
       },
       error : (err) => {
-        console.log(err);
         this.toastr.error(err.error.message);
       }
     });
@@ -386,6 +414,72 @@ export class InterfaceCaissierComponent implements OnInit{
   changePageHistory(page: number) {
     this.currentPageH = page;
     this.getHistoryOperation(this.params); // recharge les données
+  }
+
+  // afficher toutes les demandes
+  loadAllDemandes() {
+    this.loadingDmd = true;
+    const params = {
+      page: this.currentPage,
+      limit: 30,
+      search: '',
+      date: '',
+      status: '',
+      user: this.user.idutilisateur,
+    };
+    this.demandeService.getAllEntetes(params).subscribe({
+      next : (res) => {
+        if(res.success){
+          // this.entetesDmd = res.data.data;
+           this.entetesDmd = res.data.data.map((item: any) => ({
+            ...item,
+          }));
+
+          // filtre statut validé
+            this.entetesDmd = this.entetesDmd.filter((d: any) => d.statut === 3 && d.decaisse === 0);
+            
+          this.totalPages = res.data.totalPages;
+          this.loadingDmd = false;
+        }else{
+          this.loadingDmd = false;
+          this.toastr.error("Erreur de récuperation des données");
+        }
+      },
+      error: (err) => {
+        this.toastr.error(err.error.message);
+        this.loadingDmd = false;
+      }
+    });
+  }
+
+  //Recharger la page
+  changePage(page: number) {
+    this.currentPage = page;
+    this.loadAllDemandes(); // recharge les données
+  }
+
+  getTotalDemande(demande: EnteteDemande): number {
+    return demande.lignes.reduce((sum, l) => sum + l.montantdemande, 0);
+  }
+
+  //vérifie si _id est inclus dans un tableau d'IDs stocké
+  isChecked(_id: string) {
+    const ids: string[] = this.objectsSelected.map((el) => el.iddemande);
+    return ids.includes(_id);
+  }
+
+  iscaissier (): boolean {
+    if (typeof window !== 'undefined') {
+          const user =JSON.parse(localStorage.getItem('user') || '{}') ;
+      for (let index = 0; index < user.roles.length; index++) {
+          const element = user.roles[index];
+          if (element['code'] ==='04')
+              {
+                  this.caissier = true;  
+              }
+      }
+    }
+     return  this.caissier;
   }
 
 }

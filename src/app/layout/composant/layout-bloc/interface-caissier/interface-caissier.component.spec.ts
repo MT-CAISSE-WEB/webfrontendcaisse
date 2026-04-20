@@ -21,3 +21,4 @@ describe('InterfaceCaissierComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+
