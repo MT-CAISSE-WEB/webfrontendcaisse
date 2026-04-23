@@ -398,12 +398,22 @@
                                             <td class="text-start">
                                                 <div class="mb-2">
                                                     <div class="input-light">
-                                                        <select class="form-select form-select-sm bg-light border-0" formControlName="natureop" required>
+                                                        <!-- <select class="form-select form-select-sm bg-light border-0" formControlName="natureop" required>
                                                             <option value="" selected>Choisir nature operation</option>
                                                             @for(item of naturesFiltrees; track $index){
                                                                 <option value="{{item.idnature}}"> {{item.libelle}} </option>
                                                             }
-                                                        </select>
+                                                        </select> -->
+                                                        <input type="text" formControlName="natureop" placeholder="Selectionner nature opération"
+                                                                [matAutocomplete]="autoNature" class="form-control form-control-sm bg-light">
+
+                                                        <mat-autocomplete #autoNature="matAutocomplete" [displayWith]="displayNature">
+                                                            @for(item of ligneFilteredMap.get($index)?.natures | async; track item.idnature){
+                                                            <mat-option [value]="item">
+                                                                {{item.libelle}}
+                                                            </mat-option>
+                                                            }
+                                                        </mat-autocomplete>
                                                     </div>
                                                     <div class="invalid-feedback">{{ msgErros }}</div>
                                                 </div>
@@ -411,24 +421,44 @@
                                             <td class="text-start">
                                                 <div class="mb-2">
                                                     <div class="input-light">
-                                                        <select formControlName="centre" (mousedown)="protectionField(ligne, 'centre')" class="form-select form-select-sm bg-light border-0">
+                                                        <!-- <select formControlName="centre" (mousedown)="protectionField(ligne, 'centre')" class="form-select form-select-sm bg-light border-0">
                                                             <option value="" selected>Choisir centre analytique</option>
                                                             <option *ngFor="let c of ligne.get('centres')?.value" [value]="c.idcentreanalytique">
                                                                     {{ c.codecentreanalytique }}
                                                             </option>
-                                                        </select>
+                                                        </select> -->
+                                                        <input type="text" formControlName="centre" placeholder="Selectionner centre analytique"
+                                                                [matAutocomplete]="autoCentre" class="form-control form-control-sm bg-light">
+
+                                                            <mat-autocomplete #autoCentre="matAutocomplete" [displayWith]="displayCentre">
+                                                            @for(item of ligneFilteredMap.get($index)?.centres | async; track item.idcentreanalytique){
+                                                                <mat-option [value]="item">
+                                                                {{item.codecentreanalytique}} -- {{item.libelle}}
+                                                                </mat-option>
+                                                            }
+                                                            </mat-autocomplete>
                                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div class="input-light">
-                                                    <select formControlName="tiers" (mousedown)="protectionField(ligne, 'tiers')" class="form-select form-select-sm bg-light border-0">
+                                                    <!-- <select formControlName="tiers" (mousedown)="protectionField(ligne, 'tiers')" class="form-select form-select-sm bg-light border-0">
                                                         <option value="" selected>Choisir tiers</option>
                                                         @for(item of tiers; track $index){
                                                             <option value="{{item.idtiers}}"> {{item.designation}} </option>
                                                         }
-                                                    </select>
+                                                    </select> -->
+                                                    <input type="text" formControlName="tiers" placeholder="Selectionner tiers"
+                                                        [matAutocomplete]="autoTiers" class="form-control form-control-sm bg-light">
+
+                                                        <mat-autocomplete #autoTiers="matAutocomplete" [displayWith]="displayTiers">
+                                                        @for(item of ligneFilteredMap.get($index)?.tiers | async; track item.idtiers){
+                                                            <mat-option [value]="item">
+                                                            {{item.designation}}
+                                                            </mat-option>
+                                                        }
+                                                        </mat-autocomplete>
                                                     <div class="invalid-feedback">{{ msgErros }}</div>
                                                 </div>
                                             </td>
@@ -572,13 +602,12 @@
 
                 <div class="modal-footer">
                     <div class="hstack gap-2 justify-content-end">
-                        <!-- <button type="button" class="btn btn-sm btn-warning" (click)="toggleCaisses()"> {{ showCaisses ? 'Masquer caisses' : 'Mes caisses' }} </button> -->
                         <div class="d-flex gap-2">
                             <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
                             <button *ngIf="actionModal != 'create'" type="button" class="btn btn-sm btn-primary" (click)="printRecu()">
                                 <i class="ri-file-download-line align-bottom me-1"></i> imprimer
                             </button>
-                            <button type="submit" *ngIf="actionModal == 'create'" class="btn btn-sm btn-success" (click)="onSubmit()" [disabled]="operationForm.invalid || operationForm.errors?.['totalCaisseDepasse']">
+                            <button type="submit" *ngIf="actionModal == 'create'" class="btn btn-sm btn-success" (click)="onSubmit()" [disabled]="(operationForm.invalid || operationForm.errors?.['totalCaisseDepasse']) && resteARepartir !== 0">
                                 {{ actionModal === "create" ? 'enregistrer' : 'modifier'}}
                             </button>
                         </div>

@@ -128,6 +128,7 @@ export class ComptabilisationComponent implements OnInit{
     this.service.getAllEcriture(data).subscribe({
       next : (res) => {
         this.ecritures = res.data;
+        console.log(this.ecritures);
         this.loading = false;
       },
       error : (err) => {
@@ -146,7 +147,6 @@ export class ComptabilisationComponent implements OnInit{
       next : (res) => {
          if(res.success){
             this.sites = res.data;
-            //this.criteriaForm.get('site')?.setValue(this.criteriaForm.get('site')?.value ?? '', { emitEvent: true });
          }
       }
     });

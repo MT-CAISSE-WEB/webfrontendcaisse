@@ -1,4 +1,4 @@
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { AsyncPipe, CommonModule, CurrencyPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
@@ -6,7 +6,7 @@ import { operationModel } from '../model/operation.model';
 import { OperationService } from '../service/operation.service';
 import { caissePeriodeModel } from '../../caisse_journal/models/periodecaisse.model';
 import { CaissePeriodeService } from '../../caisse_journal/services/caisseperiode.service';
-import { debounceTime, distinctUntilChanged, forkJoin, map, Observable, takeUntil, tap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, forkJoin, map, Observable, startWith, takeUntil, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { AffectationCaisseModel } from '../../caisse_journal/models/affectationcaisse.model';
 import { AffectationCaisseService } from '../../caisse_journal/services/affectationcaisse.service';
@@ -25,10 +25,13 @@ import { AffectationNatureCentreService } from '../../donnee_base/services/affec
 import { devisemodel } from '../../donnee_base/donnee_base/model/devise.model';
 import { deviseservice } from '../../donnee_base/donnee_base/service/devise.service';
 import { tauxdevisemodel } from '../../donnee_base/donnee_base/model/tauxdevise.model';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 @Component({
   selector: 'app-operation-caisse',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatAutocompleteModule, MatInputModule, MatFormFieldModule, AsyncPipe],
   templateUrl: './operation-caisse.component.html',
   styleUrl: './operation-caisse.component.css',
   providers: [CurrencyPipe]
@@ -79,17 +82,17 @@ export class OperationCaisseComponent implements OnInit{
   caissesUser: AffectationCaisseModel[] = [];
 
   //Liste des natures filtrées
-  naturesFiltrees: any[] = [];
-  natureoperations : natureoperationModel[] = [];
+  //naturesFiltrees: any[] = [];
+  //natureoperations : natureoperationModel[] = [];
 
   //Liste des centres analytiques des natures opérations
   centresBynatures: any[] = [];
 
   //Liste des tiers
-  tiers : tiersModel[] = [];
+  //tiers : tiersModel[] = [];
 
   //Liste des centres analytiques
-  centres : centreanalytiqueModel[] = [];
+  //centres : centreanalytiqueModel[] = [];
 
   //Societé de l'utilisateur connecté
   societe : societemodel = new societemodel();
@@ -140,6 +143,25 @@ export class OperationCaisseComponent implements OnInit{
     page: 1
   };
 
+  //Liste des natures filtrées
+  naturesFiltrees: natureoperationModel[] = [];
+  natureoperations : natureoperationModel[] = [];
+  filteredNatureoperations: Observable<natureoperationModel[]> = new Observable();
+  
+  //Liste des tiers
+  tiers : tiersModel[] = [];
+  tiersFiltrees: tiersModel[] = [];
+  filteredTiers: Observable<tiersModel[]> = new Observable();
+
+  //Liste des centres analytiques
+  centres : centreanalytiqueModel[] = [];
+  centresFiltrees: centreanalytiqueModel[] = [];
+  filteredCentres: Observable<centreanalytiqueModel[]> = new Observable();
+
+  //Map to store ligne observables
+  ligneFilteredMap: Map<number, { natures: Observable<any[]>, tiers: Observable<any[]>, centres: Observable<any[]>}> = new Map();
+  
+
   constructor(private natureoperationservice: NatureoperationService, private caisseuserservice: AffectationCaisseService,
     private router : Router, private caissePeriodeservice: CaissePeriodeService, private centreanalytiqueservice: CentreAnalytiqueService,
     private operationservice: OperationService, private tiersservice: TiersService,private sc: societeservice, private AffectationNatureCentreService: AffectationNatureCentreService,
@@ -179,6 +201,70 @@ export class OperationCaisseComponent implements OnInit{
     this.searchForm.valueChanges
       .pipe(debounceTime(400),distinctUntilChanged()).subscribe(values => {
         this.applyFilters(values);});
+  }
+
+  private _normalizeValue(value: string): string {
+    return value.toLowerCase().replace(/\s/g, '');
+  }
+
+  private _filterNature(value: any): any[] {
+    const filterValue = this._normalizeValue(typeof value === 'string' ? value : value?.libelle || '');
+
+    return this.naturesFiltrees.filter(option =>
+      this._normalizeValue(option.libelle).includes(filterValue)
+    );
+  }
+  
+  private _filterTiers(value: any): any[] {
+    const filterValue = this._normalizeValue(typeof value === 'string' ? value : value?.designation || '');
+
+    return this.tiers.filter(option =>
+      this._normalizeValue(option.designation).includes(filterValue)
+    );
+  }
+
+  private _filterCentre(value: any, ligne: FormGroup): any[] {
+    const filterValue = this._normalizeValue(
+      typeof value === 'string' ? value : value?.libelle || ''
+    );
+
+    const centres = ligne.get('centres')?.value || []; //PAR LIGNE
+
+    return centres.filter((option: any) =>
+      this._normalizeValue(option.libelle).includes(filterValue)
+    );
+  }
+
+  displayNature(nature: any): string {
+    if (!nature) return '';
+
+    if (typeof nature === 'number') {
+      const found = this.naturesFiltrees.find((n: any) => n.idnature === nature);
+      return found ? found.libelle : '';
+    }
+    return typeof nature === 'string' ? nature : nature.libelle;
+  }
+
+  displayTiers(tiers: any): string {
+    if (!tiers) return '';
+
+    if (typeof tiers === 'number') {
+      const found = this.tiers.find((t: any) => t.idtiers === tiers);
+      return found ? found.designation : '';
+    }
+
+    return typeof tiers === 'string' ? tiers : tiers.designation;
+  }
+
+  displayCentre(centre: any): string {
+    if (!centre) return '';
+
+    if (typeof centre === 'number') {
+      const found = this.centresFiltrees.find((c: any) => c.idcentre === centre);
+      return found ? found.libelle : '';
+    }
+
+    return typeof centre === 'string' ? centre : centre.libelle;
   }
 
   //Recuperer toutes les opérations
@@ -256,34 +342,34 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   //Charger les centres de chaque ligne
-  loadCentresForLigne(ligne: FormGroup, idnature: string, resetCentre: boolean = true, centreId: string) {
-    this.AffectationNatureCentreService.getAll(idnature).subscribe({
-      next: (res) => {
-        if (res.success) {
-          const centres = (res.data.centresaffectes || [])
-            .filter((c: any) => c.actif === 1);
+  // loadCentresForLigne(ligne: FormGroup, idnature: string, resetCentre: boolean = true, centreId: string) {
+  //   this.AffectationNatureCentreService.getAll(idnature).subscribe({
+  //     next: (res) => {
+  //       if (res.success) {
+  //         const centres = (res.data.centresaffectes || [])
+  //           .filter((c: any) => c.actif === 1);
 
-          //stocké dans la ligne
-          ligne.get('centres')?.setValue(centres);
+  //         //stocké dans la ligne
+  //         ligne.get('centres')?.setValue(centres);
 
-          // reset centre sélectionné
-          if (resetCentre) {
-            ligne.get('centre')?.reset();
-          }
+  //         // reset centre sélectionné
+  //         if (resetCentre) {
+  //           ligne.get('centre')?.reset();
+  //         }
 
-          // Patch le centre sélectionné si fourni
-          if (centreId) {
-            const centreTrouve = centres.find(
-              (c: any) => c.idcentre === centreId
-            );
-            if (centreTrouve) {
-              ligne.get('centre')?.setValue(centreTrouve.idcentre);
-            }
-          }
-        }
-      }
-    });
-  }
+  //         // Patch le centre sélectionné si fourni
+  //         if (centreId) {
+  //           const centreTrouve = centres.find(
+  //             (c: any) => c.idcentre === centreId
+  //           );
+  //           if (centreTrouve) {
+  //             ligne.get('centre')?.setValue(centreTrouve.idcentre);
+  //           }
+  //         }
+  //       }
+  //     }
+  //   });
+  // }
 
   //Reload les datas
   reloadData() {
@@ -907,46 +993,136 @@ export class OperationCaisseComponent implements OnInit{
   getTotalDemande(demande: EnteteDemande): number {
     return demande.lignes.reduce((sum, l) => sum + l.montantdemande, 0);
   }
-  
+
   //Ajouter la ligne dans le tableau
   addLine() {
-    const ligne = this.fb.group({
-      natureop : [{ value: "", disabled: false }, [Validators.required]],
-      centre: [{ value: "", disabled: true }, ],
-      tiers: [{ value: "", disabled: true }, ],
-      montantligne: [{ value: "", disabled: true }, [Validators.required]],
+    this.lignes.push(this.newLigne());
+  }
+
+  newLigne(ligne?: any): FormGroup<any> {
+    const ligneOf = this.fb.group({
+      idlignedemande: [ligne?.idlignedemande || null],
+      numligne: [ligne?.numligne || null],
+      natureop: [ligne?.natureoperation || '', Validators.required],
+      centre: [{ value: ligne?.centreanalytique || null, disabled: true }],
+      tiers: [{ value: ligne?.tiers || null, disabled: true }],
+      montantligne: [{ value: ligne?.montantdemande ?? ligne?.montantoperation ?? 0, disabled: true }, Validators.required],
+      details: this.fb.array([]),
       //CENTRES PAR LIGNE
-      centres: this.fb.control<any[]>([])
+      centres: this.fb.control<any[]>([]),
+      filteredNatureoperations: this.fb.control<any[]>([]),
+      filteredTiers: this.fb.control<any[]>([]),
+      filteredCentres: this.fb.control<any[]>([]),
+      filteredCodebudget: this.fb.control<any[]>([])
     });
 
-    ligne.get("natureop")?.valueChanges.subscribe(natureId => {
-      if (!natureId) {
-        ligne.get("centre")?.disable();
-        ligne.get("tiers")?.disable();
-        ligne.get("montantligne")?.disable();
-        ligne.get('centres')?.setValue([]);
-        return;
-      }
+    // Filtrage NatureOperations pour cette ligne
+    const filteredNatureoperations = ligneOf.get('natureop')!.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filterNature(value || ''))
+    );
 
-      // Champs de base
-      ligne.get("centre")?.enable();
-      ligne.get("montantligne")?.enable();
+    // Filtrage Tiers pour cette ligne
+    const filteredTiers = ligneOf.get('tiers')!.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filterTiers(value || ''))
+    );
 
-      //charger centres POUR CETTE LIGNE
-      this.loadCentresForLigne(ligne, natureId, true, '');
-      // Règle métier sur tiers
-      this.handleNatureChange(ligne, natureId);
+    // Filtrage Centres pour cette ligne
+    const filteredCentres = ligneOf.get('centre')!.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filterCentre(value || '', ligneOf)) //passer la ligne
+    );
+
+    // Store observables in the map for template access
+    const ligneIndex = this.lignes.length;
+    this.ligneFilteredMap.set(ligneIndex, {
+      natures: filteredNatureoperations,
+      tiers: filteredTiers,
+      centres: filteredCentres // vide pour l’instant
     });
 
-    ligne.get("montantligne")?.valueChanges.subscribe(() => {
+    ligneOf.get('natureop')?.valueChanges.subscribe(nature => {
+      if (!nature) return;
+
+      ligneOf.get('centre')?.enable();
+      ligneOf.get('montantligne')?.enable();
+
+      //Charger les centres de chaque lignes
+      this.loadCentresForLigne(ligneOf, nature);
+
+      // Appliquer les règles métiers 
+      this.handleNatureChange(ligneOf, nature);
+    });
+
+    ligneOf.get("montantligne")?.valueChanges.subscribe(() => {
       this.updateTotalMontant();
 
       //Calcul montant ref aussi
       this.updateMontantRefGlobal();
     });
 
-    this.lignes.push(ligne);
+    return ligneOf;
   }
+
+  //Charger les centres de chaque ligne
+  loadCentresForLigne(ligne: FormGroup, nature: any) {
+    this.AffectationNatureCentreService.getAll(nature.idnature).subscribe({
+      next: (res) => {
+        if (res.success) {
+          const centres = (res.data.centresaffectes || [])
+            .filter((c: any) => c.actif === 1);
+
+          //stocké dans la ligne
+          ligne.get('centres')?.setValue(centres);
+
+          // reset centre sélectionné
+          ligne.get('centre')?.reset();
+          this.centresFiltrees = centres;
+        }
+      }
+    });
+  }
+  
+  //Ajouter la ligne dans le tableau
+  // addLine() {
+  //   const ligne = this.fb.group({
+  //     natureop : [{ value: "", disabled: false }, [Validators.required]],
+  //     centre: [{ value: "", disabled: true }, ],
+  //     tiers: [{ value: "", disabled: true }, ],
+  //     montantligne: [{ value: "", disabled: true }, [Validators.required]],
+  //     //CENTRES PAR LIGNE
+  //     centres: this.fb.control<any[]>([])
+  //   });
+
+  //   ligne.get("natureop")?.valueChanges.subscribe(natureId => {
+  //     if (!natureId) {
+  //       ligne.get("centre")?.disable();
+  //       ligne.get("tiers")?.disable();
+  //       ligne.get("montantligne")?.disable();
+  //       ligne.get('centres')?.setValue([]);
+  //       return;
+  //     }
+
+  //     // Champs de base
+  //     ligne.get("centre")?.enable();
+  //     ligne.get("montantligne")?.enable();
+
+  //     //charger centres POUR CETTE LIGNE
+  //     this.loadCentresForLigne(ligne, natureId, true, '');
+  //     // Règle métier sur tiers
+  //     this.handleNatureChange(ligne, natureId);
+  //   });
+
+  //   ligne.get("montantligne")?.valueChanges.subscribe(() => {
+  //     this.updateTotalMontant();
+
+  //     //Calcul montant ref aussi
+  //     this.updateMontantRefGlobal();
+  //   });
+
+  //   this.lignes.push(ligne);
+  // }
 
   protectionField(ligne: FormGroup, field: string) {
     if (!ligne.get("natureop")?.value) {
@@ -1533,22 +1709,21 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   //Création des lignes depuis la demande
-  createLigneFromDemande(ligne: any): FormGroup {
-    const fg = this.fb.group({
-      idligne: [''],
-      montantligne: [ligne.montantdemande, Validators.required],
-      natureop: [ligne.natureoperation?.idnature],
-      centre: [ligne.centreanalytique?.idcentre],
-      // centre: [""],
-      tiers: [ligne.tiers?.idtiers],
-      centres: this.fb.control<any[]>([])
-    });
+  // createLigneFromDemande(ligne: any): FormGroup {
+  //   const fg = this.fb.group({
+  //     idligne: [''],
+  //     montantligne: [ligne.montantdemande, Validators.required],
+  //     natureop: [ligne.natureoperation?.idnature],
+  //     centre: [ligne.centreanalytique?.idcentre],
+  //     tiers: [ligne.tiers?.idtiers],
+  //     centres: this.fb.control<any[]>([])
+  //   });
 
-    //charger centres POUR CETTE LIGNE
-    this.loadCentresForLigne(fg, ligne.natureoperation?.idnature, false, ligne.centreanalytique?.idcentre);
+  //   //charger centres POUR CETTE LIGNE
+  //   this.loadCentresForLigne(fg, ligne.natureoperation?.idnature, false, ligne.centreanalytique?.idcentre);
 
-    return fg;
-  }
+  //   return fg;
+  // }
 
   //Remplir le formulaire depuis la demande
   fillFormFromDemande(demande: any) {
@@ -1569,8 +1744,11 @@ export class OperationCaisseComponent implements OnInit{
 
     /** Recréer lignes */
     demande.lignes.forEach((ligne: any) => {
-      const ligneFG = this.createLigneFromDemande(ligne);
+      const ligneFG = this.newLigne(ligne);
       lignesFA.push(ligneFG);
+
+       //charger centres + positionner centre
+      this.getallCentresDispatch(ligne.natureoperation.idnature, ligneFG, ligne.centreanalytique.idcentre );
     });
 
     /** Recalcul auto */

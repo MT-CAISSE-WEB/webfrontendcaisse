@@ -566,7 +566,7 @@ export class EditDemandeComponent implements OnInit {
     // Lignes
     this.lignes.clear();
     this.demande.lignes.forEach((ligne: any, index: number) => {
-      const ligneGroup = this.newLigne(ligne);
+      const ligneGroup = this.newLigne(ligne); 
       this.lignes.push(ligneGroup);
 
       //DÉTAILS DE LA LIGNE

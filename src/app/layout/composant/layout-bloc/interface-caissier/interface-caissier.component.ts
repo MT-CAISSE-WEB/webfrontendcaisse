@@ -246,7 +246,6 @@ export class InterfaceCaissierComponent implements OnInit{
         }
       },
       error : (err) => {
-        console.log(err);
         this.loadingLast = false ;
       }
     });
