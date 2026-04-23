@@ -109,7 +109,7 @@ export const routes: Routes = [
           component: JournalComponent,
       },
       {
-          path : APP_CAISSE_CAISSE_JOURNAL,
+          path : APP_CAISSE_CAISSE_JOURNAL, 
           component: CaisseComponent,
       },
       {

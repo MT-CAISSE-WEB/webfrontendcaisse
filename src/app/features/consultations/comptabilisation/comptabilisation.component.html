@@ -144,7 +144,7 @@
                                             <select class="form-select form-select-sm bg-light border-0" formControlName="journal">
                                                 <option value="" selected>Choisir le journal</option>
                                                 @for(item of journaux; track $index){
-                                                    <option value="{{item.idjournal}}"> {{item.designation}} </option>
+                                                    <option value="{{item.codejournal}}"> {{item.designation}} </option>
                                                 }
                                             </select>
                                         </div>
@@ -199,7 +199,7 @@
                             <tbody class="list form-check-all">
                                 @for(piece of ecritures; track $index){
                                     <tr>
-                                        <td> {{ piece.site }} </td>
+                                        <td> {{ piece.codesite }} </td>
                                         <td> {{ piece.ref_ecriture }} </td>
                                         <td> {{ piece.numligne}} </td>
                                         <td> {{ piece.journal}} </td>

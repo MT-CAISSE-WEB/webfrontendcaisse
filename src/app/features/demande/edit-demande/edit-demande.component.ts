@@ -836,6 +836,15 @@ export class EditDemandeComponent implements OnInit {
     });
   }
 
+  //Méthode helper pour obtenir le nom complet de l'utilisateur
+  getUserFullName(): string {
+    const user = this.user;
+    if (user && user.nom && user.prenom) {
+      return `${user.nom} ${user.prenom}`;
+    }
+    return user?.nom || user?.prenom || 'Systeme';
+  }
+
   submit() {
     /** Check formulaire */
     this.msgErros = '';

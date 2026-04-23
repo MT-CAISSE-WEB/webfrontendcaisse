@@ -327,49 +327,23 @@ export class OperationCaisseComponent implements OnInit{
         const centres = (res.data.centresaffectes || [])
           .filter((c: any) => c.actif === 1);
 
-        //stocker les centres dans la ligne
+        //stocker dans la ligne
         ligne.get('centres')?.setValue(centres);
 
-        //activer le champ centre
+        //IMPORTANT : MAJ du filtrage par ligne
+        this.centresFiltrees = centres;
+
+        // activer sans déclencher valueChanges
         ligne.get('centre')?.enable({ emitEvent: false });
 
-        //positionner le centre APRÈS chargement
+        //mettre l'objet complet (PAS juste l'id)
         if (centreId) {
-          ligne.get('centre')?.setValue(centreId, { emitEvent: false });
+          const selected = centres.find((c: { idcentreanalytique: string; }) => c.idcentreanalytique === centreId);
+          ligne.get('centre')?.setValue(selected || null, { emitEvent: false });
         }
       }
     });
   }
-
-  //Charger les centres de chaque ligne
-  // loadCentresForLigne(ligne: FormGroup, idnature: string, resetCentre: boolean = true, centreId: string) {
-  //   this.AffectationNatureCentreService.getAll(idnature).subscribe({
-  //     next: (res) => {
-  //       if (res.success) {
-  //         const centres = (res.data.centresaffectes || [])
-  //           .filter((c: any) => c.actif === 1);
-
-  //         //stocké dans la ligne
-  //         ligne.get('centres')?.setValue(centres);
-
-  //         // reset centre sélectionné
-  //         if (resetCentre) {
-  //           ligne.get('centre')?.reset();
-  //         }
-
-  //         // Patch le centre sélectionné si fourni
-  //         if (centreId) {
-  //           const centreTrouve = centres.find(
-  //             (c: any) => c.idcentre === centreId
-  //           );
-  //           if (centreTrouve) {
-  //             ligne.get('centre')?.setValue(centreTrouve.idcentre);
-  //           }
-  //         }
-  //       }
-  //     }
-  //   });
-  // }
 
   //Reload les datas
   reloadData() {
@@ -877,6 +851,9 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   dispatchOperation(_object: operationModel){
+    //Filtrer les natures quand typeoperation change
+    this.filtrerNatures(_object.caisses[0].codtypeoperation);
+
     // Patch des champs simples
     this.operationForm.patchValue({
       codeoperation : _object.codeoperation,
@@ -891,27 +868,12 @@ export class OperationCaisseComponent implements OnInit{
     });
 
     this.lignes.clear();
-    _object.lignes.forEach((l: any) => {
-      const ligneGroup = this.fb.group({
-        idligne: [l.idligneoperation ?? null],
-        natureop: [l.nature?.idnature ?? null, Validators.required],
-        centre: [{ value: null, disabled: true }],
-        tiers: [{ value: l.tiers?.idtiers ?? null, disabled: true }],
-        montantligne: [{ value: l.montantoperation ?? "", disabled: false }, Validators.required],
-
-        //centres propres à la ligne
-        centres: this.fb.control<any[]>([])
-      });
-
+    _object.lignes.forEach((ligne: any, index: number) => {
+      const ligneGroup = this.newLigne(ligne); 
       this.lignes.push(ligneGroup);
 
-      // règles métier
-      this.handleNatureChange(ligneGroup, l.nature?.idnature);
-
-      //charger centres PUIS positionner le centre
-      if (l.nature?.idnature) {
-        this.getallCentresDispatch(l.nature.idnature, ligneGroup, l.centre?.idcentreanalytique);
-      }
+      //charger centres + positionner centre
+      this.getallCentresDispatch(ligne.nature.idnature, ligneGroup, ligne.centre.idcentreanalytique );
     });
 
     //différentes caisses utilisées 
@@ -946,9 +908,6 @@ export class OperationCaisseComponent implements OnInit{
         fg.disable({ emitEvent: false });
       }
     });
-
-    //Filtrer les natures quand typeoperation change
-    this.filtrerNatures(_object.caisses[0].codtypeoperation);
 
     //Bloquer tout le formulaire
     this.operationForm.disable({ emitEvent: false });
@@ -1001,10 +960,10 @@ export class OperationCaisseComponent implements OnInit{
 
   newLigne(ligne?: any): FormGroup<any> {
     const ligneOf = this.fb.group({
-      idlignedemande: [ligne?.idlignedemande || null],
+      idligneoperation: [ligne?.idligneoperation || null],
       numligne: [ligne?.numligne || null],
-      natureop: [ligne?.natureoperation || '', Validators.required],
-      centre: [{ value: ligne?.centreanalytique || null, disabled: true }],
+      natureop: [ligne?.nature ?? ligne?.natureoperation ?? '', Validators.required],
+      centre: [{ value: ligne?.centre ?? ligne?.centreanalytique ?? null, disabled: true }],
       tiers: [{ value: ligne?.tiers || null, disabled: true }],
       montantligne: [{ value: ligne?.montantdemande ?? ligne?.montantoperation ?? 0, disabled: true }, Validators.required],
       details: this.fb.array([]),
@@ -1083,46 +1042,6 @@ export class OperationCaisseComponent implements OnInit{
       }
     });
   }
-  
-  //Ajouter la ligne dans le tableau
-  // addLine() {
-  //   const ligne = this.fb.group({
-  //     natureop : [{ value: "", disabled: false }, [Validators.required]],
-  //     centre: [{ value: "", disabled: true }, ],
-  //     tiers: [{ value: "", disabled: true }, ],
-  //     montantligne: [{ value: "", disabled: true }, [Validators.required]],
-  //     //CENTRES PAR LIGNE
-  //     centres: this.fb.control<any[]>([])
-  //   });
-
-  //   ligne.get("natureop")?.valueChanges.subscribe(natureId => {
-  //     if (!natureId) {
-  //       ligne.get("centre")?.disable();
-  //       ligne.get("tiers")?.disable();
-  //       ligne.get("montantligne")?.disable();
-  //       ligne.get('centres')?.setValue([]);
-  //       return;
-  //     }
-
-  //     // Champs de base
-  //     ligne.get("centre")?.enable();
-  //     ligne.get("montantligne")?.enable();
-
-  //     //charger centres POUR CETTE LIGNE
-  //     this.loadCentresForLigne(ligne, natureId, true, '');
-  //     // Règle métier sur tiers
-  //     this.handleNatureChange(ligne, natureId);
-  //   });
-
-  //   ligne.get("montantligne")?.valueChanges.subscribe(() => {
-  //     this.updateTotalMontant();
-
-  //     //Calcul montant ref aussi
-  //     this.updateMontantRefGlobal();
-  //   });
-
-  //   this.lignes.push(ligne);
-  // }
 
   protectionField(ligne: FormGroup, field: string) {
     if (!ligne.get("natureop")?.value) {
@@ -1153,6 +1072,15 @@ export class OperationCaisseComponent implements OnInit{
     this.updateTotalMontant();
   }
 
+  //Méthode helper pour obtenir le nom complet de l'utilisateur
+  getUserFullName(): string {
+    const user = this.user;
+    if (user && user.nom && user.prenom) {
+      return `${user.nom} ${user.prenom}`;
+    }
+    return user?.nom || user?.prenom || 'Systeme';
+  }
+
   //Soumission du formulaire
   onSubmit(){
     /** Check formulaire */
@@ -1166,13 +1094,30 @@ export class OperationCaisseComponent implements OnInit{
     }
 
     /** 2. prepare data */
-    //const formValue = this.operationForm.value;
     const formValue = this.operationForm.getRawValue();
     this.closeModal('showModal');
 
-    const _operation: operationModel = {
+    const baseoperation: operationModel = {
       ...this.operation,
       ...formValue,
+      lignes: formValue.lignes.map((ligne: any) => ({
+        natureop: ligne.natureop?.idnature,
+        centre: ligne.centre?.idcentreanalytique,
+        tiers: ligne.tiers?.idtiers,
+        montantligne: ligne?.montantligne
+      }))
+    };
+
+    // Ajouter les informations utilisateur selon l'action
+    const _operation = this.actionModal === 'create'
+      ? {
+          ...baseoperation,
+          createdby: this.getUserFullName(),
+          updatedby: this.getUserFullName(),
+        }
+      : {
+          ...baseoperation,
+          updatedby: this.getUserFullName(),
     };
 
     /** 3. choices action */
@@ -1272,11 +1217,11 @@ export class OperationCaisseComponent implements OnInit{
     this.getAllcentres();
     this.loadCaissesForm().subscribe({
       next: () => {
-        this.dispatchOperation(_object);
         const type = _object.caisses[0]?.codtypeoperation;
-        this.operationForm.patchValue({ typepaiement: type });
         this.filtrerNatures(type);
+        this.operationForm.patchValue({ typepaiement: type });
         this.operationForm.get("dateoperation")?.disable();
+        this.dispatchOperation(_object);
 
         // recalcul automatique
         this.caisses.controls.forEach((caisseFG: any) => {

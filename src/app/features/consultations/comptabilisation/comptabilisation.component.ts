@@ -222,8 +222,17 @@ export class ComptabilisationComponent implements OnInit{
       return;
     }
     
-    const criteria = this.criteriaForm.value;
+    //const criteria = this.criteriaForm.value;
+    const criteria = {
+     ...this.criteriaForm.value,
+    idsite: this.criteriaForm.value.idsite || null,
+    datedebut : this.criteriaForm.value.datedebut ? new Date(this.criteriaForm.value.datedebut).toISOString() : null,
+    datefin : this.criteriaForm.value.datefin ? new Date(this.criteriaForm.value.datefin).toISOString() : null,
+    etat : this.criteriaForm.value.etat || null,
+    journal: this.criteriaForm.value.journal || null
+    };
     this.search(criteria);
+
 
     // Fermer le modal si bootstrap est utilisé
     const modalEl = document.getElementById('criteriaModal');
