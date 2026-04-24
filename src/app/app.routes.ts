@@ -21,7 +21,8 @@ import { APP, APP_DONNEE_BASE_DEVISE, APP_AFF_NATURE_CENTRE_DONNEE_BASE,
     APP_DECAISSEMENTAJUSTIFIER_CONSULTATION,
     APP_STATSAFFDEPTNATURE_CONSULTATION,
     APP_DETAILDEAMNDE_CONSULTATION,
-    APP_BANQUE_DONNEE_BASE} from './_core/routes/frontend.root';
+    APP_BANQUE_DONNEE_BASE,
+    APP_CLOTURECAISSE_CONSULTATION} from './_core/routes/frontend.root';
 
 import { LayoutMainComponent } from './layout/layout-main/layout-main.component';
 import { LayoutContentComponent } from './layout/composant/layout-content/layout-content.component';
@@ -68,6 +69,7 @@ import { NatureOperationByDepartementComponent } from './features/consultations/
 import { UpdatepasswordComponent } from './features/administration/updatepassword/updatepassword.component';
 import { DemandeDetailComponent } from './features/consultations/demande-detail/demande-detail.component';
 import { BanqueComponent } from './features/donnee_base/banque/banque.component';
+import { ClotureCaisseComponent } from './features/consultations/cloture-caisse/cloture-caisse.component';
 
 export const routes: Routes = [
   {
@@ -257,6 +259,10 @@ export const routes: Routes = [
       {
           path : APP_DETAILDEAMNDE_CONSULTATION,
           component: DemandeDetailComponent
+      },
+      {
+          path : APP_CLOTURECAISSE_CONSULTATION,
+          component: ClotureCaisseComponent
       }
     ]
   }

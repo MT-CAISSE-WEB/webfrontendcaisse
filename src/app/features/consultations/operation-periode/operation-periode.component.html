@@ -66,7 +66,7 @@
                                                                 <tr>
                                                                     <th>caisse  </th>
                                                                     <th>type opération </th>
-                                                                    <th>montant opération </th>
+                                                                    <th>montant payé </th>
                                                                     <th>montant ref </th>
                                                                     <th>numéro piece  </th>
                                                                 </tr>
@@ -85,7 +85,7 @@
                                                                         <td>{{ element.description || '-' }}</td>
                                                                         <td class="text-end">{{ element.typeoperation || '-' }}</td>
                                                                         <td class="text-end">
-                                                                            {{ element.montant | number:'1.0-2' }} {{ element.deviseop }}
+                                                                            {{ element.montant | number:'1.0-2' }} {{ caisse?.devise }}
                                                                         </td>
                                                                         <td class="text-end">
                                                                             {{ element.montant_ref | number:'1.0-2' }} {{ user.devise_ref_code }}

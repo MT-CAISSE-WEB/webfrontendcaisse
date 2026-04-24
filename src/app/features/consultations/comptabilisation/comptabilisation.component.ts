@@ -42,8 +42,8 @@ export class ComptabilisationComponent implements OnInit{
   limit: number = 4000;
 
   tableau_Ecritures = [
-    { header: 'Site', field: ' ' },
-    { header: 'N° piece', field: '' },
+    { header: 'Site', field: 'codesite' },
+    { header: 'N° piece', field: 'ref_ecriture' },
     { header: 'N° ecriture', field: 'numligne' },
     { header: 'Journal', field: 'journal' },
     { header: 'Date', field: 'numligne' },

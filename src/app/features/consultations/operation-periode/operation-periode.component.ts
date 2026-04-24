@@ -41,15 +41,8 @@ export class OperationPeriodeComponent implements OnInit {
     //Initialisation du formulaire
     this.initSearchForm();
 
-    // Liste des éléments
-    //this.getJournalpaiement();
-
     //Liste des caisses de user
     this.getCaisseUser();
-  }
-
-  getJournalpaiement(){
-    
   }
 
   //Initialiser le formulaire de recherche
