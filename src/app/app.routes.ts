@@ -16,7 +16,13 @@ import { APP, APP_DONNEE_BASE_DEVISE, APP_AFF_NATURE_CENTRE_DONNEE_BASE,
     APP_OPERATIONPERIODE_CONSULTATION,
     APP_OPERATIONDETAILS_CONSULTATION,
     APP_PARAMETREPAGE_PARAMETRE,
-    APP_OPERATION_GENERAL_JUSTIFIER} from './_core/routes/frontend.root';
+    APP_OPERATION_GENERAL_JUSTIFIER,
+    APP_COMPTABILISATION, APP_DECAISSEMENTAJUSTIFIER,
+    APP_DECAISSEMENTAJUSTIFIER_CONSULTATION,
+    APP_STATSAFFDEPTNATURE_CONSULTATION,
+    APP_DETAILDEAMNDE_CONSULTATION,
+    APP_BANQUE_DONNEE_BASE,
+    APP_CLOTURECAISSE_CONSULTATION} from './_core/routes/frontend.root';
 
 import { LayoutMainComponent } from './layout/layout-main/layout-main.component';
 import { LayoutContentComponent } from './layout/composant/layout-content/layout-content.component';
@@ -57,10 +63,15 @@ import { OperationPeriodeComponent } from './features/consultations/operation-pe
 import { OperationDetailComponent } from './features/consultations/operation-detail/operation-detail.component';
 import { ParametrePageComponent } from './features/paramètres/parametre-page/parametre-page.component';
 import { OprationJustifieeComponent } from './features/operations/opration-justifiee/opration-justifiee.component';
+import { ComptabilisationComponent } from './features/consultations/comptabilisation/comptabilisation.component';
+import { DecaissementJustifierComponent } from './features/consultations/decaissement-justifier/decaissement-justifier.component';
+import { NatureOperationByDepartementComponent } from './features/consultations/nature-par-departement/nature-par-departement.component';
 import { UpdatepasswordComponent } from './features/administration/updatepassword/updatepassword.component';
+import { DemandeDetailComponent } from './features/consultations/demande-detail/demande-detail.component';
+import { BanqueComponent } from './features/donnee_base/banque/banque.component';
+import { ClotureCaisseComponent } from './features/consultations/cloture-caisse/cloture-caisse.component';
 
 export const routes: Routes = [
-
   {
       path :'login',
       component:LoginComponent
@@ -79,10 +90,10 @@ export const routes: Routes = [
         path : '',
         component: LayoutContentComponent
       },
-    {
-                path : "app/administration/changepassword",
-                component : UpdatepasswordComponent
-    },
+      {
+        path : "app/administration/changepassword",
+        component : UpdatepasswordComponent
+      },
       {
         path : APP_STRUCTURE_DEPARTEMENT,
         component : DepartementComponent
@@ -90,7 +101,6 @@ export const routes: Routes = [
       {
           path : APP_STRUCTURE_SITE,
           component : SiteComponent
-        
       } ,
       {
           path : APP_TAUX_DONNEE_BASE,
@@ -101,7 +111,7 @@ export const routes: Routes = [
           component: JournalComponent,
       },
       {
-          path : APP_CAISSE_CAISSE_JOURNAL,
+          path : APP_CAISSE_CAISSE_JOURNAL, 
           component: CaisseComponent,
       },
       {
@@ -167,6 +177,10 @@ export const routes: Routes = [
       },
       // Début travaux Richard...
       {
+          path : APP_BANQUE_DONNEE_BASE,
+          component: BanqueComponent,
+      },
+      {
           path : APP_TIERS_DONNEE_BASE,
           component: TiersComponent,
       },
@@ -222,7 +236,7 @@ export const routes: Routes = [
           path : APP_OPERATIONPERIODE_CONSULTATION,
           component: OperationPeriodeComponent
       },
-      { 
+      {
           path : APP_OPERATIONDETAILS_CONSULTATION,
           component: OperationDetailComponent
       },
@@ -230,6 +244,26 @@ export const routes: Routes = [
           path : APP_PARAMETREPAGE_PARAMETRE,
           component: ParametrePageComponent
       },
+      {
+          path : APP_COMPTABILISATION,
+          component: ComptabilisationComponent
+      },
+      {
+        path: APP_STATSAFFDEPTNATURE_CONSULTATION,
+        component: NatureOperationByDepartementComponent,
+      },
+      {
+          path : APP_DECAISSEMENTAJUSTIFIER_CONSULTATION,
+          component: DecaissementJustifierComponent
+      },
+      {
+          path : APP_DETAILDEAMNDE_CONSULTATION,
+          component: DemandeDetailComponent
+      },
+      {
+          path : APP_CLOTURECAISSE_CONSULTATION,
+          component: ClotureCaisseComponent
+      }
     ]
   }
 ];

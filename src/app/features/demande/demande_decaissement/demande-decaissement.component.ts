@@ -281,6 +281,7 @@ export class DemandeDecaissementComponent implements OnInit {
       search: '',
       date: '',
       status: '',
+      user: this.user.idutilisateur,
     };
     this.service.getAllEntetes(params).subscribe({
       next : (res) => {

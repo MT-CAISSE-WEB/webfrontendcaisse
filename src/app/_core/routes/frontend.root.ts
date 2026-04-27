@@ -8,6 +8,7 @@ export const APP_STRUCTURE = "structure";
 export const APP_GENERAL = "general";
 export const APP_CONSULTATION = "consultations";
 export const APP_PARAMETRE = "paramètres";
+export const APP_COMPTABILISATION = "comptabilisations";
 export const APP_ROOT_CAISSE_JOURNAL = APP_ROOT + "/" + APP_CAISSE_JOURNAL;
 export const APP_ROOT_DONNEE_BASE = APP_ROOT + "/" + APP_DONNEE_BASE;
 export const APP_ROOT_GENERAL = APP_ROOT + "/" + APP_GENERAL;
@@ -15,6 +16,7 @@ export const APP_ROOT_STRUCTURE = APP_ROOT + "/"+APP_STRUCTURE;
 export const APP_ROOT_ADMINISTRATION = APP_ROOT + "/"+APP_ADMINISTRATION;
 export const APP_ROOT_CONSULTATION = APP_ROOT + "/"+APP_CONSULTATION;
 export const APP_ROOT_PARAMETRE = APP_ROOT + "/" + APP_PARAMETRE;
+export const APP_ROOT_COMPTABILISATION = APP_ROOT + "/" + APP_COMPTABILISATION;
 
 
 export const APP_DEPARTEMENT = "departement";
@@ -164,3 +166,30 @@ export const APP_ROOT_OPERATIONDETAILS_CONSULTATION = APP_ROOT + "/" + APP_OPERA
 export const APP_PARAMETREPAGE = 'générale';
 export const APP_PARAMETREPAGE_PARAMETRE = APP_PARAMETRE + "/" + APP_PARAMETREPAGE;
 export const APP_ROOT_PARAMETREPAGE_PARAMETRE = APP_ROOT + "/" + APP_PARAMETREPAGE_PARAMETRE;
+
+//Route consultation des décaissements à justifier
+export const APP_DECAISSEMENTAJUSTIFIER = 'decaissement_ajustifier';
+export const APP_DECAISSEMENTAJUSTIFIER_CONSULTATION = APP_CONSULTATION + "/" + APP_DECAISSEMENTAJUSTIFIER;
+export const APP_ROOT_DECAISSEMENTAJUSTIFIER_CONSULTATION = APP_ROOT + "/" + APP_DECAISSEMENTAJUSTIFIER_CONSULTATION;
+
+// Route stats affection nature département
+export const APP_STATSAFFDEPTNATURE = 'statistiques-globales';
+export const APP_STATSAFFDEPTNATURE_CONSULTATION =
+  APP_CONSULTATION + '/' + APP_STATSAFFDEPTNATURE;
+export const APP_ROOT_STATSAFFDEPTNATURE_CONSULTATION =
+  APP_ROOT + '/' + APP_STATSAFFDEPTNATURE_CONSULTATION;
+
+//Route consultation des demandes
+export const APP_DETAILDEAMNDE = 'demande_detail';
+export const APP_DETAILDEAMNDE_CONSULTATION = APP_CONSULTATION + "/" + APP_DETAILDEAMNDE;
+export const APP_ROOT_DETAILDEAMNDE_CONSULTATION = APP_ROOT + "/" + APP_DETAILDEAMNDE_CONSULTATION;
+
+//Route nature operation
+export const APP_BANQUE = 'banque';
+export const APP_BANQUE_DONNEE_BASE = APP_DONNEE_BASE + "/" + APP_BANQUE;
+export const APP_ROOT_BANQUE_DONNEE_BASE = APP_ROOT + "/" + APP_BANQUE_DONNEE_BASE;
+
+//Route consultation des etats cloture caisse
+export const APP_CLOTURECAISSE = 'etat_caisse';
+export const APP_CLOTURECAISSE_CONSULTATION = APP_CONSULTATION + "/" + APP_CLOTURECAISSE;
+export const APP_ROOT_CLOTURECAISSE_CONSULTATION = APP_ROOT + "/" + APP_CLOTURECAISSE_CONSULTATION;

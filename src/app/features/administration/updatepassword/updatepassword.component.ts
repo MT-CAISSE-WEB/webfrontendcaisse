@@ -3,14 +3,13 @@ import { userservice } from '../service/user.service';
 import { Router } from '@angular/router';
 import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { ToastService } from '../../../_core/toast/toast.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-updatepassword',
   imports: [ CommonModule,FormsModule,ReactiveFormsModule],
   templateUrl: './updatepassword.component.html',
   styleUrl: './updatepassword.component.css',
-  providers: [ToastService]
 })
 export class UpdatepasswordComponent {
     passwordForm!: FormGroup;
@@ -27,7 +26,7 @@ ngOnInit() {
   );
 }
 
-constructor(private fb:FormBuilder,private toast: ToastService,private us:userservice,private router : Router){}
+constructor(private fb:FormBuilder,private toast: ToastrService,private us:userservice,private router : Router){}
 get user(){
     return JSON.parse(localStorage.getItem('user') || '{}');
   }

@@ -11,9 +11,6 @@ import { plancomptableModel } from '../models/plancomptable.model';
 
 import { ToastrService } from 'ngx-toastr';
 
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
-
 
 // ADD-INS
 declare var $: any;
@@ -26,7 +23,7 @@ declare var $: any;
 })
 
 export class NatureoperationComponent implements OnInit{
-  title = "Gestion des natures d'operations";
+  title = "Natures d'operations";
   params : any = {};
   breadCrumbs : any = {};
   fb: FormBuilder = new FormBuilder();
@@ -57,6 +54,14 @@ export class NatureoperationComponent implements OnInit{
 
   ImportForm : FormGroup = this.fb.group({})
 
+  // Ajout pour fonctions de recherche et pagination
+  filteredData: any[] = [];
+  paginatedData: any[] = [];
+  searchTerm: string = '';
+  currentPage: number = 1;
+  pageSize: number = 15;
+  totalPages: number = 1;
+
 
   constructor(private natureoperationservice: NatureoperationService, 
     private plancomptableservice: PlancomptableService,
@@ -82,40 +87,8 @@ export class NatureoperationComponent implements OnInit{
       next : (res) => {
         if(res.success){
           this.natureoperations = res.data;
-
-          const table = $('#dataTable').DataTable();
-          table.destroy();
-
-          setTimeout(() => $('#dataTable').DataTable({
-            language: {
-            search: "Rechercher :",
-            lengthMenu: "Afficher _MENU_ éléments",
-            info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
-            infoEmpty: "Affichage de 0 à 0 sur 0 élément",
-            infoFiltered: "(filtré de _MAX_ éléments au total)",
-            loadingRecords: "Chargement...",
-            processing: "Traitement...",
-            zeroRecords: "Aucun élément correspondant trouvé",
-            emptyTable: "Aucune donnée disponible dans le tableau",
-            paginate: {
-              first: "Premier",
-              previous: "Précédent",
-              next: "Suivant",
-              last: "Dernier"
-            },
-            aria: {
-              sortAscending: ": activer pour trier la colonne par ordre croissant",
-              sortDescending: ": activer pour trier la colonne par ordre décroissant"
-            }
-          },
-            responsive: true,
-            ordering: true,
-            lengthMenu: [
-                [10, 25, 50, 100, 250, 500, -1],
-                [10, 25, 50, 100, 250, 500, "Tous"]
-              ]
-
-          }), 0);
+          this.filteredData = [...this.natureoperations];
+          this.updatePagination();
         }
       }
     });
@@ -126,6 +99,16 @@ export class NatureoperationComponent implements OnInit{
       next : (res) => {
         if(res.success){
           this.comptes = res.data;
+        }
+      }
+    });
+  }
+
+  getOneNatureoperation(id: string){
+    this.natureoperationservice.getOne(id).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.natureoperation = res.data;
         }
       }
     });
@@ -144,12 +127,12 @@ export class NatureoperationComponent implements OnInit{
       decajustifier : [false],
       imputationtiers : [false],
       demandedecaissement : [true],
-      typeoperation : ["", [Validators.required]],
+      typeoperation : ["Decaissement", [Validators.required]],
       idsociete : [this.user.idsociete, [Validators.required]],
       idcompte : ["", [Validators.required]],
       actif : [true],
-      createdby : [this.user.codeutilisateur],
-      updatedby : [this.user.codeutilisateur]
+      createdby : [this.user.prenom + " " + this.user.nom],
+      updatedby : [this.user.prenom + " " + this.user.nom]
     })
   }
 
@@ -165,7 +148,7 @@ export class NatureoperationComponent implements OnInit{
       decajustifier : _object.decajustifier,
       imputationtiers : _object.imputationtiers,
       demandedecaissement : _object.demandedecaissement,
-      typoeration : _object.typeoperation,
+      typeoperation : _object.typeoperation,
       idsociete: _object.idsociete,
       idcompte : _object.idcompte,
       numcompte : _object.compte.compte_numcompte,
@@ -183,26 +166,34 @@ export class NatureoperationComponent implements OnInit{
   }
 
   //vérifie si _id est inclus dans un tableau d'IDs stocké
-  isChecked(_id: string) {
-    const ids: string[] = this.objectsSelected.map((el) => el.idnature);
-    return ids.includes(_id);
+  isChecked(id: string): boolean {
+    return this.selectedItems.some(x => x.idnature === id);
   }
 
-  //selectionner une instance dans une liste
-  handleSelectOne(natureoperation: natureoperationModel, actif: any) {
-    const index = this.objectsSelected.findIndex(
-      (el) => el.idnature == natureoperation.idnature
-    );
-    if (index == -1 && actif) this.objectsSelected.push(natureoperation);
-    if (index != -1 && !actif) this.objectsSelected.splice(index, 1);
-    this.checkAllRow = this.objectsSelected?.length == this.natureoperations?.length;
+  handleSelectOne(item: any, event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+
+    if (checked) {
+      if (!this.selectedItems.some(x => x.idnature === item.idnature)) {
+        this.selectedItems.push(item);
+      }
+    } else {
+      this.selectedItems = this.selectedItems.filter(
+        x => x.idnature !== item.idnature
+      );
+    }
   }
 
   //Sélection/ Désélection de tous les éléments
-  handleSelectAll($event: any) {
-    this.checkAllRow = $event;
-    if (this.checkAllRow) this.objectsSelected = this.natureoperations.slice();
-    else this.objectsSelected = [];
+  handleSelectAll(event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.checkAllRow = checked;
+
+    if (checked) {
+      this.objectsSelected = [...this.paginatedData]; // toutes les données filtrées
+    } else {
+      this.objectsSelected = [];
+    }
   }
 
 
@@ -343,56 +334,8 @@ export class NatureoperationComponent implements OnInit{
     this.getAllNatureoperations();
   }
   
-  exportToExcel(): void {
-    const element = document.getElementById('dataTable');
   
-    if (!element) {
-      console.error('Table non trouvée');
-      return;
-    }
-  
-    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
-    const workbook: XLSX.WorkBook = {
-      Sheets: { 'Nature operation': worksheet },
-      SheetNames: ['Nature operation']
-    };
-  
-    const excelBuffer: any = XLSX.write(workbook, {
-      bookType: 'xlsx',
-      type: 'array'
-    });
-  
-    const data: Blob = new Blob(
-      [excelBuffer],
-      { type: 'application/octet-stream' }
-    );
-  
-    saveAs(data, `Nature_operation_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.xlsx`);
-  }
-    
-  exportToCSV(): void {
-    const element = document.getElementById('dataTable');
-  
-    if (!element) {
-      console.error('Table non trouvée');
-      return;
-    }
-  
-    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
-    
-    // 🔥 forcer le séparateur ;
-    const csv = XLSX.utils.sheet_to_csv(worksheet, {
-      FS: ';'
-    });
-  
-    const blob = new Blob([csv], {
-      type: 'text/csv;charset=utf-8;'
-    });
-
-    saveAs(blob, `nature_operation_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.csv`);
-  }
-
-  //Importation du plan comptable
+  //Importation
   importNatureOperation(event: any){
     const file = event.target.files[0];
 
@@ -417,15 +360,15 @@ export class NatureoperationComponent implements OnInit{
     }
     const file = input.files[0];
     const info = {
-      idsociete : this.user.idsociete,
-      createdby : this.user.codeutilisateur
+      idsociete : this.user.idsociete[0],
+      createdby : this.user.prenom + " " + this.user.nom
     }
 
     this.natureoperationservice.importNatureOperation(file, info).subscribe({
       next: (res) => {
         if (res.success) {
-          this.getAllNatureoperations();
           this.toastr.success('Importation effectuée avec succès');
+          this.getAllNatureoperations();
         } else {
           this.error = "Echec de l'importation";
           this.toastr.error(this.error);
@@ -438,6 +381,82 @@ export class NatureoperationComponent implements OnInit{
         this.toastr.error(err);
       }
     })
+  }
+
+
+  // 🔎 Filtrer (Affectees)
+  applyFilter() {
+    const term = this.searchTerm.toLowerCase();
+
+    this.filteredData = this.natureoperations.filter(item =>
+      item.codenature?.toLowerCase().includes(term) ||
+      item.libelle?.toLowerCase().includes(term)
+    );
+
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  // 📄 Pagination
+  updatePagination() {
+    this.totalPages = Math.ceil(this.filteredData.length / this.pageSize);
+
+    const start = (this.currentPage - 1) * this.pageSize;
+    const end = start + this.pageSize;
+
+    this.paginatedData = this.filteredData.slice(start, end);
+
+    console.log('Données paginées :', this.paginatedData);
+  }
+
+  // ▶ Page suivante
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+    }
+  }
+
+  // ◀ Page précédente
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
+  }
+
+  actualiser(): void {
+    this.getAllNatureoperations();
+  }
+
+
+  exportData = {
+    debut: null,
+    fin: null,
+    format: 'excel'
+  };
+  
+  exporter() {
+    this.natureoperationservice.exportNatures(this.exportData).subscribe({
+      next: (blob: Blob) => {
+
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+
+        a.download = this.exportData.format === 'pdf'
+          ? 'Liste_natures.pdf'
+          : 'Liste_natures.xlsx';
+
+        a.click();
+
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.toastr.error("Erreur export");
+      }
+    });
   }
 
 }

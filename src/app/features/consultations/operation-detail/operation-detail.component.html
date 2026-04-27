@@ -46,26 +46,51 @@
                         </div>
                         <!--end col-->
                         <div class="col-xxl-3 col-sm-4">
-                            <div class="input-light">
-                                <select class="form-select form-select-sm" formControlName="nature">
-                                    <option value="" selected>Selectionner une nature</option>
-                                    <option value="">Toutes les natures</option>
-                                    <option value="all">Comptabilisé</option>
-                                </select>
-                            </div>
+                            <app-custom-field-select
+                                mode="backend"
+                                formControlName="nature"
+                                valueField="idnature"
+                                codeField="codenature"
+                                labelField="libelle"
+                                [columns]="columnsnature"
+                                placeholder="Rechercher une nature operation..."
+                                (loadData)="searchNature($event)"
+                                (valueChange)="onSelectNature($event)"
+                                [data]="natureoperationsFiltered">
+                            </app-custom-field-select>
                         </div>
                         <!--end col-->
                         <div class="col-xxl-3 col-sm-4">
-                            <div class="input-light">
-                                <select class="form-select form-select-sm" formControlName="centre">
-                                    <option value="" selected>Selectionner un centre analytique</option>
-                                    <option value="">Tous les centres analytiques</option>
-                                    <option value="all">Comptabilisé</option>
-                                </select>
-                            </div>
+                            <app-custom-field-select
+                                mode="backend"
+                                formControlName="centre"
+                                valueField="idcentreanalytique"
+                                codeField="codecentreanalytique"
+                                labelField="libelle"
+                                [columns]="columnscentre"
+                                placeholder="Rechercher un centre analytique..."
+                                (loadData)="searchCentre($event)"
+                                (valueChange)="onSelectCentre($event)"
+                                [data]="centresFiltered">
+                            </app-custom-field-select>
                         </div>
                         <!--end col-->
                         <div class="col-xxl-3 col-sm-4">
+                            <app-custom-field-select
+                                mode="backend"
+                                formControlName="tiers"
+                                valueField="idtiers"
+                                codeField="codetiers"
+                                labelField="designation"
+                                [columns]="columnstiers"
+                                placeholder="Rechercher un tiers..."
+                                (loadData)="searchTiers($event)"
+                                (valueChange)="onSelectTiers($event)"
+                                [data]="filteredTiers">
+                            </app-custom-field-select>
+                        </div>
+
+                        <!-- <div class="col-xxl-3 col-sm-4">
                             <div class="input-light">
                                 <select class="form-select form-select-sm" formControlName="tiers">
                                     <option value="" selected>Selectionner un tiers</option>
@@ -73,7 +98,7 @@
                                     <option value="all">Comptabilisé</option>
                                 </select>
                             </div>
-                        </div>
+                        </div> -->
                         <!--end col-->
                     </div>
                     <!--end row-->
@@ -81,28 +106,25 @@
             </form>
 
             <div class="card-body">
-                <div class="table-scroll">
-                    @if (loading) {
-                        <div class="text-center py-4">
-                            <div class="spinner-border text-info"></div>
-                        </div>
-                    }
+                <div>
                     <div class="table-responsive table-card">
-                        <table class="table table-striped align-middle text-nowrap" id="invoiceTable">
-                            <thead class="">
-                                <tr>
-                                    <th scope="col" class="sort text-uppercase" data-sort="numero">Numero pièce</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="date">Date operation</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="nature">Nature operation</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="centre">Centre analytique</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="tiers">Tiers</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="tiers">Montant</th>
-                                    <th scope="col" class="sort text-uppercase" data-sort="devise">Devise</th>
+                        <table class="table table-hover table-nowrap align-middle table-scroll table-container table-custom table-compact" id="invoiceTable">
+                            <thead class="text-muted table-light">
+                                <tr class="text-uppercase">
+                                    <th scope="col" data-sort="site">Site</th>
+                                    <th scope="col" data-sort="numero">Numero pièce</th>
+                                    <th scope="col" data-sort="date">Date operation</th>
+                                    <th scope="col" data-sort="nature">Nature operation</th>
+                                    <th scope="col" data-sort="centre">Centre analytique</th>
+                                    <th scope="col" data-sort="tiers">Tiers</th>
+                                    <th scope="col" data-sort="tiers">Montant</th>
+                                    <th scope="col" data-sort="devise">Devise</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @for(item of op; track $index){
                                     <tr>
+                                        <td> {{item?.site}} </td>
                                         <td> {{item?.piece}} </td>
                                         <td> {{item?.date_operation | date:'dd/MM/yyyy'}} </td>
                                         <td> {{item?.nature_operation }} </td> 
@@ -112,6 +134,14 @@
                                         <td> {{item?.devise }} </td>
                                     </tr>
                                 }
+                                <tr *ngIf="loading">
+                                    <td colspan="8">
+                                        <div class="text-center py-4">
+                                            <div class="spinner-border text-info"></div>
+                                            <h6 class="mt-2">Chargement...</h6>
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                         <div class="" *ngIf="op?.length == 0">

@@ -39,14 +39,14 @@
                                     <form [formGroup]="form" (ngSubmit)="login()">
 
                                         <div class="mb-3">
-                                            <label for="username" class="form-label">Login</label>
-                                            <input type="text" class="form-control" id="username" formControlName="login" placeholder="Enter username">
+                                            <label for="username" class="form-label">Identifiant</label>
+                                            <input type="text" class="form-control" id="username" formControlName="login" placeholder="Entrez votre identifiant">
                                         </div>
 
                                         <div class="mb-3">
-                                            <label class="form-label" for="password-input">Password</label>
+                                            <label class="form-label" for="password-input">Mot de passe</label>
                                             <div class="position-relative auth-pass-inputgroup mb-3">
-                                                <input type="password" class="form-control pe-5 password-input" formControlName="password" placeholder="Enter password" id="password-input">
+                                                <input type="password" class="form-control pe-5 password-input" formControlName="password" placeholder="Entrez votre mot de passe" id="password-input">
                                                 <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon" type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
                                             </div>
                                         </div>

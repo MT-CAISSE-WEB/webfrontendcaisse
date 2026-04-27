@@ -7,7 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { journalModel } from '../models/journal.model';
-import { JournalService } from '../services/journal.service';
+import { CrudOperationsService } from '../services/crud-operations.service';
 import { CommonModule } from '@angular/common';
 import {
   MESSAGE_CHAMPS_OBLIGATOIRE,
@@ -16,6 +16,8 @@ import {
 } from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { JournalService } from '../services/journal.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-journal',
@@ -57,10 +59,13 @@ export class JournalComponent implements OnInit {
   //Element à supprimer
   deleteJournal: any = null;
 
+  // Indicateur pour différencier suppression individuelle vs multiple
+  isMultipleDelete: boolean = false;
+
   //Formulaire de recherche
   searchForm : FormGroup = this.fb.group({});
 
-  constructor(private journalservice: JournalService, private router: Router) {}
+  constructor(private journalservice: JournalService, private router: Router, private crudService: CrudOperationsService, private toastr: ToastrService) {}
 
   ngOnInit(): void {
     //initialiser le formulaire de recherche
@@ -78,6 +83,7 @@ export class JournalComponent implements OnInit {
   }
 
   getAllJournaux() {
+    this.loading = true; // Démarrer le chargement
     const filters = this.searchForm.value;
     this.params = {
       page: this.currentPage,
@@ -91,7 +97,13 @@ export class JournalComponent implements OnInit {
           this.journaux = res.data.data;
           this.totalPages = res.data.totalPages;
         }
+        this.loading = false; // Arrêter le chargement
       },
+      error: (err: any) => {
+        this.loading = false; // Arrêter le chargement même en cas d'erreur
+        this.error = 'Erreur lors du chargement des données';
+        this.toastr.error('Erreur lors du chargement des données.');
+      }
     });
   }
 
@@ -142,6 +154,15 @@ export class JournalComponent implements OnInit {
 
   get user(){
     return JSON.parse(localStorage.getItem('user') || '{}');
+  }
+
+  //Méthode helper pour obtenir le nom complet de l'utilisateur
+  getUserFullName(): string {
+    const user = this.user;
+    if (user && user.nom && user.prenom) {
+      return `${user.nom} ${user.prenom}`;
+    }
+    return user?.nom || user?.prenom || 'Systeme';
   }
 
   get form() {
@@ -198,6 +219,55 @@ export class JournalComponent implements OnInit {
     this.getAllJournaux(); // recharge les données
   }
 
+  //Méthode générique pour actualiser les données (réutilisable dans d'autres composants)
+  refreshData(): void {
+    this.currentPage = 1; // Remettre à la première page
+    this.objectsSelected = []; // Vider la sélection
+    this.checkAllRow = false; // Désélectionner tout
+    this.getAllJournaux(); // Recharger les données
+  }
+
+  //Suppression individuelle d'un journal
+  deleteJournalItem(journal: journalModel): void {
+    // Configurer le modal pour la suppression individuelle
+    this.isMultipleDelete = false;
+    this.deleteJournal = journal;
+    this.titleMsg = 'Suppression individuelle';
+    this.msgSup = `Êtes-vous sûr de vouloir supprimer le journal "${journal.designation}" ?`;
+
+    // Ouvrir le modal de suppression
+    this.openDeleteModal();
+  }
+
+  //Suppression en masse des journaux sélectionnés
+  deleteMultiple(): void {
+    if (this.objectsSelected.length === 0) {
+      this.toastr.warning('Veuillez sélectionner au moins un journal à supprimer.');
+      return;
+    }
+
+    // Configurer le modal pour la suppression multiple
+    this.isMultipleDelete = true;
+    this.titleMsg = 'Suppression multiple';
+    this.msgSup = this.objectsSelected.length === 1
+      ? `Êtes-vous sûr de vouloir supprimer le journal "${this.objectsSelected[0].designation}" ?`
+      : `Êtes-vous sûr de vouloir supprimer ${this.objectsSelected.length} journaux sélectionnés ?`;
+
+    // Ouvrir le modal de suppression
+    this.openDeleteModal();
+  }
+
+  //Filtrage par statut (méthode améliorée)
+  filterByStatus(status: number | ''): void {
+    this.setStatus(status);
+  }
+
+  //Méthode pour obtenir le nombre d'éléments par statut
+  getStatusCount(status: number | ''): number {
+    if (status === '') return this.journaux.length;
+    return this.journaux.filter(journal => journal.actif === status).length;
+  }
+
   rafreshpage(){
     const currentUrl = this.router.url; 
     this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
@@ -221,17 +291,27 @@ export class JournalComponent implements OnInit {
     /** 2. prepare data */
     const formValue = this.journalForm.value;
 
-    const _journal: journalModel = {
+    const baseJournal = {
       ...this.journal,
       ...formValue,
       actif: formValue.actif ? 1 : 0,
     };
 
+    // Ajouter les informations utilisateur selon l'action
+    const _journal: journalModel = this.actionModal === 'create'
+      ? {
+          ...baseJournal,
+          createdby: this.getUserFullName(),
+          updatedby: this.getUserFullName(),
+        }
+      : {
+          ...baseJournal,
+          updatedby: this.getUserFullName(),
+        };
+
     /** 3. choices action */
     if (this.actionModal == 'create') this.create(_journal);
     else this.update(_journal);
-    // if (!_journal.idjournal) this.create(_journal);
-    // else this.update(_journal);
   }
 
   //Enregistrement de données
@@ -242,36 +322,47 @@ export class JournalComponent implements OnInit {
       next: (res: any) => {
         if (res.success) {
           this.closeModal('showModal');
-          this.getAllJournaux();
-          this.rafreshpage();
+          this.toastr.success('Journal créé avec succès.');
+          // Recharger la page après l'affichage du toast
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
         } else {
           this.error = 'Erreur de création';
+          this.toastr.error('Erreur lors de la création du journal.');
         }
         this.loading = false;
       },
       error: (err: any) => {
         this.error = 'Création échec';
         this.loading = false;
+        this.toastr.error('Échec de la création du journal.');
       },
     });
   }
 
   //Modification de données
   update(_journal: journalModel){
+    this.loading = true;
     this.journalservice.update(_journal).subscribe({
       next: (res: any) => {
         if (res.success) {
           this.closeModal('showModal');
-          this.getAllJournaux();
-          this.rafreshpage();
+          this.toastr.success('Journal modifié avec succès.');
+          // Recharger la page après l'affichage du toast
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
         } else {
           this.error = 'Erreur de modification';
+          this.toastr.error('Erreur lors de la modification du journal.');
         }
         this.loading = false;
       },
       error: (err: Error) => {
         this.error = 'Modification échec';
         this.loading = false;
+        this.toastr.error('Échec de la modification du journal.');
       },
     });
   }
@@ -280,7 +371,24 @@ export class JournalComponent implements OnInit {
     const modalEl = document.getElementById(modal);
     modalEl?.classList.remove('show');
     modalEl?.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
     (document.querySelector('.modal-backdrop') as HTMLElement)?.remove();
+  }
+
+  // Méthode pour ouvrir le modal de suppression
+  openDeleteModal(): void {
+    const modalEl = document.getElementById('deleteOrder');
+    if (modalEl) {
+      modalEl.classList.add('show');
+      modalEl.setAttribute('aria-hidden', 'false');
+      modalEl.style.display = 'block';
+      document.body.classList.add('modal-open');
+
+      // Créer et ajouter le backdrop
+      const backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop fade show';
+      document.body.appendChild(backdrop);
+    }
   }
 
   modalCreate() {
@@ -301,26 +409,74 @@ export class JournalComponent implements OnInit {
 
   modalDelete(item: journalModel) {
     this.deleteJournal = item;
+    this.isMultipleDelete = false; // S'assurer que c'est une suppression individuelle
   }
 
   deleteConfirmed() {
-    if (!this.deleteJournal) return;
-    this.journalservice.delete(this.deleteJournal.idjournal).subscribe({
-      next: (res: any) => {
-        if (res.success) {
-          this.deleteJournal = null;
+    if (this.isMultipleDelete) {
+      // Suppression multiple
+      this.loading = true;
+      let successCount = 0;
+      let errorCount = 0;
+
+      // Boucler sur chaque élément sélectionné et appeler l'API de suppression
+      const deletePromises = this.objectsSelected.map(journal =>
+        this.journalservice.delete(journal.idjournal).toPromise()
+          .then(() => {
+            successCount++;
+          })
+          .catch(() => {
+            errorCount++;
+          })
+      );
+
+      Promise.allSettled(deletePromises)
+        .then(() => {
           this.closeModal('deleteOrder');
-          this.getAllJournaux();
-          this.rafreshpage();
-        } else {
-          this.error = 'Erreur de Suppression';
-        }
-        this.loading = false;
-      },
-      error: (err: any) => {
-        this.error = 'Suppression échec';
-        this.loading = false;
-      },
-    });
+          this.objectsSelected = []; // Vider la sélection
+          this.checkAllRow = false; // Désélectionner tout
+          this.isMultipleDelete = false; // Réinitialiser l'indicateur
+          this.loading = false;
+
+          if (errorCount === 0) {
+            this.toastr.success(`${successCount} journal(s) supprimé(s) avec succès.`);
+          } else if (successCount === 0) {
+            this.toastr.error('Échec de la suppression de tous les journaux.');
+          } else {
+            this.toastr.warning(`${successCount} journal(s) supprimé(s), ${errorCount} échec(s).`);
+          }
+
+          // Recharger la page après la suppression
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        });
+    } else {
+      // Suppression individuelle
+      if (!this.deleteJournal) return;
+      this.loading = true;
+      this.journalservice.delete(this.deleteJournal.idjournal).subscribe({
+        next: (res: any) => {
+          if (res.success) {
+            this.deleteJournal = null;
+            this.closeModal('deleteOrder');
+            this.toastr.success('Journal supprimé avec succès.');
+            // Recharger la page après la suppression individuelle aussi
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
+          } else {
+            this.error = 'Erreur de Suppression';
+            this.toastr.error('Erreur lors de la suppression du journal.');
+          }
+          this.loading = false;
+        },
+        error: (err: any) => {
+          this.error = 'Suppression échec';
+          this.loading = false;
+          this.toastr.error('Échec de la suppression du journal.');
+        },
+      });
+    }
   }
 }

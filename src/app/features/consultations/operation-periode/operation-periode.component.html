@@ -23,7 +23,11 @@
                     <h5 class="card-title mb-0 flex-grow-1">{{title}}</h5>
                     <div class="flex-shrink-0">
                         <div class="d-flex gap-2 flex-wrap">
-                            <button class="btn btn-sm btn-soft-secondary" data-bs-toggle="modal" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1"></i>critères</button>
+                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#showModal_imp">
+                                <i class="ri-file-download-line align-bottom me-1"></i> Impression
+                            </button>
+                            <button class="btn btn-sm btn-soft-secondary" data-bs-toggle="modal" data-bs-target="#showModal">
+                                <i class="ri-add-line align-bottom me-1"></i>critères</button>
                         </div>
                     </div>
                 </div>
@@ -37,16 +41,16 @@
                             <div class="accordion-item">
                                 <h2 class="accordion-header" id="accordionlefticonExample1">
                                     <button class="accordion-button" type="button" data-bs-toggle="collapse" [attr.data-bs-target]="'#accor_lefticonExamplecollapse' + $index" aria-expanded="true" aria-controls="accor_lefticonExamplecollapse1">
-                                        opérations du {{ item?.date | date:'dd/MM/yyyy' }}
+                                        opérations du {{ item?.date | date:'dd/MM/yyyy' }}      site : {{ item?.site }}
                                     </button>
                                 </h2>
                                 <div [attr.id]="'accor_lefticonExamplecollapse' + $index" class="accordion-collapse collapse show" aria-labelledby="accordionlefticonExample1" data-bs-parent="#accordionlefticon">
                                     <div class="accordion-body">
-                                        <table class="table align-middle table-nowrap" id="invoiceTable">
+                                        <table class="table table-borderless table-sm align-middle mb-0" id="invoiceTable">
                                             @for(caisse of item.caisses; track $index){
                                                 <tr>
-                                                    <td colspan="2" class="p-2"><strong> {{ caisse?.codecaisse }} </strong> </td>
-                                                    <td colspan="3" class="p-2">Solde ouverture : <strong> {{caisse?.solde_ouverture}} {{ caisse?.devise }}</strong> </td>
+                                                    <td colspan="2" class="p-2"><strong> {{ caisse?.codecaisse }} - {{ caisse?.caisse }} </strong> </td>
+                                                    <td colspan="2" class="start p-2">Solde ouverture : <strong> {{caisse?.solde_ouverture}} {{ caisse?.devise }}</strong> </td>
                                                 </tr>
                                                 <tr>
                                                     <td>
@@ -62,28 +66,40 @@
                                                                 <tr>
                                                                     <th>caisse  </th>
                                                                     <th>type opération </th>
-                                                                    <th>montant opération </th>
+                                                                    <th>montant payé </th>
                                                                     <th>montant ref </th>
                                                                     <th>numéro piece  </th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                                @for(element of caisse?.operations; track $index){
+                                                                @if(!caisse?.operations?.length){
                                                                     <tr>
-                                                                        <td>{{ caisse?.codecaisse }} - {{ caisse?.caisse }}</td>
-                                                                        <td class="text-end"> {{ element.typeoperation }} </td>
-                                                                        <td class="text-end"> {{ element.montant }} {{ caisse?.devise }}</td>
-                                                                        <td class="text-end"> {{ element.montant_ref }}  {{ user.devise_ref_code }}</td>
-                                                                        <td> {{ element.piece }} </td>
+                                                                        <td colspan="5" class="text-center text-muted">
+                                                                            Aucune opération
+                                                                        </td>
                                                                     </tr>
                                                                 }
-                                                            </tbody>
+
+                                                                @for(element of caisse?.operations; track element.idoperation){
+                                                                    <tr>
+                                                                        <td>{{ element.description || '-' }}</td>
+                                                                        <td class="text-end">{{ element.typeoperation || '-' }}</td>
+                                                                        <td class="text-end">
+                                                                            {{ element.montant | number:'1.0-2' }} {{ caisse?.devise }}
+                                                                        </td>
+                                                                        <td class="text-end">
+                                                                            {{ element.montant_ref | number:'1.0-2' }} {{ user.devise_ref_code }}
+                                                                        </td>
+                                                                        <td>{{ element.piece || '-' }}</td>
+                                                                    </tr>
+                                                                }
+                                                                </tbody>
                                                         </table>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td colspan="2" class="p-2"> </td>
-                                                    <td colspan="3" class="p-2">Solde fermeture : <strong> {{ caisse?.solde_fermeture}}  {{ caisse?.devise }}</strong>  </td>
+                                                    <td colspan="2" class="start p-2">Solde fermeture : <strong> {{ caisse?.solde_fermeture}}  {{ caisse?.devise }}</strong>  </td>
                                                 </tr>
                                             }
                                         </table>
@@ -178,6 +194,73 @@
                             <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
                             <button type="submit" class="btn btn-sm btn-success" (click)="onSubmit()" [disabled]="searchForm.invalid">
                                 rechercher
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+<!--end modal -->
+
+<!-- Modal impression -->
+<div class="modal fade" id="showModal_imp" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-info-subtle">
+                <h5 class="modal-title" id="exampleModalLabel">Impression {{title}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+            </div>
+
+            <form [formGroup]="searchForm">
+                <div class="modal-body p-3">
+                    <div class="row mt-4">
+                        <div class="col-lg-12 col-sm-12">
+                            <div class="mb-3">
+                                <label for="choices-payment-status">caisse </label>
+                                <div class="input-light">
+                                    <!-- initialise avec les valeurs existantes dans searchForm -->
+                                    <select formControlName="caisse" class="form-select form-select-sm bg-light border-0" [value]="searchForm.value.caisse">
+                                        <option value="">choisir la caisse</option>
+                                        @for (item of caissesUser; track $index){
+                                            <option value="{{item.caisse.idcaisse}}">{{item.caisse.codecaisse}} -- {{item.caisse.libelle}}</option>
+                                        }
+                                    </select>
+                                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-sm-6">
+                            <div class="mb-3">
+                                <label for="date-field">date debut</label>
+                                <input type="date" formControlName="datedebut" 
+                                class="form-control form-control-sm bg-light border-0" 
+                                id="date-field" data-provider="flatpickr" data-time="true" 
+                                placeholder="Selectionner date" required [value]="searchForm.value.datedebut">
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-sm-6">
+                            <div class="mb-3">
+                                <label for="date-field">date fin</label>
+                                <input type="date" formControlName="datefin" 
+                                class="form-control form-control-sm bg-light border-0" 
+                                id="date-field" data-provider="flatpickr" data-time="true" 
+                                placeholder="Selectionner date" required [value]="searchForm.value.datefin">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="hstack gap-2 justify-content-end">
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
+                            <button type="submit" class="btn btn-sm btn-success" (click)="printJournalCaisse()" [disabled]="searchForm.invalid">
+                                Imprimer
                             </button>
                         </div>
                     </div>

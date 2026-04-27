@@ -5,6 +5,9 @@ import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.contantes';
 import { AffectationCaisseModel } from '../../caisse_journal/models/affectationcaisse.model';
 import { AffectationCaisseService } from '../../caisse_journal/services/affectationcaisse.service';
+import { ToastrService } from 'ngx-toastr';
+import { blob } from 'stream/consumers';
+
 
 @Component({
   selector: 'app-operation-periode',
@@ -30,21 +33,16 @@ export class OperationPeriodeComponent implements OnInit {
   msgSup: string = "";
   titleMsg: string ="";
 
-  constructor(private service: ConsultationOpService, private caisseuserservice: AffectationCaisseService){}
+  constructor(private service: ConsultationOpService, private caisseuserservice: AffectationCaisseService
+    , private toastr : ToastrService,
+  ){}
 
   ngOnInit(): void {
     //Initialisation du formulaire
     this.initSearchForm();
 
-    // Liste des éléments
-    //this.getJournalpaiement();
-
     //Liste des caisses de user
     this.getCaisseUser();
-  }
-
-  getJournalpaiement(){
-    
   }
 
   //Initialiser le formulaire de recherche
@@ -52,7 +50,9 @@ export class OperationPeriodeComponent implements OnInit {
     this.searchForm = this.fb.group({
       caisse: [''],
       datedebut: ['', Validators.required],
-      datefin: ['', Validators.required]
+      datefin: ['', Validators.required],
+      typeentitesociete: [this.user.typeentitesociete],
+      idsite: [this.user.idsite]
     });
   }
 
@@ -105,6 +105,30 @@ export class OperationPeriodeComponent implements OnInit {
       error: () => {
         this.loading = false;
         //this.toastr.error('Erreur chargement caisses utilisateur');
+      }
+    });
+  }
+
+
+  // Autor : Richard Toulou
+  // Impression du journal de caisse
+  printJournalCaisse(): void {
+    // Préparer les données pour l'impression
+    const donnees = {
+      idcaisse: this.searchForm.get('caisse')?.value || null,
+      idsite: this.searchForm.get('idsite')?.value || null,
+      datedebut: this.searchForm.get('datedebut')?.value || null,
+      datefin: this.searchForm.get('datefin')?.value || null
+    };
+
+    this.service.printJournalCaisse(donnees).subscribe({
+       next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const win = window.open(url, '_blank');
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastr.error("Erreur d'impression du journal de caisse");
       }
     });
   }

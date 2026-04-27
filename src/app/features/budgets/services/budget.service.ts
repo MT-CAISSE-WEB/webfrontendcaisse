@@ -10,8 +10,9 @@ import { Injectable } from '@angular/core';
 })
 export class BudgetService {
   url: string = 'budget';
-  url_validateur: string = this.url + '/validateurs/'
-  url_validation: string = this.url + '/validate/'
+  url_validateur: string = this.url + '/validateurs/';
+  url_validation: string = this.url + '/validate/';
+  url_budgets_annuels_mensuels: string = this.url + '/mensuels/budgets-annuels';
 
   constructor(private http: HttpClient) {}
 
@@ -33,7 +34,7 @@ export class BudgetService {
   create(_object: any): Observable<any> {
     return this.http.post<any>(
       URL_LOCAL.baseUrl + this.url + '/create',
-      _object
+      _object,
     );
   }
 
@@ -44,7 +45,7 @@ export class BudgetService {
   update(_object: any): Observable<any> {
     return this.http.patch<any>(
       URL_LOCAL.baseUrl + this.url + '/update/' + _object.idbudget,
-      _object
+      _object,
     );
   }
 
@@ -54,7 +55,7 @@ export class BudgetService {
    */
   delete(id: string): Observable<any> {
     return this.http.delete<any>(
-      URL_LOCAL.baseUrl + this.url + '/delete/' + id
+      URL_LOCAL.baseUrl + this.url + '/delete/' + id,
     );
   }
 
@@ -82,7 +83,17 @@ export class BudgetService {
   validationBudget(id: string, _object: any): Observable<any> {
     return this.http.post<any>(
       URL_LOCAL.baseUrl + this.url_validation + id,
-      _object
+      _object,
+    );
+  }
+
+  // Obtention des budgets annuels et ses budgets mensuels
+  getAnnualBudgetsWithMonthly(params: any = {}): Observable<QueryResultModel> {
+    return this.http.get<QueryResultModel>(
+      URL_LOCAL.baseUrl + this.url_budgets_annuels_mensuels,
+      {
+        params,
+      },
     );
   }
 }

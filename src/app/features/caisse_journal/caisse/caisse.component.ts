@@ -7,13 +7,13 @@ import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELE
 import { CommonModule } from '@angular/common';
 import { journalModel } from '../models/journal.model';
 import { JournalService } from '../services/journal.service';
-import { NotificationService } from '../../../_core/services/notification.service';
 
 import { PlancomptableService } from '../../donnee_base/services/plancomptable.service';
 import { plancomptableModel } from '../../donnee_base/models/plancomptable.model';
 import { devisemodel } from '../../donnee_base/donnee_base/model/devise.model';
 import { deviseservice } from '../../donnee_base/donnee_base/service/devise.service';
 import { ToastrService } from 'ngx-toastr';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-caisse',
@@ -27,6 +27,7 @@ export class CaisseComponent implements OnInit{
   breadCrumbs : any = {};
   fb: FormBuilder = new FormBuilder();
   caisses : caisseModel[] = [];
+  allCaisses : caisseModel[] = []; // Toutes les caisses non filtrées
   caisse : caisseModel = new caisseModel();
   msgErros : string = "";
   loading: Boolean = false;
@@ -60,8 +61,22 @@ export class CaisseComponent implements OnInit{
   //Element à supprimer 
   deleteCaisse: any = null;
 
+  // Indicateur pour la suppression multiple
+  isMultipleDelete: boolean = false;
+
   comptes : plancomptableModel[] = [];
 
+  // Filtre actif pour les onglets (all, active, inactive)
+  activeFilter: string = 'all';
+
+  //Méthode pour obtenir le nombre d'éléments par statut
+  getStatusCount(status: number | ''): number {
+    if (status === '') return this.allCaisses.length;
+    return this.allCaisses.filter(caisse => caisse.actif === status).length;
+  }
+
+  //Formulaire de recherche
+  searchForm : FormGroup = this.fb.group({});
 
   constructor(private caisseservice: CaisseService, private toastr : ToastrService,
               private journalservice: JournalService,
@@ -79,11 +94,75 @@ export class CaisseComponent implements OnInit{
       this.getAllComptes();
       //Initialisation du formulaire
       this.initForm();
+      //Initialisation du formulaire de recherche
+      this.initSearchForm();
       this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("cette caisse");
       this.titleMsg = TITLE_DELETE
+
+      this.searchForm.valueChanges
+            .pipe(debounceTime(400),distinctUntilChanged()).subscribe(values => {
+            this.applyFilters(values);});
+  }
+
+  //Initialiser le formulaire de recherche
+  initSearchForm() {
+    this.searchForm = this.fb.group({
+      search: [''],
+      date: [''],
+      status: ['']
+    });
+  }
+
+  //application du filtre de recherche
+  applyFilters(filters: any) {
+    let filteredCaisses = [...this.allCaisses];
+
+    // Appliquer le filtre de recherche textuelle
+    if (filters.search && filters.search.trim()) {
+      const searchTerm = filters.search.toLowerCase().trim();
+      filteredCaisses = filteredCaisses.filter(caisse =>
+        caisse.codecaisse?.toLowerCase().includes(searchTerm) ||
+        caisse.libelle?.toLowerCase().includes(searchTerm) ||
+        caisse.devise?.codedevise?.toLowerCase().includes(searchTerm) ||
+        caisse.compte?.numcompte?.toLowerCase().includes(searchTerm) ||
+        caisse.journal?.codejournal?.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    // Appliquer le filtre de statut depuis le formulaire de recherche
+    if (filters.status && filters.status !== '') {
+      if (filters.status === '1') {
+        filteredCaisses = filteredCaisses.filter(caisse => caisse.actif === 1);
+      } else if (filters.status === '0') {
+        filteredCaisses = filteredCaisses.filter(caisse => caisse.actif === 0);
+      }
+    } else {
+      // Si pas de filtre de statut dans la recherche, appliquer le filtre des onglets
+      this.applyFilterToFilteredData(filteredCaisses);
+      return;
+    }
+
+    // Appliquer le filtre des onglets sur les données déjà filtrées
+    this.applyFilterToFilteredData(filteredCaisses);
+  }
+
+  // Appliquer le filtre des onglets sur des données déjà filtrées
+  private applyFilterToFilteredData(filteredData: caisseModel[]): void {
+    switch (this.activeFilter) {
+      case 'active':
+        this.caisses = filteredData.filter(caisse => caisse.actif === 1);
+        break;
+      case 'inactive':
+        this.caisses = filteredData.filter(caisse => caisse.actif === 0);
+        break;
+      default: // 'all'
+        this.caisses = filteredData;
+        break;
+    }
   }
 
   getAllcaisses(){
+    this.loading = true; // Démarrer le chargement
     this.params = {
       page: this.currentPage,
       limit: this.limit
@@ -91,9 +170,15 @@ export class CaisseComponent implements OnInit{
     this.caisseservice.getAll(this.params).subscribe({
       next : (res) => {
         if(res.success){
-          this.caisses = res.data.data;
+          this.allCaisses = res.data.data; // Stocker toutes les caisses
           this.totalPages = res.data.totalPages;
+          this.applyFilter(); // Appliquer le filtre actif
         }
+        this.loading = false; // Arrêter le chargement
+      },
+      error: (err) => {
+        this.loading = false; // Arrêter le chargement même en cas d'erreur
+        this.toastr.error('Erreur lors du chargement des caisses. Veuillez réessayer.');
       }
     });
   }
@@ -132,7 +217,6 @@ export class CaisseComponent implements OnInit{
         if(res.success){
           this.comptes = res.data;
           this.comptes = this.comptes.filter(compte => compte.numcompte.startsWith('5'));
-
         }
       }
     });
@@ -234,6 +318,38 @@ export class CaisseComponent implements OnInit{
     this.getAllcaisses(); // recharge les données
   }
 
+  // Actualiser les données sans refresh complet de la page
+  refreshData(): void {
+    this.currentPage = 1; // Remettre à la première page
+    this.objectsSelected = []; // Vider la sélection
+    this.checkAllRow = false; // Désélectionner tout
+    this.getAllcaisses(); // Recharger les données
+  }
+
+  // Appliquer le filtre selon le statut actif/inactif
+  applyFilter(): void {
+    switch (this.activeFilter) {
+      case 'active':
+        this.caisses = this.allCaisses.filter(caisse => caisse.actif === 1);
+        break;
+      case 'inactive':
+        this.caisses = this.allCaisses.filter(caisse => caisse.actif === 0);
+        break;
+      default: // 'all'
+        this.caisses = [...this.allCaisses];
+        break;
+    }
+  }
+
+  // Changer le filtre actif
+  setActiveFilter(filter: string): void {
+    this.activeFilter = filter;
+    this.currentPage = 1; // Remettre à la première page
+    this.objectsSelected = []; // Vider la sélection
+    this.checkAllRow = false; // Désélectionner tout
+    this.applyFilter();
+  }
+
   //Soumission du formulaire
   onSubmit(){
     /** Check formulaire */
@@ -268,37 +384,47 @@ export class CaisseComponent implements OnInit{
       next: (res) => {
         if (res.success) {
           this.closeModal('showModal');
-          this.getAllcaisses();
+          this.toastr.success('Caisse créée avec succès.');
+          // Recharger la page après l'affichage du toast
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
         } else {
           this.error = "Erreur de création";
+          this.toastr.error('Erreur lors de la création de la caisse.');
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Création échec";
         this.loading = false;
+        this.toastr.error('Échec de la création de la caisse.');
       }
     })
   }
 
   //Modification de données
   update(_caisse: caisseModel){
+    this.loading = true;
     this.caisseservice.update(_caisse).subscribe({
       next: (res) => {
         if (res.success) {
           this.closeModal('showModal');
-          this.getAllcaisses();
-          this.toastr.success('Caisse modifiée avec succès');
+          this.toastr.success('Caisse modifiée avec succès.');
+          // Recharger la page après l'affichage du toast
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
         } else {
           this.error = "Erreur de modification";
-          this.toastr.warning('Erreur lors de la modification');
+          this.toastr.error('Erreur lors de la modification de la caisse.');
         }
         this.loading = false;
       },
       error: (err) => {
         this.error = "Modification échec";
         this.loading = false;
-        this.toastr.error(err.error.message);
+        this.toastr.error('Échec de la modification de la caisse.');
       }
     })
   }
@@ -307,6 +433,7 @@ export class CaisseComponent implements OnInit{
     const modalEl = document.getElementById(modal);
     modalEl?.classList.remove('show');
     modalEl?.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
     (document.querySelector('.modal-backdrop') as HTMLElement)?.remove();
   }
 
@@ -326,24 +453,118 @@ export class CaisseComponent implements OnInit{
     this.deleteCaisse = item;
   }
 
+  // Suppression individuelle d'une caisse
+  deleteCaisseItem(caisse: caisseModel): void {
+    // Configurer le modal pour la suppression individuelle
+    this.isMultipleDelete = false;
+    this.deleteCaisse = caisse;
+    this.titleMsg = 'Suppression individuelle';
+    this.msgSup = `Êtes-vous sûr de vouloir supprimer la caisse "${caisse.libelle}" ?`;
+
+    // Ouvrir le modal de suppression
+    this.openDeleteModal();
+  }
+
+  // Suppression en masse des caisses sélectionnées
+  deleteMultiple(): void {
+    if (this.objectsSelected.length === 0) {
+      this.toastr.warning('Veuillez sélectionner au moins une caisse à supprimer.');
+      return;
+    }
+
+    // Configurer le modal pour la suppression multiple
+    this.isMultipleDelete = true;
+    this.titleMsg = 'Suppression multiple';
+    this.msgSup = this.objectsSelected.length === 1
+      ? `Êtes-vous sûr de vouloir supprimer la caisse "${this.objectsSelected[0].libelle}" ?`
+      : `Êtes-vous sûr de vouloir supprimer ${this.objectsSelected.length} caisses sélectionnées ?`;
+
+    // Ouvrir le modal de suppression
+    this.openDeleteModal();
+  }
+
+  // Méthode pour ouvrir le modal de suppression
+  openDeleteModal(): void {
+    const modalEl = document.getElementById('deleteOrder');
+    if (modalEl) {
+      modalEl.classList.add('show');
+      modalEl.setAttribute('aria-hidden', 'false');
+      modalEl.style.display = 'block';
+      document.body.classList.add('modal-open');
+
+      // Créer et ajouter le backdrop
+      const backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop fade show';
+      document.body.appendChild(backdrop);
+    }
+  }
+
   deleteConfirmed(){
-    if(!this.deleteCaisse) return ;
-    this.caisseservice.delete(this.deleteCaisse.idcaisse).subscribe({
-      next: (res) => {
-        if (res.success) {
-          this.deleteCaisse = null;
+    if (this.isMultipleDelete) {
+      // Suppression multiple
+      this.loading = true;
+      let successCount = 0;
+      let errorCount = 0;
+
+      // Boucler sur chaque élément sélectionné et appeler l'API de suppression
+      const deletePromises = this.objectsSelected.map(caisse =>
+        this.caisseservice.delete(caisse.idcaisse).toPromise()
+          .then(() => {
+            successCount++;
+          })
+          .catch(() => {
+            errorCount++;
+          })
+      );
+
+      Promise.allSettled(deletePromises)
+        .then(() => {
           this.closeModal('deleteOrder');
-          this.getAllcaisses();
-        } else {
-          this.error = "Erreur de Suppression";
+          this.objectsSelected = []; // Vider la sélection
+          this.checkAllRow = false; // Désélectionner tout
+          this.isMultipleDelete = false; // Réinitialiser l'indicateur
+          this.loading = false;
+
+          if (errorCount === 0) {
+            this.toastr.success(`${successCount} caisse(s) supprimée(s) avec succès.`);
+          } else if (successCount === 0) {
+            this.toastr.error('Échec de la suppression de toutes les caisses.');
+          } else {
+            this.toastr.warning(`${successCount} caisse(s) supprimée(s), ${errorCount} échec(s).`);
+          }
+
+          // Recharger la page après la suppression
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        });
+    } else {
+      // Suppression individuelle
+      if (!this.deleteCaisse) return;
+      this.loading = true;
+      this.caisseservice.delete(this.deleteCaisse.idcaisse).subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.deleteCaisse = null;
+            this.closeModal('deleteOrder');
+            this.toastr.success('Caisse supprimée avec succès.');
+            // Recharger la page après la suppression individuelle aussi
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
+          } else {
+            this.error = "Erreur de Suppression";
+            this.toastr.error('Erreur lors de la suppression de la caisse.');
+          }
+          this.loading = false;
+        },
+        error: (err) => {
+          this.error = "Suppression échec";
+          this.loading = false;
+          this.toastr.error('Échec de la suppression de la caisse.');
         }
-        this.loading = false;
-      },
-      error: (err) => {
-        this.error = "Suppression échec";
-        this.loading = false;
-      }
-    })
+      })
+    }
   }
   
 }

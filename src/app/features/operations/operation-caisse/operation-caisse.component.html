@@ -15,126 +15,6 @@
 <!-- end page title -->
 
 <div class="row">
-    <div class="col-xl-3 col-md-6">
-        <!-- card -->
-        <div class="card card-animate">
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <p class="text-uppercase fw-medium text-muted mb-0">Décaissement</p>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <h5 class="text-success fs-14 mb-0">
-                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i> +89.24 %
-                        </h5>
-                    </div>
-                </div>
-                <div class="d-flex align-items-end justify-content-between mt-4">
-                    <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value">{{ formatCFA(totalDecaissementJour) || 0 }}</span> {{ user.devise_ref_code }} </h4>
-                        <span class="badge bg-warning me-1">{{ formatCFA(nbrDecaissementJour) || 0 }}</span> <span class="text-muted">Décaissement</span>
-                    </div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-light rounded fs-3">
-                            <i data-feather="file-text" class="text-success icon-dual-success"></i>
-                        </span>
-                    </div>
-                </div>
-            </div><!-- end card body -->
-        </div><!-- end card -->
-    </div><!-- end col -->
- 
-    <div class="col-xl-3 col-md-6">
-        <!-- card -->
-        <div class="card card-animate">
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <p class="text-uppercase fw-medium text-muted mb-0">Plus couteux</p>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <h5 class="text-danger fs-14 mb-0">
-                            <i class="ri-arrow-right-down-line fs-13 align-middle"></i> +8.09 %
-                        </h5>
-                    </div>
-                </div>
-                <div class="d-flex align-items-end justify-content-between mt-4">
-                    <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="maxDecaissementJour?.montant || 0 ">{{ formatCFA(maxDecaissementJour?.montantref ) || 0 }}</span> {{ user.devise_ref_code }}</h4>
-                        <span class="badge bg-warning me-1"> {{ formatCFA(maxDecaissementJour?.montant) || 0 }} </span> <span class="text-muted text-small">{{ maxDecaissementJour?.devise?.codedevise }}</span>
-                        <!-- <span class="badge bg-warning me-1">2</span> <span class="text-muted">Nature operation</span> -->
-                    </div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-light rounded fs-3">
-                            <i data-feather="check-square" class="text-success icon-dual-success"></i>
-                        </span>
-                    </div>
-                </div>
-            </div><!-- end card body -->
-        </div><!-- end card -->
-    </div><!-- end col -->
-
-    <div class="col-xl-3 col-md-6">
-        <!-- card -->
-        <div class="card card-animate">
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <p class="text-uppercase fw-medium text-muted mb-0">Moins couteux</p>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <h5 class="text-danger fs-14 mb-0">
-                            <i class="ri-arrow-right-down-line fs-13 align-middle"></i> +9.01 %
-                        </h5>
-                    </div>
-                </div>
-                <div class="d-flex align-items-end justify-content-between mt-4">
-                    <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="136.98">{{ formatCFA(minDecaissementJour?.montantref ) || 0 }}</span> {{ user.devise_ref_code }}</h4>
-                        <span class="badge bg-warning me-1">{{ formatCFA(minDecaissementJour?.montant) || 0 }}</span> <span class="text-muted">{{ minDecaissementJour?.devise?.codedevise }}</span>
-                    </div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-light rounded fs-3">
-                            <i data-feather="clock" class="text-success icon-dual-success"></i>
-                        </span>
-                    </div>
-                </div>
-            </div><!-- end card body -->
-        </div><!-- end card -->
-    </div><!-- end col -->
-
-    <div class="col-xl-3 col-md-6">
-        <!-- card -->
-        <div class="card card-animate">
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <p class="text-uppercase fw-medium text-muted mb-0">Demandes</p>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <h5 class="text-success fs-14 mb-0">
-                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i> +7.55 %
-                        </h5>
-                    </div>
-                </div>
-                <div class="d-flex align-items-end justify-content-between mt-4">
-                    <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="84.20">1400</span></h4>
-                        <span class="badge bg-warning me-1">5</span> <span class="text-muted">Départements</span>
-                    </div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-light rounded fs-3">
-                            <i data-feather="x-octagon" class="text-success icon-dual-success"></i>
-                        </span>
-                    </div>
-                </div>
-            </div><!-- end card body -->
-        </div><!-- end card -->
-    </div><!-- end col -->
-</div> <!-- end row-->
-
-
-<div class="row">
     <div class="col-lg-12">
         <div class="card" id="">
             <div class="card-header border-0">
@@ -158,11 +38,11 @@
                             </div>
                         </div>
                         <!--end col-->
-                        <div class="col-xxl-3 col-sm-4">
+                        <!-- <div class="col-xxl-3 col-sm-4">
                             <input type="date" formControlName="date" class="form-control form-control-sm bg-light border-light" id="datepicker-range" placeholder="Selectionner date">
-                        </div>
+                        </div> -->
                         <!--end col-->
-                        <div class="col-xxl-3 col-sm-4">
+                        <!-- <div class="col-xxl-3 col-sm-4">
                             <div class="input-light">
                                 <select class="form-control form-control-sm" formControlName="status" id="idStatus">
                                     <option value="" selected>Tous</option>
@@ -170,12 +50,12 @@
                                     <option value="Unpaid">Non comptabilisé</option>
                                 </select>
                             </div>
-                        </div>
+                        </div> -->
                         <!--end col-->
-                        <div class="col-xxl-1 col-sm-4">
+                        <!-- <div class="col-xxl-1 col-sm-4">
                             <button type="button" class="btn btn-sm btn-primary w-100">
                             <i class="ri-equalizer-fill me-1 align-bottom"></i>filtrer</button>
-                        </div>
+                        </div> -->
                         <!--end col-->
                     </div>
                     <!--end row-->
@@ -228,9 +108,10 @@
                                                     </a>
                                                 </li>
                                                 <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
-                                                    <a class="text-danger d-inline-block remove-item-btn"  data-bs-toggle="modal" (click)="modalDelete(item)" href="#deleteOrder">
+                                                    <button type="button" class="btn btn-link text-danger p-0" data-bs-toggle="modal" data-bs-target="#deleteOrder"
+                                                        (click)="modalDelete(item)" title="Suppression" disabled>
                                                         <i class="ri-delete-bin-5-fill fs-16"></i>
-                                                    </a>
+                                                    </button>
                                                 </li>
                                             </ul>
                                         </td>
@@ -292,6 +173,126 @@
 <!--end row-->
 
 
+<div class="row">
+    <div class="col-xl-4 col-md-4">
+        <!-- card -->
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <p class="text-uppercase fw-medium text-muted mb-0">Décaissement</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-success fs-14 mb-0">
+                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i> +89.24 %
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value">{{ formatCFA(totalDecaissementJour) || 0 }}</span> {{ user.devise_ref_code }} </h4>
+                        <span class="badge bg-warning me-1">{{ formatCFA(nbrDecaissementJour) || 0 }}</span> <span class="text-muted">Décaissement</span>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-light rounded fs-3">
+                            <i data-feather="file-text" class="text-success icon-dual-success"></i>
+                        </span>
+                    </div>
+                </div>
+            </div><!-- end card body -->
+        </div><!-- end card -->
+    </div><!-- end col -->
+ 
+    <div class="col-xl-4 col-md-4">
+        <!-- card -->
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <p class="text-uppercase fw-medium text-muted mb-0">Plus couteux</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-danger fs-14 mb-0">
+                            <i class="ri-arrow-right-down-line fs-13 align-middle"></i> +8.09 %
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="maxDecaissementJour?.montant || 0 ">{{ formatCFA(maxDecaissementJour?.montantref ) || 0 }}</span> {{ user.devise_ref_code }}</h4>
+                        <span class="badge bg-warning me-1"> {{ formatCFA(maxDecaissementJour?.montant) || 0 }} </span> <span class="text-muted text-small">{{ maxDecaissementJour?.devise?.codedevise }}</span>
+                        <!-- <span class="badge bg-warning me-1">2</span> <span class="text-muted">Nature operation</span> -->
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-light rounded fs-3">
+                            <i data-feather="check-square" class="text-success icon-dual-success"></i>
+                        </span>
+                    </div>
+                </div>
+            </div><!-- end card body -->
+        </div><!-- end card -->
+    </div><!-- end col -->
+
+    <div class="col-xl-4 col-md-4">
+        <!-- card -->
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <p class="text-uppercase fw-medium text-muted mb-0">Moins couteux</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-danger fs-14 mb-0">
+                            <i class="ri-arrow-right-down-line fs-13 align-middle"></i> +9.01 %
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="136.98">{{ formatCFA(minDecaissementJour?.montantref ) || 0 }}</span> {{ user.devise_ref_code }}</h4>
+                        <span class="badge bg-warning me-1">{{ formatCFA(minDecaissementJour?.montant) || 0 }}</span> <span class="text-muted">{{ minDecaissementJour?.devise?.codedevise }}</span>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-light rounded fs-3">
+                            <i data-feather="clock" class="text-success icon-dual-success"></i>
+                        </span>
+                    </div>
+                </div>
+            </div><!-- end card body -->
+        </div><!-- end card -->
+    </div><!-- end col -->
+
+    <!-- <div class="col-xl-3 col-md-6"> -->
+        <!-- card -->
+        <!-- <div class="card card-animate"> -->
+            <!-- <div class="card-body"> -->
+                <!-- <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <p class="text-uppercase fw-medium text-muted mb-0">Demandes</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-success fs-14 mb-0">
+                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i> +7.55 %
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="84.20">1400</span></h4>
+                        <span class="badge bg-warning me-1">5</span> <span class="text-muted">Départements</span>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-light rounded fs-3">
+                            <i data-feather="x-octagon" class="text-success icon-dual-success"></i>
+                        </span>
+                    </div>
+                </div> -->
+            <!-- </div> end card body -->
+        <!-- </div>end card -->
+    <!-- </div>end col -->
+</div> <!-- end row-->
+
+
 <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0">
@@ -308,7 +309,7 @@
                                 <select formControlName="demande" class="form-select form-select-sm bg-light border-0 {{ isValidField('demande')}}">
                                     <option value=""> ---- choisir une demande à decaisser ----</option>
                                     @for(item of entetesDmd; track $index){
-                                        <option value="{{item.iddemande!}}"> demande - {{item.codedemande! }} -  du  - {{ formatDateFR(item.datedemande!) }} - de - {{ formatNumber(getTotalDemande(item))}} - {{ item.devise!.codedevise }} </option>
+                                        <option value="{{item.iddemande!}}"> demande - {{item.codedemande! }} -  du  - {{ formatDateFR(item.datedemande!) }} - de - {{ formatNumber(getTotalDemande(item))}} - {{ item.devise!.codedevise }} ----- {{ item.departement?.libelle }} </option>
                                     }
                                 </select>
                                 <div class="invalid-feedback">{{ msgErros }}</div>
@@ -397,12 +398,22 @@
                                             <td class="text-start">
                                                 <div class="mb-2">
                                                     <div class="input-light">
-                                                        <select class="form-select form-select-sm bg-light border-0" formControlName="natureop" required>
+                                                        <!-- <select class="form-select form-select-sm bg-light border-0" formControlName="natureop" required>
                                                             <option value="" selected>Choisir nature operation</option>
                                                             @for(item of naturesFiltrees; track $index){
                                                                 <option value="{{item.idnature}}"> {{item.libelle}} </option>
                                                             }
-                                                        </select>
+                                                        </select> -->
+                                                        <input type="text" formControlName="natureop" placeholder="Selectionner nature opération"
+                                                                [matAutocomplete]="autoNature" class="form-control form-control-sm bg-light">
+
+                                                        <mat-autocomplete #autoNature="matAutocomplete" [displayWith]="displayNature">
+                                                            @for(item of ligneFilteredMap.get($index)?.natures | async; track item.idnature){
+                                                            <mat-option [value]="item">
+                                                                {{item.libelle}}
+                                                            </mat-option>
+                                                            }
+                                                        </mat-autocomplete>
                                                     </div>
                                                     <div class="invalid-feedback">{{ msgErros }}</div>
                                                 </div>
@@ -410,24 +421,44 @@
                                             <td class="text-start">
                                                 <div class="mb-2">
                                                     <div class="input-light">
-                                                        <select formControlName="centre" (mousedown)="protectionField(ligne, 'centre')" class="form-select form-select-sm bg-light border-0">
+                                                        <!-- <select formControlName="centre" (mousedown)="protectionField(ligne, 'centre')" class="form-select form-select-sm bg-light border-0">
                                                             <option value="" selected>Choisir centre analytique</option>
                                                             <option *ngFor="let c of ligne.get('centres')?.value" [value]="c.idcentreanalytique">
-                                                                    {{ c.libelle }}
+                                                                    {{ c.codecentreanalytique }}
                                                             </option>
-                                                        </select>
+                                                        </select> -->
+                                                        <input type="text" formControlName="centre" placeholder="Selectionner centre analytique"
+                                                                [matAutocomplete]="autoCentre" class="form-control form-control-sm bg-light">
+
+                                                            <mat-autocomplete #autoCentre="matAutocomplete" [displayWith]="displayCentre">
+                                                            @for(item of ligneFilteredMap.get($index)?.centres | async; track item.idcentreanalytique){
+                                                                <mat-option [value]="item">
+                                                                {{item.codecentreanalytique}} -- {{item.libelle}}
+                                                                </mat-option>
+                                                            }
+                                                            </mat-autocomplete>
                                                         <div class="invalid-feedback">{{ msgErros }}</div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div class="input-light">
-                                                    <select formControlName="tiers" (mousedown)="protectionField(ligne, 'tiers')" class="form-select form-select-sm bg-light border-0">
+                                                    <!-- <select formControlName="tiers" (mousedown)="protectionField(ligne, 'tiers')" class="form-select form-select-sm bg-light border-0">
                                                         <option value="" selected>Choisir tiers</option>
                                                         @for(item of tiers; track $index){
                                                             <option value="{{item.idtiers}}"> {{item.designation}} </option>
                                                         }
-                                                    </select>
+                                                    </select> -->
+                                                    <input type="text" formControlName="tiers" placeholder="Selectionner tiers"
+                                                        [matAutocomplete]="autoTiers" class="form-control form-control-sm bg-light">
+
+                                                        <mat-autocomplete #autoTiers="matAutocomplete" [displayWith]="displayTiers">
+                                                        @for(item of ligneFilteredMap.get($index)?.tiers | async; track item.idtiers){
+                                                            <mat-option [value]="item">
+                                                            {{item.designation}}
+                                                            </mat-option>
+                                                        }
+                                                        </mat-autocomplete>
                                                     <div class="invalid-feedback">{{ msgErros }}</div>
                                                 </div>
                                             </td>
@@ -474,12 +505,6 @@
                                                         <th scope="row">Total référentiel</th>
                                                         <td>
                                                             <input type="text" formControlName="montantRefglobal" class="form-control form-control-sm bg-light border-0" placeholder="0.00" readonly />
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th scope="row">Total reporting</th>
-                                                        <td style="width:150px;">
-                                                            <input type="text" class="form-control form-control-sm bg-light border-0" placeholder="0.00" readonly />
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -548,7 +573,7 @@
                                                     }
                                                     <tr>
                                                         <td colspan="6" class="text-end text-muted small">
-                                                            Reste à répartir : {{ resteARepartir | number:'1.0-2' }}
+                                                            Reste à répartir : {{ resteARepartir | number:'1.0-2' }} {{ user.devise_ref_code }}
                                                         </td>
                                                     </tr>
                                                     <tr *ngIf="operationForm.errors?.['totalCaisseDepasse']">
@@ -577,13 +602,12 @@
 
                 <div class="modal-footer">
                     <div class="hstack gap-2 justify-content-end">
-                        <!-- <button type="button" class="btn btn-sm btn-warning" (click)="toggleCaisses()"> {{ showCaisses ? 'Masquer caisses' : 'Mes caisses' }} </button> -->
                         <div class="d-flex gap-2">
                             <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
                             <button *ngIf="actionModal != 'create'" type="button" class="btn btn-sm btn-primary" (click)="printRecu()">
                                 <i class="ri-file-download-line align-bottom me-1"></i> imprimer
                             </button>
-                            <button type="submit" *ngIf="actionModal == 'create'" class="btn btn-sm btn-success" (click)="onSubmit()" [disabled]="operationForm.invalid || operationForm.errors?.['totalCaisseDepasse']">
+                            <button type="submit" *ngIf="actionModal == 'create'" class="btn btn-sm btn-success" (click)="onSubmit()" [disabled]="(operationForm.invalid || operationForm.errors?.['totalCaisseDepasse']) && resteARepartir !== 0">
                                 {{ actionModal === "create" ? 'enregistrer' : 'modifier'}}
                             </button>
                         </div>

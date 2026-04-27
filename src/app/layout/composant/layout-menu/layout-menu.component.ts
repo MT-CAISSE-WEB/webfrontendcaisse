@@ -16,18 +16,25 @@ import { APP_ROOT,APP_ROOT_DONNEE_BASE_DEVISE,
   APP_ROOT_SUIVIBUDGET_CONSULTATION, APP_ROOT_SUIVIBUDGETFILTRE_CONSULTATION,
   APP_ROOT_OPERATIONPERIODE_CONSULTATION,
   APP_ROOT_OPERATIONDETAILS_CONSULTATION,
-  APP_ROOT_OPERATION_GENERAL_JUSITIFIER} from '../../../_core/routes/frontend.root';
+  APP_ROOT_OPERATION_GENERAL_JUSITIFIER,
+  APP_ROOT_COMPTABILISATION,
+  APP_ROOT_DECAISSEMENTAJUSTIFIER_CONSULTATION,
+  APP_ROOT_STATSAFFDEPTNATURE_CONSULTATION,
+  APP_ROOT_DETAILDEAMNDE_CONSULTATION,
+  APP_ROOT_BANQUE_DONNEE_BASE,
+  APP_ROOT_CLOTURECAISSE_CONSULTATION} from '../../../_core/routes/frontend.root';
 
 import { RouterLink, RouterModule, RouterOutlet } from "@angular/router";
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-layout-menu',
-  imports: [RouterLink, RouterModule,CommonModule],
+  imports: [RouterLink, RouterModule, CommonModule],
   templateUrl: './layout-menu.component.html',
   styleUrl: './layout-menu.component.css'
 })
 export class LayoutMenuComponent {
+  root_banque = APP_ROOT_BANQUE_DONNEE_BASE;
   root_taux = APP_ROOT_TAUX_DONNEE_BASE;
   root_tiers = APP_ROOT_TIERS_DONNEE_BASE;
   root_centre_analytique = APP_ROOT_CENTRE_ANALYTIQUE_DONNEE_BASE;
@@ -57,6 +64,11 @@ export class LayoutMenuComponent {
   root_operationperiode = APP_ROOT_OPERATIONPERIODE_CONSULTATION;
   root_operationdetail = APP_ROOT_OPERATIONDETAILS_CONSULTATION;
   root_operationjustifiee = APP_ROOT_OPERATION_GENERAL_JUSITIFIER;
+  root_comptabilisation = APP_ROOT_COMPTABILISATION;
+  root_decaissementjustifiee = APP_ROOT_DECAISSEMENTAJUSTIFIER_CONSULTATION;
+  root_nature_operation_departement = APP_ROOT_STATSAFFDEPTNATURE_CONSULTATION;
+  root_detail_demande = APP_ROOT_DETAILDEAMNDE_CONSULTATION;
+  root_cloture_caisse = APP_ROOT_CLOTURECAISSE_CONSULTATION;
 
   admin : boolean =false;
   supervisor : boolean=false;
@@ -77,7 +89,6 @@ export class LayoutMenuComponent {
         }
     }
      return this.superadmin;
-   
   }
 
   isadmin(): boolean {
@@ -92,10 +103,8 @@ export class LayoutMenuComponent {
         }
     }
      return this.admin;
-   
   }
 
-  
   issuperviseur (): boolean {
       if (typeof window !== 'undefined') {
             const user =JSON.parse(localStorage.getItem('user') || '{}') ;
@@ -108,7 +117,6 @@ export class LayoutMenuComponent {
         }
     }
      return this.supervisor;
-   
   }
 
   iscomptable (): boolean {
@@ -123,11 +131,7 @@ export class LayoutMenuComponent {
         }
     }
      return this.comptable;
-   
   }
-
-
-
 
   iscaissier (): boolean {
       if (typeof window !== 'undefined') {
@@ -141,7 +145,6 @@ export class LayoutMenuComponent {
         }
     }
      return  this.caissier;
-   
   }
 
   isdemandeur (): boolean {
@@ -156,8 +159,6 @@ export class LayoutMenuComponent {
         }
     }
      return this.demandeur;
-   
   }
 
-
-  }
+}

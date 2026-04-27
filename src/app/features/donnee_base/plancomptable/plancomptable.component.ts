@@ -52,6 +52,16 @@ export class PlancomptableComponent implements OnInit{
   //Element à supprimer 
   deleteCompte: any = null;
 
+  ImportForm : FormGroup = this.fb.group({})
+
+  // Ajout pour fonctions de recherche et pagination
+  filteredData: any[] = [];
+  paginatedData: any[] = [];
+  searchTerm: string = '';
+  currentPage: number = 1;
+  pageSize: number = 15;
+  totalPages: number = 1;
+
 
   constructor(private plancomptableservice: PlancomptableService
     // private autreservice: AutreService,
@@ -73,45 +83,14 @@ export class PlancomptableComponent implements OnInit{
       next : (res) => {
         if(res.success){
           this.comptes = res.data;
-
-          const table = $('#dataTable').DataTable();
-          table.destroy();
-
-          setTimeout(() => $('#dataTable').DataTable({
-            language: {
-            search: "Rechercher :",
-            lengthMenu: "Afficher _MENU_ éléments",
-            info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
-            infoEmpty: "Affichage de 0 à 0 sur 0 élément",
-            infoFiltered: "(filtré de _MAX_ éléments au total)",
-            loadingRecords: "Chargement...",
-            processing: "Traitement...",
-            zeroRecords: "Aucun élément correspondant trouvé",
-            emptyTable: "Aucune donnée disponible dans le tableau",
-            paginate: {
-              first: "Premier",
-              previous: "Précédent",
-              next: "Suivant",
-              last: "Dernier"
-            },
-            aria: {
-              sortAscending: ": activer pour trier la colonne par ordre croissant",
-              sortDescending: ": activer pour trier la colonne par ordre décroissant"
-            }
-          },
-            responsive: true,
-            ordering: true,
-            lengthMenu: [
-                [10, 25, 50, 100, 250, 500, -1],
-                [10, 25, 50, 100, 250, 500, "Tous"]
-              ]
-          }), 0);
+          this.filteredData = [...this.comptes];
+          this.updatePagination();
         }
       }
     });
   }
 
-    get user(){
+  get user(){
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
@@ -127,8 +106,8 @@ export class PlancomptableComponent implements OnInit{
       suivibudgetairemensuel: [false],
       idsociete : [this.user.idsociete, [Validators.required]],
       actif : [true],
-      createdby : [this.user.codeutilisateur],
-      updatedby : [this.user.codeutilisateur]
+      createdby : [this.user.prenom + " " + this.user.nom],
+      updatedby : [this.user.prenom + " " + this.user.nom]
     })
   }
 
@@ -160,26 +139,38 @@ export class PlancomptableComponent implements OnInit{
   }
 
   //vérifie si _id est inclus dans un tableau d'IDs stocké
-  isChecked(_id: string) {
-    const ids: string[] = this.objectsSelected.map((el) => el.idcompte);
-    return ids.includes(_id);
+  // isChecked(_id: string) {
+  //   const ids: string[] = this.objectsSelected.map((el) => el.idcompte);
+  //   return ids.includes(_id);
+  // }
+
+  isChecked(id: string): boolean {
+    return this.selectedItems.some(x => x.idcompte === id);
   }
 
-  //selectionner une instance dans une liste
-  handleSelectOne(compte: plancomptableModel, actif: any) {
-    const index = this.objectsSelected.findIndex(
-      (el) => el.idcompte == compte.idcompte
-    );
-    if (index == -1 && actif) this.objectsSelected.push(compte);
-    if (index != -1 && !actif) this.objectsSelected.splice(index, 1);
-    this.checkAllRow = this.objectsSelected?.length == this.comptes?.length;
+  handleSelectOne(item: any, event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+
+    if (checked) {
+      if (!this.selectedItems.some(x => x.idcompte === item.idcompte)) {
+        this.selectedItems.push(item);
+      }
+    } else {
+      this.selectedItems = this.selectedItems.filter(
+        x => x.idcompte !== item.idcompte
+      );
+    }
   }
 
-  //Sélection/ Désélection de tous les éléments
-  handleSelectAll($event: any) {
-    this.checkAllRow = $event;
-    if (this.checkAllRow) this.objectsSelected = this.comptes.slice();
-    else this.objectsSelected = [];
+  handleSelectAll(event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.checkAllRow = checked;
+
+    if (checked) {
+      this.objectsSelected = [...this.paginatedData]; // toutes les données filtrées
+    } else {
+      this.objectsSelected = [];
+    }
   }
 
   //Soumission du formulaire
@@ -223,7 +214,6 @@ export class PlancomptableComponent implements OnInit{
           this.closeModal('showModal');
           this.getAllComptes();
           this.toastr.success('Fiche créée');
-
         } else {
           this.error = "Erreur de création";
           this.toastr.error(this.error);
@@ -272,7 +262,7 @@ export class PlancomptableComponent implements OnInit{
     this.initForm();
   }
 
- modalview(_object: plancomptableModel){
+  modalview(_object: plancomptableModel){
     this.compte = _object;
     this.actionModal = "view";
     this.plancomptableForm.reset();
@@ -296,6 +286,7 @@ export class PlancomptableComponent implements OnInit{
       next: (res) => {
         if (res.success) {
           this.closeModal('delete');
+          this.toastr.success('Fiche supprimée');
           this.getAllComptes();
         } else {
           this.error = "Erreur de Suppression";
@@ -303,12 +294,12 @@ export class PlancomptableComponent implements OnInit{
         this.loading = false;
       },
       error: (err) => {
+        this.toastr.error('Erreur lors de la suppression');
         this.error = "Suppression échec";
         this.loading = false;
       }
     })
   }
-
 
   deleteMultiple(){
     for (let i = 0; i < this.objectsSelected.length; i++) {
@@ -318,65 +309,35 @@ export class PlancomptableComponent implements OnInit{
     this.getAllComptes();
   }
 
-  
-  exportToExcel(): void {
-    const element = document.getElementById('dataTable');
-  
-    if (!element) {
-      console.error('Table non trouvée');
-      return;
-    }
-  
-    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
-    const workbook: XLSX.WorkBook = {
-      Sheets: { 'Evolution Budget': worksheet },
-      SheetNames: ['Evolution Budget']
-    };
-  
-    const excelBuffer: any = XLSX.write(workbook, {
-      bookType: 'xlsx',
-      type: 'array'
-    });
-  
-    const data: Blob = new Blob(
-      [excelBuffer],
-      { type: 'application/octet-stream' }
-    );
-  
-    saveAs(data, `Evolution_budget_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.xlsx`);
-  }
-    
-  exportToCSV(): void {
-    const element = document.getElementById('dataTable');
-  
-    if (!element) {
-      console.error('Table non trouvée');
-      return;
-    }
-  
-    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
-    
-    // 🔥 forcer le séparateur ;
-    const csv = XLSX.utils.sheet_to_csv(worksheet, {
-      FS: ';'
-    });
-  
-    const blob = new Blob([csv], {
-      type: 'text/csv;charset=utf-8;'
-    });
-
-    saveAs(blob, `plan_comptable_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.csv`);
-  }
-
-  //Importation du plan comptable
+    //Importation
   importPlanComptable(event: any){
     const file = event.target.files[0];
-    const info = {
-      idsociete : this.user.idsociete,
-      createdby : this.user.codeutilisateur
 
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      this.ImportForm.patchValue({ file });
+      this.ImportForm.get('file')?.updateValueAndValidity();
     }
-    
+  }
+
+  //Création du formulaire d'importation
+  initImportForm(): void{
+    this.ImportForm = this.fb.group({
+      file : [null, [Validators.required]],
+    })
+  }
+
+  submitImportFile(input: HTMLInputElement): void {
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+    const file = input.files[0];
+    const info = {
+      idsociete : this.user.idsociete[0],
+      createdby : this.user.prenom + " " + this.user.nom
+    }
+
     this.plancomptableservice.importPlanComptable(file, info).subscribe({
       next: (res) => {
         if (res.success) {
@@ -395,4 +356,79 @@ export class PlancomptableComponent implements OnInit{
       }
     })
   }
+
+
+  // 🔎 Filtrer (Affectees)
+  applyFilter() {
+    const term = this.searchTerm.toLowerCase();
+
+    this.filteredData = this.comptes.filter(item =>
+      item.numcompte?.toLowerCase().includes(term) ||
+      item.libelle?.toLowerCase().includes(term)
+    );
+
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  // 📄 Pagination
+  updatePagination() {
+    this.totalPages = Math.ceil(this.filteredData.length / this.pageSize);
+
+    const start = (this.currentPage - 1) * this.pageSize;
+    const end = start + this.pageSize;
+
+    this.paginatedData = this.filteredData.slice(start, end);
+  }
+
+  // ▶ Page suivante
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+    }
+  }
+
+  // ◀ Page précédente
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
+  }
+
+  actualiser(): void {
+    this.getAllComptes();
+  }
+
+
+  exportData = {
+  debut: null,
+  fin: null,
+  format: 'excel'
+};
+
+  exporter() {
+    this.plancomptableservice.exportComptes(this.exportData).subscribe({
+      next: (blob: Blob) => {
+
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+
+        a.download = this.exportData.format === 'pdf'
+          ? 'comptes.pdf'
+          : 'comptes.xlsx';
+
+        a.click();
+
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.toastr.error("Erreur export");
+      }
+    });
+  }
+
 }

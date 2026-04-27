@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 // import { APP_JOURNAL_CAISSE_JOURNAL } from "../../../_core/routes/frontend.root";
 import { Observable } from 'rxjs';
 import { QueryResultModel } from '../../../_core/models/query-result.model';
@@ -10,6 +10,7 @@ export interface LigneBudgetBulkUpdateDto {
   idbudget: string;
   iddepartement: string;
   idnature: string;
+  idcentreanalytique: string;
 
   montantprevisiondept: number;
   montantprevisionsite: number;
@@ -44,7 +45,7 @@ export class LigneBudgetService {
   create(_object: any): Observable<any> {
     return this.http.post<any>(
       URL_LOCAL.baseUrl + this.url + '/create',
-      _object
+      _object,
     );
   }
 
@@ -58,7 +59,7 @@ export class LigneBudgetService {
         this.url +
         '/update/' +
         _object.idbudgetdepartementnature,
-      _object
+      _object,
     );
   }
 
@@ -68,7 +69,7 @@ export class LigneBudgetService {
    */
   delete(id: string): Observable<any> {
     return this.http.delete<any>(
-      URL_LOCAL.baseUrl + this.url + '/delete/' + id
+      URL_LOCAL.baseUrl + this.url + '/delete/' + id,
     );
   }
 
@@ -87,7 +88,25 @@ export class LigneBudgetService {
   updateMultiple(payload: LigneBudgetBulkUpdateDto[]): Observable<any> {
     return this.http.put(
       `${URL_LOCAL.baseUrl}${this.url}/bulk-update`,
-      payload
+      payload,
+    );
+  }
+
+  getByBudget(
+    idBudget: string,
+    limit?: number,
+    page?: number,
+  ): Observable<any> {
+    let params = new HttpParams();
+    if (limit && page) {
+      params = params.set('limit', limit);
+      params = params.set('page', page);
+    }
+    return this.http.get<any>(
+      URL_LOCAL.baseUrl + this.url + '/budget/' + idBudget,
+      {
+        params,
+      },
     );
   }
 }

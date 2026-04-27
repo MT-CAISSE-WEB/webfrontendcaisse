@@ -1,0 +1,243 @@
+<!-- start page title -->
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">{{title}}</h4>
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Consultation</a></li>
+                    <li class="breadcrumb-item active">{{title}}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end page title -->
+
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card" id="">
+            <div class="card-header border-0">
+                <div class="d-flex align-items-center">
+                    <h5 class="card-title mb-0 flex-grow-1">{{title}}</h5>
+                    <div class="flex-shrink-0">
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-sm btn-soft-secondary" data-bs-toggle="modal" data-bs-target="#decaisseAj"><i class="ri-add-line align-bottom me-1"></i>critères</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div>
+                    <!-- Left Icon Accordions -->
+                    <div class="accordion lefticon-accordion custom-accordionwithicon accordion-border-box" id="accordionlefticon">
+                        @for(operation of op; track $index){
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        [attr.data-bs-target]="'#operation'+$index">
+
+                                        Opération {{operation.codeoperation}}
+                                        du {{operation.dateoperation | date:'dd/MM/yyyy'}}
+
+                                    </button>
+                                </h2>
+
+                                <div class="accordion-collapse collapse show" [attr.id]="'operation'+$index">
+                                    <div class="accordion-body">
+                                        <!-- TYPE OPERATION -->
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Caisse</th>
+                                                    <th>Type</th>
+                                                    <th>Montant</th>
+                                                    <th>Montant Ref</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                @for(type of operation.typeOperations; track $index){
+
+                                                <tr>
+                                                    <td>{{type.codecaisse}} - {{type.caisse}}</td>
+                                                    <td *ngIf="type.codtypeoperation == 'decaissementaj'"> décaissement à justifier</td>
+                                                    <td *ngIf="type.codtypeoperation == 'encaissement'"> retour de caisse</td>
+                                                    <td class="text-end">
+                                                        {{type.montant}} {{type.codedevise}}
+                                                    </td>
+                                                    <td class="text-end">
+                                                        {{type.montantref}} {{user.devise_ref_code}}
+                                                    </td>
+                                                </tr>
+
+                                                }
+
+                                            </tbody>
+                                        </table>
+
+                                        <!-- LIGNES OPERATION -->
+                                        <h6 class="mt-3">Lignes opération</h6>
+
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nature</th>
+                                                    <th>Centre</th>
+                                                    <th>Tiers</th>
+                                                    <th>Montant</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @for(ligne of operation.lignesOperation; track $index){
+                                                <tr>
+                                                    <td>{{ligne.libellenature}}</td>
+                                                    <td>{{ligne.libellecentre}}</td>
+                                                    <td>{{ligne.designationtiers}}</td>
+                                                    <td class="text-end">{{ligne.montantoperation}} {{operation.codedevise}}</td>
+                                                </tr>
+                                                }
+
+                                            </tbody>
+
+                                        </table>
+
+
+                                        <!-- JUSTIFICATIFS -->
+                                        <h6 class="mt-3">Justificatifs</h6>
+
+                                        @for(just of operation.justificatifs; track $index){
+
+                                        <div class="card mb-2">
+
+                                            <div class="card-header">
+
+                                                {{just.codejustificatif}}
+                                                - {{just.date | date:'dd/MM/yyyy'}}
+
+                                                <span class="float-end">
+                                                    {{just.montantjustificatif}}
+                                                    {{just.codedevise}}
+                                                </span>
+
+                                            </div>
+
+                                            <div class="card-body">
+
+                                                <table class="table table-sm">
+
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Nature</th>
+                                                            <th>Centre</th>
+                                                            <th>Tiers</th>
+                                                            <th>Montant</th>
+                                                        </tr>
+                                                    </thead>
+
+                                                    <tbody>
+
+                                                        @for(detail of just.details; track $index){
+
+                                                        <tr>
+                                                            <td>{{detail.libellenature}}</td>
+                                                            <td>{{detail.libellecentre}}</td>
+                                                            <td>{{detail.designationtiers}}</td>
+                                                            <td class="text-end">{{detail.montantdetail}} {{just.codedevise}}</td>
+                                                        </tr>
+
+                                                        }
+
+                                                    </tbody>
+
+                                                </table>
+
+                                            </div>
+
+                                        </div>
+
+                                        }
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="decaisseAj" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-info-subtle">
+                <h5 class="modal-title" id="exampleModalLabel">Critères {{title}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+            </div>
+
+            <form [formGroup]="searchForm">
+                <div class="modal-body p-3">
+                    <div class="row mt-4">
+                        <div class="col-lg-12 col-sm-12">
+                            <div class="mb-3">
+                                <label for="date-field">N° piece</label>
+                                <input type="text" formControlName="codeoperation" class="form-control form-control-sm bg-light border-0" id="date-field">
+                            </div>
+                        </div>
+
+                        <div class="col-xxl-12 col-lg-12 col-sm-12">
+                            <div class="mb-3 bg-light">
+                                <div class="mb-2">
+                                    <div class="input-light">
+                                        <select class="form-select form-select-sm bg-light border-0" formControlName="tiers">
+                                            <option value="" selected>Selectionner un tiers</option>
+                                            @for(item of tiers; track $index){
+                                                <option value="{{item.idtiers}}"> {{item.codetiers}} -- {{ item.designation}} </option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="invalid-feedback">{{ msgErros }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-sm-6">
+                            <div class="mb-3">
+                                <label for="date-field">date debut</label>
+                                <input type="date" formControlName="datedebut" class="form-control form-control-sm bg-light border-0" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date">
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-sm-6">
+                            <div class="mb-3">
+                                <label for="date-field">date fin</label>
+                                <input type="date" formControlName="datefin" class="form-control form-control-sm bg-light border-0" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="hstack gap-2 justify-content-end">
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
+                            <button type="submit" class="btn btn-sm btn-success" (click)="onSubmit()" [disabled]="searchForm.invalid">
+                                rechercher
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+<!--end modal -->

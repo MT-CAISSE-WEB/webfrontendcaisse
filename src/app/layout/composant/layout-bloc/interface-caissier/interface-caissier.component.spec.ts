@@ -21,3 +21,7 @@ describe('InterfaceCaissierComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/chado

@@ -27,11 +27,28 @@ export class AffectationNatureCentreService {
   /**
    * @param id
    */
-  saveAffectations(id: string, data: any): Observable<any> {
+  saveAffectations(idnature: string, data: any, info: any): Observable<any> {
+    const payload = {idsCentres: data, info: info};
+
     return this.http.post<any>(
-      URL_LOCAL.baseUrl + this.url + "/" + id,
-      data
+      URL_LOCAL.baseUrl + this.url + "/" + idnature, payload);
+  }
+
+
+  exportAffectations(data: any) {
+    return this.http.post(URL_LOCAL.baseUrl + this.url + '/export/nature',
+      data,
+      { responseType: 'blob' }
     );
+  }
+
+
+  import_affectations(file: File, info: any): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('idsociete', info.idsociete);
+    formData.append('createdby', info.createdby);
+    return this.http.post<any>(URL_LOCAL.baseUrl + this.url + '/import/nature', formData);
   }
 
 }

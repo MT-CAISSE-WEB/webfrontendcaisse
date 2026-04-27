@@ -71,4 +71,11 @@ export class TiersService {
     formData.append('createdby', _object.createdby);
     return this.http.post<any>(URL_LOCAL.baseUrl + this.url + '/import', formData);
   }
+
+  exportTiers(data: any) {
+    return this.http.post(URL_LOCAL.baseUrl + this.url + '/export',
+      data,
+      { responseType: 'blob' }
+    );
+  }
 }

@@ -1,0 +1,30 @@
+<div class="table-select" (click)="toggleTable()">
+
+  <input type="text" readonly (click)="toggleTable()" [value]="value?.name || ''" placeholder="Selectionner..." />
+
+  <div *ngIf="showTable" class="dropdown">
+
+    <input *ngIf="search" type="text" placeholder="Rechercher..." (input)="searchValue($event)" />
+
+    <table>
+      <thead>
+        <tr>
+          <th *ngFor="let col of columns">
+            {{ col.label }}
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let row of filteredData" (click)="selectItem(row)">
+          <td *ngFor="let col of columns">
+            {{ row[col.field] }}
+          </td>
+        </tr>
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>

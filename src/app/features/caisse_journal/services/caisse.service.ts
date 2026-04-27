@@ -106,12 +106,23 @@ export class CaisseService {
   }
 
   /**
-   * open caisse
+   * close caisse
    * @param _object
    */
   close(id: string, _object: any): Observable<any> {
     return this.http.put<any>(
       URL_LOCAL.baseUrl + this.url + "/close/" + id,
+      _object
+    );
+  }
+
+  /**
+   * create caisse billetage
+   * @param _object
+   */
+  createBilletage(_object: any): Observable<any> {
+    return this.http.post<any>(
+      URL_LOCAL.baseUrl + this.url + "/billetage",
       _object
     );
   }

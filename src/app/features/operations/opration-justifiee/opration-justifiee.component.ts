@@ -13,10 +13,14 @@ import { OperationService } from '../service/operation.service';
 import { ToastrService } from 'ngx-toastr';
 import { deviseservice } from '../../donnee_base/donnee_base/service/devise.service';
 import { devisemodel } from '../../donnee_base/donnee_base/model/devise.model';
-import { map, Observable, tap } from 'rxjs';
+import { map, Observable, switchMap, tap } from 'rxjs';
 import { AffectationCaisseService } from '../../caisse_journal/services/affectationcaisse.service';
 import { DemandeService } from '../../demande/services/demande.service';
 import { JustificatifService } from '../service/justificatif.service';
+import { detailJustificatifModel, JustificatifModel } from '../model/justificatif.model';
+import { OperationCalculService } from '../service/operation-calcul.service';
+import { OperationValidatorService } from '../service/operation-validator.service';
+import { CaisseRegleService } from '../service/caisse-regle.service';
 
 @Component({
   selector: 'app-opration-justifiee',
@@ -39,20 +43,53 @@ export class OprationJustifieeComponent implements OnInit{
 
   loadingModal = false;
   montantTotaligne: number = 0;
+  totalpieceJustificative: number = 0;
+  totalpieceJustificativeRef: number = 0;
+  totalEncaissements: number = 0;
+  totalEncaissementsRef: number = 0;
 
   operations : operationModel[] = [];
   operationsFiltrees : operationModel[] = [];
   operation : operationModel = new operationModel();
+  ope : any;
 
   //Le taux de devises
   tauxdevise : tauxdevisemodel = new tauxdevisemodel();
   taux : any;
+
+  //Les datas justificatifs
+  justificatifPieces : JustificatifModel[] = [];
+  justificatif : JustificatifModel = new JustificatifModel();
+  justificatifFiltered : JustificatifModel[] = [];
+  loadingPiece = false;
+
+  //Les datas details justificatifs
+  justificatifDetail : detailJustificatifModel[] = [];
+  justificatifDetailFiltered : detailJustificatifModel[] = [];
 
   private tauxConversionTransaction = 1;
 
   showCaisses: Boolean = false;
   caisseperiodes : any[] = [];
   loadingCaisses: boolean = false;
+  loadingGlobal: boolean = true;
+  private loadingRequestsCount = 0;
+
+  /**
+   * GESTION DU LOADING GLOBAL
+   */
+  private startLoading() {
+    this.loadingRequestsCount++;
+    this.loadingGlobal = true;
+  }
+
+  private stopLoading() {
+    this.loadingRequestsCount--;
+    if (this.loadingRequestsCount <= 0) {
+      this.loadingRequestsCount = 0;
+      this.loadingGlobal = false;
+    }
+  }
 
   natureoperations : natureoperationModel[] = [];
   //Liste des tiers
@@ -66,253 +103,108 @@ export class OprationJustifieeComponent implements OnInit{
   isUpdated: boolean = true;
   error: string = "";
 
-   constructor(private natureoperationservice: NatureoperationService, private tiersservice: TiersService, private toastr : ToastrService,
+  selectedRetour: any = null;
+
+  // États pour le contrôle dynamique des devises
+  tauxDevises: { [key: string]: number } = {}; // Cache des taux par devise
+  devisesImpliquees: Set<string> = new Set(); // Ensemble des devises utilisées
+  loadingTaux: boolean = false;
+
+   constructor(private calculService: OperationCalculService, private validatorService: OperationValidatorService, private caisseRegleService: CaisseRegleService,
+    private natureoperationservice: NatureoperationService, private tiersservice: TiersService, private toastr : ToastrService,
     private AffectationNatureCentreService: AffectationNatureCentreService, private operationservice: OperationService,
     private ds:deviseservice, private caisseuserservice: AffectationCaisseService, private service: DemandeService, private justificatifservice: JustificatifService
    ){}
 
-  ngOnInit(): void {
-    // Initialiser un formulaire
-      this.initForm();
-      //Recuperer la devise
-      this.getalldevises();
-      //Afficher toutes les opérations
-      this.getAllOperations();
-      //Initialisation du formulaire dans la méthode getcaissesPeriodes
-      this.getcaissesPeriodes();
-      //Charger les natures d'opérations
-      this.getAllNatureoperations();
-      
-      //Récuperer les tiers
-      this.getAllTiers();
-  
-      this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("cette opération");
-      this.titleMsg = TITLE_DELETE;
+   ngOnInit(): void {
+     // Démarrer le loading global (dépend seulement des opérations)
+     this.loadingGlobal = true;
 
-      this.operationForm.get('operation')?.valueChanges.subscribe(op => {
-      if(op){
-        const operation_ = this.operations.find(el => el.idoperation === op);
-        this.fillFormFromOperation(operation_);
-      }
-      });
-
-      //A la selectionner de la devise
-      this.operationForm.get('devisejustificatif')?.valueChanges.subscribe(devise => {
-        if(devise){
-          if (devise === this.user.devise_ref_id) {
-            this.operationForm.patchValue({ tauxoperation: 1 });
-            return;
-          }
-          //Charger sur le dernier taux
-          this.loadLastdeviseTaux(devise);
-        }
-      });
-
-      this.operationForm.get('retourcaisse')?.valueChanges.subscribe(value => {
-      if (value) {
-        // ON
-        this.showCaisses = true;
-        this.loadCaissesForm().subscribe({
-          next: () => {
-            // recalcul automatique
-            this.caisses.controls.forEach((caisseFG: any) => {
-              this.applyAutoCalcul(caisseFG);
-            });
-          },
-          error: () => {
-            this.loadingModal = false;
-          }
-        });
-      } else {
-        // OFF
-        this.showCaisses = false;
-        this.clearCaisses();
-      }
-      });
+     // Initialiser un formulaire
+     this.initForm();
+    //Recuperer la devise
+    this.getalldevises();
+    //Afficher toutes les opérations
+    this.getAllOperations();
+    //Charger la période
+    this.getcaissesPeriodes();
+    //Charger les natures d'opérations
+    this.getAllNatureoperations();
+    //Lors de la selection de operation
+    this.selectOperation();
+    //Lors de la selection de la devise de justificatio
+    this.selectDeviseJustificatif();
+    //lors du retour de caisse
+    this.selectRetourCaisse();
+    //Récuperer les tiers
+    this.getAllTiers();
   }
 
-  fillFormFromOperation(op: any){
-    const totalCaissesOperation = op.caisses?.reduce(
-        (sum: any, caisse: any) => sum + (parseFloat(caisse.montantref) || 0),0) || 0;
-      
-    this.operationForm.patchValue({
-      dateoperation: this.formatDateForInput(op.dateoperation),
-      deviseoperation: op.devise?.iddevise,
-      montantoperation: op.montant,
-      montantRefglobal: totalCaissesOperation
-    });
-
-    this.updateTotalMontant();
+   /**
+   * GET FORM CONTROLS
+   */
+  get form(){
+    return this.operationForm.controls;
   }
 
-  formatDateForInput(date: string) {
-    return date ? date.substring(0, 10) : "";
+  /**
+   * LIGNES FORM ARRAY
+   */
+  get lignes(): FormArray<FormGroup> {
+    return this.operationForm.get('lignes') as FormArray<FormGroup>;
   }
 
-  //Charger le dernier taux
-  loadLastdeviseTaux(devise: any){
-    const datePivot = this.operationForm.get('datejustificatif')?.value;
-    const devises = {
-      iddeviseorigine: devise,
-      iddevisedestination : this.user.devise_ref_id,
-      datepiece : datePivot
-    };
-
-    this.getderniertaux(devises);
-  }
-
-  //Get le taux recent
-  getderniertaux (payload: any){
-    this.service.tauxrecent(payload).subscribe({
-      next : (res) => {
-         if(res.success){
-            this.tauxdevise = res.data;
-            if(!this.tauxdevise){
-              this.operationForm.patchValue({ tauxoperation: 1 });
-            }else{
-              this.operationForm.patchValue({ tauxoperation: this.tauxdevise.coefficient });
-            }
-         }else{
-          this.toastr.error("Erreur serveur", res);
-         }
-      },
-      error: (err) => {
-        this.toastr.error("Erreur backend", err.error.message)
-      }
-    });
-  }
-
-  //Initialiser le formulaire
+   /**
+   * INITIALISER FORMULAIRE
+   */
   initForm(){
     this.operationForm = this.fb.group({
       operation : [""],
       commentaire : [""],
       dateoperation : [{ value: null, disabled: false }, [Validators.required]],
-      datejustificatif : ["", [Validators.required]],
-      retourcaisse: [""], //Justificatif
-      lignes: this.fb.array([]),
-      deviseoperation : ["", [Validators.required]],
-      devisejustificatif : ["", [Validators.required]],
+      datejustificatif : ["", Validators.required],
+      deviseoperation : ["", Validators.required],
+      devisejustificatif : ["", Validators.required],
+      montantoperation : [0],
+      montantRefglobal : [0],
       site : [this.user.idsite ?? null],
       societe : [this.user.idsociete ?? null],
       resteapayerref: [0],
       resteapayeroperation: [0],
-      tauxoperation: [1],
-      montantRefglobal: [0],
-      montantoperation: [0],
-      caisses: this.fb.array([]),
+      tauxoperation : [1],
+      tauxoperationinverse: [1],
+      retourcaisse : [false],
+      lignes : this.fb.array([]),
+      caisses : this.fb.array([])
     })
   }
 
-  get user(){
-    return JSON.parse(localStorage.getItem('user') || '{}');
+  /**
+   * CAISSES FORM ARRAY
+   */
+  get caisses(): FormArray<FormGroup> {
+    return this.operationForm.get('caisses') as FormArray<FormGroup>;
   }
 
-  //validation required
-  isValidField(label: string): string {
-    let status: string = "";
-    this.form[label].valid && this.form[label].touched ? status = 'is-valid' :
-      this.form[label].invalid && this.form[label].touched ? status = 'is-invalid' : status = '';
-    return status;
-  }
-
-  clearCaisses(): void {
-    const caissesArray = this.operationForm.get('caisses') as FormArray;
-    caissesArray.clear();
-  }
-
-  get form() {
-    return this.operationForm.controls;
-  }
-
-  get lignes(): FormArray<FormGroup> {
-    return this.operationForm.get('lignes') as FormArray<FormGroup>;
-  }
-
-  //La somme de toutes les lignes opérations
-  get totalLignes(): number {
-    return this.lignes.controls.reduce((sum, l) => {
-      return sum + (parseFloat(l.get('montantligne')?.value) || 0);
-    }, 0);
-  }
-
-  //Total des montants de caisse
-  get totalCaisses(): number {
-    return this.caisses.controls.reduce((sum, c) => {
-      return sum + (parseFloat(c.get('montantref')?.value) || 0);
-    }, 0);
-  }
-
-  //Total des montants de caisse
-  get montantRef(): number {
-    return this.operations.reduce((total, operation) => {
-      const totalCaissesOperation = operation.caisses?.reduce(
-        (sum, caisse) => sum + (parseFloat(caisse.montantref) || 0),
-        0
-      ) || 0;
-
-      return total + totalCaissesOperation;
-    }, 0);
-  }
-
-  //Recuperer les natures opérations
-  getAllNatureoperations(){
-    this.natureoperationservice.getAll().subscribe({
-      next : (res) => {
-        if(res.success){
-          this.natureoperations = (res.data || []).filter(
-            (n: any) => n.actif === 1
-          );
-        }
-      }
-    });
-  }
-
-  //Recupérer les tiers
-  getAllTiers(){
-    this.tiersservice.getAll().subscribe({
-      next : (res) => {
-        if(res.success){
-          this.tiers = (res.data || []).filter(
-            (n: any) => n.actif === 1
-          )
-        }
-      }
-    });
-  }
-
-  removeLine(index: number) {
-    this.lignes.removeAt(index);
-    this.updateTotalMontant();
-  }
-
-  updateTotalMontant() {
-    let total = 0;
-
-    this.lignes.controls.forEach((ctrl: any) => {
-      const val = parseFloat(ctrl.get("montantligne")?.value || 0);
-      total += isNaN(val) ? 0 : val;
-    });
-
-    const taux = parseFloat(this.operationForm.get("tauxoperation")?.value || 1);
-    this.montantTotaligne = total;
-    const montantoperation = parseFloat(this.operationForm.get('montantoperation')?.value || 0);
-    const c = montantoperation - total;
-    const montantreferentiel = parseFloat(this.operationForm.get('montantRefglobal')?.value || 0);
-    const mtenref = this.montantTotaligne * taux;
-    const d = montantreferentiel - mtenref;
-
-    this.operationForm.patchValue({ resteapayeroperation: c });
-    this.operationForm.patchValue({ resteapayerref: d });
-  }
-
-  //Ajouter la ligne dans le tableau
+  /**
+   * AJOUT LIGNE
+   */
   addLine() {
+
+    const resteOperation = this.operationForm.get('resteapayeroperation')?.value || 0;
+    const resteRef = this.operationForm.get('resteapayerref')?.value || 0;
+
+    //BLOQUER si reste <= 0
+    if (resteOperation <= 0 || resteRef <= 0) {
+      this.toastr.warning("Impossible d'ajouter une ligne : reste à payer épuisé");
+      return;
+    }
+
     const ligne = this.fb.group({
-      idnature : [{ value: "", disabled: false }, [Validators.required]],
-      idcentreanalytique: [{ value: "", disabled: true }, ],
-      idtiers: [{ value: "", disabled: true }, ],
-      montantligne: [{ value: "", disabled: true }, [Validators.required]],
+      idnature : [{ value: null, disabled: false }, [Validators.required]],
+      idcentreanalytique: [{ value: null, disabled: true }, ],
+      idtiers: [{ value: null, disabled: true }, ],
+      montantdetail: [{ value: "", disabled: true }, [Validators.required]],
       //CENTRES PAR LIGNE
       centres: this.fb.control<any[]>([])
     });
@@ -321,14 +213,14 @@ export class OprationJustifieeComponent implements OnInit{
       if (!natureId) {
         ligne.get("idcentreanalytique")?.disable();
         ligne.get("idtiers")?.disable();
-        ligne.get("montantligne")?.disable();
+        ligne.get("montantdetail")?.disable();
         ligne.get('centres')?.setValue([]);
         return;
       }
 
       // Champs de base
       ligne.get("idcentreanalytique")?.enable();
-      ligne.get("montantligne")?.enable();
+      ligne.get("montantdetail")?.enable();
 
       //charger centres POUR CETTE LIGNE
       this.loadCentresForLigne(ligne, natureId, true, '');
@@ -336,23 +228,234 @@ export class OprationJustifieeComponent implements OnInit{
       this.handleNatureChange(ligne, natureId);
     });
 
-    ligne.get("montantligne")?.valueChanges.subscribe(() => {
-      this.updateTotalMontant();
-
-      //Calcul montant ref aussi
-      //.updateMontantRefGlobal();
+    ligne.get("montantdetail")?.valueChanges.subscribe(() => {
+      //this.updateTotalMontant();
+      this.updateTotalsAndValidate();
     });
 
     this.lignes.push(ligne);
   }
 
-  //Calcul du montant référentiel opération
-  private updateMontantRefGlobal() {
-    const montantGlobal = this.totalLignes * this.tauxConversionTransaction;
-    this.operationForm.patchValue(
-      { montantRefglobal: montantGlobal },
-      { emitEvent: false }
+  clearCaisses(): void {
+    const caissesArray = this.operationForm.get('caisses') as FormArray;
+    caissesArray.clear();
+    this.selectedRetour = null;
+  }
+
+  /**
+   * SUPPRIMER LIGNE
+   */
+  removeLine(index:number){
+    this.lignes.removeAt(index);
+    this.updateTotals();
+  }
+
+  /**
+   * METTRE A JOUR LES TOTAUX
+   */
+  updateTotals(){
+    const total = this.calculService.getTotalLignes(this.lignes);
+    const taux = this.operationForm.get('tauxoperation')?.value || 1;
+    const montantRef = this.calculService.calculMontantReferentiel(total, taux);
+
+    this.operationForm.patchValue({
+      montantRefglobal : montantRef
+    },{emitEvent:false});
+  }
+
+  //Rénitialiser le formulaire
+  reset(){
+    this.operationForm.reset();
+  }
+
+  get user(){
+    return JSON.parse(localStorage.getItem('user') || '{}');
+  }
+
+  updateTotalsAndValidate(){
+    const deviseOp = this.operationForm.get('deviseoperation')?.value;
+    const deviseJust = this.operationForm.get('devisejustificatif')?.value;
+    const deviseRef = this.user.devise_ref_id;
+
+    const montantOperation = this.operationForm.get('montantoperation')?.value || 0;
+    const montantRef = this.operationForm.get('montantRefglobal')?.value || 0;
+
+    // Total des lignes en devise justificatif
+    const totalLignes = this.calculService.getTotalLignes(this.lignes);
+
+    // Conversion du total des lignes vers devise de référence
+    const totalLignesRef = this.convertirVersReference(totalLignes, deviseJust);
+
+    // Conversion du total des lignes vers devise opération si nécessaire
+    let totalLignesOperation = totalLignes;
+    if (deviseJust !== deviseOp) {
+      totalLignesOperation = this.convertirDepuisReference(totalLignesRef, deviseOp);
+    }
+
+    // Calcul des justificatifs existants en devise de référence
+    const justificatifsExistantsRef = this.calculService.getTotalOperation(
+      this.ope, 'ref', this.justificatifPieces, this.justificatifDetail, deviseRef
     );
+
+    // Calcul des encaissements en devise de référence
+    let encaissementsRef = 0;
+    if (this.ope?.caisses) {
+      encaissementsRef = this.ope.caisses
+        .filter((caisse: any) => caisse.codtypeoperation === 'encaissement')
+        .reduce((sum: number, caisse: any) => {
+          const montantEncaissement = parseFloat(caisse.montantref) || 0;
+          return sum + montantEncaissement; // Déjà en devise de référence
+        }, 0);
+    }
+
+    // Totaux globaux (justificatifs existants + lignes actuelles + encaissements)
+    const totalGlobalRef = totalLignesRef + justificatifsExistantsRef + encaissementsRef;
+    const totalGlobalOperation = this.convertirDepuisReference(totalGlobalRef, deviseOp);
+
+    // Reste à payer = montant à justifier - total déjà justifié/encaissé
+    const resteOperation = montantOperation - totalGlobalOperation;
+    const resteRef = montantRef - totalGlobalRef;
+
+    // Update form
+    this.operationForm.patchValue({
+      resteapayeroperation: Math.max(0, resteOperation),
+      resteapayerref: Math.max(0, resteRef)
+    }, { emitEvent: false });
+
+    // Validation des dépassements
+    if (resteOperation < 0) {
+      this.toastr.error("Dépassement montant opération");
+      this.resetLastMontant();
+      return;
+    }
+
+    if (resteRef < 0) {
+      this.toastr.error("Dépassement montant référentiel");
+      this.resetLastMontant();
+      return;
+    }
+  }
+
+  resetLastMontant(){
+    const lastIndex = this.lignes.length - 1;
+    const lastCtrl = this.lignes.at(lastIndex);
+
+    if(lastCtrl){
+      lastCtrl.get('montantdetail')?.setValue('', { emitEvent:false });
+    }
+  }
+
+  //A la selection de l'operation
+  selectOperation(){
+    this.operationForm.get('operation')?.valueChanges.subscribe(opId => {
+      if(!opId) return;
+
+      //Trouver l'opération sélectionnée
+      const operation = this.operations.find(op => op.idoperation === opId);
+      if(!operation) return;
+
+      const totalcaissemontantref = operation.caisses?.reduce((sum: number, caisse: any) => {
+        if (caisse.codtypeoperation === 'decaissementaj') {
+          return sum + (parseFloat(caisse.montantref) || 0);
+        }
+        return sum;
+      }, 0) || 0;
+
+      //Remplir le formulaire avec les valeurs de l'opération
+      this.operationForm.patchValue({
+        dateoperation: this.formatDateForInput(operation.dateoperation),
+        deviseoperation: operation.devise?.iddevise,
+        montantoperation: operation.montant,
+        montantRefglobal: totalcaissemontantref
+      });
+
+      //Charger les details
+      this.getDetailJustificatifPiece(operation);
+
+      // Déclencher la gestion dynamique des devises
+      this.gererDevisesDynamiquement();
+    });
+  }
+
+  // A la selection du retour de caisse
+  selectRetourCaisse(){
+    this.operationForm.get('retourcaisse')?.valueChanges.subscribe(value => {
+      if (value) {
+        // ON
+        this.showCaisses = true;
+
+        const caissesForm = this.operationForm.get('caisses') as FormArray;
+        if (!caissesForm || caissesForm.length === 0) {
+          this.loadCaissesForm().subscribe({
+            next: () => {
+              this.caisses.controls.forEach((caisseFG: any) => {
+                this.applyAutoCalcul(caisseFG);
+              });
+            },
+            error: () => {
+              this.loadingModal = false;
+            }
+          });
+        }
+      } else {
+        // OFF
+        this.showCaisses = false;
+        this.clearCaisses();
+      }
+    });
+  }
+
+  fillCaisseFromRetour(piece: any) {
+    const caissesForm = this.operationForm.get('caisses') as FormArray;
+
+    const caisseForm = caissesForm.controls.find(
+      (c: any) => c.value.idcaisse === piece.idcaisse
+    );
+
+    if (!caisseForm) {
+      console.warn('Aucune caisse correspondante trouvée');
+      return;
+    }
+
+    const montant = parseFloat(piece.montant) || 0;
+    const taux = parseFloat(piece.taux) || 1;
+
+    caisseForm.patchValue({
+      montantcaisse: montant,
+      taux: taux,
+      montantref: montant * taux
+    });
+  }
+
+  selectRetour(piece: any) {
+    const caissesForm = this.operationForm.get('caisses') as FormArray;
+    this.selectedRetour = piece;
+    this.operationForm.get('retourcaisse')?.setValue(true);
+    // sécurité : si les caisses ne sont pas encore chargées
+    if (!caissesForm || caissesForm.length === 0) {
+      console.warn('Caisses non chargées, chargement en cours...');
+
+      this.loadCaissesForm().subscribe(() => {
+        this.fillCaisseFromRetour(piece);
+      });
+      return;
+    }
+
+    //si déjà chargé
+    this.fillCaisseFromRetour(piece);
+  }
+
+  //A la selection de la devise de justificatif
+  selectDeviseJustificatif(){
+    //A la selectionner de la devise
+    this.operationForm.get('devisejustificatif')?.valueChanges.subscribe(devise => {
+      if(devise){
+        // Déclencher la gestion dynamique des devises
+        this.gererDevisesDynamiquement();
+        //Charger le dernier taux
+        this.loadLastdeviseTaux(devise);
+      }
+    });
   }
 
   //Charger les centres de chaque ligne
@@ -405,95 +508,180 @@ export class OprationJustifieeComponent implements OnInit{
     }
   }
 
-  //Recuperer toutes les opérations
-  getAllOperations(){
-    this.loading = true;
-    this.params = {
-      page: 1,
-      limit: 10000000,
-      search: '',
-      date: '',
-      status: '',
-    };
-    this.operationservice.getAll(this.params).subscribe({
-      next : (res) => {
-        if(res.success){
-          this.operations = res.data.data;
-          if(this.operations.length != 0){
-            this.operationsFiltrees = this.operations.filter(op =>
-              op.caisses?.some(caisse =>
-                caisse.codtypeoperation?.toLowerCase().includes('decaissementaj')
-              )
-            );
-          }
-          this.loading = false;
-        }
-      },
-      error : (err) => {
-        this.loading = false;
-        this.toastr.error(err.error.message);
-      },
-    });
+  formatDateForInput(date: string) {
+    return date ? date.substring(0, 10) : "";
   }
 
-  //Récupérer les devise
-  getalldevises (){
-    const params = {
-      page: 1,
-      limit: 20
-    };
-    this.ds.getAll(params).subscribe({
-      next : (res) => {
-         if(res.success){
-            this.devises = res.data;
-         }
+  loadJustificatifs(idOperation: string, operation: any) {
+    this.loadingPiece = true;
+    this.justificatifservice.getJustificatifs({ idoperation: idOperation }).subscribe({
+      next: res => {
+        if(res.success) {
+          this.justificatifPieces = res.data;
+          // Filtrer uniquement pour cette opération
+          this.justificatifFiltered = this.justificatifPieces.filter(
+            j => j.operation.idoperation === idOperation
+          );
+        }
+      },
+      error: err => {
+        this.toastr.error("Erreur backend : " + err.error.message);
+        this.loadingPiece = false;
       }
     });
   }
 
-  formatCFA(montant: number | null | undefined): string {
-    return new Intl.NumberFormat('fr-FR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(montant ?? 0);
+  loadDetailJustificatif(justificatif: any) {
+    this.justificatifDetailFiltered = this.justificatifDetail.filter(el => el.idjustificatif == justificatif.idjustificatifoperation);
+    //justificatif.details = this.justificatifDetail.filter(el => el.idjustificatif == justificatif.idjustificatifoperation);
+    const _object = {justificatif: justificatif, details: this.justificatifDetailFiltered }
+    // Injecter dans le formulaire pour affichage ou calcul
+    this.dispatchDetail(_object);
   }
 
-  //Charger les caisses sur le formulaires
-  loadCaissesForm(): Observable<void> {
-    const payload = {
-      idutilisateur : this.user.idutilisateur,
-      iddeviserefsoc: this.user.devise_ref_id
-    };
-    this.loadingModal = true;
-    return this.caisseuserservice.getCaissesUserPeriode(payload).pipe(
-      tap(res => {
-        const periodes = res?.data ?? [];
-        this.loadingModal = res?.data ? false : true;
-        const caissesArray = this.operationForm.get('caisses') as FormArray;
-        caissesArray.clear();
-        periodes.forEach((p: any) => {
-          caissesArray.push(this.fb.group({
-            idcaisse: [p.caisse?.idcaisse],
-            caisse: [p.caisse?.code],
-            statut: [p.periode?.statut ?? null],
-            devisecaisse: [p.devise?.code ?? null],
-            iddevisecaisse: [p.devise?.iddevise ?? null],
-            solde: [this.formatCFA(p.solde?.montant ?? 0)],
-            montantcaisse: [0],
-            montantref: [0],
-            taux: [p.solde?.taux ?? 1],
-            idperiode: [p.periode?.idperiode]
-          }));
-        });
-      }),
-      map(res => res?.data ?? [])
+  //API des détails des pièces justificatives
+  getDetailJustificatifPiece(operation: any){
+    this.loadingPiece = true;
+    this.ope = operation;
+    this.justificatifservice.getdetailsJustificatif({}).pipe(
+      switchMap((res: any) => {
+        if(res.success){
+          this.justificatifDetail = res.data;
+        }
+
+        // ensuite charger justificatifs
+        return this.justificatifservice.getJustificatifs({idoperation: operation.idoperation});
+      })
+    ).subscribe({
+      next: (res: any) => {
+        if(res.success){
+          this.justificatifPieces = res.data;
+          this.justificatifFiltered =
+          this.justificatifPieces.filter(j => j.operation.idoperation === operation.idoperation);
+      
+          /**
+           * Calcul des totaux existants (SEULEMENT les justificatifs, pas les encaissements)
+           * Conversion automatique vers devise de référence
+           */
+          this.totalpieceJustificative = this.calculService.getTotalOperation(operation,'detail', this.justificatifPieces, this.justificatifDetail, this.user.devise_ref_id);
+          this.totalpieceJustificativeRef = this.calculService.getTotalOperation(operation, 'ref', this.justificatifPieces, this.justificatifDetail, this.user.devise_ref_id);
+
+          /**
+           * Calcul des retours de caisse (encaissements) - Ces montants RÉDUISENT le reste à payer
+           * Conversion automatique vers devise de référence
+           */
+          this.totalEncaissements = operation.caisses?.reduce((sum: number, caisse: any) => {
+            if (caisse.codtypeoperation === 'encaissement') {
+              const montantEncaissement = parseFloat(caisse.montant) || 0;
+              return sum + this.convertirVersReference(montantEncaissement, caisse.devise?.iddevise);
+            }
+            return sum;
+          }, 0) || 0;
+
+          this.totalEncaissementsRef = operation.caisses?.reduce((sum: number, caisse: any) => {
+            if (caisse.codtypeoperation === 'encaissement') {
+              const montantEncaissementRef = parseFloat(caisse.montantref) || 0;
+              return sum + montantEncaissementRef; // Déjà en devise de référence
+            }
+            return sum;
+          }, 0) || 0;
+        
+          /**
+           * Calcul reste : Montant opération - Justificatifs existants - Encaissements
+           * Tous les calculs sont maintenant en devise de référence
+           */
+          const montantOperationRef = this.convertirVersReference(operation.montant, operation.devise?.iddevise);
+          const resteRef = montantOperationRef - this.totalpieceJustificativeRef - this.totalEncaissementsRef;
+          const resteOperation = this.convertirDepuisReference(resteRef, operation.devise?.iddevise);
+
+          this.operationForm.patchValue({
+            resteapayeroperation: resteOperation,
+            resteapayerref: resteRef
+          });
+
+          this.loadingPiece = false;
+
+          //calcul maintenant fiable
+          //this.recalculateOperationTotals();
+        }
+      },
+      error: (err) => {
+        this.loadingPiece = false;
+        this.toastr.error("Erreur backend");
+      }
+    });
+  }
+
+  fillLignesFromDetail(details: any[]) {
+    const lignesFA = this.lignes;
+    lignesFA.clear(); // vider l’ancien contenu
+
+    details.forEach(d => {
+      const ligne = this.fb.group({
+        idnature: [d.idnature, Validators.required],
+        idcentreanalytique: [d.idcentreanalytique],
+        idtiers: [d.idtiers],
+        montantdetail: [d.montantdetail, Validators.required]
+      });
+
+      // Ajout du contrôle dynamique pour vérification immédiate
+      ligne.get('montantdetail')?.valueChanges.subscribe(() => {
+        this.updateTotalsAndValidate();
+      });
+
+      lignesFA.push(ligne);
+    });
+
+    // Mettre à jour les totaux après chargement
+    this.updateTotalsAndValidate();
+  }
+
+  //Selectionner le justificatif
+  selectJustificatif(piece: any){
+    const justificatif =
+    this.justificatifFiltered.find(
+      j => j.idjustificatifoperation === piece.idjustificatifoperation
     );
+
+    if(!justificatif) return;
+    this.loadDetailJustificatif(justificatif);
   }
 
-  get caisses(): FormArray<FormGroup> {
-    return this.operationForm.get("caisses") as FormArray<FormGroup>;
+  dispatchDetail(_object: any){
+    // Patch des champs simples
+    this.operationForm.patchValue({
+      tauxoperation       : _object.justificatif.taux,
+      devisejustificatif        : _object.justificatif.iddevise,
+      commentaire          : _object.justificatif.commentaire,
+      datejustificatif : this.formatDateForInput(_object.justificatif.date),
+    });
+
+    this.lignes.clear();
+    _object.details.forEach((l: any) => {
+      const ligneGroup = this.fb.group({
+        idligne: [l.iddetailsjustificatifoperation ?? null],
+        idnature: [l.idnature ?? null, Validators.required],
+        idcentreanalytique: [{ value: l.idcentreanalytique, disabled: true }],
+        idtiers: [{ value: l.idtiers ?? null, disabled: true }],
+        montantdetail: [{ value: l.montantdetail ?? "", disabled: false }, Validators.required],
+
+        //centres propres à la ligne
+        centres: this.fb.control<any[]>([])
+      });
+
+      this.lignes.push(ligneGroup);
+    });
   }
 
+  //validation required
+  isValidField(label: string): string {
+    let status: string = "";
+    this.form[label].valid && this.form[label].touched ? status = 'is-valid' :
+      this.form[label].invalid && this.form[label].touched ? status = 'is-invalid' : status = '';
+    return status;
+  }
+
+  //Charger les periodes de la caisse
   getcaissesPeriodes(){
     this.loadingCaisses = true;
     this.caisseuserservice.getCaissePeriodeByUser(this.user.idutilisateur ?? null).subscribe({
@@ -508,18 +696,131 @@ export class OprationJustifieeComponent implements OnInit{
       },
       error : (err) => {
         console.log(err);
+        this.loadingCaisses = false;
         this.toastr.error(err.error.message);
       }
     });
   }
 
-  formatDateInput(date: Date): string {
-    return date.toISOString().split('T')[0];
+  //Recuperer toutes les opérations
+  getAllOperations(){
+    this.loading = true;
+    this.params = {
+      page: 1,
+      limit: 100000,
+      search: '',
+      date: '',
+      user: this.user.idutilisateur,
+    };
+    this.operationservice.getAll(this.params).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.operations = res.data.data;
+          if(this.operations.length != 0){
+            this.operationsFiltrees = this.operations.filter(op =>
+              op.caisses?.some(caisse =>
+                caisse.codtypeoperation?.toLowerCase().includes('decaissementaj')
+              ) &&
+              op.justifiee <= 1 
+            );
+          }
+          this.loading = false;
+          // Fin du loading global - dépend seulement des opérations
+          this.loadingGlobal = false;
+          
+          // Restaurer l'opération sélectionnée après rechargement (pour création justificatif)
+          this.restoreSelectedOperation();
+        }
+      },
+      error : (err) => {
+        this.loading = false;
+        this.loadingGlobal = false;
+        this.toastr.error(err.error.message);
+      },
+    });
   }
 
-  parseCFA(valeur: string | null | undefined): number {
-    if (!valeur) return 0;
-    return Number(valeur.replace(/[^\d]/g, ''));
+  //Recuperer les natures opérations
+  getAllNatureoperations(){
+    this.natureoperationservice.getAll().subscribe({
+      next : (res) => {
+        if(res.success){
+          this.natureoperations = (res.data || []).filter(
+            (n: any) => n.actif === 1
+          );
+        }
+      },
+      error: (err) => {
+        this.toastr.error("Erreur lors du chargement des natures d'opérations");
+      }
+    });
+  }
+
+  //Recupérer les tiers
+  getAllTiers(){
+    this.tiersservice.getAll().subscribe({
+      next : (res) => {
+        if(res.success){
+          this.tiers = (res.data || []).filter(
+            (n: any) => n.actif === 1
+          )
+        }
+      },
+      error: (err) => {
+        this.toastr.error("Erreur lors du chargement des tiers");
+      }
+    });
+  }
+
+  //Récupérer les devise
+  getalldevises (){
+    const params = {
+      page: 1,
+      limit: 20
+    };
+    this.ds.getAll(params).subscribe({
+      next : (res) => {
+         if(res.success){
+            this.devises = res.data;
+         }
+      },
+      error: (err) => {
+        this.toastr.error("Erreur lors du chargement des devises");
+      }
+    });
+  }
+
+  //Charger le dernier taux
+  loadLastdeviseTaux(devise: any){
+    const datePivot = this.operationForm.get('datejustificatif')?.value;
+    const devises = {
+      iddeviseorigine: devise,
+      iddevisedestination : this.user.devise_ref_id,
+      datepiece : datePivot
+    };
+
+    this.getderniertaux(devises);
+  }
+
+  //Get le taux recent
+  getderniertaux (payload: any){
+    this.service.tauxrecent(payload).subscribe({
+      next : (res) => {
+         if(res.success){
+            this.tauxdevise = res.data;
+            if(!this.tauxdevise){
+              this.operationForm.patchValue({ tauxoperation: 1 });
+            }else{
+              this.operationForm.patchValue({ tauxoperation: this.tauxdevise.coefficient });
+            }
+         }else{
+          this.toastr.error("Erreur serveur", res);
+         }
+      },
+      error: (err) => {
+        this.toastr.error("Erreur api", err.error.message)
+      }
+    });
   }
 
   // Si la devise de transaction est égale à l'une des devises de caisse aussi
@@ -555,154 +856,203 @@ export class OprationJustifieeComponent implements OnInit{
     );
   }
 
+  //Charger les caisses sur le formulaires
+  loadCaissesForm(): Observable<void> {
+    const payload = {
+      idutilisateur : this.user.idutilisateur,
+      iddeviserefsoc: this.user.devise_ref_id
+    };
+    this.loadingModal = true;
+    return this.caisseuserservice.getCaissesUserPeriode(payload).pipe(
+      tap(res => {
+        const periodes = res?.data ?? [];
+        this.loadingModal = res?.data ? false : true;
+        const caissesArray = this.operationForm.get('caisses') as FormArray;
+        caissesArray.clear();
+        periodes.forEach((p: any) => {
+          caissesArray.push(this.fb.group({
+            idcaisse: [p.caisse?.idcaisse],
+            caisse: [p.caisse?.code],
+            statut: [p.periode?.statut ?? null],
+            devisecaisse: [p.devise?.code ?? null],
+            iddevisecaisse: [p.devise?.iddevise ?? null],
+            solde: [this.formatCFA(p.solde?.montant ?? 0)],
+            montantcaisse: [0],
+            montantref: [0],
+            taux: [p.solde?.taux ?? 1],
+            idperiode: [p.periode?.idperiode]
+          }));
+        });
+      }),
+      map(res => res?.data ?? [])
+    );
+  }
+
+  formatCFA(montant: number | null | undefined): string {
+    return new Intl.NumberFormat('fr-FR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(montant ?? 0);
+  }
+
   applyAutoCalcul(caisseFG: FormGroup) {
-    const soldeCtrl = caisseFG.get('solde');
     const montantCtrl = caisseFG.get('montantcaisse');
-    const devisecaisseCtrl = caisseFG.get('devisecaisse');
-    const iddevisecaisseCtrl = caisseFG.get('iddevisecaisse');
     const tauxCtrl = caisseFG.get('taux');
     const refCtrl = caisseFG.get('montantref');
-    const devTransactionCtrl = this.operationForm.get('devisejustificatif');
-    const deviseReference = this.user?.devise_ref_id;
+    const soldeCtrl = caisseFG.get('solde');
 
-    if (!montantCtrl || !tauxCtrl || !refCtrl || !soldeCtrl) return;
+    if(!montantCtrl || !tauxCtrl || !refCtrl || !soldeCtrl) return;
 
     const updateMontantRef = () => {
-      const deviseTransaction = devTransactionCtrl?.value;
+
       const montant = parseFloat(montantCtrl.value) || 0;
       const taux = parseFloat(tauxCtrl.value) || 1;
-      const solde = this.parseCFA(soldeCtrl.value) || 0;
-  
-      const montantRef = montant * taux;
-      refCtrl.setValue(montantRef, { emitEvent: false });
 
-      if (deviseTransaction === deviseReference) {
-        // même devise → pas de convedeviseReferencersion
-        // this.operationForm.patchValue(
-        //   { montantRefglobal: this.totalLignes },
-        //   { emitEvent: false }
-        // );
-      } else {
-        // utiliser le taux de la caisse correspondant à la devise transaction
-        this.getTauxDeviseTransaction(deviseTransaction);
-      }
+      const solde = this.caisseRegleService.parseCFA(soldeCtrl.value);
 
-      const montantglobal = this.operationForm.get('montantRefglobal')?.value || 0;
+      const montantRef = this.caisseRegleService.calculMontantRef(montant, taux);
 
-      //Si le solde caisse devient inférieur au montant saisie
-      if (montant > solde) {
-        montantCtrl.setErrors({
-          ...(montantCtrl.errors || {}),
-          soldeInsuffisant: true
-        });
+      const montantGlobal = this.operationForm.get('montantRefglobal')?.value || 0;
 
-        this.operationForm.setErrors({
-          ...(this.operationForm.errors || {}),
-          soldeCaisseInsuffisant: true
-        });
-
-        refCtrl.setValue(0, { emitEvent: false });
+      /**
+       * CONTROLE SOLDE
+       */
+      if(!this.caisseRegleService.checkSoldeCaisse(montant, solde)){
+        montantCtrl.setErrors({ soldeInsuffisant: true });
         return;
       }
 
-      // Nettoyage erreur solde insuffisant
-      if (montantCtrl.hasError('soldeInsuffisant')) {
-        const errors = { ...(montantCtrl.errors || {}) };
-        delete errors['soldeInsuffisant'];
-        Object.keys(errors).length
-          ? montantCtrl.setErrors(errors)
-          : montantCtrl.setErrors(null);
-      }
-
-      // Nettoyage erreur globale solde
-      if (this.operationForm.hasError('soldeCaisseInsuffisant')) {
-        const formErrors = { ...(this.operationForm.errors || {}) };
-        delete formErrors['soldeCaisseInsuffisant'];
-        Object.keys(formErrors).length
-          ? this.operationForm.setErrors(formErrors)
-          : this.operationForm.setErrors(null);
-      }
-
-      //contrôle référentiel paiement dépasse référentiel global
-      if (montantRef > montantglobal) {
+      /**
+       * CONTROLE DEPASSEMENT REF
+       */
+      if(!this.caisseRegleService.checkDepassementMontantRef(montantRef, montantGlobal)){
         montantCtrl.setErrors({ depassementMontant: true });
-        this.operationForm.setErrors({
-          ...(this.operationForm.errors || {}),
-          totalCaisseDepasse: true
-        });
-
-        refCtrl.setValue(montantRef, { emitEvent: false });
         return;
       }
 
-      // contrôle dépassement montant total
-      if (this.isCaisseOverTotal(montantRef, caisseFG, montantglobal)) {
+      /**
+       * CONTROLE DEPASSEMENT GLOBAL
+       */
+      if(this.caisseRegleService.isCaisseOverTotal(
+          montantRef,
+          caisseFG,
+          this.caisses,
+          montantGlobal
+      )){
         montantCtrl.setErrors({ depassement: true });
-        refCtrl.setValue(0, { emitEvent: false });
         return;
       }
 
-      //OK → retirer l’erreur
-      if (montantCtrl.hasError('depassementMontant')) {
-        const errors = montantCtrl.errors;
-        delete errors?.['depassementMontant'];
-        Object.keys(errors || {}).length
-          ? montantCtrl.setErrors(errors)
-          : montantCtrl.setErrors(null);
+      refCtrl.setValue(montantRef, { emitEvent:false });
+
+      /**
+       * CONTROLE TOTAL CAISSES
+       */
+      if(!this.caisseRegleService.controlTotalCaisses(this.caisses, montantGlobal)){
+        this.operationForm.setErrors({ totalCaisseDepasse: true });
       }
 
-      // Nettoyage erreur globale
-      if (this.operationForm.hasError('totalCaisseDepasse')) {
-        const formErrors = { ...(this.operationForm.errors || {}) };
-        delete formErrors['totalCaisseDepasse'];
-        Object.keys(formErrors).length
-          ? this.operationForm.setErrors(formErrors)
-          : this.operationForm.setErrors(null);
-      }
-
-      refCtrl.setValue(montantRef, { emitEvent: false });
-
-      //contrôle global après chaque saisie
-      this.controlTotalCaisses(montantglobal);
     };
 
     montantCtrl.valueChanges.subscribe(updateMontantRef);
     tauxCtrl.valueChanges.subscribe(updateMontantRef);
-
-    //Calcul initial (pour UPDATE)
     updateMontantRef();
   }
 
-  //Empêcher le dépassement par caisse
-  isCaisseOverTotal(montantRef: number, currentCaisse: FormGroup, montantGl: number): boolean {
-    const totalAutresCaisses = this.caisses.controls
-      .filter(c => c !== currentCaisse)
-      .reduce((sum, c) => {
-        return sum + (parseFloat(c.get('montantref')?.value) || 0);
-      }, 0);
+  get totalLignes(){
+    /**
+     * Total des lignes du justificatif en cours
+     */
+    const totalLignes = this.lignes.controls.reduce((sum, ctrl: any) => {
+      const val = parseFloat(ctrl.get('montantdetail')?.value || 0);
+      return sum + (isNaN(val) ? 0 : val);
+    }, 0);
 
-    return (totalAutresCaisses + montantRef) > montantGl;
+    return totalLignes
   }
 
-  controlTotalCaisses(maxMontantRef: number) {
-    const totalRef = this.caisses.controls.reduce((sum, c) =>
-      sum + (parseFloat(c.get('montantref')?.value) || 0), 0
+  updateTotalMontant() {
+    /**
+     * Total des lignes du justificatif en cours
+     */
+    const totalLignes = this.lignes.controls.reduce((sum, ctrl: any) => {
+      const val = parseFloat(ctrl.get('montantdetail')?.value || 0);
+      return sum + (isNaN(val) ? 0 : val);
+    }, 0);
+
+    /**
+     * Récupération taux et conversion référentielle
+     */
+    const taux =
+    Number(this.operationForm.get('tauxoperation')?.value || 1);
+
+    const totalRefLignes =
+    this.calculService.convertToRef(totalLignes, taux);
+
+    /**
+     * Montants opération
+     */
+    const montantOperation =
+    Number(this.operationForm.get('montantoperation')?.value || 0);
+
+    const montantRefGlobal =
+    Number(this.operationForm.get('montantRefglobal')?.value || 0);
+
+    /**
+     * Totaux des justificatifs existants
+     */
+    const totalJustificatifs =
+    this.calculService.getTotalJustificatifs(this.justificatifDetail);
+
+    const totalJustificatifsRef =
+    this.calculService.getTotalJustificatifsRef(this.justificatifDetail);
+
+    /**
+     * Calcul des restes
+     */
+    const resteOperation =
+    this.calculService.calculateResteOperation(
+      montantOperation,
+      totalJustificatifs + totalLignes
     );
 
-    if (totalRef > maxMontantRef) {
-      this.operationForm.setErrors({
-        ...(this.operationForm.errors || {}),
-        totalCaisseDepasse: true
-      });
-    } else {
-      if (this.operationForm.errors?.['totalCaisseDepasse']) {
-        const errors = { ...this.operationForm.errors };
-        delete errors['totalCaisseDepasse'];
-        Object.keys(errors).length
-          ? this.operationForm.setErrors(errors)
-          : this.operationForm.setErrors(null);
+    const resteRef =
+    this.calculService.calculateResteRef(
+      montantRefGlobal,
+      totalJustificatifsRef + totalRefLignes
+    );
+
+    /**
+     * Mise à jour formulaire
+     */
+    this.operationForm.patchValue({
+      resteapayeroperation: resteOperation,
+      resteapayerref: resteRef
+    });
+
+    /**
+     * Validation du justificatif courant
+     */
+    const validation =
+    this.calculService.validateJustificatif(
+      totalLignes,
+      totalRefLignes,
+      montantOperation - totalJustificatifs,
+      montantRefGlobal - totalJustificatifsRef
+    );
+
+    if(!validation.valid){
+
+      if(validation.error === 'DEPASSEMENT_OPERATION'){
+        this.toastr.warning("Le justificatif dépasse le montant de l'opération");
       }
+
+      if(validation.error === 'DEPASSEMENT_REFERENTIEL'){
+        this.toastr.warning("Le justificatif dépasse le montant référentiel");
+      }
+
     }
+
   }
 
   //Soumission du formulaire
@@ -718,21 +1068,21 @@ export class OprationJustifieeComponent implements OnInit{
     }
 
     /** 2. prepare data */
-    //const formValue = this.operationForm.value;
     const formValue = this.operationForm.getRawValue();
-    // this.closeModal('showModal');
-
     const _operation: operationModel = {
       ...this.operation,
       ...formValue,
     };
 
-    const _justificatif = {
-      codejustificatif : "",
+    const montanttotal = this.totalLignes
+
+    const _justificatif: any =  {
       idoperation : formValue.operation,
       iddevise : formValue.devisejustificatif,
       datejustificatif : formValue.datejustificatif,
+      montantjustificatif: montanttotal,
       taux : formValue.tauxoperation,
+      tauxinverse : formValue.tauxoperationinverse,
       commentaire : formValue.commentaire,
       details : _operation.lignes,
       idsite : formValue.site,
@@ -740,13 +1090,11 @@ export class OprationJustifieeComponent implements OnInit{
       createdby : _operation.createdby,
       retour_caisse : formValue.retourcaisse,
       caisses : _operation.caisses
-    }
-
-    console.log(_justificatif);
+    };
 
     /** 3. choices action */
-    // if(this.actionModal == "create")this.create(_operation);
-    // else this.update(_operation);
+    if(this.actionModal == "create")this.create(_justificatif);
+    else this.update(_operation);
   }
 
   //Enregistrement de données
@@ -756,8 +1104,14 @@ export class OprationJustifieeComponent implements OnInit{
     this.justificatifservice.create(dataToSend).subscribe({
       next: (res) => {
         if (res.success) {
-          //this.reloadData();
           this.toastr.success('Justificatif enregistrée avec succès');
+          // Stocker l'ID de l'opération sélectionnée avant rechargement
+          const selectedOperationId = this.operationForm.get('operation')?.value;
+          if (selectedOperationId) {
+            localStorage.setItem('selectedOperationId', selectedOperationId.toString());
+          }
+          // Recharger la page
+          window.location.reload();
         } else {
           this.error = "Erreur de création";
           this.toastr.error(this.error);
@@ -766,6 +1120,7 @@ export class OprationJustifieeComponent implements OnInit{
       },
       error: (err) => {
         this.loading = false;
+        console.log("Erreur backend")
         this.toastr.error(err.error.message);
       }
     })
@@ -789,6 +1144,185 @@ export class OprationJustifieeComponent implements OnInit{
         this.toastr.error(err.error.message);
       }
     })
+  }
+
+  /**
+   * RESTAURER L'OPERATION SELECTIONNEE APRES RECHARGEMENT
+   */
+  restoreSelectedOperation() {
+    const selectedOperationId = localStorage.getItem('selectedOperationId');
+    if (selectedOperationId) {
+      // Attendre que les opérations soient chargées
+      const checkOperationsLoaded = () => {
+        if (this.operationsFiltrees.length > 0) {
+          const operationToSelect = this.operationsFiltrees.find(op => op.idoperation == selectedOperationId);
+          if (operationToSelect) {
+            this.operationForm.patchValue({
+              operation: operationToSelect.idoperation
+            });
+            // Le subscribe de selectOperation() se déclenchera automatiquement
+          }
+          // Nettoyer le localStorage
+          localStorage.removeItem('selectedOperationId');
+        } else {
+          // Réessayer dans 100ms si les opérations ne sont pas encore chargées
+          setTimeout(checkOperationsLoaded, 100);
+        }
+      };
+      checkOperationsLoaded();
+    }
+  }
+
+  /**
+   * GESTION DYNAMIQUE DES DEVISES
+   * Détecte et gère automatiquement toutes les devises impliquées
+   */
+  private gererDevisesDynamiquement() {
+    // Collecter toutes les devises impliquées
+    this.collecterDevisesImpliquees();
+
+    // Charger les taux manquants de manière asynchrone
+    this.chargerTauxManquants().then(() => {
+      // Mettre à jour les calculs une fois les taux chargés
+      this.updateTotalsAndValidate();
+    }).catch(() => {
+      // En cas d'erreur, utiliser les taux par défaut et continuer
+      this.updateTotalsAndValidate();
+    });
+  }
+
+  /**
+   * COLLECTER TOUTES LES DEVISES IMPLIQUEES
+   */
+  private collecterDevisesImpliquees() {
+    this.devisesImpliquees.clear();
+
+    // Devise de l'opération sélectionnée
+    const operationSelectionnee = this.operationsFiltrees.find(op =>
+      op.idoperation == this.operationForm.get('operation')?.value
+    );
+    if (operationSelectionnee?.devise?.iddevise) {
+      this.devisesImpliquees.add(operationSelectionnee.devise.iddevise);
+    }
+
+    // Devise du justificatif
+    const deviseJustificatif = this.operationForm.get('devisejustificatif')?.value;
+    if (deviseJustificatif) {
+      this.devisesImpliquees.add(deviseJustificatif);
+    }
+
+    // Devise de référence utilisateur (toujours incluse)
+    this.devisesImpliquees.add(this.user.devise_ref_id);
+
+    // Devises des caisses (encaissements/décaissements)
+    if (operationSelectionnee?.caisses) {
+      operationSelectionnee.caisses.forEach((caisse: any) => {
+        if (caisse.devise?.iddevise) {
+          this.devisesImpliquees.add(caisse.devise.iddevise);
+        }
+      });
+    }
+
+    // Devises des justificatifs existants
+    if (this.justificatifPieces) {
+      this.justificatifPieces.forEach(piece => {
+        if (piece.devise?.iddevise) {
+          this.devisesImpliquees.add(piece.devise.iddevise);
+        }
+      });
+    }
+  }
+
+  /**
+   * CHARGER LES TAUX MANQUANTS
+   */
+  private chargerTauxManquants(): Promise<void> {
+    return new Promise((resolve) => {
+      const datePivot = this.operationForm.get('datejustificatif')?.value;
+      const deviseRef = this.user.devise_ref_id;
+
+      const tauxACharger: string[] = [];
+
+      // Identifier les taux manquants
+      this.devisesImpliquees.forEach(deviseId => {
+        if (deviseId !== deviseRef && !this.tauxDevises[deviseId]) {
+          tauxACharger.push(deviseId);
+        }
+      });
+
+      if (tauxACharger.length === 0) {
+        resolve();
+        return;
+      }
+
+      this.loadingTaux = true;
+
+      // Charger tous les taux manquants en parallèle
+      const promises = tauxACharger.map(deviseId =>
+        this.chargerTauxDevise(deviseId, deviseRef, datePivot)
+      );
+
+      Promise.all(promises).then(() => {
+        this.loadingTaux = false;
+        resolve();
+      }).catch(() => {
+        this.loadingTaux = false;
+        resolve(); // Résoudre même en cas d'erreur
+      });
+    });
+  }
+
+  /**
+   * CHARGER UN TAUX SPECIFIQUE
+   */
+  private async chargerTauxDevise(deviseOrigine: string, deviseDestination: string, datePivot: string): Promise<void> {
+    return new Promise((resolve) => {
+      const payload = {
+        iddeviseorigine: deviseOrigine,
+        iddevisedestination: deviseDestination,
+        datepiece: datePivot
+      };
+
+      this.service.tauxrecent(payload).subscribe({
+        next: (res) => {
+          if (res.success && res.data) {
+            this.tauxDevises[deviseOrigine] = res.data.coefficient;
+          } else {
+            // Taux par défaut si non trouvé
+            this.tauxDevises[deviseOrigine] = 1;
+          }
+          resolve();
+        },
+        error: () => {
+          this.tauxDevises[deviseOrigine] = 1; // Taux par défaut
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
+   * CONVERTIR UN MONTANT VERS LA DEVISE DE REFERENCE
+   */
+  convertirVersReference(montant: number, deviseOrigine: string): number {
+    if (!deviseOrigine || deviseOrigine === this.user.devise_ref_id) {
+      return montant;
+    }
+
+    const taux = this.tauxDevises[deviseOrigine] || 1;
+    return montant * taux;
+  }
+
+  /**
+   * CONVERTIR UN MONTANT DEPUIS LA DEVISE DE REFERENCE
+   */
+  convertirDepuisReference(montantRef: number, deviseDestination: string): number {
+    if (!deviseDestination || deviseDestination === this.user.devise_ref_id) {
+      return montantRef;
+    }
+
+    const taux = this.tauxDevises[deviseDestination] || 1;
+    return montantRef / taux;
   }
   
 }

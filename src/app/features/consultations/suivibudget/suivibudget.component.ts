@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { utilisateurdepartementservice } from '../../administration/service/userdepartement.service';
 import { ConsultationService } from '../services/suivibudget.service';
 import { BudgetService } from '../../budgets/services/budget.service';
 import { BudgetModel } from '../../budgets/models/budget.model';
@@ -13,11 +12,19 @@ import { departementservice } from '../../structure/service/departement.service'
 import { RouterModule } from '@angular/router';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { centreanalytiqueModel } from '../../donnee_base/models/centreanalytique.model';
+import { CentreAnalytiqueService } from '../../donnee_base/services/centreanalytique.service';
+import { COLUMNS_BUDGET, COLUMNS_CENTRE, COLUMNS_DEPARTEMENT, COLUMNS_NATURE } from '../../../_core/constantes/tableau.data';
+import { NatureoperationService } from '../../donnee_base/services/natureoperation.service';
+import { natureoperationModel } from '../../donnee_base/models/natureoperation.model';
+import { CustomFieldSelectComponent } from '../../../_core/custom/custom-field-select/custom-field-select.component';
+import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.contantes';
+import { ToastrService } from 'ngx-toastr';
 
 
 @Component({
   selector: 'app-suivibudget',
-  imports: [ReactiveFormsModule, CommonModule, RouterModule],
+  imports: [ReactiveFormsModule, CommonModule, RouterModule, CustomFieldSelectComponent],
   templateUrl: './suivibudget.component.html',
   styleUrl: './suivibudget.component.css'
 })
@@ -39,66 +46,112 @@ export class SuiviBudgetComponent implements OnInit {
   filteredBudgets: BudgetModel[] = [];
   params: any = {};
   budgets: BudgetModel[] = [];
+  filteredbudget: BudgetModel[] = [];
 
   //Liste des natures des départements
   naturesBydepartements: any[] = [];
-
   departements : departementmodel[] = [];
-
   filtredepartement : departementmodel[] = [];
-
   affectees: any[] = [];
-
   departementForm!: FormGroup;
-  
-
-
+  centres : centreanalytiqueModel[] = [];
+  centresFiltered : centreanalytiqueModel[] = [];
+  natureoperations : natureoperationModel[] = [];
+  natureoperationsFiltered : natureoperationModel[] = [];
 
   //TITRE ET BOUTON RETOUR
   url: string = "";
-
   evolutionbudget : any[] = [];
-
   // Nombre d'éléments par page
   totalPages: number = 0;
+  page = 1;
+  limit = 10;
+  searchs = '';
 
+  isanalytique: number = 1;
+
+  columnsbudget: any[] = COLUMNS_BUDGET;
+  columnsnature: any[] = COLUMNS_NATURE;
+  columnscentre: any[] = COLUMNS_CENTRE;
+  columnsdepartement: any[] = COLUMNS_DEPARTEMENT;
+  // budget sélectionné
+  selectedTiers: any = null;
+  // Nature sélectionné
+  selectedNature: any = null;
+  // Centre sélectionné
+  selectedCentre: any = null;
+  // Département sélectionné
+  selectedDepartement: any = null;
+  // Budget sélectionné
+  selectedBudget: any = null;
 
 
   constructor(private router : Router, private activatedRoute: ActivatedRoute
     , private ConsultationService : ConsultationService,
     private AffectationDepartementNatureService: AffectationDepartementNatureService,
-    private budgetservice : BudgetService,
+    private centreanalytiqueservice: CentreAnalytiqueService, private natureoperationservice: NatureoperationService,
+    private budgetservice : BudgetService, private toastr: ToastrService,
     private dp : departementservice){}
 
 
   ngOnInit(): void {
-    this.departementForm = this.fb.group({
-          iddepartement: ["", Validators.required],
-        });
-
     //initialiser le formulaire 
     this.initForm();
-    this.getAllBudgets();
-    this.getEvolBudget();
-    this.getalldepartements();
-
-    // ✅ Écoute du changement de departement
-    this.parametreForm.get('iddepartement')?.valueChanges.subscribe(iddepartement => {
-      if (iddepartement) {
-        this.getallAffectations(iddepartement);
+    //this.getEvolBudget();
+    
+    this.dp.getAll().subscribe({
+      next : (res) => {
+         if(res.success){
+            this.departements = res.data;
+            this.filtredepartement = [...this.departements];
+         }
       }
     });
 
-    this.soumettre();
-  }
+    this.budgetservice.getAll(this.params).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.budgets = res.data;
+          this.filteredBudgets = [...this.budgets];
+        }
+      },
+      error: (err: any) => {
+        this.msgErros = err.error.error;
+      },
+    });
 
+    //Écoute du changement de departement
+    // this.parametreForm.get('iddepartement')?.valueChanges.subscribe(iddepartement => {
+    //   if (iddepartement) {
+    //     this.getallAffectations(iddepartement);
+    //   }
+    // });
+
+    this.natureoperationservice.getAll().subscribe({
+      next : (res) => {
+        if(res.success){
+          this.natureoperations = res.data;
+          this.natureoperationsFiltered = [...this.natureoperations];
+        }}
+    });
+
+    this.centreanalytiqueservice.getAll().subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.centres = res.data;
+          this.centresFiltered = [...this.centres];
+        }
+      }
+    });
+  }
 
   //Initialiser le formulaire
   initForm() {
     this.parametreForm = this.fb.group({
       idbudget: ['', Validators.required],
-      iddepartement: ['', Validators.required],
-      idnature: ['', Validators.required],
+      iddepartement: [''],
+      centre: [''],
+      idnature: [''],
     });
 
     // Sauvegarde automatique
@@ -109,7 +162,6 @@ export class SuiviBudgetComponent implements OnInit {
       );
     });
   }
-
 
   getBudgetsAnnuels() {
     return this.filteredBudgets.filter((b) => b.typebudget === 'Annuel');
@@ -124,7 +176,6 @@ export class SuiviBudgetComponent implements OnInit {
       next: (res: any) => {
         if (res.success) {
           this.budgets = res.data;
-          console.log(this.budgets)
         }
       },
       error: (err: any) => {
@@ -133,34 +184,17 @@ export class SuiviBudgetComponent implements OnInit {
     });
   }
 
-
-  getalldepartements (){
-    this.dp.getAll().subscribe({
-      next : (res) => {
-         if(res.success){
-            this.departements = res.data;
-            console.log(this.departements);
-         }
-      }
-    });
-  }
-
-  
   getallAffectations(iddepartement: string) {
     this.AffectationDepartementNatureService.getAll(iddepartement).subscribe({
       next: (res) => {
         if (res.success) {
-          this.affectees = res.data.naturesaffectes;
+          this.natureoperationsFiltered = res.data.naturesaffectes;
         }
-
       }
     });
   }
 
-
-
   getEvolBudget() {
-    console.log(this.parametreForm);
     this.ConsultationService.getEvolBudget(this.parametreForm).subscribe({
       next: (res) => {
         if (res.success) {
@@ -170,42 +204,62 @@ export class SuiviBudgetComponent implements OnInit {
     });
   }
 
-
   get user(){
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
-
-
-
 
   //Recuperer le departement selectionné
   get departement() {
     return this.parametreForm.get("departement")?.value;
   }
 
+   //Chargement plus
+  loadMore(){
+    this.page++;
+    //this.loadTiers();
+  }
 
-  // Enregistrer les affectations
-  soumettre() {
-    const parms = {
-      idbudget : this.parametreForm.get('idbudget')?.value,
-      iddepartement : this.parametreForm.get('iddepartement')?.value,
-      idnature : this.parametreForm.get('idnature')?.value,
+  onAutocompleteOpen() {
+    this.page = 0; // reset pagination quand l'autocomplete s'ouvre
+    this.searchDepartement('');
+  }
+
+  //Soumission du formulaire
+  onSubmit(){
+    /** Check formulaire */
+    const controls = this.parametreForm.controls;
+    if (this.parametreForm.invalid) {
+      Object.keys(controls).forEach(controlName => controls[controlName].markAsTouched());
+      this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
+      //this.toastr.warning(this.msgErros);
+      return;
     }
 
-    console.log(parms);
+    /** 2. prepare data */
+    const formValue = {
+      ...this.parametreForm.value,
+      page : this.page,
+      limit: this.limit
+    };
 
+    // Send parametreForm
+    this.soumettre(formValue);
+  }
+
+  // Enregistrer les affectations
+  soumettre(parms: any) {
     this.ConsultationService.getEvolBudget(parms).subscribe({
       next: (res) => {
         if (res.success) {
           this.evolutionbudget = res.data.data;
+          this.totalPages = res.data.totalPages;
         }
       },
       error: (err) => {
-          console.error(err);
-        }
-      });
-    }
-
+        this.toastr.error(err);
+      }
+    });
+  }
 
   resetForm(){
     this.parametreForm.reset();
@@ -219,7 +273,7 @@ export class SuiviBudgetComponent implements OnInit {
     });
   }
 
-    //validation required
+  //validation required
   isValidField(label: string): string {
     let status: string = "";
     this.form[label].valid && this.form[label].touched ? status = 'is-valid' :
@@ -231,11 +285,16 @@ export class SuiviBudgetComponent implements OnInit {
     return this.parametreForm.controls;
   }
 
-    //Recharger la page
+  //Recharger la page
   changePage(page: number) {
     this.currentPage = page;
   }
 
+  //Recharger la page total
+  changePageTotal(page: number) {
+    this.page = page;
+    this.onSubmit();
+  }
 
   exportToExcel(): void {
     const element = document.getElementById('exportTable');
@@ -281,6 +340,62 @@ export class SuiviBudgetComponent implements OnInit {
   
     saveAs(blob, `evolution_budget_${new Date().getTime()}.csv`);
   }
-  
+
+  onSelectDepartement(dept: any){
+    this.selectedDepartement = dept;
+  }
+
+  //Chargement du Departement
+  searchDepartement(event: any){
+    const search = event.search || '';
+    this.filtredepartement = this.departements.filter(d =>
+      d.libelle?.toLowerCase().includes((search).toLowerCase()) ||
+      d.codedept?.toLowerCase().includes((search).toLowerCase())
+    );
+  }
+
+  //Chargement des natures
+  searchNature(event: any){
+    const search = event.search || '';
+    this.natureoperationsFiltered = this.natureoperations.filter(t =>
+      t.libelle?.toLowerCase().includes((search).toLowerCase()) ||
+      t.codenature?.toLowerCase().includes((search).toLowerCase())
+    );
+  }
+
+  onSelectNature(nature: any){
+    this.selectedNature = nature;
+  }
+
+  //Chargement du centre analytique
+  searchCentre(event: any){
+    const search = event.search || '';
+    this.centresFiltered = this.centres.filter(t =>
+      t.codecentreanalytique?.toLowerCase().includes((search).toLowerCase()) ||
+      t.libelle?.toLowerCase().includes((search).toLowerCase())
+    );
+  }
+
+  onSelectCentre(centre: any){
+    this.selectedCentre = centre;
+  }
+
+  //Chargement du budget
+  searchBudget(event: any){
+    const search = event.search || '';
+    this.filteredBudgets = this.budgets.filter(t =>
+      t.codebudget?.toLowerCase().includes((search).toLowerCase()) ||
+      t.libelle?.toLowerCase().includes((search).toLowerCase())
+    );
+  }
+
+  onSelectBudget(budget: any){
+    this.selectedBudget = budget;
+    if(this.selectedBudget.isanalytique && this.selectedBudget.isanalytique == 1){
+      this.isanalytique = 1;
+    }else{
+      this.isanalytique = 0;
+    }
+  }
 
 }

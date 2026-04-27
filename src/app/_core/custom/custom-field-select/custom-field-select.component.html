@@ -1,0 +1,83 @@
+<div class="erp-select">
+  <div class="search-box">
+    <i class="ri-search-line search-icon"></i>
+    <input
+      type="text"
+      class="form-control form-control-sm search-input"
+      [(ngModel)]="searchTerm"
+      (focus)="open()"
+      (input)="filterData()"
+      [placeholder]="placeholder"
+    />
+  </div>
+
+  <div class="dropdown-panel" *ngIf="isOpen">
+    <table class="table table-sm table-hover">
+      <thead>
+        <tr>
+          <th *ngFor="let col of columns" [hidden]="col.key">
+              {{ col.label }}
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr
+          *ngFor="let item of pagedData; trackBy: trackByFn"
+          (click)="select(item)"
+          style="cursor:pointer"
+        >
+          <td *ngFor="let col of columns" [hidden]="col.key">
+            {{ item[col.field] }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination-box">
+      <button class="btn btn-sm btn-light"
+              (click)="previousPage()"
+              [disabled]="page===1">
+        ◀
+      </button>
+      <span>{{page}} / {{totalPages}}</span>
+      <button class="btn btn-sm btn-light"
+              (click)="nextPage()"
+              [disabled]="page===totalPages">
+        ▶
+      </button>
+    </div>
+  </div>
+</div>
+
+
+
+  <!-- <div class="dropdown-panel" *ngIf="isOpen">
+
+    <div
+      class="dropdown-item"
+      *ngFor="let item of pagedData; trackBy: trackByFn"
+      (click)="select(item)"
+    >
+      {{item[codeField]}} - {{item[labelField]}}
+    </div>
+
+    <div class="pagination-box">
+
+      <button class="btn btn-sm btn-light"
+              (click)="previousPage()"
+              [disabled]="page===1">
+        ◀
+      </button>
+
+      <span>{{page}} / {{totalPages}}</span>
+
+      <button class="btn btn-sm btn-light"
+              (click)="nextPage()"
+              [disabled]="page===totalPages">
+        ▶
+      </button>
+
+    </div>
+
+  </div> -->

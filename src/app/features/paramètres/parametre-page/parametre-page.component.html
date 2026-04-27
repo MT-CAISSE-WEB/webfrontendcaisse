@@ -278,6 +278,7 @@
                             <div class="mt-4 mb-3 border-bottom pb-2">
                                 <h5 class="card-title">Valeures de comptabilisation</h5>
                             </div>
+<<<<<<< HEAD
                             <div class="d-flex flex-column flex-sm-row mb-4 mb-sm-0">
                                 <div class="flex-grow-1">
                                     <h6 class="fs-14 mb-1">Journal d'operations diverses</h6>
@@ -305,6 +306,65 @@
                                     <a href="javascript:void(0);" class="btn btn-sm btn-primary">définir</a>
                                 </div>
                             </div>
+=======
+
+                            <form [formGroup]="paramForm">
+                                <div class="d-flex flex-column flex-sm-row mb-4 mb-sm-0">
+                                    <div class="flex-grow-1">
+                                        <h6 class="fs-14 mb-1">Journal d'operations diverses</h6>
+                                        <p class="text-muted">Permet de classer les opérations diverses de la caisse</p>
+                                    </div>
+
+                                    <div class="mx-3" style="min-width: 300px;">  
+                                        <select class="form-select form-select-sm" formControlName="journal">
+                                            <option value="">selectionner le journal</option>
+                                            <option *ngFor="let j of journaux" [value]="j.idjournal">
+                                                {{ j.codejournal }} - {{ j.designation }}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="flex-shrink-0 ms-sm-3">
+                                        <a href="javascript:void(0);" (click)="editParam('journal')" class="btn btn-sm btn-primary">définir</a>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex flex-column flex-sm-row mb-4 mb-sm-0 mt-2">
+                                    <div class="flex-grow-1">
+                                        <h6 class="fs-14 mb-1">Compte intermediaire</h6>
+                                        <p class="text-muted">Permet de comptabiliser les operations diverses de la caisse</p>
+                                    </div>
+
+                                    <div class="mx-3" style="min-width: 300px;"> 
+                                        <select class="form-select form-select-sm" formControlName="compteintermediaire">
+                                            <option value="">selectionner le compte</option>
+                                            <option *ngFor="let c of comptes" [value]="c.idcompte">
+                                                {{ c.numcompte }} - {{ c.libelle }}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="flex-shrink-0 ms-sm-3">
+                                        <a href="javascript:void(0);" (click)="editParam('compteintermediaire')" class="btn btn-sm btn-primary"> définir </a>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex flex-column flex-sm-row mb-4 mb-sm-0 mt-2">
+                                    <div class="flex-grow-1">
+                                        <h6 class="fs-14 mb-1">Dossier</h6>
+                                        <p class="text-muted mb-sm-0">Permet de stocker le fichier de comptabilisation généré par le système</p>
+                                    </div>
+
+                                    <div class="mx-3" style="min-width: 300px;">
+                                        <input type="file" class="form-control form-control-sm" formControlName="urldossier" placeholder="chemin dossier">
+                                    </div>
+
+                                    <div class="flex-shrink-0 ms-sm-3">
+                                        <a href="javascript:void(0);" (click)="editParam('urldossier')" class="btn btn-sm btn-primary">définir</a>
+                                    </div>
+                                </div>
+                            </form>
+>>>>>>> origin/chado
                         </div>
                     </div>
                     <!--end configuration comptable-->
@@ -505,7 +565,10 @@
                         </div>
                         <!--end modal -->
                     </div>
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/chado
                 </div>
             </div>
         </div>

@@ -35,3 +35,8 @@
 .cell-wrapper input {
   height: 26px;
 }
+
+.table-hover tbody tr:hover {
+    background-color: rgba(113, 140, 180, 0.08); /* bleu Bootstrap */
+    cursor: pointer;
+}

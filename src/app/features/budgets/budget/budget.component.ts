@@ -91,8 +91,8 @@ export class BudgetComponent implements OnInit {
     private circuitvalidationservice: circuitvalidationservice,
     private budgetPrevisionService: BudgetPrevisionService,
     private lignebudgetservice: LigneBudgetService,
-    private router: Router
-  ) { }
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
     //Initialisation du formulaire
@@ -117,11 +117,18 @@ export class BudgetComponent implements OnInit {
       next: (res: any) => {
         if (res.success) {
           const lesbudgets = res.data as BudgetModel[];
-          this.budgets = lesbudgets.filter(
-            (b) =>
-              b.idsite === this.user.idsite &&
-              b.idsociete === this.user.idsociete
-          );
+          if (this.user.typeentitesociete === 1) {
+            this.budgets = lesbudgets.filter(
+              (b) => b.idsociete === this.user.idsociete,
+            );
+          } else {
+            this.budgets = lesbudgets.filter(
+              (b) =>
+                b.idsite === this.user.idsite &&
+                b.idsociete === this.user.idsociete,
+            );
+          }
+
           this.applyStatusFilter(this.currentStatusFilter);
           this.filteredBudgets = [...this.budgets];
           this.applyFilters();
@@ -141,13 +148,13 @@ export class BudgetComponent implements OnInit {
   lignesByBudget: LigneBudgetModel[] = [];
 
   // Afficher les lignes budgétaires du budget
-  onClickAfficherLignesBudgetaire(budget: BudgetModel): void{
-    if(!budget) return
-    this.selectedBudget = budget
+  onClickAfficherLignesBudgetaire(budget: BudgetModel): void {
+    if (!budget) return;
+    this.selectedBudget = budget;
     const lignes = this.lignesBudgetaires.filter(
-      l => l.idbudget === budget.idbudget
+      (l) => l.idbudget === budget.idbudget,
     );
-    this.lignesByBudget = lignes
+    this.lignesByBudget = lignes;
   }
 
   getAllCircuits() {
@@ -162,7 +169,7 @@ export class BudgetComponent implements OnInit {
               c.idsite === this.user.idsite &&
               c.idsociete === this.user.idsociete &&
               c.typeaction.toLocaleLowerCase() === 'budget' &&
-              c.typeentite.toLocaleLowerCase() === 'site'
+              c.typeentite.toLocaleLowerCase() === 'site',
           );
         }
       },
@@ -173,7 +180,7 @@ export class BudgetComponent implements OnInit {
   }
 
   getAllLigneBudgetaire() {
-     this.params = {
+    this.params = {
       page: this.currentPage,
       limit: 1000000000,
     };
@@ -202,7 +209,7 @@ export class BudgetComponent implements OnInit {
     this.selectedBudgetForLignes = budget;
 
     this.lignesBudgetDuBudget = this.lignesBudgetaires.filter(
-      (l) => l.idbudget === budget.idbudget
+      (l) => l.idbudget === budget.idbudget,
     );
 
     const modal = document.getElementById('modalLignesBudget');
@@ -228,18 +235,18 @@ export class BudgetComponent implements OnInit {
 
   getBudgetsMensuels(parentId: string): BudgetModel[] {
     return this.filteredBudgets.filter(
-      (b) => b.typebudget === 'Mensuel' && b.idbudgetparent === parentId
+      (b) => b.typebudget === 'Mensuel' && b.idbudgetparent === parentId,
     );
   }
   get totalActifs(): number {
     return this.budgets.filter(
-      (b) => b.actif === 1 && b.typebudget === 'Annuel'
+      (b) => b.actif === 1 && b.typebudget === 'Annuel',
     ).length;
   }
 
   get totalInactifs(): number {
     return this.budgets.filter(
-      (b) => b.actif === 0 && b.typebudget === 'Annuel'
+      (b) => b.actif === 0 && b.typebudget === 'Annuel',
     ).length;
   }
 
@@ -273,19 +280,19 @@ export class BudgetComponent implements OnInit {
       const matched = this.budgets.filter(
         (b) =>
           b.codebudget?.toLowerCase().includes(term) ||
-          b.libelle?.toLowerCase().includes(term)
+          b.libelle?.toLowerCase().includes(term),
       );
 
       // IDs des budgets annuels trouvés
       const parentIds = new Set(
-        matched.filter((b) => b.typebudget === 'Annuel').map((b) => b.idbudget)
+        matched.filter((b) => b.typebudget === 'Annuel').map((b) => b.idbudget),
       );
 
       // Appliquer la recherche en incluant les mensuels liés
       result = this.budgets.filter(
         (b) =>
           matched.includes(b) ||
-          (b.idbudgetparent && parentIds.has(b.idbudgetparent))
+          (b.idbudgetparent && parentIds.has(b.idbudgetparent)),
       );
     }
 
@@ -307,13 +314,13 @@ export class BudgetComponent implements OnInit {
     switch (status) {
       case 'ACTIF':
         parents = this.budgets.filter(
-          (b) => b.actif === 1 && b.typebudget === 'Annuel'
+          (b) => b.actif === 1 && b.typebudget === 'Annuel',
         );
         break;
 
       case 'INACTIF':
         parents = this.budgets.filter(
-          (b) => b.actif === 0 && b.typebudget === 'Annuel'
+          (b) => b.actif === 0 && b.typebudget === 'Annuel',
         );
         break;
 
@@ -327,7 +334,7 @@ export class BudgetComponent implements OnInit {
     this.filteredBudgets = this.budgets.filter(
       (b) =>
         parentIds.has(b.idbudget) ||
-        (b.idbudgetparent && parentIds.has(b.idbudgetparent))
+        (b.idbudgetparent && parentIds.has(b.idbudgetparent)),
     );
 
     // Reset sélection
@@ -337,21 +344,21 @@ export class BudgetComponent implements OnInit {
   }
 
   get hasAnnualBudgets(): boolean {
-  return this.filteredBudgets.some(b => b.typebudget === 'Annuel');
-}
+    return this.filteredBudgets.some((b) => b.typebudget === 'Annuel');
+  }
 
   getPrevisionAnnuel(budget: BudgetModel): number {
     return this.budgetPrevisionService.calculPrevisionBudgetAnnuel(
       budget,
       this.budgets,
-      this.lignesBudgetaires
+      this.lignesBudgetaires,
     );
   }
 
   getPrevisionMensuel(budget: BudgetModel): number {
     return this.budgetPrevisionService.calculPrevisionBudget(
       budget,
-      this.lignesBudgetaires
+      this.lignesBudgetaires,
     );
   }
 
@@ -363,7 +370,7 @@ export class BudgetComponent implements OnInit {
         libelle: ['', [Validators.required]],
         datedebut: ['', [Validators.required]],
         typebudget: ['', [Validators.required]],
-        entite: ['', [Validators.required]],
+        entite: [''],
         datefin: ['', [Validators.required]],
         idbudgetparent: [''],
         idsite: [this.user.idsite ?? null],
@@ -373,10 +380,11 @@ export class BudgetComponent implements OnInit {
         ],
         // createdby
         actif: [false],
+        isanalytique: [false],
       },
       {
         validators: this.budgetDateValidator(() => this.selectedBudgetParent),
-      }
+      },
     );
 
     // Désactivation et masquage du circuit de validation
@@ -396,6 +404,7 @@ export class BudgetComponent implements OnInit {
     this.budgetForm.patchValue({
       codebudget: _object.codebudget,
       libelle: _object.libelle,
+      isanalytique: _object.isanalytique,
       datedebut: this.formatDateForInput(_object.datedebut),
       typebudget: _object.typebudget,
       datefin: this.formatDateForInput(_object.datefin),
@@ -444,7 +453,7 @@ export class BudgetComponent implements OnInit {
   //selectionner une instance dans une liste
   handleSelectOne(budget: BudgetModel, actif: any) {
     const index = this.objectsSelected.findIndex(
-      (el) => el.idbudget == budget.idbudget
+      (el) => el.idbudget == budget.idbudget,
     );
     if (index == -1 && actif) this.objectsSelected.push(budget);
     if (index != -1 && !actif) this.objectsSelected.splice(index, 1);
@@ -490,6 +499,7 @@ export class BudgetComponent implements OnInit {
         'outOfParentRange',
         'duplicateMonthlyBudget',
         'invalidAnnualStartDate',
+        'duplicateAnnualBudget',
       ]);
 
       resetErrors(endCtrl, [
@@ -498,6 +508,7 @@ export class BudgetComponent implements OnInit {
         'outOfParentRange',
         'duplicateMonthlyBudget',
         'invalidAnnualEndDate',
+        'duplicateAnnualBudget',
       ]);
 
       if (!startCtrl.value || !endCtrl.value) return null;
@@ -542,6 +553,39 @@ export class BudgetComponent implements OnInit {
           });
         }
 
+        /* ==========================
+ 🔒 CONTRÔLE UNICITÉ ANNUEL PAR SITE
+ ========================== */
+        const currentYear = start.getFullYear();
+
+        const duplicateAnnual = this.budgets.some((b) => {
+          if (
+            b.typebudget !== 'Annuel' ||
+            b.idbudget === this.budget?.idbudget // exclusion en mode édition
+          ) {
+            return false;
+          }
+
+          const bYear = new Date(b.datedebut).getFullYear();
+
+          return (
+            bYear === currentYear &&
+            b.idsite === this.budgetForm.get('idsite')?.value
+          );
+        });
+
+        if (duplicateAnnual) {
+          startCtrl.setErrors({
+            ...startCtrl.errors,
+            duplicateAnnualBudget: true,
+          });
+
+          endCtrl.setErrors({
+            ...endCtrl.errors,
+            duplicateAnnualBudget: true,
+          });
+        }
+
         return null;
       }
 
@@ -556,7 +600,7 @@ export class BudgetComponent implements OnInit {
         const lastDayOfMonth = new Date(
           start.getFullYear(),
           start.getMonth() + 1,
-          0
+          0,
         ).getDate();
 
         if (!sameMonth || end.getDate() !== lastDayOfMonth) {
@@ -631,102 +675,29 @@ export class BudgetComponent implements OnInit {
     };
   }
 
-  // budgetDateValidator(getParent: () => BudgetModel | undefined): ValidatorFn {
-  //   return (group: AbstractControl): ValidationErrors | null => {
-  //     const startCtrl = group.get('datedebut');
-  //     const endCtrl = group.get('datefin');
-  //     const typeCtrl = group.get('typebudget');
-
-  //     if (!startCtrl || !endCtrl || !typeCtrl) return null;
-
-  //     const clearError = (ctrl: AbstractControl, key: string) => {
-  //       if (!ctrl.errors) return;
-  //       const { [key]: _, ...rest } = ctrl.errors;
-  //       ctrl.setErrors(Object.keys(rest).length ? rest : null);
-  //     };
-
-  //     clearError(startCtrl, 'startAfterEnd');
-  //     clearError(endCtrl, 'startAfterEnd');
-  //     clearError(endCtrl, 'invalidMonthRange');
-  //     clearError(startCtrl, 'outOfParentRange');
-  //     clearError(endCtrl, 'outOfParentRange');
-
-  //     if (!startCtrl.value || !endCtrl.value) return null;
-
-  //     const start = new Date(startCtrl.value);
-  //     const end = new Date(endCtrl.value);
-
-  //     /* ==========================
-  //    1️⃣ DATE DÉBUT < DATE FIN
-  //    ========================== */
-  //     if (start >= end) {
-  //       endCtrl.setErrors({
-  //         ...endCtrl.errors,
-  //         startAfterEnd: true,
-  //       });
-  //       return { startAfterEnd: true };
-  //     }
-
-  //     /* ==========================
-  //    2️⃣ VALIDATION MENSUELLE
-  //    ========================== */
-  //     if (typeCtrl.value === 'Mensuel') {
-  //       const sameMonth =
-  //         start.getMonth() === end.getMonth() &&
-  //         start.getFullYear() === end.getFullYear();
-
-  //       const lastDayOfMonth = new Date(
-  //         start.getFullYear(),
-  //         start.getMonth() + 1,
-  //         0
-  //       ).getDate();
-
-  //       if (!sameMonth || end.getDate() !== lastDayOfMonth) {
-  //         endCtrl.setErrors({
-  //           ...endCtrl.errors,
-  //           invalidMonthRange: true,
-  //         });
-  //         return { invalidMonthRange: true };
-  //       }
-  //     }
-
-  //     /* ==========================
-  //    3️⃣ VALIDATION PARENT STRICTE
-  //    ========================== */
-  //     const parent = getParent();
-  //     if (parent && typeCtrl.value === 'Mensuel') {
-  //       const parentStart = new Date(parent.datedebut);
-  //       const parentEnd = new Date(parent.datefin);
-
-  //       if (!(start >= parentStart && end <= parentEnd)) {
-  //         endCtrl.setErrors({
-  //           ...endCtrl.errors,
-  //           outOfParentRange: true,
-  //         });
-  //         return { outOfParentRange: true };
-  //       }
-  //     }
-
-  //     return null;
-  //   };
-  // }
-
   // choix du budget parent
   onSelectionChange(event: Event) {
     const selectedId = (event.target as HTMLSelectElement).value;
 
     this.selectedBudgetParent = this.budgets.find(
-      (b) => b.idbudget === selectedId
+      (b) => b.idbudget === selectedId,
     );
 
     const entiteCtrl = this.budgetForm.get('entite');
+    const analytiqueCtrl = this.budgetForm.get('isanalytique');
 
     if (!this.selectedBudgetParent) {
       entiteCtrl?.reset(null);
       entiteCtrl?.enable({ emitEvent: false });
+
+      analytiqueCtrl?.reset(null);
+      analytiqueCtrl?.enable({ emitEvent: false });
     } else {
       entiteCtrl?.setValue(this.selectedBudgetParent.entite);
       entiteCtrl?.disable({ emitEvent: false });
+
+      analytiqueCtrl?.setValue(this.selectedBudgetParent.isanalytique);
+      analytiqueCtrl?.disable({ emitEvent: false });
     }
 
     this.budgetForm.updateValueAndValidity({
@@ -745,7 +716,7 @@ export class BudgetComponent implements OnInit {
     const controls = this.budgetForm.controls;
     if (this.budgetForm.invalid) {
       Object.keys(controls).forEach((controlName) =>
-        controls[controlName].markAsTouched()
+        controls[controlName].markAsTouched(),
       );
       this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
       return;
@@ -754,7 +725,8 @@ export class BudgetComponent implements OnInit {
     /** 2. prepare data */
     const formValue = this.budgetForm.getRawValue();
 
-    this.budget.idcircuitvalidation = this.circuitValidation?.idcircuitvalidation as string;
+    this.budget.idcircuitvalidation = this.circuitValidation
+      ?.idcircuitvalidation as string;
     this.budget.idsite = this.user?.idsite as string;
     this.budget.idsociete = this.user?.idsociete as string;
     this.budget.datevalidedept = null;
@@ -772,6 +744,7 @@ export class BudgetComponent implements OnInit {
       datedebut: formValue.datedebut,
       datefin: formValue.datefin,
       actif: formValue.actif ? 1 : 0,
+      isanalytique: formValue.isanalytique ? 1 : 0,
     };
 
     /** 3. choices action */
@@ -787,10 +760,9 @@ export class BudgetComponent implements OnInit {
         idsite: _budget.idsite,
         idsociete: _budget.idsociete,
         actif: formValue.actif,
+        isanalytique: formValue.isanalytique,
       });
     }
-    // if (!_journal.idjournal) this.create(_journal);
-    // else this.update(_journal);
   }
 
   //Enregistrement de données
@@ -844,10 +816,12 @@ export class BudgetComponent implements OnInit {
     modalEl?.classList.remove('show');
     modalEl?.setAttribute('aria-hidden', 'true');
     (document.querySelector('.modal-backdrop') as HTMLElement)?.remove();
+    this.selectedBudget = undefined;
   }
 
   modalCreate() {
     this.actionModal = 'create';
+    this.selectedBudget = undefined;
     this.initForm();
   }
 
@@ -857,16 +831,19 @@ export class BudgetComponent implements OnInit {
     this.budgetForm.reset();
 
     this.selectedBudgetParent = this.budgets.find(
-      (b) => b.idbudget === _object.idbudgetparent
+      (b) => b.idbudget === _object.idbudgetparent,
     );
 
-    this.dispatchBudget(_object);
+    this.selectedBudget = _object;
 
+    this.dispatchBudget(_object);
     /* 🔒 Désactivation */
     this.budgetForm.get('codebudget')?.disable({ emitEvent: false });
     this.budgetForm.get('typebudget')?.disable({ emitEvent: false });
     // Désactivation et masquage du circuit de validation
     this.budgetForm.get('idcircuitvalidation')?.disable({ emitEvent: false });
+    // Désactivation du paramètre analytique
+    this.budgetForm.get('isanalytique')?.disable({ emitEvent: false });
 
     this.budgetForm.markAllAsTouched();
     this.budgetForm.updateValueAndValidity();

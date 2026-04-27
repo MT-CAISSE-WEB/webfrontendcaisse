@@ -14,7 +14,19 @@
 </div>
 <!-- end page title -->
 
-<div class="row">
+<!-- LOADER GLOBAL -->
+<div *ngIf="loadingGlobal" class="row">
+    <div class="col-12">
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+            <p class="mt-2 text-muted">Chargement des données...</p>
+        </div>
+    </div>
+</div>
+
+<div class="row" *ngIf="!loadingGlobal">
     <div class="col-lg-12">
         <form [formGroup]="operationForm">
             <div class="card" id="">
@@ -23,8 +35,8 @@
                         <h5 class="card-title mb-0 flex-grow-1">{{title}}</h5>
                         <div class="flex-shrink-0">
                             <div class="d-flex gap-2 flex-wrap">
+                                <button class="btn btn-sm btn-warning" (click)="reset()"><i class="ri-save-bin-2-line"></i>rénitialiser</button>
                                 <button class="btn btn-sm btn-primary"><i class="ri-save-bin-2-line"></i>charger</button>
-                                <button type="submit" (click)="onSubmit()" [disabled]="operationForm.invalid" class="btn btn-sm btn-success"><i class="ri-add-line align-bottom me-1"></i>enregistrer</button>
                             </div>
                         </div>
                     </div>
@@ -84,14 +96,25 @@
 
                         <div class="col-lg-3 col-sm-3">
                             <label for="invoicenoInput">Montant référentiel</label>
-                            <input type="text" formControlName="montantRefglobal" class="form-control form-control-sm bg-light border-0"  placeholder="" readonly="readonly" />
+                            <!-- <input type="text" formControlName="montantRefglobal" class="form-control form-control-sm bg-light border-0"  placeholder="" readonly="readonly" />
+                            <div class="invalid-feedback">{{ msgErros }}</div> -->
+                            <div class="input-group input-group-sm mb-2">
+                                <input type="text" formControlName="montantRefglobal" 
+                                class="form-control form-control-sm bg-light border-0" placeholder="" readonly="readonly" >
+                                <label class="input-group-text">  {{ user.devise_rep_code }}</label>
+                            </div>
                             <div class="invalid-feedback">{{ msgErros }}</div>
                         </div>
                         <!--end col-->
 
                         <div class="col-lg-3 col-sm-3">
                             <label for="invoicenoInput">Reste à payer réf</label>
-                            <input type="text" formControlName="resteapayerref" class="form-control form-control-sm bg-light border-0"  placeholder="" readonly="readonly" />
+                            <!-- <input type="text" formControlName="resteapayerref" class="form-control form-control-sm bg-light border-0"  placeholder="" readonly="readonly" /> -->
+                            <div class="input-group input-group-sm mb-2">
+                                <input type="text" formControlName="resteapayerref" 
+                                class="form-control form-control-sm bg-light border-0" placeholder="" readonly="readonly" >
+                                <label class="input-group-text">  {{ user.devise_rep_code }}</label>
+                            </div>
                             <div class="invalid-feedback">{{ msgErros }}</div>
                         </div>
                         <!--end col-->
@@ -100,20 +123,125 @@
             </div>
 
             <div class="row g-3">
+                <div class="col-lg-6 col-sm-6">
+                    <div class="card" id="">
+                        <div class="card-header border-0">
+                            <div class="d-flex align-items-center">
+                                <h5 class="card-title mb-0 flex-grow-1">Retour en caisses</h5>
+                            </div>
+                        </div>
+                        <div class="card-body border border-dashed border-start-0 border-end-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm table-borderless table-nowrap mb-0">
+                                    <colgroup>
+                                        <col style="width: 10%">
+                                        <col style="width: 30%">
+                                        <col style="width: 30%">
+                                        <col style="width: 30%">
+                                    </colgroup>
+                                    <thead class="align-middle">
+                                        <tr class="table-active">
+                                            <th scope="col" style="width: 15px;">N°</th>
+                                            <th scope="col">Piece</th>
+                                            <th scope="col">Caisse</th>
+                                            <th scope="col" class="text-end" style="width: 150px;">Montant</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="newlink">
+                                        @for(piece of ope?.caisses; track piece.idtypeoperation){
+                                            <tr *ngIf="piece.codtypeoperation == 'encaissement'" style="cursor:pointer" 
+                                            (click)="selectRetour(piece)" [class.table-active]="selectedRetour === piece">
+                                                <th scope="row" class="product-id">{{$index + 1 }}</th>
+                                                <td class="text-start"> {{ope.codeoperation}} </td>
+                                                <td class="text-start"> {{piece.caisse.codecaisse}} </td>
+                                                <td class="text-end"> {{piece.montant}} {{piece.caisse.devise}}</td>
+                                            </tr>
+                                        }
+                                        <tr *ngIf="loadingPiece">
+                                            <td colspan="3">
+                                                <div class="text-center py-4">
+                                                    <div class="spinner-border text-info"></div>
+                                                    <h6 class="mt-2">Chargement...</h6>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-sm-6">
+                    <div class="card" id="">
+                        <div class="card-header border-0">
+                            <div class="d-flex align-items-right">
+                                <h5 class="card-title mb-0 flex-grow-1">Pièces Justificatifs</h5>
+                            </div>
+                        </div>
+                        <div class="card-body border border-dashed border-start-0 border-end-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm table-borderless table-nowrap mb-0">
+                                    <colgroup>
+                                        <col style="width: 10%">
+                                        <col style="width: 60%">
+                                        <col style="width: 30%">
+                                    </colgroup>
+                                    <thead class="align-middle">
+                                        <tr class="table-active">
+                                            <th scope="col" style="width: 15px;">N°</th>
+                                            <th scope="col">Piece</th>
+                                            <th scope="col" class="text-end" style="width: 150px;">Montant</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="newlink">
+                                        @for(piece of justificatifFiltered; track piece.idjustificatifoperation){
+                                            <tr style="cursor:pointer" (click)="selectJustificatif(piece)">
+                                                <th scope="row" class="product-id">{{$index + 1 }}</th>
+                                                <td class="text-start"> {{piece.codejustificatif}} </td>
+                                                <td class="text-end"> {{piece.montantjustificatif}} {{piece.devise.codedevise}}</td>
+                                            </tr>
+                                        }
+                                        <tr *ngIf="loadingPiece">
+                                            <td colspan="3">
+                                                <div class="text-center py-4">
+                                                    <div class="spinner-border text-info"></div>
+                                                    <h6 class="mt-2">Chargement...</h6>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
                 <div class="col-lg-12 col-sm-12">
                     <div class="card" id="">
                         <div class="card-header border-0">
+                            <div class="d-flex align-items-center">
+                                <h5 class="card-title mb-0 flex-grow-1">Enregistrer justificatif</h5>
+                            </div>
+                        </div>
+                        <div class="card-body border border-dashed border-start-0 border-end-0">
                             <div class="row g-3">
                                 <div class="col-lg-3 col-sm-4">
                                     <div>
                                         <label for="choices-payment-status">Devise</label>
                                         <div class="input-light">
-                                            <select formControlName="devisejustificatif" class="form-select form-select-sm bg-light border-0 {{ isValidField('devisejustificatif')}}" required>
+                                            <select formControlName="devisejustificatif" class="form-select form-select-sm bg-light border-0 {{ isValidField('devisejustificatif')}}" required [disabled]="loadingTaux">
                                                 <option value="">choisir la devise</option>
                                                 @for (item of devises; track $index){
                                                     <option value="{{item.iddevise}}">{{item.codedevise}}</option>
                                                 }
                                             </select>
+                                            @if (loadingTaux) {
+                                                <small class="text-muted">
+                                                    <i class="mdi mdi-loading mdi-spin"></i> Chargement des taux...
+                                                </small>
+                                            }
                                             <div class="invalid-feedback">{{ msgErros }}</div>
                                         </div>
                                     </div>
@@ -135,6 +263,14 @@
                                     </div>
                                 </div>
 
+                                <div class="col-lg-3 col-sm-4">
+                                    <div>
+                                        <label for="date-field">Taux inverse</label>
+                                        <input type="texte" formControlName="tauxoperationinverse" class="form-control form-control-sm bg-light border-0 {{ isValidField('tauxoperationinverse')}}" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date">
+                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                    </div>
+                                </div>
+
                                 <div class="col-lg-12 col-sm-12">
                                     <div>
                                         <textarea class="form-control form-control-sm bg-light border-0" formControlName="commentaire" rows="4" placeholder="commentaire">
@@ -148,7 +284,7 @@
             </div>
 
             <div class="row g-3">
-                <div class="col-lg-8 col-sm-8">
+                <div class="col-lg-12 col-sm-12">
                     <div class="card" id="">
                         <div class="card-header border-0">
                             <div class="d-flex align-items-center">
@@ -221,7 +357,7 @@
                                                 
                                                 <td class="text-end">
                                                     <div>
-                                                        <input type="text" formControlName="montantligne" class="form-control form-control-sm bg-light border-0 product-line-price" id="productPrice-1" placeholder="00.000" required/>
+                                                        <input type="text" formControlName="montantdetail" class="form-control form-control-sm bg-light border-0 product-line-price" id="productPrice-1" placeholder="00.000" required/>
                                                     </div>
                                                 </td>
                                                 <td class="product-removal align-right">
@@ -239,39 +375,9 @@
                                 </table>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-sm-4">
-                    <div class="card" id="">
-                        <div class="card-header border-0">
-                            <div class="d-flex align-items-right">
-                                <h5 class="card-title mb-0 flex-grow-1">Pièces Justificatifs</h5>
-                            </div>
-                        </div>
-                        <div class="card-body border border-dashed border-start-0 border-end-0">
-                            <div class="table-responsive">
-                                <table class="table table-sm table-borderless table-nowrap mb-0">
-                                    <colgroup>
-                                        <col style="width: 10%">
-                                        <col style="width: 60%">
-                                        <col style="width: 30%">
-                                    </colgroup>
-                                    <thead class="align-middle">
-                                        <tr class="table-active">
-                                            <th scope="col" style="width: 15px;">N°</th>
-                                            <th scope="col">Piece</th>
-                                            <th scope="col" class="text-end" style="width: 150px;">Montant</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="newlink">
-                                        <tr>
-                                            <th scope="row" class="product-id"></th>
-                                            <td class="text-start"></td>
-                                            <td class="text-end"></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+
+                        <div class="card-footer border-0 d-flex justify-content-end">
+                            <button type="submit" (click)="onSubmit()" [disabled]="operationForm.invalid" class="btn btn-sm btn-success"><i class="ri-add-line align-bottom me-1"></i>enregistrer</button>
                         </div>
                     </div>
                 </div>
@@ -329,7 +435,7 @@
                                                 </td>
                                                 <td>
                                                     <div class="cell-wrapper">
-                                                        <input type="text" formControlName="montantcaisse" [ngClass]="{'bg-danger-subtle': c.get('montantcaisse')?.errors?.['soldeInsuffisant']}" class="form-control form-control-sm bg-light border-0"  placeholder="000.000"/>
+                                                        <input type="text" formControlName="montantcaisse" [readonly]="selectedRetour" [ngClass]="{'bg-danger-subtle': c.get('montantcaisse')?.errors?.['soldeInsuffisant']}" class="form-control form-control-sm bg-light border-0"  placeholder="000.000"/>
                                                         <div class="text-danger small error-slot" [class.visible]="c.get('montantcaisse')?.errors?.['soldeInsuffisant']">
                                                             Solde insuffisant
                                                         </div>
@@ -373,3 +479,4 @@
         </form>
     </div>
 </div>
+<!-- FIN DE LA DIV CONDITIONNELLE -->

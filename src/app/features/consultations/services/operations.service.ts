@@ -21,6 +21,23 @@ export class ConsultationOpService {
     }
 
     /**
+   * get demande detail
+   * @param params
+   */
+    getdemandeDetail(_data: any): Observable<QueryResultModel> {
+        return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/demande_detail', _data);
+    }
+
+    // Autor : Richard Toulou
+    printJournalCaisse(donnees: any): Observable<Blob> {
+        return this.http.post(
+            `${URL_LOCAL.baseUrl}${this.url}/journalcaisse/`,
+            donnees,
+            { responseType: 'blob' }
+        );
+    }
+
+    /**
    * get operation detail
    * @param params
    */
@@ -50,5 +67,21 @@ export class ConsultationOpService {
    */
     getAllpayment(params: any): Observable<QueryResultModel> {
         return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/allpayment', {params});
+    }
+
+     /**
+   * get All
+   * @param params
+   */
+    getEtatcloture(_data: any): Observable<QueryResultModel> {
+        return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/cloture/caisse', _data);
+    }
+
+    printEtatcloture(donnees: any): Observable<Blob> {
+        return this.http.post(
+            `${URL_LOCAL.baseUrl}${this.url}/etat/cloture/pdf`,
+            donnees,
+            { responseType: 'blob' }
+        );
     }
 }

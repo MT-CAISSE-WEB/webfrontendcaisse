@@ -62,6 +62,7 @@
                     </div>
                   </th>
                   <th class="sort" data-sort="id">Code</th>
+                  <th class="sort" data-sort="id">Département</th>
                   <th class="sort" data-sort="customer_name">Type</th>
                   <th class="sort" data-sort="status">Montant</th>
                   <th class="sort" data-sort="customer_name">Devise</th>
@@ -79,6 +80,7 @@
                         </div>
                     </th>
                     <td class="numero"><a href="#" class="fw-medium link-primary">{{ item.codedemande }}</a></td>
+                    <td class="departement"> {{ item.departement?.libelle }} </td>
                     <td class="typedemande"> {{ item.typedemande! }} </td>
                     <td class="text-end"> {{ formatCFA(getTotalDemande(item)) }} </td>
                     <td class="devise"> {{ item.devise!.codedevise }} </td>
@@ -88,8 +90,8 @@
                     <td class="devise text-warning" *ngIf="item.statut! == 2 && item.decaisse! == 0"> <span class="badge bg-warning-subtle text-warning"> a revoir </span> </td>
                     <td class="devise text-warning" *ngIf="item.statut! == 2 && item.decaisse! == 1"> <span class="badge bg-warning-subtle text-warning"> a revoir </span> </td>
                     <td class="devise text-success" *ngIf="item.statut! == 3 && item.decaisse! == 0"> <span class="badge bg-success-subtle text-success"> validée </span> </td>
-                    <td class="devise text-secondary" *ngIf="item.statut! == 3 && item.decaisse! == 1"> <span class="badge bg-secondary-subtle text-secondary"> decaissée </span> </td>
-                    <td class="devise text-danger" *ngIf="item.statut! == 4"> <span class="badge bg-dark-subtle text-body"> rejetée </span> </td>
+                    <td class="devise text-secondary" *ngIf="item.statut! == 3 && item.decaisse! == 1"> <span class="badge bg-secondary-subtle text-secondary"> payée </span> </td>
+                    <td class="devise text-danger" *ngIf="item.statut! == 4"> <span class="badge bg-danger-subtle text-danger"> rejetée </span> </td>
                     <td>
                       <ul class="list-inline hstack gap-2 mb-0">
                           <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
@@ -97,11 +99,14 @@
                                   <i class="ri-pencil-fill fs-16"></i>
                               </a>
                           </li>
-                          <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
-                              <a class="text-danger d-inline-block remove-item-btn"  data-bs-toggle="modal" (click)="modalDelete(item)" href="#deleteOrder">
-                                  <i class="ri-delete-bin-5-fill fs-16"></i>
-                              </a>
+
+                          <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Suppression non autorisée">
+                              <button type="button" class="btn btn-link text-danger p-0" data-bs-toggle="modal" data-bs-target="#deleteOrder"
+                                (click)="modalDelete(item)" [disabled]="item.statut === 3" title="Suppression">
+                                <i class="ri-delete-bin-5-fill fs-16"></i>
+                              </button>
                           </li>
+
                           <li class="list-inline-item">
                               <div class="d-flex gap-1 align-items-center">
                                   <div class="dropdown">
@@ -118,7 +123,6 @@
                                   </div>
                               </div>
                           </li>
-                          
                       </ul>
                     </td>
                   </tr>
@@ -367,7 +371,9 @@
                                   <table class="table mb-0">
                                       <thead class="align-middle">
                                           <tr class="table-active">
-                                              <th scope="col"> Nature operation</th>
+                                              <th scope="col">Code budget</th>
+                                              <th scope="col" *ngIf="detailBudgets.budget?.isanalytique || detailBudgets.budget?.isanalytique === 1 ">Centre ana</th>
+                                              <th scope="col" *ngIf="!detailBudgets.budget?.isanalytique || detailBudgets.budget?.isanalytique !== 1">Nature operation</th>
                                               <th scope="col"> Prévision </th>
                                               <th scope="col"> Préengagé </th>
                                               <th scope="col"> Engagé </th>
@@ -379,7 +385,9 @@
                                       <tbody>
                                         @for(det of detailBudgets?.details; track $index){
                                           <tr>
-                                            <td class="text-start"> {{ det?.nature_lib }} </td>
+                                            <td class="text-start"> {{ det?.codebudgetaire }} </td>
+                                            <td class="text-start" *ngIf="detailBudgets.budget?.isanalytique || detailBudgets.budget?.isanalytique === 1 "> {{ det?.centre_lib }} </td>
+                                            <td class="text-start" *ngIf="!detailBudgets.budget?.isanalytique || detailBudgets.budget?.isanalytique !== 1"> {{ det?.nature_lib }} </td>
                                             <td class="text-end"> {{ formatCFA(det?.prevision) }} </td>
                                             <td class="text-end"> {{ formatCFA(det?.preengage) }} </td>
                                             <td class="text-end"> {{ formatCFA(det?.engage) }} </td>

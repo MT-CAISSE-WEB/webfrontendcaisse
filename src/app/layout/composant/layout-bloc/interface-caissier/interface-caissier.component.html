@@ -1,5 +1,119 @@
 
 <div class="row">
+    @for(item of caisseSolde; track $index){
+        <div [ngClass]="getCaisseClass(caisseSolde)">
+            <div class="card card-height-100">
+                <div class="card-body">
+                    <div class="float-end">
+                        <div class="dropdown card-header-dropdown">
+                            <a class="text-reset dropdown-btn" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="text-muted fs-18"><i class="mdi mdi-dots-vertical align-middle"></i></span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <a class="dropdown-item" href="#">Aujourd'hui</a>
+                                <a class="dropdown-item" href="#">Hier</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-sm flex-shrink-0">
+                            <span class="avatar-title bg-info-subtle rounded fs-3">
+                                <i [ngClass]="getSoldeClass(item)"></i>
+                            </span>
+                        </div>
+                        <div class="flex-grow-1 ps-3">
+                            <h5 class="text-muted text-uppercase fs-13 mb-0">Solde {{ item.libelle!}}</h5>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-1">
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-0"> {{ calculSolde(item!) }} <span class="counter-value"> {{ item.codedevise!}} </span> </h4>
+                        <p class="mt-4 mb-0 text-muted"><span class="badge bg-danger-subtle text-danger mb-0 me-1"> <i class="ri-arrow-down-line align-middle"></i> {{ item.decaissement! || 0}} {{ item.codedevise!}} </span> sorties de caisse</p>
+                        <p class="mt-4 mb-0 text-muted"><span class="badge bg-success-subtle text-success mb-0"> <i class="ri-arrow-up-line align-middle"></i> {{ calculEntree(item) }} {{ item.codedevise!}} </span> entrées de caisse</p>
+                    </div>
+                </div>
+            </div>
+        </div><!--end col-->
+    } 
+</div>
+
+<div class="row" *ngIf="iscaissier()">
+    <div class="col-xxl-12">
+        <div class="card card-height">
+            <div class="card-header align-items-center d-flex">
+                <h4 class="card-title mb-0 flex-grow-1">Demandes de paiement validées</h4>
+            </div>
+            <div class="card-body pt-0 mt-3">
+                <div>
+                    <div class="table-responsive table-card mb-1">
+                        <table class="table table-hover table-nowrap align-middle table-scroll table-container table-custom table-compact" id="orderTable">
+                            <thead class="text-muted table-light">
+                                <tr class="text-uppercase">
+                                    <th class="sort" data-sort="id">Code</th>
+                                    <th class="sort" data-sort="id">Département</th>
+                                    <th class="sort" data-sort="customer_name">Type</th>
+                                    <th class="sort" data-sort="status">Montant</th>
+                                    <th class="sort" data-sort="customer_name">Devise</th>
+                                    <th class="sort" data-sort="customer_name">Date</th>
+                                    <th class="sort" data-sort="status">Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody class="list form-check-all">
+                                @for (item of entetesDmd; track item.iddemande){
+                                <tr class="fs-12">
+                                    <td class="numero"><a href="#" class="fw-medium link-primary">{{ item.codedemande }}</a></td>
+                                    <td class="departement"> {{ item.departement?.libelle }} </td>
+                                    <td class="typedemande"> {{ item.typedemande! }} </td>
+                                    <td class="text-end"> {{ formatCFA(getTotalDemande(item)) }} </td>
+                                    <td class="devise"> {{ item.devise!.codedevise }} </td>
+                                    <td class="text-muted text-uppercase fs-11"> {{ formatDateFR(item.datedemande!) }}</td>
+                                    <td class="devise" *ngIf="item.statut! == 0"> <span class="badge bg-primary-subtle text-primary"> non valide </span> </td>
+                                    <td class="devise text-primary" *ngIf="item.statut! == 1"> <span class="badge bg-info-subtle text-info"> en cours </span> </td>
+                                    <td class="devise text-warning" *ngIf="item.statut! == 2 && item.decaisse! == 0"> <span class="badge bg-warning-subtle text-warning"> a revoir </span> </td>
+                                    <td class="devise text-warning" *ngIf="item.statut! == 2 && item.decaisse! == 1"> <span class="badge bg-warning-subtle text-warning"> a revoir </span> </td>
+                                    <td class="devise text-success" *ngIf="item.statut! == 3 && item.decaisse! == 0"> <span class="badge bg-success-subtle text-success"> validée </span> </td>
+                                    <td class="devise text-secondary" *ngIf="item.statut! == 3 && item.decaisse! == 1"> <span class="badge bg-secondary-subtle text-secondary"> payée </span> </td>
+                                    <td class="devise text-danger" *ngIf="item.statut! == 4"> <span class="badge bg-danger-subtle text-danger"> rejetée </span> </td>
+                                </tr>
+                                }
+                                <tr *ngIf="loading">
+                                <td colspan="8">
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border text-info"></div>
+                                        <h6 class="mt-2">Chargement...</h6>
+                                    </div>
+                                </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="noresult" *ngIf="entetesDmd.length == 0 && !loading">
+                        <div class="text-center">
+                            <h6 class="mt-2">Désole! Aucun resultat trouvé</h6>
+                            <p class="text-muted">
+                            Désole il n' y aucune demande dans cette base
+                            </p>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <div class="pagination-wrap hstack gap-2">
+                        <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)"
+                            class="btn btn-sm btn-soft-primary pagination-prev">
+                            Précédent
+                        </button>
+                        <ul class="pagination listjs-pagination mb-0"> Page {{currentPage}} / {{totalPages}} </ul>
+                        <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)"
+                            class="btn btn-sm btn-soft-primary pagination-next">
+                            Suivant
+                        </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
     <div class="col-xl-4 col-md-6">
         <!-- card -->
         <div class="card card-animate">
@@ -50,14 +164,14 @@
                     </div>
                     <div class="flex-shrink-0">
                         <h5 class="text-danger fs-14 mb-0">
-                            <i class="ri-arrow-right-down-line fs-13 align-middle"></i> -3.57 %
+                            <i class="ri-arrow-right-down-line fs-13 align-middle"></i> {{ratioDemandesJour | number:'1.0-2' }} %
                         </h5>
                     </div>
                 </div>
                 <div class="d-flex align-items-end justify-content-between mt-4">
                     <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="36894">36 000</span>{{ user.devise_ref_code}}</h4>
-                        <a href="#" class="text-decoration-underline">Voir plus</a>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="36894">{{totalDemandesPayeesJour}} </span>{{ user.devise_ref_code}}</h4>
+                        <a [routerLink]="root_demande_decaissement" class="text-decoration-underline">Voir plus</a>
                     </div>
                     <div class="avatar-sm flex-shrink-0">
                         <span class="avatar-title bg-info-subtle rounded fs-3">
@@ -106,43 +220,6 @@
 </div> <!-- end row-->
 
 <div class="row">
-    @for(item of caisseSolde; track $index){
-        <div [ngClass]="getCaisseClass(caisseSolde)">
-            <div class="card card-height-100">
-                <div class="card-body">
-                    <div class="float-end">
-                        <div class="dropdown card-header-dropdown">
-                            <a class="text-reset dropdown-btn" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="text-muted fs-18"><i class="mdi mdi-dots-vertical align-middle"></i></span>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-end">
-                                <a class="dropdown-item" href="#">Aujourd'hui</a>
-                                <a class="dropdown-item" href="#">Hier</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <div class="avatar-sm flex-shrink-0">
-                            <span class="avatar-title bg-info-subtle rounded fs-3">
-                                <i [ngClass]="getSoldeClass(item)"></i>
-                            </span>
-                        </div>
-                        <div class="flex-grow-1 ps-3">
-                            <h5 class="text-muted text-uppercase fs-13 mb-0">Solde {{ item.libelle!}}</h5>
-                        </div>
-                    </div>
-                    <div class="mt-4 pt-1">
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-0"> {{ calculSolde(item!) }} <span class="counter-value"> {{ item.codedevise!}} </span> </h4>
-                        <p class="mt-4 mb-0 text-muted"><span class="badge bg-danger-subtle text-danger mb-0 me-1"> <i class="ri-arrow-down-line align-middle"></i> {{ item.decaissement! || 0}} </span> sorties de caisse</p>
-                        <p class="mt-4 mb-0 text-muted"><span class="badge bg-success-subtle text-success mb-0"> <i class="ri-arrow-up-line align-middle"></i> {{ calculEntree(item) }} </span> entrées de caisse</p>
-                    </div>
-                </div>
-            </div>
-        </div><!--end col-->
-    } 
-</div>
-
-<div class="row">
     <div class="col-xl-7">
         <div class="card card-height">
             <div class="card-header align-items-center d-flex">
@@ -160,13 +237,13 @@
                 </div>
             </div><!-- end card header -->
             <div class="card-body">
-                <div class="table-responsive table-card">
+                <div class="table-responsive table-card table-container">
                     @if (loadingLast) {
                         <div class="text-center py-4">
                             <div class="spinner-border text-info"></div>
                         </div>
                     }
-                    <table class="table table-hover table-borderless table-centered align-middle table-nowrap mb-0">
+                    <table class="table table-hover table-borderless table-centered align-middle table-container table-nowrap mb-0">
                         <thead class="text-muted bg-light-subtle">
                             <tr>
                                 <th>Piece</th>
@@ -179,62 +256,68 @@
                         </thead><!-- end thead -->
                         <tbody>
                             @for(item of opLast; track $index){
-                                <tr class="fs-12">
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div>
-                                                <h6 class="fs-12 mb-0">{{item.piece!}}</h6>
+                                @for(element of item.caisses!; track element.codecaisse){
+                                    <tr class="fs-12">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div>
+                                                    <h6 class="fs-12 mb-0">{{item.piece!}}</h6>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td class="text-muted text-end">{{ formatCFA(item.montantop!)}}</td>
-                                    <td *ngIf="item.typeoperation == 'encaissement'">
-                                        <h6 class="text-success fs-13 mb-0">
-                                            <i class="mdi mdi-trending-up align-middle me-1"></i> {{ item.typeoperation!}} 
-                                        </h6>
-                                    </td>
-                                    <td *ngIf="item.typeoperation == 'decaissement'">
-                                        <h6 class="text-danger fs-13 mb-0">
-                                            <i class="mdi mdi-trending-down align-middle me-1"></i> {{ item.typeoperation!}} 
-                                        </h6>
-                                    </td>
-                                    <td class="text-muted text-end"> {{ formatCFA(item.montant!)}}  {{ item.devise! }}</td>
-                                    <td class="text-muted text-end"> {{ formatCFA(item.montant_ref) }} {{user.devise_ref_code}}</td>
-                                    <td class="text-muted text-uppercase"> {{ formatDateFR(item.date!) }} </td>
-                                </tr><!-- end -->
+                                        </td>
+                                        <td class="text-muted text-end">{{ formatCFA(item.montantop!)}}  {{ item.deviseop! }}</td>
+                                        <td *ngIf="item.typeoperation == 'encaissement'">
+                                            <h6 class="text-success fs-13 mb-0">
+                                                <i class="mdi mdi-trending-up align-middle me-1"></i> {{ item.typeoperation!}} 
+                                            </h6>
+                                        </td>
+                                        <td *ngIf="item.typeoperation == 'decaissement'">
+                                            <h6 class="text-danger fs-13 mb-0">
+                                                <i class="mdi mdi-trending-down align-middle me-1"></i> {{ item.typeoperation!}} 
+                                            </h6>
+                                        </td>
+                                        <td *ngIf="item.typeoperation == 'decaissementaj'">
+                                            <h6 class="text-danger fs-13 mb-0">
+                                                <i class="mdi mdi-trending-down align-middle me-1"></i> decaissement à justifier 
+                                            </h6>
+                                        </td>
+                                        <td class="text-muted text-end"> {{ formatCFA(element.montant!)}}  {{ element.devise! }}</td>
+                                        <td class="text-muted text-end"> {{ formatCFA(element.montant_ref) }} {{user.devise_ref_code}}</td>
+                                        <td class="text-muted text-uppercase"> {{ formatDateFR(item.date!) }} </td>
+                                    </tr><!-- end -->
+                                }
                             }
-                            <tr class="fs-12">
-                                <td colspan="3"></td>
-                                <td col="2">
-                                    <div class="d-flex justify-content-end">
-                                        <div class="pagination-wrap">
-                                            <ul class="pagination pagination-separated pagination-sm mb-0 justify-content-center">
-                                                <li class="page-item" [class.disabled]="currentPageL == 1">
-                                                    <a href="javascript:void(0)" class="page-link" (click)="currentPageL > 1 && changePageLast(currentPageL - 1)">←</a>
-                                                </li>
-
-                                                <li class="page-item">
-                                                    <a href="javascript:void(0)" class="page-link"> Page {{currentPageL}} / {{totalPagesL}}</a>
-                                                </li>
-                                                
-                                                <li class="page-item" [class.disabled]="currentPageL == totalPagesL">
-                                                    <a href="javascript:void(0)" class="page-link" (click)="currentPageL < totalPagesL && changePageLast(currentPageL + 1)">→</a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
+                            
                         </tbody><!-- end tbody -->
                     </table><!-- end table -->
+                    <!-- PAGINATION -->
+                    <div class="d-flex justify-content-end mt-2" *ngIf="opLast.length > 0">
+                        <ul class="pagination pagination-separated pagination-sm mb-0">
+                            <li class="page-item" [class.disabled]="currentPageL == 1">
+                                <a href="javascript:void(0)" class="page-link"
+                                (click)="currentPageL > 1 && changePageLast(currentPageL - 1)">←</a>
+                            </li>
+
+                            <li class="page-item">
+                                <span class="page-link">Page {{currentPageL}} / {{totalPagesL}}</span>
+                            </li>
+
+                            <li class="page-item" [class.disabled]="currentPageL == totalPagesL">
+                                <a href="javascript:void(0)" class="page-link"
+                                (click)="currentPageL < totalPagesL && changePageLast(currentPageL + 1)">→</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- NO RESULT -->
                     <div class="noresult" *ngIf="opLast.length == 0">
-                         <div class="text-center"> 
+                        <div class="text-center"> 
                             <i class="ri-inbox-2-line fs-1 text-muted"></i>
                             <h6 class="mt-2">Aucune donnée disponible</h6>
                             <p class="text-muted mb-0">
                                 Désolé pas de donnée trouvée dans la base de donnée
                             </p>
-                         </div>
+                        </div>
                     </div>
                 </div><!-- end tbody -->
             </div><!-- end cardbody -->
@@ -246,7 +329,7 @@
             <div class="card-header align-items-center d-flex">
                 <h4 class="card-title mb-0 flex-grow-1">Historique du jour</h4>
             </div><!-- end card header -->
-            <div class="card-body p-0">
+            <div class="card-body p-0 table-container">
                 <div class="d-flex flex-column" style="height: 390px;">
                     @if (loadingHistory) {
                         <div class="text-center py-4">
@@ -275,11 +358,11 @@
                                         </p>
                                     </div>
                                     <div class="flex-shrink-0 text-end">
-                                        <h6 class="mb-1 text-muted" *ngIf="e.typeoperation == 'decaissement'">- {{ formatCFA(e.montant!)}} <span class="text-uppercase ms-1">{{ e.devise! }}</span></h6>
-                                        <p class="text-warning fs-13 mb-0" *ngIf="e.typeoperation == 'decaissement'">- {{ formatCFA(e.montant_ref) }} {{user.devise_ref_code}}</p>
+                                        <h6 class="mb-1 text-muted" *ngIf="e.typeoperation == 'decaissement'"></h6>
+                                        <p class="text-warning fs-13 mb-0" *ngIf="e.typeoperation == 'decaissement'">- {{ formatCFA(e.montant!)}} <span class="text-uppercase ms-1">{{ e.deviseop! }}</span> </p>
 
-                                        <h6 class="mb-1 text-success" *ngIf="e.typeoperation == 'encaissement'">+ {{ formatCFA(e.montant!)}} <span class="text-uppercase ms-1">{{ e.devise! }}</span></h6>
-                                        <p class="text-success fs-13 mb-0" *ngIf="e.typeoperation == 'encaissement'">+ {{ formatCFA(e.montant_ref) }} {{user.devise_ref_code}} </p>
+                                        <h6 class="mb-1 text-success" *ngIf="e.typeoperation == 'encaissement'"></h6>
+                                        <p class="text-success fs-13 mb-0" *ngIf="e.typeoperation == 'encaissement'">+ {{ formatCFA(e.montant!)}} <span class="text-uppercase ms-1">{{ e.deviseop! }}</span></p>
                                     </div>
                                 </div><!-- end -->
                             }

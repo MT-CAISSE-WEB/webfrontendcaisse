@@ -1,8 +1,7 @@
-import { CommonModule } from '@angular/common';
+import { AsyncPipe, CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DemandeService } from '../services/demande.service';
-import { catchError, finalize, of, switchMap } from 'rxjs';
 import { natureoperationModel } from '../../donnee_base/models/natureoperation.model';
 import { tiersModel } from '../../donnee_base/models/tiers.model';
 import { centreanalytiqueModel } from '../../donnee_base/models/centreanalytique.model';
@@ -14,19 +13,26 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.contantes';
 import { EnteteDemande } from '../models/entete-demande.model';
 import { utilisateurdepartementservice } from '../../administration/service/userdepartement.service';
-import { affectationdepartementnatureModel } from '../../donnee_base/models/affectationdepartementnature.model';
 import { AffectationDepartementNatureService } from '../../donnee_base/services/affectationdepartementnature.service';
-import { affectationnaturecentreModel } from '../../donnee_base/models/affectationnaturecentre.model';
 import { AffectationNatureCentreService } from '../../donnee_base/services/affectationnaturecentre.service';
 import { devisemodel } from '../../donnee_base/donnee_base/model/devise.model';
 import { deviseservice } from '../../donnee_base/donnee_base/service/devise.service';
 import { tauxdevisemodel } from '../../donnee_base/donnee_base/model/tauxdevise.model';
 import { tauxdeviseservice } from '../../donnee_base/donnee_base/service/tauxdevise.service';
 import { departementservice } from '../../structure/service/departement.service';
+import { COLUMNS_DEPARTEMENT } from '../../../_core/constantes/tableau.data';
+import { combineLatest, distinctUntilChanged, filter, map, Observable, shareReplay, startWith, switchMap } from 'rxjs';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { LigneBudgetModel } from '../../budgets/models/ligne_budget.model';
+import { BudgetService } from '../../budgets/services/budget.service';
+import { LigneBudgetService } from '../../budgets/services/ligne_budget.service';
+import { BudgetModel } from '../../budgets/models/budget.model';
 
 @Component({
   selector: 'app-edit-demande',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, MatAutocompleteModule, MatInputModule, MatFormFieldModule, AsyncPipe],
   templateUrl: './edit-demande.component.html',
   styleUrl: './edit-demande.component.css'
 })
@@ -53,6 +59,11 @@ export class EditDemandeComponent implements OnInit {
 
   //Liste des départements de l'utilisateurs
   departementUser: any = [];
+  departementUserFiltered: any = [];
+  filteredDepartements: Observable<any[]> = new Observable();
+
+
+  columnscentre: any[] = COLUMNS_DEPARTEMENT;
   //Liste des natures des départements
   naturesBydepartements: any[] = [];
   //Liste des centres analytiques des natures opérations
@@ -66,19 +77,41 @@ export class EditDemandeComponent implements OnInit {
   devise : devisemodel = new devisemodel();
 
   //Liste des natures filtrées
-  naturesFiltrees: any[] = [];
+  naturesFiltrees: natureoperationModel[] = [];
   natureoperations : natureoperationModel[] = [];
+  filteredNatureoperations: Observable<natureoperationModel[]> = new Observable();
 
   //Liste des tiers
   tiers : tiersModel[] = [];
+  tiersFiltrees: tiersModel[] = [];
+  filteredTiers: Observable<tiersModel[]> = new Observable();
 
   //TITRE ET BOUTON RETOUR
   url: string = "";
 
   //Liste des centres analytiques
   centres : centreanalytiqueModel[] = [];
+  centresFiltrees: centreanalytiqueModel[] = [];
+  filteredCentres: Observable<centreanalytiqueModel[]> = new Observable();
 
-  constructor(private service: DemandeService, private natureoperationservice: NatureoperationService, private router : Router, private ds:deviseservice, private ts: tauxdeviseservice,
+  // Liste des lignes budgetaires
+  ligneBudgets: LigneBudgetModel[] = [];
+  lignesFiltrees : LigneBudgetModel[] = [];
+  filteredLigneBudgets: Observable<LigneBudgetModel[]> = new Observable();
+
+  budgetGlobal!: BudgetModel;
+  lignesBudgetGlobales: LigneBudgetModel[] = [];
+
+  //Map to store ligne observables
+  ligneFilteredMap: Map<number, { natures: Observable<any[]>, tiers: Observable<any[]>, centres: Observable<any[]>, codebudget: Observable<any[]> }> = new Map();
+
+  constructor(private service: DemandeService, 
+    private natureoperationservice: NatureoperationService,
+    private lignebudgetservice: LigneBudgetService,
+    private budgetservice: BudgetService, 
+    private router : Router, 
+    private ds:deviseservice, 
+    private ts: tauxdeviseservice,
     private centreanalytiqueservice: CentreAnalytiqueService, private userdepartement: utilisateurdepartementservice, private AffectationDepartementNatureService: AffectationDepartementNatureService,
     private tiersservice: TiersService, private dp : departementservice, private toastr : ToastrService, private activatedRoute: ActivatedRoute,private AffectationNatureCentreService: AffectationNatureCentreService){}
 
@@ -90,16 +123,8 @@ export class EditDemandeComponent implements OnInit {
     //initialiser le formulaire 
     this.initForm();
     this.title = 'Création';
-    this.activatedRoute.paramMap.subscribe(params =>{
-      const id= params.get("id");
-      this.iddemande = id;
-      if(id && id !="0"){
-        this.getDemande();
-        this.loading = false;
-      }
-    });
-     //Charger les départements de l'user
-    this.loadDepartementsByUser();
+    //Charger les départements de l'user
+    this.getDepartementOfUser();
     //Afficher toutes les devises
     this.getalldevises();
     //charger les centres analytiques
@@ -107,12 +132,35 @@ export class EditDemandeComponent implements OnInit {
     //charger les tiers
     this.getAllTiers();
 
-    this.demandeForm.get('departement')?.valueChanges.subscribe(dept => {
-      if(dept){
-        //filtrer sur la natures des opérations
-        this.onTypeDepartementChange(dept);
+    this.activatedRoute.paramMap.subscribe(params =>{
+      const id= params.get("id");
+      this.iddemande = id;
+      if(id && id !="0"){
+        this.getDemande(this.iddemande);
+        this.loading = false;
       }
     });
+
+    this.demandeForm.get('datedemande')?.valueChanges.pipe(
+      startWith(this.demandeForm.get('datedemande')?.value),
+      filter(date => !!date), // ignore null / vide
+      map(date => new Date(date)),
+      filter(date => !isNaN(date.getTime())), //garde seulement dates valides
+      distinctUntilChanged((a, b) => a.getTime() === b.getTime()),
+      switchMap(date => this.loadBudgetGlobal(date))
+    ).subscribe();
+
+    //Initialiser les departements filtrées après la création du formulaire
+    this.filteredDepartements  = this.demandeForm.get('departement')!.valueChanges.pipe(
+      startWith(''),
+      map(value => {
+        if (value && typeof value !== 'string') {
+          this.onTypeDepartementChange(value.iddepartement!);
+        }
+        //Retourner la liste filtrée
+        return this._filterDepartement(value || '');
+      }),
+    );
 
     //A la selectionner de la devise
     this.demandeForm.get('devise')?.valueChanges.subscribe(devise => {
@@ -125,6 +173,109 @@ export class EditDemandeComponent implements OnInit {
         this.loadLastdeviseTaux(devise);
       }
     });
+
+  }
+
+  private _normalizeValue(value: string): string {
+    return value.toLowerCase().replace(/\s/g, '');
+  }
+
+  private _filterCodeBudget(value: any, ligne: FormGroup): any[] {
+    const filterValue = this._normalizeValue(
+      typeof value === 'string' ? value : value?.codebudgetaire || ''
+    );
+
+    const lignes = this.filterLignesBudget(ligne);
+    return lignes.filter(option =>
+      this._normalizeValue(option.codebudgetaire).includes(filterValue)
+    );
+  }
+
+  private _filterDepartement(value: any): any[] {
+    const filterValue = this._normalizeValue(typeof value === 'string' ? value : value?.libelle || '');
+
+    return this.departementUserFiltered.filter((option: any) =>
+      this._normalizeValue(option.libelle).includes(filterValue)
+    );
+  }
+
+  private _filterNature(value: any): any[] {
+    const filterValue = this._normalizeValue(typeof value === 'string' ? value : value?.libelle || '');
+
+    return this.naturesBydepartements.filter(option =>
+      this._normalizeValue(option.libelle).includes(filterValue)
+    );
+  }
+
+  private _filterTiers(value: any): any[] {
+    const filterValue = this._normalizeValue(typeof value === 'string' ? value : value?.designation || '');
+
+    return this.tiers.filter(option =>
+      this._normalizeValue(option.designation).includes(filterValue)
+    );
+  }
+
+  private _filterCentre(value: any, ligne: FormGroup): any[] {
+    const filterValue = this._normalizeValue(
+      typeof value === 'string' ? value : value?.libelle || ''
+    );
+
+    const centres = ligne.get('centres')?.value || []; //PAR LIGNE
+
+    return centres.filter((option: any) =>
+      this._normalizeValue(option.libelle).includes(filterValue)
+    );
+  }
+
+  displayDepartement(departement: any): string {
+    if (!departement) return '';
+
+    if (typeof departement === 'number') {
+      const found = this.departementUserFiltered.find((d: any)  => d.iddepartement === departement);
+      return found ? found.libelle : '';
+    }
+
+    return typeof departement === 'string' ? departement : departement.libelle;
+  }
+
+  displayNature(nature: any): string {
+    if (!nature) return '';
+
+    if (typeof nature === 'number') {
+      const found = this.naturesFiltrees.find((n: any) => n.idnature === nature);
+      return found ? found.libelle : '';
+    }
+    return typeof nature === 'string' ? nature : nature.libelle;
+  }
+
+  displayTiers(tiers: any): string {
+    if (!tiers) return '';
+
+    if (typeof tiers === 'number') {
+      const found = this.tiers.find((t: any) => t.idtiers === tiers);
+      return found ? found.designation : '';
+    }
+
+    return typeof tiers === 'string' ? tiers : tiers.designation;
+  }
+
+  displayCentre(centre: any): string {
+    if (!centre) return '';
+
+    if (typeof centre === 'number') {
+      const found = this.centresFiltrees.find((c: any) => c.idcentre === centre);
+      return found ? found.libelle : '';
+    }
+
+    return typeof centre === 'string' ? centre : centre.libelle;
+  }
+
+  displayLigne = (ligne: any): string => {
+    return ligne?.codebudgetaire || '';
+  };
+
+  get isReady(): boolean {
+    return this.departementUserFiltered.length > 0 && !!this.demande;
   }
 
   //Get le taux recent
@@ -203,34 +354,30 @@ export class EditDemandeComponent implements OnInit {
   }
 
   //recupere et afficher une demande
-  getDemande(){
-    this.activatedRoute.paramMap.subscribe(params =>{
-      const id= params.get("id");
-      this.iddemande = id;
-      if(id && id !="0"){
-        this.loading = true;
-        this.service.getEntete(id).subscribe({
-          next: (res)=> {
-            if(res.success) {
-              this.demande = res.data;
-              this.breadCrumbItems = [
-                {label: 'Demande'},
-                {label: 'Modification de la demande', active: true}
-              ];
-              this.title = 'Modification';
+  getDemande(id: any){
+    if(id && id !="0"){
+      this.loading = true;
+      this.service.getEntete(id).subscribe({
+        next: (res)=> {
+          if(res.success) {
+            this.demande = res.data;
+            this.breadCrumbItems = [
+              {label: 'Demande'},
+              {label: 'Modification de la demande', active: true}
+            ];
+            this.title = 'Modification';
+            if(this.isReady){
               this.dispatchDemande();
-              //this.lockFormIfRejected();
-              //this.toastr.success("Récuperation réussi")
             }
-            this.loading = false;
-          },
-          error: (err)=> {
-            this.loading = false;
-            this.toastr.error("Erreur backend", err.error.message)
           }
-        })
-      }
-    })
+          this.loading = false;
+        },
+        error: (err)=> {
+          this.loading = false;
+          this.toastr.error("Erreur backend", err.error.message)
+        }
+      })
+    }
   }
 
   //Recuperer les natures opérations
@@ -246,12 +393,14 @@ export class EditDemandeComponent implements OnInit {
     });
   }
 
-  //Récuperer le departement de l'utilisateur
   getDepartementOfUser(){
     this.userdepartement.getutilisateurdepartement(this.user.idutilisateur).subscribe({
       next : (res) => {
         if(res.success){
           this.departementUser = res.data[0];
+
+          //ensuite charger tous les départements
+          this.getalldepartements();
         }
       },
       error: (err) => {
@@ -260,13 +409,38 @@ export class EditDemandeComponent implements OnInit {
     });
   }
 
-  //Tous les departements
   getalldepartements (){
     this.dp.getAll().subscribe({
       next : (res) => {
-         if(res.success){
-            this.departementUser = res.data;
-         }
+        if(res.success){
+          const allDepartements = res.data;
+          //CAS 1 : ADMIN SOCIETE → tout afficher
+          if (this.user?.typeentitesociete === 1) {
+            this.departementUserFiltered = allDepartements;
+          }
+
+          //CAS 2 : ADMIN SITE → filtrer par site
+          else if (this.user?.typeentitesite === 1) {
+            this.departementUserFiltered = allDepartements.filter(
+              (dep:any) => dep.idsite === this.user.idsite
+            );
+          }
+
+          //CAS 3 : UTILISATEUR NORMAL → filtrer par ses départements
+          else {
+            const userIds = new Set(
+              this.departementUser.map((d:any) => d.iddepartement)
+            );
+
+            this.departementUserFiltered = allDepartements.filter(
+              (dep:any) => userIds.has(dep.iddepartement)
+            );
+          }
+
+          if(this.isReady){
+            this.dispatchDemande();
+          }
+        }
       }
     });
   }
@@ -284,7 +458,6 @@ export class EditDemandeComponent implements OnInit {
     this.AffectationDepartementNatureService.getAll(iddepartement).subscribe({
       next: (res) => {
         if (res.success) {
-          //this.naturesBydepartements = res.data.naturesaffectes;
           this.naturesBydepartements = (res.data.naturesaffectes || []).filter(
             (n: any) => n.actif === 1
           );
@@ -313,18 +486,22 @@ export class EditDemandeComponent implements OnInit {
         const centres = (res.data.centresaffectes || [])
           .filter((c: any) => c.actif === 1);
 
-        //stocker les centres dans la ligne
+        //stocker dans la ligne
         ligne.get('centres')?.setValue(centres);
 
-        //activer le champ centre
+        //IMPORTANT : MAJ du filtrage par ligne
+        this.centresFiltrees = centres;
+
+        // activer sans déclencher valueChanges
         ligne.get('centre')?.enable({ emitEvent: false });
 
-        //positionner le centre APRÈS chargement
+        //mettre l'objet complet (PAS juste l'id)
         if (centreId) {
-          ligne.get('centre')?.setValue(centreId, { emitEvent: false });
+          const selected = centres.find((c: { idcentreanalytique: string; }) => c.idcentreanalytique === centreId);
+          ligne.get('centre')?.setValue(selected || null, { emitEvent: false });
         }
       }
-  });
+    });
   }
 
   //Recuperer le departement selectionné
@@ -353,8 +530,6 @@ export class EditDemandeComponent implements OnInit {
       });
   }
 
-  //Recuperer la nature
-
   //Recupérer les centres analytiques
   getAllcentres(){
     this.centreanalytiqueservice.getAll().subscribe({
@@ -373,6 +548,9 @@ export class EditDemandeComponent implements OnInit {
   }
 
   dispatchDemande(){
+    const found = this.departementUserFiltered.find(
+      (d: any) => d.iddepartement === this.demande.iddepartement
+    );
     this.demandeForm.patchValue({
       iddemande : this.demande.iddemande,
       codedemande: this.demande.codedemande,
@@ -382,13 +560,13 @@ export class EditDemandeComponent implements OnInit {
       circuit: this.demande.idcircuit,
       site: this.demande.site?.idsite,
       datedemande: this.formatDateForInput(this.demande.datedemande!),
-      departement: this.demande.iddepartement
+      departement: found
     });
 
     // Lignes
     this.lignes.clear();
     this.demande.lignes.forEach((ligne: any, index: number) => {
-      const ligneGroup = this.newLigne(ligne);
+      const ligneGroup = this.newLigne(ligne); 
       this.lignes.push(ligneGroup);
 
       //DÉTAILS DE LA LIGNE
@@ -434,60 +612,113 @@ export class EditDemandeComponent implements OnInit {
     return this.demandeForm.get('lignes') as FormArray<FormGroup>;
   }
 
-  newLigne(ligne?: any): FormGroup {
+  newLigne(ligne?: any): FormGroup<any> {
     const ligneOf = this.fb.group({
       idlignedemande: [ligne?.idlignedemande || null],
       numligne: [ligne?.numligne || null],
-      natureop: [ligne?.natureoperation.idnature || '', Validators.required],
-      centre: [{ value: ligne?.centreanalytique?.idcentre || null, disabled: true }, Validators.required],
-      tiers: [{ value: ligne?.tiers?.idtiers || null, disabled: true }],
+      natureop: [ligne?.natureoperation || '', Validators.required],
+      centre: [{ value: ligne?.centreanalytique || null, disabled: true }],
+      tiers: [{ value: ligne?.tiers || null, disabled: true }],
+      codebudget: [{ value: ligne?.codebudget || null, disabled: true }],
       montantdemande: [{ value: ligne?.montantdemande || 0, disabled: true }, Validators.required],
       details: this.fb.array([]),
       //CENTRES PAR LIGNE
-      centres: this.fb.control<any[]>([])
+      centres: this.fb.control<any[]>([]),
+      filteredNatureoperations: this.fb.control<any[]>([]),
+      filteredTiers: this.fb.control<any[]>([]),
+      filteredCentres: this.fb.control<any[]>([]),
+      filteredCodebudget: this.fb.control<any[]>([])
     });
 
-    //ÉCOUTE CORRECTE
+    // Filtrage NatureOperations pour cette ligne
+    const filteredNatureoperations = ligneOf.get('natureop')!.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filterNature(value || ''))
+    );
+
+    // Filtrage Tiers pour cette ligne
+    const filteredTiers = ligneOf.get('tiers')!.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filterTiers(value || ''))
+    );
+
+    // Filtrage Centres pour cette ligne
+    const filteredCentres = ligneOf.get('centre')!.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filterCentre(value || '', ligneOf)) //passer la ligne
+    );
+
+    // Filtrage LigneBudgets pour cette ligne
+    const filteredLigneBudgets = ligneOf.get('codebudget')!.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filterCodeBudget(value || '', ligneOf)) //passer la ligne
+    );
+
+    // Store observables in the map for template access
+    const ligneIndex = this.lignes.length;
+    this.ligneFilteredMap.set(ligneIndex, {
+      natures: filteredNatureoperations,
+      tiers: filteredTiers,
+      centres: filteredCentres, // vide pour l’instant
+      codebudget: filteredLigneBudgets // vide pour l’instant
+    });
+
     ligneOf.get('natureop')?.valueChanges.subscribe(nature => {
-      if (!nature) {
-        ligneOf.get('centre')?.disable();
-        ligneOf.get('tiers')?.disable();
-        ligneOf.get('montantdemande')?.disable();
-        ligneOf.patchValue({ centre: null });
-        ligneOf.get('centres')?.setValue([]);
-        return;
-      }
+      // reset AVANT logique
+      ligneOf.get('codebudget')?.setValue(null, { emitEvent: false });
+
+      if (!nature) return;
 
       ligneOf.get('centre')?.enable();
       ligneOf.get('montantdemande')?.enable();
 
-      //charger centres POUR CETTE LIGNE
+      const lignes = this.filterLignesBudget(ligneOf);
+      if (!this.budgetGlobal?.isanalytique && nature.decajustifier === 0) {
+        ligneOf.get('codebudget')?.setValue(lignes[0] || null, { emitEvent: true });
+      }
+
+      //Charger les centres de chaque lignes
       this.loadCentresForLigne(ligneOf, nature);
 
-      // règle métier tiers
+      // Appliquer les règles métiers 
       this.handleNatureChange(ligneOf, nature);
+    });
+
+    ligneOf.get('centre')?.valueChanges.subscribe(centre => {
+      if (!centre) return;
+
+      if (this.budgetGlobal?.isanalytique === 1) {
+        const lignes = this.filterLignesBudget(ligneOf);
+        ligneOf.get('codebudget')?.setValue(lignes[0] || null, { emitEvent: true });
+      }
     });
 
     return ligneOf;
   }
 
   //Selection de la nature / Activer ou desactiver imputation tiers
-  handleNatureChange(ligne: FormGroup, natureId: string) {
-    const nature = this.naturesBydepartements.find(
-      n => n.idnature === natureId
+  handleNatureChange(ligne: FormGroup, nature: any) {
+    const natures = this.naturesBydepartements.find(
+      n => n.idnature === nature.idnature
     );
 
-    if (!nature) {
+    if (!natures) {
       ligne.get('tiers')?.disable();
       ligne.get('tiers')?.reset();
       return;
     }
 
-    if (nature.imputationtiers === 1) {
+    if (natures.imputationtiers === 1) {
       ligne.get('tiers')?.enable();
     } else {
       ligne.get('tiers')?.disable();
       ligne.get('tiers')?.reset();
+    }
+
+    if(natures.decajustifier === 1){
+      ligne.get('codebudget')?.enable();
+    }else{
+      ligne.get('codebudget')?.disable();
     }
   }
 
@@ -496,8 +727,8 @@ export class EditDemandeComponent implements OnInit {
   }
 
   //Charger les centres de chaque ligne
-  loadCentresForLigne(ligne: FormGroup, idnature: string) {
-    this.AffectationNatureCentreService.getAll(idnature).subscribe({
+  loadCentresForLigne(ligne: FormGroup, nature: any) {
+    this.AffectationNatureCentreService.getAll(nature.idnature).subscribe({
       next: (res) => {
         if (res.success) {
           const centres = (res.data.centresaffectes || [])
@@ -508,6 +739,7 @@ export class EditDemandeComponent implements OnInit {
 
           // reset centre sélectionné
           ligne.get('centre')?.reset();
+          this.centresFiltrees = centres;
         }
       }
     });
@@ -604,6 +836,15 @@ export class EditDemandeComponent implements OnInit {
     });
   }
 
+  //Méthode helper pour obtenir le nom complet de l'utilisateur
+  getUserFullName(): string {
+    const user = this.user;
+    if (user && user.nom && user.prenom) {
+      return `${user.nom} ${user.prenom}`;
+    }
+    return user?.nom || user?.prenom || 'Systeme';
+  }
+
   submit() {
     /** Check formulaire */
     this.msgErros = '';
@@ -616,9 +857,20 @@ export class EditDemandeComponent implements OnInit {
     }
 
     /** 2. prepare data */
+    const raw = this.demandeForm.getRawValue();
     const formValue = {
       ...this.demande,
-      ...this.demandeForm.getRawValue(),
+      ...raw,
+      //transformer departement
+      departement: raw.departement?.iddepartement || raw.departement,
+      //transformer lignes
+      lignes: raw.lignes.map((l: any) => ({
+        ...l,
+        natureop: l.natureop?.idnature || l.natureop,
+        centre: l.centre?.idcentreanalytique || l.centre,
+        tiers: l.tiers?.idtiers || l.tiers
+      })),
+
       createdby: this.user.codeutilisateur ?? null,
       updatedby: this.title === 'Modification'
         ? `${this.user.nom} ${this.user.prenom}`
@@ -628,9 +880,6 @@ export class EditDemandeComponent implements OnInit {
     /** 3. choices action */
     if(this.title == "Création")this.create(formValue);
     else this.update(formValue);
-
-    // if (!formValue.iddemande) this.create(formValue);
-    // else this.update(formValue);
   }
 
   resetForm(){
@@ -699,4 +948,71 @@ export class EditDemandeComponent implements OnInit {
     })
   }
 
+  // Charger les lignes du budget Globals
+  loadBudgetGlobal(date: Date): Observable<void> {
+    const params = { page: 1, limit: 10000 };
+    return this.budgetservice.getAll(params).pipe(
+      map((res: any) => {
+        let budgets = res.data as BudgetModel[];
+
+        budgets = budgets.filter(b =>
+          this.user.typeentitesociete === 1
+            ? b.idsociete === this.user.idsociete
+            : b.idsociete === this.user.idsociete &&
+              b.idsite === this.user.idsite
+        );
+
+        budgets = budgets.filter(b => b.actif === 1 && b.valide === 1);
+        const target = new Date(date).getTime();
+        budgets = budgets.filter(b => {
+          const debut = new Date(b.datedebut).getTime();
+          const fin = new Date(b.datefin).getTime();
+          return target >= debut && target <= fin;
+        });
+
+        const mensuels = budgets.filter(b => b.typebudget === 'Mensuel');
+        this.budgetGlobal = mensuels.length ? mensuels[0] : budgets[0];
+
+        return this.budgetGlobal;
+      }),
+      switchMap(budget =>
+        this.lignebudgetservice.getByBudget(budget.idbudget, 10000000, 1)
+      ),
+      map((res: any) => {
+        this.lignesBudgetGlobales = res.data.lignes || [];
+      }),
+      shareReplay(1)
+    );
+  }
+
+  // Filtre les lignes selon le budget
+  filterLignesBudget(ligne: FormGroup): LigneBudgetModel[] {
+    if (!this.lignesBudgetGlobales.length) return [];
+
+    const nature = ligne.get('natureop')?.value;
+    const centre = ligne.get('centre')?.value;
+    const departement = this.demandeForm.get('departement')?.value;
+
+    //CAS DECAJUSTIFIER
+    if (nature?.decajustifier === 1) {
+      return this.lignesBudgetGlobales;
+    }
+
+    //ANALYTIQUE
+    if (this.budgetGlobal?.isanalytique === 1) {
+      if (!centre) return [];
+
+      return this.lignesBudgetGlobales.filter(l =>
+        l.idcentreanalytique === centre.idcentreanalytique
+      );
+    }
+
+    //NON ANALYTIQUE
+    return this.lignesBudgetGlobales.filter(l =>
+      l.iddepartement === departement?.iddepartement &&
+      l.idnature === nature?.idnature
+    );
+  }
+
 }
+

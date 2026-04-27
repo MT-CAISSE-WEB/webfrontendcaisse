@@ -110,7 +110,6 @@ export class CircuitvalidationComponent implements OnInit{
                   //   validateurs.clear();
                   // });
               });
-
         }
 
   getallcircuitvalidation(){
@@ -433,23 +432,17 @@ removeEtape(index: number) {
               {
                 this.create(_circuitvalidation);
                 this.refreshpage();
-              }
-
-
-
-         
+              } 
       }
 
       refreshpage(){
         const currentUrl = this.router.url;
-
         this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
           this.router.navigate([currentUrl]);
         });
       }
 
       create (circuitvalidation : any){
-          console.log(circuitvalidation);
           this.cv.createcomplete(circuitvalidation).subscribe({
             next: (res: any) => {
               if(res.success){

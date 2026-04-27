@@ -8,7 +8,7 @@ import { Injectable } from "@angular/core";
   providedIn: 'root'
 })
 export class JustificatifService {
-    url : string = 'justificatifs' ;
+    url : string = 'justificatifs';
 
     constructor(private http: HttpClient) {}
 
@@ -16,10 +16,20 @@ export class JustificatifService {
    * get All
    * @param params
    */
-    getAll(params: any = {}): Observable<QueryResultModel> {
-        return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url, {
+    getJustificatifs(params: any = {}): Observable<QueryResultModel> {
+      return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url, {
         params,
-        });
+      });
+    }
+
+    /**
+   * get All Details justificatifs
+   * @param params
+   */
+    getdetailsJustificatif(params: any = {}): Observable<QueryResultModel> {
+      return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + 'justificatifs-details', {
+        params,
+      });
     }
 
   /**

@@ -1,4 +1,5 @@
 import { MainModel } from '../../../_core/models/main.model';
+import { centreanalytiqueModel } from '../../donnee_base/models/centreanalytique.model';
 import { natureoperationModel } from '../../donnee_base/models/natureoperation.model';
 import { departementmodel } from '../../structure/model/departement.model';
 import { BudgetModel } from './budget.model';
@@ -6,8 +7,10 @@ import { BudgetModel } from './budget.model';
 export class LigneBudgetModel extends MainModel {
   idbudgetdepartementnature: string = '';
   idbudget: string = '';
+  codebudgetaire: string = '';
   iddepartement: string | null = '';
   idnature: string | null = '';
+  idcentreanalytique: string | null = '';
   montantprevisiondept: number = 0;
   montantprevisionsite: number = 0;
   montantprevisionsociete: number = 0;
@@ -16,4 +19,5 @@ export class LigneBudgetModel extends MainModel {
   budget: BudgetModel | null = null;
   departement: departementmodel | null = null;
   nature_operation: natureoperationModel | null = null;
+  centre_analytique: centreanalytiqueModel | null = null;
 }
