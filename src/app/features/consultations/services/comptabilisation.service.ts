@@ -35,7 +35,16 @@ export class ComptabilisationService {
    * @param params
    */
     getAllEcriture(_data: any): Observable<QueryResultModel> {
+        console.log(_data);
         return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/Ecriture/LigneEcriture', _data);
+    }
+
+    /**
+   * get toutes les ecritures
+   * @param params
+   */
+    Comptabilisationdefinitive(_data: any): Observable<QueryResultModel> {
+        return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/Ecriture/LigneEcriture/comptabilisationdefinitive', _data);
     }
 
      /**

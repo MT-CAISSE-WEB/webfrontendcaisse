@@ -231,6 +231,8 @@ export class ComptabilisationComponent implements OnInit{
     etat : this.criteriaForm.value.etat || null,
     journal: this.criteriaForm.value.journal || null
     };
+
+    console.log(criteria);
     this.search(criteria);
 
 
@@ -262,10 +264,11 @@ export class ComptabilisationComponent implements OnInit{
   }
 
   generate(data: any){
-    this.service.generateEcriture(data).subscribe({
+    console.log(data);
+    this.service.Comptabilisationdefinitive(data).subscribe({
       next : (res) => {
         if(res.success){
-          this.toastr.success("Ecritures générées avec succès");
+          this.toastr.success("Simulation d'écritures intégrée avec succès");
           // Recharger la page
           window.location.reload();
         }
