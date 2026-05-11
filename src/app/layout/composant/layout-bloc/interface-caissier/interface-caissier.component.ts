@@ -176,7 +176,23 @@ export class InterfaceCaissierComponent implements OnInit{
   }
 
   calculSolde(item: any): string {
-    return this.formatCFA(this.getSolde(item));
+    if(item.codedevise! != 'USD'){
+      return this.formatCFA(this.getSolde(item));
+    }else{
+      return this.formatNumber(this.getSolde(item));
+    }
+  }
+
+  formatNumber(montant: number | string | undefined): string {
+    if (montant === null || montant === undefined || montant === "") return "";
+    const valeur = Number(montant);
+    if (isNaN(valeur)) return "";
+
+    return valeur
+      .toLocaleString('fr-FR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
   }
 
   formatCFA(montant: number | null | undefined): string {
@@ -191,7 +207,11 @@ export class InterfaceCaissierComponent implements OnInit{
   }
 
   calculEntree(item: any): string {
-    return this.formatCFA(this.getEntree(item));
+    if(item.codedevise! != 'USD'){
+      return this.formatCFA(this.getEntree(item));
+    }else{
+      return this.formatNumber(this.getEntree(item));
+    }
   }
 
   getCaisseClass(item: any[]): string {

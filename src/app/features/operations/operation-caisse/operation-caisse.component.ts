@@ -602,6 +602,17 @@ export class OperationCaisseComponent implements OnInit{
     return this.operationForm.controls;
   }
 
+  afficheMontant(item: any){
+    console.log(item);
+    if(item.devise.codedevise != 'USD'){
+      console.log("Voir ", item.montant);
+      return this.formatCFA(item.montant)
+    }else{
+      console.log("revoir ", item.montant)
+      return this.formatNumber(item.montant)
+    }
+  }
+
   formatNumber(montant: number | string): string {
     if (montant === null || montant === undefined || montant === "") return "";
     const valeur = Number(montant);

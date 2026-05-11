@@ -124,8 +124,28 @@ export class LayoutHeaderComponent implements OnInit {
     return (Number(item?.soldeinitialisation) || 0) + (Number(item?.solde) || 0);
   }
 
+  // calculSolde(item: any): string {
+  //   return this.formatCFA(this.getSolde(item));
+  // }
+
   calculSolde(item: any): string {
-    return this.formatCFA(this.getSolde(item));
+    if(item.codedevise! != 'USD'){
+      return this.formatCFA(this.getSolde(item));
+    }else{
+      return this.formatNumber(this.getSolde(item));
+    }
+  }
+
+  formatNumber(montant: number | string | undefined): string {
+    if (montant === null || montant === undefined || montant === "") return "";
+    const valeur = Number(montant);
+    if (isNaN(valeur)) return "";
+
+    return valeur
+      .toLocaleString('fr-FR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
   }
 
   getSoldeClass(item: any): string {

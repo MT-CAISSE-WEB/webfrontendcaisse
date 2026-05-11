@@ -92,7 +92,8 @@
                                         <td class="typepaiement text-success" *ngIf="item.caisses[0].codtypeoperation == 'encaissement'"> {{ item.caisses[0].codtypeoperation}} <i class="ri-arrow-right-up-line fs-13 align-middle"></i> </td>
                                         <td class="typepaiement text-warning" *ngIf="item.caisses[0].codtypeoperation == 'decaissement'"> {{ item.caisses[0].codtypeoperation}} <i class="ri-arrow-right-down-line fs-13 align-middle"></i> </td>
                                         <td class="typepaiement text-primary" *ngIf="item.caisses[0].codtypeoperation == 'decaissementaj'"> decaissement à justifier <i class="ri-arrow-right-down-line fs-13 align-middle"></i> </td>
-                                        <td class="montant text-center"> {{ formatCFA(item.montant) }} </td>
+                                        <td class="montant text-center" *ngIf="item.devise.codedevise != 'USD'"> {{ formatCFA(item.montant) }} </td>
+                                        <td class="montant text-center" *ngIf="item.devise.codedevise == 'USD'"> {{ formatNumber(item.montant) }} </td>
                                         <td class="devise"> {{ item.devise.codedevise }} </td>
                                         <td class="text-muted text-uppercase fs-11"> {{ formatDateFR(item.dateoperation) }}</td>
                                         <td>
