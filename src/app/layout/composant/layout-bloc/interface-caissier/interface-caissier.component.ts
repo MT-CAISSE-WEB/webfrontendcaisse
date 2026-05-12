@@ -162,7 +162,6 @@ export class InterfaceCaissierComponent implements OnInit{
       next : (res) => {
         if(res.success){
           this.caisseperiodes = res.data;
-          console.log(this.caisseperiodes)
           if(this.caisseperiodes.length > 0){
             this.params.date = this.formatDateInput(new Date(this.caisseperiodes[0].dernierePeriode.dateperiode));
           }

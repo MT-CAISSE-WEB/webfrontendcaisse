@@ -99,4 +99,23 @@ export class DecaissementJustifierComponent implements OnInit {
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
+  formatCFA(montant: number | null | undefined): string {
+    return new Intl.NumberFormat('fr-FR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(montant ?? 0);
+  }
+
+  formatNumber(montant: number | string): string {
+    if (montant === null || montant === undefined || montant === "") return "";
+    const valeur = Number(montant);
+    if (isNaN(valeur)) return "";
+
+    return valeur
+      .toLocaleString('fr-FR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+  }
+
 }

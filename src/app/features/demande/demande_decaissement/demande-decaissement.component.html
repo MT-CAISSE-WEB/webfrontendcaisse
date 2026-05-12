@@ -82,9 +82,10 @@
                     <td class="numero"><a href="#" class="fw-medium link-primary">{{ item.codedemande }}</a></td>
                     <td class="departement"> {{ item.departement?.libelle }} </td>
                     <td class="typedemande"> {{ item.typedemande! }} </td>
-                    <td class="text-end"> {{ formatCFA(getTotalDemande(item)) }} </td>
+                    <td class="montant text-end" *ngIf="item.devise!.codedevise != 'USD'"> {{ formatCFA(getTotalDemande(item)) }} </td>
+                    <td class="montant text-end" *ngIf="item.devise!.codedevise == 'USD'"> {{ formatNumber(getTotalDemande(item)) }} </td>
                     <td class="devise"> {{ item.devise!.codedevise }} </td>
-                    <td class="text-muted text-uppercase fs-11"> {{ formatDateFR(item.datedemande!) }}</td>
+                    <td class="text-muted text-uppercase fs-11">{{ formatDateFR(item.datedemande!) }}</td>
                     <td class="devise" *ngIf="item.statut! == 0"> <span class="badge bg-primary-subtle text-primary"> non valide </span> </td>
                     <td class="devise text-primary" *ngIf="item.statut! == 1"> <span class="badge bg-info-subtle text-info"> en cours </span> </td>
                     <td class="devise text-warning" *ngIf="item.statut! == 2 && item.decaisse! == 0"> <span class="badge bg-warning-subtle text-warning"> a revoir </span> </td>

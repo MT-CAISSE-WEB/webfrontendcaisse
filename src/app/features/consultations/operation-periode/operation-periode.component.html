@@ -50,7 +50,8 @@
                                             @for(caisse of item.caisses; track $index){
                                                 <tr>
                                                     <td colspan="2" class="p-2"><strong> {{ caisse?.codecaisse }} - {{ caisse?.caisse }} </strong> </td>
-                                                    <td colspan="2" class="start p-2">Solde ouverture : <strong> {{caisse?.solde_ouverture}} {{ caisse?.devise }}</strong> </td>
+                                                    <td colspan="2" class="start p-2" *ngIf="item?.devise != 'USD'" >Solde ouverture : <strong> {{ formatCFA(caisse?.solde_ouverture)}} {{ caisse?.devise }}</strong> </td>
+                                                    <td colspan="2" class="start p-2" *ngIf="item?.devise == 'USD'" >Solde ouverture : <strong> {{ formatNumber(caisse?.solde_ouverture) }} {{ caisse?.devise }}</strong> </td>
                                                 </tr>
                                                 <tr>
                                                     <td>
@@ -84,11 +85,17 @@
                                                                     <tr>
                                                                         <td>{{ element.description || '-' }}</td>
                                                                         <td class="text-end">{{ element.typeoperation || '-' }}</td>
-                                                                        <td class="text-end">
-                                                                            {{ element.montant | number:'1.0-2' }} {{ caisse?.devise }}
+                                                                        <td class="text-end" *ngIf="caisse?.devise != 'USD'">
+                                                                            {{ formatCFA(element.montant) }} {{ caisse?.devise }}
                                                                         </td>
-                                                                        <td class="text-end">
-                                                                            {{ element.montant_ref | number:'1.0-2' }} {{ user.devise_ref_code }}
+                                                                        <td class="text-end" *ngIf="caisse?.devise == 'USD'">
+                                                                            {{ formatNumber(element.montant) }} {{ caisse?.devise }}
+                                                                        </td>
+                                                                        <td class="text-end" *ngIf="user.devise_ref_code != 'USD'">
+                                                                            {{ formatCFA(element.montant_ref) }} {{ user.devise_ref_code }}
+                                                                        </td>
+                                                                        <td class="text-end" *ngIf="user.devise_ref_code == 'USD'">
+                                                                            {{ formatNumber(element.montant_ref) }} {{ user.devise_ref_code }}
                                                                         </td>
                                                                         <td>{{ element.piece || '-' }}</td>
                                                                     </tr>
@@ -99,7 +106,8 @@
                                                 </tr>
                                                 <tr>
                                                     <td colspan="2" class="p-2"> </td>
-                                                    <td colspan="2" class="start p-2">Solde fermeture : <strong> {{ caisse?.solde_fermeture}}  {{ caisse?.devise }}</strong>  </td>
+                                                    <td colspan="2" class="start p-2" *ngIf="caisse?.devise != 'USD'">Solde fermeture : <strong> {{ formatCFA(caisse?.solde_fermeture)}}  {{ caisse?.devise }}</strong>  </td>
+                                                    <td colspan="2" class="start p-2" *ngIf="caisse?.devise == 'USD'">Solde fermeture : <strong> {{ formatNumber(caisse?.solde_fermeture)}}  {{ caisse?.devise }}</strong>  </td>
                                                 </tr>
                                             }
                                         </table>

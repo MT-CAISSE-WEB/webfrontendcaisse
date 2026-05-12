@@ -67,11 +67,17 @@
                                                     <td>{{type.codecaisse}} - {{type.caisse}}</td>
                                                     <td *ngIf="type.codtypeoperation == 'decaissementaj'"> décaissement à justifier</td>
                                                     <td *ngIf="type.codtypeoperation == 'encaissement'"> retour de caisse</td>
-                                                    <td class="text-end">
-                                                        {{type.montant}} {{type.codedevise}}
+                                                    <td class="text-end" *ngIf="type.codedevise != 'USD'">
+                                                        {{ formatCFA(type.montant) }} {{type.codedevise}}
                                                     </td>
-                                                    <td class="text-end">
-                                                        {{type.montantref}} {{user.devise_ref_code}}
+                                                    <td class="text-end" *ngIf="type.codedevise == 'USD'">
+                                                        {{ formatNumber(type.montant) }} {{type.codedevise}}
+                                                    </td>
+                                                    <td class="text-end" *ngIf="user.devise_ref_code != 'USD'">
+                                                        {{ formatCFA(type.montantref) }} {{user.devise_ref_code}}
+                                                    </td>
+                                                    <td class="text-end" *ngIf="user.devise_ref_code == 'USD'">
+                                                        {{ formatNumber(type.montantref) }} {{user.devise_ref_code}}
                                                     </td>
                                                 </tr>
 
@@ -98,7 +104,8 @@
                                                     <td>{{ligne.libellenature}}</td>
                                                     <td>{{ligne.libellecentre}}</td>
                                                     <td>{{ligne.designationtiers}}</td>
-                                                    <td class="text-end">{{ligne.montantoperation}} {{operation.codedevise}}</td>
+                                                    <td class="text-end" *ngIf="operation.codedevise != 'USD'">{{ formatCFA(ligne.montantoperation) }} {{operation.codedevise}} </td>
+                                                    <td class="text-end" *ngIf="operation.codedevise == 'USD'">{{ formatNumber(ligne.montantoperation) }} {{operation.codedevise}} </td>
                                                 </tr>
                                                 }
 
@@ -119,9 +126,12 @@
                                                 {{just.codejustificatif}}
                                                 - {{just.date | date:'dd/MM/yyyy'}}
 
-                                                <span class="float-end">
-                                                    {{just.montantjustificatif}}
-                                                    {{just.codedevise}}
+                                                <span class="float-end" *ngIf="just.codedevise != 'USD'">
+                                                    {{ formatCFA(just.montantjustificatif)}}  {{just.codedevise}}   
+                                                </span>
+
+                                                <span class="float-end" *ngIf="just.codedevise == 'USD'">
+                                                    {{ formatNumber(just.montantjustificatif)}}  {{just.codedevise}}   
                                                 </span>
 
                                             </div>
@@ -147,7 +157,8 @@
                                                             <td>{{detail.libellenature}}</td>
                                                             <td>{{detail.libellecentre}}</td>
                                                             <td>{{detail.designationtiers}}</td>
-                                                            <td class="text-end">{{detail.montantdetail}} {{just.codedevise}}</td>
+                                                            <td class="montant text-end" *ngIf="just.codedevise != 'USD'"> {{ formatCFA(detail.montantdetail)}}  {{just.codedevise}}</td>
+                                                            <td class="montant text-end" *ngIf="just.codedevise == 'USD'"> {{ formatNumber(detail.montantdetail)}}  {{just.codedevise}}</td>
                                                         </tr>
 
                                                         }

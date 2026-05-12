@@ -130,8 +130,9 @@
                                         <td> {{item?.nature_operation }} </td> 
                                         <td> {{item?.centrelibelle }} </td>
                                         <td> {{item?.tiers || 'Aucun tiers'}} </td>
-                                        <td> {{item?.montantligne }} </td>
-                                        <td> {{item?.devise }} </td>
+                                        <td *ngIf="item?.devise != 'USD'"> {{ formatCFA(item?.montantligne) }} </td>
+                                        <td *ngIf="item?.devise == 'USD'"> {{ formatNumber(item?.montantligne) }} </td>
+                                        <td> {{item?.devise}} </td>
                                     </tr>
                                 }
                                 <tr *ngIf="loading">
