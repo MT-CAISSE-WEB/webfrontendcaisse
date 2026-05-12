@@ -43,7 +43,8 @@ export class ComptabilisationComponent implements OnInit{
 
   tableau_Ecritures = [
     { header: 'Site', field: 'codesite' },
-    { header: 'N° piece', field: 'ref_ecriture' },
+    { header: 'N° document', field: 'ref_ecriture' },
+    { header: 'N° piece', field: 'num_piece' },
     { header: 'N° ecriture', field: 'numligne' },
     { header: 'Journal', field: 'journal' },
     { header: 'Date', field: 'numligne' },
