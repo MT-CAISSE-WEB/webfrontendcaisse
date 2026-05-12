@@ -180,7 +180,8 @@
                             <thead class="text-muted">
                                 <tr>
                                     <th class="sort text-uppercase" data-sort="site">Site</th>
-                                    <th class="sort text-uppercase" data-sort="document">N° piece</th>
+                                    <th class="sort text-uppercase" data-sort="document">N° document</th>
+                                    <th class="sort text-uppercase" data-sort="ecriture">N° piece</th>
                                     <th class="sort text-uppercase" data-sort="numero">N° ecriture</th>
                                     <th class="sort text-uppercase" data-sort="journal">Journal</th>
                                     <th class="sort text-uppercase" data-sort="date">Date</th>
@@ -201,6 +202,7 @@
                                     <tr>
                                         <td> {{ piece.codesite }} </td>
                                         <td> {{ piece.ref_ecriture }} </td>
+                                        <td>  {{ piece.num_piece }} </td>
                                         <td> {{ piece.numligne}} </td>
                                         <td> {{ piece.journal}} </td>
                                         <td> {{ formatDateFR(piece.date_operation) }} </td>
@@ -217,7 +219,6 @@
                                         <td></td>
                                     </tr>
                                 }
-                                
                             </tbody>
                         </table>
                         <div *ngIf="!ecritures || ecritures.length == 0" class="text-center">
