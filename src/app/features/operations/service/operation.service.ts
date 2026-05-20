@@ -35,6 +35,18 @@ export class OperationService {
   }
 
   /**
+   * cancel
+   * @param _object
+   * 
+   */
+  cancel(_object: any): Observable<any> {
+    return this.http.post<any>(
+      URL_LOCAL.baseUrl + this.url + "/cancel",
+      _object
+    );
+  }
+
+  /**
    * update
    * @param _object
    */

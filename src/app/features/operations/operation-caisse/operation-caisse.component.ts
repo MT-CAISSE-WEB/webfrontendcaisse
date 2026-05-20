@@ -52,6 +52,7 @@ export class OperationCaisseComponent implements OnInit{
   operations : operationModel[] = [];
   operation : operationModel = new operationModel();
   operationdetail : operationModel | null = new operationModel();
+  operationecriture : operationModel | null = new operationModel();
 
   //Faire le check selection **********
   objectsSelected : operationModel[] = [];
@@ -105,6 +106,9 @@ export class OperationCaisseComponent implements OnInit{
 
   //Element à supprimer 
   deleteOperation: any = null;
+
+  //Element à annuler 
+  cancelOperation: any = null;
 
   //Element statistiques
   stats : any = null;
@@ -283,6 +287,7 @@ export class OperationCaisseComponent implements OnInit{
           this.operations = res.data.data;
           this.totalPages = res.data.totalPages;
           this.loading = false;
+          console.log(this.operations);
         }
       },
       error : (err) => {
@@ -603,12 +608,9 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   afficheMontant(item: any){
-    console.log(item);
     if(item.devise.codedevise != 'USD'){
-      console.log("Voir ", item.montant);
       return this.formatCFA(item.montant)
     }else{
-      console.log("revoir ", item.montant)
       return this.formatNumber(item.montant)
     }
   }
@@ -1152,9 +1154,8 @@ export class OperationCaisseComponent implements OnInit{
       next: (res) => {
         if (res.success) {
           this.closeModal('showModal');
-          //this.getAllOperations();
-          this.rafreshpage();
-          this.reloadData();
+          // Recharger la page
+          window.location.reload();
           this.toastr.success('Opération enregistrée avec succès');
         } else {
           this.error = "Erreur de création";
@@ -1170,7 +1171,8 @@ export class OperationCaisseComponent implements OnInit{
   }
 
   //Impression du reçu
-  printRecu(){
+  printRecu(_object: operationModel){
+    this.operation = _object;
     if (!this.operation) return;
 
     //Recuperationd de l'id
@@ -1179,13 +1181,6 @@ export class OperationCaisseComponent implements OnInit{
       next: (blob: Blob) => {
         const url = window.URL.createObjectURL(blob);
         const win = window.open(url, '_blank');
-      // next: (blob) => {
-      //   const url = URL.createObjectURL(blob);
-      //   const iframe = document.createElement('iframe');
-      //   iframe.style.display = 'none';
-      //   iframe.src = url;
-      //   document.body.appendChild(iframe);
-      //   iframe.contentWindow?.print();
       },
       error: (err) => {
         this.toastr.error("Erreur d\'impression du reçu");
@@ -1625,8 +1620,8 @@ export class OperationCaisseComponent implements OnInit{
           this.deleteOperation = null;
           this.closeModal('deleteOrder');
           this.getAllOperations();
-          this.rafreshpage();
-          this.toastr.error('Opération supprimée');
+          window.location.reload();
+          this.toastr.success('Opération supprimée');
         } else {
           this.error = "Erreur de Suppression";
           this.toastr.error(this.error);
@@ -1663,23 +1658,6 @@ export class OperationCaisseComponent implements OnInit{
       }
     });
   }
-
-  //Création des lignes depuis la demande
-  // createLigneFromDemande(ligne: any): FormGroup {
-  //   const fg = this.fb.group({
-  //     idligne: [''],
-  //     montantligne: [ligne.montantdemande, Validators.required],
-  //     natureop: [ligne.natureoperation?.idnature],
-  //     centre: [ligne.centreanalytique?.idcentre],
-  //     tiers: [ligne.tiers?.idtiers],
-  //     centres: this.fb.control<any[]>([])
-  //   });
-
-  //   //charger centres POUR CETTE LIGNE
-  //   this.loadCentresForLigne(fg, ligne.natureoperation?.idnature, false, ligne.centreanalytique?.idcentre);
-
-  //   return fg;
-  // }
 
   //Remplir le formulaire depuis la demande
   fillFormFromDemande(demande: any) {
@@ -1727,6 +1705,84 @@ export class OperationCaisseComponent implements OnInit{
       { montantRefglobal: montantGlobal },
       { emitEvent: false }
     );
+  }
+
+  modalCancel(item: any) {
+    item.dateoperation = this.getDatePeriodeDuJour();
+    this.cancelOperation = item;
+  }
+
+  //Annulation de l'opération
+  cancelConfirmed(){
+    if(!this.cancelOperation) return;
+    this.loading = true;
+    this.operationservice.cancel(this.cancelOperation).subscribe({
+      next: (res) => {
+        if (res.success){
+          this.closeModal('cancelModal');
+          this.rafreshpage();
+          // Recharger la page
+          window.location.reload();
+          this.toastr.success('Opération annulée avec succès');
+        } else{
+          this.error = "Erreur de création";
+          this.toastr.error(this.error);
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        this.loading = false;
+        this.toastr.error(err.error.message);
+      }
+    })
+  }
+
+  // getTotalDebit(ecritures: any[]): number {
+  //   return ecritures?.reduce(
+  //     (sum, item) => sum + (+item.debit || 0),
+  //     0
+  //   ) || 0;
+  // }
+
+  getTotalDebit(ecritures: any[]): number {
+    return ecritures?.reduce((total, ecriture) => {
+
+      const sousTotal =
+        ecriture.lignes?.reduce(
+          (sum: number, ligne: any) =>
+            sum + Number(ligne.debit || 0),
+          0
+        ) || 0;
+
+      return total + sousTotal;
+
+    }, 0) || 0;
+  }
+
+  // getTotalCredit(ecritures: any[]): number {
+  //   return ecritures?.reduce(
+  //     (sum, item) => sum + (+item.credit || 0),
+  //     0
+  //   ) || 0;
+  // }
+
+  getTotalCredit(ecritures: any[]): number {
+    return ecritures?.reduce((total, ecriture) => {
+
+      const sousTotal =
+        ecriture.lignes?.reduce(
+          (sum: number, ligne: any) =>
+            sum + Number(ligne.credit || 0),
+          0
+        ) || 0;
+
+      return total + sousTotal;
+
+    }, 0) || 0;
+  }
+
+  modalEcriture(item: any){
+    this.operationecriture = item;
   }
 
 }
