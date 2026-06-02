@@ -36,8 +36,6 @@
   height: 26px;
 }
 
-
-
 .radio-line {
   display: flex;
   align-items: center;
@@ -47,6 +45,16 @@
   border: 1px solid #dee2e6;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
+}
+
+/* Empêcher le scroll quand les modals sont ouverts */
+::ng-deep body.modal-open {
+  overflow-y: scroll !important;
+}
+
+/* Réserver la place de la scrollbar pour éviter le décalage */
+::ng-deep body {
+  overflow-y: scroll;
 }
 
 .radio-line:hover {

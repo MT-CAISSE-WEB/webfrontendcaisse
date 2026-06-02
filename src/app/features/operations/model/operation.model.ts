@@ -9,6 +9,7 @@ export class operationModel extends MainModel{
     justifiee : number = 0;
     annulee : number = 0;
     libelle : string = "";
+    commentaire : string = "";
     lignes : any[] = [];
     caisses: any[] = [];
     ecritures: any[] = [];
@@ -16,6 +17,8 @@ export class operationModel extends MainModel{
     site : any;
     montant : number = 0;
     tauxoperation: number = 1 ;
+    typeoperation : string = "";
+    beneficiaire : string = "";
     dateoperation: string = "";
     societe :  any;
     typepaiement : string = ""
