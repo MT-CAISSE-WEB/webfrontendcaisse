@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { NgbModal, NgbModalModule, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { caisseModel } from '../models/caisse.model';
 import { CaisseService } from '../services/caisse.service';
 import { Router } from '@angular/router';
@@ -17,7 +18,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-caisse',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbModalModule],
   templateUrl: './caisse.component.html',
   styleUrl: './caisse.component.css'
 })
@@ -77,11 +78,21 @@ export class CaisseComponent implements OnInit{
 
   //Formulaire de recherche
   searchForm : FormGroup = this.fb.group({});
+  // Formulaire pour le recalcul du solde
+  recalcForm: FormGroup = this.fb.group({});
+  // Caisse ciblée pour le recalcul
+  recalcCaisse: caisseModel | null = null;
+  @ViewChild('recalcModalTemplate') recalcModalTemplate!: TemplateRef<any>;
+  modalRef?: NgbModalRef;
+  recalcLoading: boolean = false;
+  recalcProgress: number = 0;
+  private recalcProgressInterval?: number;
 
   constructor(private caisseservice: CaisseService, private toastr : ToastrService,
               private journalservice: JournalService,
               private plancomptableservice: PlancomptableService,
-              private router: Router, private ds:deviseservice){}
+              private router: Router, private ds:deviseservice,
+              private modalService: NgbModal){}
 
   ngOnInit(): void {
       //Afficher toutes les devises
@@ -96,12 +107,96 @@ export class CaisseComponent implements OnInit{
       this.initForm();
       //Initialisation du formulaire de recherche
       this.initSearchForm();
+      // Initialisation du formulaire de recalcul
+      this.initRecalcForm();
       this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("cette caisse");
       this.titleMsg = TITLE_DELETE
 
       this.searchForm.valueChanges
             .pipe(debounceTime(400),distinctUntilChanged()).subscribe(values => {
             this.applyFilters(values);});
+  }
+
+  initRecalcForm(){
+    this.recalcForm = this.fb.group({
+      startDate: [null, [Validators.required]]
+    });
+  }
+
+  openRecalcModal(caisse?: caisseModel): void {
+    this.recalcForm.reset();
+    this.recalcCaisse = caisse || null;
+    this.recalcProgress = 0;
+    this.recalcLoading = false;
+    if (this.recalcModalTemplate) {
+      this.modalRef = this.modalService.open(this.recalcModalTemplate, {
+        centered: true,
+        backdrop: 'static',
+        keyboard: false,
+        size: 'lg'
+      });
+    }
+  }
+
+  submitRecalc(): void {
+    if (this.recalcForm.invalid) {
+      Object.keys(this.recalcForm.controls).forEach(controlName => this.recalcForm.get(controlName)?.markAsTouched());
+      this.toastr.warning('Veuillez sélectionner une date de départ.');
+      return;
+    }
+
+    const startDate = this.recalcForm.value.startDate;
+    const payload: any = { startDate };
+    if (this.recalcCaisse && this.recalcCaisse.idcaisse) payload.idcaisse = this.recalcCaisse.idcaisse;
+
+    this.recalcLoading = true;
+    this.startRecalcProgress();
+
+    this.caisseservice.recalculate(payload).subscribe({
+      next: (res) => {
+        this.stopRecalcProgress();
+        this.recalcProgress = 100;
+        if (res?.success) {
+          this.toastr.success('Recalcul lancé avec succès.');
+          this.refreshData();
+          setTimeout(() => this.closeRecalcModal(), 200);
+        } else {
+          this.toastr.error('Échec du recalcul.');
+        }
+        this.recalcLoading = false;
+      },
+      error: (err) => {
+        this.stopRecalcProgress();
+        this.recalcProgress = 100;
+        this.recalcLoading = false;
+        this.toastr.error('Erreur lors du recalcul.', err?.message || '');
+      }
+    });
+  }
+
+  private startRecalcProgress(): void {
+    this.recalcProgress = 0;
+    this.recalcProgressInterval = window.setInterval(() => {
+      if (this.recalcProgress < 90) {
+        this.recalcProgress = Math.min(90, this.recalcProgress + Math.floor(Math.random() * 8) + 2);
+      } else if (this.recalcProgress < 98) {
+        this.recalcProgress += 1;
+      }
+    }, 300);
+  }
+
+  private stopRecalcProgress(): void {
+    if (this.recalcProgressInterval) {
+      clearInterval(this.recalcProgressInterval);
+      this.recalcProgressInterval = undefined;
+    }
+  }
+
+  closeRecalcModal(): void {
+    this.modalRef?.close();
+    this.stopRecalcProgress();
+    this.recalcLoading = false;
+    this.recalcProgress = 0;
   }
 
   //Initialiser le formulaire de recherche

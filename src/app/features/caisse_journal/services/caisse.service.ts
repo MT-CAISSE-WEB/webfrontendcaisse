@@ -136,5 +136,15 @@ export class CaisseService {
     );
   }
 
+  /**
+   * Recalculer le solde des caisses à partir d'une date
+   */
+  recalculate(body: any): Observable<any> {
+    return this.http.post<any>(
+      URL_LOCAL.baseUrl + this.url + "/recalculate",
+      body
+    );
+  }
+
 
 }

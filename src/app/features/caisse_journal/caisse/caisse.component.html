@@ -25,6 +25,7 @@
                             <button type="button" class="btn btn-sm btn-soft-info"><i class="ri-file-download-line align-bottom me-1"></i> import</button>
                             <button class="btn btn-sm btn-soft-danger" [disabled]="objectsSelected.length === 0" (click)="deleteMultiple()" title="Supprimer la sélection"><i class="ri-delete-bin-2-line"></i></button>
                             <button type="button" class="btn btn-sm btn-info" (click)="refreshData()" title="Actualiser les données"><i class="ri-refresh-fill align-bottom me-1"></i>actualiser</button>
+                            <!-- bouton global de recalcul supprimé : action déplacée par ligne -->
                         </div>
                     </div>
                 </div>
@@ -114,6 +115,11 @@
                                                 <a class="text-danger d-inline-block remove-item-btn" (click)="deleteCaisseItem(item)" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
                                                     <i class="ri-delete-bin-5-fill fs-16"></i>
                                                 </a>
+                                            </li>
+                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Recalculer le solde">
+                                                <button type="button" class="btn btn-sm btn-warning p-0" (click)="openRecalcModal(item)">
+                                                    <i class="ri-refresh-line fs-16"></i>
+                                                </button>
                                             </li>
                                         </ul>
                                     </td>
@@ -291,6 +297,40 @@
                     </div>
                 </div>
                 <!--end modal -->
+                <!-- Recalcul solde modal -->
+                <ng-template #recalcModalTemplate>
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header bg-light p-3">
+                                <h5 class="modal-title">Recalculer le solde de la caisse</h5>
+                                <button type="button" class="btn-close" aria-label="Close" (click)="closeRecalcModal()"></button>
+                            </div>
+                            <form [formGroup]="recalcForm">
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label form-label-sm">Caisse</label>
+                                        <div class="mb-2">{{ recalcCaisse?.codecaisse || '-' }} - {{ recalcCaisse?.libelle || '-' }}</div>
+                                        <label class="form-label form-label-sm">Date de départ</label>
+                                        <input type="date" formControlName="startDate" class="form-control form-control-sm" [disabled]="recalcLoading" />
+                                        <div *ngIf="recalcForm.get('startDate')?.invalid && recalcForm.get('startDate')?.touched" class="text-danger small">Veuillez sélectionner une date.</div>
+                                        <small class="text-muted">Le recalcul sera effectué de cette date jusqu'à la date actuelle.</small>
+                                    </div>
+
+                                    <div *ngIf="recalcLoading" class="mb-3">
+                                        <label class="form-label form-label-sm">Chargement en cours</label>
+                                        <div class="progress" style="height: 14px;">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" [style.width.%]="recalcProgress" aria-valuemin="0" aria-valuemax="100">{{ recalcProgress }}%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-sm btn-light" [disabled]="recalcLoading" (click)="closeRecalcModal()">Annuler</button>
+                                    <button type="button" class="btn btn-sm btn-warning" [disabled]="recalcLoading" (click)="submitRecalc()">Recalculer</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </ng-template>
             </div>
         </div>
 
