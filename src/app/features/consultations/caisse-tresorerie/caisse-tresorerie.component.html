@@ -1,0 +1,214 @@
+<!-- En-tête avec titre et actions -->
+<div class="sticky-top bg-white pt-3 pb-2 mb-4 shadow-sm z-10" style="top: 0;">
+  <div class="container-fluid px-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center">
+      <div>
+        <h1 class="h3 mb-0">{{ title }}</h1>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-0 mt-2">
+            <li class="breadcrumb-item"><a routerLink="/">Accueil</a></li>
+            <li class="breadcrumb-item active">{{ title }}</li>
+          </ol>
+        </nav>
+      </div>
+      <div class="mt-2 mt-sm-0">
+        <button class="btn btn-outline-secondary btn-sm me-2" (click)="exportToExcel()">
+            <i class="ri-file-excel-line"></i> Excel
+        </button>
+        <button class="btn btn-outline-danger btn-sm" (click)="exportToPDF()">
+            <i class="ri-file-pdf-line"></i> PDF
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid px-4">
+  <!-- Filtres – carte flottante -->
+  <div class="card shadow-sm mb-4 border-0">
+    <div class="card-header bg-white py-3">
+      <h5 class="mb-0"><i class="ri-filter-3-line me-2"></i>Filtrer les données</h5>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="searchForm">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Date début</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="ri-calendar-line"></i></span>
+              <input type="date" class="form-control form-control-sm" formControlName="dateDebut">
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Date fin</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="ri-calendar-line"></i></span>
+              <input type="date" class="form-control form-control-sm" formControlName="dateFin">
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Caisse</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="ri-bank-line"></i></span>
+              <select class="form-select form-select-sm" formControlName="caisse">
+                <option value="">Toutes les caisses</option>
+                <option *ngFor="let c of caisses" [value]="c.idcaisse">
+                  {{ c.codecaisse }} – {{ c.libelle }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-4">
+          <div class="col-12 text-end">
+            <button class="btn btn-sm btn-primary px-4" (click)="onSubmit()" [disabled]="loading">
+              <i class="ri-search-line me-1"></i> Rechercher
+            </button>
+            <button class="btn btn-sm btn-link text-muted ms-2" (click)="resetFilters()" *ngIf="searchForm.dirty">
+              Réinitialiser
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Zone de résultats -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p class="mt-2 text-muted">Recherche en cours...</p>
+  </div>
+
+  <div *ngIf="!loading && datas.length === 0" class="alert alert-info text-center py-5">
+    <i class="ri-information-line ri-2x"></i>
+    <p class="mb-0 mt-2">Aucune donnée trouvée pour cette période.</p>
+  </div>
+
+  <div *ngIf="!loading && datas.length > 0">
+    <!-- Totaux globaux (cards) -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="card border-0 bg-gradient-primary text-white shadow-sm">
+          <div class="card-body d-flex align-items-center">
+            <div class="flex-shrink-0 me-3">
+              <i class="ri-wallet-line ri-2x"></i>
+            </div>
+            <div>
+              <h6 class="mb-0 fw-light">Total d'ouverture</h6>
+              <h3 class="mb-0">{{ formatCFA(totaux.solde_ouverture_ref)  }} <span class="text-muted small">{{ user.devise_ref_code }}</span></h3>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 bg-gradient-success text-white shadow-sm">
+          <div class="card-body d-flex align-items-center">
+            <div class="flex-shrink-0 me-3">
+              <i class="ri-arrow-down-circle-line ri-2x"></i>
+            </div>
+            <div>
+              <h6 class="mb-0 fw-light">Total encaissements</h6>
+              <h3 class="mb-0">{{ formatCFA(totaux.total_encaissement_ref) }} <span class="text-muted small">{{ user.devise_ref_code }}</span></h3>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 bg-gradient-danger text-white shadow-sm">
+          <div class="card-body d-flex align-items-center">
+            <div class="flex-shrink-0 me-3">
+              <i class="ri-arrow-up-circle-line ri-2x"></i>
+            </div>
+            <div>
+              <h6 class="mb-0 fw-light">Total décaissements</h6>
+              <h3 class="mb-0">{{ formatCFA(totaux.total_decaissement_ref) }} <span class="text-muted small">{{ user.devise_ref_code }}</span></h3>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 bg-gradient-info text-white shadow-sm">
+          <div class="card-body d-flex align-items-center">
+            <div class="flex-shrink-0 me-3">
+              <i class="ri-calculator-line ri-2x"></i>
+            </div>
+            <div>
+              <h6 class="mb-0 fw-light">Solde global</h6>
+              <h3 class="mb-0">{{ formatCFA(totaux.solde_global_ref) }} <span class="text-muted small">{{ user.devise_ref_code }}</span></h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accordéon par jour -->
+    <div class="accordion" id="accordionPeriodes">
+      <div *ngFor="let item of datas; let i = index" class="accordion-item mb-3 border rounded-3 shadow-sm">
+        <h2 class="accordion-header" [id]="'heading'+i">
+          <button class="accordion-button" [class.collapsed]="i !== 0" type="button" data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse'+i" [attr.aria-expanded]="i === 0" [attr.aria-controls]="'collapse'+i">
+            <div class="d-flex w-100 justify-content-between align-items-center me-3">
+              <span>
+                <i class="ri-calendar-event-line me-2"></i>
+                <strong>{{ item.dateperiode | date:'EEEE d MMMM yyyy' }}</strong>
+              </span>
+              <span class="badge bg-success rounded-pill ms-3">
+                {{ item.caisses.length }} caisse(s)
+              </span>
+            </div>
+          </button>
+        </h2>
+        
+        <div [id]="'collapse'+i" class="accordion-collapse collapse" [class.show]="i === 0" [attr.aria-labelledby]="'heading'+i" data-bs-parent="#accordionPeriodes">
+          <div class="accordion-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Caisse</th>
+                    <th class="text-end">Solde ouverture</th>
+                    <th class="text-end">Encaissements</th>
+                    <th class="text-end">Décaissements</th>
+                    <th class="text-end bg-soft-success">Solde théorique</th>
+                    <th class="text-end">Solde clôture prév.</th>
+                    <th class="text-center">Statut</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let c of item.caisses">
+                    <td>
+                      <strong>{{ c.codecaisse }}</strong><br>
+                      <small class="text-muted">{{ c.libelle }}</small>
+                    </td>
+                    <td class="text-end">{{ formatCFA(c.soldeouverture)  }} <span class="text-muted small">{{ c.codedevise }}</span></td>
+                    <td class="text-end text-success">{{ formatCFA(c.total_encaissement) }} <span class="text-muted small">{{ c.codedevise }}</span></td>
+                    <td class="text-end text-danger">{{ formatCFA(c.total_decaissement) }} <span class="text-muted small">{{ c.codedevise }}</span></td>
+                    <td class="text-end fw-bold bg-soft-success">{{ formatCFA(c.solde_theorique) }} <span class="text-muted small">{{ c.codedevise }}</span></td>
+                    <td class="text-end">{{ formatCFA(c.solde_previsionnel_fermeture) }} <span class="text-muted small">{{ c.codedevise }}</span></td>
+                    <td class="text-center">
+                      <span class="badge" [class.bg-success]="c.statut === 'OUVERT'" [class.bg-secondary]="c.statut !== 'OUVERT'">
+                        {{ c.statut || 'FERMÉ' }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+                <tfoot class="table-secondary" *ngIf="item.totauxGlobaux">
+                  <tr>
+                    <th>Totaux ({{ user.devise_ref_code }})</th>
+                    <th class="text-end">{{ formatCFA(item.totauxGlobaux.soldeouverture_ref) }}</th>
+                    <th class="text-end">{{ formatCFA(item.totauxGlobaux.total_encaissement_ref) }}</th>
+                    <th class="text-end">{{ formatCFA(item.totauxGlobaux.total_decaissement_ref) }}</th>
+                    <th class="text-end">{{ formatCFA(item.totauxGlobaux.solde_global_ref) }}</th>
+                    <th class="text-end">{{ formatCFA(item.totauxGlobaux.solde_global_ref) }}</th>
+                    <th></th>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -17,12 +17,13 @@ import { APP, APP_DONNEE_BASE_DEVISE, APP_AFF_NATURE_CENTRE_DONNEE_BASE,
     APP_OPERATIONDETAILS_CONSULTATION,
     APP_PARAMETREPAGE_PARAMETRE,
     APP_OPERATION_GENERAL_JUSTIFIER,
-    APP_COMPTABILISATION, APP_DECAISSEMENTAJUSTIFIER,
+    APP_COMPTABILISATION,
     APP_DECAISSEMENTAJUSTIFIER_CONSULTATION,
     APP_STATSAFFDEPTNATURE_CONSULTATION,
     APP_DETAILDEAMNDE_CONSULTATION,
     APP_BANQUE_DONNEE_BASE,
-    APP_CLOTURECAISSE_CONSULTATION} from './_core/routes/frontend.root';
+    APP_CLOTURECAISSE_CONSULTATION,
+    APP_SOLDECAISSE_CONSULTATION } from './_core/routes/frontend.root';
 
 import { LayoutMainComponent } from './layout/layout-main/layout-main.component';
 import { LayoutContentComponent } from './layout/composant/layout-content/layout-content.component';
@@ -70,6 +71,7 @@ import { UpdatepasswordComponent } from './features/administration/updatepasswor
 import { DemandeDetailComponent } from './features/consultations/demande-detail/demande-detail.component';
 import { BanqueComponent } from './features/donnee_base/banque/banque.component';
 import { ClotureCaisseComponent } from './features/consultations/cloture-caisse/cloture-caisse.component';
+import { CaisseTresorerieComponent } from './features/consultations/caisse-tresorerie/caisse-tresorerie.component';
 
 export const routes: Routes = [
   {
@@ -263,6 +265,10 @@ export const routes: Routes = [
       {
           path : APP_CLOTURECAISSE_CONSULTATION,
           component: ClotureCaisseComponent
+      },
+      {
+        path : APP_SOLDECAISSE_CONSULTATION,
+        component: CaisseTresorerieComponent
       }
     ]
   }

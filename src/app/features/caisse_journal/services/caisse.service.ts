@@ -147,4 +147,15 @@ export class CaisseService {
   }
 
 
+  /**
+   * Solde de caisse par date
+   */
+  get_soldeCaisse(payload: any) {
+    return this.http.post<any>(
+      URL_LOCAL.baseUrl + this.url + "/tresorerie",
+      payload
+    );
+  }
+
+
 }
