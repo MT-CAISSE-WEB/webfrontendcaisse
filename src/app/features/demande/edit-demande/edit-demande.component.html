@@ -1,0 +1,624 @@
+<!-- start page title -->
+<div class="row">
+  <div class="col-12">
+    <div
+      class="page-title-box d-sm-flex align-items-center justify-content-between"
+    >
+      <h4 class="mb-sm-0">{{ title }} de la demande</h4>
+      <div class="page-title-right">
+        <ol class="breadcrumb m-0">
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);">Générales </a>
+          </li>
+          <li class="breadcrumb-item active">{{ title }} de la demande</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end page title -->
+
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card" id="orderList">
+      <div class="card-header border-0">
+        <div class="row align-items-center gy-3">
+          <div class="col-sm-auto">
+            <div class="d-flex gap-1 flex-wrap">
+              <button type="button" class="btn btn-sm btn-soft-info">
+                <i class="ri-file-download-line align-bottom me-1"></i> import
+              </button>
+              <button type="button" class="btn btn-sm btn-info">
+                <i class="ri-refresh-fill align-bottom me-1"></i>actualiser
+              </button>
+              <button
+                type="button"
+                [disabled]="title !== 'Création' && demande.statut === 3"
+                class="btn btn-sm btn-success"
+                (click)="submit()"
+              >
+                <i class="bx bx-comment-check align-bottom me-1"></i>
+                enregistrer
+              </button>
+              <button
+                *ngIf="title === 'Création'"
+                type="button"
+                class="btn btn-sm btn-primary"
+                (click)="resetForm()"
+              >
+                <i class="ri-add-fill align-bottom me-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body pt-0 mt-3">
+        <form [formGroup]="demandeForm">
+          <!-- ==================== STEP 1 : ENTÊTE ==================== -->
+          <div class="row g-3">
+            <div class="col-lg-2 col-sm-4">
+              <div class="mb-3">
+                <label class="form-label">Code demande</label>
+                <input
+                  type="text"
+                  class="form-control form-control-sm bg-light"
+                  formControlName="codedemande"
+                  readonly="readonly"
+                />
+              </div>
+            </div>
+
+            <div class="col-lg-5 col-sm-8">
+              <div class="mb-3">
+                <label class="form-label">Libellé demande</label>
+                <input
+                  type="text"
+                  class="form-control form-control-sm bg-light {{
+                    isValidField('libelledemande')
+                  }}"
+                  formControlName="libelledemande"
+                />
+              </div>
+            </div>
+
+            <div class="col-lg-2 col-sm-6">
+              <div class="mb-3">
+                <label class="form-label">Date demande</label>
+                <input
+                  type="date"
+                  class="form-control form-control-sm bg-light {{
+                    isValidField('datedemande')
+                  }}"
+                  formControlName="datedemande"
+                />
+              </div>
+            </div>
+
+            <div class="col-lg-3 col-sm-6">
+              <div class="mb-3">
+                <label class="form-label">Type demande</label>
+                <select
+                  class="form-select form-select-sm bg-light {{
+                    isValidField('typedemande')
+                  }}"
+                  formControlName="typedemande"
+                >
+                  <option value="">-- Sélectionner --</option>
+                  <option value="decaissement">Décaissement</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-lg-2 col-sm-4">
+              <div class="mb-3">
+                <select
+                  class="form-select form-select-sm bg-light {{
+                    isValidField('devise')
+                  }}"
+                  formControlName="devise"
+                >
+                  <option value="">-- Sélectionner devise --</option>
+                  @for (item of devises; track $index) {
+                    <option value="{{ item.iddevise }}">
+                      {{ item.codedevise }}
+                    </option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="col-xxl-3 col-sm-4">
+              <div class="mb-3 bg-light">
+                <input
+                  type="text"
+                  placeholder="Selectionner le departement"
+                  formControlName="departement"
+                  [matAutocomplete]="autoDepartement"
+                  class="form-select form-select-sm bg-light"
+                />
+                <mat-autocomplete
+                  #autoDepartement="matAutocomplete"
+                  [displayWith]="displayDepartement"
+                  panelClass="small-autocomplete"
+                >
+                  @for (
+                    departement of filteredDepartements | async;
+                    track departement.iddepartement!
+                  ) {
+                    <mat-option [value]="departement">
+                      {{ departement.libelle! }}
+                    </mat-option>
+                  }
+                </mat-autocomplete>
+              </div>
+            </div>
+
+            <div class="col-lg-2 col-sm-2">
+              <div class="input-group input-group-sm mb-3">
+                <label class="input-group-text">taux</label>
+                <input
+                  type="number"
+                  class="form-control form-control-sm bg-light"
+                  formControlName="taux"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- ==================== STEP 2 : LIGNES ==================== -->
+          <div class="row g-3">
+            <div class="table-responsive">
+              <table class="table table-sm table-borderless table-nowrap mb-0">
+                <colgroup>
+                  <col style="width: 05%" />
+                  <col style="width: 20%" />
+                  <col style="width: 20%" />
+                  <col style="width: 20%" />
+                  <col style="width: 20%" />
+                  <col style="width: 10%" />
+                  <col style="width: 05%" />
+                </colgroup>
+                <thead class="align-middle">
+                  <tr class="table-active">
+                    <th scope="col" style="width: 15px">N°</th>
+                    <th scope="col">Nature opération</th>
+                    <th scope="col">Centre analytique</th>
+                    <th scope="col">Tiers</th>
+                    <th scope="col">Code budget</th>
+                    <th scope="col" class="text-end" style="width: 150px">
+                      Montant
+                    </th>
+                    <th scope="col" class="text-end" style="width: 105px"></th>
+                  </tr>
+                </thead>
+                <tbody id="newlink">
+                  @for (ligne of lignes.controls; track $index) {
+                    <tr class="product" [formGroup]="ligne">
+                      <th scope="row" class="product-id">{{ $index + 1 }}</th>
+                      <td class="text-start">
+                        <div class="input-light">
+                          <input
+                            type="text"
+                            formControlName="natureop"
+                            placeholder="Selectionner nature opération"
+                            [matAutocomplete]="autoNature"
+                            class="form-control form-control-sm bg-light"
+                          />
+
+                          <mat-autocomplete
+                            #autoNature="matAutocomplete"
+                            [displayWith]="displayNature"
+                          >
+                            @for (
+                              item of ligneFilteredMap.get($index)?.natures
+                                | async;
+                              track item.idnature
+                            ) {
+                              <mat-option [value]="item">
+                                {{ item.libelle }}
+                              </mat-option>
+                            }
+                          </mat-autocomplete>
+                          <div class="invalid-feedback">{{ msgErros }}</div>
+                        </div>
+                      </td>
+                      <td class="text-start">
+                        <div class="input-light">
+                          <input
+                            type="text"
+                            formControlName="centre"
+                            placeholder="Selectionner centre analytique"
+                            [matAutocomplete]="autoCentre"
+                            class="form-control form-control-sm bg-light"
+                          />
+
+                          <mat-autocomplete
+                            #autoCentre="matAutocomplete"
+                            [displayWith]="displayCentre"
+                          >
+                            @for (
+                              item of ligneFilteredMap.get($index)?.centres
+                                | async;
+                              track item.idcentreanalytique
+                            ) {
+                              <mat-option [value]="item">
+                                {{ item.codecentreanalytique }} --
+                                {{ item.libelle }}
+                              </mat-option>
+                            }
+                          </mat-autocomplete>
+                          <div class="invalid-feedback">{{ msgErros }}</div>
+                        </div>
+                      </td>
+                      <td class="text-start">
+                        <div class="input-light">
+                          <input
+                            type="text"
+                            formControlName="tiers"
+                            placeholder="Selectionner tiers"
+                            [matAutocomplete]="autoTiers"
+                            class="form-control form-control-sm bg-light"
+                          />
+
+                          <mat-autocomplete
+                            #autoTiers="matAutocomplete"
+                            [displayWith]="displayTiers"
+                          >
+                            @for (
+                              item of ligneFilteredMap.get($index)?.tiers
+                                | async;
+                              track item.idtiers
+                            ) {
+                              <mat-option [value]="item">
+                                {{ item.designation }}
+                              </mat-option>
+                            }
+                          </mat-autocomplete>
+                          <div class="invalid-feedback">{{ msgErros }}</div>
+                        </div>
+                      </td>
+                      <td class="text-start">
+                        <div class="input-light">
+                          <input
+                            type="text"
+                            formControlName="codebudget"
+                            placeholder="Selectionner code budget"
+                            [matAutocomplete]="autoLigne"
+                            class="form-control form-control-sm bg-light"
+                          />
+
+                          <mat-autocomplete
+                            #autoLigne="matAutocomplete"
+                            [displayWith]="displayLigne"
+                          >
+                            @for (
+                              item of ligneFilteredMap.get($index)?.codebudget
+                                | async;
+                              track item.idbudgetdepartementnature
+                            ) {
+                              <mat-option [value]="item">
+                                {{ item.codebudgetaire }}
+                              </mat-option>
+                            }
+                          </mat-autocomplete>
+                          <div class="invalid-feedback">{{ msgErros }}</div>
+                        </div>
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          class="form-control form-control-sm bg-light border-0"
+                          formControlName="montantdemande"
+                        />
+                      </td>
+                      <td class="product-removal align-right">
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-danger"
+                          (click)="removeLigne($index)"
+                        >
+                          <i class="ri-delete-bin-2-line align-bottom"></i>
+                        </button>
+                        <button
+                          type="button"
+                          data-bs-toggle="modal"
+                          [attr.data-bs-target]="'#detailModal' + $index"
+                          class="btn btn-sm btn-primary"
+                        >
+                          <i class="ri-pencil-fill align-bottom"></i>
+                        </button>
+                      </td>
+                    </tr>
+
+                    <!-- Modal -->
+                    <div
+                      class="modal fade flip"
+                      [attr.id]="'detailModal' + $index"
+                      tabindex="-1"
+                      aria-hidden="true"
+                    >
+                      <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                          <div class="modal-header bg-light p-3">
+                            <h5 class="modal-title">Détail de la demande</h5>
+                            <button
+                              type="button"
+                              class="btn-close"
+                              data-bs-dismiss="modal"
+                              aria-label="Close"
+                            ></button>
+                          </div>
+
+                          <div [formGroup]="lignesFormArray.at($index)">
+                            <div class="modal-body">
+                              <div formArrayName="details" class="mt-2">
+                                <div class="table-responsive">
+                                  <table
+                                    class="table table-sm table-borderless table-nowrap mb-0"
+                                  >
+                                    <colgroup>
+                                      <col style="width: 05%" />
+                                      <col style="width: 50%" />
+                                      <col style="width: 20%" />
+                                      <col style="width: 20%" />
+                                      <col style="width: 05%" />
+                                    </colgroup>
+                                    <thead class="align-middle">
+                                      <tr class="table-active">
+                                        <th scope="col" style="width: 15px">
+                                          N°
+                                        </th>
+                                        <th scope="col">Description</th>
+                                        <th scope="col">Quantité</th>
+                                        <th scope="col" style="width: 120px">
+                                          Montant
+                                        </th>
+                                        <th
+                                          scope="col"
+                                          class="text-end"
+                                          style="width: 150px"
+                                        ></th>
+                                      </tr>
+                                    </thead>
+                                    <tbody id="newlink">
+                                      <tr
+                                        *ngFor="
+                                          let detail of getDetailsArray($index)
+                                            .controls;
+                                          let j = index
+                                        "
+                                        [formGroupName]="j"
+                                      >
+                                        <th scope="row" class="product-id">
+                                          {{ j + 1 }}
+                                        </th>
+                                        <td class="text-start">
+                                          <div class="input-light">
+                                            <input
+                                              type="textarea"
+                                              class="form-control form-control-sm"
+                                              formControlName="description"
+                                            />
+                                          </div>
+                                        </td>
+                                        <td class="text-start">
+                                          <div class="input-light">
+                                            <input
+                                              type="number"
+                                              class="form-control form-control-sm"
+                                              formControlName="quantite"
+                                            />
+                                          </div>
+                                        </td>
+                                        <td class="text-start">
+                                          <div class="input-light">
+                                            <input
+                                              type="number"
+                                              class="form-control form-control-sm"
+                                              formControlName="montant"
+                                            />
+                                          </div>
+                                        </td>
+                                        <td class="product-removal align-right">
+                                          <button
+                                            type="button"
+                                            class="btn btn-sm btn-danger"
+                                            (click)="removeDetail($index, j)"
+                                          >
+                                            <i
+                                              class="ri-delete-bin-2-line align-bottom"
+                                            ></i>
+                                          </button>
+                                        </td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="modal-footer">
+                              <div class="hstack gap-2 justify-content-end">
+                                <div class="d-flex gap-2">
+                                  <button
+                                    type="submit"
+                                    class="btn btn-sm btn-secondary"
+                                    (click)="addDetail($index)"
+                                  >
+                                    Ajouter
+                                  </button>
+                                  <button
+                                    type="button"
+                                    class="btn btn-sm btn-light"
+                                    data-bs-dismiss="modal"
+                                  >
+                                    Fermer
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </tbody>
+                <tbody>
+                  <tr>
+                    <td colspan="5">
+                      <button
+                        type="button"
+                        [disabled]="!departement"
+                        class="btn btn-sm btn-primary"
+                        (click)="addLigne()"
+                      >
+                        <i class="bx bx-zoom-in align-bottom me-1"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- ==================== PIÈCES JOINTES ==================== -->
+            <div class="card mt-3">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">
+                  <i class="ri-attachment-2 me-2"></i>
+                  Pièces jointes
+                </h6>
+              </div>
+              <div class="card-body">
+                <!-- Fichiers existants (modification) -->
+                <div *ngIf="existingPieces.length > 0" class="mb-4">
+                  <label class="form-label fw-semibold"
+                    >Documents existants</label
+                  >
+                  <div class="row g-2">
+                    <div class="col-12" *ngFor="let piece of existingPieces">
+                      <div
+                        class="d-flex align-items-center justify-content-between p-2 border rounded-3"
+                      >
+                        <div class="d-flex align-items-center gap-3">
+                          <i [class]="getFileIcon(piece)" class="fs-3"></i>
+                          <div>
+                            <span class="fw-medium">{{
+                              piece.nomfichier
+                            }}</span>
+                            <small class="text-muted d-block">{{
+                              formatFileSize(piece.taille)
+                            }}</small>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-danger"
+                          (click)="removeExistingFile(piece)"
+                          [disabled]="pjDeleting === piece.idpiecejointe"
+                        >
+                          <span
+                            *ngIf="pjDeleting === piece.idpiecejointe"
+                            class="spinner-border spinner-border-sm"
+                          ></span>
+                          <i
+                            *ngIf="pjDeleting !== piece.idpiecejointe"
+                            class="ri-delete-bin-line"
+                          ></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Zone d'upload -->
+                <div>
+                  <label class="form-label fw-semibold"
+                    >Ajouter des fichiers</label
+                  >
+                  <div
+                    class="upload-zone border border-dashed rounded-3 p-4 text-center bg-light"
+                  >
+                    <input
+                      type="file"
+                      #fileInput
+                      multiple
+                      (change)="onFilesSelected($event)"
+                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
+                      class="d-none"
+                    />
+                    <i class="ri-upload-cloud-2-line fs-1 text-muted"></i>
+                    <p class="mt-2 mb-1">
+                      Cliquez pour sélectionner des fichiers
+                    </p>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-primary"
+                      (click)="fileInput.click()"
+                      [disabled]="pjUploading"
+                    >
+                      <i class="ri-add-line me-1"></i>
+                      Choisir des fichiers
+                    </button>
+                    <small class="text-muted d-block mt-2">
+                      PDF, images, Excel, Word, CSV (max 10MB)
+                    </small>
+                  </div>
+
+                  <!-- Aperçu fichiers sélectionnés -->
+                  <div *ngIf="uploadedFiles.length > 0" class="mt-3">
+                    <label class="form-label fw-semibold"
+                      >Fichiers à uploader ({{ uploadedFiles.length }})</label
+                    >
+                    <div class="row g-2">
+                      <div
+                        class="col-12"
+                        *ngFor="let file of uploadedFiles; let i = index"
+                      >
+                        <div
+                          class="d-flex align-items-center justify-content-between p-2 border rounded-3"
+                        >
+                          <div class="d-flex align-items-center gap-3">
+                            <i class="ri-file-line fs-3 text-secondary"></i>
+                            <div>
+                              <span class="fw-medium">{{ file.name }}</span>
+                              <small class="text-muted d-block"
+                                >{{
+                                  file.size / 1024 | number: "1.0-0"
+                                }}
+                                KB</small
+                              >
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-outline-danger"
+                            (click)="removeSelectedFile(i)"
+                          >
+                            <i class="ri-close-line"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- ==================== STEP 3 : FINISH ==================== -->
+            <div>
+              <div class="alert alert-success">
+                Vérifiez toutes les informations avant de terminer.
+              </div>
+
+              <!-- <div *ngIf="demande.statut === 3" class="alert alert-warning">
+                  ⚠️ Cette demande est validée et ne peut plus être modifiée.
+                </div> -->
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,155 @@
+<div class="modal-header bg-light p-3">
+    <h5 class="modal-title">Billetage caisse</h5>
+    <button type="button" class="btn-close" (click)="cancelBilletage()"></button>
+</div>
+
+<form [formGroup]="billetageForm">
+        <div class="modal-body">
+            <ul class="nav nav-tabs-custom rounded card-header-tabs border-bottom-0 mb-3" role="tablist">
+                <li class="nav-item" *ngFor="let caisse of caissesBilletArray.controls; let i=index">
+                    <a class="nav-link" [class.active]="activeTab === i" data-bs-toggle="tab" (click)="selectTab(i)"
+                        style="cursor:pointer" role="tab">
+                        <i class="fas fa-home"></i> {{ caisse.value.caisse }} --- {{ caisse.value.devise }}
+
+                        <span class="badge bg-secondary ms-2">
+                            {{ getTotalPhysique(i) | number }}
+                        </span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="tab-content" formArrayName="caissesBillet">
+                <div class="tab-pane" role="tabpanel" *ngFor="let caisse of caissesBilletArray.controls; let i=index"
+                    [formGroupName]="i" class="caisse-bloc" [hidden]="activeTab !== i">
+                    <div class="row mt-3">
+                        <!-- COLONNE BILLETS -->
+                        <div class="col-md-6 col-sm-6">
+                            <h5 *ngIf="getBillets(i).length">Billets</h5>
+                            <div class="table-scroll">
+                                <table class="table table-sm table-bordered billetage-table"
+                                    *ngIf="getBillets(i).length">
+
+                                    <thead>
+                                        <tr>
+                                            <th class="col-valeur">Valeur</th>
+                                            <th class="col-quantite text-center">Qté</th>
+                                            <th class="col-total text-end">Total</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody formArrayName="billets">
+
+                                        <tr *ngFor="let billet of getBillets(i).controls; let j=index"
+                                            [formGroupName]="j">
+
+                                            <td class="text-end">
+                                                {{ billet.value.valeur | number }}
+                                            </td>
+
+                                            <td class="text-center">
+                                                <input type="number" min="0"
+                                                    class="form-control form-control-sm quantite-input"
+                                                    formControlName="quantite">
+                                            </td>
+
+                                            <td class="text-end">
+                                                {{ billet.value.valeur * billet.value.quantite | number }}
+                                            </td>
+
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- COLONNE PIECES -->
+                        <div class="col-md-6 col-sm-6">
+                            <h5 *ngIf="getPieces(i).length">Pièces</h5>
+                            <div class="table-scroll">
+                                <table class="table table-sm table-bordered billetage-table"
+                                    *ngIf="getPieces(i).length">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-valeur">Valeur</th>
+                                            <th class="col-quantite text-center">Qté</th>
+                                            <th class="col-total text-end">Total</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody formArrayName="pieces">
+                                        <tr *ngFor="let piece of getPieces(i).controls; let j=index"
+                                            [formGroupName]="j">
+                                            <td class="text-end">
+                                                {{ piece.value.valeur | number }}
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="number" min="0"
+                                                    class="form-control form-control-sm quantite-input"
+                                                    formControlName="quantite">
+                                            </td>
+                                            <td class="text-end">
+                                                {{ piece.value.valeur * piece.value.quantite | number }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TOTAUX -->
+                    <!-- <div class="totaux-caisse">
+                        <div class="row">
+                            <div class="col-md-4 text-end">
+                                <strong>Total billets :</strong>
+                                {{ getTotalBillets(i) | number }}
+                            </div>
+
+                            <div class="col-md-4 text-end">
+                                <strong>Total pièces :</strong>
+                                {{ getTotalPieces(i) | number }}
+                            </div>
+
+                            <div class="col-md-4 text-end total-physique">
+                                <strong>Total physique :</strong>
+                                {{ getTotalPhysique(i) | number }}
+                            </div>
+                        </div>
+                    </div> -->
+
+                    <!-- TOTAUX + ÉCART -->
+                    <div class="row mt-2 totaux-caisse">
+                        <div class="col-md-3 text-end"><strong>Total billets :</strong> {{ getTotalBillets(i) | number }}</div>
+                        <div class="col-md-3 text-end"><strong>Total pièces :</strong> {{ getTotalPieces(i) | number }}</div>
+                        <div class="col-md-3 text-end">
+                            <strong>Total physique :</strong> {{ getTotalPhysique(i) | number }} 
+                        </div>
+                        <div class="col-md-3 text-end total-physique">
+                            <span *ngIf="billetageValidated && validatedCaisseIndex === i">
+                                | Écart : {{ caisse.value.ecart | number }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-light btn-sm" (click)="cancelBilletage()">Annuler</button>
+
+            <!-- Valider caisse active -->
+            <button type="button" class="btn btn-success btn-sm"
+                    *ngIf="!billetageValidatedIndexes.includes(activeTab)"
+                    (click)="validateBilletage(activeTab)">
+                Valider billetage
+            </button>
+
+            <!-- Soumettre toutes les caisses validées -->
+            <button type="button" class="btn btn-success btn-sm"
+                    *ngIf="billetageValidatedIndexes.length == caisses.length" [disabled]="loading"
+                    (click)="submitBilletage()">
+                OK
+            </button>
+        </div>
+    </form>

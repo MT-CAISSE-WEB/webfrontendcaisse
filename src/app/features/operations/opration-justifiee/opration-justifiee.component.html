@@ -1,0 +1,482 @@
+<!-- start page title -->
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">{{title}}</h4>
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Générales</a></li>
+                    <li class="breadcrumb-item active">{{title}}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end page title -->
+
+<!-- LOADER GLOBAL -->
+<div *ngIf="loadingGlobal" class="row">
+    <div class="col-12">
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+            <p class="mt-2 text-muted">Chargement des données...</p>
+        </div>
+    </div>
+</div>
+
+<div class="row" *ngIf="!loadingGlobal">
+    <div class="col-lg-12">
+        <form [formGroup]="operationForm">
+            <div class="card" id="">
+                <div class="card-header border-0">
+                    <div class="d-flex align-items-center">
+                        <h5 class="card-title mb-0 flex-grow-1">{{title}}</h5>
+                        <div class="flex-shrink-0">
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button class="btn btn-sm btn-warning" (click)="reset()"><i class="ri-save-bin-2-line"></i>rénitialiser</button>
+                                <button class="btn btn-sm btn-primary"><i class="ri-save-bin-2-line"></i>charger</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body bg-light-subtle border border-dashed border-start-0 border-end-0">
+                    <div class="row g-3">
+                        <div class="col-lg-6 col-sm-6">
+                            <label for="invoicenoInput">Opération à justifier</label>
+                            <div class="input-light">
+                                <select formControlName="operation" class="form-select form-select-sm bg-light border-0 {{ isValidField('operation')}}">
+                                    <option value=""> ---- choisir une operation à justifier ----</option>
+                                    @for(item of operationsFiltrees; track $index){
+                                        <option value="{{item.idoperation}}"> {{item.codeoperation }}  -----:------  {{ formatCFA(item.montant)}} {{ item.devise.codedevise }}  </option>
+                                    }
+                                </select>
+                                <div class="invalid-feedback">{{ msgErros }}</div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-sm-3">
+                            <div>
+                                <label for="date-field">Date opération</label>
+                                <input type="date" formControlName="dateoperation" class="form-control form-control-sm bg-light border-0 {{ isValidField('dateoperation')}}" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date" required>
+                                <div class="invalid-feedback">{{ msgErros }}</div>
+                            </div>
+                        </div>
+                        <!--end col-->
+
+                        <div class="col-lg-3 col-sm-3">
+                            <div>
+                                <label for="choices-payment-status">Devise opération</label>
+                                <div class="input-light">
+                                    <select formControlName="deviseoperation" class="form-select form-select-sm bg-light border-0 {{ isValidField('deviseoperation')}}" required>
+                                        <option value="">choisir la devise</option>
+                                        @for (item of devises; track $index){
+                                            <option value="{{item.iddevise}}">{{item.codedevise}}</option>
+                                        }
+                                    </select>
+                                    <div class="invalid-feedback">{{ msgErros }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-sm-3">
+                            <label for="invoicenoInput">Montant opération</label>
+                            <input type="text" formControlName="montantoperation" class="form-control form-control-sm bg-light border-0"  placeholder="" readonly="readonly" />
+                            <div class="invalid-feedback">{{ msgErros }}</div>
+                        </div>
+                        <!--end col-->
+
+                        <div class="col-lg-3 col-sm-3">
+                            <label for="invoicenoInput">Reste Mt opération</label>
+                            <input type="text" formControlName="resteapayeroperation" class="form-control form-control-sm bg-light border-0"  placeholder="" readonly="readonly" />
+                            <div class="invalid-feedback">{{ msgErros }}</div>
+                        </div>
+                        <!--end col-->
+
+                        <div class="col-lg-3 col-sm-3">
+                            <label for="invoicenoInput">Montant référentiel</label>
+                            <!-- <input type="text" formControlName="montantRefglobal" class="form-control form-control-sm bg-light border-0"  placeholder="" readonly="readonly" />
+                            <div class="invalid-feedback">{{ msgErros }}</div> -->
+                            <div class="input-group input-group-sm mb-2">
+                                <input type="text" formControlName="montantRefglobal" 
+                                class="form-control form-control-sm bg-light border-0" placeholder="" readonly="readonly" >
+                                <label class="input-group-text">  {{ user.devise_rep_code }}</label>
+                            </div>
+                            <div class="invalid-feedback">{{ msgErros }}</div>
+                        </div>
+                        <!--end col-->
+
+                        <div class="col-lg-3 col-sm-3">
+                            <label for="invoicenoInput">Reste à payer réf</label>
+                            <!-- <input type="text" formControlName="resteapayerref" class="form-control form-control-sm bg-light border-0"  placeholder="" readonly="readonly" /> -->
+                            <div class="input-group input-group-sm mb-2">
+                                <input type="text" formControlName="resteapayerref" 
+                                class="form-control form-control-sm bg-light border-0" placeholder="" readonly="readonly" >
+                                <label class="input-group-text">  {{ user.devise_rep_code }}</label>
+                            </div>
+                            <div class="invalid-feedback">{{ msgErros }}</div>
+                        </div>
+                        <!--end col-->
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-lg-6 col-sm-6">
+                    <div class="card" id="">
+                        <div class="card-header border-0">
+                            <div class="d-flex align-items-center">
+                                <h5 class="card-title mb-0 flex-grow-1">Retour en caisses</h5>
+                            </div>
+                        </div>
+                        <div class="card-body border border-dashed border-start-0 border-end-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm table-borderless table-nowrap mb-0">
+                                    <colgroup>
+                                        <col style="width: 10%">
+                                        <col style="width: 30%">
+                                        <col style="width: 30%">
+                                        <col style="width: 30%">
+                                    </colgroup>
+                                    <thead class="align-middle">
+                                        <tr class="table-active">
+                                            <th scope="col" style="width: 15px;">N°</th>
+                                            <th scope="col">Piece</th>
+                                            <th scope="col">Caisse</th>
+                                            <th scope="col" class="text-end" style="width: 150px;">Montant</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="newlink">
+                                        @for(piece of ope?.caisses; track piece.idtypeoperation){
+                                            <tr *ngIf="piece.codtypeoperation == 'encaissement'" style="cursor:pointer" 
+                                            (click)="selectRetour(piece)" [class.table-active]="selectedRetour === piece">
+                                                <th scope="row" class="product-id">{{$index + 1 }}</th>
+                                                <td class="text-start"> {{ope.codeoperation}} </td>
+                                                <td class="text-start"> {{piece.caisse.codecaisse}} </td>
+                                                <td class="text-end"> {{piece.montant}} {{piece.caisse.devise}}</td>
+                                            </tr>
+                                        }
+                                        <tr *ngIf="loadingPiece">
+                                            <td colspan="3">
+                                                <div class="text-center py-4">
+                                                    <div class="spinner-border text-info"></div>
+                                                    <h6 class="mt-2">Chargement...</h6>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-sm-6">
+                    <div class="card" id="">
+                        <div class="card-header border-0">
+                            <div class="d-flex align-items-right">
+                                <h5 class="card-title mb-0 flex-grow-1">Pièces Justificatifs</h5>
+                            </div>
+                        </div>
+                        <div class="card-body border border-dashed border-start-0 border-end-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm table-borderless table-nowrap mb-0">
+                                    <colgroup>
+                                        <col style="width: 10%">
+                                        <col style="width: 60%">
+                                        <col style="width: 30%">
+                                    </colgroup>
+                                    <thead class="align-middle">
+                                        <tr class="table-active">
+                                            <th scope="col" style="width: 15px;">N°</th>
+                                            <th scope="col">Piece</th>
+                                            <th scope="col" class="text-end" style="width: 150px;">Montant</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="newlink">
+                                        @for(piece of justificatifFiltered; track piece.idjustificatifoperation){
+                                            <tr style="cursor:pointer" (click)="selectJustificatif(piece)">
+                                                <th scope="row" class="product-id">{{$index + 1 }}</th>
+                                                <td class="text-start"> {{piece.codejustificatif}} </td>
+                                                <td class="text-end"> {{piece.montantjustificatif}} {{piece.devise.codedevise}}</td>
+                                            </tr>
+                                        }
+                                        <tr *ngIf="loadingPiece">
+                                            <td colspan="3">
+                                                <div class="text-center py-4">
+                                                    <div class="spinner-border text-info"></div>
+                                                    <h6 class="mt-2">Chargement...</h6>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-lg-12 col-sm-12">
+                    <div class="card" id="">
+                        <div class="card-header border-0">
+                            <div class="d-flex align-items-center">
+                                <h5 class="card-title mb-0 flex-grow-1">Enregistrer justificatif</h5>
+                            </div>
+                        </div>
+                        <div class="card-body border border-dashed border-start-0 border-end-0">
+                            <div class="row g-3">
+                                <div class="col-lg-3 col-sm-4">
+                                    <div>
+                                        <label for="choices-payment-status">Devise</label>
+                                        <div class="input-light">
+                                            <select formControlName="devisejustificatif" class="form-select form-select-sm bg-light border-0 {{ isValidField('devisejustificatif')}}" required [disabled]="loadingTaux">
+                                                <option value="">choisir la devise</option>
+                                                @for (item of devises; track $index){
+                                                    <option value="{{item.iddevise}}">{{item.codedevise}}</option>
+                                                }
+                                            </select>
+                                            @if (loadingTaux) {
+                                                <small class="text-muted">
+                                                    <i class="mdi mdi-loading mdi-spin"></i> Chargement des taux...
+                                                </small>
+                                            }
+                                            <div class="invalid-feedback">{{ msgErros }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3 col-sm-4">
+                                    <div>
+                                        <label for="date-field">Date</label>
+                                        <input type="date" formControlName="datejustificatif" class="form-control form-control-sm bg-light border-0 {{ isValidField('datejustificatif')}}" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date" required>
+                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3 col-sm-4">
+                                    <div>
+                                        <label for="date-field">Taux</label>
+                                        <input type="texte" formControlName="tauxoperation" class="form-control form-control-sm bg-light border-0 {{ isValidField('tauxoperation')}}" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date" required>
+                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3 col-sm-4">
+                                    <div>
+                                        <label for="date-field">Taux inverse</label>
+                                        <input type="texte" formControlName="tauxoperationinverse" class="form-control form-control-sm bg-light border-0 {{ isValidField('tauxoperationinverse')}}" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date">
+                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-12 col-sm-12">
+                                    <div>
+                                        <textarea class="form-control form-control-sm bg-light border-0" formControlName="commentaire" rows="4" placeholder="commentaire">
+                                        </textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-lg-12 col-sm-12">
+                    <div class="card" id="">
+                        <div class="card-header border-0">
+                            <div class="d-flex align-items-center">
+                                <h5 class="card-title mb-0 flex-grow-1">Détails des justificatifs</h5>
+                            </div>
+                        </div>
+                        <div class="card-body border border-dashed border-start-0 border-end-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-borderless table-nowrap mb-0">
+                                    <colgroup>
+                                        <col style="width: 05%">
+                                        <col style="width: 20%">
+                                        <col style="width: 20%">
+                                        <col style="width: 20%">
+                                        <col style="width: 10%">
+                                        <col style="width: 05%">
+                                    </colgroup>
+                                    <thead class="align-middle">
+                                        <tr class="table-active">
+                                            <th scope="col" style="width: 15px;">N°</th>
+                                            <th scope="col">Nature opération</th>
+                                            <th scope="col">Centre Analytique</th>
+                                            <th scope="col" style="width: 120px;">Tiers</th>
+                                            <th scope="col" class="text-end" style="width: 150px;">Montant</th>
+                                            <th scope="col" class="text-end" style="width: 105px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="newlink">  
+                                        <!-- 2. Lignes dynamiques ajoutées -->
+                                            @for (ligne of lignes.controls; track $index){
+                                            <tr class="product" [formGroup]="ligne">
+                                                <th scope="row" class="product-id">{{$index + 1 }}</th>
+                                                <td class="text-start">
+                                                    <div class="mb-2">
+                                                        <div class="input-light">
+                                                            <select class="form-select form-select-sm bg-light border-0" formControlName="idnature" required>
+                                                                <option value="" selected>Choisir nature operation</option>
+                                                                @for(item of natureoperations; track $index){
+                                                                    <option value="{{item.idnature}}"> {{item.libelle}} </option>
+                                                                }
+                                                            </select>
+                                                        </div>
+                                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-start">
+                                                    <div class="mb-2">
+                                                        <div class="input-light">
+                                                            <select formControlName="idcentreanalytique" class="form-select form-select-sm bg-light border-0">
+                                                                <option value="" selected>Choisir centre analytique</option>
+                                                                <option *ngFor="let c of ligne.get('centres')?.value" [value]="c.idcentreanalytique">
+                                                                        {{ c.libelle }}
+                                                                </option>
+                                                            </select>
+                                                            <div class="invalid-feedback">{{ msgErros }}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="input-light">
+                                                        <select formControlName="idtiers" class="form-select form-select-sm bg-light border-0">
+                                                            <option value="" selected>Choisir tiers</option>
+                                                            @for(item of tiers; track $index){
+                                                                <option value="{{item.idtiers}}"> {{item.designation}} </option>
+                                                            }
+                                                        </select>
+                                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                                    </div>
+                                                </td>
+                                                
+                                                <td class="text-end">
+                                                    <div>
+                                                        <input type="text" formControlName="montantdetail" class="form-control form-control-sm bg-light border-0 product-line-price" id="productPrice-1" placeholder="00.000" required/>
+                                                    </div>
+                                                </td>
+                                                <td class="product-removal align-right">
+                                                    <button type="button" [disabled]="!isUpdated" class="btn btn-sm btn-soft-danger" (click)="removeLine($index)"><i class="ri-delete-bin-2-line align-bottom"></i></button>
+                                                </td>
+                                            </tr>
+                                            }
+                                            <tr class="mb-2"></tr>
+                                            <tr>
+                                                <td colspan="5">
+                                                    <button type="button" [disabled]="!isUpdated" class="btn btn-sm btn-soft-secondary fw-medium" (click)="addLine()"><i class="ri-add-fill me-1 align-bottom"></i></button>
+                                                </td>
+                                            </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="card-footer border-0 d-flex justify-content-end">
+                            <button type="submit" (click)="onSubmit()" [disabled]="operationForm.invalid" class="btn btn-sm btn-success"><i class="ri-add-line align-bottom me-1"></i>enregistrer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-lg-12 col-sm-12">
+                    <div class="card" id="">
+                        <div class="card-header border-0">
+                            <div class="d-flex align-items-center">
+                                <h6 class="card-title mb-0 flex-grow-1">Retour caisse</h6>
+                                <div class="flex-shrink-0">
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" value="1" formControlName="retourcaisse" id="flexSwitchCheckChecked">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body border border-dashed border-start-0 border-end-0" *ngIf="showCaisses">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-borderless table-nowrap mb-0">
+                                    <thead class="align-middle">
+                                        <tr>
+                                            <th scope="col"> Caisse </th>
+                                            <th scope="col"></th>
+                                            <th scope="col"> Solde </th>
+                                            <th scope="col"> Montant </th>
+                                            <th scope="col"> Taux </th>
+                                            <th scope="col"> Montant ref. </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody *ngIf="!loadingModal; else loader">
+                                        @for(c of caisses.controls; track $index){
+                                            <tr [formGroup]="c" class="caisse-row">
+                                                <td>
+                                                    <div class="cell-wrapper">
+                                                        <span> <strong> {{ c.get('caisse')?.value }} </strong> </span>
+                                                        <input type="hidden" formControlName="idcaisse">
+                                                        <div class="error-slot">&nbsp;</div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="cell-wrapper">
+                                                        <span> {{ c.get('devisecaisse')?.value }} </span>
+                                                        <div class="error-slot">&nbsp;</div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="cell-wrapper">
+                                                        <input formControlName="solde" type="text" class="form-control form-control-sm bg-success-subtle border-0"  readonly/>
+                                                        <div class="error-slot">&nbsp;</div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="cell-wrapper">
+                                                        <input type="text" formControlName="montantcaisse" [readonly]="selectedRetour" [ngClass]="{'bg-danger-subtle': c.get('montantcaisse')?.errors?.['soldeInsuffisant']}" class="form-control form-control-sm bg-light border-0"  placeholder="000.000"/>
+                                                        <div class="text-danger small error-slot" [class.visible]="c.get('montantcaisse')?.errors?.['soldeInsuffisant']">
+                                                            Solde insuffisant
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="cell-wrapper">
+                                                        <input type="text" formControlName="taux" class="form-control form-control-sm bg-light border-0"/>
+                                                        <div class="error-slot">&nbsp;</div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="cell-wrapper">
+                                                        <input type="text" formControlName="montantref" [ngClass]="{'bg-danger-subtle': c.get('montantcaisse')?.errors?.['depassementMontant']}" class="form-control form-control-sm bg-light border-0"  readonly/>
+                                                        <div class="text-danger small error-slot" [class.visible]="c.get('montantcaisse')?.errors?.['depassementMontant']">
+                                                            Montant dépassé
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                        
+                                        <tr *ngIf="operationForm.errors?.['totalCaisseDepasse']">
+                                            <td colspan="6" class="text-danger small">
+                                                Le total des caisses ne doit pas dépasser le montant total de l’opération.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <ng-template #loader>
+                                        <div class="text-center p-4">
+                                            <div class="spinner-border text-info"></div>
+                                            <p>Chargement des périodes...</p>
+                                        </div>
+                                    </ng-template>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- FIN DE LA DIV CONDITIONNELLE -->

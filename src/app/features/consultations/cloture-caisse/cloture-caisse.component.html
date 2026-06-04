@@ -1,0 +1,146 @@
+<!-- start page title -->
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">{{title}}</h4>
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Consultation</a></li>
+                    <li class="breadcrumb-item active">{{title}}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end page title -->
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card" id="">
+            <div class="card-header border-0">
+                <div class="d-flex align-items-center">
+                    <h5 class="card-title mb-0 flex-grow-1">{{title}}</h5>
+                    <div class="flex-shrink-0">
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-sm btn-success" (click)="onExportExcel()"> Export Excel </button>
+                            <button class="btn btn-sm btn-danger" (click)="onPrintPDF()"> <i class="ri-file-download-line align-bottom me-1"></i> Imprimer PDF </button>
+                            <button class="btn btn-sm btn-soft-secondary" data-bs-toggle="modal" data-bs-target="#showModal">
+                                <i class="ri-add-line align-bottom me-1"></i>critères
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <table class="table table-bordered table-sm table-hover">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Caisse</th>
+                            <th>Devise</th>
+                            <th>Solde Ouverture</th>
+                            <th>Solde Fermeture</th>
+                            <th>Montant Physique</th>
+                            <th>Ecart</th>
+                            <th>Statut</th>
+                            <th>Date cloture</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr *ngFor="let item of op">
+                            <td>{{ item.date | date:'dd/MM/yyyy' }}</td>
+                            <td>{{ item.caisse.libelle }}</td>
+                            <td>{{ item.devise }}</td>
+                            <td class="text-end">{{ formatCFA(item.soldes.ouverture)}}</td>
+                            <td class="text-end">{{ formatCFA(item.soldes.fermeture) }}</td>
+                            <td class="text-end">{{ formatCFA(item.soldes.physique) }}</td>
+
+                            <!-- Mise en évidence écart -->
+                            <td [ngClass]="{'text-danger text-end': item.soldes.ecart !== 0, 'text-success text-end': item.soldes.ecart === 0}">
+                                {{ formatCFA(item.soldes.ecart)}}
+                            </td>
+
+                            <td>
+                                <span class="badge bg-success" *ngIf="item.statut === 'cloturee'">Fermé</span>
+                                <span class="badge bg-warning" *ngIf="item.statut === 'ouverte'">Ouvert</span>
+                            </td>
+                            <td>{{ item.validation.date | date:'dd/MM/yyyy' }}</td>
+                        </tr>
+                    </tbody>
+
+                </table>
+                <div class="mt-3 text-end">
+                    <strong>Total Fermeture :</strong> {{ formatCFA(totalFermeture) }} <br>
+                    <strong>Total Physique :</strong> {{ formatCFA(totalPhysique) }} <br>
+                    <strong>Total Ecart :</strong> 
+                    <span [ngClass]="{'text-danger': totalEcart > 0, 'text-success': totalEcart === 0}">
+                        {{ formatCFA(totalEcart) }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="showModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-info-subtle">
+                <h5 class="modal-title" id="exampleModalLabel">Critères {{title}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+            </div>
+
+            <form [formGroup]="searchForm">
+                <div class="modal-body p-3">
+                    <div class="row mt-4">
+                        <div class="col-lg-12 col-sm-12">
+                            <div class="mb-3">
+                                <label for="choices-payment-status">caisse </label>
+                                <div class="input-light">
+                                    <select formControlName="idcaisse" class="form-select form-select-sm bg-light border-0">
+                                        <option value="">choisir la caisse</option>
+                                        @for (item of caissesUser; track $index){
+                                            <option value="{{item.caisse.idcaisse}}">{{item.caisse.codecaisse}} -- {{item.caisse.libelle}}</option>
+                                        }
+                                    </select>
+                                    <div class="invalid-feedback">Sélectionner une caisse</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-sm-6">
+                            <div class="mb-3">
+                                <label for="date-field">date debut</label>
+                                <input type="date" formControlName="datedebut" class="form-control form-control-sm bg-light border-0" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date" required>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-sm-6">
+                            <div class="mb-3">
+                                <label for="date-field">date fin</label>
+                                <input type="date" formControlName="datefin" class="form-control form-control-sm bg-light border-0" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="hstack gap-2 justify-content-end">
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
+                            <button type="submit" class="btn btn-sm btn-success" (click)="onSubmit()" [disabled]="searchForm.invalid">
+                                rechercher
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!--end modal -->

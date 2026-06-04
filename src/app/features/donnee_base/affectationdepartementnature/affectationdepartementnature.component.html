@@ -1,0 +1,318 @@
+<!-- start page title -->
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">{{title}}</h4>
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Données de base</a></li>
+                    <li class="breadcrumb-item active">{{title}}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end page title -->
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card" id="orderList">
+            <div class="card-header border-0">
+                <div class="row align-items-center gy-3">
+                    <div class="col-sm-auto d-flex justify-content-between align-items-center">
+                        <div class="d-flex gap-1 flex-wrap">
+                            <button class="btn btn-sm btn-info" (click)="actualiser()">
+                                <i class="ri-refresh-fill align-bottom me-1"></i>Actualiser
+                            </button>
+                        </div>
+                        <div class="flex-shrink-0 ms-2">
+                            <div class="dropdown card-header-dropdown">
+                                <a class="btn btn-soft-primary btn-sm" role="button" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Télécharger<i class="mdi mdi-chevron-down align-middle ms-1"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#importcsv">Importer csv</a>
+                                    <a class="dropdown-item" href="#" data-bs-target="#exportModal" data-bs-toggle="modal">Extraire</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal -->
+            <div class="modal fade" id="importcsv" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                    <div class="modal-header p-3 bg-info-subtle">
+                        <h5>Import des données via CSV</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+                    </div>
+                    <form [formGroup]="ImportForm">
+                        <div class="modal-body text-center">
+
+                        <!-- Décision -->
+                        <div class="d-flex flex-column align-items-center gap-3 mt-3">
+                            <input type="file" #fileInput class="form-control form-control-sm" formControlName="file" accept=".csv" />
+                        </div>
+
+                        <div *ngIf="ImportForm.get('file')?.invalid && ImportForm.get('file')?.touched" class="text-danger mt-1">
+                            <div *ngIf="ImportForm.get('file')?.errors?.['required']">
+                                Le fichier est obligatoire
+                            </div>
+
+                            <div *ngIf="ImportForm.get('file')?.errors?.['invalidFileType']">
+                                Seuls les fichiers CSV sont autorisés
+                            </div>
+                        </div>
+                        </div>
+
+                        <div class="modal-footer">
+                        <div class="hstack gap-2 justify-content-end">
+                            <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">
+                            Annuler
+                            </button>
+
+                            <button type="button" (click)="submitImportFile(fileInput)" class="btn btn-sm btn-success" [disabled]="ImportForm.invalid" data-bs-dismiss="modal">
+                            importer
+                            </button>
+                        </div>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal export -->
+            <div class="modal fade" id="exportModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Exporter les affectations</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- Plage -->
+                           <div class="mb-3">
+                                <label>Département début</label>
+                                <select class="form-select form-select-sm" [(ngModel)]="exportData.debut" name="debut">
+                                    <option value="">-- Tous --</option>
+                                    <option *ngFor="let n of departements" [value]="n.codedept">
+                                         {{ n.codedept }} - {{ n.libelle }}
+                                    </option>
+                                </select>
+                            </div>
+
+                           <div class="mb-3">
+                                <label>Département fin</label>
+                                <select class="form-select form-select-sm" [(ngModel)]="exportData.fin" name="fin">
+                                    <option value="">-- Tous --</option>
+                                    <option *ngFor="let n of departements" [value]="n.codedept">
+                                        {{ n.codedept }} - {{ n.libelle }}
+                                    </option>                                    
+                                </select>
+                            </div>
+
+                            <!-- Format -->
+                            <div class="mb-3">
+                                <label>Format</label>
+                                <select class="form-select" [(ngModel)]="exportData.format">
+                                    <option value="excel">Excel</option>
+                                    <option value="pdf">PDF</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                            <button class="btn btn-primary" (click)="exporter()">Exporter</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="card-body pt-0">
+            
+                <!-- Selection d'un élément-->
+                <div class="d-flex flex-column align-items-center">
+                    <div class="fw-bold mb-2">Sélectionner le département :</div>
+
+                    <form [formGroup]="departementForm">
+                        <div class="border">
+                            <select title="Selection" id="departementselected" class="form-select form-select-sm" formControlName="iddepartement">
+                                <option value="" class="text-center">-- Sélectionner --</option>
+                                <option *ngFor="let d of departements" [value]="d.iddepartement">
+                                    {{ d.codedept }} - {{ d.libelle }}
+                                </option>
+                            </select>
+                        </div> 
+                    </form>
+                </div> 
+
+                <!-- Tableau de jeu -->
+                <div class="row mt-4">
+
+                    <!-- N'est pas affecté à... -->
+                    <div class="col-5" id="non-affectees">
+                        <h6><i class="ri-link-unlink"></i> N'est pas affecté à...</h6>
+
+                        <!-- 🔎 Recherche -->
+                        <input type="text"  class="form-control form-control-sm mb-2" 
+                         placeholder="Rechercher code ou libellé..."
+                            [(ngModel)]="searchTermNA"
+                            (input)="applyFilterNA()"
+                        />
+
+                        <div class="table-container">
+                            <table class="table table-sm table-hover border mb-0">
+                                <thead class="table-light sticky-header">
+                                    <tr>
+                                        <th>✔</th>
+                                        <th>Code nature</th>
+                                        <th>Libellé</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr *ngFor="let item of paginatedDataNA">
+                                        <td>
+                                            <input type="checkbox" (change)="toggleLeft(item, $event)" />
+                                        </td>
+                                        <td>{{ item.codenature }}</td>
+                                        <td>{{ item.libelle }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination -->
+                        <div class="d-flex justify-content-center align-items-center gap-2 mb-0" id="pagination">
+                            <!-- Précédent -->
+                            <button 
+                                class="btn btn-sm btn-light icon-btn"
+                                (click)="prevPageNA()" 
+                                [disabled]="currentPage === 1"
+                                title="Page précédente">
+                                <i class="ri-arrow-left-s-line"></i>
+                            </button>
+
+                            <!-- Info page -->
+                            <span class="page-info">
+                                {{ currentPage }} / {{ totalPages }}
+                            </span>
+
+                            <!-- Suivant -->
+                            <button 
+                                class="btn btn-sm btn-light icon-btn"
+                                (click)="nextPageNA()" 
+                                [disabled]="currentPage === totalPages"
+                                title="Page suivante">
+                                <i class="ri-arrow-right-s-line"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Boutons centraux -->
+                    <div class="col-2 text-center d-flex flex-column gap-2 mt-5">
+
+                        <button class="btn btn-outline-primary btn-sm" (click)="add()" [disabled]="selectedLeft.length === 0">
+                            <i class="ri-arrow-right-s-line" ></i> Ajouter
+                        </button>
+
+                        <button class="btn btn-outline-primary btn-sm" (click)="addAll()">
+                            <i class="ri-arrow-right-double-line"></i> Tous
+                        </button>
+
+                        <button class="btn btn-outline-primary btn-sm" (click)="removeAll()">
+                            <i class="ri-arrow-left-double-line"></i> Aucun
+                        </button>
+
+                        <button class="btn btn-outline-primary btn-sm" (click)="remove()" [disabled]="selectedRight.length === 0">
+                            <i class="ri-arrow-left-s-line"></i> Enlever
+                        </button>
+                        <button class="btn btn-sm btn-secondary" (click)="abandonner()">
+                            <i class="ri-close-line"></i> Abandonner
+                        </button>
+                    </div>
+
+                    <!-- Est affecté à... -->
+                    <div class="col-5" id="affectees">
+                        <h6><i class="ri-link"></i> Est affecté à...</h6>
+
+                        <!-- 🔎 Recherche -->
+                        <input type="text"  class="form-control form-control-sm mb-2" 
+                         placeholder="Rechercher code ou libellé..."
+                            [(ngModel)]="searchTerm"
+                            (input)="applyFilter()"
+                        />
+
+                        <div class="table-container">
+                            <table class="table table-sm table-hover border mb-0">
+                                <thead class="table-light sticky-header">
+                                    <tr>
+                                        <th>✔</th>
+                                        <th>Code nature</th>
+                                        <th>Libellé</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr *ngFor="let item of paginatedData">
+                                        <td>
+                                            <input type="checkbox" (change)="toggleRight(item, $event)" />
+                                        </td>
+                                        <td>{{ item.codenature }}</td>
+                                        <td>{{ item.libelle }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination -->
+                        <div class="d-flex justify-content-center align-items-center gap-2 mb-0" id="pagination">
+                            <!-- Précédent -->
+                            <button 
+                                class="btn btn-sm btn-light icon-btn"
+                                (click)="prevPage()" 
+                                [disabled]="currentPage === 1"
+                                title="Page précédente">
+                                <i class="ri-arrow-left-s-line"></i>
+                            </button>
+
+                            <!-- Info page -->
+                            <span class="page-info">
+                                {{ currentPage }} / {{ totalPages }}
+                            </span>
+
+                            <!-- Suivant -->
+                            <button 
+                                class="btn btn-sm btn-light icon-btn"
+                                (click)="nextPage()" 
+                                [disabled]="currentPage === totalPages"
+                                title="Page suivante">
+                                <i class="ri-arrow-right-s-line"></i>
+                            </button>
+                        </div>
+             
+                    </div>
+
+
+                    <!-- Boutons en bas (Enregistrer) -->
+                    <div class="row mt-3">
+                        <div class="col-6">
+                        </div>
+
+                        <div class="col-6 text-end">
+                            <button id="save-btn" class="btn btn-primary" (click)="save()">
+                            <i class="ri-save-line"></i> Enregistrer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--end col-->
+</div>
+<!--end row-->
