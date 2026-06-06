@@ -12,10 +12,17 @@ import { ToastrService } from 'ngx-toastr';
 import { DemandeService } from '../../../features/demande/services/demande.service';
 import { AffectationNatureCentreService } from '../../../features/donnee_base/services/affectationnaturecentre.service';
 import { devisemodel } from '../../../features/donnee_base/donnee_base/model/devise.model';
-import { AsyncPipe, CommonModule} from '@angular/common';
+import { AsyncPipe, CommonModule } from '@angular/common';
 import { map, Observable, startWith, tap } from 'rxjs';
 import { tauxdevisemodel } from '../../../features/donnee_base/donnee_base/model/tauxdevise.model';
-import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormArray,
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { natureoperationModel } from '../../../features/donnee_base/models/natureoperation.model';
 import { caissePeriodeModel } from '../../../features/caisse_journal/models/periodecaisse.model';
 import { centreanalytiqueModel } from '../../../features/donnee_base/models/centreanalytique.model';
@@ -27,46 +34,56 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { operationModel } from '../../../features/operations/model/operation.model';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../constantes/messages.contantes';
+import { PieceJointe } from '../../../features/PJ/models/pj.model';
+import { OperationPJService } from '../../../features/PJ/service/operationpj.service';
+import { DemandePJService } from '../../../features/PJ/service/demandepj.service';
 
 @Component({
   selector: 'app-operation-modal',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, AsyncPipe, MatAutocompleteModule, MatInputModule, MatFormFieldModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    AsyncPipe,
+    MatAutocompleteModule,
+    MatInputModule,
+    MatFormFieldModule,
+  ],
   templateUrl: './operation-modal.component.html',
   styleUrl: './operation-modal.component.css',
 })
-
-export class OperationModalComponent implements OnInit{
-
+export class OperationModalComponent implements OnInit {
   @Input() title = '';
 
   //Le taux de devises
-  tauxdevise : tauxdevisemodel = new tauxdevisemodel();
-  taux : any;
+  tauxdevise: tauxdevisemodel = new tauxdevisemodel();
+  taux: any;
 
   //Changement titre modal
-  actionModal: string = "create";
+  actionModal: string = 'create';
 
   //Ramener la devise
-  devises : devisemodel[] = [];
-  devise : devisemodel = new devisemodel();
+  devises: devisemodel[] = [];
+  devise: devisemodel = new devisemodel();
 
-  params : any = {};
-  breadCrumbs : any = {};
+  params: any = {};
+  breadCrumbs: any = {};
   fb: FormBuilder = new FormBuilder();
-  msgErros : string = "";
+  msgErros: string = '';
   loading: Boolean = false;
-  operationForm : FormGroup = this.fb.group({});
+  operationForm: FormGroup = this.fb.group({});
 
   //Liste des natures filtrées
   naturesFiltrees: natureoperationModel[] = [];
-  natureoperations : natureoperationModel[] = [];
-  filteredNatureoperations: Observable<natureoperationModel[]> = new Observable();
+  natureoperations: natureoperationModel[] = [];
+  filteredNatureoperations: Observable<natureoperationModel[]> =
+    new Observable();
 
   //caisseSolde
-  caisseSolde : any = [];
+  caisseSolde: any = [];
   caisseSoldeMap = new Map<string, number>();
 
-  //Liste periode 
+  //Liste periode
   caisseperiodes: caissePeriodeModel[] = [];
 
   caisseStatuses: any = {};
@@ -84,64 +101,105 @@ export class OperationModalComponent implements OnInit{
 
   //Demande selectionnée
   isSelectedDemande: boolean = false;
-    
+
   //Liste des tiers
-  tiers : tiersModel[] = [];
+  tiers: tiersModel[] = [];
   tiersFiltrees: tiersModel[] = [];
   filteredTiers: Observable<tiersModel[]> = new Observable();
-  
+
   //Liste des centres analytiques
-  centres : centreanalytiqueModel[] = [];
+  centres: centreanalytiqueModel[] = [];
   centresFiltrees: centreanalytiqueModel[] = [];
   filteredCentres: Observable<centreanalytiqueModel[]> = new Observable();
-  
+
   //Map to store ligne observables
-  ligneFilteredMap: Map<number, { natures: Observable<any[]>, tiers: Observable<any[]>, centres: Observable<any[]>}> = new Map();
+  ligneFilteredMap: Map<
+    number,
+    {
+      natures: Observable<any[]>;
+      tiers: Observable<any[]>;
+      centres: Observable<any[]>;
+    }
+  > = new Map();
 
   loadingModal = false;
   isAnyOpen: boolean = false;
-   //Bouton active / inactive
+  //Bouton active / inactive
   isUpdated: boolean = true;
 
-  operation : operationModel = new operationModel();
+  operation: operationModel = new operationModel();
 
-  constructor(private natureoperationservice: NatureoperationService, private caisseuserservice: AffectationCaisseService,
-      private caissePeriodeservice: CaissePeriodeService, private operationservice: OperationService, private tiersservice: TiersService,
-      private AffectationNatureCentreService: AffectationNatureCentreService, private centreanalytiqueservice: CentreAnalytiqueService,
-      private toastr : ToastrService, private service: DemandeService, private ds:deviseservice,
-      public activeModal: NgbActiveModal
-    ){}
+  // gestion des PJ
+  uploadedFiles: File[] = [];
+  existingPieces: PieceJointe[] = [];
+  filesToDelete: string[] = [];
+  pjUploading = false;
+  pjDeleting: string | null = null;
+  piecesCountMap: Map<string, number> = new Map();
+  modalPJVisible = false;
+  selectedOperationPJ: operationModel | null = null;
+  piecesJointes: PieceJointe[] = [];
+  piecesJointesLoading = false;
+  // pièces jointes associées à la demande
+  demandePiecesJointes: PieceJointe[] = [];
+  demandePiecesJointesLoading = false;
+
+  constructor(
+    private natureoperationservice: NatureoperationService,
+    private caisseuserservice: AffectationCaisseService,
+    private caissePeriodeservice: CaissePeriodeService,
+    private operationservice: OperationService,
+    private tiersservice: TiersService,
+    private AffectationNatureCentreService: AffectationNatureCentreService,
+    private centreanalytiqueservice: CentreAnalytiqueService,
+    private toastr: ToastrService,
+    private service: DemandeService,
+    private ds: deviseservice,
+    public activeModal: NgbActiveModal,
+    private pjService: OperationPJService,
+    private pjDemandeService: DemandePJService,
+  ) {}
 
   ngOnInit(): void {
-      //Recuperer la devise
-      this.getalldevises();
-      //Charger les tiers
-      this.getAllTiers();
-      //Charger les centres analytiques
-      this.getAllcentres();
-      //charger les demandes
-      this.loadAllDemandes();
-      //Initialisation du formulaire
-      this.initForm();
-      //Charger les natures d'opérations
-      this.getAllNatureoperations();
-      //Charger les caisses et les périodes en une seule opération
-      this.loadCaissesForm().subscribe({
-        next: () => {
-          this.loadingModal = false;
+    //Recuperer la devise
+    this.getalldevises();
+    //Charger les tiers
+    this.getAllTiers();
+    //Charger les centres analytiques
+    this.getAllcentres();
+    //charger les demandes
+    this.loadAllDemandes();
+    //Initialisation du formulaire
+    this.initForm();
+    //Charger les natures d'opérations
+    this.getAllNatureoperations();
+    //Charger les caisses et les périodes en une seule opération
+    this.loadCaissesForm().subscribe({
+      next: () => {
+        this.loadingModal = false;
 
-          const sameDate = OperationModalUtils.checkSameDatePeriodes(this.caisseperiodes);
-          this.operationForm.patchValue({
-            dateoperation: OperationModalUtils.formatDateForInput(sameDate || new Date().toISOString())
-          });
-          if (sameDate) {
-            this.operationForm.get("dateoperation")?.disable();
-          }
+        const sameDate = OperationModalUtils.checkSameDatePeriodes(
+          this.caisseperiodes,
+        );
+        this.operationForm.patchValue({
+          dateoperation: OperationModalUtils.formatDateForInput(
+            sameDate || new Date().toISOString(),
+          ),
+        });
+        if (sameDate) {
+          this.operationForm.get('dateoperation')?.disable();
+        }
 
-          //Si la demande est sélectionnée
-          this.operationForm.get('demande')?.valueChanges.subscribe(iddemande => {
+        //Si la demande est sélectionnée
+        this.operationForm
+          .get('demande')
+          ?.valueChanges.subscribe((iddemande) => {
             if (iddemande) {
+              // charger les pj de la demande
+              this.loadDemandePiecesJointes(iddemande);
+
               // Désactiver les boutons sur le formulaire de création
+
               this.isUpdated = false;
               this.onDemandeSelected(iddemande);
               //Verrouiller tout le formulaire
@@ -153,40 +211,44 @@ export class OperationModalComponent implements OnInit{
             }
           });
 
-          // Filtrer la devise de transaction pour ramener le taux
-          this.operationForm.get('devise')?.valueChanges.subscribe(devise => {
-            this.getTauxDeviseTransaction(devise);
-          });
+        // Filtrer la devise de transaction pour ramener le taux
+        this.operationForm.get('devise')?.valueChanges.subscribe((devise) => {
+          this.getTauxDeviseTransaction(devise);
+        });
 
-          // Filtrer les natures quand typepaiement change
-          this.operationForm.get("typepaiement")?.valueChanges.subscribe(type => {
+        // Filtrer les natures quand typepaiement change
+        this.operationForm
+          .get('typepaiement')
+          ?.valueChanges.subscribe((type) => {
             this.onTypePaiementChange(type);
           });
 
-          // Recalcul des montants après le taux appliqué
-          this.operationForm.get("tauxoperation")?.valueChanges.subscribe(taux => {
+        // Recalcul des montants après le taux appliqué
+        this.operationForm
+          .get('tauxoperation')
+          ?.valueChanges.subscribe((taux) => {
             const numericTaux = Number(taux);
             if (!isNaN(numericTaux)) {
               this.updateMontantRefGlobalchange(taux);
             }
           });
 
-          // recalcul automatique
-          this.caisses.controls.forEach((caisseFG: any) => {
-            this.applyAutoCalcul(caisseFG);
-          });
-        }, 
-        error: () => {
-          this.loadingModal = false;
-        }
-      });
-      //Récuperer les soldes de caisses
-      this.getSoldeCaisse();
-      
-      // Récupérer les statuts de caisse
-      this.caissePeriodeservice.statuses$.subscribe(status => {
-        this.caisseStatuses = status;
-      });
+        // recalcul automatique
+        this.caisses.controls.forEach((caisseFG: any) => {
+          this.applyAutoCalcul(caisseFG);
+        });
+      },
+      error: () => {
+        this.loadingModal = false;
+      },
+    });
+    //Récuperer les soldes de caisses
+    this.getSoldeCaisse();
+
+    // Récupérer les statuts de caisse
+    this.caissePeriodeservice.statuses$.subscribe((status) => {
+      this.caisseStatuses = status;
+    });
   }
 
   cancel() {
@@ -194,12 +256,14 @@ export class OperationModalComponent implements OnInit{
   }
 
   //Soumission du formulaire
-  confirm(){
+  confirm() {
     /** Check formulaire */
     this.msgErros = '';
     const controls = this.operationForm.controls;
     if (this.operationForm.invalid) {
-      Object.keys(controls).forEach(controlName => controls[controlName].markAsTouched());
+      Object.keys(controls).forEach((controlName) =>
+        controls[controlName].markAsTouched(),
+      );
       this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
       this.toastr.warning(this.msgErros);
       return;
@@ -215,49 +279,133 @@ export class OperationModalComponent implements OnInit{
         natureop: ligne.natureop?.idnature,
         centre: ligne.centre?.idcentreanalytique,
         tiers: ligne.tiers?.idtiers,
-        montantligne: ligne?.montantligne
-      }))
+        montantligne: ligne?.montantligne,
+      })),
     };
 
     // Ajouter les informations utilisateur selon l'action
-    const _operation = this.actionModal === 'create'
-      ? {
-          ...baseoperation,
-          createdby: this.getUserFullName(),
-          updatedby: this.getUserFullName(),
-        }
-      : {
-          ...baseoperation,
-          updatedby: this.getUserFullName(),
-    };
+    const _operation =
+      this.actionModal === 'create'
+        ? {
+            ...baseoperation,
+            createdby: this.getUserFullName(),
+            updatedby: this.getUserFullName(),
+          }
+        : {
+            ...baseoperation,
+            updatedby: this.getUserFullName(),
+          };
+
+    // Stocker les fichiers à uploader pour traitement après création
+    const pendingFiles = [...this.uploadedFiles];
 
     // Renvoie les données au composant parent
-    this.activeModal.close(_operation);
+    this.activeModal.close({
+      operation: _operation,
+      files: pendingFiles, // ← Transmission des fichiers au parent
+    });
+  }
+
+  // Ajoute cette méthode après la méthode confirm()
+  /**
+   * Upload des fichiers après création de l'opération
+   */
+  async uploadPendingFiles(idoperation: string): Promise<void> {
+    if (this.uploadedFiles.length === 0) return Promise.resolve();
+
+    this.pjUploading = true;
+    const userId = this.user.idutilisateur;
+
+    return new Promise((resolve, reject) => {
+      this.pjService.create(idoperation, this.uploadedFiles, userId).subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.toastr.success(`${res.data.length} fichier(s) uploadé(s)`);
+            this.uploadedFiles = [];
+            resolve();
+          } else {
+            reject(new Error('Upload failed'));
+          }
+          this.pjUploading = false;
+        },
+        error: (err: any) => {
+          this.pjUploading = false;
+          reject(err);
+        },
+      });
+    });
+  }
+
+  /**
+   * Formatage de la taille des fichiers
+   */
+  formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  /**
+   * Récupère l'icône selon le type MIME
+   */
+  getFileIcon(pj: any): string {
+    let mimeType = pj?.mimeType || pj?.mimetype;
+    if (!mimeType) return 'ri-file-line';
+
+    const mime = mimeType.toLowerCase();
+    if (mime.includes('pdf')) return 'ri-file-pdf-line text-danger';
+    if (mime.includes('word')) return 'ri-file-word-line text-primary';
+    if (
+      mime.includes('excel') ||
+      mime.includes('csv') ||
+      mime.includes(
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      )
+    )
+      return 'ri-file-excel-line text-success';
+    if (mime.includes('image')) return 'ri-image-line text-warning';
+    return 'ri-file-line';
+  }
+
+  /**
+   * Supprime un fichier de la liste de sélection
+   */
+  removeSelectedFile(index: number): void {
+    this.uploadedFiles.splice(index, 1);
+  }
+
+  /**
+   * Sélection des fichiers
+   */
+  onFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+      const newFiles = Array.from(input.files);
+      this.uploadedFiles.push(...newFiles);
+    }
   }
 
   //Recupérer les tiers
-  getAllTiers(){
+  getAllTiers() {
     this.tiersservice.getAll().subscribe({
-      next : (res) => {
-        if(res.success){
-          this.tiers = (res.data || []).filter(
-            (n: any) => n.actif === 1
-          )
+      next: (res) => {
+        if (res.success) {
+          this.tiers = (res.data || []).filter((n: any) => n.actif === 1);
         }
-      }
+      },
     });
   }
 
   //Recupérer les centres analytiques
-  getAllcentres(){
+  getAllcentres() {
     this.centreanalytiqueservice.getAll().subscribe({
-      next : (res) => {
-        if(res.success){
-          this.centres = (res.data || []).filter(
-            (n: any) => n.actif === 1
-          )
+      next: (res) => {
+        if (res.success) {
+          this.centres = (res.data || []).filter((n: any) => n.actif === 1);
         }
-      }
+      },
     });
   }
 
@@ -274,50 +422,50 @@ export class OperationModalComponent implements OnInit{
   }
 
   //Récupérer les devise
-  getalldevises (){
+  getalldevises() {
     const params = {
       page: 1,
-      limit: 20
+      limit: 20,
     };
     this.ds.getAll(params).subscribe({
-      next : (res) => {
-         if(res.success){
-            this.devises = res.data;
-         }
-      }
+      next: (res) => {
+        if (res.success) {
+          this.devises = res.data;
+        }
+      },
     });
   }
 
   //Initialiser le formulaire
-  initForm(){
+  initForm() {
     this.operationForm = this.fb.group({
-      demande : [""],
-      codeoperation : [""],
-      beneficiaire: [""],
-      libelle : [""],
-      dateoperation : [{ value: null, disabled: false }, [Validators.required]],
-      typepaiement: ["", [Validators.required]],
+      demande: [''],
+      codeoperation: [''],
+      beneficiaire: [''],
+      libelle: [''],
+      dateoperation: [{ value: null, disabled: false }, [Validators.required]],
+      typepaiement: ['', [Validators.required]],
       lignes: this.fb.array([]),
-      devise : ["", [Validators.required]],
-      site : [this.user.idsite ?? null],
-      societe : [this.user.idsociete ?? null],
+      devise: ['', [Validators.required]],
+      site: [this.user.idsite ?? null],
+      societe: [this.user.idsociete ?? null],
       montant: [0],
       tauxoperation: [1],
       montantRefglobal: [0],
-      caisses : this.fb.array([])
-    })
+      caisses: this.fb.array([]),
+    });
   }
 
   //Recuperer les natures opérations
-  getAllNatureoperations(){
+  getAllNatureoperations() {
     this.natureoperationservice.getAll().subscribe({
-      next : (res) => {
-        if(res.success){
+      next: (res) => {
+        if (res.success) {
           this.natureoperations = (res.data || []).filter(
-            (n: any) => n.actif === 1
+            (n: any) => n.actif === 1,
           );
         }
-      }
+      },
     });
   }
 
@@ -331,20 +479,20 @@ export class OperationModalComponent implements OnInit{
       user: this.user.idutilisateur,
     };
     this.service.getAllEntetes(params).subscribe({
-      next : (res) => {
-        if(res.success){
+      next: (res) => {
+        if (res.success) {
           this.entetesDmd = (res.data.data || []).filter(
-            (n: any) => n.decaisse === 0 && n.statut === 3
+            (n: any) => n.decaisse === 0 && n.statut === 3,
           );
         }
       },
       error: (err) => {
-        this.toastr.error("Erreur backend");
-      }
+        this.toastr.error('Erreur backend');
+      },
     });
   }
 
-  get user(){
+  get user() {
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
@@ -353,7 +501,7 @@ export class OperationModalComponent implements OnInit{
   }
 
   get typePaiement() {
-    return this.operationForm.get("typepaiement")?.value;
+    return this.operationForm.get('typepaiement')?.value;
   }
 
   filtrerNatures(type: string) {
@@ -363,10 +511,10 @@ export class OperationModalComponent implements OnInit{
     }
 
     const cleanType = type.toLowerCase().trim();
-    if(this.isSelectedDemande){
+    if (this.isSelectedDemande) {
       this.naturesFiltrees = [...this.natureoperations];
-    }else{
-      this.naturesFiltrees = this.natureoperations.filter(n => {
+    } else {
+      this.naturesFiltrees = this.natureoperations.filter((n) => {
         //Cas encaissement / décaissement normal
         if (cleanType !== 'decaissementaj') {
           return (
@@ -377,73 +525,81 @@ export class OperationModalComponent implements OnInit{
         //Cas décaissement avec ajustement
         return (
           n.typeoperation?.toLowerCase().trim() === 'decaissement' &&
-          n.decajustifier === 1 && n.demandedecaissement === 0
+          n.decajustifier === 1 &&
+          n.demandedecaissement === 0
         );
       });
     }
   }
 
   get caisses(): FormArray<FormGroup> {
-    return this.operationForm.get("caisses") as FormArray<FormGroup>;
+    return this.operationForm.get('caisses') as FormArray<FormGroup>;
   }
 
   //Champ caisse
-  addCaisse(_caisse: any){
-    const periode = this.caisseperiodes.find(p => p.idcaisse === _caisse.idcaisse);
+  addCaisse(_caisse: any) {
+    const periode = this.caisseperiodes.find(
+      (p) => p.idcaisse === _caisse.idcaisse,
+    );
     const caisseFG = this.fb.group({
-      idcaisse : [_caisse.idcaisse, Validators.required],
+      idcaisse: [_caisse.idcaisse, Validators.required],
       caisse: [_caisse.caisse?.codecaisse, Validators.required],
       solde: [OperationModalUtils.formatNumber(_caisse.caisse?.solde) ?? 0],
       devisecaisse: [_caisse.caisse?.devise],
-      idperiode : [periode?.idperiode ? periode.idperiode : null, Validators.required]
+      idperiode: [
+        periode?.idperiode ? periode.idperiode : null,
+        Validators.required,
+      ],
     });
 
     this.caisses.push(caisseFG);
     //Calcul automatique
     this.applyAutoCalcul(caisseFG);
   }
-  
+
   //Charger les caisses sur le formulaires
   loadCaissesForm(): Observable<void> {
     const payload = {
-      idutilisateur : this.user.idutilisateur,
-      iddeviserefsoc: this.user.devise_ref_id
+      idutilisateur: this.user.idutilisateur,
+      iddeviserefsoc: this.user.devise_ref_id,
     };
 
     return this.caisseuserservice.getCaissesUserPeriode(payload).pipe(
-      tap(res => {
+      tap((res) => {
         const periodes = res?.data ?? [];
         this.caisseperiodes = periodes;
 
         const caissesArray = this.operationForm.get('caisses') as FormArray;
         caissesArray.clear();
         periodes.forEach((p: any) => {
-          caissesArray.push(this.fb.group({
-            idcaisse: [p.caisse?.idcaisse, Validators.required],
-            caisse: [p.caisse?.code, Validators.required],
-            statut: [p.periode?.statut ?? null],
-            devisecaisse: [p.devise?.code ?? null],
-            iddevisecaisse: [p.devise?.iddevise ?? null],
-            solde: [OperationModalUtils.formatCFA(p.solde?.montant ?? 0)],
-            montantcaisse: [0, [Validators.required, Validators.min(0)]],
-            montantref: [0],
-            taux: [p.solde?.taux ?? 1],
-            idperiode: [p.periode?.idperiode, Validators.required]
-          }));
+          caissesArray.push(
+            this.fb.group({
+              idcaisse: [p.caisse?.idcaisse, Validators.required],
+              caisse: [p.caisse?.code, Validators.required],
+              statut: [p.periode?.statut ?? null],
+              devisecaisse: [p.devise?.code ?? null],
+              iddevisecaisse: [p.devise?.iddevise ?? null],
+              solde: [OperationModalUtils.formatCFA(p.solde?.montant ?? 0)],
+              montantcaisse: [0, [Validators.required, Validators.min(0)]],
+              montantref: [0],
+              taux: [p.solde?.taux ?? 1],
+              idperiode: [p.periode?.idperiode, Validators.required],
+            }),
+          );
         });
       }),
-      map(() => void 0)
+      map(() => void 0),
     );
   }
 
   //Récuperer les soldes
-  getSoldeCaisse(){
+  getSoldeCaisse() {
     this.operationservice.getSoldeCaisse().subscribe({
-      next : (res) => {
-        if(res.success){
+      next: (res) => {
+        if (res.success) {
           this.caisseSolde = res.data.data;
         }
-      }
+      },
     });
   }
 
@@ -460,7 +616,7 @@ export class OperationModalComponent implements OnInit{
         natureop: null,
         centre: null,
         tiers: null,
-        montantligne: ""
+        montantligne: '',
       });
 
       ligne.get('centre')?.disable();
@@ -473,16 +629,16 @@ export class OperationModalComponent implements OnInit{
   onDemandeSelected(iddemande: string) {
     this.service.getEntete(iddemande).subscribe({
       next: (res) => {
-        if(res.success){
+        if (res.success) {
           this.isSelectedDemande = true;
           this.fillFormFromDemande(res.data);
-        }else{
+        } else {
           this.loadingModal = false;
         }
       },
       error: () => {
         this.loadingModal = false;
-      }
+      },
     });
   }
 
@@ -495,8 +651,11 @@ export class OperationModalComponent implements OnInit{
       devise: demande.devise?.iddevise,
       site: demande.site?.idsite,
       societe: demande.societe?.idsociete,
-      typepaiement: demande.typedemande === 'decaissement' ? 'decaissement' : 'encaissement',
-      montant: this.getTotalDemande(demande)
+      typepaiement:
+        demande.typedemande === 'decaissement'
+          ? 'decaissement'
+          : 'encaissement',
+      montant: this.getTotalDemande(demande),
     });
 
     /** Reset lignes */
@@ -508,8 +667,12 @@ export class OperationModalComponent implements OnInit{
       const ligneFG = this.newLigne(ligne);
       lignesFA.push(ligneFG);
 
-       //charger centres + positionner centre
-      this.getallCentresDispatch(ligne.natureoperation.idnature, ligneFG, ligne.centreanalytique.idcentre );
+      //charger centres + positionner centre
+      this.getallCentresDispatch(
+        ligne.natureoperation.idnature,
+        ligneFG,
+        ligne.centreanalytique.idcentre,
+      );
     });
 
     /** Recalcul auto */
@@ -520,10 +683,11 @@ export class OperationModalComponent implements OnInit{
 
   //Affectation natures centre for modify
   getallCentresDispatch(natureId: string, ligne: FormGroup, centreId?: string) {
-    this.AffectationNatureCentreService.getAll(natureId).subscribe(res => {
+    this.AffectationNatureCentreService.getAll(natureId).subscribe((res) => {
       if (res.success) {
-        const centres = (res.data.centresaffectes || [])
-          .filter((c: any) => c.actif === 1);
+        const centres = (res.data.centresaffectes || []).filter(
+          (c: any) => c.actif === 1,
+        );
 
         //stocker dans la ligne
         ligne.get('centres')?.setValue(centres);
@@ -536,7 +700,10 @@ export class OperationModalComponent implements OnInit{
 
         //mettre l'objet complet (PAS juste l'id)
         if (centreId) {
-          const selected = centres.find((c: { idcentreanalytique: string; }) => c.idcentreanalytique === centreId);
+          const selected = centres.find(
+            (c: { idcentreanalytique: string }) =>
+              c.idcentreanalytique === centreId,
+          );
           ligne.get('centre')?.setValue(selected || null, { emitEvent: false });
         }
       }
@@ -550,61 +717,68 @@ export class OperationModalComponent implements OnInit{
   private updateMontantRefGlobal() {
     const montantGlobal = this.calculateMontantRefGlobal(
       this.totalLignes,
-      this.tauxConversionTransaction
+      this.tauxConversionTransaction,
     );
     this.operationForm.patchValue(
       { montantRefglobal: montantGlobal },
-      { emitEvent: false }
+      { emitEvent: false },
     );
   }
 
   private updateMontantRefGlobalchange(taux: any) {
     const montantGlobal = this.calculateMontantRefGlobal(
       this.totalLignes,
-      Number(taux)
+      Number(taux),
     );
     this.operationForm.patchValue(
       { montantRefglobal: montantGlobal },
-      { emitEvent: false }
+      { emitEvent: false },
     );
   }
 
   //Récuperer le taux de la devise transaction vers la devise du référentiel
-  getderniertaux (payload: any){
+  getderniertaux(payload: any) {
     this.getDernierTaux(payload).subscribe({
-      next : (tauxdevise) => {
-         if(!tauxdevise){
-            this.tauxdevise = new tauxdevisemodel();
-            this.tauxConversionTransaction = 1;
-            this.toastr.warning("Pas de taux recent trouvé");
-         }else{
-            this.tauxdevise = tauxdevise;
-            this.tauxConversionTransaction = this.tauxdevise.coefficient;
-         }
-         this.patchTauxTransaction(this.operationForm, this.tauxConversionTransaction);
-         this.updateMontantRefGlobal();
+      next: (tauxdevise) => {
+        if (!tauxdevise) {
+          this.tauxdevise = new tauxdevisemodel();
+          this.tauxConversionTransaction = 1;
+          this.toastr.warning('Pas de taux recent trouvé');
+        } else {
+          this.tauxdevise = tauxdevise;
+          this.tauxConversionTransaction = this.tauxdevise.coefficient;
+        }
+        this.patchTauxTransaction(
+          this.operationForm,
+          this.tauxConversionTransaction,
+        );
+        this.updateMontantRefGlobal();
       },
       error: (err) => {
         //this.toastr.error("Erreur backend", err.error.message)
-      }
+      },
     });
   }
 
-  buildDernierTauxPayload(iddeviseorigine: any, iddevisedestination: any, datepiece: any) {
+  buildDernierTauxPayload(
+    iddeviseorigine: any,
+    iddevisedestination: any,
+    datepiece: any,
+  ) {
     return {
       iddeviseorigine,
       iddevisedestination,
-      datepiece
+      datepiece,
     };
   }
 
   //Charger le dernier taux
-  loadLastdeviseTaux(iddevise: any){
+  loadLastdeviseTaux(iddevise: any) {
     const datePivot = this.operationForm.get('dateoperation')?.value;
     const devises = this.buildDernierTauxPayload(
       iddevise,
       this.user.devise_ref_id,
-      datePivot
+      datePivot,
     );
 
     this.getderniertaux(devises);
@@ -614,22 +788,23 @@ export class OperationModalComponent implements OnInit{
     return deviseTransaction === deviseReference;
   }
 
-  patchTauxTransaction(operationForm: FormGroup, taux: number, emitEvent: boolean = true): void {
-    operationForm.patchValue(
-      { tauxoperation: taux },
-      { emitEvent }
-    );
+  patchTauxTransaction(
+    operationForm: FormGroup,
+    taux: number,
+    emitEvent: boolean = true,
+  ): void {
+    operationForm.patchValue({ tauxoperation: taux }, { emitEvent });
   }
 
   getDernierTaux(payload: any): Observable<tauxdevisemodel | null> {
-    return this.service.tauxrecent(payload).pipe(
-      map(res => (res.success ? res.data : null))
-    );
+    return this.service
+      .tauxrecent(payload)
+      .pipe(map((res) => (res.success ? res.data : null)));
   }
 
   getTauxFromCaisses(caisses: FormArray, deviseTransaction: any): number {
-    const matchingCaisses = caisses.controls.filter(c =>
-      c.get('iddevisecaisse')?.value !== deviseTransaction
+    const matchingCaisses = caisses.controls.filter(
+      (c) => c.get('iddevisecaisse')?.value !== deviseTransaction,
     );
 
     if (matchingCaisses.length === 0) {
@@ -640,18 +815,21 @@ export class OperationModalComponent implements OnInit{
   }
 
   // Si la devise de transaction est égale à l'une des devises de caisse aussi
-  private getTauxDeviseTransaction(deviseTransaction : any) {
+  private getTauxDeviseTransaction(deviseTransaction: any) {
     const deviseReference = this.user.devise_ref_id;
 
     if (this.isReferenceDevise(deviseTransaction, deviseReference)) {
       this.tauxConversionTransaction = 1;
-      this.patchTauxTransaction(this.operationForm, this.tauxConversionTransaction);
+      this.patchTauxTransaction(
+        this.operationForm,
+        this.tauxConversionTransaction,
+      );
       return;
     }
 
     this.tauxConversionTransaction = this.getTauxFromCaisses(
       this.caisses,
-      deviseTransaction
+      deviseTransaction,
     );
 
     //Charger le taux
@@ -662,14 +840,26 @@ export class OperationModalComponent implements OnInit{
     return montant * taux;
   }
 
-  isSoldeInsufficient(montant: number, solde: number, typePaiement?: string): boolean {
+  isSoldeInsufficient(
+    montant: number,
+    solde: number,
+    typePaiement?: string,
+  ): boolean {
     return typePaiement !== 'encaissement' && montant > solde;
   }
 
-  isCaisseOverTotal(caisses: FormArray, currentCaisse: FormGroup, montantRef: number, montantGl: number): boolean {
+  isCaisseOverTotal(
+    caisses: FormArray,
+    currentCaisse: FormGroup,
+    montantRef: number,
+    montantGl: number,
+  ): boolean {
     const totalAutresCaisses = caisses.controls
-      .filter(c => c !== currentCaisse)
-      .reduce((sum, c) => sum + (parseFloat(c.get('montantref')?.value) || 0), 0);
+      .filter((c) => c !== currentCaisse)
+      .reduce(
+        (sum, c) => sum + (parseFloat(c.get('montantref')?.value) || 0),
+        0,
+      );
 
     return totalAutresCaisses + montantRef > montantGl;
   }
@@ -691,7 +881,7 @@ export class OperationModalComponent implements OnInit{
       const montant = parseFloat(montantCtrl.value) || 0;
       const taux = parseFloat(tauxCtrl.value) || 1;
       const solde = OperationModalUtils.parseCFA(soldeCtrl.value) || 0;
-  
+
       const montantRef = this.calculateMontantRef(montant, taux);
       refCtrl.setValue(montantRef, { emitEvent: false });
 
@@ -699,25 +889,26 @@ export class OperationModalComponent implements OnInit{
         // même devise → pas de convedeviseReferencersion
         this.operationForm.patchValue(
           { montantRefglobal: this.totalLignes },
-          { emitEvent: false }
+          { emitEvent: false },
         );
       } else {
         // utiliser le taux de la caisse correspondant à la devise transaction
         this.getTauxDeviseTransaction(deviseTransaction);
       }
 
-      const maxMontantRef = this.operationForm.get('montantRefglobal')?.value || 0;
+      const maxMontantRef =
+        this.operationForm.get('montantRefglobal')?.value || 0;
 
       //Si le solde caisse devient inférieur au montant saisie
       if (this.isSoldeInsufficient(montant, solde, this.typePaiement)) {
         montantCtrl.setErrors({
           ...(montantCtrl.errors || {}),
-          soldeInsuffisant: true
+          soldeInsuffisant: true,
         });
 
         this.operationForm.setErrors({
           ...(this.operationForm.errors || {}),
-          soldeCaisseInsuffisant: true
+          soldeCaisseInsuffisant: true,
         });
 
         refCtrl.setValue(0, { emitEvent: false });
@@ -747,7 +938,7 @@ export class OperationModalComponent implements OnInit{
         montantCtrl.setErrors({ depassementMontant: true });
         this.operationForm.setErrors({
           ...(this.operationForm.errors || {}),
-          totalCaisseDepasse: true
+          totalCaisseDepasse: true,
         });
 
         refCtrl.setValue(montantRef, { emitEvent: false });
@@ -755,7 +946,14 @@ export class OperationModalComponent implements OnInit{
       }
 
       // contrôle dépassement montant total
-      if (this.isCaisseOverTotal(this.caisses, caisseFG, montantRef, maxMontantRef)) {
+      if (
+        this.isCaisseOverTotal(
+          this.caisses,
+          caisseFG,
+          montantRef,
+          maxMontantRef,
+        )
+      ) {
         montantCtrl.setErrors({ depassement: true });
         refCtrl.setValue(0, { emitEvent: false });
         return;
@@ -792,25 +990,31 @@ export class OperationModalComponent implements OnInit{
     updateMontantRef();
   }
 
-  controlTotalCaisses(caisses: FormArray, operationForm: FormGroup, maxMontantRef: number): void {
+  controlTotalCaisses(
+    caisses: FormArray,
+    operationForm: FormGroup,
+    maxMontantRef: number,
+  ): void {
     const totalRef = this.calculateTotalCaisses(caisses);
 
     if (totalRef > maxMontantRef) {
       operationForm.setErrors({
         ...(operationForm.errors || {}),
-        totalCaisseDepasse: true
+        totalCaisseDepasse: true,
       });
     } else if (operationForm.hasError('totalCaisseDepasse')) {
       const errors = { ...operationForm.errors };
       delete errors['totalCaisseDepasse'];
-      Object.keys(errors).length ? operationForm.setErrors(errors) : operationForm.setErrors(null);
+      Object.keys(errors).length
+        ? operationForm.setErrors(errors)
+        : operationForm.setErrors(null);
     }
   }
 
   calculateTotalCaisses(caisses: FormArray): number {
     return caisses.controls.reduce(
       (sum, c) => sum + (parseFloat(c.get('montantref')?.value) || 0),
-      0
+      0,
     );
   }
 
@@ -828,17 +1032,16 @@ export class OperationModalComponent implements OnInit{
   }
 
   //Modification du taux de devise de la caisse référentiel
-  updateTauxCaisse(devise: any){
-
+  updateTauxCaisse(devise: any) {
     //Récupérer la ou les caisses dont la devise egale à la devise de référence
-    const caisseConversion = this.caisses.controls.find(c =>
-      c.get('iddevisecaisse')?.value !== devise
+    const caisseConversion = this.caisses.controls.find(
+      (c) => c.get('iddevisecaisse')?.value !== devise,
     );
 
-    if (caisseConversion){
+    if (caisseConversion) {
       //recuperer celle dont la devise
       const tauxCtrl = caisseConversion.get('taux');
-      if(!tauxCtrl) return;
+      if (!tauxCtrl) return;
       tauxCtrl.setValue(this.tauxConversionTransaction, { emitEvent: false });
 
       this.updateMontantRefGlobal();
@@ -867,40 +1070,61 @@ export class OperationModalComponent implements OnInit{
   addLine() {
     this.lignes.push(this.newLigne());
   }
-  
+
   newLigne(ligne?: any): FormGroup<any> {
     const ligneOf = this.fb.group({
       idligneoperation: [ligne?.idligneoperation || null],
       numligne: [ligne?.numligne || null],
-      natureop: [ligne?.nature ?? ligne?.natureoperation ?? '', Validators.required],
-      centre: [{ value: ligne?.centre ?? ligne?.centreanalytique ?? null, disabled: true }],
+      natureop: [
+        ligne?.nature ?? ligne?.natureoperation ?? '',
+        Validators.required,
+      ],
+      centre: [
+        {
+          value: ligne?.centre ?? ligne?.centreanalytique ?? null,
+          disabled: true,
+        },
+      ],
       tiers: [{ value: ligne?.tiers || null, disabled: true }],
-      montantligne: [{ value: ligne?.montantdemande ?? ligne?.montantoperation ?? 0, disabled: true }, Validators.required],
+      montantligne: [
+        {
+          value: ligne?.montantdemande ?? ligne?.montantoperation ?? 0,
+          disabled: true,
+        },
+        Validators.required,
+      ],
       details: this.fb.array([]),
       //CENTRES PAR LIGNE
       centres: this.fb.control<any[]>([]),
       filteredNatureoperations: this.fb.control<any[]>([]),
       filteredTiers: this.fb.control<any[]>([]),
       filteredCentres: this.fb.control<any[]>([]),
-      filteredCodebudget: this.fb.control<any[]>([])
+      filteredCodebudget: this.fb.control<any[]>([]),
     });
 
     // Filtrage NatureOperations pour cette ligne
     const filteredNatureoperations = ligneOf.get('natureop')!.valueChanges.pipe(
       startWith(''),
-      map(value => OperationModalUtils.filterNature(value || '', this.naturesFiltrees))
+      map((value) =>
+        OperationModalUtils.filterNature(value || '', this.naturesFiltrees),
+      ),
     );
 
     // Filtrage Tiers pour cette ligne
     const filteredTiers = ligneOf.get('tiers')!.valueChanges.pipe(
       startWith(''),
-      map(value => OperationModalUtils.filterTiers(value || '', this.tiers))
+      map((value) => OperationModalUtils.filterTiers(value || '', this.tiers)),
     );
 
     // Filtrage Centres pour cette ligne
     const filteredCentres = ligneOf.get('centre')!.valueChanges.pipe(
       startWith(''),
-      map(value => OperationModalUtils.filterCentre(value || '', ligneOf.get('centres')?.value || []))
+      map((value) =>
+        OperationModalUtils.filterCentre(
+          value || '',
+          ligneOf.get('centres')?.value || [],
+        ),
+      ),
     );
 
     // Store observables in the map for template access
@@ -908,10 +1132,10 @@ export class OperationModalComponent implements OnInit{
     this.ligneFilteredMap.set(ligneIndex, {
       natures: filteredNatureoperations,
       tiers: filteredTiers,
-      centres: filteredCentres // vide pour l’instant
+      centres: filteredCentres, // vide pour l’instant
     });
 
-    ligneOf.get('natureop')?.valueChanges.subscribe(nature => {
+    ligneOf.get('natureop')?.valueChanges.subscribe((nature) => {
       if (!nature) return;
 
       ligneOf.get('centre')?.enable();
@@ -920,11 +1144,11 @@ export class OperationModalComponent implements OnInit{
       //Charger les centres de chaque lignes
       this.loadCentresForLigne(ligneOf, nature);
 
-      // Appliquer les règles métiers 
+      // Appliquer les règles métiers
       this.handleNatureChange(ligneOf, nature);
     });
 
-    ligneOf.get("montantligne")?.valueChanges.subscribe(() => {
+    ligneOf.get('montantligne')?.valueChanges.subscribe(() => {
       this.updateTotalMontant();
 
       //Calcul montant ref aussi
@@ -933,14 +1157,15 @@ export class OperationModalComponent implements OnInit{
 
     return ligneOf;
   }
-  
+
   //Charger les centres de chaque ligne
   loadCentresForLigne(ligne: FormGroup, nature: any) {
     this.AffectationNatureCentreService.getAll(nature.idnature).subscribe({
       next: (res) => {
         if (res.success) {
-          const centres = (res.data.centresaffectes || [])
-            .filter((c: any) => c.actif === 1);
+          const centres = (res.data.centresaffectes || []).filter(
+            (c: any) => c.actif === 1,
+          );
 
           //stocké dans la ligne
           ligne.get('centres')?.setValue(centres);
@@ -949,39 +1174,42 @@ export class OperationModalComponent implements OnInit{
           ligne.get('centre')?.reset();
           this.centresFiltrees = centres;
         }
-      }
+      },
     });
   }
 
   protectionField(ligne: FormGroup, field: string) {
-    if (!ligne.get("natureop")?.value) {
-      this.toastr.error("Veuillez renseigner la nature avant de continuer.");
+    if (!ligne.get('natureop')?.value) {
+      this.toastr.error('Veuillez renseigner la nature avant de continuer.');
       return false;
     }
     // return true;
     if (field === 'tiers') {
       const natureId = ligne.get('natureop')?.value;
-      const nature = this.natureoperations.find(n => n.idnature === natureId);
+      const nature = this.natureoperations.find((n) => n.idnature === natureId);
       if (!nature || nature.imputationtiers !== 1) {
         return false;
       }
     }
     return true;
   }
-  
+
   //validation required
   isValidField(label: string): string {
-    let status: string = "";
-    this.form[label].valid && this.form[label].touched ? status = 'is-valid' :
-      this.form[label].invalid && this.form[label].touched ? status = 'is-invalid' : status = '';
+    let status: string = '';
+    this.form[label].valid && this.form[label].touched
+      ? (status = 'is-valid')
+      : this.form[label].invalid && this.form[label].touched
+        ? (status = 'is-invalid')
+        : (status = '');
     return status;
   }
-  
+
   removeLine(index: number) {
     this.lignes.removeAt(index);
     this.updateTotalMontant();
   }
-  
+
   //Méthode helper pour obtenir le nom complet de l'utilisateur
   getUserFullName(): string {
     const user = this.user;
@@ -994,7 +1222,7 @@ export class OperationModalComponent implements OnInit{
   //Selection de la nature / Activer ou desactiver imputation tiers
   handleNatureChange(ligne: FormGroup, natureId: any) {
     const nature = this.natureoperations.find(
-      n => n.idnature === natureId.idnature
+      (n) => n.idnature === natureId.idnature,
     );
 
     if (!nature) {
@@ -1015,7 +1243,7 @@ export class OperationModalComponent implements OnInit{
     let total = 0;
 
     this.lignes.controls.forEach((ctrl: any) => {
-      const val = parseFloat(ctrl.get("montantligne")?.value || 0);
+      const val = parseFloat(ctrl.get('montantligne')?.value || 0);
       total += isNaN(val) ? 0 : val;
     });
 
@@ -1033,5 +1261,39 @@ export class OperationModalComponent implements OnInit{
   formatNumber(value: number): string {
     return OperationModalUtils.formatNumber(value);
   }
-
+  loadDemandePiecesJointes(iddemande: string): void {
+    this.demandePiecesJointesLoading = true;
+    this.pjDemandeService.getAll(iddemande).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.demandePiecesJointes = res.data;
+        } else {
+          this.demandePiecesJointes = [];
+        }
+        this.demandePiecesJointesLoading = false;
+      },
+      error: (err) => {
+        console.error('Erreur chargement PJ demande:', err);
+        this.demandePiecesJointes = [];
+        this.demandePiecesJointesLoading = false;
+      },
+    });
+  }
+  downloadPiece(piece: PieceJointe): void {
+    this.pjService.downloadFile(piece.urlpiece).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = piece.nomfichier;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.toastr.success('Téléchargement démarré');
+      },
+      error: (err) => {
+        console.error('Erreur téléchargement:', err);
+        this.toastr.error('Erreur lors du téléchargement');
+      },
+    });
+  }
 }

@@ -21,7 +21,7 @@
 
 /* Réserve TOUJOURS la place de l'erreur */
 .error-slot {
-  min-height: 14px;   /* hauteur fixe */
+  min-height: 14px; /* hauteur fixe */
   line-height: 14px;
   visibility: hidden;
 }
@@ -34,4 +34,13 @@
 /* Optionnel : alignement input */
 .cell-wrapper input {
   height: 26px;
+}
+
+.upload-zone {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.upload-zone:hover {
+  background-color: #f8f9fa !important;
+  border-color: #86b7fe !important;
 }

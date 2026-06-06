@@ -168,7 +168,7 @@ export class DemandeDecaissementComponent implements OnInit {
   }
 
   /**
-   * ⭐ Charge les compteurs de pièces jointes pour toutes les demandes
+   * Charge les compteurs de pièces jointes pour toutes les demandes
    * Utilise des appels parallèles pour optimiser les performances
    */
   loadPiecesCountsForAllDemandes(): void {
@@ -606,7 +606,6 @@ export class DemandeDecaissementComponent implements OnInit {
       next: (res) => {
         if (res.success) {
           this.piecesJointes = res.data;
-          console.log('PJ chargées:', this.piecesJointes);
           this.piecesCountMap.set(iddemande, this.piecesJointes.length);
         } else {
           this.piecesJointes = [];
