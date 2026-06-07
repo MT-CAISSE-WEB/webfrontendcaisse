@@ -47,7 +47,7 @@ export class ComptabilisationComponent implements OnInit{
     { header: 'N° piece', field: 'num_piece' },
     { header: 'N° ecriture', field: 'numligne' },
     { header: 'Journal', field: 'journal' },
-    { header: 'Date', field: 'numligne' },
+    { header: 'Date', field: 'date_operation' },
     { header: 'Type', field: 'typeecriture' },
     { header: 'Compte', field: 'compte' },
     { header: 'Tiers', field: 'tiers' },
@@ -129,7 +129,6 @@ export class ComptabilisationComponent implements OnInit{
     this.service.getAllEcriture(data).subscribe({
       next : (res) => {
         this.ecritures = res.data;
-        console.log(this.ecritures);
         this.loading = false;
       },
       error : (err) => {
