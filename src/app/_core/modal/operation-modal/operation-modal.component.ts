@@ -656,6 +656,7 @@ export class OperationModalComponent implements OnInit {
           ? 'decaissement'
           : 'encaissement',
       montant: this.getTotalDemande(demande),
+      beneficiaire: demande.demandeur.nom + ' ' + demande.demandeur.prenom,
     });
 
     /** Reset lignes */
