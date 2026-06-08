@@ -219,7 +219,7 @@
 
                     <li class="nav-item">
                         <a class="nav-link menu-link" href="#sidebarConsultation" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
-                            <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">consultation</span>
+                            <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Consultations</span>
                         </a>
                         <div class="collapse menu-dropdown" id="sidebarConsultation">
                             <ul class="nav nav-sm flex-column">
@@ -228,7 +228,7 @@
                                 </li>
 
                                 <li class="nav-item">
-                                    <a [routerLink]="root_operationperiode" class="nav-link" data-key="t-operationperiode"> Journal de paiement </a>
+                                    <a [routerLink]="root_operationperiode" class="nav-link" data-key="t-operationperiode"> Journal de caisse </a>
                                 </li>
 
                                 <div *ngIf="issuperviseur() || iscaissier() || isuperadmin()">
@@ -259,6 +259,27 @@
                                         <a [routerLink]="root_cloture_caisse" class="nav-link" data-key="t-cloture">
                                             Etat de clôture caisse
                                         </a>
+                                    </li>
+
+                                    <li class="nav-item">
+                                        <a href="#depenses" class="nav-link" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarProfile" data-key="t-profile"> Dépenses
+                                        </a>
+                                        <div class="collapse menu-dropdown" id="depenses">
+                                            <ul class="nav nav-sm flex-column">
+                                                <div *ngIf="iscaissier() || iscomptable() || issuperviseur() || isuperadmin()">
+                                                    <li class="nav-item">
+                                                        <a [routerLink]="root_devise" class="nav-link" data-key="t-simple-page">Dépenses par département</a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a [routerLink]="root_devise" class="nav-link" data-key="t-simple-page">Dépenses par nature</a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a [routerLink]="root_devise" class="nav-link" data-key="t-simple-page">Dépenses par centre analytique</a>
+                                                    </li>
+                                                </div>
+                                                
+                                            </ul>
+                                        </div>
                                     </li>
                                 </div>
                             </ul>
