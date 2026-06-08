@@ -880,6 +880,17 @@
                           }}</span>
                         </div>
 
+                        <!-- ⭐ Bouton Tout télécharger -->
+                        <button
+                          *ngIf="existingPieces.length > 0"
+                          type="button"
+                          class="btn-download-all"
+                          (click)="downloadAllFiles()"
+                          title="Télécharger toutes les pièces jointes"
+                        >
+                          <i class="ri-download-line"></i> Tout télécharger
+                        </button>
+
                         <input
                           type="file"
                           #fileInput

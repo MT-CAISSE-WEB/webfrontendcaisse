@@ -47,4 +47,17 @@ export class BudgetPJService {
       responseType: 'blob',
     });
   }
+
+  /**
+   * Télécharge toutes les pièces jointes d'un budget
+   * @param idbudget - ID du budget
+   */
+  downloadAllFiles(idbudget: string): Observable<Blob> {
+    return this.http.get(
+      `${this.baseUrl}budget/${idbudget}/budget-pieces-jointes/download-all`,
+      {
+        responseType: 'blob',
+      },
+    );
+  }
 }
