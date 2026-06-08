@@ -1,804 +1,1422 @@
 <!-- start page title -->
 <div class="row">
-    <div class="col-12">
-        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">{{title}}</h4>
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Générales</a></li>
-                    <li class="breadcrumb-item active">{{title}}</li>
-                </ol>
-            </div>
-        </div>
+  <div class="col-12">
+    <div
+      class="page-title-box d-sm-flex align-items-center justify-content-between"
+    >
+      <h4 class="mb-sm-0">{{ title }}</h4>
+      <div class="page-title-right">
+        <ol class="breadcrumb m-0">
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);">Générales</a>
+          </li>
+          <li class="breadcrumb-item active">{{ title }}</li>
+        </ol>
+      </div>
     </div>
+  </div>
 </div>
 <!-- end page title -->
 
 <div class="row">
-    <div class="col-lg-12">
-        <div class="card" id="">
-            <div class="card-header border-0">
-                <div class="d-flex align-items-center">
-                    <h5 class="card-title mb-0 flex-grow-1">{{title}}</h5>
-                    <div class="flex-shrink-0">
-                        <div class="d-flex gap-2 flex-wrap">
-                            <button class="btn btn-sm btn-danger" [disabled]="!isAnyOpen" (click)="creationOperation()"><i class="ri-add-line align-bottom me-1"></i>nouvelle operation</button>
-                            <div class="btn-group" role="group" aria-label="view mode">
-                              <button type="button" class="btn btn-sm" [class.btn-outline-primary]="viewMode==='table'" [class.btn-light]="viewMode!=='table'" (click)="setViewMode('table')">Table</button>
-                              <button type="button" class="btn btn-sm" [class.btn-outline-primary]="viewMode==='details'" [class.btn-light]="viewMode!=='details'" (click)="setViewMode('details')">Détails</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  <div class="col-lg-12">
+    <div class="card" id="">
+      <div class="card-header border-0">
+        <div class="d-flex align-items-center">
+          <h5 class="card-title mb-0 flex-grow-1">{{ title }}</h5>
+          <div class="flex-shrink-0">
+            <div class="d-flex gap-2 flex-wrap">
+              <button
+                class="btn btn-sm btn-danger"
+                [disabled]="!isAnyOpen"
+                (click)="creationOperation()"
+              >
+                <i class="ri-add-line align-bottom me-1"></i>nouvelle operation
+              </button>
+              <div class="btn-group" role="group" aria-label="view mode">
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  [class.btn-outline-primary]="viewMode === 'table'"
+                  [class.btn-light]="viewMode !== 'table'"
+                  (click)="setViewMode('table')"
+                >
+                  Table
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  [class.btn-outline-primary]="viewMode === 'details'"
+                  [class.btn-light]="viewMode !== 'details'"
+                  (click)="setViewMode('details')"
+                >
+                  Détails
+                </button>
+              </div>
             </div>
-            <div class="card-body bg-light-subtle border border-dashed border-start-0 border-end-0">
-                <form [formGroup]="searchForm">
-                    <div class="row g-3">
-                        <div class="col-xxl-5 col-sm-12">
-                            <div class="d-flex flex-wrap gap-2 align-items-center">
-                                <div class="search-box search-box-sm flex-grow-1">
-                                    <input type="text" class="form-control form-control-sm search bg-light border-light" formControlName="search" placeholder="rechercher par numero, montant et devise...">
-                                    <i class="ri-search-line search-icon"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xxl-7 col-sm-12">
-                            <div class="row g-2">
-                                <div class="col-md-4">
-                                    <select class="form-select form-select-sm" formControlName="typepaiement">
-                                        <option value="">Tous types</option>
-                                        <option value="encaissement">encaissement</option>
-                                        <option value="decaissement">decaissement</option>
-                                        <option value="decaissementaj">decaissement à justifier</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <select class="form-select form-select-sm" formControlName="devise">
-                                        <option value="">Toutes devises</option>
-                                        @for (d of devises; track $index){
-                                            <option value="{{d.iddevise}}">{{d.codedevise}}</option>
-                                        }
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="search-box search-box-sm flex-grow-1">
-                                        <input type="date" class="form-control form-control-sm bg-light border-light" formControlName="date" placeholder="Date" />
-                                        <i class="ri-search-line search-icon"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!--end row-->
-                </form>
-            </div>
-            
-            <div class="card-body">
-                <div *ngIf="loading && operations.length === 0" class="text-center py-5">
-                    <div class="spinner-border text-info" role="status"></div>
-                    <h6 class="mt-3">Chargement des opérations...</h6>
-                </div>
-                <div *ngIf="!loading || operations.length > 0">
-                    <div *ngIf="viewMode === 'table'">
-                        <div class="table-responsive table-card">
-                            <table class="table align-middle table-nowrap table-container table-custom table-compact" id="invoiceTable">
-                                <thead class="text-muted">
-                                    <tr>
-                                        <th scope="col" style="width: 50px;">
-                                            <div class="form-check form-check-sm">
-                                                <input class="form-check-input" type="checkbox" id="checkAll" value="option">
-                                            </div>
-                                        </th>
-                                        <th class="sort text-uppercase" data-sort="invoice_id">numero</th>
-                                        <th class="sort text-uppercase" data-sort="type">operation</th>
-                                        <th class="sort text-uppercase" data-sort="invoice_amount">Montant</th>
-                                        <th class="sort text-uppercase" data-sort="status">Devise</th>
-                                        <th class="sort text-uppercase" data-sort="date">Date</th>
-                                        <th class="sort text-uppercase" data-sort="action">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="list form-check-all" id="invoice-list-data">
-                                    @for (item of operations; track $index){
-                                        <tr class="fs-12"> 
-                                            <th scope="row">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" [checked]="isChecked(item.idoperation)" [(ngModel)]="selectedItems[$index]" (ngModelChange)="handleSelectOne(item, $event)" type="checkbox" name="itemGroup_{{ $index }}">
-                                                </div>
-                                            </th>
-                                            <td class="numero"><a href="#" class="fw-medium link-primary">{{ item.codeoperation }}</a></td>
-                                            <td class="typepaiement text-danger"
-                                                *ngIf="item.idoperationorigine">
-                                                <i class="ri-close-circle-line fs-13 align-middle me-1"></i>
-                                                Annulation :
-                                                {{ item.caisses[0]?.codtypeoperation }}
-                                            </td>
-
-                                            <td class="typepaiement text-success"
-                                                *ngIf="!item.idoperationorigine 
-                                                    && item.caisses[0]?.codtypeoperation == 'encaissement'">
-                                                {{ item.caisses[0]?.codtypeoperation }}
-                                                <i class="ri-arrow-right-up-line fs-13 align-middle"></i>
-                                            </td>
-
-                                            <td class="typepaiement text-warning"
-                                                *ngIf="!item.idoperationorigine
-                                                    && item.caisses[0]?.codtypeoperation == 'decaissement'">
-                                                {{ item.caisses[0]?.codtypeoperation }}
-                                                <i class="ri-arrow-right-down-line fs-13 align-middle"></i>
-                                            </td>
-
-                                            <td class="typepaiement text-primary"
-                                                *ngIf="!item.idoperationorigine
-                                                    && item.caisses[0]?.codtypeoperation == 'decaissementaj'">
-                                                decaissement à justifier
-                                                <i class="ri-arrow-right-down-line fs-13 align-middle"></i>
-                                            </td>
-                                            <td class="montant text-center" *ngIf="item.devise.codedevise != 'USD'"> {{ formatCFA(item.montant) }} </td>
-                                            <td class="montant text-center" *ngIf="item.devise.codedevise == 'USD'"> {{ formatNumber(item.montant) }} </td>
-                                            <td class="devise"> {{ item.devise.codedevise }} </td>
-                                            <td class="text-muted text-uppercase fs-11"> {{ formatDateFR(item.dateoperation) }}</td>
-                                            <td>
-                                                <ul class="list-inline hstack gap-2 mb-0">
-                                                    <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="View">
-                                                        <button type="button" class="btn btn-link text-primary p-0" (click)="openEditModal(editModalTpl, item)">
-                                                            <i class="ri-eye-fill fs-16"></i>
-                                                        </button>
-                                                    </li>
-                                                    <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Imprimer">
-                                                        <button type="button" (click)="printRecu(item)" class="btn btn-link text-secondary p-0 edit-item-btn">
-                                                            <i class="ri-printer-fill fs-16"></i>
-                                                        </button>
-                                                    </li>
-                                                    <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Ecriture">
-                                                        <button type="button" class="btn btn-link text-dark p-0 edit-item-btn" (click)="openEcritureModal(ecritureModalTpl, item)">
-                                                            <i class="ri-price-tag-3-fill fs-16"></i>
-                                                        </button>
-                                                    </li>
-                                                    <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Annuler">
-                                                        <button type="button"
-                                                            class="btn btn-link p-0 edit-item-btn"
-                                                            (click)="openCancelModal(cancelModalTpl, item)"
-                                                            [class.text-secondary]="item.annulee === 1 || item.idoperationannulation"
-                                                            [class.text-warning]="!(item.annulee === 1 || item.idoperationannulation)"
-                                                            [style.pointer-events]="(item.annulee === 1 || item.idoperationannulation) ? 'none' : 'auto'"
-                                                            [style.opacity]="(item.annulee === 1 || item.idoperationannulation) ? '0.4' : '1'">
-                                                            <i class="bx bx-x-circle fs-16"></i>
-                                                        </button>
-                                                    </li>
-                                                    <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
-                                                        <button type="button" class="btn btn-link text-danger p-0" data-bs-toggle="modal" data-bs-target="#deleteOrder"
-                                                            (click)="modalDelete(item)" title="Suppression" disabled>
-                                                            <i class="ri-delete-bin-5-fill fs-16"></i>
-                                                        </button>
-                                                    </li>
-                                                </ul>
-                                            </td>
-                                        </tr>
-                                    }
-                                    <tr *ngIf="loading">
-                                        <td colspan="8">
-                                            <div class="text-center py-4">
-                                                <div class="spinner-border text-info"></div>
-                                                <h6 class="mt-2">Chargement...</h6>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-
-                            <div class="" *ngIf="operations.length == 0 && !loading">
-                                <div class="text-center">
-                                    <h6 class="mt-2">Désolé! Aucune opération trouvé</h6>
-                                    <p class="text-muted mb-0">Désole il n' y aucune donnée dans cette base</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div *ngIf="viewMode === 'details'">
-                        <div class="row">
-                            @for(item of operations; track $index){
-                            <div class="col-12 mb-3">
-                                <div class="card" id="card-{{item.idoperation}}">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div>
-                                                <h6 class="mb-1">{{ item.codeoperation }}</h6>
-                                                <div class="text-muted mb-2">
-                                                    {{ formatDateFR(item.dateoperation) }} • {{ item.montant | number:'1.2-2' }} • {{ item.devise?.codedevise }}
-                                                </div>
-                                            </div>
-                                            <div class="hstack gap-2">
-                                                <button type="button" class="btn btn-link text-primary p-0" (click)="openEditModal(editModalTpl, item)" title="Voir">
-                                                    <i class="ri-eye-fill fs-16"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-link text-secondary p-0" (click)="printRecu(item)" title="Imprimer">
-                                                    <i class="ri-printer-fill fs-16"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-link text-dark p-0" (click)="openEcritureModal(ecritureModalTpl, item)" title="Écriture">
-                                                    <i class="ri-price-tag-3-fill fs-16"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-link p-0"
-                                                    (click)="openCancelModal(cancelModalTpl, item)"
-                                                    [class.text-secondary]="item.annulee === 1 || item.idoperationannulation"
-                                                    [class.text-warning]="!(item.annulee === 1 || item.idoperationannulation)"
-                                                    [style.pointer-events]="(item.annulee === 1 || item.idoperationannulation) ? 'none' : 'auto'"
-                                                    [style.opacity]="(item.annulee === 1 || item.idoperationannulation) ? '0.4' : '1'"
-                                                    title="Annuler">
-                                                    <i class="bx bx-x-circle fs-16"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-link text-danger p-0" title="Suppression" disabled>
-                                                    <i class="ri-delete-bin-5-fill fs-16"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div class="row bg-light rounded-3 p-3 mt-3 align-items-center">
-                                            <div class="col-md-6">
-                                                <div class="d-flex flex-wrap align-items-center gap-2">
-                                                    <span class="badge" [ngClass]="item.caisses[0]?.codtypeoperation === 'encaissement' ? 'bg-success' : 'bg-primary'">{{ item.caisses[0]?.codtypeoperation === 'decaissementaj' ? 'decaissement à justifier' : (item.caisses[0]?.codtypeoperation || 'Type inconnu') }}</span>
-                                                    <span class="badge" [ngClass]="item.annulee === 1 || item.idoperationannulation ? 'bg-danger' : 'bg-light text-dark'">{{ item.annulee === 1 || item.idoperationannulation ? 'Annulée' : 'Active' }}</span>
-                                                </div>
-                                                <div class="mt-2 text-muted">
-                                                    <strong>Description :</strong>
-                                                    <span>{{ item.lignes[0]?.libelle || '-' }}</span>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 text-end">
-                                                <div class="d-inline-block text-start bg-white p-2 rounded shadow-sm mb-2 ms-2">
-                                                    <div class="fs-13 text-muted">Caisse de paiement</div>
-                                                     @for (caisse of item.caisses; track $index) {
-                                                        <div class="fw-medium">{{ caisse?.caisse?.libelle || '-' }} {{ caisse?.montant | number:'1.2-2' }} {{ caisse.caisse?.devise }}</div>
-                                                     }
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            }
-                        </div>
-                    </div>
-
-                <div class="d-flex justify-content-end mt-3">
-                    <div class="pagination-wrap hstack gap-2">
-                        <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
-                            Précédent
-                        </button>
-                        <ul class="pagination listjs-pagination mb-0"> Page {{currentPage}} / {{totalPages}} </ul>
-                        <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)" class="btn btn-sm btn-soft-primary pagination-next">
-                            Suivant
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Modal -->
-                <div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-body p-5 text-center">
-                                <div class="mt-4 text-center">
-                                    <h4>{{titleMsg}}</h4>
-                                    <p class="text-muted fs-15 mb-4">{{msgSup}}</p>
-                                    <div class="hstack gap-2 justify-content-center remove">
-                                        <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> annuler</button>
-                                        <button class="btn btn-sm btn-danger" (click)="deleteConfirmed()" id="delete-record">Oui, supprimer</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--end modal -->
-
-                <ng-template #cancelModalTpl let-modal>
-                    <div class="p-4 text-center">
-                        <h4>Annulation d'opération</h4>
-                        <p class="text-muted fs-15 mb-4">Êtes-vous sûr de vouloir annuler cette opération ?</p>
-                        <div class="hstack gap-2 justify-content-center remove">
-                            <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" (click)="modal.dismiss()"> non </button>
-                            <button class="btn btn-sm btn-danger" (click)="cancelConfirmed()">Oui, annuler</button>
-                        </div>
-                    </div>
-                </ng-template>
-            </div>
+          </div>
         </div>
+      </div>
+      <div
+        class="card-body bg-light-subtle border border-dashed border-start-0 border-end-0"
+      >
+        <form [formGroup]="searchForm">
+          <div class="row g-3">
+            <div class="col-xxl-5 col-sm-12">
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <div class="search-box search-box-sm flex-grow-1">
+                  <input
+                    type="text"
+                    class="form-control form-control-sm search bg-light border-light"
+                    formControlName="search"
+                    placeholder="rechercher par numero, montant et devise..."
+                  />
+                  <i class="ri-search-line search-icon"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-xxl-7 col-sm-12">
+              <div class="row g-2">
+                <div class="col-md-4">
+                  <select
+                    class="form-select form-select-sm"
+                    formControlName="typepaiement"
+                  >
+                    <option value="">Tous types</option>
+                    <option value="encaissement">encaissement</option>
+                    <option value="decaissement">decaissement</option>
+                    <option value="decaissementaj">
+                      decaissement à justifier
+                    </option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <select
+                    class="form-select form-select-sm"
+                    formControlName="devise"
+                  >
+                    <option value="">Toutes devises</option>
+                    @for (d of devises; track $index) {
+                      <option value="{{ d.iddevise }}">
+                        {{ d.codedevise }}
+                      </option>
+                    }
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <div class="search-box search-box-sm flex-grow-1">
+                    <input
+                      type="date"
+                      class="form-control form-control-sm bg-light border-light"
+                      formControlName="date"
+                      placeholder="Date"
+                    />
+                    <i class="ri-search-line search-icon"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--end row-->
+        </form>
+      </div>
+
+      <div class="card-body">
+        <div
+          *ngIf="loading && operations.length === 0"
+          class="text-center py-5"
+        >
+          <div class="spinner-border text-info" role="status"></div>
+          <h6 class="mt-3">Chargement des opérations...</h6>
+        </div>
+        <div *ngIf="!loading || operations.length > 0">
+          <div *ngIf="viewMode === 'table'">
+            <div class="table-responsive table-card">
+              <table
+                class="table align-middle table-nowrap table-container table-custom table-compact"
+                id="invoiceTable"
+              >
+                <thead class="text-muted">
+                  <tr>
+                    <th scope="col" style="width: 50px">
+                      <div class="form-check form-check-sm">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          id="checkAll"
+                          value="option"
+                        />
+                      </div>
+                    </th>
+                    <th class="sort text-uppercase" data-sort="invoice_id">
+                      numero
+                    </th>
+                    <th class="sort text-uppercase" data-sort="type">
+                      operation
+                    </th>
+                    <th class="sort text-uppercase" data-sort="invoice_amount">
+                      Montant
+                    </th>
+                    <th class="sort text-uppercase" data-sort="status">
+                      Devise
+                    </th>
+                    <th class="sort text-uppercase" data-sort="date">Date</th>
+                    <th class="sort text-uppercase" data-sort="action">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="list form-check-all" id="invoice-list-data">
+                  @for (item of operations; track $index) {
+                    <tr class="fs-12">
+                      <th scope="row">
+                        <div class="form-check">
+                          <input
+                            class="form-check-input"
+                            [checked]="isChecked(item.idoperation)"
+                            [(ngModel)]="selectedItems[$index]"
+                            (ngModelChange)="handleSelectOne(item, $event)"
+                            type="checkbox"
+                            name="itemGroup_{{ $index }}"
+                          />
+                        </div>
+                      </th>
+                      <td class="numero">
+                        <a href="#" class="fw-medium link-primary">{{
+                          item.codeoperation
+                        }}</a>
+                      </td>
+                      <td
+                        class="typepaiement text-danger"
+                        *ngIf="item.idoperationorigine"
+                      >
+                        <i
+                          class="ri-close-circle-line fs-13 align-middle me-1"
+                        ></i>
+                        Annulation :
+                        {{ item.caisses[0]?.codtypeoperation }}
+                      </td>
+
+                      <td
+                        class="typepaiement text-success"
+                        *ngIf="
+                          !item.idoperationorigine &&
+                          item.caisses[0]?.codtypeoperation == 'encaissement'
+                        "
+                      >
+                        {{ item.caisses[0]?.codtypeoperation }}
+                        <i
+                          class="ri-arrow-right-up-line fs-13 align-middle"
+                        ></i>
+                      </td>
+
+                      <td
+                        class="typepaiement text-warning"
+                        *ngIf="
+                          !item.idoperationorigine &&
+                          item.caisses[0]?.codtypeoperation == 'decaissement'
+                        "
+                      >
+                        {{ item.caisses[0]?.codtypeoperation }}
+                        <i
+                          class="ri-arrow-right-down-line fs-13 align-middle"
+                        ></i>
+                      </td>
+
+                      <td
+                        class="typepaiement text-primary"
+                        *ngIf="
+                          !item.idoperationorigine &&
+                          item.caisses[0]?.codtypeoperation == 'decaissementaj'
+                        "
+                      >
+                        decaissement à justifier
+                        <i
+                          class="ri-arrow-right-down-line fs-13 align-middle"
+                        ></i>
+                      </td>
+                      <td
+                        class="montant text-center"
+                        *ngIf="item.devise.codedevise != 'USD'"
+                      >
+                        {{ formatCFA(item.montant) }}
+                      </td>
+                      <td
+                        class="montant text-center"
+                        *ngIf="item.devise.codedevise == 'USD'"
+                      >
+                        {{ formatNumber(item.montant) }}
+                      </td>
+                      <td class="devise">{{ item.devise.codedevise }}</td>
+                      <td class="text-muted text-uppercase fs-11">
+                        {{ formatDateFR(item.dateoperation) }}
+                      </td>
+                      <td>
+                        <ul class="list-inline hstack gap-2 mb-0">
+                          <li
+                            class="list-inline-item"
+                            data-bs-toggle="tooltip"
+                            data-bs-trigger="hover"
+                            data-bs-placement="top"
+                            title="View"
+                          >
+                            <button
+                              type="button"
+                              class="btn btn-link text-primary p-0"
+                              (click)="openEditModal(editModalTpl, item)"
+                            >
+                              <i class="ri-eye-fill fs-16"></i>
+                            </button>
+                          </li>
+                          <li
+                            class="list-inline-item edit"
+                            data-bs-toggle="tooltip"
+                            data-bs-trigger="hover"
+                            data-bs-placement="top"
+                            title="Imprimer"
+                          >
+                            <button
+                              type="button"
+                              (click)="printRecu(item)"
+                              class="btn btn-link text-secondary p-0 edit-item-btn"
+                            >
+                              <i class="ri-printer-fill fs-16"></i>
+                            </button>
+                          </li>
+                          <li
+                            class="list-inline-item edit"
+                            data-bs-toggle="tooltip"
+                            data-bs-trigger="hover"
+                            data-bs-placement="top"
+                            title="Ecriture"
+                          >
+                            <button
+                              type="button"
+                              class="btn btn-link text-dark p-0 edit-item-btn"
+                              (click)="
+                                openEcritureModal(ecritureModalTpl, item)
+                              "
+                            >
+                              <i class="ri-price-tag-3-fill fs-16"></i>
+                            </button>
+                          </li>
+                          <li
+                            class="list-inline-item edit"
+                            data-bs-toggle="tooltip"
+                            data-bs-trigger="hover"
+                            data-bs-placement="top"
+                            title="Pièces jointes"
+                          >
+                            <div class="d-flex align-items-center gap-2">
+                              <!-- Icône avec badge de comptage -->
+                              <div class="position-relative">
+                                <button
+                                  type="button"
+                                  class="btn btn-link text-dark p-0 edit-item-btn"
+                                  (click)="openPiecesJointesModal(item)"
+                                >
+                                  <i
+                                    class="ri-attachment-2 fs-18 text-muted"
+                                  ></i>
+                                  <span
+                                    *ngIf="getPiecesCount(item.idoperation) > 0"
+                                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary"
+                                    style="
+                                      font-size: 9px;
+                                      margin-top: -2px;
+                                      margin-left: -6px;
+                                    "
+                                  >
+                                    {{ getPiecesCount(item.idoperation) }}
+                                  </span>
+                                </button>
+                              </div>
+                            </div>
+                          </li>
+                          <li
+                            class="list-inline-item edit"
+                            data-bs-toggle="tooltip"
+                            data-bs-trigger="hover"
+                            data-bs-placement="top"
+                            title="Annuler"
+                          >
+                            <button
+                              type="button"
+                              class="btn btn-link p-0 edit-item-btn"
+                              (click)="openCancelModal(cancelModalTpl, item)"
+                              [class.text-secondary]="
+                                item.annulee === 1 || item.idoperationannulation
+                              "
+                              [class.text-warning]="
+                                !(
+                                  item.annulee === 1 ||
+                                  item.idoperationannulation
+                                )
+                              "
+                              [style.pointer-events]="
+                                item.annulee === 1 || item.idoperationannulation
+                                  ? 'none'
+                                  : 'auto'
+                              "
+                              [style.opacity]="
+                                item.annulee === 1 || item.idoperationannulation
+                                  ? '0.4'
+                                  : '1'
+                              "
+                            >
+                              <i class="bx bx-x-circle fs-16"></i>
+                            </button>
+                          </li>
+                          <li
+                            class="list-inline-item"
+                            data-bs-toggle="tooltip"
+                            data-bs-trigger="hover"
+                            data-bs-placement="top"
+                            title="Remove"
+                          >
+                            <button
+                              type="button"
+                              class="btn btn-link text-danger p-0"
+                              data-bs-toggle="modal"
+                              data-bs-target="#deleteOrder"
+                              (click)="modalDelete(item)"
+                              title="Suppression"
+                              disabled
+                            >
+                              <i class="ri-delete-bin-5-fill fs-16"></i>
+                            </button>
+                          </li>
+                        </ul>
+                      </td>
+                    </tr>
+                  }
+                  <tr *ngIf="loading">
+                    <td colspan="8">
+                      <div class="text-center py-4">
+                        <div class="spinner-border text-info"></div>
+                        <h6 class="mt-2">Chargement...</h6>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="" *ngIf="operations.length == 0 && !loading">
+                <div class="text-center">
+                  <h6 class="mt-2">Désolé! Aucune opération trouvé</h6>
+                  <p class="text-muted mb-0">
+                    Désole il n' y aucune donnée dans cette base
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="viewMode === 'details'">
+            <div class="row">
+              @for (item of operations; track $index) {
+                <div class="col-12 mb-3">
+                  <div class="card" id="card-{{ item.idoperation }}">
+                    <div class="card-body">
+                      <div
+                        class="d-flex justify-content-between align-items-start"
+                      >
+                        <div>
+                          <h6 class="mb-1">{{ item.codeoperation }}</h6>
+                          <div class="text-muted mb-2">
+                            {{ formatDateFR(item.dateoperation) }} •
+                            {{ item.montant | number: "1.2-2" }} •
+                            {{ item.devise?.codedevise }}
+                          </div>
+                        </div>
+                        <div class="hstack gap-2">
+                          <button
+                            type="button"
+                            class="btn btn-link text-primary p-0"
+                            (click)="openEditModal(editModalTpl, item)"
+                            title="Voir"
+                          >
+                            <i class="ri-eye-fill fs-16"></i>
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-link text-secondary p-0"
+                            (click)="printRecu(item)"
+                            title="Imprimer"
+                          >
+                            <i class="ri-printer-fill fs-16"></i>
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-link text-dark p-0"
+                            (click)="openEcritureModal(ecritureModalTpl, item)"
+                            title="Écriture"
+                          >
+                            <i class="ri-price-tag-3-fill fs-16"></i>
+                          </button>
+                          <div class="d-flex align-items-center gap-2">
+                            <!-- Icône avec badge de comptage -->
+                            <div class="position-relative">
+                              <button
+                                type="button"
+                                class="btn btn-link text-dark p-0 edit-item-btn"
+                                (click)="openPiecesJointesModal(item)"
+                              >
+                                <i class="ri-attachment-2 fs-18 text-muted"></i>
+                                <span
+                                  *ngIf="getPiecesCount(item.idoperation) > 0"
+                                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary"
+                                  style="
+                                    font-size: 9px;
+                                    margin-top: -2px;
+                                    margin-left: -6px;
+                                  "
+                                >
+                                  {{ getPiecesCount(item.idoperation) }}
+                                </span>
+                              </button>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            class="btn btn-link p-0"
+                            (click)="openCancelModal(cancelModalTpl, item)"
+                            [class.text-secondary]="
+                              item.annulee === 1 || item.idoperationannulation
+                            "
+                            [class.text-warning]="
+                              !(
+                                item.annulee === 1 || item.idoperationannulation
+                              )
+                            "
+                            [style.pointer-events]="
+                              item.annulee === 1 || item.idoperationannulation
+                                ? 'none'
+                                : 'auto'
+                            "
+                            [style.opacity]="
+                              item.annulee === 1 || item.idoperationannulation
+                                ? '0.4'
+                                : '1'
+                            "
+                            title="Annuler"
+                          >
+                            <i class="bx bx-x-circle fs-16"></i>
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-link text-danger p-0"
+                            title="Suppression"
+                            disabled
+                          >
+                            <i class="ri-delete-bin-5-fill fs-16"></i>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div
+                        class="row bg-light rounded-3 p-3 mt-3 align-items-center"
+                      >
+                        <div class="col-md-6">
+                          <div
+                            class="d-flex flex-wrap align-items-center gap-2"
+                          >
+                            <span
+                              class="badge"
+                              [ngClass]="
+                                item.caisses[0]?.codtypeoperation ===
+                                'encaissement'
+                                  ? 'bg-success'
+                                  : 'bg-primary'
+                              "
+                              >{{
+                                item.caisses[0]?.codtypeoperation ===
+                                "decaissementaj"
+                                  ? "decaissement à justifier"
+                                  : item.caisses[0]?.codtypeoperation ||
+                                    "Type inconnu"
+                              }}</span
+                            >
+                            <span
+                              class="badge"
+                              [ngClass]="
+                                item.annulee === 1 || item.idoperationannulation
+                                  ? 'bg-danger'
+                                  : 'bg-light text-dark'
+                              "
+                              >{{
+                                item.annulee === 1 || item.idoperationannulation
+                                  ? "Annulée"
+                                  : "Active"
+                              }}</span
+                            >
+                          </div>
+                          <div class="mt-2 text-muted">
+                            <strong>Description :</strong>
+                            <span>{{ item.lignes[0]?.libelle || "-" }}</span>
+                          </div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                          <div
+                            class="d-inline-block text-start bg-white p-2 rounded shadow-sm mb-2 ms-2"
+                          >
+                            <div class="fs-13 text-muted">
+                              Caisse de paiement
+                            </div>
+                            @for (caisse of item.caisses; track $index) {
+                              <div class="fw-medium">
+                                {{ caisse?.caisse?.libelle || "-" }}
+                                {{ caisse?.montant | number: "1.2-2" }}
+                                {{ caisse.caisse?.devise }}
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end mt-3">
+            <div class="pagination-wrap hstack gap-2">
+              <button
+                [disabled]="currentPage == 1"
+                (click)="changePage(currentPage - 1)"
+                class="btn btn-sm btn-soft-primary pagination-prev"
+              >
+                Précédent
+              </button>
+              <ul class="pagination listjs-pagination mb-0">
+                Page
+                {{
+                  currentPage
+                }}
+                /
+                {{
+                  totalPages
+                }}
+              </ul>
+              <button
+                [disabled]="currentPage == totalPages"
+                (click)="changePage(currentPage + 1)"
+                class="btn btn-sm btn-soft-primary pagination-next"
+              >
+                Suivant
+              </button>
+            </div>
+          </div>
+
+          <!-- Modal -->
+          <div
+            class="modal fade flip"
+            id="deleteOrder"
+            tabindex="-1"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-body p-5 text-center">
+                  <div class="mt-4 text-center">
+                    <h4>{{ titleMsg }}</h4>
+                    <p class="text-muted fs-15 mb-4">{{ msgSup }}</p>
+                    <div class="hstack gap-2 justify-content-center remove">
+                      <button
+                        class="btn btn-sm btn-link link-success fw-medium text-decoration-none"
+                        id="deleteRecord-close"
+                        data-bs-dismiss="modal"
+                      >
+                        <i class="ri-close-line me-1 align-middle"></i> annuler
+                      </button>
+                      <button
+                        class="btn btn-sm btn-danger"
+                        (click)="deleteConfirmed()"
+                        id="delete-record"
+                      >
+                        Oui, supprimer
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--end modal -->
+
+          <ng-template #cancelModalTpl let-modal>
+            <div class="p-4 text-center">
+              <h4>Annulation d'opération</h4>
+              <p class="text-muted fs-15 mb-4">
+                Êtes-vous sûr de vouloir annuler cette opération ?
+              </p>
+              <div class="hstack gap-2 justify-content-center remove">
+                <button
+                  class="btn btn-sm btn-link link-success fw-medium text-decoration-none"
+                  (click)="modal.dismiss()"
+                >
+                  non
+                </button>
+                <button
+                  class="btn btn-sm btn-danger"
+                  (click)="cancelConfirmed()"
+                >
+                  Oui, annuler
+                </button>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
     </div>
     <!--end col-->
 
-
-<div class="row">
-    <div class="col-xl-4 col-md-4">
+    <div class="row">
+      <div class="col-xl-4 col-md-4">
         <!-- card -->
         <div class="card card-animate">
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <p class="text-uppercase fw-medium text-muted mb-0">Décaissement</p>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <h5 class="text-success fs-14 mb-0">
-                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i> +89.24 %
-                        </h5>
-                    </div>
-                </div>
-                <div class="d-flex align-items-end justify-content-between mt-4">
-                    <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value">{{ formatCFA(totalDecaissementJour) || 0 }}</span> {{ user.devise_ref_code }} </h4>
-                        <span class="badge bg-warning me-1">{{ formatCFA(nbrDecaissementJour) || 0 }}</span> <span class="text-muted">Décaissement</span>
-                    </div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-light rounded fs-3">
-                            <i data-feather="file-text" class="text-success icon-dual-success"></i>
-                        </span>
-                    </div>
-                </div>
-            </div><!-- end card body -->
-        </div><!-- end card -->
-    </div><!-- end col -->
- 
-    <div class="col-xl-4 col-md-4">
-        <!-- card -->
-        <div class="card card-animate">
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <p class="text-uppercase fw-medium text-muted mb-0">Plus couteux</p>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <h5 class="text-danger fs-14 mb-0">
-                            <i class="ri-arrow-right-down-line fs-13 align-middle"></i> +8.09 %
-                        </h5>
-                    </div>
-                </div>
-                <div class="d-flex align-items-end justify-content-between mt-4">
-                    <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="maxDecaissementJour?.montant || 0 ">{{ formatCFA(maxDecaissementJour?.montantref ) || 0 }}</span> {{ user.devise_ref_code }}</h4>
-                        <span class="badge bg-warning me-1"> {{ formatCFA(maxDecaissementJour?.montant) || 0 }} </span> <span class="text-muted text-small">{{ maxDecaissementJour?.devise?.codedevise }}</span>
-                        <!-- <span class="badge bg-warning me-1">2</span> <span class="text-muted">Nature operation</span> -->
-                    </div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-light rounded fs-3">
-                            <i data-feather="check-square" class="text-success icon-dual-success"></i>
-                        </span>
-                    </div>
-                </div>
-            </div><!-- end card body -->
-        </div><!-- end card -->
-    </div><!-- end col -->
-
-    <div class="col-xl-4 col-md-4">
-        <!-- card -->
-        <div class="card card-animate">
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <p class="text-uppercase fw-medium text-muted mb-0">Moins couteux</p>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <h5 class="text-danger fs-14 mb-0">
-                            <i class="ri-arrow-right-down-line fs-13 align-middle"></i> +9.01 %
-                        </h5>
-                    </div>
-                </div>
-                <div class="d-flex align-items-end justify-content-between mt-4">
-                    <div>
-                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="136.98">{{ formatCFA(minDecaissementJour?.montantref ) || 0 }}</span> {{ user.devise_ref_code }}</h4>
-                        <span class="badge bg-warning me-1">{{ formatCFA(minDecaissementJour?.montant) || 0 }}</span> <span class="text-muted">{{ minDecaissementJour?.devise?.codedevise }}</span>
-                    </div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-light rounded fs-3">
-                            <i data-feather="clock" class="text-success icon-dual-success"></i>
-                        </span>
-                    </div>
-                </div>
-            </div><!-- end card body -->
-        </div><!-- end card -->
-    </div><!-- end col -->
-</div> <!-- end row-->
-
-
-<ng-template #editModalTpl let-modal>
-    <div class="modal-header p-3 bg-info-subtle">
-        <h5 class="modal-title">Details {{title}}</h5>
-        <button type="button" class="btn-close" (click)="modal.close()" aria-label="Close"></button>
-    </div>
-
-    <div class="modal-body" *ngIf="operationdetail as op">
-                <div class="row gx-lg-5">
-                    <div class="col-xl-12">
-
-                        <div class="mt-xl-0 mt-5">
-                            <div class="d-flex">
-                                <div class="flex-grow-1">
-                                    <h5>{{ op.codeoperation }}</h5>
-
-                                    <div class="hstack gap-3 flex-wrap">
-                                        <div class="text-primary d-block">
-                                            Opération
-                                        </div>
-
-                                        <div class="vr"></div>
-
-                                        <div class="text-muted">
-                                            Type :
-                                            <span class="text-body fw-medium">
-                                                {{ op.caisses[0]?.codtypeoperation }}
-                                            </span>
-                                        </div>
-
-                                        <div class="vr"></div>
-
-                                        <div class="text-muted">
-                                            Date :
-                                            <span class="text-body fw-medium">
-                                                {{ formatDateFR(op.dateoperation || '') }}
-                                            </span>
-                                        </div>
-
-                                        <div class="vr"></div>
-
-                                        <div class="text-muted">
-                                            Devise :
-                                            <span class="text-body fw-medium">
-                                                {{ op.devise?.codedevise }}
-                                                - {{ op.devise?.intitule }}
-                                            </span>
-                                        </div>
-
-                                        <div class="vr"></div>
-
-                                        <div class="text-muted">
-                                            Payé à :
-                                            <span class="text-body fw-medium">
-                                                {{ op.beneficiaire }}
-                                            </span>
-                                        </div>
-
-                                    </div>
-
-                                    <div class="mb-2">
-                                        <span class="badge bg-light text-dark fs-6">
-                                            {{ op.lignes[0]?.libelle || 'Sans libellé' }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Resume -->
-                            <div class="row mt-4">
-                                <div class="col-lg-4 col-sm-4">
-                                    <div class="p-2 border border-dashed rounded">
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar-sm me-2">
-                                                <div class="avatar-title rounded bg-transparent text-success fs-24">
-                                                    <i class="ri-money-dollar-circle-fill"></i>
-                                                </div>
-                                            </div>
-
-                                            <div class="flex-grow-1">
-                                                <p class="text-muted mb-1">
-                                                    Montant total
-                                                </p>
-
-                                                <h5 class="mb-0">
-                                                    {{ op.montant | number:'1.2-2' }}
-                                                    {{ op.devise?.codedevise }}
-                                                </h5>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-4 col-sm-4">
-                                    <div class="p-2 border border-dashed rounded">
-                                        <div class="flex-grow-1">
-                                            <p class="text-muted mb-1">
-                                                Société
-                                            </p>
-
-                                            <h6 class="mb-0">
-                                                {{ op.site?.libelle }}
-                                            </h6>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-4 col-sm-4">
-                                    <div class="p-2 border border-dashed rounded">
-                                        <div class="flex-grow-1">
-                                            <p class="text-muted mb-1">
-                                                Site
-                                            </p>
-
-                                            <h6 class="mb-0">
-                                                {{ op.site?.libelle }}
-                                            </h6>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Lignes opération -->
-                            <div class="product-content mt-5">
-                                <h5 class="fs-14 mb-3">
-                                    Lignes de l'opération
-                                </h5>
-
-                                <div class="table-responsive">
-                                    <table class="table table-bordered align-middle table-custom table-compact">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Nature opération</th>
-                                                <th>Centre analytique</th>
-                                                <th>Tiers</th>
-                                                <th class="text-end">
-                                                    Montant
-                                                </th>
-                                            </tr>
-                                        </thead>
-
-                                        <tbody>
-                                            @for(item of op.lignes; track $index){
-                                                <tr>
-                                                    <td>
-                                                        {{ item.nature?.libelle || '-' }}
-                                                    </td>
-
-                                                    <td>
-                                                        {{ item.centre?.libelle || '-' }}
-                                                    </td>
-
-                                                    <td>
-                                                        {{ item.tiers?.designation || '-' }}
-                                                    </td>
-
-                                                    <td class="text-end">
-                                                        {{ item.montantoperation | number:'1.2-2' }}
-                                                        {{ op.devise?.codedevise }}
-                                                    </td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <!-- Caisses de paiement -->
-                            <div class="product-content mt-4">
-                                <h5 class="fs-14 mb-3">
-                                    Caisses de paiement
-                                </h5>
-
-                                <div class="table-responsive">
-                                    <table class="table table-bordered align-middle table-custom table-compact">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Type opération</th>
-                                                <th>Caisse</th>
-                                                <th class="text-end">
-                                                    Montant
-                                                </th>
-                                                <th>Devise</th>
-                                                <th>Taux</th>
-                                                <th class="text-end">
-                                                    Montant référence
-                                                </th>
-                                            </tr>
-                                        </thead>
-
-                                        <tbody>
-                                            @for(caisse of op.caisses; track $index){
-                                                <tr>
-                                                    <td>
-                                                        {{ caisse.codtypeoperation }}
-                                                    </td>
-
-                                                    <td>
-                                                        {{ caisse.caisse?.libelle || '-' }}
-                                                    </td>
-
-                                                    <td class="text-end">
-                                                        {{ caisse.montant | number:'1.2-2' }}
-                                                    </td>
-
-                                                    <td>
-                                                        {{ op.devise?.codedevise }}
-                                                    </td>
-
-                                                    <td>
-                                                        {{ caisse.taux }}
-                                                    </td>
-
-                                                    <td class="text-end">
-                                                        {{ caisse.montantref | number:'1.2-2' }}
-                                                    </td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="flex-grow-1">
+                <p class="text-uppercase fw-medium text-muted mb-0">
+                  Décaissement
+                </p>
+              </div>
+              <div class="flex-shrink-0">
+                <h5 class="text-success fs-14 mb-0">
+                  <i class="ri-arrow-right-up-line fs-13 align-middle"></i>
+                  +89.24 %
+                </h5>
+              </div>
             </div>
-
-    <div class="modal-footer">
-        <div class="hstack gap-2 justify-content-end">
-            <div class="d-flex gap-2">
-                <button type="button" class="btn btn-sm btn-light" (click)="modal.close()">Fermer</button>
+            <div class="d-flex align-items-end justify-content-between mt-4">
+              <div>
+                <h4 class="fs-22 fw-semibold ff-secondary mb-4">
+                  <span class="counter-value">{{
+                    formatCFA(totalDecaissementJour) || 0
+                  }}</span>
+                  {{ user.devise_ref_code }}
+                </h4>
+                <span class="badge bg-warning me-1">{{
+                  formatCFA(nbrDecaissementJour) || 0
+                }}</span>
+                <span class="text-muted">Décaissement</span>
+              </div>
+              <div class="avatar-sm flex-shrink-0">
+                <span class="avatar-title bg-light rounded fs-3">
+                  <i
+                    data-feather="file-text"
+                    class="text-success icon-dual-success"
+                  ></i>
+                </span>
+              </div>
             </div>
+          </div>
+          <!-- end card body -->
         </div>
+        <!-- end card -->
+      </div>
+      <!-- end col -->
+
+      <div class="col-xl-4 col-md-4">
+        <!-- card -->
+        <div class="card card-animate">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="flex-grow-1">
+                <p class="text-uppercase fw-medium text-muted mb-0">
+                  Plus couteux
+                </p>
+              </div>
+              <div class="flex-shrink-0">
+                <h5 class="text-danger fs-14 mb-0">
+                  <i class="ri-arrow-right-down-line fs-13 align-middle"></i>
+                  +8.09 %
+                </h5>
+              </div>
+            </div>
+            <div class="d-flex align-items-end justify-content-between mt-4">
+              <div>
+                <h4 class="fs-22 fw-semibold ff-secondary mb-4">
+                  <span
+                    class="counter-value"
+                    data-target="maxDecaissementJour?.montant || 0 "
+                    >{{ formatCFA(maxDecaissementJour?.montantref) || 0 }}</span
+                  >
+                  {{ user.devise_ref_code }}
+                </h4>
+                <span class="badge bg-warning me-1">
+                  {{ formatCFA(maxDecaissementJour?.montant) || 0 }}
+                </span>
+                <span class="text-muted text-small">{{
+                  maxDecaissementJour?.devise?.codedevise
+                }}</span>
+                <!-- <span class="badge bg-warning me-1">2</span> <span class="text-muted">Nature operation</span> -->
+              </div>
+              <div class="avatar-sm flex-shrink-0">
+                <span class="avatar-title bg-light rounded fs-3">
+                  <i
+                    data-feather="check-square"
+                    class="text-success icon-dual-success"
+                  ></i>
+                </span>
+              </div>
+            </div>
+          </div>
+          <!-- end card body -->
+        </div>
+        <!-- end card -->
+      </div>
+      <!-- end col -->
+
+      <div class="col-xl-4 col-md-4">
+        <!-- card -->
+        <div class="card card-animate">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="flex-grow-1">
+                <p class="text-uppercase fw-medium text-muted mb-0">
+                  Moins couteux
+                </p>
+              </div>
+              <div class="flex-shrink-0">
+                <h5 class="text-danger fs-14 mb-0">
+                  <i class="ri-arrow-right-down-line fs-13 align-middle"></i>
+                  +9.01 %
+                </h5>
+              </div>
+            </div>
+            <div class="d-flex align-items-end justify-content-between mt-4">
+              <div>
+                <h4 class="fs-22 fw-semibold ff-secondary mb-4">
+                  <span class="counter-value" data-target="136.98">{{
+                    formatCFA(minDecaissementJour?.montantref) || 0
+                  }}</span>
+                  {{ user.devise_ref_code }}
+                </h4>
+                <span class="badge bg-warning me-1">{{
+                  formatCFA(minDecaissementJour?.montant) || 0
+                }}</span>
+                <span class="text-muted">{{
+                  minDecaissementJour?.devise?.codedevise
+                }}</span>
+              </div>
+              <div class="avatar-sm flex-shrink-0">
+                <span class="avatar-title bg-light rounded fs-3">
+                  <i
+                    data-feather="clock"
+                    class="text-success icon-dual-success"
+                  ></i>
+                </span>
+              </div>
+            </div>
+          </div>
+          <!-- end card body -->
+        </div>
+        <!-- end card -->
+      </div>
+      <!-- end col -->
     </div>
-</ng-template>
+    <!-- end row-->
 
+    <ng-template #editModalTpl let-modal>
+      <div class="modal-header p-3 bg-info-subtle">
+        <h5 class="modal-title">Details {{ title }}</h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="modal.close()"
+          aria-label="Close"
+        ></button>
+      </div>
 
-<ng-template #ecritureModalTpl let-modal>
-    <div class="modal-header p-3 bg-info-subtle">
-        <h5 class="modal-title">Ecritures comptables</h5>
-        <button type="button" class="btn-close" (click)="modal.close()" aria-label="Close"></button>
-    </div>
+      <div class="modal-body" *ngIf="operationdetail as op">
+        <div class="row gx-lg-5">
+          <div class="col-xl-12">
+            <div class="mt-xl-0 mt-5">
+              <div class="d-flex">
+                <div class="flex-grow-1">
+                  <h5>{{ op.codeoperation }}</h5>
 
-    <div class="modal-body" *ngIf="operationecriture as op">
-                <div class="row gx-lg-5">
-                    <div class="col-xl-12">
+                  <div class="hstack gap-3 flex-wrap">
+                    <div class="text-primary d-block">Opération</div>
 
-                        <div class="mt-xl-0 mt-5">
-                            <div class="d-flex">
-                                <div class="flex-grow-1">
-                                    <h5>{{ op.codeoperation }}</h5>
+                    <div class="vr"></div>
 
-                                    <div class="hstack gap-3 flex-wrap">
-                                        <div class="text-primary d-block">
-                                            Opération
-                                        </div>
+                    <div class="text-muted">
+                      Type :
+                      <span class="text-body fw-medium">
+                        {{ op.caisses[0]?.codtypeoperation }}
+                      </span>
+                    </div>
 
-                                        <div class="vr"></div>
+                    <div class="vr"></div>
 
-                                        <div class="text-muted">
-                                            Type :
-                                            <span class="text-body fw-medium">
-                                                {{ op.caisses[0]?.codtypeoperation }}
-                                            </span>
-                                        </div>
+                    <div class="text-muted">
+                      Date :
+                      <span class="text-body fw-medium">
+                        {{ formatDateFR(op.dateoperation || "") }}
+                      </span>
+                    </div>
 
-                                        <div class="vr"></div>
+                    <div class="vr"></div>
 
-                                        <div class="text-muted">
-                                            Date :
-                                            <span class="text-body fw-medium">
-                                                {{ formatDateFR(op.dateoperation || '') }}
-                                            </span>
-                                        </div>
+                    <div class="text-muted">
+                      Devise :
+                      <span class="text-body fw-medium">
+                        {{ op.devise?.codedevise }}
+                        - {{ op.devise?.intitule }}
+                      </span>
+                    </div>
 
-                                        <div class="vr"></div>
+                    <div class="vr"></div>
 
-                                        <div class="text-muted">
-                                            Devise :
-                                            <span class="text-body fw-medium">
-                                                {{ op.devise?.codedevise }}
-                                                - {{ op.devise?.intitule }}
-                                            </span>
-                                        </div>
-                                    </div>
+                    <div class="text-muted">
+                      Payé à :
+                      <span class="text-body fw-medium">
+                        {{ op.beneficiaire }}
+                      </span>
+                    </div>
+                  </div>
 
-                                    <div class="mb-2">
-                                        <span class="badge bg-light text-dark fs-6">
-                                            {{ op.lignes[0]?.libelle || 'Sans libellé' }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+                  <div class="mb-2">
+                    <span class="badge bg-light text-dark fs-6">
+                      {{ op.lignes[0]?.libelle || "Sans libellé" }}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-
-                            <div class="product-content mt-4">
-                                <h5 class="fs-14 mb-3">
-                                    Écritures comptables
-                                </h5>
-
-                                <div class="table-responsive">
-                                    <table class="table table-bordered align-middle table-custom table-compact">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Date</th>
-                                                <th>Journal</th>
-                                                <th>Pièce</th>
-                                                <th>Compte</th>
-                                                <th>Libellé</th>
-                                                <th class="text-end">Débit</th>
-                                                <th class="text-end">Crédit</th>
-                                            </tr>
-                                        </thead>
-
-                                        <tbody>
-
-                                            @for(ecriture of op.ecritures; track $index){
-
-                                                <!-- Lignes comptables -->
-                                                @for(ligne of ecriture.lignes; track $index){
-                                                    <tr>
-
-                                                        <td>
-                                                            {{ formatDateFR(ecriture.dateoperation) }}
-                                                        </td>
-
-                                                        <td>
-                                                            {{ ecriture.journal }}
-                                                        </td>
-
-                                                        <td>
-                                                            {{ ecriture.numpiece }}
-                                                        </td>
-
-                                                        <td>
-                                                            {{ ligne.compte?.compte }}
-                                                        </td>
-
-                                                        <td>
-                                                            {{ ligne.libelle }}
-                                                        </td>
-
-                                                        <td class="text-end">
-                                                            {{ ligne.debit | number:'1.2-2' }}
-                                                        </td>
-
-                                                        <td class="text-end">
-                                                            {{ ligne.credit | number:'1.2-2' }}
-                                                        </td>
-
-                                                    </tr>
-                                                }
-                                            }
-
-                                            @if(!op.ecritures.length){
-                                                <tr>
-                                                    <td colspan="7"
-                                                        class="text-center text-muted">
-                                                        Aucune écriture comptable
-                                                    </td>
-                                                </tr>
-                                            }
-
-                                        </tbody>
-
-                                        <tfoot class="table-light">
-                                            <tr>
-
-                                                <th colspan="5" class="text-end">
-                                                    Total
-                                                </th>
-
-                                                <th class="text-end">
-                                                    {{
-                                                        getTotalDebit(op.ecritures)
-                                                        | number:'1.2-2'
-                                                    }}
-                                                </th>
-
-                                                <th class="text-end">
-                                                    {{
-                                                        getTotalCredit(op.ecritures)
-                                                        | number:'1.2-2'
-                                                    }}
-                                                </th>
-
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
-                            </div>
+              <!-- Resume -->
+              <div class="row mt-4">
+                <div class="col-lg-4 col-sm-4">
+                  <div class="p-2 border border-dashed rounded">
+                    <div class="d-flex align-items-center">
+                      <div class="avatar-sm me-2">
+                        <div
+                          class="avatar-title rounded bg-transparent text-success fs-24"
+                        >
+                          <i class="ri-money-dollar-circle-fill"></i>
                         </div>
+                      </div>
+
+                      <div class="flex-grow-1">
+                        <p class="text-muted mb-1">Montant total</p>
+
+                        <h5 class="mb-0">
+                          {{ op.montant | number: "1.2-2" }}
+                          {{ op.devise?.codedevise }}
+                        </h5>
+                      </div>
                     </div>
+                  </div>
                 </div>
+
+                <div class="col-lg-4 col-sm-4">
+                  <div class="p-2 border border-dashed rounded">
+                    <div class="flex-grow-1">
+                      <p class="text-muted mb-1">Société</p>
+
+                      <h6 class="mb-0">
+                        {{ op.site?.libelle }}
+                      </h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-lg-4 col-sm-4">
+                  <div class="p-2 border border-dashed rounded">
+                    <div class="flex-grow-1">
+                      <p class="text-muted mb-1">Site</p>
+
+                      <h6 class="mb-0">
+                        {{ op.site?.libelle }}
+                      </h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Lignes opération -->
+              <div class="product-content mt-5">
+                <h5 class="fs-14 mb-3">Lignes de l'opération</h5>
+
+                <div class="table-responsive">
+                  <table
+                    class="table table-bordered align-middle table-custom table-compact"
+                  >
+                    <thead class="table-light">
+                      <tr>
+                        <th>Nature opération</th>
+                        <th>Centre analytique</th>
+                        <th>Tiers</th>
+                        <th class="text-end">Montant</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      @for (item of op.lignes; track $index) {
+                        <tr>
+                          <td>
+                            {{ item.nature?.libelle || "-" }}
+                          </td>
+
+                          <td>
+                            {{ item.centre?.libelle || "-" }}
+                          </td>
+
+                          <td>
+                            {{ item.tiers?.designation || "-" }}
+                          </td>
+
+                          <td class="text-end">
+                            {{ item.montantoperation | number: "1.2-2" }}
+                            {{ op.devise?.codedevise }}
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Caisses de paiement -->
+              <div class="product-content mt-4">
+                <h5 class="fs-14 mb-3">Caisses de paiement</h5>
+
+                <div class="table-responsive">
+                  <table
+                    class="table table-bordered align-middle table-custom table-compact"
+                  >
+                    <thead class="table-light">
+                      <tr>
+                        <th>Type opération</th>
+                        <th>Caisse</th>
+                        <th class="text-end">Montant</th>
+                        <th>Devise</th>
+                        <th>Taux</th>
+                        <th class="text-end">Montant référence</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      @for (caisse of op.caisses; track $index) {
+                        <tr>
+                          <td>
+                            {{ caisse.codtypeoperation }}
+                          </td>
+
+                          <td>
+                            {{ caisse.caisse?.libelle || "-" }}
+                          </td>
+
+                          <td class="text-end">
+                            {{ caisse.montant | number: "1.2-2" }}
+                          </td>
+
+                          <td>
+                            {{ op.devise?.codedevise }}
+                          </td>
+
+                          <td>
+                            {{ caisse.taux }}
+                          </td>
+
+                          <td class="text-end">
+                            {{ caisse.montantref | number: "1.2-2" }}
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="hstack gap-2 justify-content-end">
+          <div class="d-flex gap-2">
+            <button
+              type="button"
+              class="btn btn-sm btn-light"
+              (click)="modal.close()"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #ecritureModalTpl let-modal>
+      <div class="modal-header p-3 bg-info-subtle">
+        <h5 class="modal-title">Ecritures comptables</h5>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="modal.close()"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <div class="modal-body" *ngIf="operationecriture as op">
+        <div class="row gx-lg-5">
+          <div class="col-xl-12">
+            <div class="mt-xl-0 mt-5">
+              <div class="d-flex">
+                <div class="flex-grow-1">
+                  <h5>{{ op.codeoperation }}</h5>
+
+                  <div class="hstack gap-3 flex-wrap">
+                    <div class="text-primary d-block">Opération</div>
+
+                    <div class="vr"></div>
+
+                    <div class="text-muted">
+                      Type :
+                      <span class="text-body fw-medium">
+                        {{ op.caisses[0]?.codtypeoperation }}
+                      </span>
+                    </div>
+
+                    <div class="vr"></div>
+
+                    <div class="text-muted">
+                      Date :
+                      <span class="text-body fw-medium">
+                        {{ formatDateFR(op.dateoperation || "") }}
+                      </span>
+                    </div>
+
+                    <div class="vr"></div>
+
+                    <div class="text-muted">
+                      Devise :
+                      <span class="text-body fw-medium">
+                        {{ op.devise?.codedevise }}
+                        - {{ op.devise?.intitule }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="mb-2">
+                    <span class="badge bg-light text-dark fs-6">
+                      {{ op.lignes[0]?.libelle || "Sans libellé" }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="product-content mt-4">
+                <h5 class="fs-14 mb-3">Écritures comptables</h5>
+
+                <div class="table-responsive">
+                  <table
+                    class="table table-bordered align-middle table-custom table-compact"
+                  >
+                    <thead class="table-light">
+                      <tr>
+                        <th>Date</th>
+                        <th>Journal</th>
+                        <th>Pièce</th>
+                        <th>Compte</th>
+                        <th>Libellé</th>
+                        <th class="text-end">Débit</th>
+                        <th class="text-end">Crédit</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      @for (ecriture of op.ecritures; track $index) {
+                        <!-- Lignes comptables -->
+                        @for (ligne of ecriture.lignes; track $index) {
+                          <tr>
+                            <td>
+                              {{ formatDateFR(ecriture.dateoperation) }}
+                            </td>
+
+                            <td>
+                              {{ ecriture.journal }}
+                            </td>
+
+                            <td>
+                              {{ ecriture.numpiece }}
+                            </td>
+
+                            <td>
+                              {{ ligne.compte?.compte }}
+                            </td>
+
+                            <td>
+                              {{ ligne.libelle }}
+                            </td>
+
+                            <td class="text-end">
+                              {{ ligne.debit | number: "1.2-2" }}
+                            </td>
+
+                            <td class="text-end">
+                              {{ ligne.credit | number: "1.2-2" }}
+                            </td>
+                          </tr>
+                        }
+                      }
+
+                      @if (!op.ecritures.length) {
+                        <tr>
+                          <td colspan="7" class="text-center text-muted">
+                            Aucune écriture comptable
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+
+                    <tfoot class="table-light">
+                      <tr>
+                        <th colspan="5" class="text-end">Total</th>
+
+                        <th class="text-end">
+                          {{ getTotalDebit(op.ecritures) | number: "1.2-2" }}
+                        </th>
+
+                        <th class="text-end">
+                          {{ getTotalCredit(op.ecritures) | number: "1.2-2" }}
+                        </th>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="hstack gap-2 justify-content-end">
+          <div class="d-flex gap-2">
+            <button
+              type="button"
+              class="btn btn-sm btn-light"
+              (click)="modal.close()"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+
+    <div
+      class="modal fade"
+      [class.show]="modalPJVisible"
+      [style.display]="modalPJVisible ? 'block' : 'none'"
+      id="piecesJointesModal"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header bg-primary-subtle">
+            <div class="d-flex align-items-center gap-2">
+              <i class="ri-attachment-2 fs-20 text-primary"></i>
+              <h5 class="modal-title">
+                Pièces jointes - {{ selectedOperationPJ?.codeoperation }}
+              </h5>
+            </div>
+            <button
+              type="button"
+              class="btn-close"
+              (click)="closePiecesJointesModal()"
+              aria-label="Close"
+            ></button>
+          </div>
+
+          <div class="modal-body">
+            <!-- Zone d'upload -->
+            <div
+              class="upload-area mb-4 p-3 border border-dashed rounded-3 bg-light"
+            >
+              <div
+                class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+              >
+                <div class="d-flex align-items-center gap-3">
+                  <i class="ri-upload-cloud-2-line fs-1 text-primary"></i>
+                  <div>
+                    <h6 class="mb-0">Ajouter des fichiers</h6>
+                    <p class="text-muted small mb-0">
+                      PDF, images, Excel, CSV (max 10MB)
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <input
+                    type="file"
+                    #fileInput
+                    multiple
+                    (change)="onFilesSelected($event)"
+                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
+                    class="d-none"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    (click)="fileInput.click()"
+                    [disabled]="pjUploading"
+                  >
+                    <i class="ri-add-line me-1"></i>
+                    Choisir des fichiers
+                  </button>
+                </div>
+              </div>
+
+              <!-- Aperçu des fichiers sélectionnés -->
+              <div *ngIf="selectedFiles.length > 0" class="mt-3">
+                <div class="d-flex flex-wrap gap-2">
+                  <div
+                    *ngFor="let file of selectedFiles; let i = index"
+                    class="file-preview bg-white rounded p-2 shadow-sm"
+                  >
+                    <div class="d-flex align-items-center gap-2">
+                      <i class="ri-file-line fs-4 text-secondary"></i>
+                      <div class="flex-grow-1">
+                        <small
+                          class="fw-medium d-block text-truncate"
+                          style="max-width: 150px"
+                          >{{ file.name }}</small
+                        >
+                        <small class="text-muted"
+                          >{{ file.size / 1024 | number: "1.0-0" }} KB</small
+                        >
+                      </div>
+                      <button
+                        class="btn btn-sm btn-link text-danger p-0"
+                        (click)="removeSelectedFile(i)"
+                      >
+                        <i class="ri-close-line"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-2 text-end">
+                  <button
+                    class="btn btn-sm btn-success"
+                    (click)="uploadPieces()"
+                    [disabled]="pjUploading"
+                  >
+                    <span
+                      *ngIf="pjUploading"
+                      class="spinner-border spinner-border-sm me-1"
+                    ></span>
+                    Uploader {{ selectedFiles.length }} fichier(s)
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <div class="modal-footer">
-                <div class="hstack gap-2 justify-content-end">
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-sm btn-light" (click)="modal.close()">Fermer</button>
+            <!-- Liste des pièces jointes -->
+            <div class="pieces-list">
+              <h6 class="mb-3">
+                <i class="ri-file-list-line me-1"></i>
+                Documents ({{ piecesJointes.length }})
+              </h6>
+
+              <div *ngIf="piecesJointesLoading" class="text-center py-4">
+                <div
+                  class="spinner-border spinner-border-sm text-primary"
+                ></div>
+                <p class="mt-2 small">Chargement des pièces jointes...</p>
+              </div>
+
+              <div
+                *ngIf="!piecesJointesLoading && piecesJointes.length === 0"
+                class="text-center py-4 text-muted"
+              >
+                <i class="ri-folder-open-line fs-1"></i>
+                <p class="mt-2">Aucune pièce jointe pour cette demande</p>
+              </div>
+
+              <div
+                class="row g-2"
+                *ngIf="!piecesJointesLoading && piecesJointes.length > 0"
+              >
+                <div class="col-12" *ngFor="let pj of piecesJointes">
+                  <div
+                    class="piece-item d-flex align-items-center justify-content-between p-2 border rounded-3 hover-shadow"
+                  >
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="piece-icon text-center" style="width: 40px">
+                        <i [class]="getFileIcon(pj)" class="fs-2"></i>
+                      </div>
+                      <div>
+                        <h6 class="mb-0 small fw-semibold">
+                          {{ pj.nomfichier }}
+                        </h6>
+                        <div class="d-flex gap-2 mt-1">
+                          <span
+                            class="badge bg-light text-muted"
+                            style="font-size: 10px"
+                          >
+                            {{ formatFileSize(pj.taille) }}
+                          </span>
+                          <span class="text-muted" style="font-size: 10px">
+                            {{ pj.createdat | date: "dd/MM/yyyy HH:mm" }}
+                          </span>
+                        </div>
+                      </div>
                     </div>
+                    <div class="d-flex gap-1">
+                      <button
+                        class="btn btn-sm btn-soft-primary"
+                        (click)="downloadPiece(pj)"
+                        title="Télécharger"
+                      >
+                        <i class="ri-download-line"></i>
+                      </button>
+                      <button
+                        class="btn btn-sm btn-soft-danger"
+                        (click)="deletePiece(pj)"
+                        [disabled]="pjDeleting === pj.idpiecejointe"
+                        title="Supprimer"
+                      >
+                        <span
+                          *ngIf="pjDeleting === pj.idpiecejointe"
+                          class="spinner-border spinner-border-sm"
+                        ></span>
+                        <i
+                          *ngIf="pjDeleting !== pj.idpiecejointe"
+                          class="ri-delete-bin-line"
+                        ></i>
+                      </button>
+                    </div>
+                  </div>
                 </div>
+              </div>
             </div>
-</ng-template>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-sm btn-light"
+              (click)="closePiecesJointesModal()"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Backdrop -->
+    <div
+      *ngIf="modalPJVisible"
+      class="modal-backdrop fade show"
+      (click)="closePiecesJointesModal()"
+    ></div>
+  </div>
+</div>

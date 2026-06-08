@@ -21,7 +21,11 @@
 
 /* Réserve TOUJOURS la place de l'erreur */
 .error-slot {
+<<<<<<< HEAD
   min-height: 14px;   /* hauteur fixe */
+=======
+  min-height: 14px; /* hauteur fixe */
+>>>>>>> 0503d38968d89961ba3838330e742acedfc67aec
   line-height: 14px;
   visibility: hidden;
 }
@@ -34,4 +38,17 @@
 /* Optionnel : alignement input */
 .cell-wrapper input {
   height: 26px;
+<<<<<<< HEAD
 }
+=======
+}
+
+.upload-zone {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.upload-zone:hover {
+  background-color: #f8f9fa !important;
+  border-color: #86b7fe !important;
+}
+>>>>>>> 0503d38968d89961ba3838330e742acedfc67aec

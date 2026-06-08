@@ -24,6 +24,10 @@ import { circuitvalidationservice } from '../../workflow/service/circuitvalidati
 import { circuitvalidationmodel } from '../../workflow/model/circuitvalidation.model';
 import { BudgetPrevisionService } from '../services/budget-calcul.service';
 import { LigneBudgetService } from '../services/ligne_budget.service';
+import { BudgetPJService } from '../../PJ/service/budgetpj.service';
+import { PieceJointe } from '../../PJ/models/pj.model';
+import { ToastrService } from 'ngx-toastr';
+import { catchError, forkJoin, of } from 'rxjs';
 
 type BudgetStatusFilter = 'ALL' | 'ACTIF' | 'INACTIF';
 
@@ -86,11 +90,23 @@ export class BudgetComponent implements OnInit {
   entiteParent?: string;
   selectedBudget?: BudgetModel;
 
+  // Propriétés pour les pièces jointes
+  piecesJointes: PieceJointe[] = [];
+  piecesJointesLoading = false;
+  selectedFiles: File[] = [];
+  selectedBudgetPJ: BudgetModel | null = null;
+  pjUploading = false;
+  pjDeleting: string | null = null;
+  piecesCountMap: Map<string, number> = new Map(); // Cache pour les compteurs
+  newlyCreatedBudget: BudgetModel | null = null;
+
   constructor(
     private budgetservice: BudgetService,
     private circuitvalidationservice: circuitvalidationservice,
     private budgetPrevisionService: BudgetPrevisionService,
     private lignebudgetservice: LigneBudgetService,
+    private bugetPJService: BudgetPJService,
+    private toastr: ToastrService,
     private router: Router,
   ) {}
 
@@ -128,6 +144,8 @@ export class BudgetComponent implements OnInit {
                 b.idsociete === this.user.idsociete,
             );
           }
+
+          this.loadPiecesCountsForAllOperations(); // Appeler la fonction de chargement des compteurs de piloadPiecesCountsForAllOperations
 
           this.applyStatusFilter(this.currentStatusFilter);
           this.filteredBudgets = [...this.budgets];
@@ -771,10 +789,12 @@ export class BudgetComponent implements OnInit {
 
     this.loading = true;
     this.budgetservice.create(dataToSend).subscribe({
-      next: (res: any) => {
+      next: async (res: any) => {
         //console.log('Resultat:', res);
         if (res.success) {
           this.currentStatusFilter = 'ALL';
+          await this.uploadPendingFiles(res.data.idbudget);
+          this.toastr.success('Budget créé avec succès');
           this.closeModal('showModal');
           this.getAllBudgets();
         } else {
@@ -787,6 +807,7 @@ export class BudgetComponent implements OnInit {
       error: (err: any) => {
         this.msgErros = err.error.error;
         this.loading = false;
+        this.toastr.error(this.msgErros || 'Erreur lors de la création');
       },
     });
   }
@@ -795,8 +816,11 @@ export class BudgetComponent implements OnInit {
   update(_budget: any) {
     _budget.updatedby = this.user.nom + ' ' + this.user.prenom;
     this.budgetservice.update(_budget).subscribe({
-      next: (res: any) => {
+      next: async (res: any) => {
         if (res.success) {
+          await this.deleteMarkedFiles(_budget.idbudget);
+          await this.uploadPendingFiles(_budget.idbudget);
+          this.toastr.success('Budget modifié avec succès');
           this.closeModal('showModal');
           this.getAllBudgets();
         } else {
@@ -807,6 +831,7 @@ export class BudgetComponent implements OnInit {
       error: (err: any) => {
         this.msgErros = err.error.error;
         this.loading = false;
+        this.toastr.error(this.msgErros || 'Erreur lors de la modification');
       },
     });
   }
@@ -817,11 +842,15 @@ export class BudgetComponent implements OnInit {
     modalEl?.setAttribute('aria-hidden', 'true');
     (document.querySelector('.modal-backdrop') as HTMLElement)?.remove();
     this.selectedBudget = undefined;
+    this.existingPieces = []; // ⭐ Nettoyer après fermeture
+    // this.uploadedFiles = [];
   }
 
   modalCreate() {
     this.actionModal = 'create';
     this.selectedBudget = undefined;
+    this.existingPieces = [];
+    // this.uploadedFiles = [];
     this.initForm();
   }
 
@@ -847,6 +876,27 @@ export class BudgetComponent implements OnInit {
 
     this.budgetForm.markAllAsTouched();
     this.budgetForm.updateValueAndValidity();
+    this.loadExistingPieces(_object.idbudget);
+  }
+
+  /**
+   * Charge les pièces jointes existantes d'un budget
+   */
+  loadExistingPieces(idbudget: string): void {
+    this.bugetPJService.getAll(idbudget).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.existingPieces = res.data;
+          console.log('PJ existantes chargées:', this.existingPieces);
+        } else {
+          this.existingPieces = [];
+        }
+      },
+      error: (err) => {
+        console.error('Erreur chargement PJ existantes:', err);
+        this.existingPieces = [];
+      },
+    });
   }
 
   // loader(){
@@ -865,6 +915,7 @@ export class BudgetComponent implements OnInit {
         if (res.success) {
           this.deleteBudget = null;
           this.closeModal('deleteOrder');
+          this.toastr.success('Budget supprimé avec succès');
           this.getAllBudgets();
         } else {
           this.error = 'Erreur de Suppression';
@@ -874,7 +925,349 @@ export class BudgetComponent implements OnInit {
       error: (err: any) => {
         this.error = 'Suppression échec';
         this.loading = false;
+        this.toastr.error(
+          err.error?.message || 'Erreur lors de la suppression',
+        );
       },
     });
+  }
+
+  // Récupère le nombre de pièces jointes (avec cache)
+  getPiecesCount(idbudget: string): number {
+    return this.piecesCountMap.get(idbudget) || 0;
+  }
+
+  modalPJVisible = false;
+  // Ouvre le modal des pièces jointes
+  openPiecesJointesModal(budget: BudgetModel): void {
+    this.selectedBudgetPJ = budget;
+    this.selectedFiles = [];
+    this.loadPiecesJointes(budget.idbudget);
+    this.modalPJVisible = true;
+    document.body.style.overflow = 'hidden'; // Empêche le scroll
+  }
+
+  closePiecesJointesModal(): void {
+    this.modalPJVisible = false;
+    this.selectedBudgetPJ = null;
+    this.piecesJointes = [];
+    this.selectedFiles = [];
+    this.pjUploading = false;
+    this.pjDeleting = null;
+    this.existingPieces = []; // ⭐ Nettoyer après fermeture
+    // this.uploadedFiles = [];
+    document.body.style.overflow = ''; // Restaure le scroll
+  }
+
+  // Charge les pièces jointes d'une demande
+  loadPiecesJointes(idbudget: string): void {
+    this.piecesJointesLoading = true;
+    this.bugetPJService.getAll(idbudget).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.piecesJointes = res.data;
+          this.piecesCountMap.set(idbudget, this.piecesJointes.length);
+        } else {
+          this.piecesJointes = [];
+        }
+        this.piecesJointesLoading = false;
+      },
+      error: (err) => {
+        console.error('Erreur chargement PJ:', err);
+        this.piecesJointes = [];
+        this.piecesJointesLoading = false;
+        this.toastr.error('Erreur lors du chargement des pièces jointes');
+      },
+    });
+  }
+
+  // Sélection des fichiers
+  onFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+      this.selectedFiles = Array.from(input.files);
+    }
+  }
+
+  // Supprime un fichier de la liste de sélection
+  removeSelectedFile(index: number): void {
+    this.selectedFiles.splice(index, 1);
+  }
+
+  // Upload des fichiers
+  uploadPieces(): void {
+    if (!this.selectedBudgetPJ || this.selectedFiles.length === 0) return;
+
+    this.pjUploading = true;
+    const userId = this.user.idutilisateur;
+
+    this.bugetPJService
+      .create(this.selectedBudgetPJ.idbudget, this.selectedFiles, userId)
+      .subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.toastr.success(
+              `${res.data.length} fichier(s) uploadé(s) avec succès`,
+            );
+            this.selectedFiles = [];
+            this.loadPiecesJointes(this.selectedBudgetPJ!.idbudget);
+          } else {
+            this.toastr.error("Erreur lors de l'upload");
+          }
+          this.pjUploading = false;
+        },
+        error: (err) => {
+          console.error('Erreur upload:', err);
+          this.toastr.error(err.error?.message || "Erreur lors de l'upload");
+          this.pjUploading = false;
+        },
+      });
+  }
+
+  // Téléchargement d'un fichier
+  downloadPiece(piece: PieceJointe): void {
+    this.bugetPJService.downloadFile(piece.urlpiece).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = piece.nomfichier;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.toastr.success('Téléchargement démarré');
+      },
+      error: (err) => {
+        console.error('Erreur téléchargement:', err);
+        this.toastr.error('Erreur lors du téléchargement');
+      },
+    });
+  }
+
+  // Suppression d'un fichier
+  deletePiece(piece: PieceJointe): void {
+    if (!confirm(`Supprimer "${piece.nomfichier}" ?`)) return;
+
+    this.pjDeleting = piece.idpiecejointe;
+    const userId = this.user.idutilisateur;
+
+    this.bugetPJService
+      .delete(this.selectedBudgetPJ!.idbudget, piece.idpiecejointe)
+      .subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.toastr.success('Fichier supprimé');
+            this.loadPiecesJointes(this.selectedBudgetPJ!.idbudget);
+          } else {
+            this.toastr.error('Erreur lors de la suppression');
+          }
+          this.pjDeleting = null;
+        },
+        error: (err) => {
+          console.error('Erreur suppression:', err);
+          this.toastr.error(
+            err.error?.message || 'Erreur lors de la suppression',
+          );
+          this.pjDeleting = null;
+        },
+      });
+  }
+
+  // Formatage de la taille des fichiers
+  formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  // Récupère l'icône selon le type MIME (version 100% sécurisée)
+  getFileIcon(pj: any): string {
+    // Essaie plusieurs possibilités
+    let mimeType = pj?.mimeType || pj?.mimetype || pj?.MimeType || pj?.MIMETYPE;
+
+    if (!mimeType || typeof mimeType !== 'string') {
+      return 'ri-file-line text-secondary';
+    }
+
+    const mime = mimeType.toLowerCase();
+
+    if (mime.includes('pdf')) return 'ri-file-pdf-line text-danger';
+    if (mime.includes('word')) return 'ri-file-word-line text-primary';
+    if (mime.includes('excel') || mime.includes('csv'))
+      return 'ri-file-excel-line text-success';
+    if (mime.includes('image')) return 'ri-profile-line text-warning';
+    if (mime.includes('text')) return 'ri-file-text-line';
+    if (
+      mime.includes(
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      )
+    )
+      return 'ri-file-excel-line text-success';
+
+    return 'ri-file-line text-secondary';
+  }
+
+  // selectedFiles: File[] = [];
+  existingPieces: PieceJointe[] = [];
+  filesToDelete: string[] = [];
+
+  private uploadPendingFiles(idbudget: string): Promise<void> {
+    if (this.selectedFiles.length === 0) return Promise.resolve();
+
+    this.pjUploading = true;
+    const userId = this.user.idutilisateur;
+
+    return new Promise((resolve, reject) => {
+      this.bugetPJService
+        .create(idbudget, this.selectedFiles, userId)
+        .subscribe({
+          next: (res) => {
+            if (res.success) {
+              this.toastr.success(`${res.data.length} fichier(s) uploadé(s)`);
+              this.selectedFiles = [];
+              resolve();
+            } else {
+              reject(new Error('Upload failed'));
+            }
+            this.pjUploading = false;
+          },
+          error: (err) => {
+            this.pjUploading = false;
+            reject(err);
+          },
+        });
+    });
+  }
+
+  private deleteMarkedFiles(idbudget: string): Promise<void> {
+    if (this.filesToDelete.length === 0) return Promise.resolve();
+
+    const deletePromises = this.filesToDelete.map((id) =>
+      this.bugetPJService.delete(idbudget, id).toPromise(),
+    );
+
+    return Promise.all(deletePromises)
+      .then(() => {
+        this.toastr.success(
+          `${this.filesToDelete.length} fichier(s) supprimés`,
+        );
+        this.filesToDelete = [];
+      })
+      .catch((err) => {
+        console.error('Erreur suppression:', err);
+        throw err;
+      });
+  }
+
+  removeExistingFile(piece: PieceJointe): void {
+    if (!confirm(`Supprimer définitivement "${piece.nomfichier}" ?`)) return;
+
+    this.pjDeleting = piece.idpiecejointe;
+
+    // ⭐ Utiliser l'ID du budget sélectionné, pas this.idbudget
+    const budgetId = this.selectedBudget?.idbudget || this.budget?.idbudget;
+
+    if (!budgetId) {
+      this.toastr.error('ID du budget non trouvé');
+      this.pjDeleting = null;
+      return;
+    }
+
+    this.bugetPJService.delete(budgetId, piece.idpiecejointe).subscribe({
+      next: (res) => {
+        if (res.success) {
+          const index = this.existingPieces.findIndex(
+            (p) => p.idpiecejointe === piece.idpiecejointe,
+          );
+          if (index !== -1) {
+            this.existingPieces.splice(index, 1);
+          }
+          this.toastr.success('Fichier supprimé avec succès');
+        } else {
+          this.toastr.error('Erreur lors de la suppression');
+        }
+        this.pjDeleting = null;
+      },
+      error: (err) => {
+        this.toastr.error(
+          err.error?.message || 'Erreur lors de la suppression',
+        );
+        this.pjDeleting = null;
+      },
+    });
+  }
+  loadPiecesCountsForAllOperations(): void {
+    if (!this.budgets || this.budgets.length === 0) return;
+
+    // Créer un tableau de promesses pour toutes les opérations
+    const requests = this.budgets.map((budget) =>
+      this.bugetPJService
+        .getAll(budget.idbudget)
+        .pipe(catchError(() => of({ success: false, data: [] }))),
+    );
+
+    // Exécuter toutes les requêtes en parallèle
+    forkJoin(requests).subscribe({
+      next: (responses) => {
+        responses.forEach((response, index) => {
+          const budget = this.budgets[index];
+          if (response.success && response.data) {
+            this.piecesCountMap.set(budget.idbudget, response.data.length);
+          } else {
+            this.piecesCountMap.set(budget.idbudget, 0);
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Erreur chargement compteurs PJ:', err);
+        // En cas d'erreur, initialiser à 0 pour toutes
+        this.budgets.forEach((budget) => {
+          this.piecesCountMap.set(budget.idbudget, 0);
+        });
+      },
+    });
+  }
+
+  isDragOver = false;
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const newFiles = Array.from(files);
+      // Filtrer par extension
+      const allowedExtensions = [
+        '.pdf',
+        '.jpg',
+        '.jpeg',
+        '.png',
+        '.doc',
+        '.docx',
+        '.xls',
+        '.xlsx',
+        '.csv',
+      ];
+      const validFiles = newFiles.filter((file) => {
+        const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+        return allowedExtensions.includes(ext) && file.size <= 10 * 1024 * 1024;
+      });
+      this.selectedFiles.push(...validFiles);
+    }
   }
 }

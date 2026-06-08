@@ -19,7 +19,6 @@
   border-color: #198754;
 }
 
-
 .radio-line.active.form-radio-warning {
   background-color: rgba(112, 65, 11, 0.1);
   border-color: #ff9d00;
@@ -31,16 +30,15 @@
 }
 
 .table-hover tbody tr:hover {
-    background-color: rgba(113, 140, 180, 0.08); /* bleu Bootstrap */
-    cursor: pointer;
+  background-color: rgba(113, 140, 180, 0.08); /* bleu Bootstrap */
+  cursor: pointer;
 }
 
 .table-scroll {
-    max-height: 400px;      /* hauteur du tableau */
-    overflow-y: auto;       /* scroll vertical */
-    overflow-x: hidden;
+  max-height: 400px; /* hauteur du tableau */
+  overflow-y: auto; /* scroll vertical */
+  overflow-x: hidden;
 }
-
 
 .table-container {
   max-width: 100%;
@@ -85,3 +83,77 @@
   /* valeur UX optimale */
   vertical-align: middle;
 }
+
+/* Pour les pj */
+.pieces-jointes {
+  .position-relative {
+    cursor: pointer;
+  }
+}
+
+.file-preview {
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.piece-item {
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+}
+
+.hover-shadow:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.border-dashed {
+  border-style: dashed !important;
+  border-width: 2px !important;
+}
+
+.upload-area {
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #f8f9fa !important;
+    border-color: #86b7fe !important;
+  }
+}
+
+.piece-icon {
+  i {
+    &.ri-file-pdf-line {
+      color: #dc3545;
+    }
+    &.ri-file-word-line {
+      color: #0d6efd;
+    }
+    &.ri-file-excel-line {
+      color: #198754;
+    }
+    &.ri-file-image-line {
+      color: #fd7e14;
+    }
+    &.ri-file-text-line {
+      color: #6c757d;
+    }
+  }
+}
+
+.modal {
+  .modal-dialog {
+    margin: 1.75rem auto;
+    transform: translate(0, -50px);
+    transition: transform 0.3s ease-out;
+  }
+}
+
+.modal.show .modal-dialog {
+  transform: translate(0, 0);
+}
+  }}

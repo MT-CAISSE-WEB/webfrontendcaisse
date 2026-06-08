@@ -277,6 +277,27 @@
                             <i class="ri-pencil-fill"></i>
                           </a>
 
+                          <div class="position-relative">
+                            <button
+                              type="button"
+                              class="btn btn-link text-dark p-0 edit-item-btn"
+                              (click)="openPiecesJointesModal(item)"
+                            >
+                              <i class="ri-attachment-2 fs-18 text-muted"></i>
+                              <span
+                                *ngIf="getPiecesCount(item.idbudget) > 0"
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary"
+                                style="
+                                  font-size: 9px;
+                                  margin-top: -2px;
+                                  margin-left: -6px;
+                                "
+                              >
+                                {{ getPiecesCount(item.idbudget) }}
+                              </span>
+                            </button>
+                          </div>
+
                           <!-- Bouton supprimer -->
                           <a
                             *ngIf="
@@ -426,6 +447,33 @@
                                       >
                                         <i class="ri-pencil-fill"></i>
                                       </a>
+
+                                      <div class="position-relative">
+                                        <button
+                                          type="button"
+                                          class="btn btn-link text-dark p-0 edit-item-btn"
+                                          (click)="
+                                            openPiecesJointesModal(child)
+                                          "
+                                        >
+                                          <i
+                                            class="ri-attachment-2 fs-18 text-muted"
+                                          ></i>
+                                          <span
+                                            *ngIf="
+                                              getPiecesCount(child.idbudget) > 0
+                                            "
+                                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary"
+                                            style="
+                                              font-size: 9px;
+                                              margin-top: -2px;
+                                              margin-left: -6px;
+                                            "
+                                          >
+                                            {{ getPiecesCount(child.idbudget) }}
+                                          </span>
+                                        </button>
+                                      </div>
 
                                       <!-- Supprimer -->
                                       <a
@@ -814,6 +862,142 @@
                     </div>
                   </div>
 
+                  <!-- ==================== PIÈCES JOINTES ==================== -->
+                  <div class="card mt-3">
+                    <div class="card-header bg-light">
+                      <h6 class="mb-0">
+                        <i class="ri-attachment-2 me-2"></i>
+                        Pièces jointes
+                      </h6>
+                    </div>
+                    <div class="card-body">
+                      <!-- Fichiers existants (modification) -->
+                      <div *ngIf="existingPieces.length > 0" class="mb-4">
+                        <label class="form-label fw-semibold"
+                          >Documents existants</label
+                        >
+                        <div class="row g-2">
+                          <div
+                            class="col-12"
+                            *ngFor="let piece of existingPieces"
+                          >
+                            <div
+                              class="d-flex align-items-center justify-content-between p-2 border rounded-3"
+                            >
+                              <div class="d-flex align-items-center gap-3">
+                                <i
+                                  [class]="getFileIcon(piece)"
+                                  class="fs-3"
+                                ></i>
+                                <div>
+                                  <span class="fw-medium">{{
+                                    piece.nomfichier
+                                  }}</span>
+                                  <small class="text-muted d-block">{{
+                                    formatFileSize(piece.taille)
+                                  }}</small>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-outline-danger"
+                                (click)="removeExistingFile(piece)"
+                                [disabled]="pjDeleting === piece.idpiecejointe"
+                              >
+                                <span
+                                  *ngIf="pjDeleting === piece.idpiecejointe"
+                                  class="spinner-border spinner-border-sm"
+                                ></span>
+                                <i
+                                  *ngIf="pjDeleting !== piece.idpiecejointe"
+                                  class="ri-delete-bin-line"
+                                ></i>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Zone d'upload -->
+                      <div>
+                        <label class="form-label fw-semibold"
+                          >Ajouter des fichiers</label
+                        >
+                        <div
+                          class="upload-zone border border-dashed rounded-3 p-4 text-center bg-light"
+                        >
+                          <input
+                            type="file"
+                            #fileInput
+                            multiple
+                            (change)="onFilesSelected($event)"
+                            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
+                            class="d-none"
+                          />
+                          <i class="ri-upload-cloud-2-line fs-1 text-muted"></i>
+                          <p class="mt-2 mb-1">
+                            Cliquez pour sélectionner des fichiers
+                          </p>
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-primary"
+                            (click)="fileInput.click()"
+                            [disabled]="pjUploading"
+                          >
+                            <i class="ri-add-line me-1"></i>
+                            Choisir des fichiers
+                          </button>
+                          <small class="text-muted d-block mt-2">
+                            PDF, images, Excel, Word, CSV (max 10MB)
+                          </small>
+                        </div>
+
+                        <!-- Aperçu fichiers sélectionnés -->
+                        <div *ngIf="selectedFiles.length > 0" class="mt-3">
+                          <label class="form-label fw-semibold"
+                            >Fichiers à uploader ({{
+                              selectedFiles.length
+                            }})</label
+                          >
+                          <div class="row g-2">
+                            <div
+                              class="col-12"
+                              *ngFor="let file of selectedFiles; let i = index"
+                            >
+                              <div
+                                class="d-flex align-items-center justify-content-between p-2 border rounded-3"
+                              >
+                                <div class="d-flex align-items-center gap-3">
+                                  <i
+                                    class="ri-file-line fs-3 text-secondary"
+                                  ></i>
+                                  <div>
+                                    <span class="fw-medium">{{
+                                      file.name
+                                    }}</span>
+                                    <small class="text-muted d-block"
+                                      >{{
+                                        file.size / 1024 | number: "1.0-0"
+                                      }}
+                                      KB</small
+                                    >
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  class="btn btn-sm btn-outline-danger"
+                                  (click)="removeSelectedFile(i)"
+                                >
+                                  <i class="ri-close-line"></i>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   <div class="mb-3">
                     <label
                       class="form-label form-label-sm"
@@ -1145,6 +1329,221 @@
             </div>
           </div>
         </div>
+        <!-- Modal Pièces Jointes - Version corrigée -->
+        <div
+          class="modal fade"
+          [class.show]="modalPJVisible"
+          [style.display]="modalPJVisible ? 'block' : 'none'"
+          id="piecesJointesModal"
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+              <div class="modal-header bg-primary-subtle">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="ri-attachment-2 fs-20 text-primary"></i>
+                  <h5 class="modal-title">
+                    Pièces jointes - {{ selectedBudgetPJ?.codebudget }} -
+                    {{ selectedBudgetPJ?.libelle }}
+                  </h5>
+                </div>
+                <button
+                  type="button"
+                  class="btn-close"
+                  (click)="closePiecesJointesModal()"
+                  aria-label="Close"
+                ></button>
+              </div>
+
+              <div class="modal-body">
+                <!-- Zone d'upload -->
+                <div
+                  class="upload-area mb-4 p-3 border border-dashed rounded-3 bg-light"
+                >
+                  <div
+                    class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+                  >
+                    <div class="d-flex align-items-center gap-3">
+                      <i class="ri-upload-cloud-2-line fs-1 text-primary"></i>
+                      <div>
+                        <h6 class="mb-0">Ajouter des fichiers</h6>
+                        <p class="text-muted small mb-0">
+                          PDF, images, Excel, CSV (max 10MB)
+                        </p>
+                      </div>
+                    </div>
+                    <div>
+                      <input
+                        type="file"
+                        #fileInput
+                        multiple
+                        (change)="onFilesSelected($event)"
+                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
+                        class="d-none"
+                      />
+                      <button
+                        type="button"
+                        class="btn btn-primary btn-sm"
+                        (click)="fileInput.click()"
+                        [disabled]="pjUploading"
+                      >
+                        <i class="ri-add-line me-1"></i>
+                        Choisir des fichiers
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Aperçu des fichiers sélectionnés -->
+                  <div *ngIf="selectedFiles.length > 0" class="mt-3">
+                    <div class="d-flex flex-wrap gap-2">
+                      <div
+                        *ngFor="let file of selectedFiles; let i = index"
+                        class="file-preview bg-white rounded p-2 shadow-sm"
+                      >
+                        <div class="d-flex align-items-center gap-2">
+                          <i class="ri-file-line fs-4 text-secondary"></i>
+                          <div class="flex-grow-1">
+                            <small
+                              class="fw-medium d-block text-truncate"
+                              style="max-width: 150px"
+                              >{{ file.name }}</small
+                            >
+                            <small class="text-muted"
+                              >{{
+                                file.size / 1024 | number: "1.0-0"
+                              }}
+                              KB</small
+                            >
+                          </div>
+                          <button
+                            class="btn btn-sm btn-link text-danger p-0"
+                            (click)="removeSelectedFile(i)"
+                          >
+                            <i class="ri-close-line"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mt-2 text-end">
+                      <button
+                        class="btn btn-sm btn-success"
+                        (click)="uploadPieces()"
+                        [disabled]="pjUploading"
+                      >
+                        <span
+                          *ngIf="pjUploading"
+                          class="spinner-border spinner-border-sm me-1"
+                        ></span>
+                        Uploader {{ selectedFiles.length }} fichier(s)
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Liste des pièces jointes -->
+                <div class="pieces-list">
+                  <h6 class="mb-3">
+                    <i class="ri-file-list-line me-1"></i>
+                    Documents ({{ piecesJointes.length }})
+                  </h6>
+
+                  <div *ngIf="piecesJointesLoading" class="text-center py-4">
+                    <div
+                      class="spinner-border spinner-border-sm text-primary"
+                    ></div>
+                    <p class="mt-2 small">Chargement des pièces jointes...</p>
+                  </div>
+
+                  <div
+                    *ngIf="!piecesJointesLoading && piecesJointes.length === 0"
+                    class="text-center py-4 text-muted"
+                  >
+                    <i class="ri-folder-open-line fs-1"></i>
+                    <p class="mt-2">Aucune pièce jointe pour cette demande</p>
+                  </div>
+
+                  <div
+                    class="row g-2"
+                    *ngIf="!piecesJointesLoading && piecesJointes.length > 0"
+                  >
+                    <div class="col-12" *ngFor="let pj of piecesJointes">
+                      <div
+                        class="piece-item d-flex align-items-center justify-content-between p-2 border rounded-3 hover-shadow"
+                      >
+                        <div class="d-flex align-items-center gap-3">
+                          <div
+                            class="piece-icon text-center"
+                            style="width: 40px"
+                          >
+                            <i [class]="getFileIcon(pj)" class="fs-2"></i>
+                          </div>
+                          <div>
+                            <h6 class="mb-0 small fw-semibold">
+                              {{ pj.nomfichier }}
+                            </h6>
+                            <div class="d-flex gap-2 mt-1">
+                              <span
+                                class="badge bg-light text-muted"
+                                style="font-size: 10px"
+                              >
+                                {{ formatFileSize(pj.taille) }}
+                              </span>
+                              <span class="text-muted" style="font-size: 10px">
+                                {{ pj.createdat | date: "dd/MM/yyyy HH:mm" }}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="d-flex gap-1">
+                          <button
+                            class="btn btn-sm btn-soft-primary"
+                            (click)="downloadPiece(pj)"
+                            title="Télécharger"
+                          >
+                            <i class="ri-download-line"></i>
+                          </button>
+                          <button
+                            class="btn btn-sm btn-soft-danger"
+                            (click)="deletePiece(pj)"
+                            [disabled]="pjDeleting === pj.idpiecejointe"
+                            title="Supprimer"
+                          >
+                            <span
+                              *ngIf="pjDeleting === pj.idpiecejointe"
+                              class="spinner-border spinner-border-sm"
+                            ></span>
+                            <i
+                              *ngIf="pjDeleting !== pj.idpiecejointe"
+                              class="ri-delete-bin-line"
+                            ></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-light"
+                  (click)="closePiecesJointesModal()"
+                >
+                  Fermer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Backdrop -->
+        <div
+          *ngIf="modalPJVisible"
+          class="modal-backdrop fade show"
+          (click)="closePiecesJointesModal()"
+        ></div>
       </div>
     </div>
   </div>
