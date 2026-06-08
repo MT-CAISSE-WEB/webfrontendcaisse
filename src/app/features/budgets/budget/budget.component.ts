@@ -831,6 +831,7 @@ export class BudgetComponent implements OnInit {
       error: (err: any) => {
         this.msgErros = err.error.error;
         this.loading = false;
+        this.toastr.error(this.msgErros || 'Erreur lors de la modification');
       },
     });
   }
@@ -914,6 +915,7 @@ export class BudgetComponent implements OnInit {
         if (res.success) {
           this.deleteBudget = null;
           this.closeModal('deleteOrder');
+          this.toastr.success('Budget supprimé avec succès');
           this.getAllBudgets();
         } else {
           this.error = 'Erreur de Suppression';
@@ -923,6 +925,9 @@ export class BudgetComponent implements OnInit {
       error: (err: any) => {
         this.error = 'Suppression échec';
         this.loading = false;
+        this.toastr.error(
+          err.error?.message || 'Erreur lors de la suppression',
+        );
       },
     });
   }
@@ -1222,5 +1227,47 @@ export class BudgetComponent implements OnInit {
         });
       },
     });
+  }
+
+  isDragOver = false;
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const newFiles = Array.from(files);
+      // Filtrer par extension
+      const allowedExtensions = [
+        '.pdf',
+        '.jpg',
+        '.jpeg',
+        '.png',
+        '.doc',
+        '.docx',
+        '.xls',
+        '.xlsx',
+        '.csv',
+      ];
+      const validFiles = newFiles.filter((file) => {
+        const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+        return allowedExtensions.includes(ext) && file.size <= 10 * 1024 * 1024;
+      });
+      this.selectedFiles.push(...validFiles);
+    }
   }
 }
