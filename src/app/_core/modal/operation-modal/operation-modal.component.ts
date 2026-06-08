@@ -659,6 +659,8 @@ export class OperationModalComponent implements OnInit {
       beneficiaire: demande.demandeur.nom + ' ' + demande.demandeur.prenom,
     });
 
+    console.log('Demandes:', demande);
+
     /** Reset lignes */
     const lignesFA = this.operationForm.get('lignes') as FormArray;
     lignesFA.clear();
