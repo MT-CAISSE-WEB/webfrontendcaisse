@@ -192,13 +192,4 @@ export const APP_ROOT_BANQUE_DONNEE_BASE = APP_ROOT + "/" + APP_BANQUE_DONNEE_BA
 //Route consultation des etats cloture caisse
 export const APP_CLOTURECAISSE = 'etat_caisse';
 export const APP_CLOTURECAISSE_CONSULTATION = APP_CONSULTATION + "/" + APP_CLOTURECAISSE;
-<<<<<<< HEAD
 export const APP_ROOT_CLOTURECAISSE_CONSULTATION = APP_ROOT + "/" + APP_CLOTURECAISSE_CONSULTATION;
-
-//Route consultation des dépenses par nature, département et centre analytique
-export const APP_DEPNSESNATURE = 'depenses_nature';
-export const APP_DEPNSESNATURE_CONSULTATION = APP_CONSULTATION + "/" + APP_DEPNSESNATURE;
-export const APP_ROOT_DEPNSESNATURE_CONSULTATION = APP_ROOT + "/" + APP_DEPNSESNATURE_CONSULTATION;
-=======
-export const APP_ROOT_CLOTURECAISSE_CONSULTATION = APP_ROOT + "/" + APP_CLOTURECAISSE_CONSULTATION;
->>>>>>> 0503d38968d89961ba3838330e742acedfc67aec

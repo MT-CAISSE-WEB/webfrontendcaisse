@@ -70,13 +70,6 @@ export class LayoutMenuComponent {
   root_detail_demande = APP_ROOT_DETAILDEAMNDE_CONSULTATION;
   root_cloture_caisse = APP_ROOT_CLOTURECAISSE_CONSULTATION;
 
-<<<<<<< HEAD
-//   root_depense_nature = APP_ROOT_DONNEE_BASE_DEVISE;
-//   root_depense_departement = APP_ROOT_DONNEE_BASE_DEVISE;
-//   root_depense_centre_analytique = APP_ROOT_DONNEE_BASE_DEVISE;
-
-=======
->>>>>>> 0503d38968d89961ba3838330e742acedfc67aec
   admin : boolean =false;
   supervisor : boolean=false;
   caissier : boolean = false;
