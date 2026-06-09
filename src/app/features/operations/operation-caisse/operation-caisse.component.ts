@@ -207,6 +207,8 @@ export class OperationCaisseComponent implements OnInit {
   > = new Map();
 
   // Propriétés pour les pièces jointes
+  operationPiecesJointes: PieceJointe[] = [];
+  demandePiecesJointes: PieceJointe[] = [];
   piecesJointes: PieceJointe[] = [];
   piecesJointesLoading = false;
   selectedFiles: File[] = [];
@@ -215,6 +217,11 @@ export class OperationCaisseComponent implements OnInit {
   pjDeleting: string | null = null;
   piecesCountMap: Map<string, number> = new Map(); // Cache pour les compteurs
   newlyCreatedOperation: operationModel | null = null;
+  operationPiecesCount = 0;
+  demandePiecesCount = 0;
+  totalPiecesCount = 0;
+  hasDemande = false;
+  demandeInfo: any = null;
 
   constructor(
     private natureoperationservice: NatureoperationService,
@@ -266,38 +273,32 @@ export class OperationCaisseComponent implements OnInit {
   loadPiecesCountsForAllOperations(): void {
     if (!this.operations || this.operations.length === 0) return;
 
-    // Créer un tableau de promesses pour toutes les opérations
     const requests = this.operations.map((op) =>
       this.pjService
-        .getAll(op.idoperation)
-        .pipe(catchError(() => of({ success: false, data: [] }))),
+        .getOperationWithDemandePieces(op.idoperation)
+        .pipe(
+          catchError(() => of({ success: false, data: { totalCount: 0 } })),
+        ),
     );
 
-    // Exécuter toutes les requêtes en parallèle
     forkJoin(requests).subscribe({
       next: (responses) => {
         responses.forEach((response, index) => {
           const operation = this.operations[index];
-          if (response.success && response.data) {
-            this.piecesCountMap.set(
-              operation.idoperation,
-              response.data.length,
-            );
-          } else {
-            this.piecesCountMap.set(operation.idoperation, 0);
-          }
+          const totalCount = response.success
+            ? response.data?.totalCount || 0
+            : 0;
+          this.piecesCountMap.set(operation.idoperation, totalCount);
         });
       },
       error: (err) => {
         console.error('Erreur chargement compteurs PJ:', err);
-        // En cas d'erreur, initialiser à 0 pour toutes
         this.operations.forEach((operation) => {
           this.piecesCountMap.set(operation.idoperation, 0);
         });
       },
     });
   }
-
   creationOperation() {
     const modalRef = this.modalService.open(OperationModalComponent, {
       centered: true,
@@ -967,43 +968,92 @@ export class OperationCaisseComponent implements OnInit {
   openPiecesJointesModal(op: operationModel): void {
     this.selectedOperationPJ = op;
     this.selectedFiles = [];
-    this.loadPiecesJointes(op.idoperation);
+    // this.loadPiecesJointes(op.idoperation);
+    this.loadAllPiecesJointes(op.idoperation);
     this.modalPJVisible = true;
     document.body.style.overflow = 'hidden'; // Empêche le scroll
   }
 
-  closePiecesJointesModal(): void {
-    this.modalPJVisible = false;
-    this.selectedOperationPJ = null;
-    this.piecesJointes = [];
-    this.selectedFiles = [];
-    this.pjUploading = false;
-    this.pjDeleting = null;
-    document.body.style.overflow = ''; // Restaure le scroll
-  }
-
-  // Charge les pièces jointes d'une demande
-  loadPiecesJointes(idoperation: string): void {
+  /**
+   * Charge toutes les pièces jointes (opération + demande associée)
+   */
+  loadAllPiecesJointes(idoperation: string): void {
     this.piecesJointesLoading = true;
-    this.pjService.getAll(idoperation).subscribe({
+    this.pjService.getOperationWithDemandePieces(idoperation).subscribe({
       next: (res) => {
         if (res.success) {
-          this.piecesJointes = res.data;
-          console.log('PJ chargées:', this.piecesJointes);
-          this.piecesCountMap.set(idoperation, this.piecesJointes.length);
+          this.operationPiecesJointes = res.data.operationPJ || [];
+          this.demandePiecesJointes = res.data.demandePJ || [];
+          this.operationPiecesCount = res.data.operationCount || 0;
+          this.demandePiecesCount = res.data.demandeCount || 0;
+          this.totalPiecesCount = res.data.totalCount || 0;
+          this.hasDemande = res.data.hasDemande || false;
+          this.demandeInfo = res.data.demandeInfo;
+
+          // ⭐ METTRE À JOUR LE CACHE
+          this.piecesCountMap.set(idoperation, this.totalPiecesCount);
+
+          console.log('PJ opération:', this.operationPiecesCount);
+          console.log('PJ demande:', this.demandePiecesCount);
+          console.log('Total PJ:', this.totalPiecesCount);
         } else {
-          this.piecesJointes = [];
+          this.resetPiecesData();
         }
         this.piecesJointesLoading = false;
       },
       error: (err) => {
         console.error('Erreur chargement PJ:', err);
-        this.piecesJointes = [];
+        this.resetPiecesData();
         this.piecesJointesLoading = false;
         this.toastr.error('Erreur lors du chargement des pièces jointes');
       },
     });
   }
+
+  /**
+   * Réinitialise les données des pièces jointes
+   */
+  resetPiecesData(): void {
+    this.operationPiecesJointes = [];
+    this.demandePiecesJointes = [];
+    this.operationPiecesCount = 0;
+    this.demandePiecesCount = 0;
+    this.totalPiecesCount = 0;
+    this.hasDemande = false;
+    this.demandeInfo = null;
+  }
+
+  closePiecesJointesModal(): void {
+    this.modalPJVisible = false;
+    this.selectedOperationPJ = null;
+    this.resetPiecesData();
+    this.selectedFiles = [];
+    this.pjUploading = false;
+    this.pjDeleting = null;
+    document.body.style.overflow = '';
+  }
+
+  // Charge les pièces jointes d'une demande
+  // loadPiecesJointes(idoperation: string): void {
+  //   this.piecesJointesLoading = true;
+  //   this.pjService.getAll(idoperation).subscribe({
+  //     next: (res) => {
+  //       if (res.success) {
+  //         this.piecesJointes = res.data;
+  //         this.piecesCountMap.set(idoperation, this.piecesJointes.length);
+  //       } else {
+  //         this.piecesJointes = [];
+  //       }
+  //       this.piecesJointesLoading = false;
+  //     },
+  //     error: (err) => {
+  //       console.error('Erreur chargement PJ:', err);
+  //       this.piecesJointes = [];
+  //       this.piecesJointesLoading = false;
+  //       this.toastr.error('Erreur lors du chargement des pièces jointes');
+  //     },
+  //   });
+  // }
 
   // Sélection des fichiers
   onFilesSelected(event: Event): void {
@@ -1034,7 +1084,8 @@ export class OperationCaisseComponent implements OnInit {
               `${res.data.length} fichier(s) uploadé(s) avec succès`,
             );
             this.selectedFiles = [];
-            this.loadPiecesJointes(this.selectedOperationPJ!.idoperation);
+            // this.loadPiecesJointes(this.selectedOperationPJ!.idoperation);
+            this.loadAllPiecesJointes(this.selectedOperationPJ!.idoperation);
           } else {
             this.toastr.error("Erreur lors de l'upload");
           }
@@ -1080,7 +1131,8 @@ export class OperationCaisseComponent implements OnInit {
         next: (res) => {
           if (res.success) {
             this.toastr.success('Fichier supprimé');
-            this.loadPiecesJointes(this.selectedOperationPJ!.idoperation);
+            // this.loadPiecesJointes(this.selectedOperationPJ!.idoperation);
+            this.loadAllPiecesJointes(this.selectedOperationPJ!.idoperation);
           } else {
             this.toastr.error('Erreur lors de la suppression');
           }
@@ -1168,6 +1220,94 @@ export class OperationCaisseComponent implements OnInit {
         console.error('Erreur téléchargement ZIP:', err);
         this.toastr.error(err.error?.message);
         this.loading = false;
+      },
+    });
+  }
+
+  downloadingAll: boolean = false;
+
+  downloadAllFiles2(): void {
+    const idoperation = this.selectedOperationPJ?.idoperation;
+    const iddemande = this.selectedOperationPJ?.iddemande;
+
+    const hasOperationPJ = this.operationPiecesJointes.length > 0;
+    const hasDemandePJ = this.demandePiecesJointes.length > 0;
+
+    const totalFiles =
+      (hasDemandePJ ? this.demandePiecesJointes.length : 0) +
+      (hasOperationPJ ? this.demandePiecesJointes.length : 0);
+
+    if (totalFiles === 0) {
+      this.toastr.warning('Aucune pièce jointe à télécharger');
+      return;
+    }
+
+    // Cas 1: Seulement la demande a des PJ
+    if (hasDemandePJ && !hasOperationPJ) {
+      console.log('📥 Téléchargement uniquement des PJ de la demande');
+      this.downloadingAll = true;
+
+      this.pjService.downloadAllOperationFiles(undefined, iddemande).subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          const timestamp = new Date()
+            .toISOString()
+            .slice(0, 19)
+            .replace(/:/g, '-');
+          const filename = `demande_${iddemande}_${timestamp}.zip`;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+          this.toastr.success(
+            `${this.demandePiecesJointes.length} fichier(s) téléchargé(s)`,
+          );
+          this.downloadingAll = false;
+        },
+        error: (err) => {
+          this.toastr.error(
+            err.error?.message || 'Erreur lors du téléchargement',
+          );
+          this.downloadingAll = false;
+        },
+      });
+      return;
+    }
+
+    // Cas 2: Opération avec ou sans demande
+    if (!idoperation) {
+      this.toastr.error("ID de l'opération non trouvé");
+      return;
+    }
+
+    this.downloadingAll = true;
+
+    this.pjService.downloadAllOperationFiles(idoperation, iddemande).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const timestamp = new Date()
+          .toISOString()
+          .slice(0, 19)
+          .replace(/:/g, '-');
+        const filename = `operation${this.operation.codeoperation}_${timestamp}.zip`;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        this.toastr.success(`${totalFiles} fichier(s) téléchargé(s)`);
+        this.downloadingAll = false;
+      },
+      error: (err) => {
+        this.toastr.error(
+          err.error?.message || 'Erreur lors du téléchargement',
+        );
+        this.downloadingAll = false;
       },
     });
   }

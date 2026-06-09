@@ -91,4 +91,11 @@ export class OperationPJService {
       responseType: 'blob',
     });
   }
+
+  // Opération + demande avec ses pièces jointes
+  getOperationWithDemandePieces(idoperation: string): Observable<any> {
+    return this.http.get(
+      `${this.baseUrl}entete_operation/${idoperation}/operation-demande-pieces-jointes`,
+    );
+  }
 }
