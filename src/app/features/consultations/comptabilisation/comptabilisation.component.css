@@ -26,6 +26,10 @@
   /* text-align: center; */
 }
 
+.table td, .table th {
+    white-space: nowrap;
+}
+
 .button-custom:hover {
   background-color: #218838;
 }
@@ -83,3 +87,10 @@
 .small-autocomplete {
   z-index: 2000 !important;
 }
+
+/* .modal-backdrop {
+  z-index: 1040;
+}
+.modal.show {
+  z-index: 1050;
+} */
