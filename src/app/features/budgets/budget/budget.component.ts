@@ -1270,4 +1270,48 @@ export class BudgetComponent implements OnInit {
       this.selectedFiles.push(...validFiles);
     }
   }
+
+  // budget.component.ts
+
+  /**
+   * Télécharge toutes les pièces jointes du budget
+   */
+  downloadAllFiles(): void {
+    if (!this.selectedBudgetPJ && !this.budget) {
+      this.toastr.error('Aucun budget sélectionné');
+      return;
+    }
+
+    const budgetId = this.selectedBudgetPJ?.idbudget || this.budget?.idbudget;
+
+    if (!budgetId) {
+      this.toastr.error('ID du budget non trouvé');
+      return;
+    }
+
+    this.loading = true;
+    this.bugetPJService.downloadAllFiles(budgetId).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+
+        // Extraire le nom du fichier des headers ou utiliser un nom par défaut
+        const contentDisposition = blob.type;
+        const filename = `budget_${this.selectedBudgetPJ?.codebudget || this.budget?.codebudget}_${this.selectedBudgetPJ?.libelle || this.budget?.libelle}_pieces_jointes.zip`;
+
+        link.download = filename;
+        link.click();
+        window.URL.revokeObjectURL(url);
+
+        this.toastr.success('Téléchargement démarré');
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Erreur téléchargement ZIP:', err);
+        this.toastr.error(err.error?.message);
+        this.loading = false;
+      },
+    });
+  }
 }

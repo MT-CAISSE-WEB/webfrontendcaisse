@@ -97,6 +97,9 @@
   &:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
 .piece-item {
   transition: all 0.2s ease;
 
@@ -156,4 +159,56 @@
 .modal.show .modal-dialog {
   transform: translate(0, 0);
 }
-  }}
+
+/* Le bouton tout téléchargé modal pj */
+.btn-link-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--vz-primary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+
+  i {
+    font-size: 0.85rem;
+    transition: transform 0.2s ease;
+  }
+
+  span {
+    position: relative;
+  }
+
+  /* Ligne de soulignement animée */
+  .link-underline {
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #3b82f6, var(--vz-primary));
+    border-radius: 2px;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  &:hover {
+    color: var(--vz-primary);
+
+    i {
+      transform: translateY(-2px);
+    }
+
+    .link-underline {
+      width: 100%;
+    }
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}

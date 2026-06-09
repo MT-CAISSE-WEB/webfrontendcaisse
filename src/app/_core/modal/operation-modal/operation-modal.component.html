@@ -478,7 +478,6 @@
       </div>
     </div>
 
-    <!-- Pièces jointes -->
     <!-- Pièces jointes modernisées -->
     <div class="attachments-section">
       <div class="section-header">
@@ -493,6 +492,25 @@
             }}
           </span>
         </div>
+
+        <!-- ⭐ Bouton Tout télécharger avec message adapté -->
+        <button
+          *ngIf="demandePiecesJointes.length > 0 || existingPieces.length > 0"
+          type="button"
+          class="btn-download-all"
+          (click)="downloadAllFiles()"
+          [disabled]="downloadingAll"
+          [title]="getDownloadTooltip()"
+        >
+          <i class="ri-download-line"></i>
+          <span *ngIf="!downloadingAll">
+            {{ getDownloadButtonText() }}
+          </span>
+          <span *ngIf="downloadingAll">Préparation...</span>
+          <span class="badge ms-1">{{
+            demandePiecesJointes.length + existingPieces.length
+          }}</span>
+        </button>
       </div>
 
       <!-- ⭐ SECTION 1: PIÈCES JOINTES DE LA DEMANDE (lecture seule) -->
@@ -549,10 +567,6 @@
               <button (click)="downloadPiece(pj)" title="Télécharger">
                 <i class="ri-download-line"></i>
               </button>
-              <!-- <button (click)="removeExistingFile(pj)" title="Supprimer" [disabled]="pjDeleting === pj.idpiecejointe">
-            <span *ngIf="pjDeleting === pj.idpiecejointe" class="spinner-border spinner-border-sm"></span>
-            <i *ngIf="pjDeleting !== pj.idpiecejointe" class="ri-delete-bin-line"></i>
-          </button> -->
             </div>
           </div>
         </div>
@@ -604,6 +618,19 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Message si aucune PJ -->
+      <div
+        *ngIf="
+          demandePiecesJointes.length === 0 &&
+          existingPieces.length === 0 &&
+          uploadedFiles.length === 0
+        "
+        class="empty-state"
+      >
+        <i class="ri-folder-open-line"></i>
+        <p>Aucune pièce jointe disponible</p>
       </div>
 
       <!-- Message si aucune PJ -->

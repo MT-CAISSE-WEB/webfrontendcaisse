@@ -1259,4 +1259,43 @@ export class EditDemandeComponent implements OnInit {
         throw err;
       });
   }
+
+  downloadAllFiles(): void {
+    if (!this.demande) {
+      this.toastr.error('Aucun budget sélectionné');
+      return;
+    }
+
+    const iddemande = this.demande?.iddemande;
+
+    if (!iddemande) {
+      this.toastr.error('ID demande non trouvée');
+      return;
+    }
+
+    this.loading = true;
+    this.pjService.downloadAllFiles(iddemande).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+
+        // Extraire le nom du fichier des headers ou utiliser un nom par défaut
+        const contentDisposition = blob.type;
+        const filename = `demande_${this.demande.codedemande}_${this.demande.libelledemande}_pieces_jointes.zip`;
+
+        link.download = filename;
+        link.click();
+        window.URL.revokeObjectURL(url);
+
+        this.toastr.success('Téléchargement démarré');
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Erreur téléchargement ZIP:', err);
+        this.toastr.error(err.error?.message);
+        this.loading = false;
+      },
+    });
+  }
 }
