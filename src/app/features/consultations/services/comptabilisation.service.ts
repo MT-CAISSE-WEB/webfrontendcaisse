@@ -46,4 +46,16 @@ export class ComptabilisationService {
         return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/' + _data.operation, _data);
     }
 
+    // Dans comptabilisation.service.ts
+    validateByIds(ids: string[]): Observable<any> {
+        return this.http.post(URL_LOCAL.baseUrl + this.url + '/Ecriture/LigneEcriture/valider-par-ids', { ids });
+    }
+    
+    comptabiliserOperation(idoperation: string): Observable<any> {
+        return this.http.post(URL_LOCAL.baseUrl + this.url + '/Ecriture/comptabiliser-unitaire', { idoperation });
+    }
+    comptabiliserParCriteres(criteria: any): Observable<any> {
+        return this.http.post(URL_LOCAL.baseUrl + this.url + '/Ecriture/comptabiliser-masse', criteria);
+    }
+
 }

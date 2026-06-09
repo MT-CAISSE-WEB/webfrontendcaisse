@@ -13,7 +13,7 @@ import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-caisse-tresorerie',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, CurrencyPipe],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './caisse-tresorerie.component.html',
   styleUrl: './caisse-tresorerie.component.css',
   providers: [CurrencyPipe]

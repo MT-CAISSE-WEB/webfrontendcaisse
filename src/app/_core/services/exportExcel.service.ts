@@ -49,4 +49,38 @@ export class ExcelService {
     saveAs(data, `${fileName}_${new Date().getTime()}.xlsx`);
   }
 
+ 
+
+  exportToExcelts(data: any[], columns: any[], fileName: string) {
+
+    // Transformer les données selon les colonnes
+     // Dans exportToExcel
+    const formattedData = data.map(row => {
+      const newRow = { ...row };
+      Object.keys(newRow).forEach(key => {
+        if (key.toLowerCase().includes('date') && newRow[key]) {
+          newRow[key] = new Date(newRow[key]).toLocaleDateString('fr-FR');
+        }
+      });
+      return newRow;
+    });
+
+    // Créer worksheet
+    const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(formattedData);
+
+    // Créer workbook
+    const workbook: XLSX.WorkBook = {
+      Sheets: { 'data': worksheet },
+      SheetNames: ['data']
+    };
+
+    // Export
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array'
+    });
+
+    this.saveFile(excelBuffer, fileName);
+  }
+
 }
