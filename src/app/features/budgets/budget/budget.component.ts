@@ -1298,7 +1298,7 @@ export class BudgetComponent implements OnInit {
 
         // Extraire le nom du fichier des headers ou utiliser un nom par défaut
         const contentDisposition = blob.type;
-        const filename = `budget_${budgetId}_pieces_jointes.zip`;
+        const filename = `budget_${this.selectedBudgetPJ?.codebudget || this.budget?.codebudget}_${this.selectedBudgetPJ?.libelle || this.budget?.libelle}_pieces_jointes.zip`;
 
         link.download = filename;
         link.click();

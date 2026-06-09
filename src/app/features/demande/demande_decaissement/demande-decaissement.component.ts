@@ -747,4 +747,45 @@ export class DemandeDecaissementComponent implements OnInit {
 
     return 'ri-file-line text-secondary';
   }
+
+  // Télécharger tous les fichiers
+
+  downloadAllFiles(): void {
+    if (!this.selectedDemandePJ) {
+      this.toastr.error('Aucun budget sélectionné');
+      return;
+    }
+
+    const iddemande = this.selectedDemandePJ?.iddemande;
+
+    if (!iddemande) {
+      this.toastr.error('ID demande non trouvée');
+      return;
+    }
+
+    this.loading = true;
+    this.pjService.downloadAllFiles(iddemande).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+
+        // Extraire le nom du fichier des headers ou utiliser un nom par défaut
+        const contentDisposition = blob.type;
+        const filename = `demande_${this.selectedDemandePJ?.codedemande}_${this.selectedDemandePJ?.libelledemande}_pieces_jointes.zip`;
+
+        link.download = filename;
+        link.click();
+        window.URL.revokeObjectURL(url);
+
+        this.toastr.success('Téléchargement démarré');
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Erreur téléchargement ZIP:', err);
+        this.toastr.error(err.error?.message);
+        this.loading = false;
+      },
+    });
+  }
 }

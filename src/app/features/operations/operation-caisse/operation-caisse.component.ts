@@ -1131,4 +1131,44 @@ export class OperationCaisseComponent implements OnInit {
 
     return 'ri-file-line text-secondary';
   }
+
+  downloadAllFiles(): void {
+    if (!this.selectedOperationPJ) {
+      this.toastr.error('Aucune opération sélectionnée');
+      return;
+    }
+
+    const idoperation = this.selectedOperationPJ?.idoperation;
+    const codeoperation = this.selectedOperationPJ?.codeoperation;
+
+    if (!idoperation) {
+      this.toastr.error('ID opération non trouvé');
+      return;
+    }
+
+    this.loading = true;
+    this.pjService.downloadAllFiles(idoperation).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+
+        // Extraire le nom du fichier des headers ou utiliser un nom par défaut
+        const contentDisposition = blob.type;
+        const filename = `operation__${this.selectedOperationPJ?.codeoperation}_${this.selectedOperationPJ?.libelle}__pieces_jointes.zip`;
+
+        link.download = filename;
+        link.click();
+        window.URL.revokeObjectURL(url);
+
+        this.toastr.success('Téléchargement démarré');
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Erreur téléchargement ZIP:', err);
+        this.toastr.error(err.error?.message);
+        this.loading = false;
+      },
+    });
+  }
 }

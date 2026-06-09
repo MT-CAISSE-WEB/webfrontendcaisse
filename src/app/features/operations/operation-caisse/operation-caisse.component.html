@@ -1320,10 +1320,28 @@
 
             <!-- Liste des pièces jointes -->
             <div class="pieces-list">
-              <h6 class="mb-3">
-                <i class="ri-file-list-line me-1"></i>
-                Documents ({{ piecesJointes.length }})
-              </h6>
+              <div
+                class="d-flex align-items-center justify-content-between mb-3"
+              >
+                <h6 class="mb-0">
+                  <i class="ri-file-list-line me-1"></i>
+                  Documents (<span class="badge-doc-count"
+                    >{{ piecesJointes.length }})</span
+                  >
+                </h6>
+
+                <button
+                  *ngIf="piecesJointes.length > 0"
+                  type="button"
+                  class="btn-link-download"
+                  (click)="downloadAllFiles()"
+                  title="Télécharger toutes les pièces jointes"
+                >
+                  <i class="ri-download-line"></i>
+                  <span>Tout télécharger</span>
+                  <span class="link-underline"></span>
+                </button>
+              </div>
 
               <div *ngIf="piecesJointesLoading" class="text-center py-4">
                 <div
