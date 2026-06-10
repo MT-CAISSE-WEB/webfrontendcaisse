@@ -1131,8 +1131,6 @@ export class OperationCaisseComponent implements OnInit {
 
     return 'ri-file-line text-secondary';
   }
-<<<<<<< HEAD
-=======
 
   downloadAllFiles(): void {
     if (!this.selectedOperationPJ) {
@@ -1173,5 +1171,4 @@ export class OperationCaisseComponent implements OnInit {
       },
     });
   }
->>>>>>> origin/richard
 }

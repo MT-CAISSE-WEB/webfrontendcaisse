@@ -11,7 +11,7 @@ export const URL_MAIN_LOCAL_SOCKET = "http://localhost:5000/";
 
 export const URL_LOCAL = {
     type : 'local',
-    baseUrl: 'http://localhost:5000/api',
+    baseUrl: 'http://localhost:5000/api/',
     baseUrlFiles: 'http://localhost:5000/uploads/',
     baseUrlPdfs: 'http://localhost:5000/pdfs/',
 };

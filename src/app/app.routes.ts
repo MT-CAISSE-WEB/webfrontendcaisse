@@ -22,8 +22,8 @@ import { APP, APP_DONNEE_BASE_DEVISE, APP_AFF_NATURE_CENTRE_DONNEE_BASE,
     APP_STATSAFFDEPTNATURE_CONSULTATION,
     APP_DETAILDEAMNDE_CONSULTATION,
     APP_BANQUE_DONNEE_BASE,
-    APP_CLOTURECAISSE_CONSULTATION,
-    APP_SOLDECAISSE_CONSULTATION } from './_core/routes/frontend.root';
+    APP_CLOTURECAISSE_CONSULTATION, 
+    APP_SOLDECAISSE_CONSULTATION} from './_core/routes/frontend.root';
 
 import { LayoutMainComponent } from './layout/layout-main/layout-main.component';
 import { LayoutContentComponent } from './layout/composant/layout-content/layout-content.component';
