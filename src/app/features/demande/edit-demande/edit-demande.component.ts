@@ -189,17 +189,8 @@ export class EditDemandeComponent implements OnInit {
       }
     });
 
-    this.demandeForm
-      .get('datedemande')
-      ?.valueChanges.pipe(
-        startWith(this.demandeForm.get('datedemande')?.value),
-        filter((date) => !!date), // ignore null / vide
-        map((date) => new Date(date)),
-        filter((date) => !isNaN(date.getTime())), //garde seulement dates valides
-        distinctUntilChanged((a, b) => a.getTime() === b.getTime()),
-        switchMap((date) => this.loadBudgetGlobal(date)),
-      )
-      .subscribe();
+    // Charge le budget
+    this.changeDate();
 
     //Initialiser les departements filtrées après la création du formulaire
     this.filteredDepartements = this.demandeForm
@@ -209,6 +200,8 @@ export class EditDemandeComponent implements OnInit {
         map((value) => {
           if (value && typeof value !== 'string') {
             this.onTypeDepartementChange(value.iddepartement!);
+            // Charge le budget
+            this.changeDate();
           }
           //Retourner la liste filtrée
           return this._filterDepartement(value || '');
@@ -222,10 +215,28 @@ export class EditDemandeComponent implements OnInit {
           this.demandeForm.patchValue({ taux: 1 });
           return;
         }
+        // Charge le budget
+        this.changeDate();
+
         //Charger sur le dernier taux
         this.loadLastdeviseTaux(devise);
       }
     });
+  }
+
+  //Changement de la date
+  changeDate(){
+    this.demandeForm
+      .get('datedemande')
+      ?.valueChanges.pipe(
+        startWith(this.demandeForm.get('datedemande')?.value),
+        filter((date) => !!date), // ignore null / vide
+        map((date) => new Date(date)),
+        filter((date) => !isNaN(date.getTime())), //garde seulement dates valides
+        distinctUntilChanged((a, b) => a.getTime() === b.getTime()),
+        switchMap((date) => this.loadBudgetGlobal(date)),
+      )
+      .subscribe();
   }
 
   private _normalizeValue(value: string): string {
@@ -746,6 +757,7 @@ export class EditDemandeComponent implements OnInit {
       ligneOf.get('montantdemande')?.enable();
 
       const lignes = this.filterLignesBudget(ligneOf);
+      console.log(this.budgetGlobal);
       if (!this.budgetGlobal?.isanalytique && nature.decajustifier === 0) {
         ligneOf
           .get('codebudget')
@@ -1062,8 +1074,12 @@ export class EditDemandeComponent implements OnInit {
           return target >= debut && target <= fin;
         });
 
+        console.log('Budgets valides pour la date', date, budgets);
+
         const mensuels = budgets.filter((b) => b.typebudget === 'Mensuel');
         this.budgetGlobal = mensuels.length ? mensuels[0] : budgets[0];
+
+        console.log('Budget global sélectionné:', this.budgetGlobal);
 
         return this.budgetGlobal;
       }),
@@ -1080,6 +1096,8 @@ export class EditDemandeComponent implements OnInit {
   // Filtre les lignes selon le budget
   filterLignesBudget(ligne: FormGroup): LigneBudgetModel[] {
     if (!this.lignesBudgetGlobales.length) return [];
+
+    console.log('Filtrage des lignes budget pour la ligne', this.lignesBudgetGlobales);
 
     const nature = ligne.get('natureop')?.value;
     const centre = ligne.get('centre')?.value;
@@ -1240,5 +1258,44 @@ export class EditDemandeComponent implements OnInit {
         console.error('Erreur suppression:', err);
         throw err;
       });
+  }
+
+  downloadAllFiles(): void {
+    if (!this.demande) {
+      this.toastr.error('Aucun budget sélectionné');
+      return;
+    }
+
+    const iddemande = this.demande?.iddemande;
+
+    if (!iddemande) {
+      this.toastr.error('ID demande non trouvée');
+      return;
+    }
+
+    this.loading = true;
+    this.pjService.downloadAllFiles(iddemande).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+
+        // Extraire le nom du fichier des headers ou utiliser un nom par défaut
+        const contentDisposition = blob.type;
+        const filename = `demande_${this.demande.codedemande}_${this.demande.libelledemande}_pieces_jointes.zip`;
+
+        link.download = filename;
+        link.click();
+        window.URL.revokeObjectURL(url);
+
+        this.toastr.success('Téléchargement démarré');
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Erreur téléchargement ZIP:', err);
+        this.toastr.error(err.error?.message);
+        this.loading = false;
+      },
+    });
   }
 }

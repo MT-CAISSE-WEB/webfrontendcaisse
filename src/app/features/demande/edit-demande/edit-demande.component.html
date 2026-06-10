@@ -494,9 +494,26 @@
               <div class="card-body">
                 <!-- Fichiers existants (modification) -->
                 <div *ngIf="existingPieces.length > 0" class="mb-4">
-                  <label class="form-label fw-semibold"
-                    >Documents existants</label
+                  <div
+                    class="d-flex align-items-center justify-content-between mb-3"
                   >
+                    <label class="form-label fw-semibold"
+                      >Documents existants</label
+                    >
+
+                    <button
+                      *ngIf="existingPieces.length > 0"
+                      type="button"
+                      class="btn-link-download"
+                      (click)="downloadAllFiles()"
+                      title="Télécharger toutes les pièces jointes"
+                    >
+                      <i class="ri-download-line"></i>
+                      <span>Tout télécharger</span>
+                      <span class="link-underline"></span>
+                    </button>
+                  </div>
+
                   <div class="row g-2">
                     <div class="col-12" *ngFor="let piece of existingPieces">
                       <div

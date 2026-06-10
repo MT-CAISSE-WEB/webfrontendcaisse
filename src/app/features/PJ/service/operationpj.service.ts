@@ -47,4 +47,48 @@ export class OperationPJService {
       responseType: 'blob',
     });
   }
+
+  // Toutes les pièces jointes d'une opération
+  downloadAllFiles(idoperation: string): Observable<Blob> {
+    return this.http.get(
+      `${this.baseUrl}entete_operation/${idoperation}/operation-pieces-jointes/download-all`,
+      {
+        responseType: 'blob',
+      },
+    );
+  }
+
+  // operationpj.service.ts
+  /**
+   * Télécharge toutes les pièces jointes (opération et/ou demande)
+   * @param idoperation - ID de l'opération (optionnel)
+   * @param iddemande - ID de la demande (optionnel)
+   */
+  // operationpj.service.ts
+
+  downloadAllOperationFiles(
+    idoperation?: string,
+    iddemande?: string,
+  ): Observable<Blob> {
+    let url: string;
+
+    if (idoperation) {
+      // Cas avec opération (avec ou sans demande)
+      url = `${this.baseUrl}entete_operation/${idoperation}/operation-demande-pieces-jointes/download-all`;
+      if (iddemande) {
+        url += `?iddemande=${iddemande}`;
+      }
+    } else if (iddemande) {
+      // Cas demande seule
+      url = `${this.baseUrl}entete_operation/demande-pieces-jointes/download-all?iddemande=${iddemande}`;
+    } else {
+      throw new Error('Au moins un ID (opération ou demande) est requis');
+    }
+
+    console.log('URL de téléchargement:', url);
+
+    return this.http.get(url, {
+      responseType: 'blob',
+    });
+  }
 }

@@ -1,4 +1,3 @@
-// services/demande-pj.service.ts
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
@@ -48,5 +47,18 @@ export class DemandePJService {
     return this.http.get(downloadUrl, {
       responseType: 'blob',
     });
+  }
+
+  /**
+   * Télécharge toutes les pièces jointes d'une demande
+   * @param iddemande - ID du budget
+   */
+  downloadAllFiles(iddemande: string): Observable<Blob> {
+    return this.http.get(
+      `${this.baseUrl}entete-demande/${iddemande}/demande-pieces-jointes/download-all`,
+      {
+        responseType: 'blob',
+      },
+    );
   }
 }

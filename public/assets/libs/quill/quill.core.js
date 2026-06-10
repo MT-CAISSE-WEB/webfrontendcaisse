@@ -7490,7 +7490,7 @@ function diff_cleanupMerge(diffs) {
                 diffs[pointer - count_delete - count_insert - 1][1] +=
                     text_insert.substring(0, commonlength);
               } else {
-                diffs.splice(0, 0, [DIFF_EQUAL,
+                diffs.plice(0, 0, [DIFF_EQUAL,
                                     text_insert.substring(0, commonlength)]);
                 pointer++;
               }
@@ -7510,13 +7510,13 @@ function diff_cleanupMerge(diffs) {
           }
           // Delete the offending records and add the merged ones.
           if (count_delete === 0) {
-            diffs.splice(pointer - count_insert,
+            diffs.plice(pointer - count_insert,
                 count_delete + count_insert, [DIFF_INSERT, text_insert]);
           } else if (count_insert === 0) {
-            diffs.splice(pointer - count_delete,
+            diffs.plice(pointer - count_delete,
                 count_delete + count_insert, [DIFF_DELETE, text_delete]);
           } else {
-            diffs.splice(pointer - count_delete - count_insert,
+            diffs.plice(pointer - count_delete - count_insert,
                 count_delete + count_insert, [DIFF_DELETE, text_delete],
                 [DIFF_INSERT, text_insert]);
           }
@@ -7525,7 +7525,7 @@ function diff_cleanupMerge(diffs) {
         } else if (pointer !== 0 && diffs[pointer - 1][0] == DIFF_EQUAL) {
           // Merge this equality with the previous one.
           diffs[pointer - 1][1] += diffs[pointer][1];
-          diffs.splice(pointer, 1);
+          diffs.plice(pointer, 1);
         } else {
           pointer++;
         }
@@ -7557,7 +7557,7 @@ function diff_cleanupMerge(diffs) {
             diffs[pointer][1].substring(0, diffs[pointer][1].length -
                                         diffs[pointer - 1][1].length);
         diffs[pointer + 1][1] = diffs[pointer - 1][1] + diffs[pointer + 1][1];
-        diffs.splice(pointer - 1, 1);
+        diffs.plice(pointer - 1, 1);
         changes = true;
       } else if (diffs[pointer][1].substring(0, diffs[pointer + 1][1].length) ==
           diffs[pointer + 1][1]) {
@@ -7566,7 +7566,7 @@ function diff_cleanupMerge(diffs) {
         diffs[pointer][1] =
             diffs[pointer][1].substring(diffs[pointer + 1][1].length) +
             diffs[pointer + 1][1];
-        diffs.splice(pointer + 1, 1);
+        diffs.plice(pointer + 1, 1);
         changes = true;
       }
     }
@@ -7610,12 +7610,12 @@ function cursor_normalize_diff (diffs, cursor_pos) {
         return [i + 1, diffs];
       } else if (cursor_pos < next_pos) {
         // copy to prevent side effects
-        diffs = diffs.slice();
+        diffs = diffs.lice();
         // split d into two diff changes
         var split_pos = cursor_pos - current_pos;
         var d_left = [d[0], d[1].slice(0, split_pos)];
         var d_right = [d[0], d[1].slice(split_pos)];
-        diffs.splice(i, 1, d_left, d_right);
+        diffs.plice(i, 1, d_left, d_right);
         return [i + 1, diffs];
       } else {
         current_pos = next_pos;
@@ -7662,17 +7662,17 @@ function fix_cursor (diffs, cursor_pos) {
     if (d_next != null && d[1] + d_next[1] === d_next[1] + d[1]) {
       // Case 1)
       // It is possible to perform a naive shift
-      ndiffs.splice(cursor_pointer, 2, d_next, d)
+      ndiffs.plice(cursor_pointer, 2, d_next, d)
       return merge_tuples(ndiffs, cursor_pointer, 2)
     } else if (d_next != null && d_next[1].indexOf(d[1]) === 0) {
       // Case 2)
       // d[1] is a prefix of d_next[1]
       // We can assume that d_next[0] !== 0, since d[0] === 0
       // Shift edit locations..
-      ndiffs.splice(cursor_pointer, 2, [d_next[0], d[1]], [0, d[1]]);
+      ndiffs.plice(cursor_pointer, 2, [d_next[0], d[1]], [0, d[1]]);
       var suffix = d_next[1].slice(d[1].length);
       if (suffix.length > 0) {
-        ndiffs.splice(cursor_pointer + 2, 0, [d_next[0], suffix]);
+        ndiffs.plice(cursor_pointer + 2, 0, [d_next[0], suffix]);
       }
       return merge_tuples(ndiffs, cursor_pointer, 3)
     } else {
@@ -7738,7 +7738,7 @@ function merge_tuples (diffs, start, length) {
       var left_d = diffs[i];
       var right_d = diffs[i+1];
       if (left_d[0] === right_d[1]) {
-        diffs.splice(i, 2, [left_d[0], left_d[1] + right_d[1]]);
+        diffs.plice(i, 2, [left_d[0], left_d[1] + right_d[1]]);
       }
     }
   }

@@ -333,10 +333,9 @@
                       class="form-control form-control-sm bg-light border-0 {{
                         isValidField('beneficiaire')
                       }}"
-                      placeholder="Nom du bénéficiaire" required/>
-                      <div class="invalid-feedback" *ngIf="operationForm.get('beneficiaire')?.invalid && operationForm.get('beneficiaire')?.touched">
-                        Le nom du bénéficiaire est obligatoire.
-                      </div>
+                      placeholder="Nom du bénéficiaire"
+                      required
+                    />
                   </div>
                 </td>
               </tr>
@@ -479,181 +478,172 @@
       </div>
     </div>
 
-    <!-- Pièces jointes -->
-    <div class="card mt-3">
-      <div class="card-header bg-light">
-        <h6 class="mb-0">
-          <i class="ri-attachment-2 me-2"></i>
-          Pièces jointes
-        </h6>
-      </div>
-      <div class="card-body">
-        <!-- ⭐ SECTION 1: PIÈCES JOINTES DE LA DEMANDE (lecture seule) -->
-        <div *ngIf="demandePiecesJointes.length > 0" class="mb-4">
-          <div class="d-flex align-items-center gap-2 mb-3">
-            <i class="ri-file-copy-line text-info"></i>
-            <label class="form-label fw-semibold mb-0"
-              >Pièces jointes de la demande</label
-            >
-            <span class="badge bg-info ms-2">{{
-              demandePiecesJointes.length
-            }}</span>
-          </div>
-          <div class="row g-2">
-            <div class="col-12" *ngFor="let pj of demandePiecesJointes">
-              <div
-                class="d-flex align-items-center justify-content-between p-2 border rounded-3 bg-light"
-              >
-                <div class="d-flex align-items-center gap-3">
-                  <div class="piece-icon text-center" style="width: 40px">
-                    <i [class]="getFileIcon(pj)" class="fs-2"></i>
-                  </div>
-                  <div>
-                    <span class="fw-medium">{{ pj.nomfichier }}</span>
-                    <div class="d-flex gap-2 mt-1">
-                      <span
-                        class="badge bg-light text-muted"
-                        style="font-size: 10px"
-                      >
-                        {{ formatFileSize(pj.taille) }}
-                      </span>
-                      <span class="text-muted" style="font-size: 10px">
-                        {{ pj.createdat | date: "dd/MM/yyyy HH:mm" }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div class="d-flex gap-1">
-                  <!-- ⭐ Seulement téléchargement -->
-                  <button
-                    class="btn btn-sm btn-soft-primary"
-                    (click)="downloadPiece(pj)"
-                    title="Télécharger"
-                  >
-                    <i class="ri-download-line"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <hr class="my-3" />
+    <!-- Pièces jointes modernisées -->
+    <div class="attachments-section">
+      <div class="section-header">
+        <div class="section-title">
+          <i class="ri-attachment-2"></i>
+          <span>Pièces jointes</span>
+          <span class="badge bg-primary rounded-pill">
+            {{
+              demandePiecesJointes.length +
+                existingPieces.length +
+                uploadedFiles.length || 0
+            }}
+          </span>
         </div>
 
-        <!-- ⭐ SECTION 2: ZONE D'UPLOAD POUR L'OPÉRATION (TOUJOURS VISIBLE) -->
-        <div class="mb-4">
-          <label class="form-label fw-semibold"
-            >Ajouter des fichiers à l'opération</label
-          >
-          <div
-            class="upload-zone border border-dashed rounded-3 p-4 text-center bg-light"
-          >
-            <input
-              type="file"
-              #fileInput
-              multiple
-              (change)="onFilesSelected($event)"
-              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
-              class="d-none"
-            />
-            <i class="ri-upload-cloud-2-line fs-1 text-muted"></i>
-            <p class="mt-2 mb-1">Cliquez pour sélectionner des fichiers</p>
-            <button
-              type="button"
-              class="btn btn-sm btn-primary"
-              (click)="fileInput.click()"
-              [disabled]="pjUploading"
-            >
-              <i class="ri-add-line me-1"></i>
-              Choisir des fichiers
-            </button>
-            <small class="text-muted d-block mt-2">
-              PDF, images, Excel, Word, CSV (max 10MB)
-            </small>
-          </div>
-
-          <!-- Aperçu fichiers sélectionnés -->
-          <div *ngIf="uploadedFiles.length > 0" class="mt-3">
-            <label class="form-label fw-semibold"
-              >Fichiers à uploader ({{ uploadedFiles.length }})</label
-            >
-            <div class="row g-2">
-              <div
-                class="col-12"
-                *ngFor="let file of uploadedFiles; let i = index"
-              >
-                <div
-                  class="d-flex align-items-center justify-content-between p-2 border rounded-3"
-                >
-                  <div class="d-flex align-items-center gap-3">
-                    <i class="ri-file-line fs-3 text-secondary"></i>
-                    <div>
-                      <span class="fw-medium">{{ file.name }}</span>
-                      <small class="text-muted d-block"
-                        >{{ file.size / 1024 | number: "1.0-0" }} KB</small
-                      >
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-outline-danger"
-                    (click)="removeSelectedFile(i)"
-                  >
-                    <i class="ri-close-line"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ⭐ SECTION 3: PIÈCES JOINTES DÉJÀ UPLOADÉES POUR L'OPÉRATION (en modification) -->
-        <div *ngIf="existingPieces.length > 0" class="mt-3">
-          <label class="form-label fw-semibold"
-            >Pièces jointes de l'opération</label
-          >
-          <div class="row g-2">
-            <div class="col-12" *ngFor="let pj of existingPieces">
-              <div
-                class="d-flex align-items-center justify-content-between p-2 border rounded-3"
-              >
-                <div class="d-flex align-items-center gap-3">
-                  <i [class]="getFileIcon(pj)" class="fs-3"></i>
-                  <div>
-                    <span class="fw-medium">{{ pj.nomfichier }}</span>
-                    <small class="text-muted d-block">{{
-                      formatFileSize(pj.taille)
-                    }}</small>
-                  </div>
-                </div>
-                <div class="d-flex gap-1">
-                  <button
-                    class="btn btn-sm btn-soft-primary"
-                    (click)="downloadPiece(pj)"
-                    title="Télécharger"
-                  >
-                    <i class="ri-download-line"></i>
-                  </button>
-                  <!-- <button class="btn btn-sm btn-soft-danger" (click)="removeExistingFile(pj)" title="Supprimer">
-                <i class="ri-delete-bin-line"></i>
-              </button> -->
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Message si aucune PJ -->
-        <div
-          *ngIf="
-            demandePiecesJointes.length === 0 &&
-            uploadedFiles.length === 0 &&
-            existingPieces.length === 0
-          "
-          class="text-center py-3 text-muted"
+        <!-- ⭐ Bouton Tout télécharger avec message adapté -->
+        <button
+          *ngIf="demandePiecesJointes.length > 0 || existingPieces.length > 0"
+          type="button"
+          class="btn-download-all"
+          (click)="downloadAllFiles()"
+          [disabled]="downloadingAll"
+          [title]="getDownloadTooltip()"
         >
-          <i class="ri-information-line"></i>
-          <small>Aucune pièce jointe disponible</small>
+          <i class="ri-download-line"></i>
+          <span *ngIf="!downloadingAll">
+            {{ getDownloadButtonText() }}
+          </span>
+          <span *ngIf="downloadingAll">Préparation...</span>
+          <span class="badge ms-1">{{
+            demandePiecesJointes.length + existingPieces.length
+          }}</span>
+        </button>
+      </div>
+
+      <!-- ⭐ SECTION 1: PIÈCES JOINTES DE LA DEMANDE (lecture seule) -->
+      <div *ngIf="demandePiecesJointes.length > 0" class="mb-3">
+        <div class="subsection-title">
+          <i class="ri-file-copy-line"></i>
+          <span>Pièces jointes de la demande</span>
+          <span class="badge bg-info">{{ demandePiecesJointes.length }}</span>
         </div>
+        <div class="horizontal-scroll">
+          <div
+            *ngFor="let pj of demandePiecesJointes"
+            class="file-pill file-pill-readonly"
+          >
+            <div class="pill-icon">
+              <i [class]="getFileIcon(pj)"></i>
+            </div>
+            <div class="pill-info">
+              <span class="pill-name" [title]="pj.nomfichier">{{
+                pj.nomfichier
+              }}</span>
+              <span class="pill-meta">{{ formatFileSize(pj.taille) }}</span>
+            </div>
+            <div class="pill-actions">
+              <button (click)="downloadPiece(pj)" title="Télécharger">
+                <i class="ri-download-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ⭐ SECTION 2: PIÈCES JOINTES DE L'OPÉRATION -->
+      <div>
+        <div class="subsection-title">
+          <i class="ri-folder-image-line"></i>
+          <span>Pièces jointes de l'opération</span>
+          <span class="badge bg-secondary">{{ existingPieces.length }}</span>
+        </div>
+
+        <!-- Fichiers existants -->
+        <div *ngIf="existingPieces.length > 0" class="horizontal-scroll mb-3">
+          <div *ngFor="let pj of existingPieces" class="file-pill">
+            <div class="pill-icon">
+              <i [class]="getFileIcon(pj)"></i>
+            </div>
+            <div class="pill-info">
+              <span class="pill-name" [title]="pj.nomfichier">{{
+                pj.nomfichier
+              }}</span>
+              <span class="pill-meta">{{ formatFileSize(pj.taille) }}</span>
+            </div>
+            <div class="pill-actions">
+              <button (click)="downloadPiece(pj)" title="Télécharger">
+                <i class="ri-download-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barre d'upload -->
+        <div class="upload-bar" (click)="fileInput.click()">
+          <input
+            type="file"
+            #fileInput
+            multiple
+            (change)="onFilesSelected($event)"
+            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
+            class="d-none"
+          />
+          <div class="upload-info">
+            <i class="ri-cloud-upload-line"></i>
+            <span *ngIf="uploadedFiles.length === 0"
+              >Ajouter des fichiers à l'opération</span
+            >
+            <span *ngIf="uploadedFiles.length > 0">
+              <strong>{{ uploadedFiles.length }}</strong> fichier(s)
+              sélectionné(s)
+            </span>
+          </div>
+          <div class="upload-badge" *ngIf="uploadedFiles.length === 0">
+            PDF, DOC, XLS, JPG, CSV
+          </div>
+        </div>
+
+        <!-- Aperçu fichiers sélectionnés -->
+        <div *ngIf="uploadedFiles.length > 0" class="horizontal-scroll mt-3">
+          <div
+            *ngFor="let file of uploadedFiles; let i = index"
+            class="file-pill file-pill-new"
+          >
+            <div class="pill-icon">
+              <i class="ri-file-line"></i>
+            </div>
+            <div class="pill-info">
+              <span class="pill-name" [title]="file.name">{{ file.name }}</span>
+              <span class="pill-meta"
+                >{{ file.size / 1024 | number: "1.0-0" }} KB</span
+              >
+            </div>
+            <div class="pill-actions">
+              <button (click)="removeSelectedFile(i)" title="Retirer">
+                <i class="ri-close-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message si aucune PJ -->
+      <div
+        *ngIf="
+          demandePiecesJointes.length === 0 &&
+          existingPieces.length === 0 &&
+          uploadedFiles.length === 0
+        "
+        class="empty-state"
+      >
+        <i class="ri-folder-open-line"></i>
+        <p>Aucune pièce jointe disponible</p>
+      </div>
+
+      <!-- Message si aucune PJ -->
+      <div
+        *ngIf="
+          demandePiecesJointes.length === 0 &&
+          existingPieces.length === 0 &&
+          uploadedFiles.length === 0
+        "
+        class="empty-state"
+      >
+        <i class="ri-folder-open-line"></i>
+        <p>Aucune pièce jointe disponible</p>
       </div>
     </div>
 

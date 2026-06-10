@@ -441,7 +441,7 @@ export class OperationModalComponent implements OnInit {
     this.operationForm = this.fb.group({
       demande: [''],
       codeoperation: [''],
-      beneficiaire: ['', Validators.required],
+      beneficiaire: [''],
       libelle: [''],
       dateoperation: [{ value: null, disabled: false }, [Validators.required]],
       typepaiement: ['', [Validators.required]],
@@ -656,7 +656,10 @@ export class OperationModalComponent implements OnInit {
           ? 'decaissement'
           : 'encaissement',
       montant: this.getTotalDemande(demande),
+      beneficiaire: demande.demandeur.nom + ' ' + demande.demandeur.prenom,
     });
+
+    console.log('Demandes:', demande);
 
     /** Reset lignes */
     const lignesFA = this.operationForm.get('lignes') as FormArray;
@@ -1293,6 +1296,144 @@ export class OperationModalComponent implements OnInit {
       error: (err) => {
         console.error('Erreur téléchargement:', err);
         this.toastr.error('Erreur lors du téléchargement');
+      },
+    });
+  }
+
+  // operation-modal.component.ts - Version corrigée
+
+  /**
+   * Télécharge toutes les pièces jointes
+   * - Si une demande est sélectionnée : opération + demande
+   * - Sinon : uniquement les pièces jointes de l'opération
+   */
+  downloadingAll = false;
+  // operation-modal.component.ts
+
+  /**
+   * Détermine le texte du bouton selon ce qui est disponible
+   */
+  getDownloadButtonText(): string {
+    const hasDemandePJ = this.demandePiecesJointes.length > 0;
+    const hasOperationPJ = this.existingPieces.length > 0;
+    const hasDemande = this.operationForm.get('demande')?.value;
+
+    if (hasDemandePJ && hasOperationPJ) {
+      return 'Tout télécharger (opération + demande)';
+    } else if (hasDemandePJ && !hasOperationPJ) {
+      return 'Télécharger les pièces de la demande';
+    } else if (!hasDemandePJ && hasOperationPJ) {
+      return "Télécharger les pièces de l'opération";
+    }
+    return 'Tout télécharger';
+  }
+
+  /**
+   * Détermine le tooltip du bouton
+   */
+  getDownloadTooltip(): string {
+    const hasDemandePJ = this.demandePiecesJointes.length > 0;
+    const hasOperationPJ = this.existingPieces.length > 0;
+
+    if (hasDemandePJ && hasOperationPJ) {
+      return "Télécharger les pièces jointes de l'opération et de la demande";
+    } else if (hasDemandePJ && !hasOperationPJ) {
+      return 'Télécharger les pièces jointes de la demande sélectionnée';
+    } else if (!hasDemandePJ && hasOperationPJ) {
+      return "Télécharger les pièces jointes de l'opération";
+    }
+    return 'Aucune pièce jointe disponible';
+  }
+
+  /**
+   * Télécharge toutes les pièces jointes
+   * - Si une demande est sélectionnée avec des PJ : opération + demande
+   * - Si seule l'opération a des PJ : uniquement l'opération
+   * - Si seule la demande a des PJ : uniquement la demande
+   */
+
+  downloadAllFiles(): void {
+    const idoperation = this.operation.idoperation;
+    const iddemande = this.operationForm.get('demande')?.value;
+
+    const hasOperationPJ = this.existingPieces.length > 0;
+    const hasDemandePJ = this.demandePiecesJointes.length > 0;
+
+    const totalFiles =
+      (hasDemandePJ ? this.demandePiecesJointes.length : 0) +
+      (hasOperationPJ ? this.existingPieces.length : 0);
+
+    if (totalFiles === 0) {
+      this.toastr.warning('Aucune pièce jointe à télécharger');
+      return;
+    }
+
+    // Cas 1: Seulement la demande a des PJ
+    if (hasDemandePJ && !hasOperationPJ) {
+      console.log('📥 Téléchargement uniquement des PJ de la demande');
+      this.downloadingAll = true;
+
+      this.pjService.downloadAllOperationFiles(undefined, iddemande).subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          const timestamp = new Date()
+            .toISOString()
+            .slice(0, 19)
+            .replace(/:/g, '-');
+          const filename = `demande_${iddemande}_${timestamp}.zip`;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+          this.toastr.success(
+            `${this.demandePiecesJointes.length} fichier(s) téléchargé(s)`,
+          );
+          this.downloadingAll = false;
+        },
+        error: (err) => {
+          this.toastr.error(
+            err.error?.message || 'Erreur lors du téléchargement',
+          );
+          this.downloadingAll = false;
+        },
+      });
+      return;
+    }
+
+    // Cas 2: Opération avec ou sans demande
+    if (!idoperation) {
+      this.toastr.error("ID de l'opération non trouvé");
+      return;
+    }
+
+    this.downloadingAll = true;
+
+    this.pjService.downloadAllOperationFiles(idoperation, iddemande).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const timestamp = new Date()
+          .toISOString()
+          .slice(0, 19)
+          .replace(/:/g, '-');
+        const filename = `operation${this.operation.codeoperation}_${timestamp}.zip`;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        this.toastr.success(`${totalFiles} fichier(s) téléchargé(s)`);
+        this.downloadingAll = false;
+      },
+      error: (err) => {
+        this.toastr.error(
+          err.error?.message || 'Erreur lors du téléchargement',
+        );
+        this.downloadingAll = false;
       },
     });
   }

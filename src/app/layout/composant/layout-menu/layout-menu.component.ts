@@ -22,8 +22,7 @@ import { APP_ROOT,APP_ROOT_DONNEE_BASE_DEVISE,
   APP_ROOT_STATSAFFDEPTNATURE_CONSULTATION,
   APP_ROOT_DETAILDEAMNDE_CONSULTATION,
   APP_ROOT_BANQUE_DONNEE_BASE,
-  APP_ROOT_CLOTURECAISSE_CONSULTATION,
-  APP_ROOT_SOLDECAISSE_CONSULTATION} from '../../../_core/routes/frontend.root';
+  APP_ROOT_CLOTURECAISSE_CONSULTATION} from '../../../_core/routes/frontend.root';
 
 import { RouterLink, RouterModule, RouterOutlet } from "@angular/router";
 import { CommonModule } from '@angular/common';
@@ -70,7 +69,6 @@ export class LayoutMenuComponent {
   root_nature_operation_departement = APP_ROOT_STATSAFFDEPTNATURE_CONSULTATION;
   root_detail_demande = APP_ROOT_DETAILDEAMNDE_CONSULTATION;
   root_cloture_caisse = APP_ROOT_CLOTURECAISSE_CONSULTATION;
-  root_solde_caisse = APP_ROOT_SOLDECAISSE_CONSULTATION;
 
   admin : boolean =false;
   supervisor : boolean=false;
