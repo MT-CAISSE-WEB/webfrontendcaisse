@@ -1,19 +1,31 @@
 import { Component } from '@angular/core';
-import { APP_ROOT,APP_ROOT_DONNEE_BASE_DEVISE, 
-  APP_ROOT_AFFECTATION_CAISSIER_CAISSE_JOURNAL, 
-  APP_ROOT_CAISSE_CAISSE_JOURNAL, APP_ROOT_CENTRE_ANALYTIQUE_DONNEE_BASE, 
-  APP_ROOT_JOURNAL_CAISSE_JOURNAL, APP_ROOT_NATURE_OPERATION_DONNEE_BASE, 
-  APP_ROOT_OPERATION_GENERAL, APP_ROOT_PLAN_COMPTABLE_DONNEE_BASE, 
-  APP_ROOT_TIERS_DONNEE_BASE, 
-  APP_ROOT_TAUX_DONNEE_BASE, APP_STRUCTURE_SOCIETE, APP_ROOT_USER_ADMINISTRATION, 
-  APP_ROOT_STRUCTURE_SITE, APP_ROOT_STRUCTURE_DEPARTEMENT, 
-  APP_ROOT_ROLE_PERMISSION_ADMINISTRATION, APP_ROOT_PERMISSION_ADMINISTRATION, 
-  APP_ROOT_ROLE_ADMINISTRATION,APP_ROOT_AFF_NATURE_CENTRE_DONNEE_BASE, 
+import {
+  APP_ROOT,
+  APP_ROOT_DONNEE_BASE_DEVISE,
+  APP_ROOT_AFFECTATION_CAISSIER_CAISSE_JOURNAL,
+  APP_ROOT_CAISSE_CAISSE_JOURNAL,
+  APP_ROOT_CENTRE_ANALYTIQUE_DONNEE_BASE,
+  APP_ROOT_JOURNAL_CAISSE_JOURNAL,
+  APP_ROOT_NATURE_OPERATION_DONNEE_BASE,
+  APP_ROOT_OPERATION_GENERAL,
+  APP_ROOT_PLAN_COMPTABLE_DONNEE_BASE,
+  APP_ROOT_TIERS_DONNEE_BASE,
+  APP_ROOT_TAUX_DONNEE_BASE,
+  APP_STRUCTURE_SOCIETE,
+  APP_ROOT_USER_ADMINISTRATION,
+  APP_ROOT_STRUCTURE_SITE,
+  APP_ROOT_STRUCTURE_DEPARTEMENT,
+  APP_ROOT_ROLE_PERMISSION_ADMINISTRATION,
+  APP_ROOT_PERMISSION_ADMINISTRATION,
+  APP_ROOT_ROLE_ADMINISTRATION,
+  APP_ROOT_AFF_NATURE_CENTRE_DONNEE_BASE,
   APP_AFF_DEPT_NATURE_DONNEE_BASE,
-  APP_ROOT_BUDGETS_LIGNE_BUDGET, APP_ROOT_BUDGETS_BUDGET,
-  APP_ROOT_DMD_DECAISSEMENT, 
+  APP_ROOT_BUDGETS_LIGNE_BUDGET,
+  APP_ROOT_BUDGETS_BUDGET,
+  APP_ROOT_DMD_DECAISSEMENT,
   APP_ROOT_WORKFLOW_ADMINISTRATION,
-  APP_ROOT_SUIVIBUDGET_CONSULTATION, APP_ROOT_SUIVIBUDGETFILTRE_CONSULTATION,
+  APP_ROOT_SUIVIBUDGET_CONSULTATION,
+  APP_ROOT_SUIVIBUDGETFILTRE_CONSULTATION,
   APP_ROOT_OPERATIONPERIODE_CONSULTATION,
   APP_ROOT_OPERATIONDETAILS_CONSULTATION,
   APP_ROOT_OPERATION_GENERAL_JUSITIFIER,
@@ -22,16 +34,17 @@ import { APP_ROOT,APP_ROOT_DONNEE_BASE_DEVISE,
   APP_ROOT_STATSAFFDEPTNATURE_CONSULTATION,
   APP_ROOT_DETAILDEAMNDE_CONSULTATION,
   APP_ROOT_BANQUE_DONNEE_BASE,
-  APP_ROOT_CLOTURECAISSE_CONSULTATION} from '../../../_core/routes/frontend.root';
+  APP_ROOT_CLOTURECAISSE_CONSULTATION,
+} from '../../../_core/routes/frontend.root';
 
-import { RouterLink, RouterModule, RouterOutlet } from "@angular/router";
+import { RouterLink, RouterModule, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-layout-menu',
   imports: [RouterLink, RouterModule, CommonModule],
   templateUrl: './layout-menu.component.html',
-  styleUrl: './layout-menu.component.css'
+  styleUrl: './layout-menu.component.css',
 })
 export class LayoutMenuComponent {
   root_banque = APP_ROOT_BANQUE_DONNEE_BASE;
@@ -70,95 +83,88 @@ export class LayoutMenuComponent {
   root_detail_demande = APP_ROOT_DETAILDEAMNDE_CONSULTATION;
   root_cloture_caisse = APP_ROOT_CLOTURECAISSE_CONSULTATION;
 
-  admin : boolean =false;
-  supervisor : boolean=false;
-  caissier : boolean = false;
-  comptable : boolean = false; 
-  superadmin : boolean = false;
-  demandeur : boolean = false;
+  admin: boolean = false;
+  supervisor: boolean = false;
+  caissier: boolean = false;
+  comptable: boolean = false;
+  superadmin: boolean = false;
+  demandeur: boolean = false;
 
-  isuperadmin (): boolean {
-      if (typeof window !== 'undefined') {
-            const user =JSON.parse(localStorage.getItem('user') || '{}') ;
-        for (let index = 0; index < user.roles.length; index++) {
-            const element = user.roles[index];
-            if (element['code'] ==='00')
-                {
-                    this.superadmin = true;  
-                }
+  isuperadmin(): boolean {
+    if (typeof window !== 'undefined') {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      for (let index = 0; index < user.roles.length; index++) {
+        const element = user.roles[index];
+        if (element['code'] === '00') {
+          this.superadmin = true;
         }
+      }
     }
-     return this.superadmin;
+    return this.superadmin;
   }
 
   isadmin(): boolean {
-      if (typeof window !== 'undefined') {
-            const user =JSON.parse(localStorage.getItem('user') || '{}') ;
-        for (let index = 0; index < user.roles.length; index++) {
-            const element = user.roles[index];
-            if (element['code'] ==='01')
-                {
-                    this.admin = true;  
-                }
+    if (typeof window !== 'undefined') {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      for (let index = 0; index < user.roles.length; index++) {
+        const element = user.roles[index];
+        if (element['code'] === '01') {
+          this.admin = true;
         }
+      }
     }
-     return this.admin;
+    return this.admin;
   }
 
-  issuperviseur (): boolean {
-      if (typeof window !== 'undefined') {
-            const user =JSON.parse(localStorage.getItem('user') || '{}') ;
-        for (let index = 0; index < user.roles.length; index++) {
-            const element = user.roles[index];
-            if (element['code'] ==='02')
-                {
-                    this.supervisor = true;  
-                }
+  issuperviseur(): boolean {
+    if (typeof window !== 'undefined') {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      for (let index = 0; index < user.roles.length; index++) {
+        const element = user.roles[index];
+        if (element['code'] === '02') {
+          this.supervisor = true;
         }
+      }
     }
-     return this.supervisor;
+    return this.supervisor;
   }
 
-  iscomptable (): boolean {
-      if (typeof window !== 'undefined') {
-            const user =JSON.parse(localStorage.getItem('user') || '{}') ;
-        for (let index = 0; index < user.roles.length; index++) {
-            const element = user.roles[index];
-            if (element['code'] ==='03')
-                {
-                    this.comptable = true;  
-                }
+  iscomptable(): boolean {
+    if (typeof window !== 'undefined') {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      for (let index = 0; index < user.roles.length; index++) {
+        const element = user.roles[index];
+        if (element['code'] === '03') {
+          this.comptable = true;
         }
+      }
     }
-     return this.comptable;
+    return this.comptable;
   }
 
-  iscaissier (): boolean {
-      if (typeof window !== 'undefined') {
-            const user =JSON.parse(localStorage.getItem('user') || '{}') ;
-        for (let index = 0; index < user.roles.length; index++) {
-            const element = user.roles[index];
-            if (element['code'] ==='04')
-                {
-                    this.caissier = true;  
-                }
+  iscaissier(): boolean {
+    if (typeof window !== 'undefined') {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      for (let index = 0; index < user.roles.length; index++) {
+        const element = user.roles[index];
+        if (element['code'] === '04') {
+          this.caissier = true;
         }
+      }
     }
-     return  this.caissier;
+    return this.caissier;
   }
 
-  isdemandeur (): boolean {
-      if (typeof window !== 'undefined') {
-            const user =JSON.parse(localStorage.getItem('user') || '{}') ;
-        for (let index = 0; index < user.roles.length; index++) {
-            const element = user.roles[index];
-            if (element['code'] ==='05')
-                {
-                    this.demandeur = true;  
-                }
+  isdemandeur(): boolean {
+    if (typeof window !== 'undefined') {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      for (let index = 0; index < user.roles.length; index++) {
+        const element = user.roles[index];
+        if (element['code'] === '05') {
+          this.demandeur = true;
         }
+      }
     }
-     return this.demandeur;
+    return this.demandeur;
   }
-
 }

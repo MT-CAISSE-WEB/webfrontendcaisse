@@ -1,273 +1,433 @@
-<!-- ================= PAGE TITLE ================= -->
-<div class="row">
-  <div class="col-12">
-    <div class="page-title-box d-flex justify-content-between align-items-center">
-      <h4>Circuit de validation</h4>
-      <ol class="breadcrumb m-0">
-        <li class="breadcrumb-item">Administration</li>
-        <li class="breadcrumb-item active">Workflow</li>
-      </ol>
+<!-- ================= PAGE TITLE GLASS ================= -->
+<div class="page-title-glass">
+  <div class="row align-items-center">
+    <div class="col-12">
+      <div
+        class="d-flex justify-content-between align-items-center flex-wrap gap-3"
+      >
+        <div class="title-header">
+          <div class="title-icon-glow">
+            <i class="ri-shield-check-line"></i>
+          </div>
+          <div>
+            <h4 class="mb-1">Circuit de validation</h4>
+            <p class="text-muted small mb-0">
+              Gérez vos workflows de validation
+            </p>
+          </div>
+        </div>
+        <div class="breadcrumb-glass">
+          <i class="ri-home-line"></i>
+          <span>Administration</span>
+          <i class="ri-arrow-right-s-line"></i>
+          <span class="active">Workflow</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ================= CARD ================= -->
-<div class="card">
-  <div class="card-header">
-    <div class="row">
-      <div class="col-sm-10">
-         <h5>Configuration du workflow</h5>
-      </div>
-
-      <div class="col-sm-2">
-          <button type="button" class="btn btn-md btn-light" (click)="modalCreate()"> Rénitialiser </button>
-      </div>
-    </div>
-   
-  </div>
-
-  <div class="card-body">
-
-    <!-- ================= FORM ================= -->
-    <form [formGroup]="circuitvalidationForm" (ngSubmit)="onsubmit()">
-
-      <!-- ================= NAV STEPS ================= -->
-      <ul class="nav nav-pills nav-justified mb-4">
-        <li class="nav-item">
-          <button type="button" class="nav-link active" data-bs-toggle="pill" data-bs-target="#step1">
-           Etape 1 :  Circuit de validation
-          </button>
-        </li>
-        <li class="nav-item">
-          <button type="button" class="nav-link" data-bs-toggle="pill" data-bs-target="#step2">
-            Etape 2 : Etapes et Validateurs
-          </button>
-        </li>
-        <li class="nav-item">
-          <button type="button" class="nav-link" data-bs-toggle="pill" data-bs-target="#step3">
-            Etape 3 : Finish
-          </button>
-        </li>
-      </ul>
-
-      <div class="tab-content">
-
-        <!-- ================= STEP 1 ================= -->
-        <div class="tab-pane fade show active" id="step1">
-          <div class="row g-3">
-
-            <div class="col-md-4">
-              <label>Code circuit</label>
-              <input class="form-control form-control-sm"
-                     formControlName="codecircuitvalidation">
-            </div>
-
-            <div class="col-md-4">
-              <label>Type entité</label>
-              <select class="form-select form-select-sm" formControlName="typeentite">
-                <option value="">-- Choisir --</option>
-                <option value="societe">Société</option>
-                <option value="site">Site</option>
-              </select>
-            </div>
-
-            <div class="col-md-4">
-              <label>Type action</label>
-              <select class="form-select form-select-sm" formControlName="typeaction">
-                <option value="">-- Choisir --</option>
-                <option value="budget">Budget</option>
-                <option value="decaissement">Décaissement</option>
-              </select>
-            </div>
-
-            <div class="col-md-6">
-              <label>Société</label>
-              <select class="form-select form-select-sm" formControlName="idsociete">
-                <option value="">-- Société --</option>
-                <option *ngFor="let s of societes" [value]="s.idsociete">
-                  {{ s.raisonsociale }}
-                </option>
-              </select>
-            </div>
-
-            <div class="col-md-6">
-              <div *ngIf="circuitvalidationForm.get('typeentite')?.value !== 'societe'">
-              <label>Site</label>
-              <select class="form-select form-select-sm" formControlName="idsite">
-                <option value="">-- Site --</option>
-                <option *ngFor="let st of sites" [value]="st.idsite">
-                  {{ st.libelle }}
-                </option>
-              </select>
-            </div>
-            </div>
-
+<div class="row g-4">
+  <!-- Formulaire principal -->
+  <div class="col-xl-8">
+    <div class="glass-card-workflow">
+      <div class="glass-card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="header-title">
+            <i class="ri-settings-4-line text-primary"></i>
+            <h5 class="mb-0">Configuration du workflow</h5>
           </div>
+          <button class="btn-reset-glass" (click)="modalCreate()">
+            <i class="ri-refresh-line"></i>
+            <span>Réinitialiser</span>
+          </button>
         </div>
+      </div>
 
-        <!-- ================= STEP 2 ================= -->
-        <div class="tab-pane fade" id="step2">
+      <div class="glass-card-body">
+        <form [formGroup]="circuitvalidationForm" (ngSubmit)="onsubmit()">
+          <!-- ================= STEP PROGRESS ================= -->
+          <div class="step-progress-glass">
+            <div
+              class="step-item-glass"
+              [class.active]="currentStep === 1"
+              (click)="goToStep(1)"
+            >
+              <div class="step-circle-glass">
+                <span class="step-number">1</span>
+                <i class="ri-check-line step-check"></i>
+              </div>
+              <div class="step-content">
+                <span class="step-title">Circuit</span>
+                <span class="step-desc">Elaboration</span>
+              </div>
+            </div>
+            <div
+              class="step-line-glass"
+              [class.active]="currentStep >= 2"
+            ></div>
 
-          <div class ="etapes-scroll" formArrayName="etapes">
+            <div
+              class="step-item-glass"
+              [class.active]="currentStep === 2"
+              (click)="goToStep(2)"
+            >
+              <div class="step-circle-glass">
+                <span class="step-number">2</span>
+                <i class="ri-check-line step-check"></i>
+              </div>
+              <div class="step-content">
+                <span class="step-title">Étapes</span>
+                <span class="step-desc">Validateurs</span>
+              </div>
+            </div>
+            <div
+              class="step-line-glass"
+              [class.active]="currentStep >= 3"
+            ></div>
 
-            <div *ngFor="let etape of etapes.controls; let i = index"
-                 [formGroupName]="i"
-                 class="card mb-3">
+            <div
+              class="step-item-glass"
+              [class.active]="currentStep === 3"
+              (click)="goToStep(3)"
+            >
+              <div class="step-circle-glass">
+                <span class="step-number">3</span>
+                <i class="ri-check-line step-check"></i>
+              </div>
+              <div class="step-content">
+                <span class="step-title">Finalisation</span>
+                <span class="step-desc">Confirmation</span>
+              </div>
+            </div>
+          </div>
 
-             <div class="card-header d-flex justify-content-between align-items-center">
-                <strong>Étape {{ i + 1 }}</strong>
-
-                <div class="d-flex gap-2">
-                    <button
-                    type="button"
-                    class="btn btn-sm btn-outline-primary"
-                    (click)="addValidateur(i)">
-                    + Validateur
-                    </button>
-
-                    <button
-                    type="button"
-                    class="btn btn-sm btn-outline-danger"
-                    (click)="removeEtape(i)"
-                    *ngIf="etapes.length > 1">
-                    🗑️ Étape
-                    </button>
+          <!-- Contenu des étapes -->
+          <div class="step-content-glass">
+            <!-- ÉTAPE 1 -->
+            <div class="step-pane" [class.active]="currentStep === 1">
+              <div class="form-section-glass">
+                <div class="section-header-glass">
+                  <i class="ri-information-line"></i>
+                  <span>Informations générales</span>
                 </div>
-                </div>
-
-
-              <div class="card-body">
-
-                <div formArrayName="validateurs">
-
-                  <div *ngFor="let v of getValidateurs(i).controls; let j = index"
-                       [formGroupName]="j"
-                       class="row align-items-center mb-2">
-
-                    <div class="col-md-10">
-                      <select class="form-select form-select-sm"
-                              formControlName="idutilisateur">
-                        <option [ngValue]="">-- Utilisateur --</option>
-                        <option *ngFor="let u of utilisateursFiltres"
-                                [ngValue]="u.idutilisateur">
-                          {{ u.prenom }} {{ u.nom }}
-                        </option>
-                      </select>
-
+                <div class="row g-4">
+                  <div class="col-md-4">
+                    <div class="input-glass">
+                      <i class="ri-barcode-line"></i>
+                      <input
+                        type="text"
+                        formControlName="codecircuitvalidation"
+                        placeholder=" "
+                      />
+                      <label>Code circuit</label>
+                      <div class="input-border"></div>
                     </div>
-
-                    <div class="col-md-2 text-end">
-                      <button type="button"
-                              class="btn btn-sm btn-danger"
-                              (click)="removeValidateur(i, j)">
-                        ❌
-                      </button>
-                    </div>
-
                   </div>
 
+                  <div class="col-md-4">
+                    <div class="input-glass">
+                      <i class="ri-building-line"></i>
+                      <select formControlName="typeentite">
+                        <option value="">-- Choisir --</option>
+                        <option value="societe">Société</option>
+                        <option value="site">Site</option>
+                      </select>
+                      <label>Type entité</label>
+                      <div class="input-border"></div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="input-glass">
+                      <i class="ri-flashlight-line"></i>
+                      <select formControlName="typeaction">
+                        <option value="">-- Choisir --</option>
+                        <option value="budget">Budget</option>
+                        <option value="decaissement">Décaissement</option>
+                      </select>
+                      <label>Type action</label>
+                      <div class="input-border"></div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="input-glass">
+                      <i class="ri-community-line"></i>
+                      <select formControlName="idsociete">
+                        <option value="">-- Société --</option>
+                        <option
+                          *ngFor="let s of societes"
+                          [value]="s.idsociete"
+                        >
+                          {{ s.raisonsociale }}
+                        </option>
+                      </select>
+                      <label>Société</label>
+                      <div class="input-border"></div>
+                    </div>
+                  </div>
+
+                  <div
+                    class="col-md-6"
+                    *ngIf="
+                      circuitvalidationForm.get('typeentite')?.value !==
+                      'societe'
+                    "
+                  >
+                    <div class="input-glass">
+                      <i class="ri-map-pin-line"></i>
+                      <select formControlName="idsite">
+                        <option value="">-- Site --</option>
+                        <option *ngFor="let st of sites" [value]="st.idsite">
+                          {{ st.libelle }}
+                        </option>
+                      </select>
+                      <label>Site</label>
+                      <div class="input-border"></div>
+                    </div>
+                  </div>
                 </div>
+              </div>
+
+              <div class="step-actions">
+                <button
+                  type="button"
+                  class="btn-next-glass"
+                  (click)="nextStep()"
+                >
+                  Suivant <i class="ri-arrow-right-line"></i>
+                </button>
               </div>
             </div>
 
+            <!-- ÉTAPE 2 -->
+            <div class="step-pane" [class.active]="currentStep === 2">
+              <div class="form-section-glass">
+                <div class="section-header-glass">
+                  <i class="ri-stack-line"></i>
+                  <span>Étapes et validateurs</span>
+                </div>
+
+                <div class="etapes-container" formArrayName="etapes">
+                  <div
+                    *ngFor="let etape of etapes.controls; let i = index"
+                    [formGroupName]="i"
+                    class="etape-card-glass"
+                  >
+                    <div class="etape-header-glass">
+                      <div class="etape-number">
+                        <div class="number-circle">{{ i + 1 }}</div>
+                        <span>Étape {{ i + 1 }}</span>
+                      </div>
+                      <div class="etape-actions">
+                        <button
+                          type="button"
+                          class="btn-icon-glass success"
+                          (click)="addValidateur(i)"
+                          title="Ajouter validateur"
+                        >
+                          <i class="ri-add-line"></i>
+                        </button>
+                        <button
+                          type="button"
+                          class="btn-icon-glass danger"
+                          (click)="removeEtape(i)"
+                          *ngIf="etapes.length > 1"
+                          title="Supprimer l'étape"
+                        >
+                          <i class="ri-delete-bin-line"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="etape-body-glass">
+                      <div class="validateurs-list" formArrayName="validateurs">
+                        <div
+                          *ngFor="
+                            let v of getValidateurs(i).controls;
+                            let j = index
+                          "
+                          [formGroupName]="j"
+                          class="validateur-item-glass"
+                        >
+                          <div class="validateur-avatar">
+                            <i class="ri-user-line"></i>
+                          </div>
+                          <select
+                            class="validateur-select-glass"
+                            formControlName="idutilisateur"
+                          >
+                            <option [ngValue]="">-- Utilisateur --</option>
+                            <option
+                              *ngFor="let u of utilisateursFiltres"
+                              [ngValue]="u.idutilisateur"
+                            >
+                              {{ u.prenom }} {{ u.nom }}
+                            </option>
+                          </select>
+                          <button
+                            type="button"
+                            class="remove-validateur-glass"
+                            (click)="removeValidateur(i, j)"
+                          >
+                            <i class="ri-close-line"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  class="btn-add-etape-glass"
+                  (click)="addEtape()"
+                >
+                  <i class="ri-add-line"></i> Ajouter une étape
+                </button>
+              </div>
+
+              <div class="step-actions between">
+                <button
+                  type="button"
+                  class="btn-prev-glass"
+                  (click)="prevStep()"
+                >
+                  <i class="ri-arrow-left-line"></i> Précédent
+                </button>
+                <button
+                  type="button"
+                  class="btn-next-glass"
+                  (click)="nextStep()"
+                >
+                  Suivant <i class="ri-arrow-right-line"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- ÉTAPE 3 -->
+            <div class="step-pane" [class.active]="currentStep === 3">
+              <div class="finish-section-glass">
+                <div class="finish-icon-glass">
+                  <i class="ri-checkbox-circle-line"></i>
+                </div>
+                <h3>Prêt à enregistrer le circuit</h3>
+                <p>Vérifiez toutes les informations avant de confirmer</p>
+                <button type="submit" class="btn-submit-glass">
+                  <i class="ri-save-line"></i>
+                  {{
+                    actionModal === "create"
+                      ? "Enregistrer"
+                      : actionModal === "update"
+                        ? "Modifier"
+                        : "Dupliquer"
+                  }}
+                </button>
+              </div>
+
+              <div class="step-actions">
+                <button
+                  type="button"
+                  class="btn-prev-glass"
+                  (click)="prevStep()"
+                >
+                  <i class="ri-arrow-left-line"></i> Précédent
+                </button>
+              </div>
+            </div>
           </div>
-
-          <button type="button"
-                  class="btn btn-success"
-                  (click)="addEtape()">
-            + Ajouter une étape
-          </button>
-        </div>
-
-        <!-- ================= STEP 3 ================= -->
-        <div class="tab-pane fade text-center" id="step3">
-          <h4 class="mt-4">Prêt à enregistrer le circuit </h4>
-          <!-- <button type="submit" class="btn btn-primary mt-3">   Enregistrer
-          </button>-->
-
-            <!-- <div class="hstack gap-2 justify-content-end"> -->
-                                        <button type="submit" class="btn btn-sm btn-success">
-                                           {{actionModal === 'create' ? 'Enregistrer' :
-                                             actionModal === 'update' ? 'Modifier' :
-                                             'Dupliquer'
-                                            }}
-                                        </button>
-                                    </div>
-          
-        <!-- </div> -->
-
+        </form>
       </div>
-    </form>
+    </div>
+  </div>
+
+  <!-- Liste des circuits -->
+  <div class="col-xl-4">
+    <div class="glass-card-workflow">
+      <div class="glass-card-header">
+        <div class="header-title">
+          <i class="ri-list-check-2 text-primary"></i>
+          <h5 class="mb-0">Circuits existants</h5>
+        </div>
+        <span class="circuit-badge">{{ filtrecircuitvalidation.length }}</span>
+      </div>
+
+      <div class="glass-card-body p-0">
+        <div class="circuit-list-glass">
+          <div
+            *ngFor="let circuit of filtrecircuitvalidation"
+            class="circuit-item-glass"
+          >
+            <div class="circuit-icon-glass">
+              <i class="ri-shield-line"></i>
+            </div>
+            <div class="circuit-info-glass">
+              <div class="circuit-code">
+                {{ circuit.codecircuitvalidation }}
+              </div>
+              <div class="circuit-tags">
+                <span class="tag-type">{{ circuit.typeentite }}</span>
+                <span class="tag-action">{{ circuit.typeaction }}</span>
+              </div>
+              <div class="circuit-location">
+                <small>{{ getSocieteName(circuit.idsociete) }}</small>
+                <small *ngIf="circuit.idsite">
+                  • {{ getSiteName(circuit.idsite) }}</small
+                >
+              </div>
+            </div>
+            <div class="circuit-actions-glass">
+              <button
+                class="btn-action edit"
+                (click)="modalUpdate(circuit)"
+                title="Modifier"
+              >
+                <i class="ri-pencil-line"></i>
+              </button>
+              <button
+                class="btn-action delete"
+                (click)="modalDelete(circuit)"
+                data-bs-toggle="modal"
+                data-bs-target="#deleteOrder"
+                title="Supprimer"
+              >
+                <i class="ri-delete-bin-line"></i>
+              </button>
+            </div>
+          </div>
+          <div
+            *ngIf="filtrecircuitvalidation.length === 0"
+            class="empty-state-glass"
+          >
+            <i class="ri-inbox-line"></i>
+            <p>Aucun circuit de validation</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="card">
-    <div class="card-header">
-      <h5>Circuits de validations </h5>
+<!-- Modal suppression glass -->
+<div class="modal fade" id="deleteOrder" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content glass-modal-delete">
+      <div class="modal-body text-center p-4">
+        <div class="delete-icon-glass">
+          <i class="ri-delete-bin-line"></i>
+        </div>
+        <h5>{{ titleMsg }}</h5>
+        <p class="text-muted small">{{ msgSup }}</p>
+        <div class="d-flex gap-2 justify-content-center mt-4">
+          <button class="btn-glass-outline" data-bs-dismiss="modal">
+            <i class="ri-close-line"></i> Annuler
+          </button>
+          <button class="btn-glass-danger" (click)="deleteConfirmed()">
+            <i class="ri-delete-bin-line"></i> Supprimer
+          </button>
+        </div>
+      </div>
     </div>
-    <div class="card-body">
-          <table class="table">
-  <thead>
-    <tr>
-      <th>Code</th>
-      <th>Type Entité</th>
-      <th>Type Action</th>
-      <th>Société</th>
-      <th>Site</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let circuit of filtrecircuitvalidation">
-      <td>{{ circuit.codecircuitvalidation }}</td>
-      <td>{{ circuit.typeentite }}</td>
-      <td>{{ circuit.typeaction }}</td>
-      <td>{{ getSocieteName(circuit.idsociete) }}</td>
-      <td>{{ getSiteName(circuit.idsite) }}</td>
-      <td>
-        <ul>
-           <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-              <a href="#showModal" data-bs-toggle="modal" (click)="modalUpdate(circuit)" class="text-primary d-inline-block edit-item-btn">
-                  <i class="ri-pencil-fill fs-16"></i> 
-              </a>
-          </li>
-            <!-- <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-              <a href="#showModal" data-bs-toggle="modal" (click)="modalDuplicate(circuit)" class="text-primary d-inline-block edit-item-btn">
-                  <i class="ri-file-copy-2-line fs-16"></i>
-              </a>
-          </li> -->
-          <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
-              <a class="text-danger d-inline-block remove-item-btn" (click)="modalDelete(circuit)" data-bs-toggle="modal" href="#deleteOrder">
-                  <i class="ri-delete-bin-5-fill fs-16"></i>
-              </a>
-          </li>
-        </ul>
-     </td>
-        
-        
-    </tr>
-  </tbody>
-</table>
-    </div>
+  </div>
 </div>
-
-
-   <!-- Modal -->
-                <div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-body p-5 text-center">
-                                <div class="mt-4 text-center">
-                                    <h4>{{titleMsg}}</h4>
-                                    <p class="text-muted fs-15 mb-4">{{msgSup}}</p>
-                                    <div class="hstack gap-2 justify-content-center remove">
-                                        <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> annuler</button>
-                                        <button class="btn btn-sm btn-danger" (click)="deleteConfirmed()" id="delete-record">Oui, supprimer</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--end modal -->
-                            

@@ -1,457 +1,757 @@
 <!-- start page title -->
 <div class="row">
-    <div class="col-12">
-        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">{{title}}</h4>
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Administration</a></li>
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Users</a></li>
-                    <li class="breadcrumb-item active">{{title}}</li>
-                </ol>
-            </div>
-        </div>
+  <div class="col-12">
+    <div
+      class="page-title-box d-sm-flex align-items-center justify-content-between"
+    >
+      <h4 class="mb-sm-0">{{ title }}</h4>
+      <div class="page-title-right">
+        <ol class="breadcrumb m-0">
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);">Administration</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);">Utilisateurs</a>
+          </li>
+          <li class="breadcrumb-item active">{{ title }}</li>
+        </ol>
+      </div>
     </div>
+  </div>
 </div>
-<!-- end page title -->
 
 <div class="row">
-    <div class="col-sm-8">
-        <div class="card" id="orderList">
-            <div class="card-header border-0">
-                <div class="row align-items-center gy-3">
-                    <div class="col-sm-auto">
-                        <div class="d-flex gap-1 flex-wrap">
-                            <button type="button" class="btn btn-sm btn-soft-success" data-bs-toggle="modal" (click)="modalCreate()" id="create-btn" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1"></i>créer</button>
-                            <button type="button" class="btn btn-sm btn-soft-info"><i class="ri-file-download-line align-bottom me-1"></i> import</button>
-                            <button class="btn btn-sm btn-soft-danger" [disabled]="!checkAllRow" onClick="deleteMultiple()"><i class="ri-delete-bin-2-line"></i></button>
-                            <button type="button" class="btn btn-sm btn-info"> <i class="ri-refresh-fill align-bottom me-1"></i>actualiser</button>
-                        </div>
-                    </div>
-                </div>
+  <!-- Colonne principale -->
+  <div class="col-xl-8">
+    <div class="card">
+      <!-- Header -->
+      <div class="card-header border-0 bg-transparent pt-3">
+        <div
+          class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+        >
+          <div class="d-flex gap-2">
+            <button
+              type="button"
+              class="btn-glass-primary"
+              (click)="modalCreate()"
+              data-bs-toggle="modal"
+              data-bs-target="#showModal"
+            >
+              <i class="ri-add-line me-1 align-bottom"></i>Nouvel utilisateur
+            </button>
+
+            <button
+              type="button"
+              class="btn-glass-secondary"
+              (click)="getallusers()"
+            >
+              <i class="ri-refresh-line me-1 align-bottom"></i>Actualiser
+            </button>
+          </div>
+          <div class="search-container">
+            <div class="search-glass">
+              <i class="ri-search-line"></i>
+              <input
+                type="text"
+                [(ngModel)]="searchtext"
+                (input)="searchuser()"
+                placeholder="Rechercher..."
+                autocomplete="off"
+              />
+              <div class="search-glow"></div>
             </div>
-            <div class="card-body border border-dashed border-end-0 border-start-0">
-                <form>
-                    <div class="row g-3">
-                        <div class="col-xxl-5 col-sm-6">
-                            <div class="search-box">
-                                <input type="text" [(ngModel)]="searchtext" [ngModelOptions]="{standalone: true}" (input)="searchuser()" class="form-control form-control-sm search" placeholder="rechercher par Société, Nom, Prénom...">
-                                <i class="ri-search-line search-icon"></i>
-                            </div>
-                        </div>
-                        <!--end col-->
-    
-                        <!--end col-->
-                        <!-- <div class="col-xxl-2 col-sm-4">
-                            <div>
-                                <select class="form-control form-control-sm" data-choices data-choices-search-false name="choices-single-default" id="idStatus">
-                                    <option value="">Status</option>
-                                    <option value="all" selected>tous</option>
-                                    <option value="Pending">Actif</option>
-                                    <option value="Pending">Inactif</option>
-                                </select>
-                            </div>
-                        </div> -->
-                        <!--end col-->
-                        
-                        <!--end col-->
-                        <!-- <div class="col-xxl-1 col-sm-2">
-                            <div>
-                                <button type="button" class="btn btn-sm btn-primary w-100" onclick="SearchData();"> <i class="ri-equalizer-fill me-1 align-bottom"></i>
-                                    Filtrer
-                                </button>
-                            </div>
-                        </div> -->
-                        <!--end col-->
-                    </div>
-                    <!--end row-->
-                </form>
-            </div>
-            <div class="card-body pt-0">
-                <div>
-                    <ul class="nav nav-tabs nav-tabs-custom nav-success mb-3" role="tablist" >
-                        <li class="nav-item">
-                            <a class="nav-link active All py-3" [class.active]="selectedstatus === ''" (click)="setActiveTab('All')"  data-bs-toggle="tab" id="All" href="#" role="tab" aria-selected="true">
-                                <i class="ri-store-2-fill me-1 align-bottom"></i> Tous 
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link py-3 Delivered" [class.active]="selectedstatus === '1'" (click)="setActiveTab('societe')" data-bs-toggle="tab" id="Delivered" href="#" role="tab" aria-selected="false">
-                                <i class="ri-checkbox-circle-line me-1 align-bottom"></i> Entité Société <span class="badge bg-success align-middle ms-1">{{societeCount}}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link py-3 Pickups" [class.active]="selectedstatus === '2'" (click)="setActiveTab('site')" data-bs-toggle="tab" id="Pickups" href="#" role="tab" aria-selected="false">
-                                <i class="ri-truck-line me-1 align-bottom"></i> Entité Site<span class="badge bg-danger align-middle ms-1">{{siteCount}}</span>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link py-3 Pickups" [class.active]="selectedstatus === '3'" (click)="setActiveTab('departement')" data-bs-toggle="tab" id="Pickups" href="#" role="tab" aria-selected="false">
-                                <i class="ri-truck-line me-1 align-bottom"></i> Entité Département <span class="badge bg-danger align-middle ms-1">{{departementCount}}</span>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link py-3 Pickups" [class.active]="selectedstatus === '4'" (click)="setActiveTab('acheteur')" data-bs-toggle="tab" id="Pickups" href="#" role="tab" aria-selected="false">
-                                <i class="ri-truck-line me-1 align-bottom"></i> Acheteur <span class="badge bg-danger align-middle ms-1">{{acheteurCount}}</span>
-                            </a>
-                        </li>
-                    </ul>
-
-                    <div class="table-responsive table-card mb-1">
-                        <table class="table table-nowrap align-middle" id="orderTable">
-                            <thead class="text-muted table-light">
-                                <tr class="text-uppercase">
-                                    <th scope="col" style="width: 25px;">
-                                        <!-- <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" [(ngModel)]="checkAllRow" id="checkAll" (ngModelChange)="handleSelectOne($event)">
-                                        </div> -->
-                                    </th>
-                                    <!-- <th class="sort" data-sort="id">Code </th> -->
-                                    <!-- <th class="sort" data-sort="customer_name">Société </th> -->
-                                    <th class="sort" data-sort="status">Nom </th>
-                                    <th class="sort" data-sort="status">Prénom </th>
-                                    <th class="sort" data-sort="city">Entité Société </th>
-                                     <th class="sort" data-sort="city">Entité Site </th>
-                                    <th class="sort" data-sort="city">Entité Departement </th>
-                                    <th class="sort" data-sort="city">Acheteur </th>
-                                    <th class="sort" data-sort="city">Actions </th>
-                                </tr>
-                            </thead>
-                            <tbody class="list form-check-all">
-                                @for (item of pagedusers; track $index){
-                                    <tr
-                                    [class.table-active]="selectedUser?.idutilisateur === item.idutilisateur" 
-                                    class="role-row">
-                                    <th scope="row">
-                                        <!-- <div class="form-check">
-                                            <input class="form-check-input" [checked]="isChecked(item.idsociete)" [(ngModel)]="selectedItems[$index]" (ngModelChange)="handleSelectOne(item, $event)" type="checkbox" name="itemGroup_{{ $index }}">
-                                        </div> -->
-                                    </th>
-                                    <!-- <td class="code"><a href="#" class="fw-medium link-primary">{{item.codeutilisateur}}</a></td> -->
-                                    <!-- <td class="customer_name">{{item.societe}}</td> -->
-                                    <td class="customer_name"  (click)="selectUser(item)">{{item.nom   }}</td>
-                                    <td class="customer_name"  (click)="selectUser(item)">{{item.prenom   }}</td>
-                                    <td class="customer_name"  (click)="selectUser(item)">
-                                        <span *ngIf="item.typeentitesociete == 1" class="badge bg-success-subtle text-success text-uppercase"> Oui </span>
-                                        <span *ngIf="item.typeentitesociete == 0" class="badge bg-danger-subtle text-danger text-uppercase"> Non </span>
-                                    </td>
-                                    <td class="customer_name"  (click)="selectUser(item)">
-                                        <span *ngIf="item.typeentitesite == 1" class="badge bg-success-subtle text-success text-uppercase"> Oui </span>
-                                        <span *ngIf="item.typeentitesite == 0" class="badge bg-danger-subtle text-danger text-uppercase"> Non </span>
-                                    </td>
-                                     <td class="customer_name"  (click)="selectUser(item)">
-                                        <span *ngIf="item.typeentitedepartement == 1" class="badge bg-success-subtle text-success text-uppercase"> Oui </span>
-                                        <span *ngIf="item.typeentitedepartement == 0" class="badge bg-danger-subtle text-danger text-uppercase"> Non </span>
-                                    </td>
-                                    <td class="customer_name"  (click)="selectUser(item)">
-                                        <span *ngIf="item.acheteur == 1" class="badge bg-success-subtle text-success text-uppercase"> Oui </span>
-                                        <span *ngIf="item.acheteur == 0" class="badge bg-danger-subtle text-danger text-uppercase"> Non </span>
-                                    </td>
-                                    <td>
-                                        <ul class="list-inline hstack gap-2 mb-0">
-                                             <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Dupliquer">
-                                               <a href="#" class="text-primary d-inline-block" data-bs-target="#showModal" data-bs-toggle="modal" (click)="modalUpdate(item)">
-                                                    <i class="ri-eye-fill fs-16"></i>
-                                                </a>
-                                            </li>
-                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Dupliquer">
-                                               <a href="#" class="text-success d-inline-block" data-bs-target="#showModal" data-bs-toggle="modal" (click)="modalDuplicate(item)">
-                                                    <i class="ri-file-copy-2-line fs-16"></i>
-                                                </a>
-                                            </li>
-                                            <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                <a href="#showModal" data-bs-toggle="modal" (click)="modalUpdate(item)" class="text-primary d-inline-block edit-item-btn">
-                                                    <i class="ri-pencil-fill fs-16"></i>
-                                                </a>
-                                            </li>
-                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
-                                                <a class="text-danger d-inline-block remove-item-btn" (click)="modalDelete(item)" data-bs-toggle="modal" href="#deleteOrder">
-                                                    <i class="ri-delete-bin-5-fill fs-16"></i>
-                                                </a>
-                                            </li>
-                                              <li class="list-incline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
-                                                <a  class ="text-primary d-inline-block" 
-                                                    title="Gérer rôle"
-                                                    (click)="selectUser(item)">
-                                                <i class="ri-shield-user-fill fs-16"></i>
-                                                 </a>
-                                            </li>
-                                        </ul>
-                                    </td>
-                                </tr>
-                                }
-                                
-                            </tbody>
-                        </table>
-                        <div class="noresult" style="display: none">
-                            <div class="text-center">
-                                <h5 class="mt-2">Désole! Aucun resultat trouvé</h5>
-                                <p class="text-muted">We've searched more than 150+ Orders We did not find any orders for you search.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-end">
-                        <div class="pagination-wrap hstack gap-2">
-                            <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
-                                Précédent
-                            </button>
-                            <ul class="pagination listjs-pagination mb-0"> Page {{currentPage}} / {{totalPages}}</ul>
-                            <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)" class="btn btn-sm btn-soft-primary pagination-next">
-                                Suivant
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal fade modal-lg" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header bg-light p-3">
-                                <h5 class="modal-title" id="exampleModalLabel">{{actionModal === 'create' ? 'Enregistrer' :
-                                                                                 actionModal === 'update' ? 'Modifier' :
-                                                                                'Dupliquer'
-                                                                                }} Utilisateur </h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
-                            </div>
-                        <form [formGroup]="userForm" (ngSubmit)="onsubmit()" class="ng-untouched ng-pristine ng-invalid">
-                             <div class="modal-body">
-                                     <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="codedevise" class="form-label">Code Utilisateur </label>
-                                <input id="code" formControlName="codeutilisateur" class="form-control form-control-sm" placeholder="Ex:1234">
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                               <div class="mb-3">
-                                <label for="site" class="form-label">Site </label>
-                                <select class="form-control form-control-sm" formControlName="idsite">
-                                    <option value="">----Choisir le site-----</option>
-                                    <option *ngFor="let s of sites"  [value]="s.idsite">{{ s.libelle }}</option>
-                                </select>
-        <!-- <label class="input-group-text">Dévise de référence</label> -->
-                                </div>
-                            </div>
-
-                            <!-- ID Société (hidden) -->
-                                <input type="hidden" formControlName="idsociete" />
-
-                                 <div class="mb-3">
-                                        <label class="form-label form-label-sm">Société</label>
-                                        <input type="text" class="form-control form-control-sm"
-                                            formControlName="societe" readonly/>
-                                </div>
-
-                            
-
-                            <div class="col-md-12 mb-3">
-                                <label for="nom" class="form-label">Nom</label>
-                                <input id="nom" formControlName="nom" class="form-control form-control-sm" placeholder="Ex: MAYOUMA">
-                            </div>
-
-                             <div class="col-md-12 mb-3">
-                                <label for="prenom" class="form-label">Prénom</label>
-                                <input id="prenom" formControlName="prenom" class="form-control form-control-sm" placeholder="Ex: MAYOUMA">
-                            </div>
-
-                              <div class="col-md-12 mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" id="email" formControlName="email" class="form-control form-control-sm" placeholder="Ex: example@example.com">
-                              </div>
-
-                              <div class="col-md-12 mb-3">
-                                <label for="login" class="form-label">login</label>
-                                <input type="email" id="login" formControlName="login" class="form-control form-control-sm" value="email">
-                              </div>
-
-                             <div class="col-md-12 mb-3" *ngIf="(actionModal==='create')">
-                                <label for="password" class="form-label">Mot de passe </label>
-                                <input type="password" id="password" formControlName="password" class="form-control form-control-sm" placeholder="Mot de passe">
-                              </div>
-
-                              <!-- <div class="col-md-12 mb-3">
-                                <label for="password" class="form-label">Confirmez Mot de passe </label>
-                                <input type="password" id="password" formControlName="password" class="form-control" placeholder="Mot de passe">
-                              </div> -->
-
-                           
-
-                            
-                            <div class="row">
-                                <div class="col-md-3 mb-3">
-                                <label class="form-label d-block">Entité Société</label>
-                                <div class="form-check form-check-inline">
-                                    <input type="radio" id="typeentitesocieteOui" formControlName="typeentitesociete" class="form-check-input" [value]="1">
-                                    <label for="typeentitesocieteOui" class="form-check-label">Oui</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input type="radio" id="typeentitesocieteNon" formControlName="typeentitesociete" class="form-check-input" [value]="0">
-                                    <label for="typeentitesocieteNon" class="form-check-label">Non</label>
-                                </div>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                <label class="form-label d-block">Entité Département</label>
-                                <div class="form-check form-check-inline">
-                                    <input type="radio" id="typeentitedepartementOui" formControlName="typeentitedepartement" class="form-check-input" [value]="1">
-                                    <label for="typeentitedepartementOui" class="form-check-label">Oui</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input type="radio" id="typeentitedepartementNon" formControlName="typeentitedepartement" class="form-check-input" [value]="0">
-                                    <label for="typeentitedepartementNon" class="form-check-label">Non</label>
-                                </div>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label d-block">Entité Site</label>
-                                    <div class="form-check form-check-inline">
-                                        <input type="radio" id="typeentitesiteOui" formControlName="typeentitesite" class="form-check-input" [value]="1">
-                                        <label for="typeentitesiteOui" class="form-check-label">Oui</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input type="radio" id="typeentitesiteNon" formControlName="typeentitesite" class="form-check-input" [value]="0">
-                                        <label for="typeentitesiteNon" class="form-check-label">Non</label>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label d-block">Entité Acheteur</label>
-                                    <div class="form-check form-check-inline">
-                                        <input type="radio" id="acheteurOui" formControlName="acheteur" class="form-check-input" [value]="1">
-                                        <label for="acheteurOui" class="form-check-label">Oui</label>
-                                    </div>
-
-                                    <div class="form-check form-check-inline">
-                                        <input type="radio" id="acheteurNon" formControlName="acheteur" class="form-check-input" [value]="0">
-                                        <label for="acheteurNon" class="form-check-label">Non</label>
-                                    </div>
-
-                                    
-                            </div>
-
-                              <div class="col-md-12 mb-3">
-                                <label for="adresse" class="form-label">Adresse</label>
-                                <input id="adresse" formControlName="adresse" class="form-control form-control-sm" placeholder="Ex: 09 Rue Ngouendi">
-                             </div>
-
-                             
-                              <div class="col-md-12 mb-3">
-                                <label for="telephone" class="form-label">Téléphone</label>
-                                <input type="tel" id="telephone" formControlName="telephone" class="form-control form-control-sm" placeholder="Ex: (+242) 06 123 45 67">
-                             </div>
-                           
-                            </div>
-
-
-                            
-
-                            <!-- <div class="col-md-12 mb-3">
-                                <label class="form-label">Statut</label>
-                                <select formControlName="actif" class="form-select">
-                                <option [value]="1">Actif</option>
-                                <option [value]="0">Inactif</option>
-                                </select>
-                            </div> -->
-                            </div>
-                             </div>
-
-                             <div class="modal-footer">
-                                    <button type="submit" class="btn btn-primary" [disabled]="loading">
-                                                                                {{actionModal === 'create' ? 'Enregistrer' :
-                                                                                 actionModal === 'update' ? 'Modifier' :
-                                                                                'Dupliquer'
-                                                                                }} l'utilisateur
-                                    </button>
-                             </div>
-                    </form>
-
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Modal -->
-                <div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-body p-5 text-center">
-                                <div class="mt-4 text-center">
-                                    <h4>{{titleMsg}}</h4>
-                                    <p class="text-muted fs-15 mb-4">{{msgSup}}</p>
-                                    <div class="hstack gap-2 justify-content-center remove">
-                                        <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> annuler</button>
-                                        <button class="btn btn-sm btn-danger" (click)="deleteConfirmed()" id="delete-record">Oui, supprimer</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--end modal -->
-            </div>
+          </div>
         </div>
-
-    </div>
-    <!--end col-->
-    <div class="col-sm-4">
-        <div class="card" *ngIf="selectedUser">
-            <div class="card-header">
-                 <h5 class="card-title">Rôle Utilisateur</h5>
-                <span class="badge bg-primary mb-3">
-                  {{ selectedUser.nom }} {{ selectedUser.prenom }}
-                </span>
-            </div>
-
-            <div class="card-body">
-                <div *ngFor="let r of roles" class="form-check">
-                <input class="form-check-input"
-                        type="checkbox"
-                        [checked]="userRoles.includes(tonumber(r.idrole!))"
-                        (change)="toggleRole(r.idrole!, $event)">
-
-                <label class="form-check-label">
-                    {{ r.libelle }}
-                </label>
-                </div>
-            </div>
-            </div>
-     <div *ngIf="!selectedUser"
-           class="text-muted text-center mt-5">
-        Sélectionnez un utilisateur pour gérer ses rôles et départements
       </div>
 
-      <div class="card" *ngIf="selectedUser">
-            <div class="card-header">
-                 <h5 class="card-title"> Département Utilisateur </h5>
-                <span class="badge bg-primary mb-3">
-                  {{ selectedUser.nom }} {{ selectedUser.prenom }}
-                </span>
-            </div>
+      <!-- Filtres en chips -->
+      <div class="card-body pt-0">
+        <div class="filter-chips-container">
+          <div
+            class="filter-chip-modern"
+            [class.active]="selectedstatus === ''"
+            (click)="setActiveTab('')"
+          >
+            <i class="ri-group-line"></i>
+            <span>Tous</span>
+            <span class="count-badge">{{ users.length }}</span>
+          </div>
+          <div
+            class="filter-chip-modern"
+            [class.active]="selectedstatus === 'societe'"
+            (click)="setActiveTab('societe')"
+          >
+            <i class="ri-building-line"></i>
+            <span>Société</span>
+            <span class="count-badge">{{ societeCount }}</span>
+          </div>
+          <div
+            class="filter-chip-modern"
+            [class.active]="selectedstatus === 'site'"
+            (click)="setActiveTab('site')"
+          >
+            <i class="ri-map-pin-line"></i>
+            <span>Site</span>
+            <span class="count-badge">{{ siteCount }}</span>
+          </div>
+          <div
+            class="filter-chip-modern"
+            [class.active]="selectedstatus === 'departement'"
+            (click)="setActiveTab('departement')"
+          >
+            <i class="ri-folder-chart-line"></i>
+            <span>Département</span>
+            <span class="count-badge">{{ departementCount }}</span>
+          </div>
+          <div
+            class="filter-chip-modern"
+            [class.active]="selectedstatus === 'acheteur'"
+            (click)="setActiveTab('acheteur')"
+          >
+            <i class="ri-shopping-cart-line"></i>
+            <span>Acheteur</span>
+            <span class="count-badge">{{ acheteurCount }}</span>
+          </div>
+        </div>
 
-            <div class="card-body">
-                <div *ngFor="let d of departements" class="form-check">
-                <input class="form-check-input"
-                        type="checkbox"
-                        [checked]="userdepts.includes(d.iddepartement!)"
-                        (change)="toggledepartement(d.iddepartement!, $event)">
+        <!-- Tableau -->
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Utilisateur</th>
+                <th>Contact</th>
+                <th class="text-center">Rôles</th>
+                <th class="text-center">Permissions</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let item of pagedusers"
+                class="user-row"
+                [class.table-active]="
+                  selectedUser?.idutilisateur === item.idutilisateur
+                "
+                (click)="selectUser(item)"
+              >
+                <!-- Utilisateur -->
+                <td>
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="avatar-circle">
+                      <span>{{
+                        (item.prenom?.charAt(0) || "") +
+                          (item.nom?.charAt(0) || "")
+                      }}</span>
+                    </div>
+                    <div>
+                      <h6 class="mb-0 fw-semibold">
+                        {{ item.prenom }} {{ item.nom }}
+                      </h6>
+                      <span class="text-muted small"
+                        >&#64;{{ item.login || item.email }}</span
+                      >
+                    </div>
+                  </div>
+                </td>
+                <!-- Contact -->
+                <td>
+                  <div class="d-flex flex-column">
+                    <span class="small text-muted"
+                      ><i class="ri-mail-line me-1"></i>{{ item.email }}</span
+                    >
+                    <span class="small text-muted" *ngIf="item.telephone"
+                      ><i class="ri-phone-line me-1"></i
+                      >{{ item.telephone }}</span
+                    >
+                  </div>
+                </td>
+                <!-- Rôles  -->
+                <td class="text-center">
+                  <div class="d-flex flex-wrap gap-1 justify-content-center">
+                    <span
+                      *ngFor="let role of getUserRoleNames(item.idutilisateur)"
+                      class="role-badge"
+                      [ngClass]="getRoleBadgeClass(role)"
+                    >
+                      {{ getRoleShortName(role) }}
+                    </span>
+                  </div>
+                </td>
+                <!-- Permissions -->
+                <td class="text-center">
+                  <div class="d-flex flex-wrap gap-1 justify-content-center">
+                    <span
+                      *ngIf="item.typeentitesociete == 1"
+                      class="perm-badge societe"
+                      >Société</span
+                    >
+                    <span
+                      *ngIf="item.typeentitesite == 1"
+                      class="perm-badge site"
+                      >Site</span
+                    >
+                    <span
+                      *ngIf="item.typeentitedepartement == 1"
+                      class="perm-badge departement"
+                      >Département</span
+                    >
+                    <span *ngIf="item.acheteur == 1" class="perm-badge acheteur"
+                      >Acheteur</span
+                    >
+                  </div>
+                </td>
+                <!-- Actions -->
+                <td>
+                  <div class="d-flex justify-content-end gap-1">
+                    <button
+                      class="btn-icon btn-edit"
+                      (click)="modalUpdate(item); $event.stopPropagation()"
+                      data-bs-toggle="modal"
+                      data-bs-target="#showModal"
+                      title="Modifier"
+                    >
+                      <i class="ri-pencil-line"></i>
+                    </button>
+                    <button
+                      class="btn-icon btn-duplicate"
+                      (click)="modalDuplicate(item); $event.stopPropagation()"
+                      data-bs-toggle="modal"
+                      data-bs-target="#showModal"
+                      title="Dupliquer"
+                    >
+                      <i class="ri-file-copy-line"></i>
+                    </button>
+                    <button
+                      class="btn-icon btn-delete"
+                      (click)="modalDelete(item); $event.stopPropagation()"
+                      data-bs-toggle="modal"
+                      data-bs-target="#deleteOrder"
+                      title="Supprimer"
+                    >
+                      <i class="ri-delete-bin-line"></i>
+                    </button>
+                    <button
+                      class="btn-icon btn-roles"
+                      (click)="selectUser(item); $event.stopPropagation()"
+                      title="Gérer les rôles"
+                    >
+                      <i class="ri-shield-user-line"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="pagedusers.length === 0">
+                <td colspan="5" class="text-center py-5">
+                  <i class="ri-user-unfollow-line fs-1 text-muted"></i>
+                  <p class="mt-2 text-muted mb-0">Aucun utilisateur trouvé</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-                <label class="form-check-label">
-                   {{ d.codedept }}-{{ d.libelle }}
+        <!-- Pagination -->
+        <div
+          class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-3 pt-2"
+        >
+          <div class="text-muted small">
+            Affichage de
+            <span class="fw-semibold">{{
+              (currentPage - 1) * pageSize + 1
+            }}</span>
+            à
+            <span class="fw-semibold">{{
+              currentPage * pageSize > users.length
+                ? users.length
+                : currentPage * pageSize
+            }}</span>
+            sur <span class="fw-semibold">{{ users.length }}</span> utilisateurs
+          </div>
+          <div class="d-flex gap-1">
+            <button
+              class="page-btn"
+              [disabled]="currentPage == 1"
+              (click)="changePage(currentPage - 1)"
+            >
+              <i class="ri-arrow-left-s-line"></i>
+            </button>
+            <span class="page-current">{{ currentPage }}</span>
+            <button
+              class="page-btn"
+              [disabled]="currentPage == totalPages"
+              (click)="changePage(currentPage + 1)"
+            >
+              <i class="ri-arrow-right-s-line"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panneau latéral - Rôles et Départements -->
+  <div class="col-xl-4">
+    <!-- Carte des rôles -->
+    <div class="card" *ngIf="selectedUser">
+      <div class="card-header bg-transparent border-0 pt-3">
+        <div class="d-flex align-items-center gap-3">
+          <div
+            class="avatar-sm bg-soft-primary rounded-3 d-flex align-items-center justify-content-center"
+          >
+            <span class="fw-semibold">{{
+              (selectedUser.prenom.charAt(0) || "") +
+                (selectedUser.nom.charAt(0) || "")
+            }}</span>
+          </div>
+          <div>
+            <h6 class="mb-0">
+              {{ selectedUser.prenom }} {{ selectedUser.nom }}
+            </h6>
+            <span class="text-muted small">{{ selectedUser.email }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-body pt-0">
+        <!-- Tabs -->
+        <ul class="nav nav-tabs nav-tabs-custom nav-primary mb-3">
+          <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="tab" href="#rolesTab">
+              <i class="ri-shield-line me-1"></i>Rôles
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#departementsTab">
+              <i class="ri-folder-line me-1"></i>Départements
+            </a>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+          <div class="tab-pane fade show active" id="rolesTab">
+            <div class="vstack gap-2">
+              <div *ngFor="let r of roles" class="form-check form-switch">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  [id]="'role_' + r.idrole"
+                  [checked]="userRoles.includes(tonumber(r.idrole))"
+                  (change)="toggleRole(r.idrole, $event)"
+                />
+                <label class="form-check-label" [for]="'role_' + r.idrole">
+                  <span class="fw-medium">{{ r.libelle }}</span>
+                  <span class="text-muted small ms-1" *ngIf="r.code"
+                    >({{ r.code }})</span
+                  >
                 </label>
-                </div>
+              </div>
+              <div
+                *ngIf="roles.length === 0"
+                class="text-center text-muted py-3 small"
+              >
+                Aucun rôle disponible
+              </div>
             </div>
-     <!-- <div *ngIf="!selectedUser"
-           class="text-muted text-center mt-5">
-        Sélectionnez un utilisateur pour gérer ses départements 
-      </div> -->
+          </div>
 
-
+          <div class="tab-pane fade" id="departementsTab">
+            <div class="vstack gap-2">
+              <div *ngFor="let d of departements" class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  [id]="'dept_' + d.iddepartement"
+                  [checked]="userdepts.includes(d.iddepartement)"
+                  (change)="toggledepartement(d.iddepartement, $event)"
+                />
+                <label
+                  class="form-check-label"
+                  [for]="'dept_' + d.iddepartement"
+                >
+                  <span class="fw-medium">{{ d.libelle }}</span>
+                  <span class="text-muted small ms-1" *ngIf="d.codedept"
+                    >({{ d.codedept }})</span
+                  >
+                </label>
+              </div>
+              <div
+                *ngIf="departements.length === 0"
+                class="text-center text-muted py-3 small"
+              >
+                Aucun département disponible
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-</div>
-<!--end row-->
-<div class="row">
-    <div class="col-sm-6">
-        
 
+    <div class="card" *ngIf="!selectedUser">
+      <div class="card-body text-center py-5">
+        <i class="ri-user-settings-line fs-1 text-muted"></i>
+        <h6 class="mt-3">Aucun utilisateur sélectionné</h6>
+        <p class="text-muted small mb-0">
+          Cliquez sur un utilisateur pour gérer ses rôles et départements
+        </p>
+      </div>
     </div>
-</div>
+  </div>
 </div>
 
+<!-- Modal de création/modification -->
+<div class="modal fade" id="showModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content shadow-lg border-0">
+      <!-- Header avec gradient -->
+      <div
+        class="modal-header"
+        style="
+          background: linear-gradient(135deg, #3b82f6 0%, #405189 100%);
+          border: 0;
+        "
+      >
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-user-add-line text-white fs-5"></i>
+          </div>
+          <h5 class="modal-title text-white fw-semibold">
+            {{
+              actionModal === "create"
+                ? "Nouvel utilisateur"
+                : actionModal === "update"
+                  ? "Modifier utilisateur"
+                  : "Dupliquer utilisateur"
+            }}
+          </h5>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <form [formGroup]="userForm" (ngSubmit)="onsubmit()">
+        <div class="modal-body p-4">
+          <!-- Section identification -->
+          <div class="mb-4">
+            <h6
+              class="mb-3 fw-semibold small text-uppercase text-muted"
+              style="letter-spacing: 0.5px"
+            >
+              <i class="ri-id-card-line me-1"></i> Identification
+            </h6>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input
+                    formControlName="codeutilisateur"
+                    class="form-control"
+                    id="codeutilisateur"
+                    placeholder="Code utilisateur"
+                  />
+                  <label for="codeutilisateur" class="small"
+                    >Code utilisateur</label
+                  >
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <select
+                    formControlName="idsite"
+                    class="form-select"
+                    id="idsite"
+                  >
+                    <option value="">-- Sélectionner --</option>
+                    <option *ngFor="let s of sites" [value]="s.idsite">
+                      {{ s.libelle }}
+                    </option>
+                  </select>
+                  <label for="idsite" class="small">Site</label>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="form-floating">
+                  <input
+                    formControlName="societe"
+                    class="form-control bg-light"
+                    id="societe"
+                    readonly
+                  />
+                  <label for="societe" class="small">Société</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input
+                    formControlName="nom"
+                    class="form-control"
+                    id="nom"
+                    placeholder="Nom"
+                  />
+                  <label for="nom" class="small">Nom</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input
+                    formControlName="prenom"
+                    class="form-control"
+                    id="prenom"
+                    placeholder="Prénom"
+                  />
+                  <label for="prenom" class="small">Prénom</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section contact -->
+          <div class="mb-4">
+            <h6
+              class="mb-3 fw-semibold small text-uppercase text-muted"
+              style="letter-spacing: 0.5px"
+            >
+              <i class="ri-mail-send-line me-1"></i> Contact
+            </h6>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input
+                    type="email"
+                    formControlName="email"
+                    class="form-control"
+                    id="email"
+                    placeholder="Email"
+                  />
+                  <label for="email" class="small">Email</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input
+                    formControlName="login"
+                    class="form-control"
+                    id="login"
+                    placeholder="Login"
+                  />
+                  <label for="login" class="small">Login</label>
+                </div>
+              </div>
+              <div class="col-md-6" *ngIf="actionModal === 'create'">
+                <div class="form-floating">
+                  <input
+                    type="password"
+                    formControlName="password"
+                    class="form-control"
+                    id="password"
+                    placeholder="Mot de passe"
+                  />
+                  <label for="password" class="small">Mot de passe</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input
+                    formControlName="telephone"
+                    class="form-control"
+                    id="telephone"
+                    placeholder="Téléphone"
+                  />
+                  <label for="telephone" class="small">Téléphone</label>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="form-floating">
+                  <input
+                    formControlName="adresse"
+                    class="form-control"
+                    id="adresse"
+                    placeholder="Adresse"
+                  />
+                  <label for="adresse" class="small">Adresse</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section permissions -->
+          <div>
+            <h6
+              class="mb-3 fw-semibold small text-uppercase text-muted"
+              style="letter-spacing: 0.5px"
+            >
+              <i class="ri-shield-check-line me-1"></i> Permissions
+            </h6>
+            <div class="row g-2">
+              <div class="col-6 col-md-3">
+                <div
+                  class="permission-card"
+                  [class.active]="userForm.get('typeentitesociete')?.value == 1"
+                >
+                  <div
+                    class="form-check form-switch d-flex align-items-center justify-content-between px-2"
+                  >
+                    <label
+                      class="form-check-label small fw-medium"
+                      for="typeentitesociete"
+                    >
+                      <i class="ri-building-line me-1"></i> Société
+                    </label>
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="typeentitesociete"
+                      formControlName="typeentitesociete"
+                      [value]="1"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div
+                  class="permission-card"
+                  [class.active]="userForm.get('typeentitesite')?.value == 1"
+                >
+                  <div
+                    class="form-check form-switch d-flex align-items-center justify-content-between px-2"
+                  >
+                    <label
+                      class="form-check-label small fw-medium"
+                      for="typeentitesite"
+                    >
+                      <i class="ri-map-pin-line me-1"></i> Site
+                    </label>
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="typeentitesite"
+                      formControlName="typeentitesite"
+                      [value]="1"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div
+                  class="permission-card"
+                  [class.active]="
+                    userForm.get('typeentitedepartement')?.value == 1
+                  "
+                >
+                  <div
+                    class="form-check form-switch d-flex align-items-center justify-content-between px-2"
+                  >
+                    <label
+                      class="form-check-label small fw-medium"
+                      for="typeentitedepartement"
+                    >
+                      <i class="ri-folder-chart-line me-1"></i> Département
+                    </label>
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="typeentitedepartement"
+                      formControlName="typeentitedepartement"
+                      [value]="1"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div
+                  class="permission-card"
+                  [class.active]="userForm.get('acheteur')?.value == 1"
+                >
+                  <div
+                    class="form-check form-switch d-flex align-items-center justify-content-between px-2"
+                  >
+                    <label
+                      class="form-check-label small fw-medium"
+                      for="acheteur"
+                    >
+                      <i class="ri-shopping-cart-line me-1"></i> Acheteur
+                    </label>
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="acheteur"
+                      formControlName="acheteur"
+                      [value]="1"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer border-0 p-4" style="background: transparent">
+          <div class="d-flex gap-3 justify-content-end w-100">
+            <button
+              type="button"
+              class="btn-glass-cancel"
+              data-bs-dismiss="modal"
+            >
+              <i class="ri-close-line me-1"></i> Annuler
+            </button>
+            <button
+              type="submit"
+              class="btn-glass-submit"
+              [disabled]="loading || userForm.invalid"
+            >
+              <span
+                *ngIf="loading"
+                class="spinner-border spinner-border-sm me-2"
+              ></span>
+              <i *ngIf="!loading" class="ri-save-line me-1"></i>
+              {{
+                actionModal === "create"
+                  ? "Créer l'utilisateur"
+                  : actionModal === "update"
+                    ? "Modifier l'utilisateur"
+                    : "Dupliquer l'utilisateur"
+              }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de suppression -->
+<div class="modal fade" id="deleteOrder" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content bg-transparent border-0">
+      <div class="modal-body text-center p-0">
+        <!-- Carte flottante -->
+        <div class="glass-card p-4">
+          <!-- Icône -->
+          <div class="vibration-icon mb-4">
+            <div class="icon-bg">
+              <i class="ri-delete-bin-line"></i>
+            </div>
+          </div>
+
+          <h5 class="fw-bold text-white mb-2">{{ titleMsg }}</h5>
+          <p class="text-white-50 small mb-4">{{ msgSup }}</p>
+
+          <div class="d-flex gap-2 justify-content-center">
+            <button class="btn-glass" data-bs-dismiss="modal">
+              <i class="ri-close-line me-1"></i> Annuler
+            </button>
+            <button
+              class="btn-glass-danger"
+              (click)="deleteConfirmed()"
+              data-bs-dismiss="modal"
+            >
+              <i class="ri-delete-bin-line me-1"></i> Supprimer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

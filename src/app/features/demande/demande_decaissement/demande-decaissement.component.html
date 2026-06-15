@@ -93,7 +93,6 @@
                   <th class="sort" data-sort="customer_name">Devise</th>
                   <th class="sort" data-sort="customer_name">Date</th>
                   <th class="sort" data-sort="status">Statut</th>
-                  <th class="sort" data-sort="pieces">Pièces jointes</th>
                   <th class="sort" data-sort="city">Action</th>
                 </tr>
               </thead>
@@ -183,41 +182,6 @@
                       </span>
                     </td>
 
-                    <td class="pieces-jointes">
-                      <div class="d-flex align-items-center gap-2">
-                        <!-- Icône avec badge de comptage -->
-                        <div class="position-relative">
-                          <i class="ri-attachment-2 fs-18 text-muted"></i>
-                          <span
-                            *ngIf="getPiecesCount(item.iddemande) > 0"
-                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary"
-                            style="
-                              font-size: 9px;
-                              margin-top: -2px;
-                              margin-left: -6px;
-                            "
-                          >
-                            {{ getPiecesCount(item.iddemande) }}
-                          </span>
-                        </div>
-
-                        <!-- Bouton d'ouverture du modal -->
-                        <button
-                          type="button"
-                          class="btn btn-sm btn-outline-primary"
-                          (click)="openPiecesJointesModal(item)"
-                          style="padding: 2px 8px; font-size: 11px"
-                        >
-                          <i class="ri-folder-image-line me-1"></i>
-                          {{
-                            getPiecesCount(item.iddemande) > 0
-                              ? "Voir (" + getPiecesCount(item.iddemande) + ")"
-                              : "Aucune"
-                          }}
-                        </button>
-                      </div>
-                    </td>
-
                     <td>
                       <ul class="list-inline hstack gap-2 mb-0">
                         <li
@@ -233,6 +197,37 @@
                           >
                             <i class="ri-pencil-fill fs-16"></i>
                           </a>
+                        </li>
+                        <li
+                          class="list-inline-item edit"
+                          data-bs-toggle="tooltip"
+                          data-bs-trigger="hover"
+                          data-bs-placement="top"
+                          title="Pièces jointes"
+                        >
+                          <div class="d-flex align-items-center gap-2">
+                            <!-- Icône avec badge de comptage -->
+                            <div class="position-relative">
+                              <button
+                                type="button"
+                                class="btn btn-link text-dark p-0 edit-item-btn"
+                                (click)="openPiecesJointesModal(item)"
+                              >
+                                <i class="ri-attachment-2 fs-18 text-muted"></i>
+                                <span
+                                  *ngIf="getPiecesCount(item.iddemande) > 0"
+                                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary"
+                                  style="
+                                    font-size: 9px;
+                                    margin-top: -2px;
+                                    margin-left: -6px;
+                                  "
+                                >
+                                  {{ getPiecesCount(item.iddemande) }}
+                                </span>
+                              </button>
+                            </div>
+                          </div>
                         </li>
 
                         <li

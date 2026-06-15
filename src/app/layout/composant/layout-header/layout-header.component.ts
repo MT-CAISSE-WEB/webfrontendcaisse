@@ -4,7 +4,14 @@ import { CaisseService } from '../../../features/caisse_journal/services/caisse.
 import { caissePeriodeModel } from '../../../features/caisse_journal/models/periodecaisse.model';
 import { forkJoin, map, Observable } from 'rxjs';
 import { CaissePeriodeService } from '../../../features/caisse_journal/services/caisseperiode.service';
-import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormArray,
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.contantes';
 import { AffectationCaisseModel } from '../../../features/caisse_journal/models/affectationcaisse.model';
@@ -19,20 +26,26 @@ import { BilletageModalComponent } from '../../../features/operations/billetage-
 
 @Component({
   selector: 'app-layout-header',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, RouterModule, NgbModalModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RouterLink,
+    RouterModule,
+    NgbModalModule,
+  ],
   templateUrl: './layout-header.component.html',
-  styleUrl: './layout-header.component.css'
+  styleUrl: './layout-header.component.css',
 })
 export class LayoutHeaderComponent implements OnInit {
-
-  caisserecent : caissePeriodeModel = new caissePeriodeModel();
-  caisseperiodes : any[] = [];
+  caisserecent: caissePeriodeModel = new caissePeriodeModel();
+  caisseperiodes: any[] = [];
   fb: FormBuilder = new FormBuilder();
-  caisseperiodeForm : FormGroup = this.fb.group({});
-  msgErros: string = "";
-  error: string = "";
+  caisseperiodeForm: FormGroup = this.fb.group({});
+  msgErros: string = '';
+  error: string = '';
   loading: boolean = false;
-  caisseSolde : any;
+  caisseSolde: any;
 
   //Liste des routes
   root_parametre = APP_ROOT_PARAMETREPAGE_PARAMETRE;
@@ -46,13 +59,21 @@ export class LayoutHeaderComponent implements OnInit {
 
   caissesStatuses: { [id: string]: string } = {};
 
-  constructor(private modalService: NgbModal, private caisseuserservice: AffectationCaisseService, private caisseservice: CaisseService, private router: Router, private loader: LoaderService,
-    private caisseStatusService: CaissePeriodeService, private caisseService: CaisseService, private toastr : ToastrService,){}
+  constructor(
+    private modalService: NgbModal,
+    private caisseuserservice: AffectationCaisseService,
+    private caisseservice: CaisseService,
+    private router: Router,
+    private loader: LoaderService,
+    private caisseStatusService: CaissePeriodeService,
+    private caisseService: CaisseService,
+    private toastr: ToastrService,
+  ) {}
 
   ngOnInit(): void {
     //récuperer les caisses de l'utilisateur
     this.caisseperiodeForm = this.fb.group({
-      caisses: this.fb.array([])
+      caisses: this.fb.array([]),
     });
 
     this.getCaisseUser();
@@ -62,42 +83,44 @@ export class LayoutHeaderComponent implements OnInit {
     return this.caisseStatusService;
   }
 
-  get user(){
+  get user() {
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
   formatCFA(montant: number | null | undefined): string {
     return new Intl.NumberFormat('fr-FR', {
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(montant ?? 0);
   }
-  
-  logout (){
+
+  logout() {
     localStorage.clear();
   }
 
-  getCaisseUser(){
+  getCaisseUser() {
     this.loadingCaisses = true;
-    this.caisseuserservice.getCaisseByUser(this.user.idutilisateur ?? null).subscribe({
-      next : (res) => {
-        if(res.success){
-          this.caissesUser = res.data;
-          if (this.caissesUser.length > 0) {
-            this.getcaissesPeriodes();
-            //Charger les soldes
-            this.getSoldeCaisse();
-          }else {
-            this.loadingCaisses = false;
-            //this.toastr.warning("Aucune caisse affectée à l\'utilisateur");
+    this.caisseuserservice
+      .getCaisseByUser(this.user.idutilisateur ?? null)
+      .subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.caissesUser = res.data;
+            if (this.caissesUser.length > 0) {
+              this.getcaissesPeriodes();
+              //Charger les soldes
+              this.getSoldeCaisse();
+            } else {
+              this.loadingCaisses = false;
+              //this.toastr.warning("Aucune caisse affectée à l\'utilisateur");
+            }
           }
-        }
-      },
-      error: (err) => {
-        this.loadingCaisses = false;
-        this.toastr.error(err.error.message);
-      }
-    });
+        },
+        error: (err) => {
+          this.loadingCaisses = false;
+          this.toastr.error(err.error.message);
+        },
+      });
   }
 
   reloadPage() {
@@ -107,21 +130,23 @@ export class LayoutHeaderComponent implements OnInit {
   }
 
   //Récuperer les soldes
-  getSoldeCaisse(){
+  getSoldeCaisse() {
     this.caisseService.getSolde().subscribe({
-      next : (res) => {
-        if(res.success){
-          this.caisseSolde = res.data ;
+      next: (res) => {
+        if (res.success) {
+          this.caisseSolde = res.data;
           this.caisseSolde = this.caisseSolde.filter((cs: any) =>
-              this.caissesUser.some(cu => cu.idcaisse === cs.idcaisse)
-            );
+            this.caissesUser.some((cu) => cu.idcaisse === cs.idcaisse),
+          );
         }
-      }
+      },
     });
   }
 
   getSolde(item: any): number {
-    return (Number(item?.soldeinitialisation) || 0) + (Number(item?.solde) || 0);
+    return (
+      (Number(item?.soldeinitialisation) || 0) + (Number(item?.solde) || 0)
+    );
   }
 
   // calculSolde(item: any): string {
@@ -129,38 +154,37 @@ export class LayoutHeaderComponent implements OnInit {
   // }
 
   calculSolde(item: any): string {
-    if(item.codedevise! != 'USD'){
+    if (item.codedevise! != 'USD') {
       return this.formatCFA(this.getSolde(item));
-    }else{
+    } else {
       return this.formatNumber(this.getSolde(item));
     }
   }
 
   formatNumber(montant: number | string | undefined): string {
-    if (montant === null || montant === undefined || montant === "") return "";
+    if (montant === null || montant === undefined || montant === '') return '';
     const valeur = Number(montant);
-    if (isNaN(valeur)) return "";
+    if (isNaN(valeur)) return '';
 
-    return valeur
-      .toLocaleString('fr-FR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
+    return valeur.toLocaleString('fr-FR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   }
 
   getSoldeClass(item: any): string {
     const solde = this.getSolde(item);
     const seuil = Number(item?.seuilmnimal) || 0;
 
-    if (solde == 0){
+    if (solde == 0) {
       return 'text-danger';
     }
 
-    if (solde == seuil){
+    if (solde == seuil) {
       return 'text-warning';
     }
 
-    if (solde > seuil){
+    if (solde > seuil) {
       return 'text-success';
     }
 
@@ -170,15 +194,15 @@ export class LayoutHeaderComponent implements OnInit {
   getCaisseClass(item: FormArray<FormGroup<any>>): string {
     const nbr = item.length;
 
-    if (nbr == 1){
+    if (nbr == 1) {
       return 'col-xl-12 col-md-12';
     }
 
-    if (nbr == 2){
+    if (nbr == 2) {
       return 'col-xl-6 col-md-6 col-sm-6';
     }
 
-    if (nbr > 2){
+    if (nbr > 2) {
       return 'col-xl-4 col-md-4';
     }
 
@@ -186,48 +210,53 @@ export class LayoutHeaderComponent implements OnInit {
   }
 
   //Récuperer les caisses périodes
-  getcaissesPeriodes(){
+  getcaissesPeriodes() {
     this.loadingCaisses = true;
-    this.caisseuserservice.getCaissePeriodeByUser(this.user.idutilisateur ?? null).subscribe({
-      next : (res) => {
-        if(res.success){
-          this.caisseperiodes = res.data;
-          this.initForm();
-          this.loadingCaisses = false;
-        }else{
-          this.toastr.error("Echec de récupération de la période")
-        }
-      },
-      error : (err) => {
-        this.toastr.error(err.error.message);
-      }
-    });
+    this.caisseuserservice
+      .getCaissePeriodeByUser(this.user.idutilisateur ?? null)
+      .subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.caisseperiodes = res.data;
+            this.initForm();
+            this.loadingCaisses = false;
+          } else {
+            this.toastr.error('Echec de récupération de la période');
+          }
+        },
+        error: (err) => {
+          this.toastr.error(err.error.message);
+        },
+      });
   }
 
-  initForm(){
+  initForm() {
     this.caissesArray.clear(); // si rechargement
-    this.caisseperiodes.forEach(c => {
+    this.caisseperiodes.forEach((c) => {
       this.caissesArray.push(
         this.fb.group({
           idperiode: [c.dernierePeriode.idperiode],
           idcaisse: [c.caisse.idcaisse],
           statut: [c.dernierePeriode.statut],
           dateperiode: [c.dernierePeriode.dateperiode],
-          caisse: [c.caisse]
-      }));
+          caisse: [c.caisse],
+        }),
+      );
     });
   }
 
   get caissesArray(): FormArray<FormGroup> {
-    return this.caisseperiodeForm.get("caisses") as FormArray<FormGroup>;
+    return this.caisseperiodeForm.get('caisses') as FormArray<FormGroup>;
   }
 
-  openCaisseUser(){
+  openCaisseUser() {
     /** Check formulaire */
     this.msgErros = '';
     const controls = this.caisseperiodeForm.controls;
     if (this.caisseperiodeForm.invalid) {
-      Object.keys(controls).forEach(controlName => controls[controlName].markAsTouched());
+      Object.keys(controls).forEach((controlName) =>
+        controls[controlName].markAsTouched(),
+      );
       this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
       return;
     }
@@ -245,27 +274,27 @@ export class LayoutHeaderComponent implements OnInit {
     } else {
       this.openCaisse(this.user.idutilisateur, _caisse.caisses);
       //Chargement de la page
-      this.reloadPage()    // Journée fermée → ouvrir
+      this.reloadPage(); // Journée fermée → ouvrir
     }
   }
 
-  openCaisse(iduser: string, caisses: any){
+  openCaisse(iduser: string, caisses: any) {
     this.caisseservice.open(iduser, caisses).subscribe({
       next: (res) => {
         if (res.success) {
-          this.error = "Caisse ouverte";
-          this.toastr.info("Ouverture de la journée")
+          this.error = 'Caisse ouverte';
+          this.toastr.info('Ouverture de la journée');
         } else {
-          this.toastr.error("Erreur serveur des données")
+          this.toastr.error('Erreur serveur des données');
         }
         this.loading = false;
       },
       error: (err) => {
-        this.error = "Modification échec";
+        this.error = 'Modification échec';
         this.loading = false;
-        this.toastr.error("Erreur serveur des données", err.error.message)
-      }
-    })
+        this.toastr.error('Erreur serveur des données', err.error.message);
+      },
+    });
   }
 
   formatDate(date: any): string {
@@ -275,19 +304,19 @@ export class LayoutHeaderComponent implements OnInit {
 
   isJourneeOuverte(): boolean {
     return this.caisseperiodes.some(
-      p => p.dernierePeriode.statut?.toLowerCase() === "ouverte"
+      (p) => p.dernierePeriode.statut?.toLowerCase() === 'ouverte',
     );
   }
 
   isJourneeCloturee(): boolean {
     return this.caisseperiodes.some(
-      p => p.dernierePeriode.statut?.toLowerCase() === "cloturee"
+      (p) => p.dernierePeriode.statut?.toLowerCase() === 'cloturee',
     );
   }
 
   isJourneeValide(): boolean {
     return this.caisseperiodes.some(
-      p => p.statut?.toLowerCase() === "validee"
+      (p) => p.statut?.toLowerCase() === 'validee',
     );
   }
 
@@ -295,20 +324,22 @@ export class LayoutHeaderComponent implements OnInit {
     if (this.isJourneeOuverte()) {
       //this.closeCaisseUser();     // journée déjà ouverte → on la clôture
     } else {
-      this.openCaisseUser();      // journée fermée → on l’ouvre
+      this.openCaisseUser(); // journée fermée → on l’ouvre
     }
   }
 
-  closeCaisse(iduser : string, caisses: any) {
+  closeCaisse(iduser: string, caisses: any) {
     this.caisseservice.close(iduser, caisses).subscribe({
       next: (res) => {
-        res.success ? this.toastr.info("Fermeture de la journée") : this.toastr.error("Erreur serveur de données");
+        res.success
+          ? this.toastr.info('Fermeture de la journée')
+          : this.toastr.error('Erreur serveur de données');
         this.loading = false;
       },
       error: (err) => {
         this.loading = false;
         this.toastr.error(err.error.message);
-      }
+      },
     });
   }
 
@@ -318,8 +349,8 @@ export class LayoutHeaderComponent implements OnInit {
     const controls = this.caisseperiodeForm.controls;
 
     if (this.caisseperiodeForm.invalid) {
-      Object.keys(controls).forEach(controlName =>
-        controls[controlName].markAsTouched()
+      Object.keys(controls).forEach((controlName) =>
+        controls[controlName].markAsTouched(),
       );
       this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
       return;
@@ -331,9 +362,9 @@ export class LayoutHeaderComponent implements OnInit {
 
     /** Décision */
     if (this.isJourneeOuverte()) {
-      this.closeCaisse(this.user.idutilisateur, caisses);   // Journée ouverte → fermer
+      this.closeCaisse(this.user.idutilisateur, caisses); // Journée ouverte → fermer
     } else {
-      this.openCaisse(this.user.idutilisateur, caisses);    // Journée fermée → ouvrir
+      this.openCaisse(this.user.idutilisateur, caisses); // Journée fermée → ouvrir
     }
   }
 
@@ -354,19 +385,18 @@ export class LayoutHeaderComponent implements OnInit {
     return `${dayShort} ${day} ${month} ${year}`;
   }
 
-  openBilletageModal(){
-    const modalRef = this.modalService.open(BilletageModalComponent,{
-      size:'lg',
-      backdrop:'static',
-      centered:true
+  openBilletageModal() {
+    const modalRef = this.modalService.open(BilletageModalComponent, {
+      size: 'lg',
+      backdrop: 'static',
+      centered: true,
     });
 
     modalRef.componentInstance.caisses = this.caisseperiodeForm.value.caisses;
     modalRef.componentInstance.caisseSolde = this.caisseSolde;
 
-    modalRef.result.then((result)=>{
-      console.log("Billetage reçu", result);
+    modalRef.result.then((result) => {
+      console.log('Billetage reçu', result);
     });
   }
-
 }

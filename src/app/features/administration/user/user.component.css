@@ -1,9 +1,613 @@
-.role-row {
+.btn-glass-primary {
+  background: rgba(59, 130, 246, 0.1);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 30px;
+  padding: 0.4rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #405189;
   cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
 }
 
-.role-row.table-active {
-  background-color: rgba(13, 110, 253, 0.12) !important; /* bleu Bootstrap */
-  border-left: 4px solid #0d6efd;
+.btn-glass-primary:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #405189;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+  color: #405189;
+}
+
+.btn-glass-primary:hover i {
+  animation: bounce 0.4s ease;
+}
+
+.btn-glass-secondary {
+  background: rgba(203, 213, 225, 0.3);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(203, 213, 225, 0.4);
+  border-radius: 30px;
+  padding: 0.4rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-glass-secondary:hover {
+  background: rgba(203, 213, 225, 0.5);
+  border-color: #94a3b8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  color: #1e293b;
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Rechercher un utilisateur */
+.search-container {
+  position: relative;
+}
+
+.search-glass {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border-radius: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.search-glass i {
+  position: absolute;
+  left: 16px;
+  font-size: 1rem;
+  color: rgba(186, 184, 184, 0.7);
+  z-index: 1;
+}
+
+.search-glass input {
+  width: 260px;
+  padding: 10px 16px 10px 42px;
+  background: transparent;
+  border: none;
+  font-size: 0.8rem;
+  color: #1e293b;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.search-glass input::placeholder {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.search-glass input:focus {
+  width: 300px;
+}
+
+.search-glow {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s ease;
+  pointer-events: none;
+}
+
+.search-glass:hover .search-glow,
+.search-glass:focus-within .search-glow {
+  left: 100%;
+}
+
+.search-glass:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.15);
+}
+
+.search-glass:focus-within {
+  border-color: #405189;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-glass:focus-within i {
+  color: #405189;
+}
+
+/* glassmorphism filter */
+.filter-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.filter-chip-modern {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(203, 213, 225, 0.5);
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.filter-chip-modern i {
+  font-size: 1rem;
+  color: #64748b;
+  transition: all 0.2s;
+}
+
+.filter-chip-modern .count-badge {
+  background: #e2e8f0;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #475569;
+  transition: all 0.2s;
+}
+
+.filter-chip-modern:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.filter-chip-modern.active {
+  background: linear-gradient(135deg, #3b82f6, #405189);
+  border-color: #405189;
+  color: white;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+}
+
+.filter-chip-modern.active i {
+  color: white;
+}
+
+.filter-chip-modern.active .count-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
+.avatar-circle {
+  width: 40px;
+  height: 40px;
+  background: #f1f5f9;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+/* Lignes du tableau */
+.user-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.user-row:hover {
+  background-color: #f8fafc;
+}
+.table-active {
+  background-color: rgba(59, 130, 246, 0.08) !important;
+  border-left: 3px solid #3b82f6;
+}
+
+/* Badges des rôles */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+.role-super-admin {
+  background: #dc2626;
+  color: white;
+}
+.role-admin {
+  background: #1e293b;
+  color: white;
+}
+.role-caissier {
+  background: #06b6d4;
+  color: white;
+}
+.role-superviseur {
+  background: #f59e0b;
+  color: white;
+}
+.role-demandeur {
+  background: #64748b;
+  color: white;
+}
+.role-comptable {
+  background: #10b981;
+  color: white;
+}
+.role-default {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+/* Badges des permissions */
+.perm-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+.perm-badge.societe {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+.perm-badge.site {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+.perm-badge.departement {
+  background: rgba(6, 182, 212, 0.1);
+  color: #06b6d4;
+}
+.perm-badge.acheteur {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+/* Boutons d'action */
+.btn-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+}
+.btn-edit:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+.btn-duplicate:hover {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+.btn-delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+.btn-roles:hover {
+  background: rgba(6, 182, 212, 0.1);
+  color: #06b6d4;
+}
+
+/* Pagination */
+.page-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.page-btn:hover:not(:disabled) {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.page-current {
+  padding: 0 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+/* Permission cards */
+.permission-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.permission-card:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+.permission-card.active {
+  background: #eff6ff;
+  border-color: #405189;
+}
+.permission-card .form-check-input:checked {
+  background-color: #405189;
+  border-color: #405189;
+}
+
+/* Form floating customization */
+.form-floating > .form-control,
+.form-floating > .form-select {
+  height: 58px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+.form-floating > .form-control:focus,
+.form-floating > .form-select:focus {
+  border-color: #405189;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+.form-floating > label {
+  padding: 1rem 0.75rem;
+  color: #64748b;
+  font-weight: 400;
+}
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label,
+.form-floating > .form-select ~ label {
+  transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+  color: #405189;
+}
+
+/* Modal animation */
+.modal-content {
+  animation: slideUp 0.3s ease-out;
+}
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.icon-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Glassmorphism */
+.glass-card {
+  background: rgba(30, 41, 59, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Icône vibrante */
+.icon-bg {
+  width: 80px;
+  height: 80px;
+  background: rgba(239, 68, 68, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  animation: vibrate 0.3s ease-in-out infinite;
+}
+
+.icon-bg i {
+  font-size: 2.5rem;
+  color: #ef4444;
+}
+
+@keyframes vibrate {
+  0%,
+  100% {
+    transform: translate(0);
+  }
+  25% {
+    transform: translate(-2px, 2px);
+  }
+  75% {
+    transform: translate(2px, -2px);
+  }
+}
+
+/* Boutons glassmorphism */
+.btn-glass {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 6px 20px;
+  border-radius: 30px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn-glass-danger {
+  background: rgba(239, 68, 68, 0.8);
+  border: none;
+  color: white;
+  padding: 6px 20px;
+  border-radius: 30px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+.btn-glass-danger:hover {
+  background: #ef4444;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* Bouton Annuler - Glassmorphism */
+.btn-glass-cancel {
+  background: rgba(100, 116, 139, 0.12);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(100, 116, 139, 0.25);
+  padding: 0.5rem 1.5rem;
+  border-radius: 40px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-glass-cancel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.btn-glass-cancel:hover::before {
+  left: 100%;
+}
+
+.btn-glass-cancel:hover {
+  background: rgba(100, 116, 139, 0.2);
+  border-color: rgba(100, 116, 139, 0.4);
+  transform: translateY(-2px);
+  color: #1e293b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.btn-glass-cancel:active {
+  transform: translateY(0);
+}
+
+/* Bouton Soumettre - Glassmorphism */
+.btn-glass-submit {
+  background: rgba(59, 130, 246, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  padding: 0.5rem 1.8rem;
+  border-radius: 40px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #405189;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-glass-submit::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.btn-glass-submit:hover::before {
+  left: 100%;
+}
+
+.btn-glass-submit:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: #405189;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25);
+  color: #405189;
+}
+
+.btn-glass-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-glass-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Animation du spinner */
+.btn-glass-submit .spinner-border {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-width: 2px;
 }
