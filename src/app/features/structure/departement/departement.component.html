@@ -1,295 +1,482 @@
 <!-- start page title -->
 <div class="row">
-    <div class="col-12">
-        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">{{title}}</h4>
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Structure</a></li>
-                    <li class="breadcrumb-item active">{{title}}</li>
-                </ol>
-            </div>
-        </div>
+  <div class="col-12">
+    <div
+      class="page-title-box d-sm-flex align-items-center justify-content-between"
+    >
+      <h4 class="mb-sm-0">{{ title }}</h4>
+      <div class="page-title-right">
+        <ol class="breadcrumb m-0">
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);">Structure</a>
+          </li>
+          <li class="breadcrumb-item active">{{ title }}</li>
+        </ol>
+      </div>
     </div>
+  </div>
 </div>
 
 <div class="row">
-    <div class="col-lg-12">
-        <div class="card" id="orderList">
-            <div class="card-header border-0">
-                <div class="row align-items-center gy-3">
-                    <div class="col-sm-auto">
-                        <div class="d-flex gap-1 flex-wrap">
-                            <button type="button" class="btn btn-sm btn-soft-success" data-bs-toggle="modal" (click)="modalCreate()" id="create-btn" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1"></i>créer</button>
-                            <button type="button" class="btn btn-sm btn-soft-info"><i class="ri-file-download-line align-bottom me-1"></i> import</button>
-                            <button class="btn btn-sm btn-soft-danger" [disabled]="!checkAllRow" onClick="deleteMultiple()"><i class="ri-delete-bin-2-line"></i></button>
-                            <button type="button" class="btn btn-sm btn-info"> <i class="ri-refresh-fill align-bottom me-1"></i>actualiser</button>
-                        </div>
-                    </div>
-                </div>
+  <div class="col-lg-12">
+    <div class="card-glass" id="orderList">
+      <!-- Header -->
+      <div class="card-header-glass border-0 mb-3">
+        <div
+          class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+        >
+          <div class="d-flex gap-2 flex-wrap">
+            <button
+              type="button"
+              class="btn-glass-primary"
+              data-bs-toggle="modal"
+              (click)="modalCreate()"
+              id="create-btn"
+              data-bs-target="#showModal"
+            >
+              <i class="ri-add-line align-bottom me-1"></i>Nouveau département
+            </button>
+            <button type="button" class="btn-glass-secondary">
+              <i class="ri-file-download-line align-bottom me-1"></i>Importer
+            </button>
+            <button type="button" class="btn-glass-secondary">
+              <i class="ri-refresh-fill align-bottom me-1"></i>Actualiser
+            </button>
+          </div>
+          <div class="search-container">
+            <div class="search-glass">
+              <i class="ri-search-line"></i>
+              <input
+                type="text"
+                [(ngModel)]="searchtext"
+                [ngModelOptions]="{ standalone: true }"
+                (input)="searchdepartement()"
+                placeholder="Rechercher par code, libellé..."
+                autocomplete="off"
+              />
+              <div class="search-glow"></div>
             </div>
-            <div class="card-body border border-dashed border-end-0 border-start-0">
-                <form>
-                    <div class="row g-3">
-                        <div class="col-xxl-5 col-sm-6">
-                            <div class="search-box">
-                                <input type="text" [(ngModel)]="searchtext" [ngModelOptions]="{standalone: true}" (input)="searchdepartement()" class="form-control form-control-sm search" placeholder="rechercher par code, libelle,Site..."> 
-                                <i class="ri-search-line search-icon"></i>
-                            </div>
-                        </div>
-                        <!--end col-->
-    
-                        <!--end col-->
-                        <div class="col-xxl-2 col-sm-4">
-                            <div>
-                                <select class="form-control form-control-sm" data-choices data-choices-search-false name="choices-single-default" id="idStatus">
-                                    <option value="">Status</option>
-                                    <option value="all" selected>tous</option>
-                                    <option value="Pending">Actif</option>
-                                    <option value="Pending">Inactif</option>
-                                </select>
-                            </div>
-                        </div>
-                        <!--end col-->
-                        
-                        <!--end col-->
-                        <div class="col-xxl-1 col-sm-2">
-                            <div>
-                                <button type="button" class="btn btn-sm btn-primary w-100" onclick="SearchData();"> <i class="ri-equalizer-fill me-1 align-bottom"></i>
-                                    Filtrer
-                                </button>
-                            </div>
-                        </div>
-                        <!--end col-->
-                    </div>
-                    <!--end row-->
-                </form>
-            </div>
-<!-- end page title -->
+          </div>
+        </div>
+      </div>
 
-<div class="card-body pt-0">
-                <div>
-                     <!-- <ul class="nav nav-tabs nav-tabs-custom nav-success mb-3" role="tablist" >
-                        <li class="nav-item">
-                            <a class="nav-link active All py-3" [class.active]="selectedstatus === ''" (click)="setActiveTab('All')"  data-bs-toggle="tab" id="All" href="#" role="tab" aria-selected="true">
-                                <i class="ri-store-2-fill me-1 align-bottom"></i> Tous 
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link py-3 Delivered" [class.active]="selectedstatus === '1'" (click)="setActiveTab('Actif')" data-bs-toggle="tab" id="Delivered" href="#" role="tab" aria-selected="false">
-                                <i class="ri-checkbox-circle-line me-1 align-bottom"></i> Suivi analytique <span class="badge bg-success align-middle ms-1">{{actifCount}}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link py-3 Pickups" [class.active]="selectedstatus === '0'" (click)="setActiveTab('Inactif')" data-bs-toggle="tab" id="Pickups" href="#" role="tab" aria-selected="false">
-                                <i class="ri-truck-line me-1 align-bottom"></i> Sans suivi analytique <span class="badge bg-danger align-middle ms-1">{{inactifCount}}</span>
-                            </a>
-                        </li>
-                    </ul>
-                     -->
-                    <div *ngIf="loading" class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Chargement...</span>
-                    </div>
-
-                    <div *ngIf="!loading">
-
-                    <div class="table-responsive table-card mb-1">
-                        <table class="table table-nowrap align-middle" id="orderTable">
-                            <thead class="text-muted table-light">
-                                <tr class="text-uppercase">
-                                    <th scope="col" style="width: 25px;">
-                                        <!-- <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" [(ngModel)]="checkAllRow" id="checkAll" (ngModelChange)="handleSelectOne($event)">
-                                        </div> -->
-                                    </th>
-                                    <th class="sort" data-sort="id">Code</th>
-                                    <th class="sort" data-sort="customer_name">Libelle </th>
-                                    <th class="sort" data-sort="status">Site</th>
-                                    <th class="sort" data-sort="status">Société</th>
-                                    <th class="sort" data-sort="status">Responsable </th>
-                                    <th class="sort" data-sort="city">Actions </th>
-                                </tr>
-                            </thead>
-                            <tbody class="list form-check-all">
-                                @for (item of pagedDepartements; track $index){
-                                    <tr>
-                                    <th scope="row">
-                                        <!-- <div class="form-check">
-                                            <input class="form-check-input" [checked]="isChecked(item.idsociete)" [(ngModel)]="selectedItems[$index]" (ngModelChange)="handleSelectOne(item, $event)" type="checkbox" name="itemGroup_{{ $index }}">
-                                        </div> -->
-                                    </th>
-                                    <td class="code"><a href="#" class="fw-medium link-primary">{{item.codedept}}</a></td>
-                                    <td class="customer_name">{{item.libelle}}</td>
-                                    <td class="customer_name">{{item.site}}</td>
-                                    <td class="customer_name">{{item.raisonsociale}}</td>
-                                    <td class="customer_name">{{item.nom}} {{item.prenom}}</td>
-                                    <td>
-                                        <ul class="list-inline hstack gap-2 mb-0">
-                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="View">
-                                                <a href="#showModal" class="text-primary d-inline-block" data-bs-toggle="modal" (click)="modalUpdate(item)">
-                                                    <i class="ri-eye-fill fs-16"></i>
-                                                </a>
-                                            </li>
-                                            <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                <a href="#showModal" data-bs-toggle="modal" (click)="modalUpdate(item)" class="text-primary d-inline-block edit-item-btn">
-                                                    <i class="ri-pencil-fill fs-16"></i>
-                                                </a>
-                                            </li>
-                                             <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                <a href="#showModal" data-bs-toggle="modal" (click)="modalDuplicate(item)" class="text-primary d-inline-block edit-item-btn">
-                                                    <i class="ri-file-copy-2-line fs-16"></i>
-                                                </a>
-                                            </li>
-                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
-                                                <a class="text-danger d-inline-block remove-item-btn" (click)="modalDelete(item)" data-bs-toggle="modal" href="#deleteOrder">
-                                                    <i class="ri-delete-bin-5-fill fs-16"></i>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </td>
-                                </tr>
-                                }
-                                
-                            </tbody>
-                        </table>
-                        <div class="noresult" style="display: none">
-                            <div class="text-center">
-                                <h5 class="mt-2">Désole! Aucun resultat trouvé</h5>
-                                <p class="text-muted">We've searched more than 150+ Orders We did not find any orders for you search.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-end">
-                        <div class="pagination-wrap hstack gap-2">
-                            <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
-                                Précédent
-                            </button>
-                             <ul class="pagination listjs-pagination mb-0"> Page {{currentPage}} / {{totalPages}}</ul>
-                            <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)" class="btn btn-sm btn-soft-primary pagination-next">
-                                Suivant
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                </div>
-
-                <div class="modal fade modal-lg" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header bg-light p-3">
-                                <h5 class="modal-title" id="exampleModalLabel">{{actionModal === 'create' ? 'Enregistrer' :
-                                             actionModal === 'update' ? 'Modifier' :
-                                             'Dupliquer'
-                                            }} </h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
-                            </div>
-                            <form [formGroup]="departementForm">
-                                <div class="modal-body">
-                                    <input type="hidden" id="id-field"/>
-
-                                    <div class="mb-3">
-                                        <label class="form-label form-label-sm">Code</label>
-                                        <input type="text" class="form-control form-control-sm {{ isValidField('codedept')}}" 
-                                            formControlName="codedept" />
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label form-label-sm">libellé</label>
-                                        <input type="text" class="form-control form-control-sm {{ isValidField('libelle')}}" 
-                                            formControlName="libelle" />
-                                    </div>
-  
-                                 <div class="mb-3">
-                                     <label class="form-label form-label-sm">Site</label>
-                                    <select class="form-select form-select-sm" formControlName="idsite">
-                                        <option value="">----Choisir Site-----</option>
-                                         <option *ngFor="let st of sites"  [value]="st.idsite">{{ st.libelle }}</option> 
-                                        </select>
-                                        <!-- <label class="input-group-text">Dévise de référence</label> -->
-                                </div>
-
-                                <!-- ID Société (hidden) -->
-                                <input type="hidden" formControlName="idsociete" />
-
-                                 <div class="mb-3">
-                                        <label class="form-label form-label-sm">Société</label>
-                                        <input type="text" class="form-control form-control-sm"
-                                            formControlName="societe" readonly/>
-                                </div>
-
-                                  <div class="mb-3">
-                                     <label class="form-label form-label-sm">Responsable</label>
-                                    <select class="form-select form-select-sm" formControlName="responsable">
-                                        <option value="">----Choisir le responsable-----</option>
-                                         <option *ngFor="let u of utilisateurs"  [value]="u.idutilisateur">{{ u.nom }} {{ u.prenom }}</option> 
-                                        </select>
-                                        <!-- <label class="input-group-text">Dévise de référence</label> -->
-                                </div>
-
-                             
-
-                                    <div class="mb-3">
-                                        <label class="form-label form-label-sm">Email</label>
-                                        <input type="text" class="form-control form-control-sm {{ isValidField('email')}}" 
-                                            formControlName="email" />
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label form-label-sm">Téléphone</label>
-                                        <input type="text" class="form-control form-control-sm {{ isValidField('telephone')}}" 
-                                            formControlName="telephone" />
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label form-label-sm">Adresse</label>
-                                        <input type="text" class="form-control form-control-sm {{ isValidField('adresse')}}" 
-                                            formControlName="adresse" />
-                                    </div>
-
-
-                                </div>
-
-                                <div class="modal-footer">
-                                    <div class="hstack gap-2 justify-content-end">
-                                        <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
-                                        <button type="submit" class="btn btn-sm btn-success" (click)="onsubmit()">
-                                           {{actionModal === 'create' ? 'Enregistrer' :
-                                             actionModal === 'update' ? 'Modifier' :
-                                             'Dupliquer'
-                                            }}
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Modal -->
-                <div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-body p-5 text-center">
-                                <div class="mt-4 text-center">
-                                    <h4>{{titleMsg}}</h4>
-                                    <p class="text-muted fs-15 mb-4">{{msgSup}}</p>
-                                    <div class="hstack gap-2 justify-content-center remove">
-                                        <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> annuler</button>
-                                        <button class="btn btn-sm btn-danger" (click)="deleteConfirmed()" id="delete-record">Oui, supprimer</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--end modal -->
-            </div>
+      <!-- Corps -->
+      <div class="card-body-glass pt-0">
+        <!-- Loading -->
+        <div *ngIf="loading" class="spinner-glass">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement...</span>
+          </div>
         </div>
 
+        <!-- Tableau -->
+        <div *ngIf="!loading">
+          <div class="table-responsive">
+            <table class="table table-modern align-middle" id="orderTable">
+              <thead>
+                <tr>
+                  <th style="width: 40px">#</th>
+                  <th>Code</th>
+                  <th>Libellé</th>
+                  <th>Site</th>
+                  <th>Société</th>
+                  <th>Responsable</th>
+                  <th style="text-align: right; width: 160px">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of pagedDepartements; track $index) {
+                  <tr>
+                    <td>{{ (currentPage - 1) * pageSize + $index + 1 }}</td>
+                    <td>
+                      <span class="code-badge">{{ item.codedept }}</span>
+                    </td>
+                    <td>
+                      <span class="fw-medium">{{ item.libelle }}</span>
+                    </td>
+                    <td>
+                      <span class="text-muted">{{ item.site || "-" }}</span>
+                    </td>
+                    <td>
+                      <span class="text-muted">{{
+                        item.raisonsociale || "-"
+                      }}</span>
+                    </td>
+                    <td>
+                      <span class="text-muted"
+                        >{{ item.nom || "-" }} {{ item.prenom || "" }}</span
+                      >
+                    </td>
+                    <td>
+                      <div class="actions-group">
+                        <button
+                          class="action-btn action-view"
+                          (click)="modalUpdate(item)"
+                          data-bs-toggle="modal"
+                          data-bs-target="#showModal"
+                          title="Voir"
+                        >
+                          <i class="ri-eye-line"></i>
+                        </button>
+                        <button
+                          class="action-btn action-edit"
+                          (click)="modalUpdate(item)"
+                          data-bs-toggle="modal"
+                          data-bs-target="#showModal"
+                          title="Modifier"
+                        >
+                          <i class="ri-pencil-line"></i>
+                        </button>
+                        <button
+                          class="action-btn action-duplicate"
+                          (click)="modalDuplicate(item)"
+                          data-bs-toggle="modal"
+                          data-bs-target="#showModal"
+                          title="Dupliquer"
+                        >
+                          <i class="ri-file-copy-line"></i>
+                        </button>
+                        <button
+                          class="action-btn action-delete"
+                          (click)="modalDelete(item)"
+                          data-bs-toggle="modal"
+                          data-bs-target="#deleteOrder"
+                          title="Supprimer"
+                        >
+                          <i class="ri-delete-bin-line"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+                @if (pagedDepartements.length === 0) {
+                  <tr>
+                    <td colspan="7" class="text-center py-5">
+                      <div class="empty-state">
+                        <i class="ri-folder-3-line"></i>
+                        <p>Aucun département trouvé</p>
+                        <span class="empty-hint"
+                          >Commencez par créer un nouveau département</span
+                        >
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination-modern">
+            <div class="pagination-info">
+              <span>Affichage de</span>
+              <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong>
+              <span>à</span>
+              <strong>{{
+                currentPage * pageSize > (departements.length || 0)
+                  ? departements.length || 0
+                  : currentPage * pageSize
+              }}</strong>
+              <span>sur</span>
+              <strong>{{ departements.length || 0 }}</strong>
+              <span>départements</span>
+            </div>
+            <div class="pagination-controls">
+              <button
+                class="page-control"
+                [disabled]="currentPage == 1"
+                (click)="changePage(currentPage - 1)"
+              >
+                <i class="ri-arrow-left-s-line"></i>
+              </button>
+              <span class="page-number">{{ currentPage }}</span>
+              <button
+                class="page-control"
+                [disabled]="currentPage == totalPages"
+                (click)="changePage(currentPage + 1)"
+              >
+                <i class="ri-arrow-right-s-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de création/modification -->
+      <div
+        class="modal fade modal-lg"
+        id="showModal"
+        tabindex="-1"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content shadow-lg border-0">
+            <!-- Header avec gradient -->
+            <div
+              class="modal-header"
+              style="
+                background: linear-gradient(135deg, #3b82f6 0%, #405189 100%);
+                border: 0;
+              "
+            >
+              <div class="d-flex align-items-center gap-2">
+                <div class="icon-circle">
+                  <i class="ri-folder-chart-line text-white fs-5"></i>
+                </div>
+                <h5 class="modal-title text-white fw-semibold">
+                  {{
+                    actionModal === "create"
+                      ? "Nouveau département"
+                      : actionModal === "update"
+                        ? "Modifier département"
+                        : "Dupliquer département"
+                  }}
+                </h5>
+              </div>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+
+            <form [formGroup]="departementForm" (ngSubmit)="onsubmit()">
+              <div class="modal-body p-4">
+                <!-- Section identification -->
+                <div class="mb-4">
+                  <h6
+                    class="mb-3 fw-semibold small text-uppercase text-muted"
+                    style="letter-spacing: 0.5px"
+                  >
+                    <i class="ri-id-card-line me-1"></i> Identification
+                  </h6>
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <div class="form-floating">
+                        <input
+                          type="text"
+                          class="form-control {{ isValidField('codedept') }}"
+                          formControlName="codedept"
+                          id="codedept"
+                          placeholder="Code département"
+                        />
+                        <label for="codedept" class="small">Code</label>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-floating">
+                        <input
+                          type="text"
+                          class="form-control {{ isValidField('libelle') }}"
+                          formControlName="libelle"
+                          id="libelle"
+                          placeholder="Libellé"
+                        />
+                        <label for="libelle" class="small">Libellé</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section organisation -->
+                <div class="mb-4">
+                  <h6
+                    class="mb-3 fw-semibold small text-uppercase text-muted"
+                    style="letter-spacing: 0.5px"
+                  >
+                    <i class="ri-building-line me-1"></i> Organisation
+                  </h6>
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <div class="form-floating">
+                        <select
+                          class="form-select"
+                          formControlName="idsite"
+                          id="idsite"
+                        >
+                          <option value="">----Choisir le site-----</option>
+                          <option *ngFor="let st of sites" [value]="st.idsite">
+                            {{ st.libelle }}
+                          </option>
+                        </select>
+                        <label for="idsite" class="small">Site</label>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-floating">
+                        <input
+                          type="text"
+                          class="form-control"
+                          formControlName="societe"
+                          id="societe"
+                          placeholder="Société"
+                          readonly
+                        />
+                        <label for="societe" class="small">Société</label>
+                      </div>
+                    </div>
+                    <input type="hidden" formControlName="idsociete" />
+                  </div>
+                </div>
+
+                <!-- Section responsable -->
+                <div class="mb-4">
+                  <h6
+                    class="mb-3 fw-semibold small text-uppercase text-muted"
+                    style="letter-spacing: 0.5px"
+                  >
+                    <i class="ri-user-line me-1"></i> Responsable
+                  </h6>
+                  <div class="row g-3">
+                    <div class="col-12">
+                      <div class="form-floating">
+                        <select
+                          class="form-select"
+                          formControlName="responsable"
+                          id="responsable"
+                        >
+                          <option value="">
+                            ----Choisir le responsable-----
+                          </option>
+                          <option
+                            *ngFor="let u of utilisateurs"
+                            [value]="u.idutilisateur"
+                          >
+                            {{ u.nom }} {{ u.prenom }}
+                          </option>
+                        </select>
+                        <label for="responsable" class="small"
+                          >Responsable</label
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section contact -->
+                <div>
+                  <h6
+                    class="mb-3 fw-semibold small text-uppercase text-muted"
+                    style="letter-spacing: 0.5px"
+                  >
+                    <i class="ri-mail-send-line me-1"></i> Contact & Adresse
+                  </h6>
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <div class="form-floating">
+                        <input
+                          type="text"
+                          class="form-control {{ isValidField('email') }}"
+                          formControlName="email"
+                          id="email"
+                          placeholder="Email"
+                        />
+                        <label for="email" class="small">Email</label>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-floating">
+                        <input
+                          type="text"
+                          class="form-control {{ isValidField('telephone') }}"
+                          formControlName="telephone"
+                          id="telephone"
+                          placeholder="Téléphone"
+                        />
+                        <label for="telephone" class="small">Téléphone</label>
+                      </div>
+                    </div>
+                    <div class="col-12">
+                      <div class="form-floating">
+                        <input
+                          type="text"
+                          class="form-control {{ isValidField('adresse') }}"
+                          formControlName="adresse"
+                          id="adresse"
+                          placeholder="Adresse"
+                        />
+                        <label for="adresse" class="small">Adresse</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="modal-footer border-0 p-4"
+                style="background: transparent"
+              >
+                <div class="d-flex gap-3 justify-content-end w-100">
+                  <button
+                    type="button"
+                    class="btn-glass-cancel"
+                    data-bs-dismiss="modal"
+                  >
+                    <i class="ri-close-line me-1"></i> Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    class="btn-glass-submit"
+                    [disabled]="loading || departementForm.invalid"
+                  >
+                    <span
+                      *ngIf="loading"
+                      class="spinner-border spinner-border-sm me-2"
+                    ></span>
+                    <i *ngIf="!loading" class="ri-save-line me-1"></i>
+                    {{
+                      actionModal === "create"
+                        ? "Créer le département"
+                        : actionModal === "update"
+                          ? "Modifier le département"
+                          : "Dupliquer le département"
+                    }}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de suppression -->
+      <div
+        class="modal fade flip"
+        id="deleteOrder"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+          <div class="modal-content bg-transparent border-0">
+            <div class="modal-body text-center p-0">
+              <div class="delete-modal-card p-4">
+                <div class="delete-icon-wrapper mb-4">
+                  <i class="ri-delete-bin-line"></i>
+                </div>
+                <h5 class="delete-modal-title">{{ titleMsg }}</h5>
+                <p class="delete-modal-message">{{ msgSup }}</p>
+                <div class="d-flex gap-3 justify-content-center">
+                  <button class="delete-btn-cancel" data-bs-dismiss="modal">
+                    <i class="ri-close-line me-1"></i> Annuler
+                  </button>
+                  <button
+                    class="delete-btn-confirm"
+                    (click)="deleteConfirmed()"
+                    data-bs-dismiss="modal"
+                  >
+                    <i class="ri-delete-bin-line me-1"></i> Supprimer
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--end modal -->
     </div>
-    <!--end col-->
+  </div>
+  <!--end col-->
 </div>
 <!--end row-->
-
-

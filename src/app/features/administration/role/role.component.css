@@ -1,9 +1,552 @@
-.role-row {
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
+/* ========================================
+   PAGE TITLE - GLASSMORPHISM
+   ======================================== */
+
+.page-title-box {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.1),
+    rgba(64, 81, 137, 0.08)
+  );
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
-.role-row.table-active {
-  background-color: rgba(13, 110, 253, 0.12) !important; /* bleu Bootstrap */
-  border-left: 4px solid #0d6efd;
+.page-title-box h4 {
+  background: linear-gradient(135deg, #3b82f6, #405189);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.breadcrumb-item a {
+  color: #405189;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb-item a:hover {
+  color: #3b82f6;
+}
+
+.breadcrumb-item.active {
+  color: #6b7280;
+}
+
+/* ========================================
+   CARDS - GLASSMORPHISM PREMIUM
+   ======================================== */
+
+.card {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.7)
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Effet de brillance sur les cards */
+.card::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.3),
+    transparent 60%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.12);
+}
+
+.card-body {
+  padding: 24px;
+}
+
+.card-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 0;
+  color: #1a1a2e;
+}
+
+/* ========================================
+   BADGES - CORRECTION IMPORTANTE
+   ======================================== */
+
+/* Forcer la couleur blanche sur les badges */
+.badge {
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 20px;
+}
+
+.badge.bg-primary {
+  background: linear-gradient(135deg, #3b82f6, #405189) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+}
+
+.badge.bg-success {
+  background: linear-gradient(135deg, #10b981, #34d399) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+}
+
+/* Classe utilitaire pour texte blanc forcé */
+.text-white-force {
+  color: #ffffff !important;
+}
+
+/* ========================================
+   TABLES - MODERN STYLE
+   ======================================== */
+
+.table {
+  border-collapse: separate;
+  border-spacing: 0 4px;
+}
+
+.table thead th {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.08),
+    rgba(64, 81, 137, 0.05)
+  );
+  border: none;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #4b5563;
+  padding: 12px 16px;
+  border-radius: 8px 8px 0 0;
+}
+
+.table tbody td {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(4px);
+  border: none;
+  padding: 10px 16px;
+  color: #1f2937;
+  transition: all 0.2s ease;
+}
+
+.table tbody tr {
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.table tbody tr:hover td {
+  background: rgba(59, 130, 246, 0.06);
+  transform: scale(1.01);
+}
+
+/* Ligne active - sélection */
+.role-row.table-active td {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.15),
+    rgba(64, 81, 137, 0.1)
+  );
+  border-left: 4px solid #405189;
+  position: relative;
+}
+
+.role-row.table-active td:first-child {
+  border-radius: 10px 0 0 10px;
+}
+
+.role-row.table-active td:last-child {
+  border-radius: 0 10px 10px 0;
+}
+
+.role-row {
+  cursor: pointer;
+}
+
+/* ========================================
+   BOUTONS - GLASSMORPHISM
+   ======================================== */
+
+.btn {
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Bouton primaire - dégradé */
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #405189) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 25px rgba(59, 130, 246, 0.4);
+  color: white !important;
+}
+
+.btn-primary:active {
+  transform: scale(0.95);
+}
+
+/* Bouton succès - dégradé */
+.btn-success {
+  background: linear-gradient(135deg, #10b981, #34d399) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.btn-success:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
+  color: white !important;
+}
+
+.btn-success:active {
+  transform: scale(0.95);
+}
+
+/* Effet de brillance sur les boutons */
+.btn::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.2),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.btn:hover::after {
+  opacity: 1;
+}
+
+/* ========================================
+   INPUTS - GLASSMORPHISM
+   ======================================== */
+
+.form-control {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  color: #1f2937;
+}
+
+.form-control:focus {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: #405189;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  outline: none;
+}
+
+.form-control::placeholder {
+  color: #9ca3af;
+}
+
+/* ========================================
+   ACTIONS ICONS
+   ======================================== */
+
+.action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  color: #6b7280;
+  text-decoration: none;
+}
+
+.action-icon:hover {
+  transform: translateY(-2px);
+}
+
+.action-icon.text-success:hover {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.action-icon.text-danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.action-icon.text-primary:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #405189;
+}
+
+/* ========================================
+   CHECKS MODERNES
+   ======================================== */
+
+.form-check {
+  padding-left: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(4px);
+  padding: 8px 12px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.form-check:hover {
+  background: rgba(255, 255, 255, 0.5);
+  transform: translateX(4px);
+}
+
+.form-check-input {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.form-check-input:checked {
+  background: linear-gradient(135deg, #3b82f6, #405189);
+  border-color: #405189;
+}
+
+.form-check-input:checked::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.form-check-input:hover {
+  border-color: #3b82f6;
+  transform: scale(1.05);
+}
+
+.form-check-label {
+  color: #1f2937;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+/* ========================================
+   RIGHT COLUMN - STICKY CARD
+   ======================================== */
+
+.sticky-top {
+  position: sticky;
+  top: 80px;
+  z-index: 1;
+}
+
+.text-muted.text-center {
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(4px);
+  padding: 40px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #6b7280;
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+/* Animation d'entrée des éléments */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  animation: fadeSlideUp 0.4s ease forwards;
+}
+
+.card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+/* Animation des lignes de tableau */
+@keyframes tableRowFade {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.table tbody tr {
+  animation: tableRowFade 0.3s ease forwards;
+}
+
+/* Animation des checkboxes */
+@keyframes checkPop {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.form-check-input:checked {
+  animation: checkPop 0.2s ease;
+}
+
+/* ========================================
+   NO ROLE SELECTED
+   ======================================== */
+
+.no-role-selected {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3),
+    rgba(255, 255, 255, 0.1)
+  );
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 60px 30px;
+  text-align: center;
+  color: #6b7280;
+  animation: fadeSlideUp 0.4s ease;
+}
+
+.no-role-selected i {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #3b82f6, #405189);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.no-role-selected p {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+  .page-title-box {
+    padding: 16px;
+  }
+
+  .page-title-box h4 {
+    font-size: 1.2rem;
+  }
+
+  .card-body {
+    padding: 16px;
+  }
+
+  .table tbody td {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+
+  .action-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .sticky-top {
+    position: relative;
+    top: 0;
+  }
+}
+
+/* ========================================
+   SCROLLBAR MODERNE
+   ======================================== */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3b82f6, #405189);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #2563eb, #405189);
 }

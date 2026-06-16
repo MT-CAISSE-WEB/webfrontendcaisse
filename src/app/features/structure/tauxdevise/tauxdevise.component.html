@@ -1,264 +1,496 @@
 <!-- start page title -->
 <div class="row">
-    <div class="col-12">
-        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">{{title}}</h4>
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Données de base</a></li>
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Paramétrage dévise</a></li>
-                    <li class="breadcrumb-item active">{{title}}</li>
-                </ol>
-            </div>
+  <div class="col-12">
+    <div
+      class="page-title-premium d-sm-flex align-items-center justify-content-between"
+    >
+      <div class="d-flex align-items-center gap-3">
+        <div class="title-icon-premium">
+          <i class="ri-exchange-dollar-line"></i>
         </div>
+        <div>
+          <h4 class="mb-0 title-premium">{{ title }}</h4>
+          <span class="title-subtitle-premium">Gestion des taux de change</span>
+        </div>
+      </div>
+      <div class="page-title-right">
+        <ol class="breadcrumb-premium m-0">
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);">
+              <i class="ri-home-4-line me-1"></i>Données de base
+            </a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);">Paramétrage devise</a>
+          </li>
+          <li class="breadcrumb-item active">
+            <i class="ri-exchange-dollar-line me-1"></i>{{ title }}
+          </li>
+        </ol>
+      </div>
     </div>
+  </div>
 </div>
 <!-- end page title -->
 
 <div class="row">
-    <div class="col-lg-12">
-        <div class="card" id="orderList">
-            <div class="card-header border-0">
-                <div class="row align-items-center gy-3">
-                    <div class="col-sm-auto">
-                        <div class="d-flex gap-1 flex-wrap">
-                            <button type="button" class="btn btn-sm btn-soft-success" data-bs-toggle="modal" (click)="modalCreate()" id="create-btn" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1"></i>créer</button>
-                            <button type="button" class="btn btn-sm btn-soft-info"><i class="ri-file-download-line align-bottom me-1"></i> import</button>
-                            <button class="btn btn-sm btn-soft-danger" [disabled]="!checkAllRow" onClick="deleteMultiple()"><i class="ri-delete-bin-2-line"></i></button>
-                            <button type="button" class="btn btn-sm btn-info"> <i class="ri-refresh-fill align-bottom me-1"></i>actualiser</button>
-                        </div>
-                    </div>
-                </div>
+  <div class="col-lg-12">
+    <div class="card-premium" id="orderList">
+      <!-- Header avec actions -->
+      <div class="card-header-premium">
+        <div
+          class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+        >
+          <div class="d-flex gap-2 flex-wrap">
+            <button
+              type="button"
+              class="btn-premium-primary"
+              data-bs-toggle="modal"
+              (click)="modalCreate()"
+              id="create-btn"
+              data-bs-target="#showModal"
+            >
+              <i class="ri-add-line"></i>
+              <span>Nouveau taux</span>
+            </button>
+            <button type="button" class="btn-premium-secondary">
+              <i class="ri-file-download-line"></i>
+              <span>Importer</span>
+            </button>
+            <button
+              type="button"
+              class="btn-premium-secondary"
+              (click)="getalltauxDevises()"
+            >
+              <i class="ri-refresh-line"></i>
+              <span>Actualiser</span>
+            </button>
+          </div>
+          <div class="search-premium">
+            <div class="search-input-premium">
+              <i class="ri-search-line"></i>
+              <input
+                type="text"
+                [(ngModel)]="searchtext"
+                [ngModelOptions]="{ standalone: true }"
+                (input)="searchtauxdevise()"
+                placeholder="Rechercher un taux..."
+                autocomplete="off"
+              />
+              <div class="search-focus-ring"></div>
             </div>
-            <div class="card-body border border-dashed border-end-0 border-start-0">
-                <form>
-                    <div class="row g-3">
-                        <div class="col-xxl-5 col-sm-6">
-                            <div class="search-box">
-                                <input type="text" [(ngModel)]="searchtext" [ngModelOptions]="{standalone: true}" (input)="searchtauxdevise()" class="form-control form-control-sm search" placeholder="rechercher par code,code ISO...">
-                                <i class="ri-search-line search-icon"></i>
-                            </div>
-                        </div>
-                        <!--end col-->
-    
-                        <!--end col-->
-                        <!-- <div class="col-xxl-2 col-sm-4">
-                            <div>
-                                <select class="form-control form-control-sm" data-choices data-choices-search-false name="choices-single-default" id="idStatus">
-                                    <option value="">Status</option>
-                                    <option value="all" selected>tous</option>
-                                    <option value="Pending">Actif</option>
-                                    <option value="Pending">Inactif</option>
-                                </select>
-                            </div>
-                        </div> -->
-                        <!--end col-->
-                        
-                        <!--end col-->
-                        <!-- <div class="col-xxl-1 col-sm-2">
-                            <div>
-                                <button type="button" class="btn btn-sm btn-primary w-100" onclick="SearchData();"> <i class="ri-equalizer-fill me-1 align-bottom"></i>
-                                    Filtrer
-                                </button>
-                            </div>
-                        </div> -->
-                        <!--end col-->
-                    </div>
-                    <!--end row-->
-                </form>
-            </div>
-            <div class="card-body pt-0">
-                <div>
-                    <!-- <ul class="nav nav-tabs nav-tabs-custom nav-success mb-3" role="tablist" >
-                        <li class="nav-item">
-                            <a class="nav-link active All py-3" [class.active]="selectedstatus === ''" (click)="setActiveTab('All')"  data-bs-toggle="tab" id="All" href="#" role="tab" aria-selected="true">
-                                <i class="ri-store-2-fill me-1 align-bottom"></i> Tous 
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link py-3 Delivered" [class.active]="selectedstatus === '1'" (click)="setActiveTab('Actif')" data-bs-toggle="tab" id="Delivered" href="#" role="tab" aria-selected="false">
-                                <i class="ri-checkbox-circle-line me-1 align-bottom"></i> Actif <span class="badge bg-success align-middle ms-1">{{actifCount}}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link py-3 Pickups" [class.active]="selectedstatus === '0'" (click)="setActiveTab('Inactif')" data-bs-toggle="tab" id="Pickups" href="#" role="tab" aria-selected="false">
-                                <i class="ri-truck-line me-1 align-bottom"></i> Inactif <span class="badge bg-danger align-middle ms-1">{{inactifCount}}</span>
-                            </a>
-                        </li>
-                    </ul> -->
-
-                    <div class="table-responsive table-card mb-1">
-                        <table class="table table-nowrap align-middle" id="orderTable">
-                            <thead class="text-muted table-light">
-                                <tr class="text-uppercase">
-                                    <th scope="col" style="width: 25px;">
-                                        <!-- <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" [(ngModel)]="checkAllRow" id="checkAll" (ngModelChange)="handleSelectOne($event)">
-                                        </div> -->
-                                    </th>
-                                    <th class="sort" data-sort="id">Code </th>
-                                    <th class="sort" data-sort="customer_name">Dévise Origine </th>
-                                    <th class="sort" data-sort="status">Dévise Destination</th>
-                                    <th class="sort" data-sort="status">Intitulé </th>
-                                    <th class="sort" data-sort="city">Type cours </th>
-                                    <th class="sort" data-sort="city">Date  </th>
-                                    <th class="sort" data-sort="city">Coefficient  </th>
-                                     <th class="sort" data-sort="city">Coefficient Inverse </th>
-                                     <th class="sort" data-sort="city">Actions </th>
-                                </tr>
-                            </thead>
-                            <tbody class="list form-check-all">
-                                @for (item of pagedtauxDevises; track $index){
-                                    <tr>
-                                    <th scope="row">
-                                        <!-- <div class="form-check">
-                                            <input class="form-check-input" [checked]="isChecked(item.idsociete)" [(ngModel)]="selectedItems[$index]" (ngModelChange)="handleSelectOne(item, $event)" type="checkbox" name="itemGroup_{{ $index }}">
-                                        </div> -->
-                                    </th>
-                                    <td class="code"><a href="#" class="fw-medium link-primary">{{item.codetauxdevise}}</a></td>
-                                    <td class="customer_name">{{item.iddeviseorigine}}</td>
-                                    <td class="customer_name">{{item.iddevisedestination}}</td>
-                                    <td class="customer_name">{{item.intitule}}</td>
-                                     <td class="customer_name">{{item.typecours}}</td>
-                                     <td class="customer_name">{{item.datecours}}</td>
-                                     <td class="customer_name">{{item.Coefficient}}</td>
-                                     <td class="customer_name">{{item.coefficientinverse}}</td>
-                                    <td>
-                                        <ul class="list-inline hstack gap-2 mb-0">
-                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Dupliquer">
-                                               <a href="#" class="text-primary d-inline-block" data-bs-target="#showModal" data-bs-toggle="modal" (click)="modalDuplicate(item)">
-                                                    <i class="ri-file-copy-2-line fs-16"></i>
-                                                </a>
-                                            </li>
-                                            <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                <a href="#showModal" data-bs-toggle="modal" (click)="modalUpdate(item)" class="text-primary d-inline-block edit-item-btn">
-                                                    <i class="ri-pencil-fill fs-16"></i>
-                                                </a>
-                                            </li>
-                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
-                                                <a class="text-danger d-inline-block remove-item-btn" (click)="modalDelete(item)" data-bs-toggle="modal" href="#deleteOrder">
-                                                    <i class="ri-delete-bin-5-fill fs-16"></i>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </td>
-                                </tr>
-                                }
-                                
-                            </tbody>
-                        </table>
-                        <div class="noresult" style="display: none">
-                            <div class="text-center">
-                                <h5 class="mt-2">Désole! Aucun resultat trouvé</h5>
-                                <p class="text-muted">We've searched more than 150+ Orders We did not find any orders for you search.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-end">
-                        <div class="pagination-wrap hstack gap-2">
-                            <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
-                                Précédent
-                            </button>
-                            <ul class="pagination listjs-pagination mb-0"> Page {{currentPage}} / {{totalPages}}</ul>
-                            <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)" class="btn btn-sm btn-soft-primary pagination-next">
-                                Suivant
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal fade modal-lg" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header bg-light p-3">
-                                <h5 class="modal-title" id="exampleModalLabel">{{actionModal === 'create' ? 'Enregistrer' :
-                                                                                 actionModal === 'update' ? 'Modifier' :
-                                                                                'Dupliquer'
-                                                                                }} Dévise </h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
-                            </div>
-                        <form [formGroup]="tauxdeviseForm" (ngSubmit)="onsubmit()" class="ng-untouched ng-pristine ng-invalid">
-                             <div class="modal-body">
-                                     <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="codedevise" class="form-label">Code Taux Dévise </label>
-                                <input id="code" formControlName="codetauxdevise" class="form-control" placeholder="Ex: 952">
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="iddeviseorigine" class="form-label">Devise Origine</label>
-                                <input id="iddeviseorigine" formControlName="iddeviseorigine" class="form-control" placeholder="Ex: XOF">
-                            </div>
-
-                             <div class="col-md-6 mb-3">
-                                <label for="iddevisedestination" class="form-label">Devise Destination</label>
-                                <input id="iddevisedestination" formControlName="iddevisedestination" class="form-control" placeholder="Ex: XOF">
-                            </div>
-
-                            <div class="col-md-12 mb-3">
-                                <label for="intitule" class="form-label">Intitulé</label>
-                                <input id="intitule" formControlName="intitule" class="form-control" placeholder="Ex: Franc CFA">
-                            </div>
-
-                            <div class="col-md-12 mb-3">
-                                <label for="typecours" class="form-label">Type cours</label>
-                                <input id="typecours" type="number" formControlName="typecours" class="form-control" placeholder="Ex: Franc CFA">
-                            </div>
-
-                             <div class="col-md-12 mb-3">
-                                <label for="datecours" class="form-label">Date </label>
-                                <input type="datetime" id="datecours" formControlName="datecours" class="form-control" placeholder="Ex: Franc CFA">
-                            </div>
-
-                             <div class="col-md-12 mb-3">
-                                <label for="Coefficient" class="form-label">Coefficient </label>
-                                <input type="number" id="Coefficient" formControlName="Coefficient" class="form-control" placeholder="Ex: Franc CFA">
-                            </div>
-
-                              <div class="col-md-12 mb-3">
-                                <label for="coefficientinverse" class="form-label">Coefficient inverse </label>
-                                <input type="number" id="coefficientinverse" formControlName="coefficientinverse" class="form-control" placeholder="Ex: Franc CFA">
-                            </div>
-                            </div>
-                             </div>
-
-                             <div class="modal-footer">
-                                    <button type="submit" class="btn btn-primary" [disabled]="loading">
-                                                                                {{actionModal === 'create' ? 'Enregistrer' :
-                                                                                 actionModal === 'update' ? 'Modifier' :
-                                                                                'Dupliquer'
-                                                                                }} la Dévise
-                                    </button>
-                             </div>
-                    </form>
-
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Modal -->
-                <div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-body p-5 text-center">
-                                <div class="mt-4 text-center">
-                                    <h4>{{titleMsg}}</h4>
-                                    <p class="text-muted fs-15 mb-4">{{msgSup}}</p>
-                                    <div class="hstack gap-2 justify-content-center remove">
-                                        <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> annuler</button>
-                                        <button class="btn btn-sm btn-danger" (click)="deleteConfirmed()" id="delete-record">Oui, supprimer</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--end modal -->
-            </div>
+          </div>
         </div>
+      </div>
 
+      <!-- Stats rapides -->
+      <div class="stats-bar-premium">
+        <div class="stat-item-premium">
+          <span class="stat-label">Total</span>
+          <span class="stat-value">{{ tauxDevises?.length || 0 }}</span>
+        </div>
+        <div class="stat-divider-premium"></div>
+        <div class="stat-item-premium stat-active">
+          <span class="stat-label">Actifs</span>
+          <span class="stat-value">{{ actifCount || 0 }}</span>
+        </div>
+        <div class="stat-divider-premium"></div>
+        <div class="stat-item-premium stat-inactive">
+          <span class="stat-label">Inactifs</span>
+          <span class="stat-value">{{ inactifCount || 0 }}</span>
+        </div>
+        <div class="stat-divider-premium"></div>
+        <div
+          class="stat-item-premium stat-filter"
+          (click)="setActiveTab('All')"
+          [class.active]="selectedstatus === ''"
+        >
+          <i class="ri-list-view"></i>
+          <span>Tous</span>
+        </div>
+        <div
+          class="stat-item-premium stat-filter"
+          (click)="setActiveTab('1')"
+          [class.active]="selectedstatus === '1'"
+        >
+          <i class="ri-checkbox-circle-line"></i>
+          <span>Actifs</span>
+        </div>
+        <div
+          class="stat-item-premium stat-filter"
+          (click)="setActiveTab('0')"
+          [class.active]="selectedstatus === '0'"
+        >
+          <i class="ri-close-circle-line"></i>
+          <span>Inactifs</span>
+        </div>
+      </div>
+
+      <!-- Corps -->
+      <div class="card-body-premium">
+        <!-- Tableau -->
+        <div class="table-container-premium">
+          <div class="table-responsive-premium">
+            <table class="table-premium">
+              <thead>
+                <tr>
+                  <th style="width: 40px">#</th>
+                  <th>Code</th>
+                  <th>Devise Origine</th>
+                  <th>Devise Destination</th>
+                  <th>Intitulé</th>
+                  <th>Type cours</th>
+                  <th>Date</th>
+                  <th>Coefficient</th>
+                  <th>Coeff. Inverse</th>
+                  <th style="text-align: right; width: 120px">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of pagedtauxDevises; track $index) {
+                  <tr>
+                    <td>{{ (currentPage - 1) * pageSize + $index + 1 }}</td>
+                    <td>
+                      <span class="code-premium">{{
+                        item.codetauxdevise
+                      }}</span>
+                    </td>
+                    <td>
+                      <span class="currency-premium">{{
+                        item.iddeviseorigine
+                      }}</span>
+                    </td>
+                    <td>
+                      <span class="currency-premium">{{
+                        item.iddevisedestination
+                      }}</span>
+                    </td>
+                    <td>
+                      <span class="text-premium">{{
+                        item.intitule || "-"
+                      }}</span>
+                    </td>
+                    <td>
+                      <span class="type-premium">{{
+                        item.typecours || "-"
+                      }}</span>
+                    </td>
+                    <td>
+                      <span class="date-premium">{{
+                        item.datecours | date: "dd/MM/yyyy"
+                      }}</span>
+                    </td>
+                    <td>
+                      <span class="coefficient-premium">{{
+                        item.Coefficient
+                      }}</span>
+                    </td>
+                    <td>
+                      <span class="coefficient-premium">{{
+                        item.coefficientinverse
+                      }}</span>
+                    </td>
+                    <td>
+                      <div class="actions-premium">
+                        <button
+                          class="action-premium action-duplicate"
+                          (click)="modalDuplicate(item)"
+                          data-bs-toggle="modal"
+                          data-bs-target="#showModal"
+                          title="Dupliquer"
+                        >
+                          <i class="ri-file-copy-line"></i>
+                        </button>
+                        <button
+                          class="action-premium action-edit"
+                          (click)="modalUpdate(item)"
+                          data-bs-toggle="modal"
+                          data-bs-target="#showModal"
+                          title="Modifier"
+                        >
+                          <i class="ri-pencil-line"></i>
+                        </button>
+                        <button
+                          class="action-premium action-delete"
+                          (click)="modalDelete(item)"
+                          data-bs-toggle="modal"
+                          data-bs-target="#deleteOrder"
+                          title="Supprimer"
+                        >
+                          <i class="ri-delete-bin-line"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+                @if (pagedtauxDevises.length === 0) {
+                  <tr>
+                    <td colspan="10" class="empty-premium">
+                      <div class="empty-premium-content">
+                        <div class="empty-premium-icon">
+                          <i class="ri-exchange-dollar-line"></i>
+                        </div>
+                        <h5>Aucun taux de devise</h5>
+                        <p>Commencez par créer un nouveau taux de change</p>
+                        <button
+                          class="btn-premium-primary"
+                          (click)="modalCreate()"
+                          data-bs-toggle="modal"
+                          data-bs-target="#showModal"
+                        >
+                          <i class="ri-add-line"></i> Créer un taux
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination-premium">
+            <div class="pagination-info-premium">
+              <span>Affichage de</span>
+              <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong>
+              <span>à</span>
+              <strong>{{
+                currentPage * pageSize > (tauxDevises?.length || 0)
+                  ? tauxDevises?.length || 0
+                  : currentPage * pageSize
+              }}</strong>
+              <span>sur</span>
+              <strong>{{ tauxDevises?.length || 0 }}</strong>
+              <span>taux</span>
+            </div>
+            <div class="pagination-controls-premium">
+              <button
+                class="page-premium"
+                [disabled]="currentPage == 1"
+                (click)="changePage(currentPage - 1)"
+              >
+                <i class="ri-arrow-left-s-line"></i>
+              </button>
+              <span class="page-current-premium">{{ currentPage }}</span>
+              <button
+                class="page-premium"
+                [disabled]="currentPage == totalPages"
+                (click)="changePage(currentPage + 1)"
+              >
+                <i class="ri-arrow-right-s-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Premium -->
+      <div
+        class="modal fade modal-premium"
+        id="showModal"
+        tabindex="-1"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-content modal-premium-content">
+            <!-- Header -->
+            <div class="modal-premium-header">
+              <div class="modal-premium-header-left">
+                <div class="modal-premium-icon">
+                  <i class="ri-exchange-dollar-line"></i>
+                </div>
+                <div>
+                  <h5 class="modal-premium-title">
+                    {{
+                      actionModal === "create"
+                        ? "Nouveau taux de change"
+                        : actionModal === "update"
+                          ? "Modifier le taux"
+                          : "Dupliquer le taux"
+                    }}
+                  </h5>
+                  <span class="modal-premium-subtitle"
+                    >Remplissez les informations ci-dessous</span
+                  >
+                </div>
+              </div>
+              <button
+                type="button"
+                class="modal-premium-close"
+                data-bs-dismiss="modal"
+              >
+                <i class="ri-close-line"></i>
+              </button>
+            </div>
+
+            <form [formGroup]="tauxdeviseForm" (ngSubmit)="onsubmit()">
+              <div class="modal-premium-body">
+                <div class="form-grid-premium">
+                  <div class="form-group-premium">
+                    <label class="form-label-premium">
+                      <i class="ri-barcode-line"></i> Code taux
+                    </label>
+                    <input
+                      type="text"
+                      class="form-input-premium"
+                      formControlName="codetauxdevise"
+                      placeholder="Ex: TX-001"
+                    />
+                  </div>
+
+                  <div class="form-group-premium">
+                    <label class="form-label-premium">
+                      <i class="ri-text"></i> Intitulé
+                    </label>
+                    <input
+                      type="text"
+                      class="form-input-premium"
+                      formControlName="intitule"
+                      placeholder="Ex: Taux USD/XOF"
+                    />
+                  </div>
+
+                  <div class="form-group-premium">
+                    <label class="form-label-premium">
+                      <i class="ri-arrow-right-up-line"></i> Devise origine
+                    </label>
+                    <input
+                      type="text"
+                      class="form-input-premium"
+                      formControlName="iddeviseorigine"
+                      placeholder="Ex: USD"
+                    />
+                  </div>
+
+                  <div class="form-group-premium">
+                    <label class="form-label-premium">
+                      <i class="ri-arrow-right-down-line"></i> Devise
+                      destination
+                    </label>
+                    <input
+                      type="text"
+                      class="form-input-premium"
+                      formControlName="iddevisedestination"
+                      placeholder="Ex: XOF"
+                    />
+                  </div>
+
+                  <div class="form-group-premium">
+                    <label class="form-label-premium">
+                      <i class="ri-price-tag-3-line"></i> Type cours
+                    </label>
+                    <input
+                      type="text"
+                      class="form-input-premium"
+                      formControlName="typecours"
+                      placeholder="Ex: Achat"
+                    />
+                  </div>
+
+                  <div class="form-group-premium">
+                    <label class="form-label-premium">
+                      <i class="ri-calendar-2-line"></i> Date
+                    </label>
+                    <input
+                      type="datetime"
+                      class="form-input-premium"
+                      formControlName="datecours"
+                      placeholder="DD/MM/YYYY"
+                    />
+                  </div>
+
+                  <div class="form-group-premium">
+                    <label class="form-label-premium">
+                      <i class="ri-calculator-line"></i> Coefficient
+                    </label>
+                    <input
+                      type="number"
+                      class="form-input-premium"
+                      formControlName="Coefficient"
+                      placeholder="Ex: 655.957"
+                      step="0.001"
+                    />
+                  </div>
+
+                  <div class="form-group-premium">
+                    <label class="form-label-premium">
+                      <i class="ri-calculator-line"></i> Coefficient inverse
+                    </label>
+                    <input
+                      type="number"
+                      class="form-input-premium"
+                      formControlName="coefficientinverse"
+                      placeholder="Ex: 0.0015"
+                      step="0.0001"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="modal-premium-footer">
+                <button
+                  type="button"
+                  class="btn-premium-cancel"
+                  data-bs-dismiss="modal"
+                >
+                  <i class="ri-close-line"></i> Annuler
+                </button>
+                <button
+                  type="submit"
+                  class="btn-premium-submit"
+                  [disabled]="loading || tauxdeviseForm.invalid"
+                >
+                  <span *ngIf="loading" class="spinner-premium"></span>
+                  <i *ngIf="!loading" class="ri-save-line"></i>
+                  {{
+                    actionModal === "create"
+                      ? "Créer le taux"
+                      : actionModal === "update"
+                        ? "Modifier le taux"
+                        : "Dupliquer le taux"
+                  }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de suppression Premium -->
+      <div
+        class="modal fade modal-premium"
+        id="deleteOrder"
+        tabindex="-1"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+          <div class="modal-content modal-delete-premium">
+            <div class="modal-delete-body">
+              <div class="delete-icon-premium">
+                <i class="ri-delete-bin-2-line"></i>
+              </div>
+              <h5 class="delete-title-premium">{{ titleMsg }}</h5>
+              <p class="delete-message-premium">{{ msgSup }}</p>
+              <div class="delete-actions-premium">
+                <button class="delete-cancel-premium" data-bs-dismiss="modal">
+                  <i class="ri-close-line"></i> Annuler
+                </button>
+                <button
+                  class="delete-confirm-premium"
+                  (click)="deleteConfirmed()"
+                  data-bs-dismiss="modal"
+                >
+                  <i class="ri-delete-bin-line"></i> Supprimer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--end modal -->
     </div>
-    <!--end col-->
+  </div>
+  <!--end col-->
 </div>
 <!--end row-->
-
