@@ -77,91 +77,98 @@
           <span class="badge bg-primary ms-2">{{ entetesDmd.length }}</span>
         </h5>
       </div>
+
       <div class="table-premium-wrap">
-        <table class="table-premium">
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Département</th>
-              <th>Type</th>
-              <th class="text-end">Montant</th>
-              <th>Devise</th>
-              <th>Date</th>
-              <th>Statut</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (item of entetesDmd; track item.iddemande) {
+        <!-- ✅ Conteneur avec scroll -->
+        <div class="table-scroll-container">
+          <table class="table-premium">
+            <thead>
               <tr>
-                <td>
-                  <a href="#" class="fw-medium link-primary">{{
-                    item.codedemande
-                  }}</a>
-                </td>
-                <td>{{ item.departement?.libelle }}</td>
-                <td>{{ item.typedemande! }}</td>
-                <td class="text-end fw-semibold">
-                  {{ formatCFA(getTotalDemande(item)) }}
-                </td>
-                <td>{{ item.devise!.codedevise }}</td>
-                <td class="text-muted">
-                  {{ formatDateFR(item.datedemande!) }}
-                </td>
-                <td>
-                  <span
-                    class="badge-premium"
-                    [ngClass]="
-                      item.statut == 0
-                        ? 'primary'
-                        : item.statut == 1
-                          ? 'info'
-                          : item.statut == 2
-                            ? 'warning'
-                            : item.statut == 3 && item.decaisse == 0
-                              ? 'success'
-                              : item.statut == 3 && item.decaisse == 1
-                                ? 'secondary'
-                                : 'danger'
-                    "
-                  >
-                    {{
-                      item.statut == 0
-                        ? "Non validée"
-                        : item.statut == 1
-                          ? "En cours"
-                          : item.statut == 2
-                            ? "À revoir"
-                            : item.statut == 3 && item.decaisse == 0
-                              ? "Validée"
-                              : item.statut == 3 && item.decaisse == 1
-                                ? "Payée"
-                                : "Rejetée"
-                    }}
-                  </span>
+                <th>Code</th>
+                <th>Département</th>
+                <th>Type</th>
+                <th class="text-end">Montant</th>
+                <th>Devise</th>
+                <th>Date</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of entetesDmd; track item.iddemande) {
+                <tr>
+                  <td>
+                    <a href="#" class="link-primary">{{ item.codedemande }}</a>
+                  </td>
+                  <td>{{ item.departement?.libelle }}</td>
+                  <td>{{ item.typedemande! }}</td>
+                  <td class="text-end fw-semibold">
+                    {{ formatCFA(getTotalDemande(item)) }}
+                  </td>
+                  <td>{{ item.devise!.codedevise }}</td>
+                  <td class="text-muted">
+                    {{ formatDateFR(item.datedemande!) }}
+                  </td>
+                  <td>
+                    <span
+                      class="badge-premium"
+                      [ngClass]="
+                        item.statut == 0
+                          ? 'primary'
+                          : item.statut == 1
+                            ? 'info'
+                            : item.statut == 2
+                              ? 'warning'
+                              : item.statut == 3 && item.decaisse == 0
+                                ? 'success'
+                                : item.statut == 3 && item.decaisse == 1
+                                  ? 'secondary'
+                                  : 'danger'
+                      "
+                    >
+                      {{
+                        item.statut == 0
+                          ? "Non validée"
+                          : item.statut == 1
+                            ? "En cours"
+                            : item.statut == 2
+                              ? "À revoir"
+                              : item.statut == 3 && item.decaisse == 0
+                                ? "Validée"
+                                : item.statut == 3 && item.decaisse == 1
+                                  ? "Payée"
+                                  : "Rejetée"
+                      }}
+                    </span>
+                  </td>
+                </tr>
+              }
+              <tr *ngIf="loading">
+                <td colspan="7" class="text-center py-4">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                  </div>
                 </td>
               </tr>
-            }
-            <tr *ngIf="loading">
-              <td colspan="7" class="text-center py-4">
-                <div class="spinner-border text-primary" role="status">
-                  <span class="visually-hidden">Chargement...</span>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="noresult" *ngIf="entetesDmd.length == 0 && !loading">
-          <div class="text-center py-4">
-            <i class="ri-inbox-2-line fs-1 text-muted"></i>
-            <h6 class="mt-2">Aucune demande trouvée</h6>
-            <p class="text-muted mb-0">
-              Désolé, il n'y a aucune demande dans cette base
-            </p>
-          </div>
+              <tr *ngIf="entetesDmd.length == 0 && !loading">
+                <td colspan="7" class="text-center py-5">
+                  <div class="empty-state">
+                    <i class="ri-inbox-2-line fs-1 text-muted"></i>
+                    <p class="mt-2 text-muted mb-0">Aucune demande trouvée</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- ✅ Indicateur de scroll (optionnel) -->
+        <div class="scroll-hint" *ngIf="entetesDmd.length > 3">
+          <i class="ri-arrow-left-right-line"></i>
+          <span>Faites défiler pour voir toutes les colonnes</span>
         </div>
       </div>
 
-      <!-- Pagination Premium -->
+      <!-- Pagination -->
       <div class="d-flex justify-content-end mt-3">
         <ul class="pagination-premium-custom">
           <li class="page-item">
@@ -313,72 +320,81 @@
       </div>
 
       <div class="table-premium-wrap">
-        <table class="table-premium">
-          <thead>
-            <tr>
-              <th>Pièce</th>
-              <th class="text-end">Montant</th>
-              <th>Type</th>
-              <th class="text-end">Payé</th>
-              <th class="text-end">Réf</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (item of opLast; track $index) {
-              @for (element of item.caisses!; track element.codecaisse) {
-                <tr>
-                  <td>{{ item.piece! }}</td>
-                  <td class="text-end">
-                    {{
-                      item.deviseop != "USD"
-                        ? formatCFA(item.montantop!)
-                        : formatNumber(item.montantop!)
-                    }}
-                    {{ item.deviseop! }}
-                  </td>
-                  <td>
-                    <span
-                      class="badge-premium"
-                      [ngClass]="
-                        item.typeoperation == 'encaissement'
-                          ? 'success'
-                          : 'danger'
-                      "
-                    >
-                      <i
-                        class="mdi me-1"
+        <!-- ✅ Conteneur avec scroll horizontal et vertical -->
+        <div class="table-scroll-container">
+          <table class="table-premium">
+            <thead>
+              <tr>
+                <th>Pièce</th>
+                <th class="text-end">Montant</th>
+                <th>Type</th>
+                <th class="text-end">Payé</th>
+                <th class="text-end">Réf</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of opLast; track $index) {
+                @for (element of item.caisses!; track element.codecaisse) {
+                  <tr>
+                    <td>{{ item.piece! }}</td>
+                    <td class="text-end">
+                      {{
+                        item.deviseop != "USD"
+                          ? formatCFA(item.montantop!)
+                          : formatNumber(item.montantop!)
+                      }}
+                      {{ item.deviseop! }}
+                    </td>
+                    <td>
+                      <span
+                        class="badge-premium"
                         [ngClass]="
                           item.typeoperation == 'encaissement'
-                            ? 'mdi-trending-up'
-                            : 'mdi-trending-down'
+                            ? 'success'
+                            : 'danger'
                         "
-                      ></i>
-                      {{ item.typeoperation! }}
-                    </span>
-                  </td>
-                  <td class="text-end">
-                    {{
-                      element.devise != "USD"
-                        ? formatCFA(element.montant!)
-                        : formatNumber(element.montant!)
-                    }}
-                    {{ element.devise! }}
-                  </td>
-                  <td class="text-end">
-                    {{
-                      user.devise_ref_code != "USD"
-                        ? formatCFA(element.montant_ref)
-                        : formatNumber(element.montant_ref)
-                    }}
-                    {{ user.devise_ref_code }}
-                  </td>
-                  <td class="text-muted">{{ formatDateFR(item.date!) }}</td>
-                </tr>
+                      >
+                        <i
+                          class="mdi me-1"
+                          [ngClass]="
+                            item.typeoperation == 'encaissement'
+                              ? 'mdi-trending-up'
+                              : 'mdi-trending-down'
+                          "
+                        ></i>
+                        {{ item.typeoperation! }}
+                      </span>
+                    </td>
+                    <td class="text-end">
+                      {{
+                        element.devise != "USD"
+                          ? formatCFA(element.montant!)
+                          : formatNumber(element.montant!)
+                      }}
+                      {{ element.devise! }}
+                    </td>
+                    <td class="text-end">
+                      {{
+                        user.devise_ref_code != "USD"
+                          ? formatCFA(element.montant_ref)
+                          : formatNumber(element.montant_ref)
+                      }}
+                      {{ user.devise_ref_code }}
+                    </td>
+                    <td class="text-muted">{{ formatDateFR(item.date!) }}</td>
+                  </tr>
+                }
               }
-            }
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- ✅ Indicateur de scroll (optionnel) -->
+        <div class="scroll-hint" *ngIf="opLast.length > 3">
+          <i class="ri-arrow-left-right-line"></i>
+          <span>Faites défiler pour voir toutes les colonnes</span>
+        </div>
       </div>
 
       <!-- Pagination Premium -->

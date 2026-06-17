@@ -30,151 +30,168 @@
         </div>
       </div>
 
-      <!-- Tableau avec scroll -->
+      <!-- Tableau avec double scroll -->
       <div class="demande-table-wrap">
-        <table class="demande-table">
-          <thead>
-            <tr>
-              <th>N° demande</th>
-              <th>Date demande</th>
-              <th class="text-end">Montant</th>
-              <th>Statut</th>
-              <th>Payé</th>
-              <th>Niveau actuel</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (item of demandesGlobal; track $index) {
+        <!-- ✅ Conteneur avec scroll horizontal et vertical -->
+        <div class="demande-scroll-container">
+          <table class="demande-table">
+            <thead>
               <tr>
-                <td>
-                  <a href="#" class="demande-code">{{ item.codedemande! }}</a>
-                </td>
-                <td class="text-muted">
-                  {{ formatDateFR(item.datedemande!) }}
-                </td>
-                <td class="text-end demande-montant">
-                  {{ formatCFA(getTotalDemande(item)) }}
-                  <span class="text-muted fs-11">{{
-                    item.devise!.codedevise
-                  }}</span>
-                </td>
-                <td>
-                  <span
-                    class="demande-statut"
-                    [ngClass]="
-                      item.statut == 0
-                        ? 'primary'
-                        : item.statut == 1
-                          ? 'info'
-                          : item.statut == 2
-                            ? 'warning'
-                            : item.statut == 3 && item.decaisse == 0
-                              ? 'success'
-                              : item.statut == 4
-                                ? 'danger'
-                                : 'secondary'
-                    "
-                  >
-                    {{
-                      item.statut == 0
-                        ? "Non validée"
-                        : item.statut == 1
-                          ? "En cours"
-                          : item.statut == 2
-                            ? "À revoir"
-                            : item.statut == 3 && item.decaisse == 0
-                              ? "Validée"
-                              : item.statut == 4
-                                ? "Rejetée"
-                                : "Payée"
-                    }}
-                  </span>
-                </td>
-                <td>
-                  <span
-                    class="demande-statut"
-                    [ngClass]="item.decaisse == 1 ? 'success' : 'primary'"
-                  >
-                    {{ item.decaisse == 1 ? "Oui" : "Non" }}
-                  </span>
-                </td>
-                <td class="text-muted">-</td>
+                <th>N° demande</th>
+                <th>Date demande</th>
+                <th class="text-end">Montant</th>
+                <th>Statut</th>
+                <th>Payé</th>
+                <th>Niveau actuel</th>
               </tr>
-            }
-            <tr *ngIf="loadingRequest">
-              <td colspan="6" class="text-center py-4">
-                <div class="spinner-border text-primary" role="status">
-                  <span class="visually-hidden">Chargement...</span>
-                </div>
-              </td>
-            </tr>
-            <tr *ngIf="demandesGlobal.length == 0 && !loadingRequest">
-              <td colspan="6" class="text-center py-4">
-                <div class="noresult">
-                  <i class="ri-inbox-2-line fs-1 text-muted"></i>
-                  <h6 class="mt-2">Aucune demande trouvée</h6>
-                  <p class="text-muted mb-0">
-                    Désolé, pas de donnée trouvée dans la base de données
-                  </p>
-                </div>
-              </td>
-            </tr>
-            <!-- Pagination -->
-            <tr>
-              <td colspan="6">
-                <div class="d-flex justify-content-end mt-3">
-                  <ul class="pagination-premium-custom">
-                    <li class="page-item">
-                      <a
-                        class="page-link"
-                        [class.disabled]="currentPage == 1"
-                        (click)="currentPage > 1 && changePage(currentPage - 1)"
+            </thead>
+            <tbody>
+              @for (item of demandesGlobal; track $index) {
+                <tr>
+                  <td>
+                    <a href="#" class="demande-code">{{ item.codedemande! }}</a>
+                  </td>
+                  <td class="text-muted">
+                    {{ formatDateFR(item.datedemande!) }}
+                  </td>
+                  <td class="text-end demande-montant">
+                    {{ formatCFA(getTotalDemande(item)) }}
+                    <span class="text-muted fs-11">{{
+                      item.devise!.codedevise
+                    }}</span>
+                  </td>
+                  <td>
+                    <span
+                      class="demande-statut"
+                      [ngClass]="
+                        item.statut == 0
+                          ? 'primary'
+                          : item.statut == 1
+                            ? 'info'
+                            : item.statut == 2
+                              ? 'warning'
+                              : item.statut == 3 && item.decaisse == 0
+                                ? 'success'
+                                : item.statut == 4
+                                  ? 'danger'
+                                  : 'secondary'
+                      "
+                    >
+                      {{
+                        item.statut == 0
+                          ? "Non validée"
+                          : item.statut == 1
+                            ? "En cours"
+                            : item.statut == 2
+                              ? "À revoir"
+                              : item.statut == 3 && item.decaisse == 0
+                                ? "Validée"
+                                : item.statut == 4
+                                  ? "Rejetée"
+                                  : "Payée"
+                      }}
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      class="demande-statut"
+                      [ngClass]="item.decaisse == 1 ? 'success' : 'primary'"
+                    >
+                      {{ item.decaisse == 1 ? "Oui" : "Non" }}
+                    </span>
+                  </td>
+                  <td class="text-muted">-</td>
+                </tr>
+              }
+              <tr *ngIf="loadingRequest">
+                <td colspan="6" class="text-center py-4">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="demandesGlobal.length == 0 && !loadingRequest">
+                <td colspan="6" class="text-center py-4">
+                  <div class="noresult">
+                    <i class="ri-inbox-2-line fs-1 text-muted"></i>
+                    <h6 class="mt-2">Aucune demande trouvée</h6>
+                    <p class="text-muted mb-0">
+                      Désolé, pas de donnée trouvée dans la base de données
+                    </p>
+                  </div>
+                </td>
+              </tr>
+              <!-- Pagination -->
+              <tr>
+                <td colspan="6">
+                  <div class="d-flex justify-content-end mt-3">
+                    <ul class="pagination-premium-custom">
+                      <li class="page-item">
+                        <a
+                          class="page-link"
+                          [class.disabled]="currentPage == 1"
+                          (click)="
+                            currentPage > 1 && changePage(currentPage - 1)
+                          "
+                        >
+                          <i class="ri-arrow-left-s-line"></i>
+                        </a>
+                      </li>
+                      <li class="page-item">
+                        <span class="page-link active">{{ currentPage }}</span>
+                      </li>
+                      <li class="page-item" *ngIf="currentPage < totalPages">
+                        <a
+                          class="page-link"
+                          (click)="changePage(currentPage + 1)"
+                          >{{ currentPage + 1 }}</a
+                        >
+                      </li>
+                      <li
+                        class="page-item"
+                        *ngIf="currentPage + 1 < totalPages"
                       >
-                        <i class="ri-arrow-left-s-line"></i>
-                      </a>
-                    </li>
-                    <li class="page-item">
-                      <span class="page-link active">{{ currentPage }}</span>
-                    </li>
-                    <li class="page-item" *ngIf="currentPage < totalPages">
-                      <a
-                        class="page-link"
-                        (click)="changePage(currentPage + 1)"
-                        >{{ currentPage + 1 }}</a
+                        <span class="page-link">...</span>
+                      </li>
+                      <li
+                        class="page-item"
+                        *ngIf="currentPage < totalPages - 1"
                       >
-                    </li>
-                    <li class="page-item" *ngIf="currentPage + 1 < totalPages">
-                      <span class="page-link">...</span>
-                    </li>
-                    <li class="page-item" *ngIf="currentPage < totalPages - 1">
-                      <a class="page-link" (click)="changePage(totalPages)">{{
-                        totalPages
-                      }}</a>
-                    </li>
-                    <li class="page-item">
-                      <a
-                        class="page-link"
-                        [class.disabled]="currentPage == totalPages"
-                        (click)="
-                          currentPage < totalPages &&
-                            changePage(currentPage + 1)
-                        "
-                      >
-                        <i class="ri-arrow-right-s-line"></i>
-                      </a>
-                    </li>
-                    <li class="page-item">
-                      <span class="pagination-info-premium">
-                        Page <strong>{{ currentPage }}</strong> /
-                        <strong>{{ totalPages }}</strong>
-                      </span>
-                    </li>
-                  </ul>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                        <a class="page-link" (click)="changePage(totalPages)">{{
+                          totalPages
+                        }}</a>
+                      </li>
+                      <li class="page-item">
+                        <a
+                          class="page-link"
+                          [class.disabled]="currentPage == totalPages"
+                          (click)="
+                            currentPage < totalPages &&
+                              changePage(currentPage + 1)
+                          "
+                        >
+                          <i class="ri-arrow-right-s-line"></i>
+                        </a>
+                      </li>
+                      <li class="page-item">
+                        <span class="pagination-info-premium">
+                          Page <strong>{{ currentPage }}</strong> /
+                          <strong>{{ totalPages }}</strong>
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- ✅ Indicateur de scroll -->
+        <div class="scroll-hint" *ngIf="demandesGlobal.length > 3">
+          <i class="ri-arrow-left-right-line"></i>
+          <span>Faites défiler pour voir toutes les colonnes</span>
+        </div>
       </div>
     </div>
   </div>
