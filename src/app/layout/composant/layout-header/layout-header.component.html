@@ -6,10 +6,18 @@
         <div class="navbar-brand-box horizontal-logo">
           <a href="#" class="logo logo-dark">
             <span class="logo-sm">
-              <img src="assets/images/logocaisse.png" alt="" height="40" />
+              <img
+                src="assets/images/logo_caisse_sans_bg.png"
+                alt=""
+                height="40"
+              />
             </span>
             <span class="logo-lg">
-              <img src="assets/images/logocaisse.png" alt="" height="40" />
+              <img
+                src="assets/images/logo_caisse_sans_bg.png"
+                alt=""
+                height="40"
+              />
             </span>
           </a>
 
@@ -84,40 +92,56 @@
             <i class="bx bx-category-alt fs-22"></i>
           </button>
           <div class="dropdown-menu dropdown-menu-lg p-0 dropdown-menu-end">
-            <div
-              class="p-3 border-top-0 border-start-0 border-end-0 border-dashed border"
-            >
-              <div class="row align-items-center">
-                <div class="col">
-                  <h6 class="m-0 fw-semibold fs-15">Mes caisses</h6>
-                </div>
-                <div class="col-auto">
-                  <a href="#!" class="btn btn-sm btn-soft-info">
-                    Voir tous...
-                    <i class="ri-arrow-right-s-line align-middle"></i
-                  ></a>
-                </div>
+            <!-- ✅ En-tête -->
+            <div class="dropdown-header-custom">
+              <div class="dropdown-title">
+                <i class="ri-bank-card-2-line"></i>
+                Mes caisses
+                <span class="badge-count">2</span>
               </div>
+              <a href="#!" class="btn-view-all">
+                Voir tous
+                <i class="ri-arrow-right-s-line"></i>
+              </a>
             </div>
 
-            <div class="p-2">
-              <div class="row g-0">
-                <div class="col">
-                  <a class="dropdown-icon-item" href="#!">
-                    <img src="assets/images/brands/github.png" alt="Github" />
-                    <span>Caisse USD</span>
-                  </a>
+            <!-- ✅ Liste des caisses en grille -->
+            <div class="dropdown-items-grid">
+              <!-- Caisse 1 -->
+              <a class="dropdown-caisse-item" href="#!">
+                <div class="caisse-icon-wrapper usd">
+                  <i class="ri-dollar-fill"></i>
                 </div>
-                <div class="col">
-                  <a class="dropdown-icon-item" href="#!">
-                    <img
-                      src="assets/images/brands/bitbucket.png"
-                      alt="bitbucket"
-                    />
-                    <span>Caisse CDF</span>
-                  </a>
+                <div class="caisse-info">
+                  <span class="caisse-name">Caisse Principale</span>
+                  <span class="caisse-devise">USD</span>
                 </div>
-              </div>
+                <span class="caisse-status-dot open"></span>
+              </a>
+
+              <!-- Caisse 2 -->
+              <a class="dropdown-caisse-item" href="#!">
+                <div class="caisse-icon-wrapper cdf">
+                  <i class="ri-money-franc-circle-fill"></i>
+                </div>
+                <div class="caisse-info">
+                  <span class="caisse-name">Caisse Secondaire</span>
+                  <span class="caisse-devise">CDF</span>
+                </div>
+                <span class="caisse-status-dot closed"></span>
+              </a>
+
+              <!-- Caisse 3 -->
+              <a class="dropdown-caisse-item" href="#!">
+                <div class="caisse-icon-wrapper eur">
+                  <i class="ri-euro-fill"></i>
+                </div>
+                <div class="caisse-info">
+                  <span class="caisse-name">Caisse Europe</span>
+                  <span class="caisse-devise">EUR</span>
+                </div>
+                <span class="caisse-status-dot open"></span>
+              </a>
             </div>
           </div>
         </div>
@@ -139,113 +163,105 @@
             class="dropdown-menu dropdown-menu-xl dropdown-menu-end p-0 dropdown-menu-cart"
             aria-labelledby="page-header-cart-dropdown"
           >
-            <div
-              class="p-3 border-top-0 border-start-0 border-end-0 border-dashed border"
-            >
-              <div class="row align-items-center">
-                <div class="col">
-                  <h6 class="m-0 fs-16 fw-semibold">Mes caisse</h6>
-                </div>
-                <div class="col-auto">
-                  <span class="badge bg-warning-subtle text-warning fs-13"
-                    ><span class="cartitem-badge">{{
-                      caissesArray.length
-                    }}</span>
-                    Caisse(s)
-                  </span>
-                </div>
+            <!-- ✅ En-tête -->
+            <div class="dropdown-cart-header">
+              <div class="dropdown-cart-title">
+                <i class="ri-wallet-3-line"></i>
+                Mes caisses
               </div>
+              <span class="badge-cart-count">
+                {{ caissesArray.length }} caisse(s)
+              </span>
             </div>
+
+            <!-- ✅ Corps -->
             <form [formGroup]="caisseperiodeForm">
-              <div data-simplebar>
-                <div class="p-2">
-                  @if (loadingCaisses) {
-                    <div
-                      class="d-flex justify-content-center align-items-center py-4"
-                    >
-                      <div class="spinner-border text-info" role="status">
-                        <span class="visually-hidden">Chargement...</span>
-                      </div>
+              <div class="dropdown-cart-body">
+                <!-- Loading -->
+                @if (loadingCaisses) {
+                  <div class="cart-loading">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Chargement...</span>
                     </div>
-                  }
+                    <span>Chargement des caisses...</span>
+                  </div>
+                }
 
-                  @if (caissesArray.length === 0) {
-                    <div class="text-center text-muted py-4">
-                      Aucune caisse disponible
-                    </div>
-                  }
+                <!-- Empty -->
+                @if (caissesArray.length === 0 && !loadingCaisses) {
+                  <div class="cart-empty">
+                    <i class="ri-inbox-2-line"></i>
+                    <p>Aucune caisse disponible</p>
+                  </div>
+                }
 
-                  @if (caissesArray.length > 0) {
-                    <div class="row g-3">
-                      @for (group of caissesArray.controls; track group) {
-                        <div
-                          [ngClass]="getCaisseClass(caissesArray)"
-                          [formGroup]="group"
-                        >
-                          <div class="text-center empty-cart" id="empty-cart">
-                            <div class="avatar-md mx-auto my-3">
-                              <div
-                                class="avatar-title bg-info-subtle text-info fs-36 rounded-circle"
-                              >
-                                <i class="bx bx-cart"></i>
-                              </div>
-                            </div>
-                            <input type="hidden" formControlName="idperiode" />
-                            <input type="hidden" formControlName="idcaisse" />
-                            <span class="mb-3"
-                              >{{ group.value.caisse?.libelle }}
-                              {{ group.value.caisse?.codedevise }}</span
-                            >
-                            <br />
-                            <span class="badge bg-info w-md mb-3">{{
-                              group.value.statut
-                            }}</span>
-                            <input type="hidden" formControlName="statut" />
-                            <input
-                              type="hidden"
-                              formControlName="dateperiode"
-                            />
-                          </div>
-
-                          <div class="justify-content-between text-center">
-                            <span class="mb-3 py-2">{{
-                              formatDateFR(group.value.dateperiode)
-                            }}</span>
-                          </div>
+                <!-- Liste des caisses -->
+                @if (caissesArray.length > 0 && !loadingCaisses) {
+                  <div class="cart-list">
+                    @for (group of caissesArray.controls; track group) {
+                      <div class="cart-caisse-item" [formGroup]="group">
+                        <!-- ✅ Icône simple -->
+                        <div class="cart-caisse-icon">
+                          <i class="ri-wallet-line"></i>
                         </div>
-                      }
-                    </div>
-                  }
-                </div>
+
+                        <!-- Infos cachées -->
+                        <input type="hidden" formControlName="idperiode" />
+                        <input type="hidden" formControlName="idcaisse" />
+                        <input type="hidden" formControlName="statut" />
+                        <input type="hidden" formControlName="dateperiode" />
+
+                        <!-- Infos -->
+                        <div class="cart-caisse-info">
+                          <span class="cart-caisse-name">
+                            {{ group.value.caisse?.libelle }}
+                          </span>
+                          <span class="cart-caisse-devise">
+                            {{ group.value.caisse?.codedevise }}
+                          </span>
+                        </div>
+
+                        <!-- Statut -->
+                        <span
+                          class="cart-caisse-status"
+                          [class.open]="group.value.statut === 'ouverte'"
+                          [class.closed]="group.value.statut !== 'ouverte'"
+                        >
+                          {{ group.value.statut }}
+                        </span>
+
+                        <!-- Date -->
+                        <span class="cart-caisse-date">
+                          {{ formatDateFR(group.value.dateperiode) }}
+                        </span>
+                      </div>
+                    }
+                  </div>
+                }
               </div>
-              <div
-                class="p-3 border-bottom-0 border-start-0 border-end-0 border-dashed border"
-                id="checkout-elem"
-              >
+
+              <!-- ✅ Footer -->
+              <div class="dropdown-cart-footer">
                 <button
                   type="button"
                   *ngIf="!isJourneeOuverte()"
                   [disabled]="loadingCaisses || caissesArray.length === 0"
                   (click)="openCaisseUser()"
-                  class="btn btn-sm btn-secondary text-center w-100"
-                  id="page-header-cart-dropdown"
-                  data-bs-toggle="dropdown"
-                  data-bs-auto-close="outside"
-                  aria-haspopup="true"
-                  aria-expanded="false"
+                  class="btn-cart-action btn-cart-open"
                 >
-                  <i class="ri-lock-unlock-line align-middle me-1"></i> Ouvrir
-                  ma journée
+                  <i class="ri-lock-unlock-line"></i>
+                  Ouvrir ma journée
                 </button>
+
                 <button
                   type="button"
                   *ngIf="isJourneeOuverte()"
                   [disabled]="loadingCaisses || caissesArray.length === 0"
                   (click)="openBilletageModal()"
-                  class="btn btn-sm btn-secondary text-center w-100"
+                  class="btn-cart-action btn-cart-close"
                 >
-                  <i class="ri-lock-line align-middle me-1"></i> Clôturer ma
-                  journée
+                  <i class="ri-lock-line"></i>
+                  Clôturer ma journée
                 </button>
               </div>
             </form>

@@ -1,340 +1,788 @@
 <!-- start page title -->
 <div class="row">
-    <div class="col-12">
-        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">{{title}}</h4>
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Données de base</a></li>
-                    <li class="breadcrumb-item active">{{title}}</li>
-                </ol>
-            </div>
+  <div class="col-12">
+    <div
+      class="page-title-premium d-sm-flex align-items-center justify-content-between"
+    >
+      <div class="d-flex align-items-center gap-3">
+        <div class="title-icon-premium">
+          <i class="ri-pie-chart-2-fill"></i>
         </div>
+        <div>
+          <h4 class="mb-0 title-premium">{{ title }}</h4>
+          <span class="title-subtitle-premium"
+            >Gestion des centres analytiques</span
+          >
+        </div>
+      </div>
+      <div class="page-title-right">
+        <ol class="breadcrumb-premium m-0">
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);">
+              <i class="ri-home-4-line me-1"></i>Paramétrage
+            </a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);">Données de base</a>
+          </li>
+          <li class="breadcrumb-item active">
+            <i class="ri-pie-chart-2-fill"></i>{{ title }}
+          </li>
+        </ol>
+      </div>
     </div>
+  </div>
 </div>
 <!-- end page title -->
 
 <div class="row">
-    <div class="col-lg-12">
-        <div class="card" id="orderList">
-            <div class="card-header border-0">
-                <div class="row align-items-center gy-3">
-                    <div class="col-sm-auto d-flex justify-content-between align-items-center">
-                        <div class="d-flex flex-wrap gap-2">
-                            <button type="button" class="btn btn-sm btn-soft-success" data-bs-toggle="modal" (click)="modalCreate()" id="create-btn" data-bs-target="#showModal">
-                                <i class="ri-add-line align-bottom me-1"></i>Créer
-                            </button>
-
-                            <button title ="button" class="btn btn-sm btn-soft-danger" href="deleteAll" data-bs-toggle="modal" data-bs-toggle="tooltip" data-bs-trigger="hover" [disabled]="!checkAllRow" (click)="deleteMultiple()">
-                                <i class="ri-delete-bin-2-line"></i></button>
-                            <button type="button" class="btn btn-sm btn-info" (click)="actualiser()"> <i class="ri-refresh-fill align-bottom me-1"></i>Actualiser</button>
-                        </div>
-
-                        <div class="flex-shrink-0 ms-2">
-                            <div class="dropdown card-header-dropdown">
-                                <a class="btn btn-soft-primary btn-sm" role="button" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Télécharger<i class="mdi mdi-chevron-down align-middle ms-1"></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-end">
-                                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#importcsv">Importer csv</a>
-                                    <a class="dropdown-item" href="#" data-bs-target="#exportModal" data-bs-toggle="modal">Extraire</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  <div class="col-lg-12">
+    <div class="card-glass" id="orderList">
+      <!-- Header -->
+      <div class="card-header-glass border-0">
+        <div
+          class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+        >
+          <div class="d-flex gap-2 flex-wrap">
+            <button
+              type="button"
+              class="btn-glass-primary"
+              data-bs-toggle="modal"
+              (click)="modalCreate()"
+              id="create-btn"
+              data-bs-target="#showModal"
+            >
+              <i class="ri-add-line align-bottom me-1"></i>Nouveau centre
+            </button>
+            <button
+              type="button"
+              class="btn-glass-secondary"
+              (click)="actualiser()"
+            >
+              <i class="ri-refresh-fill align-bottom me-1"></i>Actualiser
+            </button>
+            <div class="dropdown">
+              <button class="btn-glass-secondary" data-bs-toggle="dropdown">
+                <i class="ri-file-download-line me-1"></i>Télécharger
+                <i class="mdi mdi-chevron-down align-middle ms-1"></i>
+              </button>
+              <div class="dropdown-menu dropdown-menu-end">
+                <a
+                  class="dropdown-item"
+                  data-bs-toggle="modal"
+                  data-bs-target="#importcsv"
+                >
+                  <i class="ri-file-upload-line me-2"></i>Importer CSV
+                </a>
+                <a
+                  class="dropdown-item"
+                  data-bs-target="#exportModal"
+                  data-bs-toggle="modal"
+                >
+                  <i class="ri-file-download-line me-2"></i>Exporter
+                </a>
+              </div>
             </div>
-
-            <!-- Modal -->
-            <div class="modal fade" id="importcsv" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                    <div class="modal-header p-3 bg-info-subtle">
-                        <h5>Import des données via CSV</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
-                    </div>
-                    <form [formGroup]="ImportForm">
-                        <div class="modal-body text-center">
-
-                        <!-- Décision -->
-                        <div class="d-flex flex-column align-items-center gap-3 mt-3">
-                            <input type="file" #fileInput class="form-control form-control-sm" formControlName="file" accept=".csv" />
-                        </div>
-
-                        <div *ngIf="ImportForm.get('file')?.invalid && ImportForm.get('file')?.touched" class="text-danger mt-1">
-                            <div *ngIf="ImportForm.get('file')?.errors?.['required']">
-                                Le fichier est obligatoire
-                            </div>
-
-                            <div *ngIf="ImportForm.get('file')?.errors?.['invalidFileType']">
-                                Seuls les fichiers CSV sont autorisés
-                            </div>
-                        </div>
-                        </div>
-
-                        <div class="modal-footer">
-                        <div class="hstack gap-2 justify-content-end">
-                            <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">
-                            Annuler
-                            </button>
-
-                            <button type="button" (click)="submitImportFile(fileInput)" class="btn btn-sm btn-success" [disabled]="ImportForm.invalid" data-bs-dismiss="modal">
-                            importer
-                            </button>
-                        </div>
-                        </div>
-                    </form>
-                    </div>
-                </div>
+          </div>
+          <div class="search-container">
+            <div class="search-glass">
+              <i class="ri-search-line"></i>
+              <input
+                type="text"
+                [(ngModel)]="searchTerm"
+                (input)="applyFilter()"
+                placeholder="Rechercher par code ou libellé..."
+                autocomplete="off"
+              />
+              <div class="search-glow"></div>
             </div>
+          </div>
+        </div>
+      </div>
 
-            <!-- Modal d'exportation -->
-            <div class="modal fade" id="exportModal" tabindex="-1">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Exporter centres analytiques</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-
-                        <div class="modal-body">
-                            <!-- Plage -->
-                           <div class="mb-3">
-                                <label>Centre début</label>
-                                <select class="form-select form-select-sm" [(ngModel)]="exportData.debut" name="debut">
-                                    <option value="">-- Tous --</option>
-                                    <option *ngFor="let n of centres" [value]="n.codecentreanalytique">
-                                        {{ n.codecentreanalytique }} - {{ n.libelle }}
-                                    </option>
-                                </select>
-                            </div>
-
-                           <div class="mb-3">
-                                <label>Centre fin</label>
-                                <select class="form-select form-select-sm" [(ngModel)]="exportData.fin" name="fin">
-                                    <option value="">-- Tous --</option>
-                                    <option *ngFor="let n of centres" [value]="n.codecentreanalytique">
-                                        {{ n.codecentreanalytique }} - {{ n.libelle }}
-                                    </option>
-                                </select>
-                            </div>
-
-                            <!-- Format -->
-                            <div class="mb-3">
-                                <label>Format</label>
-                                <select class="form-select" [(ngModel)]="exportData.format">
-                                    <option value="excel">Excel</option>
-                                    <option value="pdf">PDF</option>
-                                </select>
-                            </div>
-
-                        </div>
-
-                        <div class="modal-footer">
-                            <button class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                            <button class="btn btn-primary" (click)="exporter()">Exporter</button>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="card-body pt-0"> 
-                <div>
-                    <div class="col-12">
-                        <!-- 🔎 Recherche -->
-                        <input type="text"  class="form-control form-control-sm mb-2" 
-                         placeholder="Rechercher numéro ou libellé..."
-                            [(ngModel)]="searchTerm"
-                            (input)="applyFilter()"
-                        />
-                        <div class="table-container">
-                            <table class="table table-sm table-hover border mb-0" id="dataTable">
-                                <thead class="table-light sticky-header">
-                                    <tr>
-                                        <th>
-                                            <div class="form-check">
-                                                <input type="checkbox" class="form-check-input"
-                                                    [checked]="checkAllRow"
-                                                    (change)="handleSelectAll($event)">
-                                            </div>
-                                        </th>
-                                        <th>Code</th>
-                                        <th>Libelle</th>
-                                        <th>Statut</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody class="list form-check-all">
-                                    <tr *ngFor="let item of paginatedData; let i = index">
-                                        <th scope="row">
-                                            <div class="form-check">
-                                                <input 
-                                                    type="checkbox" class="form-check-input"
-                                                    [checked]="isChecked(item.idcompte)"
-                                                    (change)="handleSelectOne(item, $event)"
-                                                >
-                                            </div>
-                                        </th>
-                                        <td class="code"><a href="#" class="fw-medium link-primary">{{item.codecentreanalytique}}</a></td>
-                                        <td class="libelle">{{item.libelle}}</td>
-                                        <td class="status">
-                                            <span *ngIf="item.actif == 1" class="badge bg-success-subtle text-success text-uppercase"> Actif </span>
-                                            <span *ngIf="item.actif == 0" class="badge bg-danger-subtle text-danger text-uppercase"> Inactif </span>
-                                        </td>
-                                        <!-- Actions -->
-                                        <td>
-                                            <ul class="list-inline hstack gap-2 mb-0">
-                                                <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="View">
-                                                    <a href="#showModal" class="text-primary d-inline-block" data-bs-toggle="modal" (click)="modalview(item)">
-                                                        <i class="ri-eye-fill fs-16"></i>
-                                                    </a>
-                                                </li>
-                                                <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                    <a title="link" href="#showModal" data-bs-toggle="modal" (click)="modalUpdate(item)" class="text-primary d-inline-block edit-item-btn">
-                                                        <i class="ri-pencil-fill fs-16"></i>
-                                                    </a>
-                                                </li>
-                                                <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
-                                                    <a title="link" href="#delete" data-bs-toggle="modal" (click)="modalDelete(item)" class="text-danger d-inline-block remove-item-btn">
-                                                        <i class="ri-delete-bin-5-fill fs-16"></i>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </td>
-                                    </tr>
-                                    <!-- } -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <!-- Pagination -->
-                        <div class="d-flex justify-content-center align-items-center gap-2 mb-0" id="pagination">
-                            <!-- Précédent -->
-                            <button 
-                                class="btn btn-sm btn-light icon-btn"
-                                (click)="prevPage()" 
-                                [disabled]="currentPage === 1"
-                                title="Page précédente">
-                                <i class="ri-arrow-left-s-line"></i>
-                            </button>
-
-                            <!-- Info page -->
-                            <span class="page-info">
-                                {{ currentPage }} / {{ totalPages }}
-                            </span>
-
-                            <!-- Suivant -->
-                            <button 
-                                class="btn btn-sm btn-light icon-btn"
-                                (click)="nextPage()" 
-                                [disabled]="currentPage === totalPages"
-                                title="Page suivante">
-                                <i class="ri-arrow-right-s-line"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Création d'un nouveau tiers OK -->
-                <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header bg-light p-3">
-                                <h5 class="modal-title" id="exampleModalLabel">{{ actionModal === "create" ? 'Créer' : 'Modifier'}} un centre analytique</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
-                            </div>
-                            
-                            <!-- Formulaire de création de centre analytique -->
-                            <form [formGroup]="centreanalytiqueForm">
-                                <div class="modal-body">
-                                    <input type="hidden" id="id-field"/>
-
-                                    <div class="mb-3" id="modal-id">
-                                        <label for="orderId" class="form-label form-label-sm">Code</label>
-                                        <input type="text" id="orderId" class="form-control form-control-sm {{ isValidField('codecentreanalytique')}}" formControlName="codecentreanalytique" placeholder="" required maxlength="10"/>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="customername-field" class="form-label form-label-sm">Libellé</label>
-                                        <input type="text" id="customername-field" class="form-control form-control-sm {{ isValidField('libelle')}}" formControlName="libelle" placeholder="Libellé centre analytique"/>
-                                        <div class="invalid-feedback">{{ msgErros }}</div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <!-- <label for="customername-field" class="form-label form-label-sm">Societe</label> -->
-                                        <input type="hidden" id="customername-field" class="form-control form-control-sm {{ isValidField('idsociete')}}" formControlName="idsociete" placeholder="Societe"/>
-                                        <div class="invalid-feedback">{{ msgErros }}</div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch" value="1" formControlName="actif" id="flexSwitchCheckChecked" checked>
-                                            <label class="form-check-label" for="flexSwitchCheckChecked">Actif</label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="modal-footer">
-                                    <div class="hstack gap-2 justify-content-end">
-                                        <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Annuler</button>
-                                        <button type="submit" class="btn btn-sm btn-success" id="add-btn" (click)="onSubmit()">
-                                            {{ actionModal === "create" ? 'Enregistrer' : 'Modifier'}}
-                                        </button>
-                                        <!-- <button type="button" class="btn btn-success" id="edit-btn">Update</button> -->
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Modal Suppression OK -->
-                <div class="modal fade flip" id="delete" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-body p-5 text-center">
-                                <div class="mt-4 text-center">
-                                    <h4>{{titleMsg}} de {{deletecentre?.codecentreanalytique}} : {{deletecentre?.libelle}}</h4>
-                                    <p class="text-muted fs-15 mb-4">{{msgSup}}</p>
-                                    <div class="hstack gap-2 justify-content-center remove">
-                                        <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal">
-                                            <i class="ri-close-line me-1 align-middle"></i> Annuler
-                                        </button>
-                                        <button class="btn btn-sm btn-danger" (click)="deleteConfirmed()" id="delete-record">Oui, supprimer</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--end modal -->
-
-                <!-- Modal Suppression All OK -->
-                <div class="modal fade flip" id="deleteAll" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-body p-5 text-center">
-                                <div class="mt-4 text-center">
-                                    <h4>Supprimer tous les centres analytiques</h4>
-                                    <p class="text-muted fs-15 mb-4">Voulez-vous supprimer tous les centres analytiques ?</p>
-                                    <div class="hstack gap-2 justify-content-center remove">
-                                        <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal">
-                                            <i class="ri-close-line me-1 align-middle"></i> Annuler
-                                        </button>
-                                        <button class="btn btn-sm btn-danger" (click)="deleteMultiple()" id="delete-record">Oui, supprimer</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--end modal -->
-            </div>
+      <!-- Corps -->
+      <div class="card-body-glass pt-0">
+        <!-- Loading -->
+        <div *ngIf="loading" class="spinner-glass">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement...</span>
+          </div>
         </div>
 
+        <!-- Tableau -->
+        <div *ngIf="!loading">
+          <div class="table-responsive">
+            <table class="table table-modern align-middle" id="orderTable">
+              <thead>
+                <tr>
+                  <th style="width: 40px">
+                    <div class="form-check">
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        [checked]="checkAllRow"
+                        (change)="handleSelectAll($event)"
+                      />
+                    </div>
+                  </th>
+                  <th>Code</th>
+                  <th>Libellé</th>
+                  <th>Statut</th>
+                  <th style="text-align: right; width: 140px">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of paginatedData; track $index) {
+                  <tr>
+                    <td>
+                      <div class="form-check">
+                        <input
+                          type="checkbox"
+                          class="form-check-input"
+                          [checked]="isChecked(item.idcentreanalytique)"
+                          (change)="handleSelectOne(item, $event)"
+                        />
+                      </div>
+                    </td>
+                    <td>
+                      <span class="code-badge">{{
+                        item.codecentreanalytique
+                      }}</span>
+                    </td>
+                    <td>
+                      <span class="fw-medium">{{ item.libelle }}</span>
+                    </td>
+                    <td>
+                      <span
+                        *ngIf="item.actif == 1"
+                        class="badge-glass badge-glass-success"
+                        >Actif</span
+                      >
+                      <span
+                        *ngIf="item.actif == 0"
+                        class="badge-glass badge-glass-danger"
+                        >Inactif</span
+                      >
+                    </td>
+                    <td>
+                      <div class="actions-group">
+                        <button
+                          class="action-btn action-view"
+                          (click)="modalview(item)"
+                          data-bs-toggle="modal"
+                          data-bs-target="#showModal"
+                          title="Voir"
+                        >
+                          <i class="ri-eye-line"></i>
+                        </button>
+                        <button
+                          class="action-btn action-edit"
+                          (click)="modalUpdate(item)"
+                          data-bs-toggle="modal"
+                          data-bs-target="#showModal"
+                          title="Modifier"
+                        >
+                          <i class="ri-pencil-line"></i>
+                        </button>
+                        <button
+                          class="action-btn action-delete"
+                          (click)="modalDelete(item)"
+                          data-bs-toggle="modal"
+                          data-bs-target="#delete"
+                          title="Supprimer"
+                        >
+                          <i class="ri-delete-bin-line"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+                @if (paginatedData.length === 0) {
+                  <tr>
+                    <td colspan="5" class="text-center py-5">
+                      <div class="empty-state">
+                        <i class="ri-pie-chart-2-line"></i>
+                        <p>Aucun centre analytique trouvé</p>
+                        <span class="empty-hint"
+                          >Commencez par créer un nouveau centre</span
+                        >
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination-modern">
+            <div class="pagination-info">
+              <span>Affichage de</span>
+              <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong>
+              <span>à</span>
+              <strong>{{
+                currentPage * pageSize > (filteredData.length || 0)
+                  ? filteredData.length || 0
+                  : currentPage * pageSize
+              }}</strong>
+              <span>sur</span>
+              <strong>{{ filteredData.length || 0 }}</strong>
+              <span>centres</span>
+            </div>
+            <div class="pagination-controls">
+              <button
+                class="page-control"
+                [disabled]="currentPage == 1"
+                (click)="prevPage()"
+              >
+                <i class="ri-arrow-left-s-line"></i>
+              </button>
+              <span class="page-number">{{ currentPage }}</span>
+              <button
+                class="page-control"
+                [disabled]="currentPage == totalPages"
+                (click)="nextPage()"
+              >
+                <i class="ri-arrow-right-s-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de création/modification -->
+      <div
+        class="modal fade modal-lg"
+        id="showModal"
+        tabindex="-1"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content shadow-lg border-0">
+            <!-- Header avec gradient -->
+            <div
+              class="modal-header"
+              style="
+                background: linear-gradient(135deg, #3b82f6 0%, #405189 100%);
+                border: 0;
+              "
+            >
+              <div class="d-flex align-items-center gap-2">
+                <div class="icon-circle">
+                  <i class="ri-pie-chart-2-line text-white fs-5"></i>
+                </div>
+                <h5 class="modal-title text-white fw-semibold">
+                  {{
+                    actionModal === "create"
+                      ? "Nouveau centre"
+                      : actionModal === "update"
+                        ? "Modifier centre"
+                        : "Voir centre"
+                  }}
+                </h5>
+              </div>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+
+            <form [formGroup]="centreanalytiqueForm" (ngSubmit)="onSubmit()">
+              <div class="modal-body p-4">
+                <!-- Section identification -->
+                <div class="mb-4">
+                  <h6
+                    class="mb-3 fw-semibold small text-uppercase text-muted"
+                    style="letter-spacing: 0.5px"
+                  >
+                    <i class="ri-id-card-line me-1"></i> Identification
+                  </h6>
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <div class="form-floating">
+                        <input
+                          type="text"
+                          class="form-control {{
+                            isValidField('codecentreanalytique')
+                          }}"
+                          formControlName="codecentreanalytique"
+                          id="codecentreanalytique"
+                          placeholder="Code centre"
+                          maxlength="10"
+                        />
+                        <label for="codecentreanalytique" class="small"
+                          >Code</label
+                        >
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-floating">
+                        <input
+                          type="text"
+                          class="form-control {{ isValidField('libelle') }}"
+                          formControlName="libelle"
+                          id="libelle"
+                          placeholder="Libellé"
+                        />
+                        <label for="libelle" class="small">Libellé</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section statut -->
+                <div>
+                  <h6
+                    class="mb-3 fw-semibold small text-uppercase text-muted"
+                    style="letter-spacing: 0.5px"
+                  >
+                    <i class="ri-shield-check-line me-1"></i> Statut
+                  </h6>
+                  <div class="row g-3">
+                    <div class="col-12">
+                      <div
+                        class="permission-card"
+                        [class.active]="
+                          centreanalytiqueForm.get('actif')?.value == 1
+                        "
+                      >
+                        <div
+                          class="form-check form-switch d-flex align-items-center justify-content-between px-2"
+                        >
+                          <label
+                            class="form-check-label small fw-medium"
+                            for="actif"
+                          >
+                            <i class="ri-checkbox-circle-line me-1"></i> Actif
+                          </label>
+                          <input
+                            class="form-check-input"
+                            type="checkbox"
+                            id="actif"
+                            formControlName="actif"
+                            [value]="1"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ID Société caché -->
+                <input type="hidden" formControlName="idsociete" />
+                <div *ngIf="msgErros" class="alert alert-danger mt-3">
+                  {{ msgErros }}
+                </div>
+              </div>
+
+              <div
+                class="modal-footer border-0 p-4"
+                style="background: transparent"
+              >
+                <div class="d-flex gap-3 justify-content-end w-100">
+                  <button
+                    type="button"
+                    class="btn-glass-cancel"
+                    data-bs-dismiss="modal"
+                  >
+                    <i class="ri-close-line me-1"></i> Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    class="btn-glass-submit"
+                    [disabled]="loading || centreanalytiqueForm.invalid"
+                  >
+                    <span
+                      *ngIf="loading"
+                      class="spinner-border spinner-border-sm me-2"
+                    ></span>
+                    <i *ngIf="!loading" class="ri-save-line me-1"></i>
+                    {{
+                      actionModal === "create"
+                        ? "Créer le centre"
+                        : actionModal === "update"
+                          ? "Modifier le centre"
+                          : "Enregistrer"
+                    }}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Import CSV -->
+      <div
+        class="modal fade"
+        id="importcsv"
+        tabindex="-1"
+        aria-hidden="true"
+        style="display: none"
+      >
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-content shadow-lg border-0">
+            <div
+              class="modal-header"
+              style="
+                background: linear-gradient(135deg, #3b82f6 0%, #405189 100%);
+                border: 0;
+              "
+            >
+              <div class="d-flex align-items-center gap-2">
+                <div class="icon-circle">
+                  <i class="ri-file-upload-line text-white fs-5"></i>
+                </div>
+                <div>
+                  <h5 class="modal-title text-white fw-semibold">Import CSV</h5>
+                  <span class="text-white-50 small"
+                    >Importez vos données en quelques clics</span
+                  >
+                </div>
+              </div>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+                (click)="closeModal('importcsv')"
+              ></button>
+            </div>
+
+            <form (ngSubmit)="submitImportFile()">
+              <div class="modal-body p-4">
+                <!-- Zone d'upload -->
+                <div
+                  class="upload-zone"
+                  [class.dragover]="isDragover"
+                  [class.has-file]="selectedFile"
+                  (dragover)="onDragOver($event)"
+                  (dragleave)="onDragLeave($event)"
+                  (drop)="onDrop($event)"
+                  (click)="fileInput.click()"
+                >
+                  <ng-container *ngIf="!selectedFile">
+                    <div class="upload-content">
+                      <div class="upload-icon-wrapper">
+                        <i class="ri-upload-cloud-2-line"></i>
+                      </div>
+                      <h6 class="upload-title">Déposez votre fichier ici</h6>
+                      <p class="upload-subtitle">ou cliquez pour parcourir</p>
+                      <div class="upload-formats">
+                        <span class="format-badge">CSV</span>
+                      </div>
+                      <div class="upload-limits">
+                        <i class="ri-information-line"></i>
+                        <span>Max 10MB</span>
+                      </div>
+                    </div>
+                  </ng-container>
+
+                  <!-- Prévisualisation du fichier -->
+                  <ng-container *ngIf="selectedFile">
+                    <div class="file-preview-container">
+                      <div class="file-preview-header">
+                        <div class="file-icon-large">
+                          <i [class]="getFileIconClass(selectedFile.name)"></i>
+                        </div>
+                        <div class="file-info-large">
+                          <div class="file-name-large">
+                            {{ selectedFile.name }}
+                          </div>
+                          <div class="file-meta-large">
+                            <span class="file-size">{{
+                              formatFileSize(selectedFile.size)
+                            }}</span>
+                            <span class="file-type">{{
+                              getFileExtension(selectedFile.name)
+                            }}</span>
+                            <span class="file-date">{{
+                              selectedFile.lastModified
+                                | date: "dd/MM/yyyy HH:mm"
+                            }}</span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          class="btn-remove-file"
+                          (click)="removeFile($event)"
+                          title="Supprimer le fichier"
+                        >
+                          <i class="ri-close-line"></i>
+                        </button>
+                      </div>
+
+                      <div
+                        class="file-preview-content"
+                        *ngIf="fileContent.length > 0"
+                      >
+                        <div class="preview-header">
+                          <span class="preview-title"
+                            ><i class="ri-table-line"></i> Aperçu du
+                            fichier</span
+                          >
+                          <span class="preview-row-count"
+                            >{{ fileContent.length }} lignes</span
+                          >
+                        </div>
+                        <div class="preview-table-wrap">
+                          <table class="preview-table">
+                            <thead>
+                              <tr>
+                                <th *ngFor="let header of fileHeaders">
+                                  {{ header }}
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr
+                                *ngFor="let row of fileContent | slice: 0 : 5"
+                              >
+                                <td *ngFor="let cell of row">{{ cell }}</td>
+                              </tr>
+                              <tr *ngIf="fileContent.length > 5">
+                                <td
+                                  [attr.colspan]="fileHeaders.length"
+                                  class="preview-more"
+                                >
+                                  ... et {{ fileContent.length - 5 }} lignes
+                                  supplémentaires
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-container>
+
+                  <input
+                    type="file"
+                    #fileInput
+                    id="fileInput"
+                    class="d-none"
+                    accept=".csv"
+                    (change)="onFileSelected($event)"
+                  />
+                </div>
+
+                <!-- Barre de progression -->
+                <div
+                  class="progress-container"
+                  *ngIf="uploadProgress > 0 && uploadProgress < 100"
+                >
+                  <div class="progress-header">
+                    <span class="progress-title"
+                      ><i class="ri-loader-4-line spin"></i> Import en
+                      cours...</span
+                    >
+                    <span class="progress-percentage"
+                      >{{ uploadProgress }}%</span
+                    >
+                  </div>
+                  <div class="progress-track">
+                    <div
+                      class="progress-bar-import"
+                      [style.width]="uploadProgress + '%'"
+                    >
+                      <span class="progress-glow"></span>
+                    </div>
+                  </div>
+                  <div class="progress-details">
+                    <span class="progress-status">{{
+                      getProgressStatus()
+                    }}</span>
+                  </div>
+                </div>
+
+                <!-- Succès -->
+                <div class="upload-success" *ngIf="uploadProgress === 100">
+                  <div class="success-icon">
+                    <i class="ri-checkbox-circle-fill"></i>
+                  </div>
+                  <div class="success-content">
+                    <h6 class="success-title">Import terminé avec succès !</h6>
+                    <p class="success-message">{{ successMessage }}</p>
+                  </div>
+                </div>
+
+                <!-- Erreurs -->
+                <div class="upload-errors" *ngIf="importErrors.length > 0">
+                  <div class="errors-header">
+                    <i class="ri-error-warning-line"></i>
+                    <span>{{ importErrors.length }} erreur(s) détectée(s)</span>
+                  </div>
+                  <div class="errors-list">
+                    <div class="error-item" *ngFor="let error of importErrors">
+                      <i class="ri-close-circle-line"></i>
+                      <span>{{ error }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="modal-footer border-0 p-4"
+                style="background: transparent"
+              >
+                <div class="d-flex gap-3 justify-content-end w-100">
+                  <button
+                    type="button"
+                    class="btn-glass-cancel"
+                    data-bs-dismiss="modal"
+                    (click)="closeModal('importcsv')"
+                    [disabled]="uploadProgress > 0 && uploadProgress < 100"
+                  >
+                    <i class="ri-close-line me-1"></i> Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    class="btn-glass-submit"
+                    [disabled]="!selectedFile || uploadProgress > 0"
+                  >
+                    <i class="ri-upload-line me-1"></i> Importer
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Export -->
+      <div class="modal fade" id="exportModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content shadow-lg border-0">
+            <div
+              class="modal-header"
+              style="
+                background: linear-gradient(135deg, #3b82f6 0%, #405189 100%);
+                border: 0;
+              "
+            >
+              <div class="d-flex align-items-center gap-2">
+                <div class="icon-circle">
+                  <i class="ri-file-download-line text-white fs-5"></i>
+                </div>
+                <h5 class="modal-title text-white fw-semibold">
+                  Exporter centres analytiques
+                </h5>
+              </div>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body p-4">
+              <div class="mb-3">
+                <label
+                  class="form-label fw-medium small text-uppercase text-muted"
+                  >Centre début</label
+                >
+                <select
+                  class="form-select"
+                  [(ngModel)]="exportData.debut"
+                  name="debut"
+                >
+                  <option value="">-- Tous --</option>
+                  <option
+                    *ngFor="let n of centres"
+                    [value]="n.codecentreanalytique"
+                  >
+                    {{ n.codecentreanalytique }} - {{ n.libelle }}
+                  </option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label
+                  class="form-label fw-medium small text-uppercase text-muted"
+                  >Centre fin</label
+                >
+                <select
+                  class="form-select"
+                  [(ngModel)]="exportData.fin"
+                  name="fin"
+                >
+                  <option value="">-- Tous --</option>
+                  <option
+                    *ngFor="let n of centres"
+                    [value]="n.codecentreanalytique"
+                  >
+                    {{ n.codecentreanalytique }} - {{ n.libelle }}
+                  </option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label
+                  class="form-label fw-medium small text-uppercase text-muted"
+                  >Format</label
+                >
+                <select class="form-select" [(ngModel)]="exportData.format">
+                  <option value="excel">Excel</option>
+                  <option value="pdf">PDF</option>
+                </select>
+              </div>
+            </div>
+            <div
+              class="modal-footer border-0 p-4"
+              style="background: transparent"
+            >
+              <button
+                type="button"
+                class="btn-glass-cancel"
+                data-bs-dismiss="modal"
+              >
+                <i class="ri-close-line me-1"></i> Fermer
+              </button>
+              <button
+                type="button"
+                class="btn-glass-submit"
+                (click)="exporter()"
+              >
+                <i class="ri-download-line me-1"></i> Exporter
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de suppression -->
+      <div class="modal fade flip" id="delete" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+          <div class="modal-content bg-transparent border-0">
+            <div class="modal-body text-center p-0">
+              <div class="delete-modal-card p-4">
+                <div class="delete-icon-wrapper mb-4">
+                  <i class="ri-delete-bin-line"></i>
+                </div>
+                <h5 class="delete-modal-title">
+                  {{ titleMsg }} de {{ deletecentre?.codecentreanalytique }} :
+                  {{ deletecentre?.libelle }}
+                </h5>
+                <p class="delete-modal-message">{{ msgSup }}</p>
+                <div class="d-flex gap-3 justify-content-center">
+                  <button class="delete-btn-cancel" data-bs-dismiss="modal">
+                    <i class="ri-close-line me-1"></i> Annuler
+                  </button>
+                  <button
+                    class="delete-btn-confirm"
+                    (click)="deleteConfirmed()"
+                    data-bs-dismiss="modal"
+                  >
+                    <i class="ri-delete-bin-line me-1"></i> Supprimer
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--end modal -->
     </div>
-    <!--end col-->
+  </div>
+  <!--end col-->
 </div>
 <!--end row-->

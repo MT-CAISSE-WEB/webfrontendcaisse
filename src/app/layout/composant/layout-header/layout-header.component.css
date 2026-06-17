@@ -1,0 +1,883 @@
+/* ============================================
+   HEADER - GLASSMORPHISM ÉPURÉ
+   ============================================ */
+
+:root {
+  --header-height: 68px;
+  --primary: #405189;
+  --primary-light: #60a5fa;
+}
+
+#page-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: var(--header-height);
+
+  /* Glassmorphism */
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 1px 20px rgba(0, 0, 0, 0.04);
+
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.layout-width {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+.navbar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--header-height);
+}
+
+/* ============================================
+   LOGO
+   ============================================ */
+
+.navbar-brand-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.logo:hover {
+  opacity: 0.8;
+}
+
+.logo-light {
+  display: none;
+}
+
+/* ============================================
+   BOUTON HAMBURGER
+   ============================================ */
+
+.topnav-hamburger {
+  display: none !important;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(226, 232, 240, 0.3);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.topnav-hamburger:hover {
+  background: rgba(59, 130, 246, 0.06);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.hamburger-icon {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 20px;
+}
+
+.hamburger-icon span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: #1e293b;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.hamburger-icon span:nth-child(2) {
+  width: 70%;
+}
+
+.hamburger-icon.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger-icon.active span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.hamburger-icon.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* ============================================
+   ICÔNES HEADER
+   ============================================ */
+
+.header-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-topbar {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.btn-topbar:hover {
+  background: rgba(59, 130, 246, 0.06);
+  color: #405189;
+}
+
+.btn-topbar i {
+  font-size: 1.2rem;
+}
+
+/* Badge */
+.topbar-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  font-size: 0.5rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: #ef4444;
+  color: white;
+  border: 2px solid white;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* ============================================
+   USER PROFILE
+   ============================================ */
+
+.topbar-user .btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 12px 4px 4px;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.topbar-user .btn:hover {
+  background: rgba(59, 130, 246, 0.04);
+}
+
+.header-profile-user {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-name-text {
+  font-weight: 500;
+  color: #1e293b;
+  font-size: 0.85rem;
+}
+
+.user-name-sub-text {
+  color: #94a3b8;
+  font-size: 0.7rem;
+}
+
+/* ============================================
+   DROPDOWN - GLASSMORPHISM
+   ============================================ */
+
+/* ============================================
+   DROPDOWN MES CAISSES - DESIGN MODERNE
+   ============================================ */
+
+/* ✅ Conteneur principal */
+.dropdown-menu {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
+  padding: 12px;
+  min-width: 260px;
+  animation: dropdownFade 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ✅ En-tête du dropdown */
+.dropdown-header-custom {
+  padding: 8px 12px 16px 12px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dropdown-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dropdown-title i {
+  font-size: 1rem;
+  color: #3b82f6;
+}
+
+.dropdown-title .badge-count {
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  background: rgba(59, 130, 246, 0.08);
+  color: #3b82f6;
+  border-radius: 20px;
+}
+
+/* ✅ Bouton "Voir tous" */
+.btn-view-all {
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.08);
+  color: #3b82f6;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-view-all:hover {
+  background: rgba(59, 130, 246, 0.12);
+  transform: translateY(-1px);
+}
+
+.btn-view-all i {
+  font-size: 0.8rem;
+}
+
+/* ✅ Liste des caisses */
+.dropdown-items-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 12px 0 4px;
+}
+
+/* ✅ Item de caisse */
+.dropdown-caisse-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(226, 232, 240, 0.1);
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ✅ Effet de brillance au survol */
+.dropdown-caisse-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.04),
+    rgba(129, 140, 248, 0.02)
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.dropdown-caisse-item:hover::before {
+  opacity: 1;
+}
+
+.dropdown-caisse-item:hover {
+  transform: translateY(-2px);
+  border-color: rgba(59, 130, 246, 0.12);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.04);
+}
+
+.dropdown-caisse-item:active {
+  transform: scale(0.96);
+}
+
+/* ✅ Icône de la caisse */
+.caisse-icon-wrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.caisse-icon-wrapper.usd {
+  background: rgba(16, 185, 129, 0.08);
+  color: #10b981;
+}
+
+.caisse-icon-wrapper.cdf {
+  background: rgba(245, 158, 11, 0.08);
+  color: #f59e0b;
+}
+
+.caisse-icon-wrapper.eur {
+  background: rgba(59, 130, 246, 0.08);
+  color: #3b82f6;
+}
+
+.caisse-icon-wrapper i {
+  font-size: 1.1rem;
+}
+
+/* ✅ Infos de la caisse */
+.caisse-info {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.caisse-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #0f172a;
+  display: block;
+  line-height: 1.2;
+}
+
+.caisse-devise {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: #94a3b8;
+  display: block;
+  margin-top: 1px;
+}
+
+/* ✅ Indicateur de statut (si disponible) */
+.caisse-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.caisse-status-dot.open {
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+}
+
+.caisse-status-dot.closed {
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .dropdown-menu {
+    min-width: 220px;
+    border-radius: 16px;
+    padding: 10px;
+  }
+
+  .dropdown-items-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .dropdown-caisse-item {
+    padding: 8px 12px;
+  }
+
+  .caisse-icon-wrapper {
+    width: 32px;
+    height: 32px;
+  }
+
+  .caisse-icon-wrapper i {
+    font-size: 0.95rem;
+  }
+
+  .caisse-name {
+    font-size: 0.75rem;
+  }
+
+  .btn-view-all {
+    font-size: 0.65rem;
+    padding: 3px 10px;
+  }
+
+  .dropdown-title {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dropdown-menu {
+    min-width: 180px;
+    border-radius: 14px;
+    padding: 8px;
+  }
+
+  .dropdown-header-custom {
+    padding: 4px 8px 12px 8px;
+  }
+
+  .dropdown-items-grid {
+    gap: 4px;
+  }
+
+  .dropdown-caisse-item {
+    padding: 6px 10px;
+    border-radius: 10px;
+  }
+
+  .caisse-icon-wrapper {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+  }
+
+  .caisse-icon-wrapper i {
+    font-size: 0.85rem;
+  }
+
+  .caisse-name {
+    font-size: 0.7rem;
+  }
+
+  .caisse-devise {
+    font-size: 0.55rem;
+  }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  :root {
+    --header-height: 60px;
+  }
+
+  .layout-width {
+    padding: 0 16px;
+  }
+
+  .topnav-hamburger {
+    display: flex !important;
+  }
+
+  .logo img {
+    height: 32px !important;
+  }
+
+  .btn-topbar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .btn-topbar i {
+    font-size: 1rem;
+  }
+
+  .header-profile-user {
+    width: 30px;
+    height: 30px;
+  }
+
+  .user-name-text,
+  .user-name-sub-text {
+    display: none !important;
+  }
+
+  .topbar-user .btn {
+    padding: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .layout-width {
+    padding: 0 12px;
+  }
+
+  :root {
+    --header-height: 56px;
+  }
+
+  .btn-topbar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .btn-topbar i {
+    font-size: 0.9rem;
+  }
+
+  .topnav-hamburger {
+    width: 36px;
+    height: 36px;
+  }
+
+  .hamburger-icon {
+    width: 18px;
+  }
+}
+
+/* ============================================
+   DROPDOWN MES CAISSES - DESIGN ÉPURÉ
+   ============================================ */
+
+.dropdown-menu-cart {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06) !important;
+  padding: 0 !important;
+  min-width: 360px !important;
+  max-width: 440px !important;
+  overflow: hidden;
+  animation: dropdownFade 0.25s ease;
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ✅ En-tête */
+.dropdown-cart-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dropdown-cart-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.dropdown-cart-title i {
+  font-size: 1.1rem;
+  color: #3b82f6;
+}
+
+/* ✅ Badge compteur */
+.badge-cart-count {
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 4px 14px;
+  background: rgba(59, 130, 246, 0.08);
+  color: #3b82f6;
+  border-radius: 20px;
+}
+
+/* ✅ Corps */
+.dropdown-cart-body {
+  padding: 12px 16px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.dropdown-cart-body::-webkit-scrollbar {
+  width: 3px;
+}
+
+.dropdown-cart-body::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 10px;
+}
+
+.dropdown-cart-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+/* ✅ Liste des caisses */
+.cart-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ✅ Item d'une caisse */
+.cart-caisse-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(226, 232, 240, 0.08);
+  transition: all 0.2s ease;
+}
+
+.cart-caisse-item:hover {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(226, 232, 240, 0.15);
+}
+
+/* ✅ Icône de la caisse - SIMPLE */
+.cart-caisse-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.cart-caisse-icon .ri-wallet-line {
+  color: #3b82f6;
+}
+
+.cart-caisse-icon .ri-wallet-3-line {
+  color: #10b981;
+}
+
+/* ✅ Infos */
+.cart-caisse-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cart-caisse-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #0f172a;
+  display: block;
+}
+
+.cart-caisse-devise {
+  font-size: 0.65rem;
+  color: #94a3b8;
+  display: block;
+  margin-top: 1px;
+}
+
+/* ✅ Statut - simple */
+.cart-caisse-status {
+  font-size: 0.55rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.cart-caisse-status.open {
+  background: rgba(16, 185, 129, 0.08);
+  color: #10b981;
+}
+
+.cart-caisse-status.closed {
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+}
+
+/* ✅ Date */
+.cart-caisse-date {
+  font-size: 0.55rem;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+/* ✅ Footer */
+.dropdown-cart-footer {
+  padding: 12px 20px 16px;
+  border-top: 1px solid rgba(226, 232, 240, 0.15);
+}
+
+/* ✅ Boutons */
+.btn-cart-action {
+  width: 100%;
+  padding: 9px 16px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: none;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-cart-action:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-cart-open {
+  background: #10b981;
+  color: white;
+}
+
+.btn-cart-open:hover:not(:disabled) {
+  background: #059669;
+}
+
+.btn-cart-close {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-cart-close:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+/* ✅ Loading */
+.cart-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 0;
+}
+
+.cart-loading .spinner-border {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.cart-loading span {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* ✅ Empty */
+.cart-empty {
+  text-align: center;
+  padding: 30px 0;
+}
+
+.cart-empty i {
+  font-size: 2rem;
+  color: #cbd5e1;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.cart-empty p {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .dropdown-menu-cart {
+    min-width: 300px !important;
+    max-width: 340px !important;
+  }
+
+  .cart-caisse-item {
+    padding: 8px 12px;
+  }
+
+  .cart-caisse-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dropdown-menu-cart {
+    min-width: 260px !important;
+    max-width: 300px !important;
+    border-radius: 16px !important;
+  }
+
+  .dropdown-cart-header {
+    padding: 12px 16px;
+  }
+
+  .dropdown-cart-body {
+    padding: 8px 12px;
+  }
+
+  .dropdown-cart-footer {
+    padding: 10px 16px 12px;
+  }
+}
