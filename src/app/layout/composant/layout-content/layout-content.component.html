@@ -1,222 +1,412 @@
-<div class="row">
+<div class="dashboard-wrapper">
+  <!-- ============================================ -->
+  <!-- EN-TÊTE - GLASSMORPHISM PREMIUM -->
+  <!-- ============================================ -->
+  <div class="row">
     <div class="col">
-        <div class="h-100">
-            <div class="row mb-3 pb-1">
-                <div class="col-12">
-                    <div class="d-flex align-items-lg-center flex-lg-row flex-column">
-                        <div class="flex-grow-1">
-                            <h4 class="fs-16 mb-1">Bonjour et bienvenu(e), {{ user.prenom}} {{ user.nom }}!</h4>
-                            <p class="text-muted mb-0">Voici ce qui se passe aujourd'hui dans votre caisse.</p>
-                        </div>
-                        <div class="mt-3 mt-lg-0">
-                            <form [formGroup]="caisseperiodeForm">
-                                <div class="row g-3 mb-0 align-items-center">
-                                    <div class="col-sm-auto">
-                                        <div class="input-group">
-                                            <input formControlName="dateperiode" type="date"
-                                                class="form-control border-0 dash-filter-picker shadow">
-                                        </div>
-                                    </div>
-                                    <!--end col-->
-                                    <div class="col-auto">
-                                        <!-- OUVRIR JOURNÉE -->
-                                        <button
-                                            *ngIf="!isJourneeOuverte()"
-                                            type="button"
-                                            [disabled]="loadingCaisses || caissesArray.length === 0"
-                                            (click)="openCaisseUser()"
-                                            class="btn btn-soft-success">
-
-                                            <i class="ri-lock-unlock-line align-middle me-1"></i>
-                                            Ouvrir ma journée
-                                        </button>
-
-                                        <!-- CLÔTURER JOURNÉE -->
-                                        <button
-                                            *ngIf="isJourneeOuverte()"
-                                            type="button"
-                                            [disabled]="loadingCaisses || caissesArray.length === 0"
-                                            (click)="openBilletageModal(modalBilletage)"
-                                            class="btn btn-soft-danger">
-
-                                            <i class="ri-lock-line align-middle me-1"></i>
-                                            Clôturer ma journée
-                                        </button>
-                                    </div>
-                                    <!--end col-->
-                                </div>
-                                <!--end row-->
-                            </form>
-                        </div>
-                    </div><!-- end card header -->
+      <div class="h-100">
+        <div class="dashboard-header glass-header">
+          <div class="row align-items-center">
+            <div class="col-lg-7">
+              <div class="header-content">
+                <div class="welcome-badge">
+                  <span class="badge-glass">
+                    <i class="ri-shield-check-line"></i>
+                    Caisse sécurisée
+                  </span>
                 </div>
-                <!--end col-->
+                <h1 class="welcome-title">
+                  Bonjour,
+                  <span class="highlight"
+                    >{{ user.prenom }} {{ user.nom }}</span
+                  >
+                </h1>
+                <p class="welcome-subtitle">
+                  <i class="ri-time-line"></i>
+                  Voici ce qui se passe aujourd'hui dans votre caisse.
+                </p>
+              </div>
             </div>
-            <!--end row-->
-        </div> <!-- end .h-100-->
-    </div> <!-- end col -->
+            <div class="col-lg-5">
+              <div class="header-actions">
+                <form [formGroup]="caisseperiodeForm">
+                  <div class="action-group">
+                    <!-- Date picker -->
+                    <div class="date-picker-glass">
+                      <i class="ri-calendar-2-line"></i>
+                      <input
+                        formControlName="dateperiode"
+                        type="date"
+                        class="date-input-glass"
+                      />
+                    </div>
+
+                    <!-- Boutons d'action -->
+                    <div class="action-buttons">
+                      <!-- OUVRIR JOURNÉE -->
+                      <button
+                        *ngIf="!isJourneeOuverte()"
+                        type="button"
+                        [disabled]="loadingCaisses || caissesArray.length === 0"
+                        (click)="openCaisseUser()"
+                        class="btn-glass-open"
+                      >
+                        <i class="ri-lock-unlock-line"></i>
+                        <span>Ouvrir</span>
+                      </button>
+
+                      <!-- CLÔTURER JOURNÉE -->
+                      <button
+                        *ngIf="isJourneeOuverte()"
+                        type="button"
+                        [disabled]="loadingCaisses || caissesArray.length === 0"
+                        (click)="openBilletageModal(modalBilletage)"
+                        class="btn-glass-close"
+                      >
+                        <i class="ri-lock-line"></i>
+                        <span>Clôturer</span>
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- STATS RAPIDES - GLASSMORPHISM -->
+  <!-- ============================================ -->
+  <div class="row g-4 mb-4">
+    <div class="col-xl-3 col-lg-6 col-md-6">
+      <div class="stat-card glass-stat">
+        <div class="stat-icon-wrapper">
+          <div class="stat-icon stat-icon-primary">
+            <i class="ri-wallet-3-line"></i>
+          </div>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Caisses actives</span>
+          <h3 class="stat-value">{{ caissesArray.length }}</h3>
+        </div>
+        <div class="stat-progress">
+          <div class="progress-bar" style="width: 75%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-lg-6 col-md-6">
+      <div class="stat-card glass-stat">
+        <div class="stat-icon-wrapper">
+          <div class="stat-icon stat-icon-success">
+            <i class="ri-check-double-line"></i>
+          </div>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Journée ouverte</span>
+          <h3 class="stat-value">
+            {{ isJourneeOuverte() ? "✅ Oui" : "⛔ Non" }}
+          </h3>
+        </div>
+        <div class="stat-progress">
+          @if (isJourneeOuverte()) {
+            <div class="progress-bar success" style="width: 100%"></div>
+          } @else {
+            <div class="progress-bar success" style="width: 0%"></div>
+          }
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-lg-6 col-md-6">
+      <div class="stat-card glass-stat">
+        <div class="stat-icon-wrapper">
+          <div class="stat-icon stat-icon-warning">
+            <i class="ri-time-line"></i>
+          </div>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Date du jour</span>
+          <h3 class="stat-value">{{ today | date: "dd/MM/yyyy" }}</h3>
+        </div>
+        <div class="stat-progress">
+          <div class="progress-bar warning" style="width: 50%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-lg-6 col-md-6">
+      <div class="stat-card glass-stat">
+        <div class="stat-icon-wrapper">
+          <div class="stat-icon stat-icon-info">
+            <i class="ri-user-follow-line"></i>
+          </div>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Utilisateur</span>
+          <h3 class="stat-value">{{ user.prenom }}</h3>
+        </div>
+        <div class="stat-progress">
+          <div class="progress-bar info" style="width: 100%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- CONTENU PRINCIPAL - GLASSMORPHISM -->
+  <!-- ============================================ -->
+  <div class="row g-4">
+    <div class="col-xl-12">
+      <div class="main-content-glass">
+        <app-interface-caissier></app-interface-caissier>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mt-2">
+    <div class="col-xl-6">
+      <div class="main-content-glass">
+        <app-interface-demande-user></app-interface-demande-user>
+      </div>
+    </div>
+    <div class="col-xl-6">
+      <div class="main-content-glass">
+        <app-interface-user></app-interface-user>
+      </div>
+    </div>
+  </div>
 </div>
 
+<!-- ============================================ -->
+<!-- MODAL BILLETAGE - GLASSMORPHISM -->
+<!-- ============================================ -->
 <ng-template #modalBilletage let-modal>
-    <div class="modal-header bg-light p-3">
-        <h5 class="modal-title">Billetage caisse</h5>
-        <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  <div class="modal-glass-container">
+    <!-- HEADER -->
+    <div class="modal-glass-header">
+      <div class="modal-header-content">
+        <div class="modal-icon-wrapper">
+          <i class="ri-money-dollar-circle-fill"></i>
+        </div>
+        <div>
+          <h5 class="modal-glass-title">Billetage caisse</h5>
+          <span class="modal-glass-subtitle"
+            >Saisissez les quantités pour chaque caisse</span
+          >
+        </div>
+      </div>
+      <button type="button" class="modal-glass-close" (click)="modal.dismiss()">
+        <i class="ri-close-line"></i>
+      </button>
     </div>
 
     <form [formGroup]="billetageForm">
-        <div class="modal-body">
-            <ul class="nav nav-tabs-custom rounded card-header-tabs border-bottom-0 mb-3" role="tablist">
-                <li class="nav-item" *ngFor="let caisse of caissesBilletArray.controls; let i=index">
-                    <a class="nav-link" [class.active]="activeTab === i" data-bs-toggle="tab" (click)="selectTab(i)"
-                        style="cursor:pointer" role="tab">
-                        <i class="fas fa-home"></i> {{ caisse.value.caisse }} --- {{ caisse.value.devise }}
+      <div class="modal-glass-body">
+        <!-- Tabs -->
+        <ul class="tabs-glass" role="tablist">
+          <li
+            class="tab-item"
+            *ngFor="let caisse of caissesBilletArray.controls; let i = index"
+          >
+            <a
+              class="tab-link"
+              [class.active]="activeTab === i"
+              (click)="selectTab(i)"
+              role="tab"
+            >
+              <i class="ri-bank-card-line"></i>
+              <span class="tab-name">{{ caisse.value.caisse }}</span>
+              <span class="tab-badge">{{ caisse.value.devise }}</span>
+              <span class="tab-total">{{ getTotalPhysique(i) | number }}</span>
+            </a>
+          </li>
+        </ul>
 
-                        <span class="badge bg-secondary ms-2">
-                            {{ getTotalPhysique(i) | number }}
-                        </span>
-                    </a>
-                </li>
-            </ul>
-
-            <div class="tab-content" formArrayName="caissesBillet">
-                <div class="tab-pane" role="tabpanel" *ngFor="let caisse of caissesBilletArray.controls; let i=index"
-                    [formGroupName]="i" class="caisse-bloc" [hidden]="activeTab !== i">
-                    <div class="row mt-3">
-                        <!-- COLONNE BILLETS -->
-                        <div class="col-md-6 col-sm-6">
-                            <h5 *ngIf="getBillets(i).length">Billets</h5>
-                            <div class="table-scroll">
-                                <table class="table table-sm table-bordered billetage-table"
-                                    *ngIf="getBillets(i).length">
-
-                                    <thead>
-                                        <tr>
-                                            <th class="col-valeur">Valeur</th>
-                                            <th class="col-quantite text-center">Qté</th>
-                                            <th class="col-total text-end">Total</th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody formArrayName="billets">
-
-                                        <tr *ngFor="let billet of getBillets(i).controls; let j=index"
-                                            [formGroupName]="j">
-
-                                            <td class="text-end">
-                                                {{ billet.value.valeur | number }}
-                                            </td>
-
-                                            <td class="text-center">
-                                                <input type="number" min="0"
-                                                    class="form-control form-control-sm quantite-input"
-                                                    formControlName="quantite">
-                                            </td>
-
-                                            <td class="text-end">
-                                                {{ billet.value.valeur * billet.value.quantite | number }}
-                                            </td>
-
-                                        </tr>
-
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- COLONNE PIECES -->
-                        <div class="col-md-6 col-sm-6">
-                            <h5 *ngIf="getPieces(i).length">Pièces</h5>
-                            <div class="table-scroll">
-                                <table class="table table-sm table-bordered billetage-table"
-                                    *ngIf="getPieces(i).length">
-                                    <thead>
-                                        <tr>
-                                            <th class="col-valeur">Valeur</th>
-                                            <th class="col-quantite text-center">Qté</th>
-                                            <th class="col-total text-end">Total</th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody formArrayName="pieces">
-                                        <tr *ngFor="let piece of getPieces(i).controls; let j=index"
-                                            [formGroupName]="j">
-                                            <td class="text-end">
-                                                {{ piece.value.valeur | number }}
-                                            </td>
-                                            <td class="text-center">
-                                                <input type="number" min="0"
-                                                    class="form-control form-control-sm quantite-input"
-                                                    formControlName="quantite">
-                                            </td>
-                                            <td class="text-end">
-                                                {{ piece.value.valeur * piece.value.quantite | number }}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- TOTAUX -->
-                    <!-- <div class="totaux-caisse">
-                        <div class="row">
-                            <div class="col-md-4 text-end">
-                                <strong>Total billets :</strong>
-                                {{ getTotalBillets(i) | number }}
-                            </div>
-
-                            <div class="col-md-4 text-end">
-                                <strong>Total pièces :</strong>
-                                {{ getTotalPieces(i) | number }}
-                            </div>
-
-                            <div class="col-md-4 text-end total-physique">
-                                <strong>Total physique :</strong>
-                                {{ getTotalPhysique(i) | number }}
-                            </div>
-                        </div>
-                    </div> -->
-
-                    <!-- TOTAUX + ÉCART -->
-                    <div class="row mt-2 totaux-caisse">
-                        <div class="col-md-3 text-end"><strong>Total billets :</strong> {{ getTotalBillets(i) | number }}</div>
-                        <div class="col-md-3 text-end"><strong>Total pièces :</strong> {{ getTotalPieces(i) | number }}</div>
-                        <div class="col-md-3 text-end">
-                            <strong>Total physique :</strong> {{ getTotalPhysique(i) | number }} 
-                        </div>
-                        <div class="col-md-3 text-end total-physique">
-                            <span *ngIf="billetageValidated && validatedCaisseIndex === i">
-                                | Écart : {{ caisse.value.ecart | number }}
-                            </span>
-                        </div>
-                    </div>
+        <div class="tab-content-glass" formArrayName="caissesBillet">
+          <div
+            class="tab-pane-glass"
+            *ngFor="let caisse of caissesBilletArray.controls; let i = index"
+            [formGroupName]="i"
+            [hidden]="activeTab !== i"
+          >
+            <div class="billetage-grid">
+              <!-- BILLETS -->
+              <div class="billetage-col" *ngIf="getBillets(i).length">
+                <div class="billetage-header">
+                  <div class="billetage-header-icon bills">
+                    <i class="ri-money-euro-circle-line"></i>
+                  </div>
+                  <span>Billets</span>
+                  <span class="billetage-count">{{
+                    getBillets(i).length
+                  }}</span>
                 </div>
+                <div class="billetage-table-wrap">
+                  <table class="billetage-table">
+                    <thead>
+                      <tr>
+                        <th>Valeur</th>
+                        <th class="text-center">Qté</th>
+                        <th class="text-end">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="billets">
+                      <tr
+                        *ngFor="
+                          let billet of getBillets(i).controls;
+                          let j = index
+                        "
+                        [formGroupName]="j"
+                      >
+                        <td class="text-end valeur-cell">
+                          {{ billet.value.valeur | number }}
+                        </td>
+                        <td class="text-center">
+                          <input
+                            type="number"
+                            min="0"
+                            class="quantite-glass"
+                            formControlName="quantite"
+                            placeholder="0"
+                          />
+                        </td>
+                        <td class="text-end total-cell">
+                          {{
+                            billet.value.valeur * billet.value.quantite | number
+                          }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- PIÈCES -->
+              <div class="billetage-col" *ngIf="getPieces(i).length">
+                <div class="billetage-header">
+                  <div class="billetage-header-icon coins">
+                    <i class="ri-copper-coin-line"></i>
+                  </div>
+                  <span>Pièces</span>
+                  <span class="billetage-count">{{ getPieces(i).length }}</span>
+                </div>
+                <div class="billetage-table-wrap">
+                  <table class="billetage-table">
+                    <thead>
+                      <tr>
+                        <th>Valeur</th>
+                        <th class="text-center">Qté</th>
+                        <th class="text-end">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="pieces">
+                      <tr
+                        *ngFor="
+                          let piece of getPieces(i).controls;
+                          let j = index
+                        "
+                        [formGroupName]="j"
+                      >
+                        <td class="text-end valeur-cell">
+                          {{ piece.value.valeur | number }}
+                        </td>
+                        <td class="text-center">
+                          <input
+                            type="number"
+                            min="0"
+                            class="quantite-glass"
+                            formControlName="quantite"
+                            placeholder="0"
+                          />
+                        </td>
+                        <td class="text-end total-cell">
+                          {{
+                            piece.value.valeur * piece.value.quantite | number
+                          }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
+
+            <!-- TOTAUX -->
+            <div class="billetage-totaux">
+              <div class="total-item">
+                <span class="total-label">
+                  <i class="ri-money-euro-circle-line"></i> Billets
+                </span>
+                <span class="total-value">{{
+                  getTotalBillets(i) | number
+                }}</span>
+              </div>
+              <div class="total-divider"></div>
+              <div class="total-item">
+                <span class="total-label">
+                  <i class="ri-copper-coin-line"></i> Pièces
+                </span>
+                <span class="total-value">{{
+                  getTotalPieces(i) | number
+                }}</span>
+              </div>
+              <div class="total-divider"></div>
+              <div class="total-item total-physique">
+                <span class="total-label">
+                  <i class="ri-cash-line"></i> Total physique
+                </span>
+                <span class="total-value">{{
+                  getTotalPhysique(i) | number
+                }}</span>
+              </div>
+              <div
+                class="total-divider"
+                *ngIf="billetageValidated && validatedCaisseIndex === i"
+              ></div>
+              <div
+                class="total-item total-ecart"
+                *ngIf="billetageValidated && validatedCaisseIndex === i"
+              >
+                <span class="total-label">
+                  <i class="ri-error-warning-line"></i> Écart
+                </span>
+                <span class="total-value">{{
+                  caisse.value.ecart | number
+                }}</span>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div class="modal-footer">
-            <button type="button" class="btn btn-light btn-sm" (click)="cancelBilletage()">Annuler</button>
-
-            <!-- Valider caisse active -->
-            <button type="button" class="btn btn-success btn-sm"
-                    *ngIf="!billetageValidatedIndexes.includes(activeTab)"
-                    (click)="validateBilletage(activeTab)">
-                Valider billetage
-            </button>
-
-            <!-- Soumettre toutes les caisses validées -->
-            <button type="button" class="btn btn-success btn-sm"
-                    *ngIf="billetageValidatedIndexes.length == caissesUser.length" [disabled]="loading"
-                    (click)="submitBilletage()">
-                OK
-            </button>
-        </div>
+      <!-- FOOTER -->
+      <div class="modal-glass-footer">
+        <button
+          type="button"
+          class="btn-glass-cancel-footer"
+          (click)="cancelBilletage()"
+        >
+          <i class="ri-close-line"></i> Annuler
+        </button>
+        <button
+          type="button"
+          class="btn-glass-validate"
+          *ngIf="!billetageValidatedIndexes.includes(activeTab)"
+          (click)="validateBilletage(activeTab)"
+        >
+          <i class="ri-check-line"></i> Valider
+        </button>
+        <button
+          type="button"
+          class="btn-glass-submit-footer"
+          *ngIf="billetageValidatedIndexes.length == caissesUser.length"
+          [disabled]="loading"
+          (click)="submitBilletage()"
+        >
+          <i class="ri-save-line"></i> Terminer
+        </button>
+      </div>
     </form>
+  </div>
 </ng-template>
-
-<app-interface-caissier> </app-interface-caissier>
-
-<app-interface-demande-user> </app-interface-demande-user>
-
-<app-interface-user> </app-interface-user>

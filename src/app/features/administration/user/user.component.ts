@@ -1,9 +1,18 @@
-
 import { Component } from '@angular/core';
 import { usermodel } from '../model/user.model';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { userservice } from '../service/user.service';
-import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
+import {
+  MESSAGE_CHAMPS_OBLIGATOIRE,
+  MESSAGE_SUPPRESSION_DESCRIPTION,
+  TITLE_DELETE,
+} from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { societemodel } from '../../structure/model/societe.model';
@@ -21,542 +30,596 @@ import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-user',
-  imports: [CommonModule,FormsModule,ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './user.component.html',
-  styleUrl: './user.component.css'
+  styleUrl: './user.component.css',
 })
 export class UserComponent {
-      title = "Utilisateurs";
-      params : any = {};
-      breadCrumbs : any = {};
-      fb: FormBuilder = new FormBuilder();
-      users : usermodel[] = [];
-      user : usermodel = new usermodel();
-      msgErros : string = "";
-      loading: Boolean = false;
-      userForm : FormGroup = this.fb.group({});
-      societes : societemodel[] = [];
-      sites : sitemodel[] = [];
+  title = 'Utilisateurs';
+  params: any = {};
+  breadCrumbs: any = {};
+  fb: FormBuilder = new FormBuilder();
+  users: usermodel[] = [];
+  user: usermodel = new usermodel();
+  msgErros: string = '';
+  loading: Boolean = false;
+  userForm: FormGroup = this.fb.group({});
+  societes: societemodel[] = [];
+  sites: sitemodel[] = [];
 
-      //Tri et recherche 
-      filtreusers : usermodel[] = [];
-      searchtext : string ="";
-      sortby: string = "code";
-      sortdirection : 'asc' | 'desc' = 'asc';
-      selectedstatus : string="";
-      activeTab: string = 'all';
+  //Tri et recherche
+  filtreusers: usermodel[] = [];
+  searchtext: string = '';
+  sortby: string = 'code';
+  sortdirection: 'asc' | 'desc' = 'asc';
+  selectedstatus: string = '';
+  activeTab: string = 'all';
 
-      //Pagination 
-      pageSize: number = 10;        // éléments par page (à adapter si tu veux)
-      currentPage: number = 1;      // page courante
+  //Pagination
+  pageSize: number = 10; // éléments par page (à adapter si tu veux)
+  currentPage: number = 1; // page courante
 
+  userRolesMap: Map<string, number[]> = new Map();
 
-      // Définissez des propriétés de pagination
-      //currentPage: number = 1;
-      // Nombre d'éléments par page
-      limit: number = 5;
+  // Définissez des propriétés de pagination
+  //currentPage: number = 1;
+  // Nombre d'éléments par page
+  limit: number = 5;
 
-      //Faire le check selection **********
-      objectsSelected : usermodel[] = [];
-      selectedItems : any[] = [];
-      // Détermine si toutes les lignes sont selectionnées
-      checkAllRow : any;
-      error : string = "";
+  //Faire le check selection **********
+  objectsSelected: usermodel[] = [];
+  selectedItems: any[] = [];
+  // Détermine si toutes les lignes sont selectionnées
+  checkAllRow: any;
+  error: string = '';
 
-      //Changement titre modal
-      actionModal: string = "create";
-      
-      //Message suppression
-      msgSup: string = "";
-      titleMsg: string ="";
+  //Changement titre modal
+  actionModal: string = 'create';
 
-      //Element à supprimer 
-      deleteuser : any = null;
+  //Message suppression
+  msgSup: string = '';
+  titleMsg: string = '';
 
-      //Gestion des roles de l'utilisateur la tête chauffe dejà
-      roles : rolemodel [] = [];
-      departements : departementmodel [] = [];
-      selectedUser: usermodel | null = null;
-      userRoles: number[] = []; 
-      userdepts : string[] = [];  
+  //Element à supprimer
+  deleteuser: any = null;
 
-      constructor(
-        private us:userservice,
-        private cdr: ChangeDetectorRef,
-        private sc:societeservice,
-        private rol : roleservice,
-        private dp : departementservice,
-        private ud : utilisateurdepartementservice,
-        private ur:utilisateurroleservice,
-        private st: siteservice,
-        private toast: ToastrService,
-        private router : Router){}
-      
-      ngOnInit(): void {
-      //Afficher toutes les users
-      this.getallsocietes();
-      this.loadsites();
-      this.getallusers();
-      this.loadRoles();
-      this.loaddepartements();
-      //Initialisation du formulaire
-      this.initForm();
-      this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("cet utilisateur");
-      this.titleMsg = TITLE_DELETE;
-      // this.userForm.get('email')?.valueChanges.subscribe(value => {
-      //   this.userForm.patchValue({
-      //     login : value
-      //   }, { emitEvent: false });
-      //   });
+  //Gestion des roles de l'utilisateur la tête chauffe dejà
+  roles: rolemodel[] = [];
+  departements: departementmodel[] = [];
+  selectedUser: usermodel | null = null;
+  userRoles: number[] = [];
+  userdepts: string[] = [];
+
+  constructor(
+    private us: userservice,
+    private cdr: ChangeDetectorRef,
+    private sc: societeservice,
+    private rol: roleservice,
+    private dp: departementservice,
+    private ud: utilisateurdepartementservice,
+    private ur: utilisateurroleservice,
+    private st: siteservice,
+    private toast: ToastrService,
+    private router: Router,
+  ) {}
+
+  ngOnInit(): void {
+    //Afficher toutes les users
+    this.getallsocietes();
+    this.loadsites();
+    this.getallusers();
+    this.loadRoles();
+    this.loaddepartements();
+    //Initialisation du formulaire
+    this.initForm();
+    this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION('cet utilisateur');
+    this.titleMsg = TITLE_DELETE;
+    // this.userForm.get('email')?.valueChanges.subscribe(value => {
+    //   this.userForm.patchValue({
+    //     login : value
+    //   }, { emitEvent: false });
+    //   });
   }
 
-   getallusers (){
+  getallusers() {
     this.us.getAll().subscribe({
-      next : (res) => {
-         if(res.success){
-            this.users = res.data;
-            this.filtreusers = res.data;
-         }
+      next: (res) => {
+        if (res.success) {
+          this.users = res.data;
+          this.filtreusers = res.data;
+          this.loadAllUsersRoles();
+        }
+      },
+    });
+  }
+
+  getRoleShortName(roleName: string): string {
+    switch (roleName) {
+      case 'Super administrateur':
+        return 'Super Admin';
+      case 'Administrateur system':
+        return 'Admin System';
+      case 'Superviseur caisse':
+        return 'Superviseur';
+      default:
+        return roleName;
+    }
+  }
+
+  getsocietebysite() {
+    this.userForm.get('idsite')?.valueChanges.subscribe((idsite) => {
+      const site = this.sites.find((s) => s.idsite === idsite);
+
+      if (site) {
+        // Mettre l’ID société dans le formulaire
+        this.userForm.get('idsociete')?.setValue(site.idsociete);
+
+        // Mettre le nom société dans l’input affiché
+        this.userForm.get('societe')?.setValue(site.raisonsociale);
+      } else {
+        this.userForm.get('idsociete')?.setValue(null);
+        this.userForm.get('societe')?.setValue('');
       }
     });
   }
 
-  getsocietebysite(){
-    this.userForm.get('idsite')?.valueChanges.subscribe(idsite => {
-    const site = this.sites.find(s => s.idsite === idsite);
-  
-    if (site) {
-      // Mettre l’ID société dans le formulaire
-      this.userForm.get('idsociete')?.setValue(site.idsociete);
-
-      // Mettre le nom société dans l’input affiché
-      this.userForm.get('societe')?.setValue(site.raisonsociale);
-    } else {
-      this.userForm.get('idsociete')?.setValue(null);
-      this.userForm.get('societe')?.setValue('');
-    }
-  });
-}
-
-  getallsocietes(){
+  getallsocietes() {
     this.sc.getAll().subscribe({
-      next : (res) => {
-        if(res.success){  
+      next: (res) => {
+        if (res.success) {
           this.societes = res.data;
         }
+      },
+    });
+  }
+
+  // rôle des utilisateurs
+  loadAllUsersRoles() {
+    this.users.forEach((user) => {
+      this.ur.getutilisateurroles(user.idutilisateur).subscribe({
+        next: (res) => {
+          const roleIds = res.data[0]?.map((r: any) => r.idrole) || [];
+          this.userRolesMap.set(user.idutilisateur, roleIds);
+        },
+        error: (err) => console.error('Erreur chargement rôles:', err),
+      });
+    });
+  }
+
+  // Obtenir les noms des rôles d'un utilisateur
+  getUserRoleNames(userId: string): string[] {
+    const roleIds = this.userRolesMap.get(userId) || [];
+    const roleNames: string[] = [];
+
+    roleIds.forEach((id) => {
+      const role = this.roles.find((r) => this.tonumber(r.idrole) === id);
+      if (role) {
+        roleNames.push(role.libelle);
       }
     });
+
+    return roleNames;
+  }
+
+  // Obtenir la classe CSS du badge
+  getRoleBadgeClass(roleName: string): string {
+    switch (roleName) {
+      case 'Super administrateur':
+        return 'role-super-admin';
+      case 'Administrateur system':
+        return 'role-admin';
+      case 'Caissier':
+        return 'role-caissier';
+      case 'Superviseur caisse':
+        return 'role-superviseur';
+      case 'Demandeur':
+        return 'role-demandeur';
+      case 'Comptable':
+        return 'role-comptable';
+      default:
+        return 'role-default';
+    }
   }
 
   loadRoles(): void {
-    this.rol.getAll().subscribe(res => {
+    this.rol.getAll().subscribe((res) => {
       this.roles = res.data;
       console.log(res.data);
     });
   }
 
   loaddepartements(): void {
-    this.dp.getAll().subscribe(res => {
+    this.dp.getAll().subscribe((res) => {
       this.departements = res.data;
-    } );
+    });
   }
-  loadsites():void {
-    this.st.getAll().subscribe(res => {
+  loadsites(): void {
+    this.st.getAll().subscribe((res) => {
       this.sites = res.data;
-    } );
+    });
   }
 
   // Nombre total de pages calculé dynamiquement
-get totalPages(): number {
-  return Math.ceil(this.filtreusers.length / this.pageSize);
-}
+  get totalPages(): number {
+    return Math.ceil(this.filtreusers.length / this.pageSize);
+  }
 
-// Liste des éléments visibles pour la page courante
-get pagedusers(): any[] {
-  const start = (this.currentPage - 1) * this.pageSize;
-  return this.filtreusers.slice(start, start + this.pageSize);
-}
+  // Liste des éléments visibles pour la page courante
+  get pagedusers(): any[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filtreusers.slice(start, start + this.pageSize);
+  }
 
-changePage(page: number) {
-  if(page < 1 || page > this.totalPages) return;
-  this.currentPage = page;
-}
+  changePage(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+  }
 
+  searchuser() {
+    const term = this.normalize(this.searchtext);
 
- searchuser() {
-  const term = this.normalize(this.searchtext);
+    this.filtreusers = this.users.filter((user) => {
+      const codeutilisateur = this.normalize(user.codeutilisateur);
+      const idsociete = this.normalize(user.idsociete);
+      const nom = this.normalize(user.nom);
+      const prenom = this.normalize(user.prenom);
+      const adresse = this.normalize(user.adresse);
+      const telephone = this.normalize(user.telephone);
+      const email = this.normalize(user.email);
+      const login = this.normalize(user.login);
+      const password = this.normalize(user.password);
+      const typeentitesite = this.normalize(user.typeentitesite);
+      const typeentitedepartement = this.normalize(user.typeentitedepartement);
+      const typeentitesociete = this.normalize(user.typeentitesociete);
+      const acheteur = this.normalize(user.acheteur);
 
-  this.filtreusers = this.users.filter(user => {
-    const codeutilisateur = this.normalize(user.codeutilisateur);
-    const idsociete = this.normalize(user.idsociete);
-    const nom = this.normalize(user.nom);
-    const prenom = this.normalize(user.prenom);
-    const adresse = this.normalize(user.adresse);
-    const telephone = this.normalize(user.telephone);
-    const email = this.normalize(user.email);
-    const login = this.normalize(user.login);
-    const password = this.normalize(user.password);
-    const typeentitesite = this.normalize(user.typeentitesite);
-    const typeentitedepartement = this.normalize(user.typeentitedepartement);
-    const typeentitesociete = this.normalize(user.typeentitesociete);
-    const acheteur = this.normalize(user.acheteur); 
+      const matchtext =
+        codeutilisateur.includes(term) ||
+        idsociete.includes(term) ||
+        nom.includes(term) ||
+        prenom.includes(term) ||
+        adresse.includes(term) ||
+        telephone.includes(term) ||
+        email.includes(term) ||
+        login.includes(term) ||
+        password.includes(term) ||
+        typeentitesite.includes(term) ||
+        typeentitedepartement.includes(term) ||
+        typeentitesociete.includes(term) ||
+        acheteur.includes(term);
 
-    const matchtext =
-      codeutilisateur.includes(term) ||
-      idsociete.includes(term) ||
-      nom.includes(term) ||
-      prenom.includes(term) ||
-      adresse.includes(term) ||
-      telephone.includes(term) ||
-      email.includes(term) ||
-      login.includes(term) ||
-      password.includes(term) ||
-      typeentitesite.includes(term) ||
-      typeentitedepartement.includes(term) ||
-      typeentitesociete.includes(term) ||
-      acheteur.includes(term);
+      const matchstatus = (() => {
+        switch (this.selectedstatus) {
+          case '':
+            return true;
+          case 'societe':
+            return user.typeentitesociete === 1;
+          case 'site':
+            return user.typeentitesite === 1;
+          case 'departement':
+            return user.typeentitedepartement === 1;
+          case 'acheteur':
+            return user.acheteur === 1;
+          default:
+            return true;
+        }
+      })();
 
-   const matchstatus = (() => {
-      switch (this.selectedstatus) {
-        case "":
-          return true;
-        case "societe":
-          return user.typeentitesociete === 1;
-        case "site":
-          return user.typeentitesite === 1;
-        case "departement":
-          return user.typeentitedepartement === 1;
-        case "acheteur":
-          return user.acheteur === 1;
-        default:
-          return true;
-      }
-    })();
+      return matchtext && matchstatus;
+    });
 
-    return matchtext && matchstatus;
-  });
+    this.currentPage = 1;
+  }
 
-  this.currentPage = 1;
-}
+  setActiveTab(tab: string) {
+    this.selectedstatus = tab;
+    this.searchuser();
+  }
 
-setActiveTab(tab: string) {
- 
- this.selectedstatus = tab;
- this.searchuser(); 
-}
+  // //Gestion des Badges
+  get societeCount(): number {
+    return this.users.filter((user) => user.typeentitesociete === 1).length;
+  }
 
-// //Gestion des Badges
-get societeCount(): number {
-  return this.users.filter(user => user.typeentitesociete === 1).length;
-}
+  get siteCount(): number {
+    return this.users.filter((user) => user.typeentitesite === 1).length;
+  }
 
-get siteCount(): number {
-  return this.users.filter(user => user.typeentitesite === 1).length;
-}
+  get departementCount(): number {
+    return this.users.filter((user) => user.typeentitedepartement === 1).length;
+  }
 
-get departementCount(): number {
-  return this.users.filter(user => user.typeentitedepartement === 1).length;
-}
-
-get acheteurCount(): number {
-  return this.users.filter(user => user.acheteur === 1).length;
-}
+  get acheteurCount(): number {
+    return this.users.filter((user) => user.acheteur === 1).length;
+  }
   //normaliser le test pour la recherche
   normalize(value: any): string {
-  return (value || "")
-    .toString()
-    .toLowerCase()
-    .normalize("NFD")               // Décompose les caractères accentués
-    .replace(/[\u0300-\u036f]/g, "") // Supprime les accents
-    .trim();
-}
+    return (value || '')
+      .toString()
+      .toLowerCase()
+      .normalize('NFD') // Décompose les caractères accentués
+      .replace(/[\u0300-\u036f]/g, '') // Supprime les accents
+      .trim();
+  }
 
-
-   initForm(): void{
+  initForm(): void {
     this.userForm = this.fb.group({
-       codeutilisateur :['', Validators.required],
-       idsociete :[''],
-       idsite : ['', Validators.required],
-       societe :[''],
-       nom :[''],
-       prenom :[''],
-       adresse :[''],
-       telephone : [''],
-       email :  [''],
-       login : [''],
-       password :[''],
-       typeentitesite :[''],
-       typeentitedepartement :[''],
-       typeentitesociete : [''],
-       acheteur: ['']
-
+      codeutilisateur: ['', Validators.required],
+      idsociete: [''],
+      idsite: ['', Validators.required],
+      societe: [''],
+      nom: [''],
+      prenom: [''],
+      adresse: [''],
+      telephone: [''],
+      email: [''],
+      login: [''],
+      password: [''],
+      typeentitesite: [''],
+      typeentitedepartement: [''],
+      typeentitesociete: [''],
+      acheteur: [''],
     });
     this.getsocietebysite();
   }
 
-  get form(){
+  get form() {
     return this.userForm.controls;
   }
 
-  dispatchuser(_object: usermodel){
-      this.userForm.patchValue({
-        codeutilisateur :_object.codeutilisateur,
-        idsociete :_object.idsociete,
-        societe : _object.societe,
-        idsite :_object.idsite,
-        nom :_object.nom,
-        prenom :_object.prenom,
-        adresse :_object.adresse,
-        telephone : _object.telephone,
-        email :  _object.email,
-        login : _object.login,
-        typeentitesite :_object.typeentitesite,
-        typeentitedepartement :_object.typeentitedepartement,
-        typeentitesociete : _object.typeentitesociete,
-        acheteur: _object.acheteur
-      });
-    }
+  dispatchuser(_object: usermodel) {
+    this.userForm.patchValue({
+      codeutilisateur: _object.codeutilisateur,
+      idsociete: _object.idsociete,
+      societe: _object.societe,
+      idsite: _object.idsite,
+      nom: _object.nom,
+      prenom: _object.prenom,
+      adresse: _object.adresse,
+      telephone: _object.telephone,
+      email: _object.email,
+      login: _object.login,
+      typeentitesite: _object.typeentitesite,
+      typeentitedepartement: _object.typeentitedepartement,
+      typeentitesociete: _object.typeentitesociete,
+      acheteur: _object.acheteur,
+    });
+  }
 
-    isValidField(field: string): string {
-  const control = this.userForm.get(field);
-  return control && control.invalid && (control.touched || control.dirty)
-    ? 'is-invalid'
-    : '';
-}
+  isValidField(field: string): string {
+    const control = this.userForm.get(field);
+    return control && control.invalid && (control.touched || control.dirty)
+      ? 'is-invalid'
+      : '';
+  }
 
-//vérifie si _id est inclus dans un tableau d'Ius stocké
+  //vérifie si _id est inclus dans un tableau d'Ius stocké
   isChecked(_id: String) {
     const ius: String[] = this.objectsSelected.map((el) => el.idutilisateur);
     return ius.includes(_id);
   }
 
   //selectionner une instance dans une liste
-      handleSelectOne(user: usermodel, actif: any) {
-        const index = this.objectsSelected.findIndex(
-          (el) => el.idutilisateur== user.idutilisateur
-        );
-        if (index == -1) this.objectsSelected.push(user);
-        if (index != -1) this.objectsSelected.splice(index, 1);
-        //this.checkAllRow = this.objectsSelected?.length == this.user?.length;
-      }
+  handleSelectOne(user: usermodel, actif: any) {
+    const index = this.objectsSelected.findIndex(
+      (el) => el.idutilisateur == user.idutilisateur,
+    );
+    if (index == -1) this.objectsSelected.push(user);
+    if (index != -1) this.objectsSelected.splice(index, 1);
+    //this.checkAllRow = this.objectsSelected?.length == this.user?.length;
+  }
 
-       //Soumission du formulaire
-        onsubmit(){
-          /** Check formulaire */
-          this.msgErros = '';
-          const controls = this.userForm.controls;
-          if (this.userForm.invalid) {
-            Object.keys(controls).forEach(controlName => controls[controlName].markAsTouched());
-            this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
-            return;
-          }
-      
-          /** 2. prepare data */
-          const formValue = this.userForm.value;
-          
-          const _user: usermodel = {
-                ...this.user,
-                ...formValue,
-              };
-      
-              this.upsert(_user);
-              this.closeModal('showModal');
-
-
-      
-      }
-
-      rafreshpage(){
-        const currentUrl = this.router.url; 
-        this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-          this.router.navigate([currentUrl]);
-        });
-      }
-
-      upsert (user : usermodel){
-          this.us.upsert(user).subscribe({
-            next: (res: any) => {
-              console.log(res);
-              if(res.success){
-                this.loadusers(true);
-                this.closeModal('showModal');
-                this.rafreshpage();
-                this.toast.success(res.message);
-              }
-            },
-            error :(err) => {
-                 this.rafreshpage();
-                 this.toast.error(err.error.message);
-            }
-          });
-      }
-
-      closeModal(modal: string){
-        const modalEl = document.getElementById(modal);
-        modalEl?.classList.remove('show');
-        modalEl?.setAttribute('aria-hidden', 'true');
-        (document.querySelector('.modal-backdrop') as HTMLElement)?.remove();
-      }
-
-      modalCreate(){
-      this.actionModal = "create";
-      this.initForm();
-      }
-
-      modalUpdate(_object: usermodel){
-        this.user = _object;
-        this.actionModal = "update";
-        this.userForm.reset();
-        this.dispatchuser(_object);
-      }
-
-      modalDuplicate(_object: usermodel){
-        this.user = _object;
-        this.actionModal = "duplicate";
-        this.userForm.reset();
-        this.userForm.patchValue({
-        codeutilisateur :'',
-        idsociete :_object.idsociete,
-        societe : _object.societe,
-        idsite :_object.idsite,
-        nom :_object.nom,
-        prenom :_object.prenom,
-        adresse :_object.adresse,
-        telephone : _object.telephone,
-        email :  _object.email,
-        login : _object.login,
-        password :'',
-        typeentitesite :_object.typeentitesite,
-        typeentitedepartement :_object.typeentitedepartement,
-        typeentitesociete : _object.typeentitesociete,
-        acheteur: _object.acheteur
-      });
-      }
-
-      modalView (_object : usermodel){
-        this.user = _object;
-        this.actionModal ="view";
-        this.userForm.reset();
-        this.dispatchuser(_object);
-      }
-
-      modalDelete(item: usermodel){
-        this.deleteuser = item;
-      }
-
-      deleteConfirmed(){
-  if(!this.deleteuser) return ;
-  this.us.delete(this.deleteuser.idutilisateur).subscribe({
-    next: (res) => {
-      if (res.success) {
-        this.deleteuser = null;
-        this.closeModal('deleteOrder');
-        this.getallusers();
-        this.rafreshpage();
-        this.toast.warning(res.message);
-      } else {
-        this.rafreshpage();
-        this.error = "Erreur de Suppression";
-        this.toast.error(this.error);
-      }
-      this.loading = false;
-    },
-    error: (err) => {
-      this.rafreshpage();
-      this.error = "Suppression échec";
-      this.loading = false;
-      this.toast.error(err.error.message);
+  //Soumission du formulaire
+  onsubmit() {
+    /** Check formulaire */
+    this.msgErros = '';
+    const controls = this.userForm.controls;
+    if (this.userForm.invalid) {
+      Object.keys(controls).forEach((controlName) =>
+        controls[controlName].markAsTouched(),
+      );
+      this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
+      return;
     }
-  })
-}
 
-loadusers(applyFilterAfter: boolean = false) {
-  this.us.getAll().subscribe({
-    next: (data) => {
-      this.users = data.data;
+    /** 2. prepare data */
+    const formValue = this.userForm.value;
 
-      if (applyFilterAfter) {
-        this.searchuser();
-      } else {
-        this.filtreusers = [...this.users]; // affichage initial
-      }
-    }
-  });
-}
+    const _user: usermodel = {
+      ...this.user,
+      ...formValue,
+    };
 
-selectUser(user: usermodel) {
-  this.userRoles = [];
-  this.userdepts = [];
+    this.upsert(_user);
+    this.closeModal('showModal');
+  }
 
-   if (this.selectedUser?.idutilisateur === user.idutilisateur) {
-    this.selectedUser = null;
+  rafreshpage() {
+    const currentUrl = this.router.url;
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.router.navigate([currentUrl]);
+    });
+  }
+
+  upsert(user: usermodel) {
+    this.us.upsert(user).subscribe({
+      next: (res: any) => {
+        console.log(res);
+        if (res.success) {
+          this.loadusers(true);
+          this.closeModal('showModal');
+          this.rafreshpage();
+          this.toast.success(res.message);
+        }
+      },
+      error: (err) => {
+        this.rafreshpage();
+        this.toast.error(err.error.message);
+      },
+    });
+  }
+
+  closeModal(modal: string) {
+    const modalEl = document.getElementById(modal);
+    modalEl?.classList.remove('show');
+    modalEl?.setAttribute('aria-hidden', 'true');
+    (document.querySelector('.modal-backdrop') as HTMLElement)?.remove();
+  }
+
+  modalCreate() {
+    this.actionModal = 'create';
+    this.initForm();
+  }
+
+  modalUpdate(_object: usermodel) {
+    this.user = _object;
+    this.actionModal = 'update';
+    this.userForm.reset();
+    this.dispatchuser(_object);
+  }
+
+  modalDuplicate(_object: usermodel) {
+    this.user = _object;
+    this.actionModal = 'duplicate';
+    this.userForm.reset();
+    this.userForm.patchValue({
+      codeutilisateur: '',
+      idsociete: _object.idsociete,
+      societe: _object.societe,
+      idsite: _object.idsite,
+      nom: _object.nom,
+      prenom: _object.prenom,
+      adresse: _object.adresse,
+      telephone: _object.telephone,
+      email: _object.email,
+      login: _object.login,
+      password: '',
+      typeentitesite: _object.typeentitesite,
+      typeentitedepartement: _object.typeentitedepartement,
+      typeentitesociete: _object.typeentitesociete,
+      acheteur: _object.acheteur,
+    });
+  }
+
+  modalView(_object: usermodel) {
+    this.user = _object;
+    this.actionModal = 'view';
+    this.userForm.reset();
+    this.dispatchuser(_object);
+  }
+
+  modalDelete(item: usermodel) {
+    this.deleteuser = item;
+  }
+
+  deleteConfirmed() {
+    if (!this.deleteuser) return;
+    this.us.delete(this.deleteuser.idutilisateur).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.deleteuser = null;
+          this.closeModal('deleteOrder');
+          this.getallusers();
+          this.rafreshpage();
+          this.toast.warning(res.message);
+        } else {
+          this.rafreshpage();
+          this.error = 'Erreur de Suppression';
+          this.toast.error(this.error);
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        this.rafreshpage();
+        this.error = 'Suppression échec';
+        this.loading = false;
+        this.toast.error(err.error.message);
+      },
+    });
+  }
+
+  loadusers(applyFilterAfter: boolean = false) {
+    this.us.getAll().subscribe({
+      next: (data) => {
+        this.users = data.data;
+
+        if (applyFilterAfter) {
+          this.searchuser();
+        } else {
+          this.filtreusers = [...this.users]; // affichage initial
+        }
+      },
+    });
+  }
+
+  selectUser(user: usermodel) {
     this.userRoles = [];
     this.userdepts = [];
+
+    if (this.selectedUser?.idutilisateur === user.idutilisateur) {
+      this.selectedUser = null;
+      this.userRoles = [];
+      this.userdepts = [];
+    } else {
+      // Sinon on sélectionne le rôle et on recharge ses permissions
+      this.selectedUser = user;
+      this.userRoles = [];
+      this.userdepts = [];
+
+      this.ur.getutilisateurroles(user.idutilisateur).subscribe((res) => {
+        this.userRoles = res.data[0].map((r: any) => r.idrole);
+      });
+
+      this.ud.getutilisateurdepartement(user.idutilisateur).subscribe((res) => {
+        this.userdepts = res.data[0].map((d: any) => d.iddepartement);
+      });
+    }
   }
-  else {
-    // Sinon on sélectionne le rôle et on recharge ses permissions
-     this.selectedUser = user;
-     this.userRoles = [];
-     this.userdepts = [];
 
-     this.ur.getutilisateurroles(user.idutilisateur)
-    .subscribe(res => {
-      this.userRoles = res.data[0].map((r: any) => r.idrole);
-    });
+  toggleRole(idrole: string, event: any) {
+    if (!this.selectedUser) return;
 
-    this.ud.getutilisateurdepartement(user.idutilisateur)
-    .subscribe(res => {
-       this.userdepts = res.data[0].map((d: any) => d.iddepartement);
-    });
-  } 
-  
-}
-
-toggleRole(idrole: string, event: any) {
-  if (!this.selectedUser) return;
-
-  if (event.target.checked) {
-    // ADD ROLE
-    this.ur.upsert({
-      idutilisateur: this.selectedUser.idutilisateur,
-      idrole: idrole
-    }).subscribe(() => {
-      this.userRoles.push(Number(idrole));
-    });
-  } else {
-    // REMOVE ROLE
-    this.ur.delete(
-      this.selectedUser.idutilisateur,
-      idrole
-    ).subscribe(() => {
-      this.userRoles = this.userRoles.filter(r => r !== Number(idrole));
-    });
+    if (event.target.checked) {
+      // ADD ROLE
+      this.ur
+        .upsert({
+          idutilisateur: this.selectedUser.idutilisateur,
+          idrole: idrole,
+        })
+        .subscribe(() => {
+          this.userRoles.push(Number(idrole));
+        });
+    } else {
+      // REMOVE ROLE
+      this.ur.delete(this.selectedUser.idutilisateur, idrole).subscribe(() => {
+        this.userRoles = this.userRoles.filter((r) => r !== Number(idrole));
+      });
+    }
   }
-}
 
-toggledepartement(iddepartement: string, event: any) {
-  if (!this.selectedUser) return;
+  toggledepartement(iddepartement: string, event: any) {
+    if (!this.selectedUser) return;
 
-  if (event.target.checked) {
-    // ADD ROLE
-    this.ud.upsert({
-      idutilisateur: this.selectedUser.idutilisateur,
-      iddepartement: iddepartement
-    }).subscribe(() => {
-      this.userdepts.push(iddepartement);
-    });
-  } else {
-    // REMOVE ROLE
-    this.ud.delete(
-      this.selectedUser.idutilisateur,
-      iddepartement
-    ).subscribe(() => {
-      this.userdepts = this.userdepts.filter(r => r !== iddepartement);
-    });
+    if (event.target.checked) {
+      // ADD ROLE
+      this.ud
+        .upsert({
+          idutilisateur: this.selectedUser.idutilisateur,
+          iddepartement: iddepartement,
+        })
+        .subscribe(() => {
+          this.userdepts.push(iddepartement);
+        });
+    } else {
+      // REMOVE ROLE
+      this.ud
+        .delete(this.selectedUser.idutilisateur, iddepartement)
+        .subscribe(() => {
+          this.userdepts = this.userdepts.filter((r) => r !== iddepartement);
+        });
+    }
   }
-}
-tonumber (idrole:any){
-  return Number(idrole);
-}
-
+  tonumber(idrole: any) {
+    return Number(idrole);
+  }
 }

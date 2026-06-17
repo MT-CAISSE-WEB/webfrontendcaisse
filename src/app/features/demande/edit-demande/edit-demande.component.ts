@@ -225,7 +225,7 @@ export class EditDemandeComponent implements OnInit {
   }
 
   //Changement de la date
-  changeDate(){
+  changeDate() {
     this.demandeForm
       .get('datedemande')
       ?.valueChanges.pipe(
@@ -757,7 +757,7 @@ export class EditDemandeComponent implements OnInit {
       ligneOf.get('montantdemande')?.enable();
 
       const lignes = this.filterLignesBudget(ligneOf);
-      console.log(this.budgetGlobal);
+      console.log('BudgetGlobal:', this.budgetGlobal);
       if (!this.budgetGlobal?.isanalytique && nature.decajustifier === 0) {
         ligneOf
           .get('codebudget')
@@ -1097,7 +1097,10 @@ export class EditDemandeComponent implements OnInit {
   filterLignesBudget(ligne: FormGroup): LigneBudgetModel[] {
     if (!this.lignesBudgetGlobales.length) return [];
 
-    console.log('Filtrage des lignes budget pour la ligne', this.lignesBudgetGlobales);
+    console.log(
+      'Filtrage des lignes budget pour la ligne',
+      this.lignesBudgetGlobales,
+    );
 
     const nature = ligne.get('natureop')?.value;
     const centre = ligne.get('centre')?.value;

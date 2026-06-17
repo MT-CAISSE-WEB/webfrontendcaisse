@@ -1,8 +1,9 @@
-import { devisemodel } from "../../donnee_base/donnee_base/model/devise.model";
-import { societeModel } from "../../donnee_base/models/societe.model";
-import { departementmodel } from "../../structure/model/departement.model";
-import { sitemodel } from "../../structure/model/site.model";
-import { LigneDemande } from "./ligne-demande.model";
+import { devisemodel } from '../../donnee_base/donnee_base/model/devise.model';
+import { societeModel } from '../../donnee_base/models/societe.model';
+import { departementmodel } from '../../structure/model/departement.model';
+import { sitemodel } from '../../structure/model/site.model';
+import { circuitvalidationmodel } from '../../workflow/model/circuitvalidation.model';
+import { LigneDemande } from './ligne-demande.model';
 
 export interface EnteteDemande {
   canValidateUser: Boolean;
@@ -25,9 +26,10 @@ export interface EnteteDemande {
   createdby?: string;
   updatedat?: string;
   updatedby?: string;
-  lignes : LigneDemande[];
+  lignes: LigneDemande[];
   site?: sitemodel;
-  societe? : societeModel;
-  devise? : devisemodel;
+  societe?: societeModel;
+  devise?: devisemodel;
   departement?: departementmodel;
+  circuit: circuitvalidationmodel;
 }

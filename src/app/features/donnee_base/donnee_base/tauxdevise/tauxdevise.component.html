@@ -1,273 +1,380 @@
 <!-- start page title -->
 <div class="row">
-    <div class="col-12">
-        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">Taux devise</h4>
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Données de base</a></li>
-                    <li class="breadcrumb-item active">Paramétrage Devise</li>
-                     <li class="breadcrumb-item active">Taux Devise</li>
-                </ol>
-            </div>
+  <div class="col-12">
+    <div
+      class="page-title-premium d-sm-flex align-items-center justify-content-between"
+    >
+      <div class="d-flex align-items-center gap-3">
+        <div class="title-icon-premium">
+          <i class="ri-exchange-dollar-line"></i>
         </div>
+        <div>
+          <h4 class="mb-0 title-premium">Taux de change</h4>
+          <span class="title-subtitle-premium">Gestion des taux de devise</span>
+        </div>
+      </div>
+      <div class="page-title-right">
+        <ol class="breadcrumb-premium m-0">
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);">
+              <i class="ri-home-4-line me-1"></i>Données de base
+            </a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);">Paramétrage devise</a>
+          </li>
+          <li class="breadcrumb-item active">
+            <i class="ri-exchange-dollar-line me-1"></i>Taux devise
+          </li>
+        </ol>
+      </div>
     </div>
+  </div>
 </div>
 <!-- end page title -->
 
+<!-- Formulaire de création -->
+<div class="card-premium">
+  <div class="card-body-premium-form">
+    <form [formGroup]="tauxdeviseForm" (ngSubmit)="onsubmit()">
+      <div class="form-grid-premium">
+        <!-- Code -->
+        <div class="form-group-premium">
+          <label class="form-label-premium">
+            <i class="ri-barcode-line"></i> Code
+          </label>
+          <input
+            type="text"
+            formControlName="codetauxdevise"
+            class="form-input-premium"
+            placeholder="Ex: TX-001"
+          />
+        </div>
 
+        <!-- Devise origine -->
+        <div class="form-group-premium">
+          <label class="form-label-premium">
+            <i class="ri-arrow-right-up-line"></i> Devise origine
+          </label>
+          <select
+            class="form-select-premium"
+            formControlName="iddeviseorigine"
+            (change)="filterDestinationList()"
+          >
+            <option value="">---- Choisir la devise d'origine -----</option>
+            <option *ngFor="let d of devises" [value]="d.iddevise">
+              {{ d.codeiso }}
+            </option>
+          </select>
+        </div>
 
-<div class="card">
-    <div class="card-body">
-       <form [formGroup]="tauxdeviseForm" (ngSubmit)="onsubmit()">
-  <div class="row g-3">
+        <!-- Coefficient -->
+        <div class="form-group-premium">
+          <label class="form-label-premium">
+            <i class="ri-calculator-line"></i> Coefficient
+          </label>
+          <input
+            type="number"
+            formControlName="coefficient"
+            class="form-input-premium"
+            placeholder="Ex: 655.957"
+            step="0.001"
+          />
+        </div>
 
-     <!-- Code taux devise -->
-    <div class="col-xl-2 col-md-2">
-      <div class="input-group input-group-sm mb-2">
-    <input type="text" formControlName="codetauxdevise" 
-       class="form-control form-control-sm">
-       <label class="input-group-text">Code</label>
+        <!-- Devise destination -->
+        <div class="form-group-premium">
+          <label class="form-label-premium">
+            <i class="ri-arrow-right-down-line"></i> Devise destination
+          </label>
+          <select
+            class="form-select-premium"
+            formControlName="iddevisedestination"
+          >
+            <option value="">
+              ---- Choisir une devise de destination -----
+            </option>
+            <option *ngFor="let d of filtresdevises" [value]="d.iddevise">
+              {{ d.codeiso }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Date -->
+        <div class="form-group-premium">
+          <label class="form-label-premium">
+            <i class="ri-calendar-2-line"></i> Date
+          </label>
+          <input
+            type="date"
+            formControlName="datecours"
+            class="form-input-premium"
+          />
+        </div>
+
+        <!-- Coefficient inverse -->
+        <div class="form-group-premium">
+          <label class="form-label-premium">
+            <i class="ri-calculator-line"></i> Taux inverse
+          </label>
+          <input
+            type="number"
+            formControlName="coefficientinverse"
+            class="form-input-premium"
+            readonly
+          />
+        </div>
+
+        <!-- Type cours (hidden) -->
+        <input type="text" formControlName="typecours" hidden />
+
+        <!-- Actions -->
+        <div class="form-actions-premium">
+          <button type="submit" class="btn-premium-primary">
+            <i class="ri-save-line"></i>
+            {{
+              actionModal === "create"
+                ? "Enregistrer"
+                : actionModal === "update"
+                  ? "Modifier"
+                  : "Dupliquer"
+            }}
+          </button>
+          <button
+            type="button"
+            class="btn-premium-secondary"
+            (click)="modalCreate()"
+          >
+            <i class="ri-refresh-line"></i> Réinitialiser
+          </button>
+        </div>
       </div>
-    </div>
-
-    <!-- Devise origine -->
-    <div class="col-xl-3 col-md-2">
-      <div class="input-group input-group-sm mb-2">
-        <label class="input-group-text">1</label>
-        <select class="form-select form-select-sm" formControlName="iddeviseorigine"  (change)="filterDestinationList()">
-          <option value="">----Choisir la devise d'origine -----</option>
-          <option *ngFor="let d of devises" [value]="d.iddevise">{{ d.codeiso }}</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Coefficient -->
-    <div class="col-md-2">
-      <div class="input-group input-group-sm mb-3">
-        <label class="input-group-text"> = </label>
-        <input type="number" formControlName="coefficient" class="form-control form-control-sm" placeholder="0">
-      </div>
-    </div>
-
-    <!-- Devise destination -->
-    <div class="col-xl-4 col-md-2">
-      <div class="input-group input-group-sm mb-2">
-        <select class="form-select form-select-sm" formControlName="iddevisedestination">
-          <option value="">----Choisir une devise de destination-----</option>
-          <option *ngFor="let d of filtresdevises" change [value]="d.iddevise">{{ d.codeiso }}</option>
-        </select>
-        <label class="input-group-text">2</label>
-      </div>
-    </div>
-
-    <!-- Date -->
-    <div class="col-xl-3 col-md-2">
-      <div class="input-group input-group-sm mb-2">
-        <span class="input-group-text">
-            <!-- <i class="ri-calendar-2-line"></i> -->
-             Date 
-        </span>
-        <input type="date" formControlName="datecours" 
-       class="form-control form-control-sm">
-      </div>
-    </div>
-    <div class="col-xl-3 col-md-2">
-    <div class="input-group input-group-sm mb-2">
-    <input type="number" formControlName="coefficientinverse" 
-       class="form-control form-control-sm" readonly>
-       <label class="input-group-text">Taux Inverse</label>
-    </div>
-    </div>
-
-    <div class="col-xl-3 col-md-2" hidden="true">
-            <div class="input-group input-group-sm mb-2">
-    <input type="text" formControlName="typecours" 
-       class="form-control form-control-sm"  >
-       <label class="input-group-text">Type cours</label>
-    </div>
-    </div>
-    
-
-
-
-
-    <div class="col-md-auto ms-auto d-flex gap-2">
-    
-    <button type="submit" class="btn btn-sm btn-soft-info w-100">
-      {{ actionModal === 'create' ? 'Enregistrer' :
-         actionModal === 'update' ? 'Modifier' :
-         'Dupliquer'
-      }}
-    </button>
-
-    <button class="btn btn-sm btn-success w-100" (click)="modalCreate()">
-      Réinitialiser
-    </button>
-
-</div>
-
-
+    </form>
   </div>
-</form>
-    </div>
 </div>
 <!--end card-->
 
+<!-- Liste des taux -->
 <div class="row" id="contactList">
-    <div class="col-lg-12">
-        <div class="card">
-            <div class="card-body border border-dashed border-end-0 border-start-0">
-                <div class="row g-2">
-                    <!--end col-->
-                    <div class="col-xl-3 col-md-6">
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text" id="basic-addon1">Date</span>
-                            <input type="date"  [(ngModel)]="selecteddate" (change)="filterByDate()" class="form-control" data-provider="flatpickr" data-date-format="d M, Y" data-range-date="true" placeholder="Select date" id="range-datepicker" aria-describedby="basic-addon1">
-                        </div>
-                    </div>
-                    <!--end col-->
+  <div class="col-lg-12">
+    <div class="card-premium">
+      <!-- Filtres -->
+      <div class="card-filter-premium">
+        <div class="filter-grid-premium">
+          <!-- Date -->
+          <div class="filter-group-premium">
+            <label class="filter-label-premium">
+              <i class="ri-calendar-2-line"></i> Date
+            </label>
+            <input
+              type="date"
+              [(ngModel)]="selecteddate"
+              (change)="filterByDate()"
+              class="filter-input-premium"
+            />
+          </div>
 
-                     <div class="col-xl-3 col-md-6">
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text" id="basic-addon1">$</span>
-                            <select class="form-select"
-                                [(ngModel)]="selectedOrigine"
-                                (change)="filterByDevise()">
-                        <option value="">--- Devise d'origine</option>
-                        <option *ngFor="let d of devises" [value]="d.iddevise">
-                            {{d.codeiso}}
-                        </option>
-                        </select>
-                        </div>
-                    </div>
+          <!-- Devise origine -->
+          <div class="filter-group-premium">
+            <label class="filter-label-premium">
+              <i class="ri-arrow-right-up-line"></i> Devise origine
+            </label>
+            <select
+              class="filter-select-premium"
+              [(ngModel)]="selectedOrigine"
+              (change)="filterByDevise()"
+            >
+              <option value="">--- Toutes ---</option>
+              <option *ngFor="let d of devises" [value]="d.iddevise">
+                {{ d.codeiso }}
+              </option>
+            </select>
+          </div>
 
-                     <div class="col-xl-3 col-md-6">
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text" id="basic-addon1">$</span>
-                             <select class="form-select"
-                                [(ngModel)]="selectedDestination"
-                                (change)="filterByDevise()">
-                        <option value="">--- Devise de destination</option>
-                        <option *ngFor="let d of devises" [value]="d.iddevise">
-                            {{d.codeiso}}
-                        </option>
-                        </select>
-                        </div>
-                    </div>
-                    <div class="col-xl-2 col-md-4">
-                       <div class="row g-3 mb-3">
-                    
+          <!-- Devise destination -->
+          <div class="filter-group-premium">
+            <label class="filter-label-premium">
+              <i class="ri-arrow-right-down-line"></i> Devise destination
+            </label>
+            <select
+              class="filter-select-premium"
+              [(ngModel)]="selectedDestination"
+              (change)="filterByDevise()"
+            >
+              <option value="">--- Toutes ---</option>
+              <option *ngFor="let d of devises" [value]="d.iddevise">
+                {{ d.codeiso }}
+              </option>
+            </select>
+          </div>
 
-</div>
-
-                    </div>
-                    <!--end col-->
-            
-                    <!--end col-->
-
-                </div>
-                <!--end row-->
-            </div>
-            <div class="card-body">
-                <div class="table-responsive table-card">
-                    <table class="table align-middle table-nowrap" id="customerTable">
-                        <thead class="table-light text-muted">
-                            <tr>
-                                 <th class="sort" data-sort="time" scope="col">Code</th>
-                                <th class="sort" data-sort="time" scope="col">Date</th>
-                                <!-- <th class="sort" data-sort="time" scope="col">Type cours</th> -->
-                                <th class="sort" data-sort="currency_name" scope="col">Devise origine</th>
-                                <th class="sort" data-sort="sort-avg_price" scope="col">taux</th>
-                                <th class="sort" data-sort="sort-price" scope="col">taux inverse</th>
-                                <th class="sort" data-sort="or_val" scope="col">devise destination</th>
-                                <th class="sort" data-sort="status" scope="col">Action</th>
-                            </tr>
-                        </thead>
-                        <!--end thead-->
-                        <tbody class="list form-check-all">
-                             @for (item of pagedtauxDevises; track $index){
-                            <tr>
-                                 <td>{{item.codetauxdevise}}</td>
-                                <td class="order_date time" data-timestamp="1641945600">{{ item.datecours | date:'fullDate' }}</td>
-                                 <!-- <td>{{item.typecours}}</td> -->
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <a href="javascript:void(0);" class="flex-grow-1 ms-2 currency_name">{{item.devise_origine}}</a>
-                                    </div>
-                                </td>
-                                <td class="order_value or_val" data-orderval="370683.20">{{item.coefficient}}</td>
-                                <td class="avg_price sort-avg_price" data-av-price="46154.30">{{item.coefficientinverse}}</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <a href="javascript:void(0);" class="flex-grow-1 ms-2 currency_name">{{item.devise_destination}}</a>
-                                    </div>
-                                </td>
-                                <td>
-                                    <ul class="list-inline hstack gap-2 mb-0">
-                                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" aria-label="View" data-bs-original-title="View">
-                                            <a href="#" class="view-item-btn" data-bs-toggle="modal" (click)="modalDuplicate(item)"><i class="ri-file-copy-2-line align-bottom text-secondary"></i></a>
-                                        </li>
-                                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" aria-label="Edit" data-bs-original-title="Edit">
-                                            <a class="edit-item-btn" href="#"  data-bs-toggle="modal" (click)="modalUpdate(item)" ><i class="ri-pencil-fill align-bottom text-primary"></i></a>
-                                        </li>
-                                        <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"   data-bs-placement="top" aria-label="Delete" data-bs-original-title="Delete">
-                                            <a class="remove-item-btn" data-bs-toggle="modal" (click)="modalDelete(item)" href="#deleteOrder" >
-                                                <i class="ri-delete-bin-fill align-bottom text-danger"></i>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </td>
-                            </tr>
-                            <!--end tr-->
-                        }
-                        </tbody>
-                    </table>
-                    <!--end table-->
-                    <div class="noresult" style="display: none">
-                        <div class="text-center">
-                            <h5 class="mt-2">Désolé ! Aucun resultat trouvé</h5>
-                            <p class="text-muted mb-0">We've searched more than 150+ orders We did not find any orders for you search.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-end mt-3">
-                    <div class="d-flex justify-content-end">
-                        <div class="pagination-wrap hstack gap-2">
-                            <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
-                                Précédent
-                            </button>
-                            <ul class="pagination listjs-pagination mb-0"> Page {{currentPage}} / {{totalPages}}</ul>
-                            <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)" class="btn btn-sm btn-soft-primary pagination-next">
-                                Suivant
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          <!-- Stats -->
+          <div class="filter-stats-premium">
+            <span class="stat-badge-premium">
+              <i class="ri-database-2-line"></i>
+              {{ pagedtauxDevises.length || 0 }} taux
+            </span>
+          </div>
         </div>
-        <!--end card-->
+      </div>
+
+      <!-- Tableau -->
+      <div class="card-body-premium-table">
+        <div class="table-responsive-premium">
+          <table class="table-premium">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Date</th>
+                <th>Devise origine</th>
+                <th>Taux</th>
+                <th>Taux inverse</th>
+                <th>Devise destination</th>
+                <th style="text-align: right; width: 120px">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of pagedtauxDevises; track $index) {
+                <tr>
+                  <td>
+                    <span class="code-premium">{{ item.codetauxdevise }}</span>
+                  </td>
+                  <td>
+                    <span class="date-premium">{{
+                      item.datecours | date: "dd/MM/yyyy"
+                    }}</span>
+                  </td>
+                  <td>
+                    <span class="currency-premium">{{
+                      item.devise_origine
+                    }}</span>
+                  </td>
+                  <td>
+                    <span class="coefficient-premium">{{
+                      item.coefficient
+                    }}</span>
+                  </td>
+                  <td>
+                    <span class="coefficient-premium">{{
+                      item.coefficientinverse
+                    }}</span>
+                  </td>
+                  <td>
+                    <span class="currency-premium">{{
+                      item.devise_destination
+                    }}</span>
+                  </td>
+                  <td>
+                    <div class="actions-premium">
+                      <button
+                        class="action-premium action-duplicate"
+                        (click)="modalDuplicate(item)"
+                        title="Dupliquer"
+                      >
+                        <i class="ri-file-copy-line"></i>
+                      </button>
+                      <button
+                        class="action-premium action-edit"
+                        (click)="modalUpdate(item)"
+                        title="Modifier"
+                      >
+                        <i class="ri-pencil-line"></i>
+                      </button>
+                      <button
+                        class="action-premium action-delete"
+                        (click)="modalDelete(item)"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteOrder"
+                        title="Supprimer"
+                      >
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+              @if (pagedtauxDevises.length === 0) {
+                <tr>
+                  <td colspan="7" class="empty-premium">
+                    <div class="empty-premium-content">
+                      <div class="empty-premium-icon">
+                        <i class="ri-exchange-dollar-line"></i>
+                      </div>
+                      <h5>Aucun taux de devise</h5>
+                      <p>Commencez par créer un nouveau taux de change</p>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-premium">
+          <div class="pagination-info-premium">
+            <span>Affichage de</span>
+            <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong>
+            <span>à</span>
+            <strong>{{
+              currentPage * pageSize > (pagedtauxDevises.length || 0)
+                ? pagedtauxDevises.length || 0
+                : currentPage * pageSize
+            }}</strong>
+            <span>sur</span>
+            <strong>{{ pagedtauxDevises.length || 0 }}</strong>
+            <span>taux</span>
+          </div>
+          <div class="pagination-controls-premium">
+            <button
+              class="page-premium"
+              [disabled]="currentPage == 1"
+              (click)="changePage(currentPage - 1)"
+            >
+              <i class="ri-arrow-left-s-line"></i>
+            </button>
+            <span class="page-current-premium">{{ currentPage }}</span>
+            <button
+              class="page-premium"
+              [disabled]="currentPage == totalPages"
+              (click)="changePage(currentPage + 1)"
+            >
+              <i class="ri-arrow-right-s-line"></i>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-    <!--end col-->
+    <!--end card-->
+  </div>
+  <!--end col-->
 </div>
 <!--end row-->
 
-
-                <!-- Modal -->
-                <div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-body p-5 text-center">
-                                <div class="mt-4 text-center">
-                                    <h4>{{titleMsg}}</h4>
-                                    <p class="text-muted fs-15 mb-4">{{msgSup}}</p>
-                                    <div class="hstack gap-2 justify-content-center remove">
-                                        <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> annuler</button>
-                                        <button class="btn btn-sm btn-danger" (click)="deleteConfirmed()" id="delete-record">Oui, supprimer</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--end modal -->
+<!-- Modal de suppression -->
+<div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content modal-delete-premium">
+      <div class="modal-delete-body">
+        <div class="delete-icon-premium">
+          <i class="ri-delete-bin-2-line"></i>
+        </div>
+        <h5 class="delete-title-premium">{{ titleMsg }}</h5>
+        <p class="delete-message-premium">{{ msgSup }}</p>
+        <div class="delete-actions-premium">
+          <button class="delete-cancel-premium" data-bs-dismiss="modal">
+            <i class="ri-close-line"></i> Annuler
+          </button>
+          <button
+            class="delete-confirm-premium"
+            (click)="deleteConfirmed()"
+            data-bs-dismiss="modal"
+          >
+            <i class="ri-delete-bin-line"></i> Supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!--end modal -->

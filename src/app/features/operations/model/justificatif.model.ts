@@ -27,5 +27,4 @@ export class JustificatifModel extends MainModel{
     commentaire: string = "";
     devise: any;
     operation: any
-    montantRef: number = 0;
 }

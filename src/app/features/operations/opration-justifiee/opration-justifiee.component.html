@@ -1,353 +1,482 @@
-<!-- ============================================ -->
-<!-- PAGE TITLE & BREADCRUMB -->
-<!-- ============================================ -->
+<!-- start page title -->
 <div class="row">
     <div class="col-12">
         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">{{ title }}</h4>
+            <h4 class="mb-sm-0">{{title}}</h4>
             <div class="page-title-right">
                 <ol class="breadcrumb m-0">
                     <li class="breadcrumb-item"><a href="javascript: void(0);">Générales</a></li>
-                    <li class="breadcrumb-item active">{{ title }}</li>
+                    <li class="breadcrumb-item active">{{title}}</li>
                 </ol>
             </div>
         </div>
     </div>
 </div>
+<!-- end page title -->
 
 <!-- LOADER GLOBAL -->
 <div *ngIf="loadingGlobal" class="row">
-    <div class="col-12 text-center py-5">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Chargement...</span>
+    <div class="col-12">
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+            <p class="mt-2 text-muted">Chargement des données...</p>
         </div>
-        <p class="mt-2 text-muted">Chargement des données...</p>
     </div>
 </div>
 
-<!-- CONTENU PRINCIPAL -->
-<div *ngIf="!loadingGlobal">
-    <form [formGroup]="operationForm" (ngSubmit)="onSubmit()">
-        <div class="row">
-            <div class="col-12">
-                <!-- CARTE OPÉRATION (inchangée) -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-white py-3">
-                        <h5 class="card-title mb-0">
-                            <i class="ri-invoice-line me-2"></i>Détails de l'opération à justifier
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Opération</label>
-                                <select class="form-select form-select-sm" formControlName="operation"
-                                        [class.is-invalid]="operationForm.get('operation')?.invalid && operationForm.get('operation')?.touched">
-                                    <option value="">-- Sélectionnez une opération --</option>
-                                    <option *ngFor="let op of operationsFiltrees" [value]="op.idoperation">
-                                        {{ op.codeoperation }} - {{ formatCFA(op.montant) }} {{ op.devise?.codedevise }} - || - {{  truncateLabel(op.lignes[0]?.libelle) }}
-                                    </option>
-                                </select>
-                                <div class="invalid-feedback">Veuillez sélectionner une opération.</div>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Date opération</label>
-                                <input type="date" class="form-control form-control-sm bg-light" formControlName="dateoperation" readonly>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Devise</label>
-                                <input type="text" class="form-control form-control-sm bg-light" [value]="getDeviseCode(operationForm.get('deviseoperation')?.value)" readonly>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Montant (devise op.)</label>
-                                <input type="text" class="form-control form-control-sm bg-light" formControlName="montantoperation" readonly>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Reste à payer (devise op.)</label>
-                                <input type="text" class="form-control form-control-sm bg-light text-danger fw-bold" formControlName="resteapayeroperation" readonly>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Montant référentiel ({{ user.devise_rep_code }})</label>
-                                <div class="input-group input-group-sm">
-                                    <input type="text" class="form-control form-control-sm bg-light" formControlName="montantRefglobal" readonly>
-                                    <span class="input-group-text">{{ user.devise_rep_code }}</span>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Reste à payer réf. ({{ user.devise_rep_code }})</label>
-                                <div class="input-group input-group-sm">
-                                    <input type="text" class="form-control form-control-sm bg-light text-danger fw-bold" formControlName="resteapayerref" readonly>
-                                    <span class="input-group-text">{{ user.devise_rep_code }}</span>
-                                </div>
+<div class="row" *ngIf="!loadingGlobal">
+    <div class="col-lg-12">
+        <form [formGroup]="operationForm">
+            <div class="card" id="">
+                <div class="card-header border-0">
+                    <div class="d-flex align-items-center">
+                        <h5 class="card-title mb-0 flex-grow-1">{{title}}</h5>
+                        <div class="flex-shrink-0">
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button class="btn btn-sm btn-warning" (click)="reset()"><i class="ri-save-bin-2-line"></i>rénitialiser</button>
+                                <button class="btn btn-sm btn-primary"><i class="ri-save-bin-2-line"></i>charger</button>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- CARTE ONGLETS (3 onglets) -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-white">
-                        <ul class="nav nav-tabs card-header-tabs" id="regulTabs" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="justificatifs-tab" data-bs-toggle="tab" data-bs-target="#justificatifs" type="button" role="tab">
-                                    <i class="ri-receipt-line me-1"></i> Pièces justificatives
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="retourCaisse-tab" data-bs-toggle="tab" data-bs-target="#retourCaisse" type="button" role="tab">
-                                    <i class="ri-bank-card-line me-1"></i> Retour caisse
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="retoursExistants-tab" data-bs-toggle="tab" data-bs-target="#retoursExistants" type="button" role="tab">
-                                    <i class="ri-history-line me-1"></i> Retours déjà effectués
-                                </button>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="card-body">
-                        <div class="tab-content">
-                            <!-- ================= ONGLET JUSTIFICATIFS (avec devise/taux et upload) ================= -->
-                            <div class="tab-pane fade show active" id="justificatifs" role="tabpanel">
-                                <!-- Formulaire de création / modification du justificatif (devise, taux, date) -->
-                                <div class="row g-3 mb-4 p-3 bg-light rounded">
-                                    <div class="col-md-3">
-                                        <label class="form-label fw-semibold">Devise du justificatif</label>
-                                        <select class="form-select form-select-sm" formControlName="devisejustificatif">
-                                            <option value="">-- Devise --</option>
-                                            <option *ngFor="let d of devises" [value]="d.iddevise">{{ d.codedevise }}</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="form-label fw-semibold">Date pièce</label>
-                                        <input type="date" class="form-control form-control-sm" formControlName="datejustificatif">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="form-label fw-semibold">Taux (vers réf.)</label>
-                                        <input type="number" step="any" class="form-control form-control-sm" formControlName="tauxoperation">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="form-label fw-semibold">Taux inverse</label>
-                                        <input type="number" step="any" class="form-control form-control-sm" formControlName="tauxoperationinverse">
-                                    </div>
-                                    <div class="col-md-3 d-flex align-items-end">
-                                        <button type="button" class="btn btn-outline-primary btn-sm w-100" (click)="openFileUpload()">
-                                            <i class="ri-attachment-line me-1"></i> Joindre un document
-                                        </button>
-                                        <input type="file" #fileUpload hidden (change)="onFileSelected($event)" accept=".pdf,.jpg,.png">
-                                    </div>
-                                </div>
-
-                                <!-- Liste des justificatifs existants (inchangée) -->
-                                <div class="mb-4">
-                                    <h6 class="mb-2"><i class="ri-history-line me-1"></i> Justificatifs déjà enregistrés</h6>
-                                    <div class="table-responsive">
-                                        <table class="table table-sm table-hover">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>Code</th>
-                                                    <th>Date</th>
-                                                    <th>Devise</th>
-                                                    <th class="text-end">Montant (devise)</th>
-                                                    <th class="text-end">Montant (réf.)</th>
-                                                    <th style="width: 30px"></th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr *ngFor="let piece of justificatifFiltered; let i = index"
-                                                    [class.table-active]="selectedJustificatif === piece"
-                                                    (click)="selectJustificatif(piece)" style="cursor: pointer">
-                                                    <td>{{ piece.codejustificatif }}</td>
-                                                    <td>{{ piece.date | date:'dd/MM/yyyy' }}</td>
-                                                    <td>{{ piece.devise?.codedevise }}</td>
-                                                    <td class="text-end">{{ piece.montantjustificatif | number:'1.0-0' }} {{ piece.devise?.codedevise }}</td>
-                                                    <td class="text-end">{{ getJustificatifRef(piece) | number:'1.0-0' }} {{ user.devise_rep_code }}</td>
-                                                    <td><i class="ri-arrow-right-s-line text-primary"></i></td>
-                                                </tr>
-                                                <tr *ngIf="justificatifFiltered.length === 0">
-                                                    <td colspan="6" class="text-center text-muted py-3">Aucun justificatif trouvé pour cette opération</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <!-- Détail du justificatif courant : répartition (lignes) -->
-                                <div class="mt-4">
-                                    <h6 class="mb-2"><i class="ri-list-check-2 me-1"></i> Répartition du justificatif</h6>
-                                    <div class="table-responsive" *ngIf="lignes.length > 0">
-                                        <table class="table table-sm table-bordered">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th style="width: 40px">#</th>
-                                                    <th>Nature opération</th>
-                                                    <th>Centre analytique</th>
-                                                    <th>Tiers</th>
-                                                    <th class="text-end" style="width: 150px">Montant</th>
-                                                    <th style="width: 50px"></th>
-                                                </tr>
-                                            </thead>
-                                            <tbody formArrayName="lignes">
-                                                <tr *ngFor="let ligne of lignes.controls; let i = index" [formGroupName]="i">
-                                                    <td>{{ i+1 }}</td>
-                                                    <td>
-                                                        <select class="form-select form-select-sm" formControlName="idnature">
-                                                            <option value="">-- Nature --</option>
-                                                            <option *ngFor="let nat of natureoperations" [value]="nat.idnature">{{ nat.libelle }}</option>
-                                                        </select>
-                                                    </td>
-                                                    <td>
-                                                        <select class="form-select form-select-sm" formControlName="idcentreanalytique">
-                                                            <option value="">-- Centre --</option>
-                                                            <option *ngFor="let centre of ligne.get('centres')?.value" [value]="centre.idcentreanalytique">
-                                                                {{ centre.libelle }}
-                                                            </option>
-                                                        </select>
-                                                    </td>
-                                                    <td>
-                                                        <select class="form-select form-select-sm" formControlName="idtiers">
-                                                            <option value="">-- Tiers --</option>
-                                                            <option *ngFor="let t of tiers" [value]="t.idtiers">{{ t.designation }}</option>
-                                                        </select>
-                                                    </td>
-                                                    <td class="text-end">
-                                                        <input type="number" class="form-control form-control-sm text-end" formControlName="montantdetail" placeholder="0,00">
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeLine(i)">
-                                                            <i class="ri-delete-bin-line"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div *ngIf="lignes.length === 0" class="alert alert-light text-center py-3">
-                                        <i class="ri-information-line me-1"></i> Aucune ligne de répartition. Cliquez sur "Ajouter une ligne" pour commencer.
-                                    </div>
-                                    <div class="text-end mt-2">
-                                        <button type="button" class="btn btn-sm btn-secondary" (click)="addLine()"
-                                                [disabled]="!operationForm.get('operation')?.value">
-                                            <i class="ri-add-line me-1"></i> Ajouter une ligne
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Commentaire -->
-                                <div class="mt-4">
-                                    <label class="form-label">Commentaire (justificatif)</label>
-                                    <textarea class="form-control form-control-sm" rows="2" formControlName="commentaire" placeholder="Informations complémentaires..."></textarea>
-                                </div>
+                <div class="card-body bg-light-subtle border border-dashed border-start-0 border-end-0">
+                    <div class="row g-3">
+                        <div class="col-lg-6 col-sm-6">
+                            <label for="invoicenoInput">Opération à justifier</label>
+                            <div class="input-light">
+                                <select formControlName="operation" class="form-select form-select-sm bg-light border-0 {{ isValidField('operation')}}">
+                                    <option value=""> ---- choisir une operation à justifier ----</option>
+                                    @for(item of operationsFiltrees; track $index){
+                                        <option value="{{item.idoperation}}"> {{item.codeoperation }}  -----:------  {{ formatCFA(item.montant)}} {{ item.devise.codedevise }}  </option>
+                                    }
+                                </select>
+                                <div class="invalid-feedback">{{ msgErros }}</div>
                             </div>
+                        </div>
 
-                            <!-- ================= ONGLET RETOUR CAISSE (saisie d'un nouveau retour) ================= -->
-                            <div class="tab-pane fade" id="retourCaisse" role="tabpanel">
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" formControlName="retourcaisse" id="retourCaisseSwitch">
-                                    <label class="form-check-label" for="retourCaisseSwitch">
-                                        <i class="ri-bank-line me-1"></i> Activer le retour en caisse (nouveau)
-                                    </label>
-                                </div>
-
-                                <div *ngIf="showCaisses">
-                                    <div class="alert alert-info alert-dismissible fade show" *ngIf="selectedRetour">
-                                        <i class="ri-information-line me-1"></i> Retour automatique depuis l'opération :
-                                        <strong>{{ selectedRetour.caisse?.codecaisse }}</strong> - Montant : {{ selectedRetour.montant }} {{ selectedRetour.caisse?.devise }}
-                                        <button type="button" class="btn-close" (click)="clearSelectedRetour()"></button>
-                                    </div>
-
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered table-sm">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>Caisse</th>
-                                                    <th>Devise</th>
-                                                    <th>Solde actuel</th>
-                                                    <th>Montant à reverser</th>
-                                                    <th>Taux</th>
-                                                    <th>Montant référentiel</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody formArrayName="caisses">
-                                                <tr *ngFor="let ctrl of caisses.controls; let i = index" [formGroupName]="i">
-                                                    <td>
-                                                        <strong>{{ ctrl.get('caisse')?.value }}</strong>
-                                                        <input type="hidden" formControlName="idcaisse">
-                                                    </td>
-                                                    <td>{{ ctrl.get('devisecaisse')?.value }}</td>
-                                                    <td>{{ ctrl.get('solde')?.value | number:'1.0-0' }}</td>
-                                                    <td>
-                                                        <input type="number" class="form-control form-control-sm" formControlName="montantcaisse"
-                                                               [class.is-invalid]="ctrl.get('montantcaisse')?.invalid">
-                                                        <div class="invalid-feedback" *ngIf="ctrl.get('montantcaisse')?.hasError('soldeInsuffisant')">
-                                                            Solde insuffisant
-                                                        </div>
-                                                        <div class="invalid-feedback" *ngIf="ctrl.get('montantcaisse')?.hasError('depassementMontant')">
-                                                            Montant dépasse le reste à payer
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <input type="number" class="form-control form-control-sm" formControlName="taux">
-                                                    </td>
-                                                    <td>
-                                                        <input type="text" class="form-control form-control-sm bg-light" readonly formControlName="montantref">
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                            <tfoot *ngIf="caisses.length > 0" class="table-active">
-                                                <tr>
-                                                    <th colspan="3" class="text-end">Total retour (référentiel) :</th>
-                                                    <th colspan="3">{{ totalRetourCaisseRef | number:'1.0-0' }} {{ user.devise_rep_code }}</th>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
-                                    </div>
-                                    <div *ngIf="operationForm.hasError('totalCaisseDepasse')" class="alert alert-danger mt-2">
-                                        <i class="ri-error-warning-line me-1"></i> Le total des retours caisse dépasse le montant restant à justifier.
-                                    </div>
-                                </div>
+                        <div class="col-lg-3 col-sm-3">
+                            <div>
+                                <label for="date-field">Date opération</label>
+                                <input type="date" formControlName="dateoperation" class="form-control form-control-sm bg-light border-0 {{ isValidField('dateoperation')}}" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date" required>
+                                <div class="invalid-feedback">{{ msgErros }}</div>
                             </div>
+                        </div>
+                        <!--end col-->
 
-                            <!-- ================= ONGLET RETOURS EXISTANTS (affichage historique) ================= -->
-                            <div class="tab-pane fade" id="retoursExistants" role="tabpanel">
-                                <h6 class="mb-3"><i class="ri-bank-card-line me-1"></i> Retours caisse déjà enregistrés pour cette opération</h6>
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-hover">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Caisse</th>
-                                                <th>Devise</th>
-                                                <th class="text-end">Montant (devise caisse)</th>
-                                                <th class="text-end">Montant (référentiel)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr *ngFor="let retour of retoursCaisseExistants">
-                                                <td>{{ retour.caisse?.codecaisse }}</td>
-                                                <td>{{ retour.devise?.codedevise }}</td>
-                                                <td class="text-end">{{ retour.montant | number:'1.0-0' }} {{ retour.devise?.codedevise }}</td>
-                                                <td class="text-end">{{ retour.montantRef | number:'1.0-0' }} {{ user.devise_rep_code }}</td>
-                                            </tr>
-                                            <tr *ngIf="retoursCaisseExistants.length === 0">
-                                                <td colspan="6" class="text-center text-muted py-3">Aucun retour caisse trouvé pour cette opération</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                        <div class="col-lg-3 col-sm-3">
+                            <div>
+                                <label for="choices-payment-status">Devise opération</label>
+                                <div class="input-light">
+                                    <select formControlName="deviseoperation" class="form-select form-select-sm bg-light border-0 {{ isValidField('deviseoperation')}}" required>
+                                        <option value="">choisir la devise</option>
+                                        @for (item of devises; track $index){
+                                            <option value="{{item.iddevise}}">{{item.codedevise}}</option>
+                                        }
+                                    </select>
+                                    <div class="invalid-feedback">{{ msgErros }}</div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="card-footer bg-white text-end">
-                        <button type="button" class="btn btn-secondary btn-sm me-2" (click)="resetForm()">
-                            <i class="ri-close-line me-1"></i> Annuler
-                        </button>
-                        <button type="submit" class="btn btn-success btn-sm" 
-                                [disabled]="operationForm.invalid || (lignes.length === 0 && totalRetourCaisseRef === 0)">
-                            <i class="ri-save-line me-1"></i> Enregistrer la justification
-                        </button>
+
+                        <div class="col-lg-3 col-sm-3">
+                            <label for="invoicenoInput">Montant opération</label>
+                            <input type="text" formControlName="montantoperation" class="form-control form-control-sm bg-light border-0"  placeholder="" readonly="readonly" />
+                            <div class="invalid-feedback">{{ msgErros }}</div>
+                        </div>
+                        <!--end col-->
+
+                        <div class="col-lg-3 col-sm-3">
+                            <label for="invoicenoInput">Reste Mt opération</label>
+                            <input type="text" formControlName="resteapayeroperation" class="form-control form-control-sm bg-light border-0"  placeholder="" readonly="readonly" />
+                            <div class="invalid-feedback">{{ msgErros }}</div>
+                        </div>
+                        <!--end col-->
+
+                        <div class="col-lg-3 col-sm-3">
+                            <label for="invoicenoInput">Montant référentiel</label>
+                            <!-- <input type="text" formControlName="montantRefglobal" class="form-control form-control-sm bg-light border-0"  placeholder="" readonly="readonly" />
+                            <div class="invalid-feedback">{{ msgErros }}</div> -->
+                            <div class="input-group input-group-sm mb-2">
+                                <input type="text" formControlName="montantRefglobal" 
+                                class="form-control form-control-sm bg-light border-0" placeholder="" readonly="readonly" >
+                                <label class="input-group-text">  {{ user.devise_rep_code }}</label>
+                            </div>
+                            <div class="invalid-feedback">{{ msgErros }}</div>
+                        </div>
+                        <!--end col-->
+
+                        <div class="col-lg-3 col-sm-3">
+                            <label for="invoicenoInput">Reste à payer réf</label>
+                            <!-- <input type="text" formControlName="resteapayerref" class="form-control form-control-sm bg-light border-0"  placeholder="" readonly="readonly" /> -->
+                            <div class="input-group input-group-sm mb-2">
+                                <input type="text" formControlName="resteapayerref" 
+                                class="form-control form-control-sm bg-light border-0" placeholder="" readonly="readonly" >
+                                <label class="input-group-text">  {{ user.devise_rep_code }}</label>
+                            </div>
+                            <div class="invalid-feedback">{{ msgErros }}</div>
+                        </div>
+                        <!--end col-->
                     </div>
                 </div>
             </div>
-        </div>
-    </form>
+
+            <div class="row g-3">
+                <div class="col-lg-6 col-sm-6">
+                    <div class="card" id="">
+                        <div class="card-header border-0">
+                            <div class="d-flex align-items-center">
+                                <h5 class="card-title mb-0 flex-grow-1">Retour en caisses</h5>
+                            </div>
+                        </div>
+                        <div class="card-body border border-dashed border-start-0 border-end-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm table-borderless table-nowrap mb-0">
+                                    <colgroup>
+                                        <col style="width: 10%">
+                                        <col style="width: 30%">
+                                        <col style="width: 30%">
+                                        <col style="width: 30%">
+                                    </colgroup>
+                                    <thead class="align-middle">
+                                        <tr class="table-active">
+                                            <th scope="col" style="width: 15px;">N°</th>
+                                            <th scope="col">Piece</th>
+                                            <th scope="col">Caisse</th>
+                                            <th scope="col" class="text-end" style="width: 150px;">Montant</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="newlink">
+                                        @for(piece of ope?.caisses; track piece.idtypeoperation){
+                                            <tr *ngIf="piece.codtypeoperation == 'encaissement'" style="cursor:pointer" 
+                                            (click)="selectRetour(piece)" [class.table-active]="selectedRetour === piece">
+                                                <th scope="row" class="product-id">{{$index + 1 }}</th>
+                                                <td class="text-start"> {{ope.codeoperation}} </td>
+                                                <td class="text-start"> {{piece.caisse.codecaisse}} </td>
+                                                <td class="text-end"> {{piece.montant}} {{piece.caisse.devise}}</td>
+                                            </tr>
+                                        }
+                                        <tr *ngIf="loadingPiece">
+                                            <td colspan="3">
+                                                <div class="text-center py-4">
+                                                    <div class="spinner-border text-info"></div>
+                                                    <h6 class="mt-2">Chargement...</h6>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-sm-6">
+                    <div class="card" id="">
+                        <div class="card-header border-0">
+                            <div class="d-flex align-items-right">
+                                <h5 class="card-title mb-0 flex-grow-1">Pièces Justificatifs</h5>
+                            </div>
+                        </div>
+                        <div class="card-body border border-dashed border-start-0 border-end-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm table-borderless table-nowrap mb-0">
+                                    <colgroup>
+                                        <col style="width: 10%">
+                                        <col style="width: 60%">
+                                        <col style="width: 30%">
+                                    </colgroup>
+                                    <thead class="align-middle">
+                                        <tr class="table-active">
+                                            <th scope="col" style="width: 15px;">N°</th>
+                                            <th scope="col">Piece</th>
+                                            <th scope="col" class="text-end" style="width: 150px;">Montant</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="newlink">
+                                        @for(piece of justificatifFiltered; track piece.idjustificatifoperation){
+                                            <tr style="cursor:pointer" (click)="selectJustificatif(piece)">
+                                                <th scope="row" class="product-id">{{$index + 1 }}</th>
+                                                <td class="text-start"> {{piece.codejustificatif}} </td>
+                                                <td class="text-end"> {{piece.montantjustificatif}} {{piece.devise.codedevise}}</td>
+                                            </tr>
+                                        }
+                                        <tr *ngIf="loadingPiece">
+                                            <td colspan="3">
+                                                <div class="text-center py-4">
+                                                    <div class="spinner-border text-info"></div>
+                                                    <h6 class="mt-2">Chargement...</h6>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-lg-12 col-sm-12">
+                    <div class="card" id="">
+                        <div class="card-header border-0">
+                            <div class="d-flex align-items-center">
+                                <h5 class="card-title mb-0 flex-grow-1">Enregistrer justificatif</h5>
+                            </div>
+                        </div>
+                        <div class="card-body border border-dashed border-start-0 border-end-0">
+                            <div class="row g-3">
+                                <div class="col-lg-3 col-sm-4">
+                                    <div>
+                                        <label for="choices-payment-status">Devise</label>
+                                        <div class="input-light">
+                                            <select formControlName="devisejustificatif" class="form-select form-select-sm bg-light border-0 {{ isValidField('devisejustificatif')}}" required [disabled]="loadingTaux">
+                                                <option value="">choisir la devise</option>
+                                                @for (item of devises; track $index){
+                                                    <option value="{{item.iddevise}}">{{item.codedevise}}</option>
+                                                }
+                                            </select>
+                                            @if (loadingTaux) {
+                                                <small class="text-muted">
+                                                    <i class="mdi mdi-loading mdi-spin"></i> Chargement des taux...
+                                                </small>
+                                            }
+                                            <div class="invalid-feedback">{{ msgErros }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3 col-sm-4">
+                                    <div>
+                                        <label for="date-field">Date</label>
+                                        <input type="date" formControlName="datejustificatif" class="form-control form-control-sm bg-light border-0 {{ isValidField('datejustificatif')}}" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date" required>
+                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3 col-sm-4">
+                                    <div>
+                                        <label for="date-field">Taux</label>
+                                        <input type="texte" formControlName="tauxoperation" class="form-control form-control-sm bg-light border-0 {{ isValidField('tauxoperation')}}" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date" required>
+                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3 col-sm-4">
+                                    <div>
+                                        <label for="date-field">Taux inverse</label>
+                                        <input type="texte" formControlName="tauxoperationinverse" class="form-control form-control-sm bg-light border-0 {{ isValidField('tauxoperationinverse')}}" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date">
+                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-12 col-sm-12">
+                                    <div>
+                                        <textarea class="form-control form-control-sm bg-light border-0" formControlName="commentaire" rows="4" placeholder="commentaire">
+                                        </textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-lg-12 col-sm-12">
+                    <div class="card" id="">
+                        <div class="card-header border-0">
+                            <div class="d-flex align-items-center">
+                                <h5 class="card-title mb-0 flex-grow-1">Détails des justificatifs</h5>
+                            </div>
+                        </div>
+                        <div class="card-body border border-dashed border-start-0 border-end-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-borderless table-nowrap mb-0">
+                                    <colgroup>
+                                        <col style="width: 05%">
+                                        <col style="width: 20%">
+                                        <col style="width: 20%">
+                                        <col style="width: 20%">
+                                        <col style="width: 10%">
+                                        <col style="width: 05%">
+                                    </colgroup>
+                                    <thead class="align-middle">
+                                        <tr class="table-active">
+                                            <th scope="col" style="width: 15px;">N°</th>
+                                            <th scope="col">Nature opération</th>
+                                            <th scope="col">Centre Analytique</th>
+                                            <th scope="col" style="width: 120px;">Tiers</th>
+                                            <th scope="col" class="text-end" style="width: 150px;">Montant</th>
+                                            <th scope="col" class="text-end" style="width: 105px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="newlink">  
+                                        <!-- 2. Lignes dynamiques ajoutées -->
+                                            @for (ligne of lignes.controls; track $index){
+                                            <tr class="product" [formGroup]="ligne">
+                                                <th scope="row" class="product-id">{{$index + 1 }}</th>
+                                                <td class="text-start">
+                                                    <div class="mb-2">
+                                                        <div class="input-light">
+                                                            <select class="form-select form-select-sm bg-light border-0" formControlName="idnature" required>
+                                                                <option value="" selected>Choisir nature operation</option>
+                                                                @for(item of natureoperations; track $index){
+                                                                    <option value="{{item.idnature}}"> {{item.libelle}} </option>
+                                                                }
+                                                            </select>
+                                                        </div>
+                                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-start">
+                                                    <div class="mb-2">
+                                                        <div class="input-light">
+                                                            <select formControlName="idcentreanalytique" class="form-select form-select-sm bg-light border-0">
+                                                                <option value="" selected>Choisir centre analytique</option>
+                                                                <option *ngFor="let c of ligne.get('centres')?.value" [value]="c.idcentreanalytique">
+                                                                        {{ c.libelle }}
+                                                                </option>
+                                                            </select>
+                                                            <div class="invalid-feedback">{{ msgErros }}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="input-light">
+                                                        <select formControlName="idtiers" class="form-select form-select-sm bg-light border-0">
+                                                            <option value="" selected>Choisir tiers</option>
+                                                            @for(item of tiers; track $index){
+                                                                <option value="{{item.idtiers}}"> {{item.designation}} </option>
+                                                            }
+                                                        </select>
+                                                        <div class="invalid-feedback">{{ msgErros }}</div>
+                                                    </div>
+                                                </td>
+                                                
+                                                <td class="text-end">
+                                                    <div>
+                                                        <input type="text" formControlName="montantdetail" class="form-control form-control-sm bg-light border-0 product-line-price" id="productPrice-1" placeholder="00.000" required/>
+                                                    </div>
+                                                </td>
+                                                <td class="product-removal align-right">
+                                                    <button type="button" [disabled]="!isUpdated" class="btn btn-sm btn-soft-danger" (click)="removeLine($index)"><i class="ri-delete-bin-2-line align-bottom"></i></button>
+                                                </td>
+                                            </tr>
+                                            }
+                                            <tr class="mb-2"></tr>
+                                            <tr>
+                                                <td colspan="5">
+                                                    <button type="button" [disabled]="!isUpdated" class="btn btn-sm btn-soft-secondary fw-medium" (click)="addLine()"><i class="ri-add-fill me-1 align-bottom"></i></button>
+                                                </td>
+                                            </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="card-footer border-0 d-flex justify-content-end">
+                            <button type="submit" (click)="onSubmit()" [disabled]="operationForm.invalid" class="btn btn-sm btn-success"><i class="ri-add-line align-bottom me-1"></i>enregistrer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-lg-12 col-sm-12">
+                    <div class="card" id="">
+                        <div class="card-header border-0">
+                            <div class="d-flex align-items-center">
+                                <h6 class="card-title mb-0 flex-grow-1">Retour caisse</h6>
+                                <div class="flex-shrink-0">
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" value="1" formControlName="retourcaisse" id="flexSwitchCheckChecked">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body border border-dashed border-start-0 border-end-0" *ngIf="showCaisses">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-borderless table-nowrap mb-0">
+                                    <thead class="align-middle">
+                                        <tr>
+                                            <th scope="col"> Caisse </th>
+                                            <th scope="col"></th>
+                                            <th scope="col"> Solde </th>
+                                            <th scope="col"> Montant </th>
+                                            <th scope="col"> Taux </th>
+                                            <th scope="col"> Montant ref. </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody *ngIf="!loadingModal; else loader">
+                                        @for(c of caisses.controls; track $index){
+                                            <tr [formGroup]="c" class="caisse-row">
+                                                <td>
+                                                    <div class="cell-wrapper">
+                                                        <span> <strong> {{ c.get('caisse')?.value }} </strong> </span>
+                                                        <input type="hidden" formControlName="idcaisse">
+                                                        <div class="error-slot">&nbsp;</div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="cell-wrapper">
+                                                        <span> {{ c.get('devisecaisse')?.value }} </span>
+                                                        <div class="error-slot">&nbsp;</div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="cell-wrapper">
+                                                        <input formControlName="solde" type="text" class="form-control form-control-sm bg-success-subtle border-0"  readonly/>
+                                                        <div class="error-slot">&nbsp;</div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="cell-wrapper">
+                                                        <input type="text" formControlName="montantcaisse" [readonly]="selectedRetour" [ngClass]="{'bg-danger-subtle': c.get('montantcaisse')?.errors?.['soldeInsuffisant']}" class="form-control form-control-sm bg-light border-0"  placeholder="000.000"/>
+                                                        <div class="text-danger small error-slot" [class.visible]="c.get('montantcaisse')?.errors?.['soldeInsuffisant']">
+                                                            Solde insuffisant
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="cell-wrapper">
+                                                        <input type="text" formControlName="taux" class="form-control form-control-sm bg-light border-0"/>
+                                                        <div class="error-slot">&nbsp;</div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="cell-wrapper">
+                                                        <input type="text" formControlName="montantref" [ngClass]="{'bg-danger-subtle': c.get('montantcaisse')?.errors?.['depassementMontant']}" class="form-control form-control-sm bg-light border-0"  readonly/>
+                                                        <div class="text-danger small error-slot" [class.visible]="c.get('montantcaisse')?.errors?.['depassementMontant']">
+                                                            Montant dépassé
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                        
+                                        <tr *ngIf="operationForm.errors?.['totalCaisseDepasse']">
+                                            <td colspan="6" class="text-danger small">
+                                                Le total des caisses ne doit pas dépasser le montant total de l’opération.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <ng-template #loader>
+                                        <div class="text-center p-4">
+                                            <div class="spinner-border text-info"></div>
+                                            <p>Chargement des périodes...</p>
+                                        </div>
+                                    </ng-template>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
+<!-- FIN DE LA DIV CONDITIONNELLE -->
