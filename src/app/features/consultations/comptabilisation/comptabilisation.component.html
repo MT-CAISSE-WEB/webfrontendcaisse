@@ -91,7 +91,7 @@
                                 <td class="text-nowrap">{{ ecriture.compte }}</td>
                                 <td class="text-nowrap">{{ ecriture.tiers }}</td>
                                 <td class="text-nowrap">
-                                    {{ ecriture.libelle.length > 75 ? (ecriture.libelle | slice:0:75) + '...' : ecriture.libelle }}
+                                    {{ ecriture.libelle?.length > 75 ? (ecriture.libelle | slice:0:75) + '...' : ecriture.libelle }} {{ (ecriture.libelle?.length ?? 0) > 75 ? (ecriture.libelle | slice:0:75) + '...' : (ecriture.libelle ?? '') }}
                                 </td>
                                 <td class="text-end">{{ ecriture.debit | number:'1.2-2' }}</td>
                                 <td class="text-end">{{ ecriture.credit | number:'1.2-2' }}</td>
@@ -105,7 +105,7 @@
                                     </span>
                                 </td>
                             </tr>
-                            <tr *ngIf="ecritures.length === 0">
+                            <tr *ngIf="!ecritures?.length">
                                 <td colspan="18" class="text-center text-muted py-4">Aucune écriture trouvée.</td>
                             </tr>
                         </tbody>
