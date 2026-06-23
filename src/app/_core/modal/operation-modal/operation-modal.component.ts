@@ -54,6 +54,7 @@ import { DemandePJService } from '../../../features/PJ/service/demandepj.service
 })
 export class OperationModalComponent implements OnInit {
   @Input() title = '';
+  @Input() iddemande: string | null = null;
 
   //Le taux de devises
   tauxdevise: tauxdevisemodel = new tauxdevisemodel();
@@ -169,6 +170,17 @@ export class OperationModalComponent implements OnInit {
     this.getAllcentres();
     //charger les demandes
     this.loadAllDemandes();
+    // Si une demande est passée en paramètre, la sélectionner automatiquement
+    if (this.iddemande) {
+      const checkInterval = setInterval(() => {
+        if (this.entetesDmd.length > 0) {
+          clearInterval(checkInterval);
+          // Sélectionne la demande dans le formulaire
+          this.operationForm.get('demande')?.setValue(this.iddemande);
+          // Le reste est géré automatiquement par le valueChanges subscriber existant
+        }
+      }, 100); // Vérifie toutes les 100ms si les demandes sont chargées
+    }
     //Initialisation du formulaire
     this.initForm();
     //Charger les natures d'opérations
@@ -250,6 +262,89 @@ export class OperationModalComponent implements OnInit {
       this.caisseStatuses = status;
     });
   }
+
+  // Variables
+  demandeSelectionnee: any = null;
+
+  // Méthode appelée lors de la sélection d'une demande
+  onDemandeSelect(event: any): void {
+    const demandeId = event.target.value;
+    if (demandeId) {
+      // Récupérer la demande sélectionnée
+      this.demandeSelectionnee = this.entetesDmd.find(
+        (d) => d.iddemande === demandeId,
+      );
+
+      // Charger les pièces jointes de la demande
+      this.loadDemandePiecesJointes(demandeId);
+
+      // Remplir automatiquement les champs
+      this.autoFillDemandeFields(this.demandeSelectionnee);
+    } else {
+      this.demandeSelectionnee = null;
+      this.demandePiecesJointes = [];
+    }
+  }
+
+  // Remplir automatiquement les champs
+  autoFillDemandeFields(demande: any): void {
+    if (demande) {
+      // Remplir la devise
+      if (demande.devise) {
+        this.operationForm.patchValue({
+          devise: demande.devise.iddevise,
+        });
+      }
+
+      // Remplir le bénéficiaire si disponible
+      if (demande.demandeur) {
+        this.operationForm.patchValue({
+          beneficiaire: demande.demandeur.nom + ' ' + demande.demandeur.prenom,
+        });
+      }
+
+      // Remplir le type de paiement par défaut
+      this.operationForm.patchValue({
+        typepaiement: 'decaissement',
+      });
+
+      // Ajouter une ligne avec le montant
+      const montantTotal = this.getTotalDemande(demande);
+      this.operationForm.patchValue({
+        montant: montantTotal,
+      });
+
+      // Ajouter une ligne avec le montant
+      this.addLineWithMontant(montantTotal);
+    }
+  }
+
+  // Ajouter une ligne avec le montant
+  addLineWithMontant(montant: number): void {
+    if (this.lignes.controls.length > 0) {
+      const firstLine = this.lignes.controls[0];
+      firstLine.patchValue({
+        montantligne: montant,
+      });
+    } else {
+      const newLine = this.newLigne();
+      newLine.patchValue({
+        montantligne: montant,
+      });
+      this.lignes.push(newLine);
+    }
+  }
+
+  // Compter le total des pièces jointes
+  getTotalPiecesCount(): number {
+    return (
+      this.demandePiecesJointes.length +
+      this.existingPieces.length +
+      this.uploadedFiles.length
+    );
+  }
+
+  // Déterminer le texte du bouton de téléchargement
 
   cancel() {
     this.activeModal.dismiss(false);

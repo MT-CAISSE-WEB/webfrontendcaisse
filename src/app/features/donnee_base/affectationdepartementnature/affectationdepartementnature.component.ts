@@ -101,7 +101,7 @@ export class AffectationDepartementNatureComponent implements OnInit {
     private departementservice: departementservice,
     private router: Router,
     private toastr: ToastrService,
-    private cdr: ChangeDetectorRef, //  Ajout
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {

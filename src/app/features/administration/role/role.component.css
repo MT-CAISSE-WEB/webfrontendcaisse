@@ -1,5 +1,5 @@
 /* ============================================
-   PAGE TITLE PREMIUM
+   PAGE TITLE PREMIUM - OPTIMISÉ
    ============================================ */
 
 .page-title-premium {
@@ -8,13 +8,27 @@
     rgba(59, 130, 246, 0.08),
     rgba(102, 126, 234, 0.05)
   );
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(59, 130, 246, 0.15);
   border-radius: 20px;
   padding: 20px 28px;
   margin-bottom: 28px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+@media (min-width: 769px) {
+  .page-title-premium {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.92);
+  }
+}
+
+@media (max-width: 768px) {
+  .page-title-premium {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.7);
+  }
 }
 
 .title-icon-premium {
@@ -60,9 +74,23 @@
   flex-wrap: wrap;
   padding: 4px 14px;
   background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(8px);
   border-radius: 40px;
   border: 1px solid rgba(59, 130, 246, 0.08);
+}
+
+@media (min-width: 769px) {
+  .breadcrumb-premium {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.8);
+  }
+}
+
+@media (max-width: 768px) {
+  .breadcrumb-premium {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
 }
 
 .breadcrumb-premium .breadcrumb-item {
@@ -83,7 +111,6 @@
 .breadcrumb-premium .breadcrumb-item a {
   color: #405189;
   text-decoration: none;
-  transition: color 0.2s ease;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -99,50 +126,37 @@
 }
 
 /* ========================================
-   CARDS - GLASSMORPHISM PREMIUM
+   CARDS - OPTIMISÉ
    ======================================== */
 
 .card {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.9),
-    rgba(255, 255, 255, 0.7)
-  );
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(203, 213, 225, 0.15);
   border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.08);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
   overflow: hidden;
   position: relative;
 }
 
-/* Effet de brillance sur les cards */
+@media (min-width: 769px) {
+  .card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: white;
+  }
+}
+
+@media (max-width: 768px) {
+  .card {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.7);
+  }
+}
+
+/* Suppression des effets de brillance inutiles */
 .card::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(
-    circle at 30% 30%,
-    rgba(255, 255, 255, 0.3),
-    transparent 60%
-  );
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-
-.card:hover::before {
-  opacity: 1;
-}
-
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.12);
+  display: none;
 }
 
 .card-body {
@@ -157,10 +171,9 @@
 }
 
 /* ========================================
-   BADGES - CORRECTION IMPORTANTE
+   BADGES
    ======================================== */
 
-/* Forcer la couleur blanche sur les badges */
 .badge {
   font-weight: 600;
   padding: 5px 12px;
@@ -179,13 +192,12 @@
   box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
 }
 
-/* Classe utilitaire pour texte blanc forcé */
 .text-white-force {
   color: #ffffff !important;
 }
 
 /* ========================================
-   TABLES - MODERN STYLE
+   TABLES - OPTIMISÉ
    ======================================== */
 
 .table {
@@ -194,11 +206,7 @@
 }
 
 .table thead th {
-  background: linear-gradient(
-    135deg,
-    rgba(59, 130, 246, 0.08),
-    rgba(64, 81, 137, 0.05)
-  );
+  background: rgba(59, 130, 246, 0.06);
   border: none;
   font-weight: 600;
   font-size: 0.75rem;
@@ -211,30 +219,32 @@
 
 .table tbody td {
   background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(4px);
   border: none;
   padding: 10px 16px;
   color: #1f2937;
-  transition: all 0.2s ease;
+}
+
+@media (min-width: 769px) {
+  .table tbody td {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .table tbody td {
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
 }
 
 .table tbody tr {
   border-radius: 10px;
-  transition: all 0.2s ease;
-}
-
-.table tbody tr:hover td {
-  background: rgba(59, 130, 246, 0.06);
-  transform: scale(1.01);
 }
 
 /* Ligne active - sélection */
 .role-row.table-active td {
-  background: linear-gradient(
-    135deg,
-    rgba(59, 130, 246, 0.15),
-    rgba(64, 81, 137, 0.1)
-  );
+  background: rgba(59, 130, 246, 0.12);
   border-left: 4px solid #405189;
   position: relative;
 }
@@ -252,7 +262,7 @@
 }
 
 /* ========================================
-   BOUTONS - GLASSMORPHISM
+   BOUTONS - OPTIMISÉ
    ======================================== */
 
 .btn {
@@ -260,12 +270,11 @@
   border-radius: 20px;
   padding: 8px 16px;
   font-weight: 500;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
 
-/* Bouton primaire - dégradé */
+/* Bouton primaire */
 .btn-primary {
   background: linear-gradient(135deg, #3b82f6, #405189) !important;
   color: white !important;
@@ -273,16 +282,11 @@
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px) scale(1.02);
   box-shadow: 0 6px 25px rgba(59, 130, 246, 0.4);
   color: white !important;
 }
 
-.btn-primary:active {
-  transform: scale(0.95);
-}
-
-/* Bouton succès - dégradé */
+/* Bouton succès */
 .btn-success {
   background: linear-gradient(135deg, #10b981, #34d399) !important;
   color: white !important;
@@ -290,55 +294,40 @@
 }
 
 .btn-success:hover {
-  transform: translateY(-2px) scale(1.02);
   box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
   color: white !important;
 }
 
-.btn-success:active {
-  transform: scale(0.95);
-}
-
-/* Effet de brillance sur les boutons */
+/* Suppression de l'effet de brillance inutile */
 .btn::after {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.2),
-    transparent 60%
-  );
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.btn:hover::after {
-  opacity: 1;
+  display: none;
 }
 
 /* ========================================
-   INPUTS - GLASSMORPHISM
+   INPUTS - OPTIMISÉ
    ======================================== */
 
 .form-control {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(203, 213, 225, 0.3);
   border-radius: 10px;
   padding: 8px 14px;
   font-size: 0.875rem;
-  transition: all 0.3s ease;
   color: #1f2937;
 }
 
+@media (min-width: 769px) {
+  .form-control {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: white;
+  }
+}
+
 .form-control:focus {
-  background: rgba(255, 255, 255, 0.9);
+  background: white;
   border-color: #405189;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
   outline: none;
 }
 
@@ -347,7 +336,7 @@
 }
 
 /* ========================================
-   ACTIONS ICONS
+   ACTIONS ICONS - OPTIMISÉ
    ======================================== */
 
 .action-icon {
@@ -357,14 +346,9 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  transition: all 0.2s ease;
   cursor: pointer;
   color: #6b7280;
   text-decoration: none;
-}
-
-.action-icon:hover {
-  transform: translateY(-2px);
 }
 
 .action-icon.text-success:hover {
@@ -383,7 +367,7 @@
 }
 
 /* ========================================
-   CHECKS MODERNES
+   CHECKS MODERNES - OPTIMISÉ
    ======================================== */
 
 .form-check {
@@ -392,16 +376,17 @@
   align-items: center;
   gap: 12px;
   background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(4px);
   padding: 8px 12px;
   border-radius: 10px;
-  transition: all 0.2s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(203, 213, 225, 0.1);
 }
 
-.form-check:hover {
-  background: rgba(255, 255, 255, 0.5);
-  transform: translateX(4px);
+@media (min-width: 769px) {
+  .form-check {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.5);
+  }
 }
 
 .form-check-input {
@@ -410,7 +395,6 @@
   height: 18px;
   border: 2px solid #d1d5db;
   border-radius: 6px;
-  transition: all 0.2s ease;
   cursor: pointer;
   flex-shrink: 0;
   position: relative;
@@ -434,7 +418,6 @@
 
 .form-check-input:hover {
   border-color: #3b82f6;
-  transform: scale(1.05);
 }
 
 .form-check-label {
@@ -445,7 +428,7 @@
 }
 
 /* ========================================
-   RIGHT COLUMN - STICKY CARD
+   RIGHT COLUMN
    ======================================== */
 
 .sticky-top {
@@ -456,87 +439,30 @@
 
 .text-muted.text-center {
   background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(4px);
   padding: 40px 20px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(203, 213, 225, 0.15);
   color: #6b7280;
 }
 
 /* ========================================
-   ANIMATIONS
-   ======================================== */
-
-/* Animation d'entrée des éléments */
-@keyframes fadeSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.card {
-  animation: fadeSlideUp 0.4s ease forwards;
-}
-
-.card:nth-child(2) {
-  animation-delay: 0.1s;
-}
-
-/* Animation des lignes de tableau */
-@keyframes tableRowFade {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.table tbody tr {
-  animation: tableRowFade 0.3s ease forwards;
-}
-
-/* Animation des checkboxes */
-@keyframes checkPop {
-  0% {
-    transform: scale(0);
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.form-check-input:checked {
-  animation: checkPop 0.2s ease;
-}
-
-/* ========================================
-   NO ROLE SELECTED
+   NO ROLE SELECTED - OPTIMISÉ
    ======================================== */
 
 .no-role-selected {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.3),
-    rgba(255, 255, 255, 0.1)
-  );
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(203, 213, 225, 0.15);
   border-radius: 20px;
   padding: 60px 30px;
   text-align: center;
   color: #6b7280;
-  animation: fadeSlideUp 0.4s ease;
+}
+
+@media (min-width: 769px) {
+  .no-role-selected {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }
 
 .no-role-selected i {

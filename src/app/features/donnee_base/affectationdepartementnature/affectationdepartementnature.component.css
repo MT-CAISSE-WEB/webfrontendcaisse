@@ -1,25 +1,34 @@
 /* ============================================
-   AFFECTATION DÉPARTEMENT-NATURE - DESIGN MODERNE
-   AVEC STYLE DES MODALS DE NATUREOPERATION
-   ============================================ */
-
-/* ============================================
-   1. PAGE TITLE
+   PAGE TITLE PREMIUM - OPTIMISÉ
    ============================================ */
 
 .page-title-premium {
   background: linear-gradient(
     135deg,
-    rgba(59, 130, 246, 0.06),
-    rgba(102, 126, 234, 0.03)
+    rgba(59, 130, 246, 0.08),
+    rgba(102, 126, 234, 0.05)
   );
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.15);
   border-radius: 20px;
   padding: 20px 28px;
   margin-bottom: 28px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+@media (min-width: 769px) {
+  .page-title-premium {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.92);
+  }
+}
+
+@media (max-width: 768px) {
+  .page-title-premium {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.7);
+  }
 }
 
 .title-icon-premium {
@@ -28,13 +37,13 @@
   background: linear-gradient(
     135deg,
     rgba(59, 130, 246, 0.12),
-    rgba(102, 126, 234, 0.06)
+    rgba(102, 126, 234, 0.08)
   );
   border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.1);
   flex-shrink: 0;
 }
 
@@ -54,6 +63,7 @@
   font-size: 0.75rem;
   color: #94a3b8;
   font-weight: 400;
+  letter-spacing: 0.5px;
   display: block;
   margin-top: 2px;
 }
@@ -61,14 +71,31 @@
 .breadcrumb-premium {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   padding: 4px 14px;
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(4px);
+  background: rgba(255, 255, 255, 0.5);
   border-radius: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.08);
+}
+
+@media (min-width: 769px) {
+  .breadcrumb-premium {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.8);
+  }
+}
+
+@media (max-width: 768px) {
+  .breadcrumb-premium {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
 }
 
 .breadcrumb-premium .breadcrumb-item {
+  display: flex;
+  align-items: center;
   font-size: 0.8rem;
   color: #94a3b8;
 }
@@ -76,13 +103,17 @@
 .breadcrumb-premium .breadcrumb-item + .breadcrumb-item::before {
   content: "›";
   color: #cbd5e1;
+  font-size: 1.2rem;
+  font-weight: 300;
   padding: 0 8px;
 }
 
 .breadcrumb-premium .breadcrumb-item a {
   color: #405189;
   text-decoration: none;
-  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .breadcrumb-premium .breadcrumb-item a:hover {
@@ -95,17 +126,30 @@
 }
 
 /* ============================================
-   2. CARD PRINCIPALE
+   2. CARD PRINCIPALE - OPTIMISÉ
    ============================================ */
 
 .card-glass {
   background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 20px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.03);
   overflow: hidden;
+}
+
+@media (min-width: 769px) {
+  .card-glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.92);
+  }
+}
+
+@media (max-width: 768px) {
+  .card-glass {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
 }
 
 .card-header-glass {
@@ -118,13 +162,11 @@
 }
 
 /* ============================================
-   3. BOUTONS GLASS
+   3. BOUTONS GLASS - OPTIMISÉS
    ============================================ */
 
 .btn-glass-secondary {
   background: rgba(203, 213, 225, 0.3);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(203, 213, 225, 0.4);
   border-radius: 30px;
   padding: 0.4rem 1rem;
@@ -132,28 +174,31 @@
   font-weight: 500;
   color: #475569;
   cursor: pointer;
-  transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
+@media (min-width: 769px) {
+  .btn-glass-secondary {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
 .btn-glass-secondary:hover {
   background: rgba(203, 213, 225, 0.5);
   border-color: #94a3b8;
-  transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   color: #1e293b;
 }
 
 /* ============================================
-   4. SÉLECTEUR DE DÉPARTEMENT
+   4. SÉLECTEUR DE DÉPARTEMENT - OPTIMISÉ
    ============================================ */
 
 .departement-selector-glass {
   background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 16px;
   padding: 16px 24px;
@@ -162,8 +207,14 @@
   gap: 20px;
   flex-wrap: wrap;
   margin-bottom: 24px;
-  transition: all 0.3s ease;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 769px) {
+  .departement-selector-glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }
 
 .departement-selector-glass:hover {
@@ -198,15 +249,19 @@
   width: 100%;
   padding: 10px 16px;
   background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
   border: 1px solid rgba(226, 232, 240, 0.25);
   border-radius: 12px;
   font-size: 0.85rem;
   color: #1e293b;
-  transition: all 0.3s ease;
   appearance: none;
   cursor: pointer;
+}
+
+@media (min-width: 769px) {
+  .selector-glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }
 
 .selector-glass:focus {
@@ -224,7 +279,6 @@
   height: 2px;
   background: linear-gradient(90deg, #405189, #667eea);
   transform: scaleX(0);
-  transition: transform 0.3s ease;
   border-radius: 0 0 12px 12px;
 }
 
@@ -233,19 +287,23 @@
 }
 
 /* ============================================
-   5. TABLEAUX GLASS
+   5. TABLEAUX GLASS - OPTIMISÉS
    ============================================ */
 
 .table-card-glass {
   background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
   height: 100%;
+}
+
+@media (min-width: 769px) {
+  .table-card-glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }
 
 .table-card-glass:hover {
@@ -300,7 +358,7 @@
 }
 
 /* ============================================
-   6. SEARCH
+   6. SEARCH - OPTIMISÉ
    ============================================ */
 
 .search-wrapper {
@@ -325,14 +383,18 @@
   width: 100%;
   padding: 6px 12px 6px 36px;
   background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
   border: 1px solid rgba(226, 232, 240, 0.15);
   border-radius: 8px;
   font-size: 0.8rem;
   color: #1e293b;
-  transition: all 0.3s ease;
   outline: none;
+}
+
+@media (min-width: 769px) {
+  .search-input-mini {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }
 
 .search-input-mini:focus {
@@ -346,7 +408,7 @@
 }
 
 /* ============================================
-   7. TABLEAU AFFECTATION
+   7. TABLEAU AFFECTATION - OPTIMISÉ
    ============================================ */
 
 .table-affectation {
@@ -371,10 +433,6 @@
   color: #1e293b;
   border-bottom: 1px solid rgba(226, 232, 240, 0.04);
   vertical-align: middle;
-}
-
-.table-affectation tbody tr {
-  transition: all 0.2s ease;
 }
 
 .table-affectation tbody tr:hover {
@@ -420,7 +478,7 @@
 }
 
 /* ============================================
-   9. PAGINATION
+   9. PAGINATION - OPTIMISÉE
    ============================================ */
 
 .pagination-affectation {
@@ -443,7 +501,6 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
   color: #64748b;
 }
 
@@ -466,7 +523,7 @@
 }
 
 /* ============================================
-   10. BOUTONS CENTRAUX
+   10. BOUTONS CENTRAUX - OPTIMISÉS
    ============================================ */
 
 .actions-center {
@@ -490,17 +547,12 @@
   font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
   width: 100%;
   max-width: 130px;
 }
 
 .btn-action-center i {
   font-size: 1rem;
-}
-
-.btn-action-center:active {
-  transform: scale(0.95);
 }
 
 .btn-add {
@@ -510,14 +562,12 @@
 }
 
 .btn-add:hover:not(:disabled) {
-  transform: translateY(-2px);
   box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
 }
 
 .btn-add:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-  transform: none !important;
 }
 
 .btn-add-all {
@@ -528,7 +578,6 @@
 
 .btn-add-all:hover {
   background: rgba(16, 185, 129, 0.15);
-  transform: translateY(-2px);
 }
 
 .divider-center {
@@ -546,7 +595,6 @@
 
 .btn-remove-all:hover {
   background: rgba(239, 68, 68, 0.15);
-  transform: translateY(-2px);
 }
 
 .btn-remove {
@@ -556,14 +604,12 @@
 }
 
 .btn-remove:hover:not(:disabled) {
-  transform: translateY(-2px);
   box-shadow: 0 4px 20px rgba(239, 68, 68, 0.25);
 }
 
 .btn-remove:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-  transform: none !important;
 }
 
 .btn-abandon {
@@ -574,11 +620,10 @@
 
 .btn-abandon:hover {
   background: rgba(100, 116, 139, 0.15);
-  transform: translateY(-2px);
 }
 
 /* ============================================
-   11. BOUTON ENREGISTRER
+   11. BOUTON ENREGISTRER - OPTIMISÉ
    ============================================ */
 
 .save-container {
@@ -598,17 +643,11 @@
   font-weight: 600;
   font-size: 0.85rem;
   cursor: pointer;
-  transition: all 0.3s ease;
   box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
 }
 
 .btn-save-glass:hover {
-  transform: translateY(-3px);
   box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
-}
-
-.btn-save-glass:active {
-  transform: scale(0.96);
 }
 
 .btn-save-glass i {
@@ -616,7 +655,7 @@
 }
 
 /* ============================================
-   12. FORM CHECK
+   12. FORM CHECK - OPTIMISÉ
    ============================================ */
 
 .form-check-input {
@@ -624,7 +663,6 @@
   height: 16px;
   border: 1.5px solid #cbd5e1;
   border-radius: 4px;
-  transition: all 0.2s ease;
   cursor: pointer;
   background: rgba(255, 255, 255, 0.3);
 }
@@ -646,22 +684,29 @@
 
 .form-check-input:hover {
   border-color: #405189;
-  transform: scale(1.05);
 }
 
 /* ============================================
-   13. MODALS - STYLE NATUREOPERATION
+   13. MODALS - STYLE NATUREOPERATION OPTIMISÉ
    ============================================ */
 
-/* Modal content - Glassmorphism premium */
 .modal-content {
-  background: rgba(255, 255, 255, 0.9) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
   border: 1px solid rgba(255, 255, 255, 0.4) !important;
   border-radius: 20px !important;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.12) !important;
   overflow: hidden;
+}
+
+@media (min-width: 769px) {
+  .modal-content {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: white !important;
+  }
+}
+
+.modal-content {
   animation: slideUp 0.3s ease-out;
 }
 
@@ -676,13 +721,11 @@
   }
 }
 
-/* Modal body */
 .modal-body {
   padding: 24px !important;
   background: rgba(255, 255, 255, 0.05);
 }
 
-/* Modal footer */
 .modal-footer {
   background: rgba(255, 255, 255, 0.03) !important;
   border-top: 1px solid rgba(226, 232, 240, 0.05) !important;
@@ -690,7 +733,6 @@
   border-radius: 0 0 20px 20px !important;
 }
 
-/* Icon circle dans les modals */
 .icon-circle {
   width: 36px;
   height: 36px;
@@ -702,13 +744,11 @@
 }
 
 /* ============================================
-   14. BOUTONS MODAL - GLASSMORPHISM
+   14. BOUTONS MODAL - OPTIMISÉS
    ============================================ */
 
 .btn-glass-cancel {
   background: rgba(100, 116, 139, 0.12);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(100, 116, 139, 0.25);
   padding: 0.5rem 1.5rem;
   border-radius: 40px;
@@ -716,7 +756,6 @@
   font-weight: 500;
   color: #475569;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -724,30 +763,20 @@
   overflow: hidden;
 }
 
-.btn-glass-cancel::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transition: left 0.5s ease;
+@media (min-width: 769px) {
+  .btn-glass-cancel {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }
 
-.btn-glass-cancel:hover::before {
-  left: 100%;
+.btn-glass-cancel::before {
+  display: none;
 }
 
 .btn-glass-cancel:hover {
   background: rgba(100, 116, 139, 0.2);
   border-color: rgba(100, 116, 139, 0.4);
-  transform: translateY(-2px);
   color: #1e293b;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
@@ -759,8 +788,6 @@
 
 .btn-glass-submit {
   background: rgba(59, 130, 246, 0.15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(59, 130, 246, 0.3);
   padding: 0.5rem 1.8rem;
   border-radius: 40px;
@@ -768,7 +795,6 @@
   font-weight: 600;
   color: #405189;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -776,30 +802,20 @@
   overflow: hidden;
 }
 
-.btn-glass-submit::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(59, 130, 246, 0.2),
-    transparent
-  );
-  transition: left 0.5s ease;
+@media (min-width: 769px) {
+  .btn-glass-submit {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }
 
-.btn-glass-submit:hover::before {
-  left: 100%;
+.btn-glass-submit::before {
+  display: none;
 }
 
 .btn-glass-submit:hover:not(:disabled) {
   background: rgba(59, 130, 246, 0.25);
   border-color: #405189;
-  transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25);
   color: #405189;
 }
@@ -807,7 +823,6 @@
 .btn-glass-submit:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  transform: none !important;
 }
 
 .btn-glass-submit .spinner-border {
@@ -817,7 +832,7 @@
 }
 
 /* ============================================
-   15. UPLOAD ZONE - STYLE NATUREOPERATION
+   15. UPLOAD ZONE - OPTIMISÉ
    ============================================ */
 
 .upload-zone {
@@ -825,25 +840,28 @@
   border-radius: 16px;
   padding: 32px 24px;
   text-align: center;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(4px);
   cursor: pointer;
   position: relative;
   min-height: 200px;
 }
 
+@media (min-width: 769px) {
+  .upload-zone {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
 .upload-zone:hover {
   border-color: rgba(59, 130, 246, 0.3);
   background: rgba(255, 255, 255, 0.5);
-  transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
 }
 
 .upload-zone.dragover {
   border-color: #405189;
   background: rgba(59, 130, 246, 0.04);
-  transform: scale(1.01);
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
 }
 
@@ -853,7 +871,6 @@
   padding: 20px;
 }
 
-/* Contenu upload */
 .upload-content {
   display: flex;
   flex-direction: column;
@@ -874,16 +891,6 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 8px;
-  transition: all 0.3s ease;
-}
-
-.upload-zone:hover .upload-icon-wrapper {
-  background: linear-gradient(
-    135deg,
-    rgba(59, 130, 246, 0.15),
-    rgba(102, 126, 234, 0.08)
-  );
-  transform: scale(1.05);
 }
 
 .upload-icon-wrapper i {
@@ -935,10 +942,12 @@
   font-size: 0.8rem;
 }
 
-/* Prévisualisation du fichier */
+/* ============================================
+   16. FILE PREVIEW - OPTIMISÉ
+   ============================================ */
+
 .file-preview-container {
   width: 100%;
-  animation: fadeSlideUp 0.3s ease;
 }
 
 .file-preview-header {
@@ -947,9 +956,15 @@
   gap: 16px;
   padding: 12px 16px;
   background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(4px);
   border-radius: 12px;
   border: 1px solid rgba(226, 232, 240, 0.2);
+}
+
+@media (min-width: 769px) {
+  .file-preview-header {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }
 
 .file-icon-large {
@@ -1020,113 +1035,31 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
   flex-shrink: 0;
 }
 
 .btn-remove-file:hover {
   background: rgba(239, 68, 68, 0.12);
   color: #ef4444;
-  transform: rotate(90deg);
-}
-
-/* Aperçu du contenu */
-.file-preview-content {
-  margin-top: 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(226, 232, 240, 0.15);
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.preview-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 14px;
-  background: rgba(255, 255, 255, 0.2);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.1);
-}
-
-.preview-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #475569;
-}
-
-.preview-title i {
-  color: #3b82f6;
-}
-
-.preview-row-count {
-  font-size: 0.65rem;
-  color: #94a3b8;
-  background: rgba(226, 232, 240, 0.3);
-  padding: 2px 10px;
-  border-radius: 10px;
-}
-
-.preview-table-wrap {
-  overflow-x: auto;
-  max-height: 180px;
-  overflow-y: auto;
-}
-
-.preview-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.7rem;
-}
-
-.preview-table thead th {
-  padding: 6px 10px;
-  background: rgba(59, 130, 246, 0.04);
-  color: #64748b;
-  font-weight: 600;
-  text-align: left;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  white-space: nowrap;
-}
-
-.preview-table tbody td {
-  padding: 4px 10px;
-  color: #1e293b;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.05);
-}
-
-.preview-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.preview-table tbody tr:hover td {
-  background: rgba(59, 130, 246, 0.02);
-}
-
-.preview-more {
-  text-align: center;
-  color: #94a3b8;
-  font-style: italic;
-  padding: 6px 10px;
 }
 
 /* ============================================
-   16. PROGRESS BAR
+   17. PROGRESS BAR - OPTIMISÉ
    ============================================ */
 
 .progress-container {
   margin-top: 16px;
   padding: 16px 20px;
   background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(4px);
   border-radius: 12px;
   border: 1px solid rgba(226, 232, 240, 0.15);
-  animation: fadeSlideUp 0.3s ease;
+}
+
+@media (min-width: 769px) {
+  .progress-container {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }
 
 .progress-header {
@@ -1174,30 +1107,12 @@
   height: 100%;
   background: linear-gradient(90deg, #405189, #667eea);
   border-radius: 10px;
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
 
 .progress-glow {
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
-  );
-  animation: glow 1.5s ease-in-out infinite;
-}
-
-@keyframes glow {
-  to {
-    left: 100%;
-  }
+  display: none;
 }
 
 .progress-details {
@@ -1213,7 +1128,7 @@
 }
 
 /* ============================================
-   17. SUCCÈS & ERREURS
+   18. SUCCÈS & ERREURS - OPTIMISÉS
    ============================================ */
 
 .upload-success {
@@ -1225,7 +1140,6 @@
   background: rgba(16, 185, 129, 0.06);
   border: 1px solid rgba(16, 185, 129, 0.12);
   border-radius: 12px;
-  animation: fadeSlideUp 0.3s ease;
 }
 
 .success-icon {
@@ -1267,7 +1181,6 @@
   background: rgba(239, 68, 68, 0.04);
   border: 1px solid rgba(239, 68, 68, 0.08);
   border-radius: 12px;
-  animation: fadeSlideUp 0.3s ease;
 }
 
 .errors-header {
@@ -1304,33 +1217,7 @@
 }
 
 /* ============================================
-   19. ANIMATIONS
-   ============================================ */
-
-@keyframes fadeSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ============================================
-   20. RESPONSIVE
+   19. RESPONSIVE
    ============================================ */
 
 @media (max-width: 992px) {
