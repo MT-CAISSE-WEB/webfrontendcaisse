@@ -373,3 +373,67 @@
     animation: none;
   }
 }
+
+/* ============================================
+   RESPONSIVE MENU - GESTION MOBILE
+   ============================================ */
+
+@media (max-width: 768px) {
+  /* Menu masqué par défaut en mobile */
+  .app-menu.navbar-menu {
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: none;
+    width: 260px;
+    z-index: 1001;
+    position: fixed;
+    top: 65px; /* Hauteur du header */
+    left: 0;
+    height: calc(100vh - 65px);
+    border-radius: 0 0 12px 12px;
+  }
+
+  /* Menu visible quand ouvert */
+  .app-menu.navbar-menu.menu-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Overlay pour fermer en cliquant à l'extérieur */
+  .vertical-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .vertical-overlay.show {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+/* Pour les écrans > 768px, le menu reste à gauche */
+@media (min-width: 769px) {
+  .app-menu.navbar-menu {
+    transform: translateX(0) !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    border-radius: 0;
+    width: 240px;
+  }
+
+  .vertical-overlay {
+    display: none !important;
+  }
+}

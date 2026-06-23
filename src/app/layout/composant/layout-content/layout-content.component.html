@@ -7,7 +7,7 @@
       <div class="h-100">
         <div class="dashboard-header glass-header">
           <div class="row align-items-center">
-            <div class="col-lg-7">
+            <div class="col-lg-6">
               <div class="header-content">
                 <div class="welcome-badge">
                   <span class="badge-glass">
@@ -22,54 +22,65 @@
                   >
                 </h1>
                 <p class="welcome-subtitle">
-                  <i class="ri-time-line"></i>
-                  Voici ce qui se passe aujourd'hui dans votre caisse.
+                  <i [class]="getWelcomeIcon()"></i>
+                  {{ getWelcomeMessage() }}
                 </p>
               </div>
             </div>
-            <div class="col-lg-5">
+            <div class="col-lg-6">
               <div class="header-actions">
                 <form [formGroup]="caisseperiodeForm">
                   <div class="action-group">
-                    <!-- Date picker -->
-                    <div class="date-picker-glass">
-                      <i class="ri-calendar-2-line"></i>
-                      <input
-                        formControlName="dateperiode"
-                        type="date"
-                        class="date-input-glass"
-                      />
+                    <!-- ✅ Affichage date formatée -->
+                    <div class="date-display-modern">
+                      <div class="date-icon">
+                        <i class="ri-calendar-event-fill"></i>
+                      </div>
+                      <div class="date-info">
+                        <span class="date-label">Aujourd'hui</span>
+                        <span class="date-value">
+                          {{ formatDateFR(todayString) }}
+                        </span>
+                      </div>
                     </div>
 
-                    <!-- Boutons d'action -->
-                    <div class="action-buttons">
-                      <!-- OUVRIR JOURNÉE -->
-                      <button
-                        *ngIf="!isJourneeOuverte()"
-                        type="button"
-                        [disabled]="loadingCaisses || caissesArray.length === 0"
-                        (click)="openCaisseUser()"
-                        class="btn-glass-open"
-                      >
-                        <i class="ri-lock-unlock-line"></i>
-                        <span>Ouvrir</span>
-                      </button>
+                    <!-- ✅ Statut -->
+                    <span
+                      class="caisse-statut-badge"
+                      [class.open]="isJourneeOuverte()"
+                      [class.closed]="!isJourneeOuverte()"
+                    >
+                      <span class="dot"></span>
+                      {{ isJourneeOuverte() ? "Ouverte" : "Fermée" }}
+                    </span>
 
-                      <!-- CLÔTURER JOURNÉE -->
-                      <button
-                        *ngIf="isJourneeOuverte()"
-                        type="button"
-                        [disabled]="loadingCaisses || caissesArray.length === 0"
-                        (click)="openBilletageModal(modalBilletage)"
-                        class="btn-glass-close"
-                      >
-                        <i class="ri-lock-line"></i>
-                        <span>Clôturer</span>
-                      </button>
-                    </div>
+                    <!-- Boutons -->
                   </div>
                 </form>
               </div>
+            </div>
+            <div class="action-buttons">
+              <button
+                *ngIf="!isJourneeOuverte()"
+                type="button"
+                [disabled]="loadingCaisses || caissesArray.length === 0"
+                (click)="openCaisseUser()"
+                class="btn-glass-open"
+              >
+                <i class="ri-lock-unlock-line"></i>
+                <span>Ouvrir</span>
+              </button>
+
+              <button
+                *ngIf="isJourneeOuverte()"
+                type="button"
+                [disabled]="loadingCaisses || caissesArray.length === 0"
+                (click)="openBilletageModal(modalBilletage)"
+                class="btn-glass-close"
+              >
+                <i class="ri-lock-line"></i>
+                <span>Clôturer</span>
+              </button>
             </div>
           </div>
         </div>
@@ -123,31 +134,39 @@
       <div class="stat-card glass-stat">
         <div class="stat-icon-wrapper">
           <div class="stat-icon stat-icon-warning">
-            <i class="ri-time-line"></i>
+            <i class="ri-calendar-2-line"></i>
           </div>
         </div>
         <div class="stat-content">
-          <span class="stat-label">Date du jour</span>
-          <h3 class="stat-value">{{ today | date: "dd/MM/yyyy" }}</h3>
+          <span class="stat-label">Date de caisse</span>
+          <h3 class="stat-value">
+            {{
+              formatDateFR(caisseperiodeForm.get("dateperiode")?.value || today)
+            }}
+          </h3>
         </div>
         <div class="stat-progress">
           <div class="progress-bar warning" style="width: 50%"></div>
         </div>
       </div>
     </div>
+
     <div class="col-xl-3 col-lg-6 col-md-6">
       <div class="stat-card glass-stat">
         <div class="stat-icon-wrapper">
           <div class="stat-icon stat-icon-info">
-            <i class="ri-user-follow-line"></i>
+            <i class="ri-shield-user-fill"></i>
           </div>
         </div>
         <div class="stat-content">
-          <span class="stat-label">Utilisateur</span>
-          <h3 class="stat-value">{{ user.prenom }}</h3>
+          <span class="stat-label">Rôle</span>
+
+          <h3 class="stat-value">
+            {{ getRoleShortName(user.roles[0].libelle) }}
+          </h3>
         </div>
         <div class="stat-progress">
-          <div class="progress-bar info" style="width: 100%"></div>
+          <div class="progress-bar info" style="width: 50%"></div>
         </div>
       </div>
     </div>

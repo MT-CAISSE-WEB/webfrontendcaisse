@@ -4,7 +4,7 @@
       <div class="d-flex">
         <!-- LOGO -->
         <div class="navbar-brand-box horizontal-logo">
-          <a href="#" class="logo logo-dark">
+          <a href="/" class="logo logo-dark">
             <span class="logo-sm">
               <img
                 src="assets/images/logo_caisse_sans_bg.png"
@@ -21,7 +21,7 @@
             </span>
           </a>
 
-          <a href="#" class="logo logo-light">
+          <a href="/" class="logo logo-light">
             <span class="logo-sm">
               <img src="assets/images/logocaisse.png" alt="" height="40" />
             </span>
@@ -32,16 +32,17 @@
         </div>
 
         <button
-          title="bouton"
+          title="Menu"
           type="button"
-          class="btn btn-sm px-3 fs-16 header-item vertical-menu-btn topnav-hamburger"
+          class="header-item vertical-menu-btn topnav-hamburger"
           id="topnav-hamburger-icon"
+          [class.active]="isMenuOpen"
+          (click)="toggleMenu()"
         >
-          <span class="hamburger-icon">
-            <span></span>
-            <span></span>
-            <span></span>
-          </span>
+          <i
+            [class.ri-menu-2-fill]="!isMenuOpen"
+            [class.ri-close-line]="isMenuOpen"
+          ></i>
         </button>
       </div>
 

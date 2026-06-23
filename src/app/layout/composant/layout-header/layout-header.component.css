@@ -70,7 +70,7 @@
 }
 
 /* ============================================
-   BOUTON HAMBURGER
+   BOUTON HAMBURGER - ALIGNÉ + STYLE COHÉRENT
    ============================================ */
 
 .topnav-hamburger {
@@ -79,50 +79,54 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: rgba(255, 255, 255, 0.3);
-  border: 1px solid rgba(226, 232, 240, 0.3);
+  margin-left: 12px;
+  background: transparent;
+  border: none;
   border-radius: 12px;
+  color: #64748b;
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
 }
 
+/* MÊME STYLE DE HOVER QUE .btn-topbar */
 .topnav-hamburger:hover {
   background: rgba(59, 130, 246, 0.06);
-  border-color: rgba(59, 130, 246, 0.2);
+  color: #405189;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
-.hamburger-icon {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  width: 20px;
-}
-
-.hamburger-icon span {
-  display: block;
-  height: 2px;
-  width: 100%;
-  background: #1e293b;
-  border-radius: 4px;
+/* Icône Remix */
+.topnav-hamburger i {
+  font-size: 1.25rem;
   transition: all 0.3s ease;
 }
 
-.hamburger-icon span:nth-child(2) {
-  width: 70%;
+/* Animation de rotation quand menu ouvert */
+.topnav-hamburger.active i {
+  transform: rotate(90deg);
 }
 
-.hamburger-icon.active span:nth-child(1) {
-  transform: rotate(45deg) translate(5px, 5px);
+/* Correction d'alignement du logo et du bouton */
+.navbar-brand-box {
+  height: 40px;
+  display: flex;
+  align-items: center;
 }
 
-.hamburger-icon.active span:nth-child(2) {
-  opacity: 0;
-  transform: scaleX(0);
+/* Afficher en mobile */
+@media (max-width: 768px) {
+  .topnav-hamburger {
+    display: flex !important;
+  }
 }
 
-.hamburger-icon.active span:nth-child(3) {
-  transform: rotate(-45deg) translate(5px, -5px);
+/* Masquer l'ancien hamburger-icon (3 barres) */
+.hamburger-icon {
+  display: none !important;
 }
 
 /* ============================================

@@ -1,5 +1,5 @@
 <!-- ========== App Menu ========== -->
-<div class="app-menu navbar-menu">
+<div class="app-menu navbar-menu" [class.menu-open]="isMenuOpen">
   <!-- LOGO -->
   <div class="navbar-brand-box">
     <!-- Dark Logo-->
@@ -554,4 +554,8 @@
 </div>
 
 <!-- Vertical Overlay-->
-<div class="vertical-overlay"></div>
+<div
+  class="vertical-overlay"
+  [class.show]="isMenuOpen"
+  (click)="closeMenu()"
+></div>

@@ -56,6 +56,7 @@ export class LayoutContentComponent implements OnInit {
   dateInput: string = '';
 
   today: Date = new Date();
+  todayString = this.today.toISOString().split('T')[0];
 
   billetageForm!: FormGroup;
 
@@ -147,6 +148,96 @@ export class LayoutContentComponent implements OnInit {
           this.toastr.error(err.error.message);
         },
       });
+  }
+
+  getRoleShortName(roleName: string): string {
+    switch (roleName) {
+      case 'Super administrateur':
+        return 'Super Admin';
+      case 'Administrateur system':
+        return 'Admin System';
+      case 'Superviseur caisse':
+        return 'Superviseur';
+      default:
+        return roleName;
+    }
+  }
+
+  // Custom message en fonction de l'utilisateur connecté
+  // Méthode pour obtenir le message d'accueil selon le rôle
+  getWelcomeMessage(): string {
+    const user = this.user;
+
+    // Vérifier les rôles
+    const isSuperAdmin = user.roles[0].libelle.includes('Super administrateur');
+
+    const isAdmin = user.roles[0].libelle.includes('Administrateur system');
+    const isCaissier = user.roles[0].libelle.includes('Caissier');
+    const isSuperviseur = user.roles[0].libelle.includes('Superviseur caisse');
+    const isDemandeur = user.roles[0].libelle.includes('Demandeur');
+    const isComptable = user.roles[0].libelle.includes('Comptable');
+
+    // Messages personnalisés
+    if (isSuperAdmin) {
+      return "Vous supervisez l'ensemble du système de caisse.";
+    }
+
+    if (isAdmin) {
+      return 'Gérez les paramètres et la configuration du système.';
+    }
+
+    if (isCaissier) {
+      return "Voici ce qui se passe aujourd'hui dans votre caisse.";
+    }
+
+    if (isSuperviseur) {
+      return "Supervisez l'activité des caisses en temps réel.";
+    }
+
+    if (isComptable) {
+      return 'Consultez les opérations comptables et les bilans.';
+    }
+
+    if (isDemandeur) {
+      return "Suivez l'état de vos demandes de décaissement.";
+    }
+
+    return 'Bienvenue sur votre espace de travail.';
+  }
+
+  // Méthode pour obtenir l'icône selon le rôle
+  getWelcomeIcon(): string {
+    const user = this.user;
+
+    // Vérifier les rôles
+    const isSuperAdmin = user.roles[0].libelle.includes('Super administrateur');
+    const isAdmin = user.roles[0].libelle.includes('Administrateur system');
+    const isCaissier = user.roles[0].libelle.includes('Caissier');
+    const isSuperviseur = user.roles[0].libelle.includes('Superviseur caisse');
+    const isDemandeur = user.roles[0].libelle.includes('Demandeur');
+    const isComptable = user.roles[0].libelle.includes('Comptable');
+
+    if (isSuperAdmin || isAdmin) {
+      return 'ri-settings-5-line';
+    }
+
+    if (isCaissier) {
+      return 'ri-time-line';
+    }
+
+    if (isSuperviseur) {
+      return 'ri-eye-line';
+    }
+
+    if (isComptable) {
+      return 'ri-calculator-line';
+    }
+
+    if (isDemandeur) {
+      return 'ri-file-request-line';
+    }
+
+    return 'ri-information-line';
   }
 
   initForm() {
@@ -245,7 +336,22 @@ export class LayoutContentComponent implements OnInit {
 
     const year = date.getFullYear();
 
-    return `${dayShort} ${day} ${month} ${year}`;
+    return `${dayShort}, ${day} ${month} ${year}`;
+  }
+
+  // ✅ Récupération du nom du jour
+  formatDayName(dateInput: string | Date): string {
+    const date = new Date(dateInput);
+    const days = [
+      'Dimanche',
+      'Lundi',
+      'Mardi',
+      'Mercredi',
+      'Jeudi',
+      'Vendredi',
+      'Samedi',
+    ];
+    return days[date.getDay()];
   }
 
   formatDateForInput(date: string) {

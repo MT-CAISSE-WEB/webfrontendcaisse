@@ -374,7 +374,7 @@ export class PlancomptableComponent implements OnInit {
       next: (res) => {
         this.uploadProgress = 100;
         clearInterval(progressInterval);
-        this.successMessage = `Fichier importé avec succès !`;
+        this.successMessage = `${this.fileContent.length || 0} ligne(s) importée(s) avec succès !`;
         this.toastr.success('Import terminé avec succès');
         this.getAllComptes();
 
