@@ -1608,6 +1608,11 @@ export class OperationModalComponent implements OnInit {
           montant: 0,
           nature: null,
           tiers: null,
+          originalNatureCode: columns[0] || '',
+          originalNatureLibelle: columns[1] || '',
+          originalTiersCode: columns[2] || '',
+          originalTiersLibelle: columns[3] || '',
+          originalMontant: columns[4] || '',
           isValid: false,
           error: errorMsg,
         });
@@ -1630,6 +1635,12 @@ export class OperationModalComponent implements OnInit {
           montant: 0,
           nature: null,
           tiers: null,
+          originalNatureCode: natureCode || '',
+          originalNatureLibelle: natureLibelle || '',
+          originalTiersCode: tiersCode || '',
+          originalTiersLibelle: tiersLibelle || '',
+          originalMontant: montantStr || '',
+          // 👆 FIN DE L'AJOUT
           isValid: false,
           error: errorMsg,
         });
@@ -1649,6 +1660,11 @@ export class OperationModalComponent implements OnInit {
           montant: 0,
           nature: nature,
           tiers: null,
+          originalNatureCode: natureCode || '',
+          originalNatureLibelle: natureLibelle || '',
+          originalTiersCode: tiersCode || '',
+          originalTiersLibelle: tiersLibelle || '',
+          originalMontant: montantStr || '',
           isValid: false,
           error: errorMsg,
         });
@@ -1668,6 +1684,11 @@ export class OperationModalComponent implements OnInit {
           montant: 0,
           nature: nature,
           tiers: tiers,
+          originalNatureCode: natureCode || '',
+          originalNatureLibelle: natureLibelle || '',
+          originalTiersCode: tiersCode || '',
+          originalTiersLibelle: tiersLibelle || '',
+          originalMontant: montantStr || '',
           isValid: false,
           error: errorMsg,
         });
@@ -1685,6 +1706,11 @@ export class OperationModalComponent implements OnInit {
           montant: montant,
           nature: nature,
           tiers: tiers,
+          originalNatureCode: natureCode || '',
+          originalNatureLibelle: natureLibelle || '',
+          originalTiersCode: tiersCode || '',
+          originalTiersLibelle: tiersLibelle || '',
+          originalMontant: montantStr || '',
           isValid: false,
           error: errorMsg,
         });
@@ -1701,6 +1727,11 @@ export class OperationModalComponent implements OnInit {
         montant: montant,
         nature: nature,
         tiers: tiers,
+        originalNatureCode: natureCode || '',
+        originalNatureLibelle: natureLibelle || '',
+        originalTiersCode: tiersCode || '',
+        originalTiersLibelle: tiersLibelle || '',
+        originalMontant: montantStr || '',
         isValid: true,
         error: null,
       });
@@ -1883,8 +1914,8 @@ export class OperationModalComponent implements OnInit {
   }
 
   /**
-   * Exporte TOUTES les lignes de l'aperçu CSV avec une colonne "Erreur"
-   * (vide pour les lignes valides, contient le message pour les invalides)
+   * Exporte TOUTES les lignes EXACTEMENT comme importées,
+   * avec une colonne "Erreur" supplémentaire
    */
   exportCsvWithErrors(): void {
     if (this.csvPreview.length === 0) {
@@ -1892,7 +1923,7 @@ export class OperationModalComponent implements OnInit {
       return;
     }
 
-    // En-têtes du CSV (mêmes colonnes que l'import + "Erreur")
+    // En-têtes du CSV
     const headers = [
       'Code Nature',
       'Libellé Nature',
@@ -1902,24 +1933,25 @@ export class OperationModalComponent implements OnInit {
       'Erreur',
     ];
 
-    // Générer le contenu CSV
+    // Générer le contenu CSV avec les VALEURS ORIGINALES
     let csvContent =
       headers.map((h) => this.escapeCsvValue(h)).join(this.detectedDelimiter) +
       '\n';
 
     this.csvPreview.forEach((row) => {
       const line = [
-        this.escapeCsvValue(row.natureCode),
-        this.escapeCsvValue(row.natureLibelle),
-        this.escapeCsvValue(row.tiersCode),
-        this.escapeCsvValue(row.tiersLibelle),
-        this.escapeCsvValue(row.montant),
-        this.escapeCsvValue(row.error || ''), // ➕ Vide si valide, message si invalide
+        this.escapeCsvValue(row.originalNatureCode), // 👈 Valeur originale
+        this.escapeCsvValue(row.originalNatureLibelle), // 👈 Valeur originale
+        this.escapeCsvValue(row.originalTiersCode), // 👈 Valeur originale
+        this.escapeCsvValue(row.originalTiersLibelle), // 👈 Valeur originale
+        this.escapeCsvValue(row.originalMontant), // 👈 Valeur originale
+        this.escapeCsvValue(row.error || ''), // Colonne Erreur
       ].join(this.detectedDelimiter);
+
       csvContent += line + '\n';
     });
 
-    // Créer et télécharger le fichier
+    // Téléchargement
     const blob = new Blob(['\uFEFF' + csvContent], {
       type: 'text/csv;charset=utf-8;',
     });
@@ -1966,9 +1998,9 @@ export class OperationModalComponent implements OnInit {
   downloadCsvTemplate(): void {
     const delimiter = ';';
     const csvContent = `Code Nature${delimiter}Libellé Nature${delimiter}Code Tiers${delimiter}Libellé Tiers${delimiter}Montant
-NAT077${delimiter}Salaire du mois${delimiter}SAL01${delimiter}Salaires${delimiter}100000
-NAT078${delimiter}Frais de mission${delimiter}FRA01${delimiter}Frais divers${delimiter}50000
-NAT079${delimiter}Indemnités${delimiter}IND01${delimiter}Indemnités de transport${delimiter}25000`;
+XXXXXX${delimiter}Exemple nature${delimiter}XXXXXX${delimiter}Exemple tiers${delimiter}0
+XXXXXX${delimiter}Exemple nature${delimiter}XXXXXX${delimiter}Exemple tiers${delimiter}0
+XXXXXX${delimiter}Exemple nature${delimiter}XXXXXX${delimiter}Exemple tiers${delimiter}0`;
 
     // BOM UTF-8 pour compatibilité Excel
     const blob = new Blob(['\uFEFF' + csvContent], {
