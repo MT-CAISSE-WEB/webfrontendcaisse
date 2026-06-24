@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { operationModel } from '../model/operation.model';
 import { tauxdevisemodel } from '../../donnee_base/donnee_base/model/tauxdevise.model';
@@ -75,18 +75,6 @@ export class OprationJustifieeComponent implements OnInit{
   loadingGlobal: boolean = true;
   private loadingRequestsCount = 0;
 
-  // Propriété pour mémoriser le justificatif sélectionné dans la liste
-  selectedJustificatif: any = null;
-
-  // Gestion de l'upload de fichier
-  @ViewChild('fileUpload') fileUploadInput!: ElementRef<HTMLInputElement>;
-
-  // Liste des retours caisse existants (à peupler depuis l'opération chargée)
-  retoursCaisseExistants: any[] = [];
-
-  // Nom du fichier joint (optionnel)
-  attachedFileName: string = '';
-
   /**
    * GESTION DU LOADING GLOBAL
    */
@@ -129,27 +117,27 @@ export class OprationJustifieeComponent implements OnInit{
    ){}
 
    ngOnInit(): void {
-      // Démarrer le loading global (dépend seulement des opérations)
-      this.loadingGlobal = true;
+     // Démarrer le loading global (dépend seulement des opérations)
+     this.loadingGlobal = true;
 
-      // Initialiser un formulaire
-      this.initForm();
-      //Recuperer la devise
-      this.getalldevises();
-      //Afficher toutes les opérations
-      this.getAllOperations();
-      //Charger la période
-      this.getcaissesPeriodes();
-      //Charger les natures d'opérations
-      this.getAllNatureoperations();
-      //Lors de la selection de operation
-      this.selectOperation();
-      //Lors de la selection de la devise de justificatio
-      this.selectDeviseJustificatif();
-      //lors du retour de caisse
-      this.selectRetourCaisse();
-      //Récuperer les tiers
-      this.getAllTiers();
+     // Initialiser un formulaire
+     this.initForm();
+    //Recuperer la devise
+    this.getalldevises();
+    //Afficher toutes les opérations
+    this.getAllOperations();
+    //Charger la période
+    this.getcaissesPeriodes();
+    //Charger les natures d'opérations
+    this.getAllNatureoperations();
+    //Lors de la selection de operation
+    this.selectOperation();
+    //Lors de la selection de la devise de justificatio
+    this.selectDeviseJustificatif();
+    //lors du retour de caisse
+    this.selectRetourCaisse();
+    //Récuperer les tiers
+    this.getAllTiers();
   }
 
    /**
@@ -275,15 +263,10 @@ export class OprationJustifieeComponent implements OnInit{
     },{emitEvent:false});
   }
 
-  // //Rénitialiser le formulaire
-  // resetForm(){
-  //   this.operationForm.reset();
-  // }
-
   //Rénitialiser le formulaire
-  // reset(){
-  //   this.operationForm.reset();
-  // }
+  reset(){
+    this.operationForm.reset();
+  }
 
   get user(){
     return JSON.parse(localStorage.getItem('user') || '{}');
@@ -386,24 +369,8 @@ export class OprationJustifieeComponent implements OnInit{
         montantRefglobal: totalcaissemontantref
       });
 
-      console.log("Opération sélectionnée : ", operation);
-
       //Charger les details
       this.getDetailJustificatifPiece(operation);
-
-      // Après avoir affecté this.ope
-      if (this.ope && this.ope.caisses) {
-          this.retoursCaisseExistants = this.ope.caisses
-              .filter((c: any) => c.codtypeoperation === 'encaissement')
-              .map((c: any) => ({
-                  date: c.dateoperation,
-                  caisse: c.caisse,
-                  devise: c.devise,
-                  montant: c.montant,
-                  montantRef: c.montantref,
-                  justificatifCode: c.justificatif?.codejustificatif || null
-          }));
-      }
 
       // Déclencher la gestion dynamique des devises
       this.gererDevisesDynamiquement();
@@ -591,6 +558,7 @@ export class OprationJustifieeComponent implements OnInit{
           this.justificatifPieces = res.data;
           this.justificatifFiltered =
           this.justificatifPieces.filter(j => j.operation.idoperation === operation.idoperation);
+      
           /**
            * Calcul des totaux existants (SEULEMENT les justificatifs, pas les encaissements)
            * Conversion automatique vers devise de référence
@@ -668,22 +636,16 @@ export class OprationJustifieeComponent implements OnInit{
     this.updateTotalsAndValidate();
   }
 
-  getJustificatifRef(piece: JustificatifModel): number {
-    const details = this.justificatifDetail.filter(d => d.idjustificatif === piece.idjustificatifoperation);
-    const totalDetails = details.reduce((sum, d) => sum + (d.montantdetail || 0), 0);
-    return this.convertirVersReference(totalDetails, piece.devise?.iddevise);
-  }
-
   //Selectionner le justificatif
-  // selectJustificatif(piece: any){
-  //   const justificatif =
-  //   this.justificatifFiltered.find(
-  //     j => j.idjustificatifoperation === piece.idjustificatifoperation
-  //   );
+  selectJustificatif(piece: any){
+    const justificatif =
+    this.justificatifFiltered.find(
+      j => j.idjustificatifoperation === piece.idjustificatifoperation
+    );
 
-  //   if(!justificatif) return;
-  //   this.loadDetailJustificatif(justificatif);
-  // }
+    if(!justificatif) return;
+    this.loadDetailJustificatif(justificatif);
+  }
 
   dispatchDetail(_object: any){
     // Patch des champs simples
@@ -1362,85 +1324,5 @@ export class OprationJustifieeComponent implements OnInit{
     const taux = this.tauxDevises[deviseDestination] || 1;
     return montantRef / taux;
   }
-
-    // Getter pour le total des montants référentiels des caisses (retour caisse)
-    get totalRetourCaisseRef(): number {
-        const caissesArray = this.operationForm.get('caisses') as FormArray;
-        if (!caissesArray) return 0;
-        return caissesArray.controls.reduce((sum, ctrl) => {
-            return sum + (parseFloat(ctrl.get('montantref')?.value) || 0);
-        }, 0);
-    }
-
-  // Méthode utilitaire pour obtenir le code devise à partir de l'ID (affichage dans la carte)
-  getDeviseCode(deviseId: String): string {
-      const devise = this.devises.find(d => d.iddevise === deviseId);
-      return devise ? devise.codedevise : '';
-  }
-
-  // Réinitialisation complète du formulaire (améliorée)
-  resetForm(): void {
-      this.operationForm.reset();
-      // Réinitialiser les FormArray
-      const lignesArray = this.operationForm.get('lignes') as FormArray;
-      const caissesArray = this.operationForm.get('caisses') as FormArray;
-      lignesArray.clear();
-      caissesArray.clear();
-      // Réinitialiser les flags
-      this.showCaisses = false;
-      this.selectedRetour = null;
-      this.selectedJustificatif = null;
-      // Remettre les valeurs par défaut
-      this.operationForm.patchValue({
-          retourcaisse: false,
-          tauxoperation: 1,
-          tauxoperationinverse: 1
-      });
-  }
-
-  // Dans selectJustificatif(), conserver la référence
-  selectJustificatif(piece: any): void {
-      this.selectedJustificatif = piece;
-      this.loadDetailJustificatif(piece); // votre méthode existante
-  }
-
-  // Dans clearSelectedRetour()
-  clearSelectedRetour(): void {
-      this.selectedRetour = null;
-      // Optionnel : remettre à zéro le montant de la caisse concernée
-      const caissesArray = this.operationForm.get('caisses') as FormArray;
-      if (caissesArray) {
-          caissesArray.controls.forEach(ctrl => {
-              ctrl.patchValue({ montantcaisse: 0 });
-          });
-      }
-  }
-
-  openFileUpload() {
-      this.fileUploadInput.nativeElement.click();
-  }
-
-  onFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-        const file = input.files[0];
-        // Ici, vous pouvez soit l'envoyer immédiatement à un endpoint, soit le stocker localement
-        // jusqu'à l'enregistrement du justificatif. Pour l'exemple, on affiche simplement un toast.
-        this.toastr.info(`Fichier sélectionné : ${file.name}`);
-        this.attachedFileName = file.name;
-        // Vous pouvez le stocker dans une propriété du formulaire, par exemple formData
-        // this.justificatifFile = file;
-    }
-  }
-
-  truncateLabel(libelle: string, maxLength: number = 50): string {
-    if (!libelle) {
-      return '';
-    }
-
-    return libelle.length > maxLength
-      ? libelle.substring(0, maxLength) + '...'
-      : libelle;
-  }
-
+  
 }

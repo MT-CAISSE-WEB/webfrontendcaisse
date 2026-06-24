@@ -77,7 +77,7 @@
                 <i class="ri-check-line step-check"></i>
               </div>
               <div class="step-content">
-                <span class="step-title">Étapes</span>
+                <span class="step-title">Niveaux</span>
                 <span class="step-desc">Validateurs</span>
               </div>
             </div>
@@ -206,7 +206,7 @@
               <div class="form-section-glass">
                 <div class="section-header-glass">
                   <i class="ri-stack-line"></i>
-                  <span>Étapes et validateurs</span>
+                  <span>Niveaux et validateurs</span>
                 </div>
 
                 <div class="etapes-container" formArrayName="etapes">
@@ -218,7 +218,7 @@
                     <div class="etape-header-glass">
                       <div class="etape-number">
                         <div class="number-circle">{{ i + 1 }}</div>
-                        <span>Étape {{ i + 1 }}</span>
+                        <span>Niveau {{ i + 1 }}</span>
                       </div>
                       <div class="etape-actions">
                         <button
@@ -234,7 +234,7 @@
                           class="btn-icon-glass danger"
                           (click)="removeEtape(i)"
                           *ngIf="etapes.length > 1"
-                          title="Supprimer l'étape"
+                          title="Supprimer le niveau"
                         >
                           <i class="ri-delete-bin-line"></i>
                         </button>
@@ -284,7 +284,7 @@
                   class="btn-add-etape-glass"
                   (click)="addEtape()"
                 >
-                  <i class="ri-add-line"></i> Ajouter une étape
+                  <i class="ri-add-line"></i> Ajouter un niveau
                 </button>
               </div>
 

@@ -302,7 +302,7 @@ export class OperationCaisseComponent implements OnInit {
   creationOperation() {
     const modalRef = this.modalService.open(OperationModalComponent, {
       centered: true,
-      size: 'lg',
+      size: 'xl',
       backdrop: 'static',
     });
 

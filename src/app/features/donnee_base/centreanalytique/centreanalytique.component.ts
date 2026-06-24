@@ -65,7 +65,7 @@ export class CentreanalytiqueComponent implements OnInit {
   pageSize: number = 15;
   totalPages: number = 1;
 
-  // ✅ Variables pour l'import
+  //  Variables pour l'import
   selectedFile: File | null = null;
   fileContent: any[] = [];
   fileHeaders: string[] = [];
@@ -79,7 +79,7 @@ export class CentreanalytiqueComponent implements OnInit {
     private centreanalytiqueservice: CentreAnalytiqueService,
     private router: Router,
     private toastr: ToastrService,
-    private cdr: ChangeDetectorRef, // ✅ Injecter ChangeDetectorRef
+    private cdr: ChangeDetectorRef, //  Injecter ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -89,7 +89,7 @@ export class CentreanalytiqueComponent implements OnInit {
     this.initForm();
     this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION('ce centre analytique');
     this.titleMsg = TITLE_DELETE;
-    // ✅ Initialisation du formulaire d'import
+    //  Initialisation du formulaire d'import
     this.initImportForm();
   }
 
@@ -121,7 +121,7 @@ export class CentreanalytiqueComponent implements OnInit {
     });
   }
 
-  // ✅ Création du formulaire d'importation
+  //  Création du formulaire d'importation
   initImportForm(): void {
     this.ImportForm = this.fb.group({
       file: [null, [Validators.required]],
@@ -324,7 +324,7 @@ export class CentreanalytiqueComponent implements OnInit {
     this.getAllcentres();
   }
 
-  // ✅ Méthodes pour l'import avec prévisualisation
+  //  Méthodes pour l'import avec prévisualisation
   onFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
@@ -431,7 +431,7 @@ export class CentreanalytiqueComponent implements OnInit {
     return 'Finalisation...';
   }
 
-  // ✅ Méthode d'import améliorée avec FormData et progression
+  //  Méthode d'import améliorée avec FormData et progression
   submitImportFile(): void {
     if (!this.selectedFile) {
       this.toastr.warning('Veuillez sélectionner un fichier');
@@ -463,7 +463,7 @@ export class CentreanalytiqueComponent implements OnInit {
         next: (res) => {
           this.uploadProgress = 100;
           clearInterval(progressInterval);
-          this.successMessage = `${res.data?.imported || 0} lignes importées avec succès !`;
+          this.successMessage = `${this.fileContent.length || 0} ligne(s) importée(s) avec succès !`;
           this.toastr.success('Import terminé avec succès');
           this.getAllcentres();
           this.cdr.detectChanges();

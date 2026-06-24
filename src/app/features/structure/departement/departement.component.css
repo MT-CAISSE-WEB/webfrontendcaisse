@@ -1,10 +1,136 @@
 /* ============================================
-   BOUTONS - GLASSMORPHISM
+   PAGE TITLE PREMIUM - OPTIMISÉ
    ============================================ */
+
+.page-title-premium {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.08),
+    rgba(102, 126, 234, 0.05)
+  );
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 20px;
+  padding: 20px 28px;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+@media (min-width: 769px) {
+  .page-title-premium {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.92);
+  }
+}
+
+@media (max-width: 768px) {
+  .page-title-premium {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.7);
+  }
+}
+
+.title-icon-premium {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.12),
+    rgba(102, 126, 234, 0.08)
+  );
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  flex-shrink: 0;
+}
+
+.title-icon-premium i {
+  font-size: 1.3rem;
+  color: #405189;
+}
+
+.title-premium {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.02em;
+}
+
+.title-subtitle-premium {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-top: 2px;
+}
+
+.breadcrumb-premium {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 4px 14px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 40px;
+  border: 1px solid rgba(59, 130, 246, 0.08);
+}
+
+@media (min-width: 769px) {
+  .breadcrumb-premium {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.8);
+  }
+}
+
+@media (max-width: 768px) {
+  .breadcrumb-premium {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+}
+
+.breadcrumb-premium .breadcrumb-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.breadcrumb-premium .breadcrumb-item + .breadcrumb-item::before {
+  content: "›";
+  color: #cbd5e1;
+  font-size: 1.2rem;
+  font-weight: 300;
+  padding: 0 8px;
+}
+
+.breadcrumb-premium .breadcrumb-item a {
+  color: #405189;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.breadcrumb-premium .breadcrumb-item a:hover {
+  color: #2563eb;
+}
+
+.breadcrumb-premium .breadcrumb-item.active {
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ============================================
+   BOUTONS - OPTIMISÉS
+   ============================================ */
+
 .btn-glass-primary {
   background: rgba(59, 130, 246, 0.12);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 30px;
   padding: 0.4rem 1rem;
@@ -12,30 +138,28 @@
   font-weight: 500;
   color: #405189;
   cursor: pointer;
-  transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  position: relative;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+}
+
+@media (min-width: 769px) {
+  .btn-glass-primary {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }
 
 .btn-glass-primary:hover {
   background: rgba(59, 130, 246, 0.2);
   border-color: #405189;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
   color: #405189;
-}
-
-.btn-glass-primary:hover i {
-  animation: bounce 0.4s ease;
 }
 
 .btn-glass-secondary {
   background: rgba(203, 213, 225, 0.3);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(203, 213, 225, 0.4);
   border-radius: 30px;
   padding: 0.4rem 1rem;
@@ -43,24 +167,27 @@
   font-weight: 500;
   color: #475569;
   cursor: pointer;
-  transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
+@media (min-width: 769px) {
+  .btn-glass-secondary {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
 .btn-glass-secondary:hover {
   background: rgba(203, 213, 225, 0.5);
   border-color: #94a3b8;
-  transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   color: #1e293b;
 }
 
 .btn-glass-pagination {
   background: rgba(59, 130, 246, 0.08);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
   border: 1px solid rgba(59, 130, 246, 0.15);
   border-radius: 30px;
   padding: 0.3rem 1rem;
@@ -68,13 +195,18 @@
   font-weight: 500;
   color: #3b82f6;
   cursor: pointer;
-  transition: all 0.3s ease;
+}
+
+@media (min-width: 769px) {
+  .btn-glass-pagination {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }
 
 .btn-glass-pagination:hover:not(:disabled) {
   background: rgba(59, 130, 246, 0.18);
   border-color: #3b82f6;
-  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
   color: #2563eb;
 }
@@ -82,22 +214,12 @@
 .btn-glass-pagination:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-  transform: none !important;
-}
-
-@keyframes bounce {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-3px);
-  }
 }
 
 /* ============================================
-   SEARCH - GLASSMORPHISM
+   SEARCH - OPTIMISÉ
    ============================================ */
+
 .search-container {
   position: relative;
 }
@@ -107,12 +229,17 @@
   display: flex;
   align-items: center;
   background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border-radius: 48px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
   overflow: hidden;
+}
+
+@media (min-width: 769px) {
+  .search-glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.8);
+  }
 }
 
 .search-glass i {
@@ -131,7 +258,6 @@
   font-size: 0.8rem;
   color: #1e293b;
   outline: none;
-  transition: all 0.3s ease;
 }
 
 .search-glass input::placeholder {
@@ -142,25 +268,9 @@
   width: 300px;
 }
 
+/* Suppression du glow inutile */
 .search-glow {
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
-  );
-  transition: left 0.5s ease;
-  pointer-events: none;
-}
-
-.search-glass:hover .search-glow,
-.search-glass:focus-within .search-glow {
-  left: 100%;
+  display: none;
 }
 
 .search-glass:hover {
@@ -179,8 +289,9 @@
 }
 
 /* ============================================
-   FILTER CHIPS - GLASSMORPHISM
+   FILTER CHIPS - OPTIMISÉS
    ============================================ */
+
 .filter-chips-container {
   display: flex;
   flex-wrap: wrap;
@@ -194,21 +305,24 @@
   gap: 8px;
   padding: 8px 18px;
   background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
   border: 1px solid rgba(203, 213, 225, 0.5);
   border-radius: 30px;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 0.8rem;
   font-weight: 500;
   color: #1e293b;
 }
 
+@media (min-width: 769px) {
+  .filter-chip-modern {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
 .filter-chip-modern i {
   font-size: 1rem;
   color: #64748b;
-  transition: all 0.2s;
 }
 
 .filter-chip-modern .count-badge {
@@ -218,13 +332,11 @@
   font-size: 0.65rem;
   font-weight: 600;
   color: #475569;
-  transition: all 0.2s;
 }
 
 .filter-chip-modern:hover {
   background: #ffffff;
   border-color: #cbd5e1;
-  transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
@@ -245,7 +357,7 @@
 }
 
 /* ============================================
-   TABLEAU MODERNE - DESIGN PROPRE
+   TABLEAU MODERNE - OPTIMISÉ
    ============================================ */
 
 .table-responsive {
@@ -260,17 +372,25 @@
   border-spacing: 0;
   margin-bottom: 0;
   background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
-/* En-tête */
+@media (min-width: 769px) {
+  .table-modern {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: white;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-modern {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+}
+
 .table-modern thead {
-  background: linear-gradient(
-    135deg,
-    rgba(59, 130, 246, 0.06),
-    rgba(64, 81, 137, 0.04)
-  );
+  background: rgba(59, 130, 246, 0.04);
   border-bottom: 1px solid rgba(226, 232, 240, 0.6);
 }
 
@@ -285,10 +405,8 @@
   white-space: nowrap;
 }
 
-/* Corps du tableau */
 .table-modern tbody tr {
   border-bottom: 1px solid rgba(226, 232, 240, 0.4);
-  transition: all 0.2s ease;
 }
 
 .table-modern tbody tr:last-child {
@@ -385,39 +503,30 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
   background: transparent;
   color: #94a3b8;
   font-size: 0.9rem;
-}
-
-.action-btn:hover {
-  transform: translateY(-2px);
 }
 
 .action-btn i {
   font-size: 1rem;
 }
 
-/* View */
 .action-view:hover {
   background: rgba(59, 130, 246, 0.1);
   color: #3b82f6;
 }
 
-/* Edit */
 .action-edit:hover {
   background: rgba(16, 185, 129, 0.1);
   color: #10b981;
 }
 
-/* Duplicate */
 .action-duplicate:hover {
   background: rgba(245, 158, 11, 0.1);
   color: #f59e0b;
 }
 
-/* Delete */
 .action-delete:hover {
   background: rgba(239, 68, 68, 0.1);
   color: #ef4444;
@@ -496,7 +605,6 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
   color: #64748b;
 }
 
@@ -520,10 +628,614 @@
 }
 
 /* ============================================
+   BADGES - GLASSMORPHISM
+   ============================================ */
+
+.badge-glass {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  gap: 4px;
+}
+
+.badge-glass-success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.badge-glass-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+/* ============================================
+   ACTIONS ICONS - OPTIMISÉS
+   ============================================ */
+
+.action-icon-glass {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0.3rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  border: 1px solid transparent;
+  text-decoration: none;
+  width: 32px;
+  height: 32px;
+}
+
+@media (min-width: 769px) {
+  .action-icon-glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+.action-icon-glass:hover {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.2);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+}
+
+.action-icon-glass-danger:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.2);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+/* ============================================
+   SPINNER - OPTIMISÉ
+   ============================================ */
+
+.spinner-glass {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+/* ============================================
+   MODALS - OPTIMISÉS
+   ============================================ */
+
+.modal-content-glass {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.12);
+}
+
+@media (min-width: 769px) {
+  .modal-content-glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: white;
+  }
+}
+
+.modal-header-glass {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1.25rem 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px 20px 0 0;
+}
+
+.modal-title-glass {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.modal-body-glass {
+  padding: 1.5rem;
+}
+
+.modal-footer-glass {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0 0 20px 20px;
+}
+
+/* ============================================
+   PERMISSION CARD - OPTIMISÉ
+   ============================================ */
+
+.permission-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 8px;
+  cursor: pointer;
+}
+
+.permission-card:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.permission-card.active {
+  background: #eff6ff;
+  border-color: #405189;
+}
+
+.permission-card .form-check-input:checked {
+  background-color: #405189;
+  border-color: #405189;
+}
+
+.permission-card .form-check-input {
+  cursor: pointer;
+}
+
+.permission-card .form-check-label {
+  cursor: pointer;
+}
+
+/* ============================================
+   FORM FLOATING - ANIMATION CONSERVÉE ✅
+   ============================================ */
+
+.form-floating > .form-control,
+.form-floating > .form-select {
+  height: 58px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  background: #ffffff;
+}
+
+.form-floating > .form-control:focus,
+.form-floating > .form-select:focus {
+  border-color: #405189;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-floating > .form-control.is-invalid {
+  border-color: #ef4444;
+}
+
+.form-floating > .form-control.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-floating > label {
+  padding: 1rem 0.75rem;
+  color: #64748b;
+  font-weight: 400;
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label,
+.form-floating > .form-select ~ label {
+  transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+  color: #405189;
+}
+
+/* ============================================
+   MODAL ANIMATION - CONSERVÉE ✅
+   ============================================ */
+
+.modal-content {
+  animation: slideUp 0.3s ease-out;
+  border-radius: 16px !important;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   ICON CIRCLE
+   ============================================ */
+
+.icon-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================
+   SWITCH - OPTIMISÉ
+   ============================================ */
+
+.switch-glass {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.switch-input-glass {
+  width: 3rem;
+  height: 1.6rem;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 30px;
+  appearance: none;
+  position: relative;
+  cursor: pointer;
+}
+
+.switch-input-glass::before {
+  content: "";
+  position: absolute;
+  width: 1.2rem;
+  height: 1.2rem;
+  background: white;
+  border-radius: 50%;
+  top: 0.2rem;
+  left: 0.2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.switch-input-glass:checked {
+  background: #10b981;
+}
+
+.switch-input-glass:checked::before {
+  transform: translateX(1.4rem);
+}
+
+.switch-label-glass {
+  color: #1e293b;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+/* ============================================
+   GLASS CARD (DELETE MODAL) - OPTIMISÉ
+   ============================================ */
+
+.glass-card {
+  background: #fff;
+  color: #1e293b;
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (min-width: 769px) {
+  .glass-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* Suppression animation vibrate */
+.icon-bg {
+  width: 80px;
+  height: 80px;
+  background: rgba(239, 68, 68, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.icon-bg i {
+  font-size: 2.5rem;
+  color: #ef4444;
+}
+
+.btn-glass {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 6px 20px;
+  border-radius: 30px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-glass-danger {
+  background: rgba(239, 68, 68, 0.8);
+  border: none;
+  color: white;
+  padding: 6px 20px;
+  border-radius: 30px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.btn-glass-danger:hover {
+  background: #ef4444;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* ============================================
+   BOUTON ANNULER - OPTIMISÉ
+   ============================================ */
+
+.btn-glass-cancel {
+  background: rgba(100, 116, 139, 0.12);
+  border: 1px solid rgba(100, 116, 139, 0.25);
+  padding: 0.5rem 1.5rem;
+  border-radius: 40px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 769px) {
+  .btn-glass-cancel {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* Suppression de l'effet de brillance inutile */
+.btn-glass-cancel::before {
+  display: none;
+}
+
+.btn-glass-cancel:hover {
+  background: rgba(100, 116, 139, 0.2);
+  border-color: rgba(100, 116, 139, 0.4);
+  color: #1e293b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* ============================================
+   BOUTON SOUMETTRE - OPTIMISÉ
+   ============================================ */
+
+.btn-glass-submit {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  padding: 0.5rem 1.8rem;
+  border-radius: 40px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #405189;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 769px) {
+  .btn-glass-submit {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* Suppression de l'effet de brillance inutile */
+.btn-glass-submit::before {
+  display: none;
+}
+
+.btn-glass-submit:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: #405189;
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25);
+  color: #405189;
+}
+
+.btn-glass-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-glass-submit .spinner-border {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-width: 2px;
+}
+
+/* ============================================
+   DELETE MODAL - OPTIMISÉ
+   ============================================ */
+
+.delete-modal-card {
+  background: white;
+  border-radius: 24px;
+  border: 1px solid rgba(203, 213, 225, 0.15);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  padding: 32px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 769px) {
+  .delete-modal-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* Suppression de l'effet de brillance */
+.delete-modal-card::before {
+  display: none;
+}
+
+/* Suppression animation deletePulse */
+.delete-icon-wrapper {
+  width: 72px;
+  height: 72px;
+  background: rgba(239, 68, 68, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.delete-icon-wrapper i {
+  font-size: 2rem;
+  color: #ef4444;
+}
+
+.delete-modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.delete-modal-message {
+  font-size: 0.85rem;
+  color: rgba(88, 88, 88, 0.6);
+  text-align: center;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.delete-btn-cancel {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 30px;
+  padding: 8px 24px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (min-width: 769px) {
+  .delete-btn-cancel {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+.delete-btn-cancel:hover {
+  background: #475569;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.delete-btn-confirm {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: none;
+  border-radius: 30px;
+  padding: 8px 24px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+}
+
+.delete-btn-confirm:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3b82f6, #667eea);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #2563eb, #5b6fd4);
+}
+
+/* ============================================
    RESPONSIVE
    ============================================ */
 
 @media (max-width: 768px) {
+  .page-title-glass {
+    padding: 16px;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .card-header-glass {
+    padding: 1rem;
+    flex-direction: column;
+  }
+
+  .card-body-glass {
+    padding: 1rem;
+  }
+
+  .search-glass input {
+    width: 180px;
+  }
+
+  .search-glass input:focus {
+    width: 200px;
+  }
+
+  .filter-chip-modern {
+    padding: 6px 12px;
+    font-size: 0.7rem;
+  }
+
+  .table-glass {
+    font-size: 0.8rem;
+  }
+
+  .action-icon-glass {
+    width: 28px;
+    height: 28px;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .modal-body-glass {
+    padding: 1rem;
+  }
+
   .table-modern {
     font-size: 0.8rem;
   }
@@ -561,770 +1273,18 @@
   .pagination-info {
     font-size: 0.7rem;
   }
-}
 
-/* ============================================
-   ANIMATION LIGNES
-   ============================================ */
-
-@keyframes fadeInRow {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.table-modern tbody tr {
-  animation: fadeInRow 0.25s ease forwards;
-}
-
-.table-modern tbody tr:nth-child(1) {
-  animation-delay: 0.02s;
-}
-.table-modern tbody tr:nth-child(2) {
-  animation-delay: 0.04s;
-}
-.table-modern tbody tr:nth-child(3) {
-  animation-delay: 0.06s;
-}
-.table-modern tbody tr:nth-child(4) {
-  animation-delay: 0.08s;
-}
-.table-modern tbody tr:nth-child(5) {
-  animation-delay: 0.1s;
-}
-.table-modern tbody tr:nth-child(6) {
-  animation-delay: 0.12s;
-}
-.table-modern tbody tr:nth-child(7) {
-  animation-delay: 0.14s;
-}
-.table-modern tbody tr:nth-child(8) {
-  animation-delay: 0.16s;
-}
-.table-modern tbody tr:nth-child(9) {
-  animation-delay: 0.18s;
-}
-.table-modern tbody tr:nth-child(10) {
-  animation-delay: 0.2s;
-}
-/* ============================================
-   BADGES - GLASSMORPHISM
-   ============================================ */
-.badge-glass {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.65rem;
-  font-weight: 600;
-  gap: 4px;
-}
-
-.badge-glass-success {
-  background: rgba(16, 185, 129, 0.15);
-  color: #059669;
-  border: 1px solid rgba(16, 185, 129, 0.15);
-}
-
-.badge-glass-danger {
-  background: rgba(239, 68, 68, 0.15);
-  color: #dc2626;
-  border: 1px solid rgba(239, 68, 68, 0.15);
-}
-
-/* ============================================
-   ACTIONS ICONS - GLASSMORPHISM
-   ============================================ */
-.actions-glass {
-  gap: 4px;
-}
-
-.action-icon-glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border-radius: 10px;
-  padding: 0.3rem 0.6rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #64748b;
-  transition: all 0.3s;
-  border: 1px solid transparent;
-  text-decoration: none;
-  width: 32px;
-  height: 32px;
-}
-
-.action-icon-glass:hover {
-  background: rgba(59, 130, 246, 0.12);
-  transform: translateY(-2px);
-  border-color: rgba(59, 130, 246, 0.2);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.12);
-  color: #3b82f6;
-}
-
-.action-icon-glass-danger:hover {
-  background: rgba(239, 68, 68, 0.12);
-  border-color: rgba(239, 68, 68, 0.2);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.12);
-  color: #ef4444;
-}
-
-/* ============================================
-   PAGINATION - GLASSMORPHISM
-   ============================================ */
-.page-info-glass {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border-radius: 12px;
-  padding: 0.3rem 1.2rem;
-  color: rgba(0, 0, 0, 0.6);
-  font-size: 0.85rem;
-}
-
-.page-current {
-  padding: 0 12px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: #1e293b;
-  display: flex;
-  align-items: center;
-}
-
-/* ============================================
-   SPINNER - GLASSMORPHISM
-   ============================================ */
-.spinner-glass {
-  display: flex;
-  justify-content: center;
-  padding: 3rem 0;
-}
-
-/* ============================================
-   EMPTY STATE - GLASSMORPHISM
-   ============================================ */
-.empty-glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border-radius: 16px;
-  padding: 3rem 1rem;
-}
-
-/* ============================================
-   MODALS - GLASSMORPHISM (NATIF)
-   ============================================ */
-.modal-content-glass {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 20px;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.12);
-}
-
-.modal-header-glass {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 1.25rem 1.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 20px 20px 0 0;
-}
-
-.modal-title-glass {
-  color: #1e293b;
-  font-weight: 600;
-}
-
-.modal-close-glass {
-  opacity: 0.5;
-  transition: opacity 0.3s;
-}
-
-.modal-close-glass:hover {
-  opacity: 1;
-  transform: rotate(90deg);
-}
-
-.modal-body-glass {
-  padding: 1.5rem;
-}
-
-.modal-footer-glass {
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 1rem 1.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 0 0 20px 20px;
-}
-
-/* ============================================
-   FORMULAIRES - GLASSMORPHISM
-   ============================================ */
-/* ============================================
-   PERMISSION CARD - POUR LE SWITCH
-   ============================================ */
-
-.permission-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 10px 8px;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.permission-card:hover {
-  border-color: #cbd5e1;
-  background: #f1f5f9;
-}
-
-.permission-card.active {
-  background: #eff6ff;
-  border-color: #405189;
-}
-
-.permission-card .form-check-input:checked {
-  background-color: #405189;
-  border-color: #405189;
-}
-
-.permission-card .form-check-input {
-  cursor: pointer;
-}
-
-.permission-card .form-check-label {
-  cursor: pointer;
-}
-
-/* ============================================
-   FORM FLOATING - MÊME STYLE QUE USER
-   ============================================ */
-
-.form-floating > .form-control,
-.form-floating > .form-select {
-  height: 58px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  transition: all 0.2s ease;
-  background: #ffffff;
-}
-
-.form-floating > .form-control:focus,
-.form-floating > .form-select:focus {
-  border-color: #405189;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.form-floating > .form-control.is-invalid {
-  border-color: #ef4444;
-}
-
-.form-floating > .form-control.is-invalid:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-}
-
-.form-floating > label {
-  padding: 1rem 0.75rem;
-  color: #64748b;
-  font-weight: 400;
-}
-
-.form-floating > .form-control:focus ~ label,
-.form-floating > .form-control:not(:placeholder-shown) ~ label,
-.form-floating > .form-select ~ label {
-  transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
-  color: #405189;
-}
-
-/* ============================================
-   MODAL ANIMATION
-   ============================================ */
-
-.modal-content {
-  animation: slideUp 0.3s ease-out;
-  border-radius: 16px !important;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ============================================
-   ICON CIRCLE
-   ============================================ */
-
-.icon-circle {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-/* Switch */
-.switch-glass {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.switch-input-glass {
-  width: 3rem;
-  height: 1.6rem;
-  background: rgba(0, 0, 0, 0.08);
-  border-radius: 30px;
-  appearance: none;
-  position: relative;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.switch-input-glass::before {
-  content: "";
-  position: absolute;
-  width: 1.2rem;
-  height: 1.2rem;
-  background: white;
-  border-radius: 50%;
-  top: 0.2rem;
-  left: 0.2rem;
-  transition: all 0.3s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.switch-input-glass:checked {
-  background: #10b981;
-}
-
-.switch-input-glass:checked::before {
-  transform: translateX(1.4rem);
-}
-
-.switch-label-glass {
-  color: #1e293b;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-/* ============================================
-   GLASS CARD (DELETE MODAL)
-   ============================================ */
-.glass-card {
-  background: #fff;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  color: #1e293b;
-  border-radius: 24px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.icon-bg {
-  width: 80px;
-  height: 80px;
-  background: rgba(239, 68, 68, 0.2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;
-  animation: vibrate 0.3s ease-in-out infinite;
-}
-
-.icon-bg i {
-  font-size: 2.5rem;
-  color: #ef4444;
-}
-
-@keyframes vibrate {
-  0%,
-  100% {
-    transform: translate(0);
-  }
-  25% {
-    transform: translate(-2px, 2px);
-  }
-  75% {
-    transform: translate(2px, -2px);
-  }
-}
-
-.btn-glass {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  padding: 6px 20px;
-  border-radius: 30px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.btn-glass:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
-}
-
-.btn-glass-danger {
-  background: rgba(239, 68, 68, 0.8);
-  border: none;
-  color: white;
-  padding: 6px 20px;
-  border-radius: 30px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.btn-glass-danger:hover {
-  background: #ef4444;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-}
-
-/* Bouton Annuler - Glassmorphism */
-.btn-glass-cancel {
-  background: rgba(100, 116, 139, 0.12);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(100, 116, 139, 0.25);
-  padding: 0.5rem 1.5rem;
-  border-radius: 40px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #475569;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-glass-cancel::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transition: left 0.5s ease;
-}
-
-.btn-glass-cancel:hover::before {
-  left: 100%;
-}
-
-.btn-glass-cancel:hover {
-  background: rgba(100, 116, 139, 0.2);
-  border-color: rgba(100, 116, 139, 0.4);
-  transform: translateY(-2px);
-  color: #1e293b;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.btn-glass-cancel:active {
-  transform: translateY(0);
-}
-
-/* Bouton Soumettre - Glassmorphism */
-.btn-glass-submit {
-  background: rgba(59, 130, 246, 0.15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  padding: 0.5rem 1.8rem;
-  border-radius: 40px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #405189;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-glass-submit::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(59, 130, 246, 0.2),
-    transparent
-  );
-  transition: left 0.5s ease;
-}
-
-.btn-glass-submit:hover::before {
-  left: 100%;
-}
-
-.btn-glass-submit:hover:not(:disabled) {
-  background: rgba(59, 130, 246, 0.25);
-  border-color: #405189;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25);
-  color: #405189;
-}
-
-.btn-glass-submit:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.btn-glass-submit:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-glass-submit .spinner-border {
-  width: 0.8rem;
-  height: 0.8rem;
-  border-width: 2px;
-}
-
-/* ============================================
-   RESPONSIVE
-   ============================================ */
-@media (max-width: 768px) {
-  .page-title-glass {
-    padding: 16px;
-    flex-direction: column;
-    gap: 12px;
+  .modal-content-glass {
+    backdrop-filter: none;
+    background: white;
   }
 
-  .card-header-glass {
-    padding: 1rem;
-    flex-direction: column;
-  }
-
-  .card-body-glass {
-    padding: 1rem;
-  }
-
-  .search-glass input {
-    width: 180px;
-  }
-
-  .search-glass input:focus {
-    width: 200px;
-  }
-
-  .filter-chip-modern {
-    padding: 6px 12px;
-    font-size: 0.7rem;
-  }
-
-  .table-glass {
-    font-size: 0.8rem;
-  }
-
-  .table-header-glass th,
-  .table-body-glass .table-row-glass td {
-    padding: 0.5rem 0.8rem;
-  }
-
-  .action-icon-glass {
-    width: 28px;
-    height: 28px;
-    padding: 0.2rem 0.4rem;
-  }
-
-  .modal-body-glass {
-    padding: 1rem;
+  /* Désactiver toutes les animations sur mobile sauf les champs */
+  *:not(.form-floating):not(.form-control):not(.form-select) {
+    animation: none !important;
+    transition: none !important;
   }
 }
-
-/* ============================================
-   SCROLLBAR
-   ============================================ */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #3b82f6, #667eea);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #2563eb, #5b6fd4);
-}
-
-/* ============================================
-   DELETE MODAL - STYLE MODERNE
-   ============================================ */
-
-.delete-modal-card {
-  background: linear-gradient(135deg, #fff, #fff);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
-  padding: 32px 24px;
-  position: relative;
-  overflow: hidden;
-}
-
-.delete-modal-card::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  right: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(
-    circle at 70% 20%,
-    rgba(239, 68, 68, 0.08),
-    transparent 60%
-  );
-  pointer-events: none;
-}
-
-/* Icône de suppression */
-.delete-icon-wrapper {
-  width: 72px;
-  height: 72px;
-  background: rgba(239, 68, 68, 0.15);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  animation: deletePulse 2s ease-in-out infinite;
-}
-
-.delete-icon-wrapper i {
-  font-size: 2rem;
-  color: #ef4444;
-}
-
-@keyframes deletePulse {
-  0%,
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.2);
-  }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
-  }
-}
-
-/* Titre et message */
-.delete-modal-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 6px;
-  text-align: center;
-}
-
-.delete-modal-message {
-  font-size: 0.85rem;
-  color: rgba(88, 88, 88, 0.6);
-  text-align: center;
-  margin-bottom: 24px;
-  line-height: 1.5;
-}
-
-/* Bouton Annuler - VISIBLE */
-.delete-btn-cancel {
-  background: #1e293b;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 30px;
-  padding: 8px 24px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.8);
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.delete-btn-cancel:hover {
-  background: #475569;
-  color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.delete-btn-cancel:active {
-  transform: scale(0.96);
-}
-
-/* Bouton Supprimer */
-.delete-btn-confirm {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  border: none;
-  border-radius: 30px;
-  padding: 8px 24px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: white;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
-}
-
-.delete-btn-confirm:hover {
-  background: linear-gradient(135deg, #dc2626, #b91c1c);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
-}
-
-.delete-btn-confirm:active {
-  transform: scale(0.96);
-}
-
-/* ============================================
-   RESPONSIVE
-   ============================================ */
 
 @media (max-width: 480px) {
   .delete-modal-card {
