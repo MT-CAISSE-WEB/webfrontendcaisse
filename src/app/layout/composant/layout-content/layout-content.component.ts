@@ -23,6 +23,7 @@ import { InterfaceUserComponent } from '../layout-bloc/interface-user/interface-
 import { DENOMINATION_BILLETAGE } from '../../../_core/constantes/tableau.data';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { InterfaceDemandeUserComponent } from '../layout-bloc/interface-demande-user/interface-demande-user.component';
+import { InterfaceSupervisorComponent } from "../layout-bloc/interface-supervisor/interface-supervisor.component";
 
 @Component({
   selector: 'app-layout-content',
@@ -36,7 +37,8 @@ import { InterfaceDemandeUserComponent } from '../layout-bloc/interface-demande-
     InterfaceUserComponent,
     NgbModalModule,
     InterfaceDemandeUserComponent,
-  ],
+    InterfaceSupervisorComponent
+],
   templateUrl: './layout-content.component.html',
   styleUrl: './layout-content.component.css',
 })
@@ -64,6 +66,11 @@ export class LayoutContentComponent implements OnInit {
 
   //Caisse solde
   caisseSolde: any = [];
+
+  //Caisse all solde
+  caisseAllSolde: any = [];
+
+  supervisor: boolean = false;
 
   activeTab = 0;
   billetageValidated: boolean = false; // pour savoir si le billetage est validé
@@ -180,6 +187,19 @@ export class LayoutContentComponent implements OnInit {
         }
       },
     });
+  }
+
+  issuperviseur(): boolean {
+    if (typeof window !== 'undefined') {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      for (let index = 0; index < user.roles.length; index++) {
+        const element = user.roles[index];
+        if (element['code'] === '02') {
+          this.supervisor = true;
+        }
+      }
+    }
+    return this.supervisor;
   }
 
   //Les colonnes

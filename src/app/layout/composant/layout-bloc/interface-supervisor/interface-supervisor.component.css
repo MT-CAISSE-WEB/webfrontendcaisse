@@ -1,0 +1,102 @@
+/* ---------- Glassmorphism Card ---------- */
+      .glass-stat {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 1.25rem;
+        padding: 1.5rem 1.25rem;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      .glass-stat:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+        background: rgba(255, 255, 255, 0.18);
+      }
+
+      .stat-icon-wrapper {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 0.5rem;
+      }
+      .stat-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        font-size: 1.5rem;
+        color: #fff;
+      }
+      .stat-icon-primary {
+        background: linear-gradient(135deg, #4e73df, #224abe);
+      }
+
+      .stat-content {
+        flex: 1;
+      }
+      .stat-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: rgba(0, 0, 0, 0.5);
+        font-weight: 600;
+      }
+      .stat-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin: 0.2rem 0 0.4rem;
+        color: #1e293b;
+      }
+      .stat-detail {
+        margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+      }
+      .stat-detail strong {
+        font-weight: 600;
+      }
+
+      .stat-progress {
+        margin-top: 1rem;
+        height: 4px;
+        background: rgba(0, 0, 0, 0.06);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #4e73df, #36b9cc);
+        border-radius: 4px;
+        transition: width 0.5s ease;
+      }
+
+      /* Dark mode support (optionnel) */
+      @media (prefers-color-scheme: dark) {
+        .glass-stat {
+          background: rgba(30, 41, 59, 0.35);
+          border-color: rgba(255, 255, 255, 0.08);
+        }
+        .glass-stat:hover {
+          background: rgba(30, 41, 59, 0.45);
+        }
+        .stat-label {
+          color: rgba(255, 255, 255, 0.5);
+        }
+        .stat-value {
+          color: #f1f5f9;
+        }
+        .stat-detail .text-muted {
+          color: rgba(255, 255, 255, 0.6) !important;
+        }
+        .stat-detail .text-success {
+          color: #34d399 !important;
+        }
+        .stat-detail .text-danger {
+          color: #f87171 !important;
+        }
+      }
