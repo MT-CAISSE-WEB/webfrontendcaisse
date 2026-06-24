@@ -208,7 +208,170 @@
         <div class="section-label">
           <i class="ri-table-line"></i>
           <span>Lignes de l'opération</span>
+          <!-- ==================== NOUVEAU: BOUTON IMPORT CSV ==================== -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex gap-2">
+              <!-- Bouton Importer CSV -->
+            </div>
+          </div>
+
           <span class="badge-glass">{{ lignes.controls.length }}</span>
+          <div class="section-actions">
+            <button
+              type="button"
+              class="btn-action-line btn-clear"
+              (click)="clearAllLines()"
+              [disabled]="lignes.controls.length === 0"
+              title="Vider toutes les lignes"
+            >
+              <i class="ri-delete-bin-7-line"></i>
+              <span>Vider</span>
+            </button>
+            <button
+              type="button"
+              class="btn-action-line btn-import"
+              (click)="csvInput.click()"
+              [disabled]="!typePaiement || !isUpdated"
+              title="Importer un fichier CSV"
+            >
+              <i class="ri-file-excel-line"></i>
+              <span>Importer</span>
+            </button>
+            <input
+              #csvInput
+              type="file"
+              accept=".csv"
+              (change)="onCsvSelected($event)"
+              class="d-none"
+            />
+
+            <button
+              type="button"
+              class="btn-download-template"
+              (click)="downloadCsvTemplate()"
+              title="Télécharger un modèle CSV"
+            >
+              <i class="ri-download-line me-1"></i>
+              Modèle CSV
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== NOUVEAU: APERÇU CSV ==================== -->
+        <div *ngIf="showCsvPreview" class="csv-preview-container">
+          <div class="csv-preview-header">
+            <div class="d-flex align-items-center gap-2">
+              <i class="ri-file-excel-line text-primary"></i>
+              <h5 class="mb-0">Aperçu de l'import CSV</h5>
+              <!-- Bouton d'export des erreurs (apparaît si des erreurs existent) -->
+              <span class="badge bg-primary">
+                {{ csvPreview.length }} ligne(s) à importer
+              </span>
+            </div>
+            <button
+              type="button"
+              class="btn-close-csv"
+              (click)="cancelCsvImport()"
+              title="Fermer"
+            >
+              <i class="ri-close-line"></i>
+            </button>
+          </div>
+
+          <div class="csv-preview-body">
+            <!-- Tableau d'aperçu -->
+            <div class="table-responsive-glass">
+              <table class="table-glass-lignes">
+                <thead>
+                  <tr>
+                    <th style="width: 40px">#</th>
+                    <th>Nature opération</th>
+                    <th>Tiers</th>
+                    <th style="width: 140px; text-align: right">Montant</th>
+                    <th style="width: 120px">Statut</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of csvPreview; track $index) {
+                    <tr [class.csv-row-invalid]="!row.isValid">
+                      <td class="text-center">{{ $index + 1 }}</td>
+                      <td>
+                        <span class="d-block fw-semibold">{{
+                          row.natureLibelle
+                        }}</span>
+                        <small class="text-muted">{{ row.natureCode }}</small>
+                      </td>
+                      <td>
+                        <span class="d-block fw-semibold">{{
+                          row.tiersLibelle
+                        }}</span>
+                        <small class="text-muted">{{ row.tiersCode }}</small>
+                      </td>
+                      <td class="text-end">
+                        {{ row.montant | number: "1.2-2" }}
+                      </td>
+                      <td>
+                        @if (row.isValid) {
+                          <span class="badge-glass-success">
+                            <i class="ri-check-line me-1"></i> Valide
+                          </span>
+                        } @else {
+                          <span class="badge-glass-danger" [title]="row.error">
+                            <i class="ri-close-line me-1"></i> Invalide
+                          </span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Messages d'erreur -->
+            @if (csvErrors.length > 0) {
+              <div class="alert-glass-warning mt-3">
+                <div class="d-flex align-items-start gap-2">
+                  <i class="ri-error-warning-line text-warning mt-1"></i>
+                  <div>
+                    <strong>Attention :</strong> Certaines lignes n'ont pas pu
+                    être validées
+                    <ul class="mb-0 mt-2">
+                      @for (error of csvErrors; track $index) {
+                        <li class="small">{{ error }}</li>
+                      }
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="csv-preview-footer">
+            <button
+              type="button"
+              class="btn-glass-cancel"
+              (click)="cancelCsvImport()"
+            >
+              <i class="ri-close-line me-1"></i> Annuler
+            </button>
+            <button
+              *ngIf="getInvalidCsvRowsCount() > 0"
+              class="btn-glass-warning"
+              (click)="exportCsvWithErrors()"
+            >
+              <i class="ri-file-excel-line me-1"></i>
+              Exporter les erreurs (CSV)
+            </button>
+            <button
+              type="button"
+              class="btn-glass-submit"
+              (click)="confirmCsvImport()"
+              [disabled]="csvPreview.length === 0 || !allCsvRowsValid()"
+            >
+              <i class="ri-download-line me-1"></i>
+              Importer {{ getValidCsvRowsCount() }} lignes valides
+            </button>
+          </div>
         </div>
 
         <div class="table-responsive-glass">
@@ -352,6 +515,49 @@
                 rows="3"
                 placeholder="Ajouter un commentaire..."
               ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="totals-summary-glass">
+          <div class="totals-grid">
+            <div class="total-item">
+              <div class="total-label">
+                <i class="ri-percent-line"></i>
+                <span>Taux appliqué</span>
+              </div>
+              <input
+                type="text"
+                formControlName="tauxoperation"
+                class="form-control-glass text-center"
+                placeholder="0.00"
+              />
+            </div>
+            <div class="total-item">
+              <div class="total-label">
+                <i class="ri-money-euro-circle-line"></i>
+                <span>Total opération</span>
+              </div>
+              <input
+                type="text"
+                formControlName="montant"
+                class="form-control-glass text-center fw-bold"
+                placeholder="0.00"
+                readonly
+              />
+            </div>
+            <div class="total-item">
+              <div class="total-label">
+                <i class="ri-exchange-dollar-line"></i>
+                <span>Total référentiel</span>
+              </div>
+              <input
+                type="text"
+                formControlName="montantRefglobal"
+                class="form-control-glass text-center fw-bold"
+                placeholder="0.00"
+                readonly
+              />
             </div>
           </div>
         </div>

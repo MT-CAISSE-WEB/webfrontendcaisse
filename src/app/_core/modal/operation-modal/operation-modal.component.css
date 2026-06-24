@@ -678,6 +678,115 @@
 }
 
 /* ============================================
+   BOUTONS D'ACTION POUR LES LIGNES
+   ============================================ */
+
+.section-header-with-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(203, 213, 225, 0.1);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.section-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.section-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* Style commun aux boutons d'action */
+.btn-action-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 0.65rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
+}
+
+/* Bouton Importer (bleu) */
+.btn-import {
+  background: rgba(59, 130, 246, 0.15);
+  color: #405189;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.btn-import:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: #405189;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.btn-download-template {
+  background: #363636;
+  border: 1px solid #1f1f20;
+  padding: 0.5rem 1rem;
+  border-radius: 40px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-download-template i {
+  color: #fff;
+}
+.btn-download-template:hover {
+  background: #434345;
+  border-color: rgba(10, 10, 11, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Bouton Vider (rouge) */
+.btn-clear {
+  background: rgba(239, 68, 68, 0.08);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.btn-clear:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+}
+
+/* État désactivé */
+.btn-action-line:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Conteneur du bouton Ajouter */
+.add-line-container {
+  margin-top: 8px;
+  text-align: right;
+}
+
+/* ============================================
    11. FOOTER
    ============================================ */
 
@@ -727,6 +836,32 @@
 }
 
 .btn-glass-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-glass-warning {
+  background: linear-gradient(135deg, #c1af10, #f0dd0c);
+  border: none;
+  padding: 5px 20px;
+  border-radius: 24px;
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: white;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+}
+
+.btn-glass-warning:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d9d20e, #a47f05);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.btn-glass-warning:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   box-shadow: none;
@@ -946,5 +1081,241 @@
   .btn-download-all {
     font-size: 0.5rem;
     padding: 2px 8px;
+  }
+}
+
+/* ============================================
+   IMPORT CSV - STYLES
+   ============================================ */
+
+.btn-import-csv {
+  background: rgba(59, 130, 246, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  padding: 0.5rem 1.2rem;
+  border-radius: 40px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #405189;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-import-csv:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: #405189;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25);
+  color: #405189;
+}
+
+.btn-import-csv:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Conteneur de l'aperçu CSV */
+.csv-preview-container {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+/* Header de l'aperçu CSV */
+.csv-preview-header {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.1),
+    rgba(64, 81, 137, 0.05)
+  );
+  border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn-close-csv {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  padding: 0.4rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-close-csv:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+/* Body de l'aperçu CSV */
+.csv-preview-body {
+  padding: 1.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Footer de l'aperçu CSV */
+.csv-preview-footer {
+  background: rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+/* Ligne invalide dans l'aperçu */
+.csv-row-invalid {
+  background-color: rgba(239, 68, 68, 0.05) !important;
+}
+
+.csv-row-invalid:hover {
+  background-color: rgba(239, 68, 68, 0.08) !important;
+}
+
+/* Badges pour le statut */
+.badge-glass-success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-glass-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Alert pour les erreurs */
+.alert-glass-warning {
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 12px;
+  padding: 1rem;
+  color: #92400e;
+  font-size: 0.85rem;
+}
+
+/* Info sur l'import */
+.import-info {
+  flex: 1;
+}
+
+.import-info p {
+  margin-bottom: 0;
+  font-size: 0.75rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .csv-preview-container {
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .csv-preview-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .csv-preview-body {
+    padding: 1rem;
+    max-height: 300px;
+  }
+
+  .csv-preview-footer {
+    padding: 0.75rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .btn-import-csv {
+    padding: 0.4rem 1rem;
+    font-size: 0.7rem;
+  }
+}
+
+/* ============================================
+   RÉCAPITULATIF DES TOTAUX - STYLE GLASSMORPHISM
+   ============================================ */
+
+.totals-summary-glass {
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(203, 213, 225, 0.15);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-top: 14px;
+}
+
+.totals-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.total-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.total-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.total-label i {
+  font-size: 0.75rem;
+  color: #405189;
+}
+
+/* Adaptation pour mobile */
+@media (max-width: 768px) {
+  .totals-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .totals-summary-glass {
+    padding: 10px 12px;
+    margin-top: 10px;
   }
 }
