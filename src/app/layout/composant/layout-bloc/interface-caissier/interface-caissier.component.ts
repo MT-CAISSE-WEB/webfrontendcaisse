@@ -17,6 +17,7 @@ import { DemandeService } from '../../../../features/demande/services/demande.se
 import { EnteteDemande } from '../../../../features/demande/models/entete-demande.model';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { OperationModalComponent } from '../../../../_core/modal/operation-modal/operation-modal.component';
+import { OperationPJService } from '../../../../features/PJ/service/operationpj.service';
 
 @Component({
   selector: 'app-interface-caissier',
@@ -101,6 +102,8 @@ export class InterfaceCaissierComponent implements OnInit {
     private toastr: ToastrService,
     private service: ConsultationOpService,
     private demandeService: DemandeService,
+    private operationservice: OperationService,
+    private pjService: OperationPJService,
   ) {}
 
   ngOnInit(): void {
@@ -113,20 +116,73 @@ export class InterfaceCaissierComponent implements OnInit {
   }
 
   // ouvrir le modal avec l'ID de la demande
-
   openOperationModal(iddemande: string) {
     const modalRef = this.modalService.open(OperationModalComponent, {
       size: 'xl',
       backdrop: 'static',
     });
-    // Passez l'ID de la demande au modal
     modalRef.componentInstance.iddemande = iddemande;
+    modalRef.componentInstance.title = 'Décaissement de demande';
 
-    // Rafraîchir la liste après fermeture du modal (si une opération a été créée)
-    modalRef.result.then((result) => {
-      if (result) {
-        this.loadAllDemandes();
-      }
+    modalRef.result
+      .then((result) => {
+        if (result) {
+          // ✅ APPELEZ LA SAUVEGARDE
+          this.createOperation(result.operation, result.files);
+        }
+      })
+      .catch(() => {
+        // Modal fermé sans sauvegarde
+      });
+  }
+
+  // ➕ Ajoutez cette méthode pour sauvegarder l'opération
+  createOperation(operation: any, files?: File[]) {
+    this.loading = true;
+
+    this.operationservice.create(operation).subscribe({
+      next: (res) => {
+        if (res.success) {
+          // Upload des fichiers si nécessaire
+          if (files && files.length > 0 && res.data?.idoperation) {
+            this.uploadFiles(res.data.idoperation, files);
+          } else {
+            this.toastr.success('✅ Opération enregistrée avec succès');
+            this.loadAllDemandes();
+            this.loading = false;
+          }
+        } else {
+          this.toastr.error(
+            res.message || "❌ Erreur lors de l'enregistrement",
+          );
+          this.loading = false;
+        }
+      },
+      error: (err) => {
+        this.toastr.error(err.error?.message || '❌ Erreur backend');
+        this.loading = false;
+      },
+    });
+  }
+
+  // Uploader les fichiers
+  uploadFiles(idoperation: string, files: File[]) {
+    const userId = this.user.idutilisateur;
+    this.pjService.create(idoperation, files, userId).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.toastr.success(`${res.data.length} fichier(s) uploadé(s)`);
+          this.loadAllDemandes();
+          this.loading = false;
+        } else {
+          this.toastr.error("❌ Erreur lors de l'upload des fichiers");
+          this.loading = false;
+        }
+      },
+      error: (err) => {
+        this.toastr.error(err.error?.message || "❌ Erreur lors de l'upload");
+        this.loading = false;
+      },
     });
   }
 
