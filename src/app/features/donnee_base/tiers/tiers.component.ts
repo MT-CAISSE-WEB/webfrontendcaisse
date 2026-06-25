@@ -745,4 +745,26 @@ export class TiersComponent implements OnInit {
       },
     });
   }
+
+  downloadCsvTemplate(): void {
+    const delimiter = ';';
+    const csvContent = `code${delimiter}designation${delimiter}type${delimiter}statut
+XXXXXX${delimiter}Exemple tiers${delimiter}exemple type tiers${delimiter}1
+XXXXXX${delimiter}Exemple tiers${delimiter}exemple type tiers${delimiter}1
+XXXXXX${delimiter}Exemple tiers${delimiter}exemple type tiers${delimiter}1`;
+
+    // BOM UTF-8 pour compatibilité Excel
+    const blob = new Blob(['\uFEFF' + csvContent], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'modele_tiers.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    this.toastr.success('Modèle CSV téléchargé');
+  }
 }

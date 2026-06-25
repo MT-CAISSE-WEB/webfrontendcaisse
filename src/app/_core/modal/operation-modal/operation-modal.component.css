@@ -736,13 +736,9 @@
 }
 
 .btn-download-template {
-  background: #363636;
-  border: 1px solid #1f1f20;
-  padding: 0.5rem 1rem;
-  border-radius: 40px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #ffffff;
+  background: rgba(79, 226, 63, 0.3);
+  border-radius: 20px;
+  color: #16471b;
   cursor: pointer;
   transition: all 0.3s;
   display: inline-flex;
@@ -751,11 +747,9 @@
 }
 
 .btn-download-template i {
-  color: #fff;
+  color: #16471b;
 }
 .btn-download-template:hover {
-  background: #434345;
-  border-color: rgba(10, 10, 11, 0.3);
   transform: translateY(-2px);
 }
 
@@ -764,6 +758,10 @@
   background: rgba(239, 68, 68, 0.08);
   color: #dc2626;
   border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.btn-clear i {
+  color: #dc2626;
 }
 
 .btn-clear:hover:not(:disabled) {

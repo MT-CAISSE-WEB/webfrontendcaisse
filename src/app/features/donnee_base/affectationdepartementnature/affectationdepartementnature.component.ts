@@ -774,4 +774,26 @@ export class AffectationDepartementNatureComponent implements OnInit {
       this.ImportForm.get('file')?.updateValueAndValidity();
     }
   }
+
+  downloadCsvTemplate(): void {
+    const delimiter = ';';
+    const csvContent = `code departement${delimiter}libelle departement${delimiter}code nature${delimiter}libelle nature
+XXXXXXX${delimiter}Exemple departement${delimiter}XXXXXX${delimiter}Exemple nature
+XXXXXXX${delimiter}Exemple departement${delimiter}XXXXXX${delimiter}Exemple nature
+XXXXXXX${delimiter}Exemple departement${delimiter}XXXXXX${delimiter}Exemple nature`;
+
+    // BOM UTF-8 pour compatibilité Excel
+    const blob = new Blob(['\uFEFF' + csvContent], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'modele_affectation_dep_nature.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    this.toastr.success('Modèle CSV téléchargé');
+  }
 }

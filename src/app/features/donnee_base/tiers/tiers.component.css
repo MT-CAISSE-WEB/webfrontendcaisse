@@ -186,6 +186,34 @@
   color: #1e293b;
 }
 
+.btn-glass-modele {
+  background: rgba(79, 226, 63, 0.3);
+  border: 1px solid rgba(79, 226, 63, 0.3);
+  border-radius: 30px;
+  padding: 0.4rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #1b5822;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (min-width: 769px) {
+  .btn-glass-modele {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+.btn-glass-modele:hover {
+  background: rgba(79, 226, 63, 0.3);
+  border-color: #16471b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  color: #16471b;
+}
+
 .btn-glass-pagination {
   background: rgba(59, 130, 246, 0.08);
   border: 1px solid rgba(59, 130, 246, 0.15);
