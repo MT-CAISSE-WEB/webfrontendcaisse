@@ -54,6 +54,7 @@ import { DemandePJService } from '../../../features/PJ/service/demandepj.service
 })
 export class OperationModalComponent implements OnInit {
   @Input() title = '';
+  @Input() iddemande: string | null = null;
 
   //Le taux de devises
   tauxdevise: tauxdevisemodel = new tauxdevisemodel();
@@ -144,6 +145,15 @@ export class OperationModalComponent implements OnInit {
   demandePiecesJointes: PieceJointe[] = [];
   demandePiecesJointesLoading = false;
 
+  // import des natures d'opérations
+  // ==================== NOUVEAU: Propriétés pour l'import CSV ====================
+  csvFile: File | null = null;
+  csvPreview: any[] = [];
+  showCsvPreview = false;
+  csvErrors: string[] = [];
+  detectedDelimiter: string = ';';
+  isImportingCsv = false;
+
   constructor(
     private natureoperationservice: NatureoperationService,
     private caisseuserservice: AffectationCaisseService,
@@ -169,6 +179,17 @@ export class OperationModalComponent implements OnInit {
     this.getAllcentres();
     //charger les demandes
     this.loadAllDemandes();
+    // Si une demande est passée en paramètre, la sélectionner automatiquement
+    if (this.iddemande) {
+      const checkInterval = setInterval(() => {
+        if (this.entetesDmd.length > 0) {
+          clearInterval(checkInterval);
+          // Sélectionne la demande dans le formulaire
+          this.operationForm.get('demande')?.setValue(this.iddemande);
+          // Le reste est géré automatiquement par le valueChanges subscriber existant
+        }
+      }, 100); // Vérifie toutes les 100ms si les demandes sont chargées
+    }
     //Initialisation du formulaire
     this.initForm();
     //Charger les natures d'opérations
@@ -250,6 +271,89 @@ export class OperationModalComponent implements OnInit {
       this.caisseStatuses = status;
     });
   }
+
+  // Variables
+  demandeSelectionnee: any = null;
+
+  // Méthode appelée lors de la sélection d'une demande
+  onDemandeSelect(event: any): void {
+    const demandeId = event.target.value;
+    if (demandeId) {
+      // Récupérer la demande sélectionnée
+      this.demandeSelectionnee = this.entetesDmd.find(
+        (d) => d.iddemande === demandeId,
+      );
+
+      // Charger les pièces jointes de la demande
+      this.loadDemandePiecesJointes(demandeId);
+
+      // Remplir automatiquement les champs
+      this.autoFillDemandeFields(this.demandeSelectionnee);
+    } else {
+      this.demandeSelectionnee = null;
+      this.demandePiecesJointes = [];
+    }
+  }
+
+  // Remplir automatiquement les champs
+  autoFillDemandeFields(demande: any): void {
+    if (demande) {
+      // Remplir la devise
+      if (demande.devise) {
+        this.operationForm.patchValue({
+          devise: demande.devise.iddevise,
+        });
+      }
+
+      // Remplir le bénéficiaire si disponible
+      if (demande.demandeur) {
+        this.operationForm.patchValue({
+          beneficiaire: demande.demandeur.nom + ' ' + demande.demandeur.prenom,
+        });
+      }
+
+      // Remplir le type de paiement par défaut
+      this.operationForm.patchValue({
+        typepaiement: 'decaissement',
+      });
+
+      // Ajouter une ligne avec le montant
+      const montantTotal = this.getTotalDemande(demande);
+      this.operationForm.patchValue({
+        montant: montantTotal,
+      });
+
+      // Ajouter une ligne avec le montant
+      this.addLineWithMontant(montantTotal);
+    }
+  }
+
+  // Ajouter une ligne avec le montant
+  addLineWithMontant(montant: number): void {
+    if (this.lignes.controls.length > 0) {
+      const firstLine = this.lignes.controls[0];
+      firstLine.patchValue({
+        montantligne: montant,
+      });
+    } else {
+      const newLine = this.newLigne();
+      newLine.patchValue({
+        montantligne: montant,
+      });
+      this.lignes.push(newLine);
+    }
+  }
+
+  // Compter le total des pièces jointes
+  getTotalPiecesCount(): number {
+    return (
+      this.demandePiecesJointes.length +
+      this.existingPieces.length +
+      this.uploadedFiles.length
+    );
+  }
+
+  // Déterminer le texte du bouton de téléchargement
 
   cancel() {
     this.activeModal.dismiss(false);
@@ -1436,5 +1540,480 @@ export class OperationModalComponent implements OnInit {
         this.downloadingAll = false;
       },
     });
+  }
+
+  // Import des natures
+  /**
+   * Sélection d'un fichier CSV
+   */
+  onCsvSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.csvFile = input.files[0];
+      this.parseCsvFile();
+      // Réinitialiser la valeur de l'input pour permettre la sélection du même fichier
+      input.value = '';
+    }
+  }
+  /**
+   * Parse le fichier CSV sélectionné
+   */
+  parseCsvFile(): void {
+    if (!this.csvFile) return;
+
+    this.isImportingCsv = true;
+    this.showCsvPreview = false;
+    this.csvPreview = [];
+    this.csvErrors = [];
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      const content = e.target.result as string;
+      this.processCsvContent(content);
+      this.isImportingCsv = false;
+    };
+    reader.onerror = () => {
+      this.toastr.error('Erreur de lecture du fichier CSV');
+      this.isImportingCsv = false;
+    };
+    // UTF-8 pour gérer les accents
+    reader.readAsText(this.csvFile, 'UTF-8');
+  }
+
+  processCsvContent(content: string): void {
+    content = this.removeBOM(content);
+    const delimiter = this.detectDelimiter(content);
+    this.detectedDelimiter = delimiter;
+    const lines = content.split('\n');
+    const dataLines = lines.slice(1);
+
+    // Réinitialiser
+    this.csvPreview = [];
+    this.csvErrors = [];
+
+    dataLines.forEach((line, index) => {
+      line = line.trim();
+      if (!line) return;
+
+      const columns = this.parseCsvLine(line, delimiter);
+
+      // --- Validation du format ---
+      if (columns.length < 5) {
+        const errorMsg = `Ligne ${index + 2}: Format invalide (5 colonnes attendues, ${columns.length} trouvées)`;
+        this.csvPreview.push({
+          natureCode: '',
+          natureLibelle: '',
+          tiersCode: '',
+          tiersLibelle: '',
+          montant: 0,
+          nature: null,
+          tiers: null,
+          originalNatureCode: columns[0] || '',
+          originalNatureLibelle: columns[1] || '',
+          originalTiersCode: columns[2] || '',
+          originalTiersLibelle: columns[3] || '',
+          originalMontant: columns[4] || '',
+          isValid: false,
+          error: errorMsg,
+        });
+        this.csvErrors.push(errorMsg);
+        return;
+      }
+
+      const [natureCode, natureLibelle, tiersCode, tiersLibelle, montantStr] =
+        columns;
+
+      // --- Validation de la NATURE (CODE UNIQUEMENT) ---
+      const nature = this.findNatureByCodeExact(natureCode?.trim() || '');
+      if (!nature) {
+        const errorMsg = `Ligne ${index + 2}: Nature avec code "${natureCode?.trim()}" introuvable`;
+        this.csvPreview.push({
+          natureCode: natureCode?.trim() || '',
+          natureLibelle: natureLibelle?.trim() || '',
+          tiersCode: '',
+          tiersLibelle: '',
+          montant: 0,
+          nature: null,
+          tiers: null,
+          originalNatureCode: natureCode || '',
+          originalNatureLibelle: natureLibelle || '',
+          originalTiersCode: tiersCode || '',
+          originalTiersLibelle: tiersLibelle || '',
+          originalMontant: montantStr || '',
+          // 👆 FIN DE L'AJOUT
+          isValid: false,
+          error: errorMsg,
+        });
+        this.csvErrors.push(errorMsg);
+        return;
+      }
+
+      // --- Validation du TIERS (CODE UNIQUEMENT) ---
+      const tiers = this.findTiersByCodeExact(tiersCode?.trim() || '');
+      if (!tiers) {
+        const errorMsg = `Ligne ${index + 2}: Tiers avec code "${tiersCode?.trim()}" introuvable`;
+        this.csvPreview.push({
+          natureCode: natureCode?.trim() || '',
+          natureLibelle: natureLibelle?.trim() || '',
+          tiersCode: tiersCode?.trim() || '',
+          tiersLibelle: tiersLibelle?.trim() || '',
+          montant: 0,
+          nature: nature,
+          tiers: null,
+          originalNatureCode: natureCode || '',
+          originalNatureLibelle: natureLibelle || '',
+          originalTiersCode: tiersCode || '',
+          originalTiersLibelle: tiersLibelle || '',
+          originalMontant: montantStr || '',
+          isValid: false,
+          error: errorMsg,
+        });
+        this.csvErrors.push(errorMsg);
+        return;
+      }
+
+      // --- Validation du MONTANT (DOIT ÊTRE > 0) ---
+      const montant = this.parseMontant(montantStr);
+      if (isNaN(montant)) {
+        const errorMsg = `Ligne ${index + 2}: Montant "${montantStr}" invalide`;
+        this.csvPreview.push({
+          natureCode: natureCode?.trim() || '',
+          natureLibelle: natureLibelle?.trim() || '',
+          tiersCode: tiersCode?.trim() || '',
+          tiersLibelle: tiersLibelle?.trim() || '',
+          montant: 0,
+          nature: nature,
+          tiers: tiers,
+          originalNatureCode: natureCode || '',
+          originalNatureLibelle: natureLibelle || '',
+          originalTiersCode: tiersCode || '',
+          originalTiersLibelle: tiersLibelle || '',
+          originalMontant: montantStr || '',
+          isValid: false,
+          error: errorMsg,
+        });
+        this.csvErrors.push(errorMsg);
+        return;
+      }
+
+      if (montant <= 0) {
+        const errorMsg = `Ligne ${index + 2}: Montant doit être > 0 (valeur: ${montant})`;
+        this.csvPreview.push({
+          natureCode: natureCode?.trim() || '',
+          natureLibelle: natureLibelle?.trim() || '',
+          tiersCode: tiersCode?.trim() || '',
+          tiersLibelle: tiersLibelle?.trim() || '',
+          montant: montant,
+          nature: nature,
+          tiers: tiers,
+          originalNatureCode: natureCode || '',
+          originalNatureLibelle: natureLibelle || '',
+          originalTiersCode: tiersCode || '',
+          originalTiersLibelle: tiersLibelle || '',
+          originalMontant: montantStr || '',
+          isValid: false,
+          error: errorMsg,
+        });
+        this.csvErrors.push(errorMsg);
+        return;
+      }
+
+      // ✅ LIGNE VALIDE
+      this.csvPreview.push({
+        natureCode: natureCode?.trim() || '',
+        natureLibelle: natureLibelle?.trim() || '',
+        tiersCode: tiersCode?.trim() || '',
+        tiersLibelle: tiersLibelle?.trim() || '',
+        montant: montant,
+        nature: nature,
+        tiers: tiers,
+        originalNatureCode: natureCode || '',
+        originalNatureLibelle: natureLibelle || '',
+        originalTiersCode: tiersCode || '',
+        originalTiersLibelle: tiersLibelle || '',
+        originalMontant: montantStr || '',
+        isValid: true,
+        error: null,
+      });
+    });
+
+    if (this.csvPreview.length > 0) {
+      this.showCsvPreview = true;
+    }
+  }
+
+  /**
+   * Détecte le délimiteur utilisé dans le CSV (virgule ou point-virgule)
+   */
+  private detectDelimiter(content: string): string {
+    const firstLine = content.split('\n')[0];
+    const commaCount = (firstLine.match(/,/g) || []).length;
+    const semicolonCount = (firstLine.match(/;/g) || []).length;
+
+    // Si plus de points-virgules, utiliser ;
+    if (semicolonCount > commaCount) {
+      return ';';
+    }
+    // Sinon utiliser la virgule
+    return ',';
+  }
+
+  /**
+   * Supprime le BOM (Byte Order Mark) si présent
+   */
+  private removeBOM(content: string): string {
+    // BOM UTF-8 (caractère invisible ﻿)
+    if (content.charCodeAt(0) === 0xfeff) {
+      return content.slice(1);
+    }
+    // BOM UTF-8 avec espace
+    if (
+      content.charCodeAt(0) === 0xef &&
+      content.charCodeAt(1) === 0xbb &&
+      content.charCodeAt(2) === 0xbf
+    ) {
+      return content.slice(3);
+    }
+    return content;
+  }
+
+  /**
+   * Parse une ligne CSV avec délimiteur personnalisé
+   */
+  parseCsvLine(line: string, delimiter: string = ','): string[] {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === delimiter && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  }
+
+  /**
+   * Trouve une nature par CODE EXACT (ignore le libellé)
+   */
+  private findNatureByCodeExact(code: string): natureoperationModel | null {
+    if (!code) return null;
+    code = code.toLowerCase().trim();
+    return (
+      this.natureoperations.find(
+        (n) => n.codenature?.toLowerCase().trim() === code,
+      ) || null
+    );
+  }
+
+  /**
+   * Trouve un tiers par CODE EXACT (ignore la designation)
+   */
+  private findTiersByCodeExact(code: string): tiersModel | null {
+    if (!code) return null;
+    code = code.toLowerCase().trim();
+    return (
+      this.tiers.find((t) => t.codetiers?.toLowerCase().trim() === code) || null
+    );
+  }
+
+  /**
+   * Parse un montant (gère les virgules et espaces)
+   */
+  parseMontant(value: string): number {
+    if (!value) return 0;
+    // Supprimer tous les caractères non numériques sauf . et - et ,
+    let cleaned = value.replace(/[^\d.,-]/g, '');
+    // Remplacer la virgule par un point
+    cleaned = cleaned.replace(',', '.');
+    return parseFloat(cleaned);
+  }
+
+  /**
+   * Vérifie si toutes les lignes CSV sont valides
+   */
+  allCsvRowsValid(): boolean {
+    return this.csvPreview.every((row) => row.isValid);
+  }
+
+  /**
+   * Compte le nombre de lignes valides
+   */
+  getValidCsvRowsCount(): number {
+    return this.csvPreview.filter((row) => row.isValid).length;
+  }
+
+  /**
+   * Confirme l'import CSV et ajoute les lignes au formulaire
+   */
+  confirmCsvImport(): void {
+    if (this.csvPreview.length === 0) return;
+
+    const validRows = this.csvPreview.filter((row) => row.isValid);
+
+    if (validRows.length === 0) {
+      this.toastr.error(
+        '❌ Aucune ligne valide à importer. Veuillez corriger les erreurs.',
+      );
+      return;
+    }
+
+    validRows.forEach((row) => {
+      const newLine = this.newLigne();
+      newLine.patchValue({
+        natureop: row.nature,
+        tiers: row.tiers,
+        montantligne: row.montant,
+        centre: null,
+      });
+      newLine.get('centre')?.disable({ emitEvent: false });
+      newLine.get('montantligne')?.enable({ emitEvent: false });
+      this.lignes.push(newLine);
+    });
+
+    this.cancelCsvImport();
+    this.toastr.success(`${validRows.length} ligne(s) importée(s) avec succès`);
+    this.updateTotalMontant();
+    this.updateMontantRefGlobal();
+  }
+
+  /**
+   * Annule l'import CSV
+   */
+  cancelCsvImport(): void {
+    this.csvFile = null;
+    this.csvPreview = [];
+    this.showCsvPreview = false;
+    this.csvErrors = [];
+    this.isImportingCsv = false;
+  }
+
+  /**
+   * Échappe une valeur pour le format CSV (ajoute des guillemets si nécessaire)
+   */
+  private escapeCsvValue(value: any): string {
+    if (value === null || value === undefined) return '';
+    const str = String(value);
+    // Échapper les guillemets existants et entourer de guillemets si nécessaire
+    if (
+      str.includes(this.detectedDelimiter) ||
+      str.includes('"') ||
+      str.includes('\n')
+    ) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  }
+
+  /**
+   * Exporte TOUTES les lignes EXACTEMENT comme importées,
+   * avec une colonne "Erreur" supplémentaire
+   */
+  exportCsvWithErrors(): void {
+    if (this.csvPreview.length === 0) {
+      this.toastr.warning('Aucune ligne à exporter');
+      return;
+    }
+
+    // En-têtes du CSV
+    const headers = [
+      'Code Nature',
+      'Libellé Nature',
+      'Code Tiers',
+      'Libellé Tiers',
+      'Montant',
+      'Erreur',
+    ];
+
+    // Générer le contenu CSV avec les VALEURS ORIGINALES
+    let csvContent =
+      headers.map((h) => this.escapeCsvValue(h)).join(this.detectedDelimiter) +
+      '\n';
+
+    this.csvPreview.forEach((row) => {
+      const line = [
+        this.escapeCsvValue(row.originalNatureCode), // 👈 Valeur originale
+        this.escapeCsvValue(row.originalNatureLibelle), // 👈 Valeur originale
+        this.escapeCsvValue(row.originalTiersCode), // 👈 Valeur originale
+        this.escapeCsvValue(row.originalTiersLibelle), // 👈 Valeur originale
+        this.escapeCsvValue(row.originalMontant), // 👈 Valeur originale
+        this.escapeCsvValue(row.error || ''), // Colonne Erreur
+      ].join(this.detectedDelimiter);
+
+      csvContent += line + '\n';
+    });
+
+    // Téléchargement
+    const blob = new Blob(['\uFEFF' + csvContent], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `import_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    this.toastr.success(`Export de ${this.csvPreview.length} ligne(s) terminé`);
+  }
+
+  // Compte les lignes invalides (pour afficher/masquer le bouton)
+  getInvalidCsvRowsCount(): number {
+    return this.csvPreview.filter((row) => !row.isValid).length;
+  }
+
+  /**
+   * Vide toutes les lignes de l'opération
+   */
+  clearAllLines(): void {
+    if (this.lignes.controls.length === 0) {
+      this.toastr.warning('Aucune ligne à vider');
+      return;
+    }
+
+    this.lignes.clear();
+    this.updateTotalMontant();
+    this.updateMontantRefGlobal();
+    this.toastr.success('Toutes les lignes ont été vidées');
+  }
+
+  /**
+   * Télécharge un modèle CSV vide
+   */
+  /**
+   * Télécharge un modèle CSV avec :
+   * - Délimiteur point-virgule (standard français)
+   * - BOM UTF-8 pour Excel
+   * - Exemples réalistes alignés sous chaque colonne
+   */
+  downloadCsvTemplate(): void {
+    const delimiter = ';';
+    const csvContent = `Code Nature${delimiter}Libellé Nature${delimiter}Code Tiers${delimiter}Libellé Tiers${delimiter}Montant
+XXXXXX${delimiter}Exemple nature${delimiter}XXXXXX${delimiter}Exemple tiers${delimiter}0
+XXXXXX${delimiter}Exemple nature${delimiter}XXXXXX${delimiter}Exemple tiers${delimiter}0
+XXXXXX${delimiter}Exemple nature${delimiter}XXXXXX${delimiter}Exemple tiers${delimiter}0`;
+
+    // BOM UTF-8 pour compatibilité Excel
+    const blob = new Blob(['\uFEFF' + csvContent], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'modele_import_lignes_operation.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    this.toastr.success('Modèle CSV téléchargé');
   }
 }

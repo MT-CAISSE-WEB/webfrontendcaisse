@@ -369,6 +369,7 @@ export class DemandeDecaissementComponent implements OnInit {
       next: (res) => {
         if (res.success) {
           // this.entetesDmd = res.data.data;
+          console.log('Résultat:', res);
           this.entetesDmd = res.data.data.map((item: any) => ({
             ...item,
           }));
@@ -583,6 +584,7 @@ export class DemandeDecaissementComponent implements OnInit {
   // Ouvre le modal des pièces jointes
   openPiecesJointesModal(demande: EnteteDemande): void {
     this.selectedDemandePJ = demande;
+    console.log('demande', demande);
     this.selectedFiles = [];
     this.loadPiecesJointes(demande.iddemande);
     this.modalPJVisible = true;

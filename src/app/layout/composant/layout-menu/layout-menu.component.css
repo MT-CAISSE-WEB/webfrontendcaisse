@@ -1,99 +1,353 @@
-#scrollbar {
-  height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-
 /* ==============================
-   SCROLLBAR
+   SCROLLBAR - CORRIGÉE
 ============================== */
-/* #scrollbar {
-  height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-} */
-
-/* Zone scrollable */
 #scrollbar {
-  height: calc(100vh - 70px); /* 70px = hauteur du logo/header */
-  overflow-y: auto;
+  height: calc(100vh - 65px);
+  overflow-y: auto !important;
   overflow-x: hidden;
+  padding: 0 8px;
+  margin-right: 2px;
 }
 
+.app-menu.navbar-menu {
+  overflow-y: hidden !important;
+  display: flex;
+  flex-direction: column;
+}
 
 /* ==============================
    TYPOGRAPHIE
 ============================== */
 .app-menu .navbar-nav .nav-link {
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
 }
 
 .app-menu .menu-title {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.8px;
 }
 
 .app-menu .nav-sm .nav-link {
-  font-size: 13px;
-  color: #c7def8f6;
+  font-size: 12px;
 }
 
 /* ==============================
-   BACKGROUND SIDEBAR
+   BACKGROUND SIDEBAR - DÉGRADÉ #3b82f6 → #405189
+   + GLASSMORPHISM
 ============================== */
 .app-menu.navbar-menu {
-  background: #405189;
+  background: linear-gradient(135deg, #3b82f6 0%, #405189 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 240px;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Effet de brillance subtil - conservé car léger */
+.app-menu.navbar-menu::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(255, 255, 255, 0.5),
+    transparent
+  );
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 /* ==============================
-   COULEURS PAR DÉFAUT
+   COULEURS PAR DÉFAUT - CONTRASTÉES
 ============================== */
 .app-menu .nav-link,
 .app-menu .menu-title span,
-.app-menu .nav-item span,
-.app-menu .nav-item i {
-  color: #c7def8f6;
+.app-menu .nav-item span {
+  color: rgba(255, 255, 255, 0.85);
 }
 
-/* Hover */
+.app-menu .nav-item i {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.1rem;
+  margin-right: 10px;
+}
+
+/* Hover - Plus visible */
 .app-menu .nav-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+}
+
+.app-menu .nav-link:hover i {
   color: #ffffff;
 }
 
 /* ==============================
-   LIEN ACTIF (SURBRILLANCE)
+   LIEN ACTIF - SURBRILLANCE RENFORCÉE
 ============================== */
 .app-menu .nav-link.active,
 .app-menu .menu-link.active,
 .app-menu .nav-sm .nav-link.active {
-  background-color: rgba(255, 255, 255, 0.18); /* surbrillance */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15),
+    rgba(255, 255, 255, 0.08)
+  );
   color: #ffffff !important;
   border-radius: 6px;
+  border-left: 3px solid rgba(255, 255, 255, 0.6);
 }
 
-/* Icône active */
 .app-menu .nav-link.active i {
   color: #ffffff !important;
 }
 
 /* ==============================
-   AMÉLIORATION UX
+   SOUS-MENUS - VISIBLES
 ============================== */
-.app-menu .nav-link {
-  transition: background-color 0.2s ease, color 0.2s ease;
+.app-menu .menu-dropdown {
+  margin-left: 12px;
+  padding-left: 10px;
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  margin-top: 3px;
+  margin-bottom: 3px;
 }
 
-.app-menu .nav .nav-sm .nav-link {
-  color: #c7def8f6;
+.app-menu .nav-sm .nav-link {
+  color: rgba(255, 255, 255, 0.75);
+  padding: 6px 10px 6px 28px;
+  position: relative;
+  border-radius: 6px;
+  margin: 2px 0;
 }
 
-.app-menu .nav .nav-sm .nav-link:hover {
+/* Indicateur moderne pour sous-menu */
+.app-menu .nav-sm .nav-link::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+}
+
+.app-menu .nav-sm .nav-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.app-menu .nav-sm .nav-link.active {
+  background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
 }
 
-.app-menu .nav .nav-sm .nav-link.active {
-  background-color: rgba(255, 255, 255, 0.18);
-  color: #ffffff;
+.app-menu .nav-sm .nav-link.active::before {
+  background: #ffffff;
+  width: 6px;
+  height: 6px;
+}
+
+/* ==============================
+   TITRES DE SECTION
+============================== */
+.app-menu .menu-title {
+  position: relative;
+  padding: 14px 10px 6px 10px;
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 1.2px;
+}
+
+/* Barre décorative avant le titre */
+.app-menu .menu-title::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 2px;
+}
+
+.app-menu .menu-title i {
+  margin-right: 6px;
+  font-size: 11px;
+}
+
+/* ==============================
+   SCROLLBAR - STYLISÉE
+============================== */
+#scrollbar::-webkit-scrollbar {
+  width: 3px;
+}
+
+#scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+
+#scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+}
+
+#scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* ==============================
+   ZONE DU LOGO
+============================== */
+.navbar-brand-box {
+  padding: 14px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 6px;
+  flex-shrink: 0;
+}
+
+.logo {
+  transition: opacity 0.2s ease;
+}
+
+.logo:hover {
+  opacity: 0.9;
+}
+
+.logo img {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* ==============================
+   BOUTON TOGGLE
+============================== */
+.btn-vertical-sm-hover {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-vertical-sm-hover:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ==============================
+   OVERLAY
+============================== */
+.vertical-overlay {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  cursor: pointer;
+}
+
+.vertical-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ==============================
+   RESPONSIVE
+============================== */
+@media (max-width: 768px) {
+  .app-menu.navbar-menu {
+    transform: translateX(-100%);
+    box-shadow: none;
+    width: 240px !important;
+  }
+
+  .app-menu.navbar-menu.menu-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* ============================================
+   RESPONSIVE MENU - GESTION MOBILE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .app-menu.navbar-menu {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: none;
+    width: 260px;
+    z-index: 1001;
+    position: fixed;
+    top: 65px;
+    left: 0;
+    height: calc(100vh - 65px);
+    border-radius: 0 0 12px 12px;
+  }
+
+  .app-menu.navbar-menu.menu-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+  }
+
+  .vertical-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    cursor: pointer;
+  }
+
+  .vertical-overlay.show {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+@media (min-width: 769px) {
+  .app-menu.navbar-menu {
+    transform: translateX(0) !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    border-radius: 0;
+    width: 240px;
+  }
+
+  .vertical-overlay {
+    display: none !important;
+  }
 }

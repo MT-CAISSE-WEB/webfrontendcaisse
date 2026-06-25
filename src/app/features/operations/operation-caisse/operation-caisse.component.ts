@@ -302,7 +302,7 @@ export class OperationCaisseComponent implements OnInit {
   creationOperation() {
     const modalRef = this.modalService.open(OperationModalComponent, {
       centered: true,
-      size: 'lg',
+      size: 'xl',
       backdrop: 'static',
     });
 
@@ -967,6 +967,7 @@ export class OperationCaisseComponent implements OnInit {
   // Ouvre le modal des pièces jointes
   openPiecesJointesModal(op: operationModel): void {
     this.selectedOperationPJ = op;
+    console.log('Op:', op);
     this.selectedFiles = [];
     // this.loadPiecesJointes(op.idoperation);
     this.loadAllPiecesJointes(op.idoperation);
@@ -990,12 +991,8 @@ export class OperationCaisseComponent implements OnInit {
           this.hasDemande = res.data.hasDemande || false;
           this.demandeInfo = res.data.demandeInfo;
 
-          // ⭐ METTRE À JOUR LE CACHE
+          // METTRE À JOUR LE CACHE
           this.piecesCountMap.set(idoperation, this.totalPiecesCount);
-
-          console.log('PJ opération:', this.operationPiecesCount);
-          console.log('PJ demande:', this.demandePiecesCount);
-          console.log('Total PJ:', this.totalPiecesCount);
         } else {
           this.resetPiecesData();
         }

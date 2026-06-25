@@ -1,310 +1,561 @@
 <!-- ========== App Menu ========== -->
-<div class="app-menu navbar-menu">
-    <!-- LOGO -->
-    <div class="navbar-brand-box">
-        <!-- Dark Logo-->
-        <a href="#" class="logo logo-dark">                      
-            <span class="logo-sm">
-                <img src="assets/images/logocaisse.png" alt="" height="80">
-            </span>
-            <span class="logo-lg">
-                <img src="assets/images/logocaisse.png" alt="" height="80">
-            </span>
-        </a>
-        <!-- Light Logo-->
-        <a href="#" class="logo logo-light">
-            <span class="logo-sm">
-                <img src="assets/images/logocaisse.png" alt="" height="80">
-            </span>
-            <span class="logo-lg">
-                <img src="assets/images/logocaisse.png" alt="" height="80">
-            </span>
-        </a>
-        <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover" title="Toggle sidebar">
-            <i class="ri-record-circle-line"></i>
-        </button>
-    </div>
-    
-    <div id="scrollbar">
-        <div class="container-fluid">
-            <div id="two-column-menu">
+<div class="app-menu navbar-menu" [class.menu-open]="isMenuOpen">
+  <!-- LOGO -->
+  <div class="navbar-brand-box">
+    <!-- Dark Logo-->
+    <a href="#" class="logo logo-dark">
+      <span class="logo-sm">
+        <img src="assets/images/logo_caisse_bg.png" alt="" height="80" />
+      </span>
+      <span class="logo-lg">
+        <img src="assets/images/logo_caisse_bg.png" alt="" height="80" />
+      </span>
+    </a>
+    <!-- Light Logo-->
+    <a href="#" class="logo logo-light">
+      <span class="logo-sm">
+        <img src="assets/images/logocaisse.png" alt="" height="80" />
+      </span>
+      <span class="logo-lg">
+        <img src="assets/images/logocaisse.png" alt="" height="80" />
+      </span>
+    </a>
+  </div>
+
+  <div id="scrollbar">
+    <div class="container-fluid">
+      <div id="two-column-menu"></div>
+      <ul class="navbar-nav">
+        <div *ngIf="isadmin() || isuperadmin()">
+          <li class="menu-title">
+            <i class="ri-more-fill"></i>
+            <span data-key="t-pages">Administration</span>
+          </li>
+
+          <li class="nav-item">
+            <a
+              class="nav-link menu-link"
+              href="#sidebarLanding"
+              data-bs-toggle="collapse"
+              role="button"
+              aria-expanded="false"
+              aria-controls="sidebarLanding"
+            >
+              <i class="ri-account-circle-line"></i>
+              <span data-key="t-landing">Users</span>
+            </a>
+            <div class="collapse menu-dropdown" id="sidebarLanding">
+              <ul class="nav nav-sm flex-column">
+                <li class="nav-item">
+                  <a
+                    [routerLink]="root_utilisateur"
+                    class="nav-link"
+                    data-key="t-one-page"
+                  >
+                    Utilisateurs
+                  </a>
+                </li>
+              </ul>
             </div>
-            <ul class="navbar-nav">
-                <div *ngIf="isadmin() || isuperadmin()">
-                    <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Administration</span></li>
+          </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link menu-link" href="#sidebarLanding" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarLanding">
-                            <i class="ri-account-circle-line"></i> <span data-key="t-landing">Users</span>
-                        </a>
-                        <div class="collapse menu-dropdown" id="sidebarLanding">
-                            <ul class="nav nav-sm flex-column">
-                                <li class="nav-item">
-                                    <a [routerLink]="root_utilisateur" class="nav-link" data-key="t-one-page"> Utilisateurs </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-
-                    <li class="nav-item">
-                        <div *ngIf="isuperadmin()">
-                            <a [routerLink]="root_role" class="nav-link" data-key="t-role"><i class="ri-tools-line">
-                                </i><span data-key="t-landing">Rôles & Permissions</span> 
-                            </a>
-                        </div>
-                        <a [routerLink]="root_workflow" class="nav-link" data-key="t-role"><i class="ri-refresh-line">
-                            </i><span data-key="t-landing"> Worflow </span> 
-                        </a>
-                    </li>
-                </div>
-                
-                <div *ngIf="isadmin() || issuperviseur() || iscomptable() || iscaissier() || isuperadmin()">
-                    <li class="menu-title"><span data-key="t-menu">Paramétrages</span></li>
-
-                    <div *ngIf="isadmin() || issuperviseur() || isuperadmin()">
-                        <li class="nav-item">
-                            <a class="nav-link menu-link" href="#sidebarDashboards" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
-                                <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Structure</span>
-                            </a>
-                            <div class="collapse menu-dropdown" id="sidebarDashboards">
-                                <ul class="nav nav-sm flex-column">
-                                    <div *ngIf="isadmin() || isuperadmin()">
-                                        <li class="nav-item">
-                                            <a [routerLink]="root_societe" class="nav-link" data-key="t-analytics"> Societe </a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a [routerLink]="root_site" class="nav-link" data-key="t-crm"> Site </a>
-                                        </li>
-                                    </div>
-                                    <div *ngIf="issuperviseur() || isuperadmin()">
-                                        <li class="nav-item">
-                                            <a [routerLink]="root_departement" class="nav-link" data-key="t-ecommerce"> Département </a>
-                                        </li>
-                                    </div>
-                                </ul>
-                            </div>
-                        </li>
-                    </div>
-                </div>
-
-                <div *ngIf="iscomptable() || issuperviseur() || iscaissier() || isuperadmin()">
-                    <!-- end Menu donnees de base -->
-                    <li class="nav-item">
-                        <a class="nav-link menu-link" href="#sidebarDb" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarApps">
-                            <i class="ri-apps-2-line"></i> <span data-key="t-apps">Données de base</span>
-                        </a>
-                        <div class="collapse menu-dropdown" id="sidebarDb">
-                            <ul class="nav nav-sm flex-column">
-                                <li class="nav-item">
-                                    <a href="#sidebarProfile" class="nav-link" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarProfile" data-key="t-profile"> Devise
-                                    </a>
-                                    <div class="collapse menu-dropdown" id="sidebarProfile">
-                                        <ul class="nav nav-sm flex-column">
-                                            <div *ngIf="iscomptable() || issuperviseur() || isuperadmin()">
-                                                <li class="nav-item">
-                                                    <a [routerLink]="root_devise" class="nav-link" data-key="t-simple-page">Devise</a>
-                                                </li>
-                                            </div>
-                                            
-                                            <li class="nav-item">
-                                                <a [routerLink]="root_taux" class="nav-link" data-key="t-settings">Taux de devise</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </li>
-
-                                <div *ngIf="iscomptable() || issuperviseur() || isuperadmin()">
-                                    <li class="nav-item">
-                                        <a [routerLink]="root_plan_comptable" class="nav-link" data-key="t-chat"> Plan comptable </a>
-                                    </li>
-                                </div>
-                                
-                                <li class="nav-item">
-                                    <a [routerLink]="root_nature_operation" class="nav-link" data-key="t-calendar"> Nature opération </a>
-                                </li>
-
-                                <div *ngIf="iscomptable() || issuperviseur() || isuperadmin()">
-                                    <li class="nav-item">
-                                        <a [routerLink]="root_centre_analytique" class="nav-link" data-key="t-settings"> Centre analytique </a>
-                                    </li>
-                                </div>
-                                
-                                <li class="nav-item">
-                                    <a [routerLink]="root_tiers" class="nav-link" data-key="t-chat"> Tiers </a>
-                                </li>
-
-                                <div *ngIf="iscomptable() || issuperviseur() || isuperadmin()">
-                                    <li class="nav-item">
-                                        <a [routerLink]="root_aff_dept_nature" class="nav-link" data-key="t-chat"> Affectation Département - Nature </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a [routerLink]="root_aff_nature_centre" class="nav-link" data-key="t-chat"> Affectation Nature - CentreAnalytique </a>
-                                    </li>
-                                </div>
-                            </ul>
-                        </div>
-                    </li>
-                </div>
-
-                <div *ngIf="iscomptable() || issuperviseur() || isuperadmin()">
-                    <!-- end Caisse Journal -->
-                    <li class="nav-item">
-                        <a class="nav-link menu-link" href="#sidebarApps" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarApps">
-                            <i class="ri-stack-line"></i> <span data-key="t-apps">Caisse et Journal</span>
-                        </a>
-                        <div class="collapse menu-dropdown" id="sidebarApps">
-                            <ul class="nav nav-sm flex-column">
-                                <li class="nav-item">
-                                    <a [routerLink]="root_journal" class="nav-link" data-key="t-calendar"> Journal </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a [routerLink]="root_caisse" class="nav-link" data-key="t-chat"> Caisse </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a [routerLink]="root_affectation_caissier" class="nav-link" data-key="t-calendar">Affectation caissier </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-                </div>
-
-                <div *ngIf="iscomptable() || issuperviseur() || isuperadmin()">
-                    <li class="nav-item">
-                        <a class="nav-link menu-link" href="#sidebarBudget" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
-                            <i class="ri-honour-line"></i>
-                            <span data-key="t-dashboards">Gestion du budget</span>
-                        </a>
-                        <div class="collapse menu-dropdown" id="sidebarBudget">
-                            <ul class="nav nav-sm flex-column">
-                                <li class="nav-item">
-                                    <a [routerLink]="root_budget" class="nav-link" data-key="t-analytics">Budget</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a [routerLink]="root_ligne_budget" class="nav-link" data-key="t-crm">Lignes du budget</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-                </div>
-
-                <div *ngIf="issuperviseur() || iscomptable() || iscaissier() || isdemandeur() || isuperadmin()">
-                    <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-menu">Opérations</span></li>
-
-                    <!-- end Générales -->
-                    <li class="nav-item">
-                        <a class="nav-link menu-link" href="#sidebarOPS" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarOPS">
-                            <i class="ri-stack-line"></i> <span data-key="t-apps">Générales</span>
-                        </a>
-                        <div class="collapse menu-dropdown" id="sidebarOPS">
-                            <ul class="nav nav-sm flex-column">
-                                <li class="nav-item">
-                                    <a [routerLink]="root_demande_decaissement" class="nav-link" data-key="t-demande">Demande de décaissement</a>
-                                </li>
-
-                                <div *ngIf="iscaissier() || issuperviseur() || isuperadmin()">
-                                    <li class="nav-item">
-                                        <a [routerLink]="root_operation" class="nav-link" data-key="t-caisse">Opération caisse </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a [routerLink]="root_operationjustifiee" class="nav-link" data-key="t-operation">Justificatif des opérations</a>
-                                    </li>
-                                </div>
-                            </ul>
-                        </div>
-                    </li>
-                </div>
-
-                <div *ngIf="issuperviseur() || iscomptable() || iscaissier() || isuperadmin()">
-                    <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Consultations</span></li>
-
-                    <li class="nav-item">
-                        <a class="nav-link menu-link" href="#sidebarConsultation" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
-                            <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Consultations</span>
-                        </a>
-                        <div class="collapse menu-dropdown" id="sidebarConsultation">
-                            <ul class="nav nav-sm flex-column">
-                                <li class="nav-item">
-                                    <a [routerLink]="root_detail_demande" class="nav-link" data-key="t-operationperiode"> Detail des demandes </a>
-                                </li>
-
-                                <li class="nav-item">
-                                    <a [routerLink]="root_operationperiode" class="nav-link" data-key="t-operationperiode"> Journal de caisse </a>
-                                </li>
-
-                                <div *ngIf="issuperviseur() || iscaissier() || isuperadmin()">
-                                    <li class="nav-item">
-                                        <a [routerLink]="root_operationdetail" class="nav-link" data-key="t-operationdetail"> Opération detail de caisse </a>
-                                    </li>
-                                </div>
-
-                                <div *ngIf="issuperviseur() || isuperadmin()">
-                                    <li class="nav-item">
-                                        <a [routerLink]="root_suivibudget" class="nav-link" data-key="t-budget"> Evolution budgetaire</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a [routerLink]="root_suivibudgetfiltre" class="nav-link" data-key="t-budgets"> Prévision budgetaire </a>
-                                    </li>
-                                </div>
-                                
-                                <div *ngIf="issuperviseur() || isuperadmin() || iscaissier()">
-                                    <li class="nav-item">
-                                        <a [routerLink]="root_decaissementjustifiee" class="nav-link" data-key="t-decaissement"> Décaissement et justificatif </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a [routerLink]="root_nature_operation_departement" class="nav-link" data-key="t-budgets">
-                                        Statistiques
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a [routerLink]="root_cloture_caisse" class="nav-link" data-key="t-cloture">
-                                            Etat de clôture caisse
-                                        </a>
-                                    </li>
-
-                                    <!-- <li class="nav-item">
-                                        <a href="#depenses" class="nav-link" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarProfile" data-key="t-profile"> Dépenses
-                                        </a>
-                                        <div class="collapse menu-dropdown" id="depenses">
-                                            <ul class="nav nav-sm flex-column">
-                                                <div *ngIf="iscaissier() || iscomptable() || issuperviseur() || isuperadmin()">
-                                                    <li class="nav-item">
-                                                        <a [routerLink]="root_devise" class="nav-link" data-key="t-simple-page">Dépenses par département</a>
-                                                    </li>
-                                                    <li class="nav-item">
-                                                        <a [routerLink]="root_devise" class="nav-link" data-key="t-simple-page">Dépenses par nature</a>
-                                                    </li>
-                                                    <li class="nav-item">
-                                                        <a [routerLink]="root_devise" class="nav-link" data-key="t-simple-page">Dépenses par centre analytique</a>
-                                                    </li>
-                                                </div>
-                                                
-                                            </ul>
-                                        </div>
-                                    </li> -->
-                                </div>
-                            </ul>
-                        </div>
-                    </li>
-                </div>
-
-                <div *ngIf="issuperviseur() || isuperadmin() || iscaissier() || iscomptable()">
-                    <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Comptabilisation</span></li>
-
-                    <li class="nav-item">
-                        <a [routerLink]="root_comptabilisation" class="nav-link" data-key="t-comptabilisation">comptabilisation</a>
-                        
-                        <a class="nav-link" data-key="t-comptabilisation"></a>
-                        <a class="nav-link" data-key="t-comptabilisation"></a>
-                    </li>
-                </div>
-            </ul>
+          <li class="nav-item">
+            <div *ngIf="isuperadmin()">
+              <a [routerLink]="root_role" class="nav-link" data-key="t-role"
+                ><i class="ri-tools-line"> </i
+                ><span data-key="t-landing">Rôles & Permissions</span>
+              </a>
+            </div>
+            <a [routerLink]="root_workflow" class="nav-link" data-key="t-role"
+              ><i class="ri-refresh-line"> </i
+              ><span data-key="t-landing"> Worflow </span>
+            </a>
+          </li>
         </div>
+
+        <div
+          *ngIf="
+            isadmin() ||
+            issuperviseur() ||
+            iscomptable() ||
+            iscaissier() ||
+            isuperadmin()
+          "
+        >
+          <li class="menu-title">
+            <span data-key="t-menu">Paramétrages</span>
+          </li>
+
+          <div *ngIf="isadmin() || issuperviseur() || isuperadmin()">
+            <li class="nav-item">
+              <a
+                class="nav-link menu-link"
+                href="#sidebarDashboards"
+                data-bs-toggle="collapse"
+                role="button"
+                aria-expanded="false"
+                aria-controls="sidebarDashboards"
+              >
+                <i class="ri-dashboard-2-line"></i>
+                <span data-key="t-dashboards">Structure</span>
+              </a>
+              <div class="collapse menu-dropdown" id="sidebarDashboards">
+                <ul class="nav nav-sm flex-column">
+                  <div *ngIf="isadmin() || isuperadmin()">
+                    <li class="nav-item">
+                      <a
+                        [routerLink]="root_societe"
+                        class="nav-link"
+                        data-key="t-analytics"
+                      >
+                        Societe
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a
+                        [routerLink]="root_site"
+                        class="nav-link"
+                        data-key="t-crm"
+                      >
+                        Site
+                      </a>
+                    </li>
+                  </div>
+                  <div *ngIf="issuperviseur() || isuperadmin()">
+                    <li class="nav-item">
+                      <a
+                        [routerLink]="root_departement"
+                        class="nav-link"
+                        data-key="t-ecommerce"
+                      >
+                        Département
+                      </a>
+                    </li>
+                  </div>
+                </ul>
+              </div>
+            </li>
+          </div>
+        </div>
+
+        <div
+          *ngIf="
+            iscomptable() || issuperviseur() || iscaissier() || isuperadmin()
+          "
+        >
+          <!-- end Menu donnees de base -->
+          <li class="nav-item">
+            <a
+              class="nav-link menu-link"
+              href="#sidebarDb"
+              data-bs-toggle="collapse"
+              role="button"
+              aria-expanded="false"
+              aria-controls="sidebarApps"
+            >
+              <i class="ri-apps-2-line"></i>
+              <span data-key="t-apps">Données de base</span>
+            </a>
+            <div class="collapse menu-dropdown" id="sidebarDb">
+              <ul class="nav nav-sm flex-column">
+                <li class="nav-item">
+                  <a
+                    href="#sidebarProfile"
+                    class="nav-link"
+                    data-bs-toggle="collapse"
+                    role="button"
+                    aria-expanded="false"
+                    aria-controls="sidebarProfile"
+                    data-key="t-profile"
+                  >
+                    Devise
+                  </a>
+                  <div class="collapse menu-dropdown" id="sidebarProfile">
+                    <ul class="nav nav-sm flex-column">
+                      <div
+                        *ngIf="
+                          iscomptable() || issuperviseur() || isuperadmin()
+                        "
+                      >
+                        <li class="nav-item">
+                          <a
+                            [routerLink]="root_devise"
+                            class="nav-link"
+                            data-key="t-simple-page"
+                            >Devise</a
+                          >
+                        </li>
+                      </div>
+
+                      <li class="nav-item">
+                        <a
+                          [routerLink]="root_taux"
+                          class="nav-link"
+                          data-key="t-settings"
+                          >Taux de devise</a
+                        >
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+
+                <div *ngIf="iscomptable() || issuperviseur() || isuperadmin()">
+                  <li class="nav-item">
+                    <a
+                      [routerLink]="root_plan_comptable"
+                      class="nav-link"
+                      data-key="t-chat"
+                    >
+                      Plan comptable
+                    </a>
+                  </li>
+                </div>
+
+                <li class="nav-item">
+                  <a
+                    [routerLink]="root_nature_operation"
+                    class="nav-link"
+                    data-key="t-calendar"
+                  >
+                    Nature opération
+                  </a>
+                </li>
+
+                <div *ngIf="iscomptable() || issuperviseur() || isuperadmin()">
+                  <li class="nav-item">
+                    <a
+                      [routerLink]="root_centre_analytique"
+                      class="nav-link"
+                      data-key="t-settings"
+                    >
+                      Centre analytique
+                    </a>
+                  </li>
+                </div>
+
+                <li class="nav-item">
+                  <a
+                    [routerLink]="root_tiers"
+                    class="nav-link"
+                    data-key="t-chat"
+                  >
+                    Tiers
+                  </a>
+                </li>
+
+                <div *ngIf="iscomptable() || issuperviseur() || isuperadmin()">
+                  <li class="nav-item">
+                    <a
+                      [routerLink]="root_aff_dept_nature"
+                      class="nav-link"
+                      data-key="t-chat"
+                    >
+                      Affectation Département - Nature
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a
+                      [routerLink]="root_aff_nature_centre"
+                      class="nav-link"
+                      data-key="t-chat"
+                    >
+                      Affectation Nature - CentreAnalytique
+                    </a>
+                  </li>
+                </div>
+              </ul>
+            </div>
+          </li>
+        </div>
+
+        <div *ngIf="iscomptable() || issuperviseur() || isuperadmin()">
+          <!-- end Caisse Journal -->
+          <li class="nav-item">
+            <a
+              class="nav-link menu-link"
+              href="#sidebarApps"
+              data-bs-toggle="collapse"
+              role="button"
+              aria-expanded="false"
+              aria-controls="sidebarApps"
+            >
+              <i class="ri-stack-line"></i>
+              <span data-key="t-apps">Caisse et Journal</span>
+            </a>
+            <div class="collapse menu-dropdown" id="sidebarApps">
+              <ul class="nav nav-sm flex-column">
+                <li class="nav-item">
+                  <a
+                    [routerLink]="root_journal"
+                    class="nav-link"
+                    data-key="t-calendar"
+                  >
+                    Journal
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a
+                    [routerLink]="root_caisse"
+                    class="nav-link"
+                    data-key="t-chat"
+                  >
+                    Caisse
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a
+                    [routerLink]="root_affectation_caissier"
+                    class="nav-link"
+                    data-key="t-calendar"
+                    >Affectation caissier
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
+        </div>
+
+        <div *ngIf="iscomptable() || issuperviseur() || isuperadmin()">
+          <li class="nav-item">
+            <a
+              class="nav-link menu-link"
+              href="#sidebarBudget"
+              data-bs-toggle="collapse"
+              role="button"
+              aria-expanded="false"
+              aria-controls="sidebarDashboards"
+            >
+              <i class="ri-honour-line"></i>
+              <span data-key="t-dashboards">Gestion du budget</span>
+            </a>
+            <div class="collapse menu-dropdown" id="sidebarBudget">
+              <ul class="nav nav-sm flex-column">
+                <li class="nav-item">
+                  <a
+                    [routerLink]="root_budget"
+                    class="nav-link"
+                    data-key="t-analytics"
+                    >Budget</a
+                  >
+                </li>
+                <li class="nav-item">
+                  <a
+                    [routerLink]="root_ligne_budget"
+                    class="nav-link"
+                    data-key="t-crm"
+                    >Lignes du budget</a
+                  >
+                </li>
+              </ul>
+            </div>
+          </li>
+        </div>
+
+        <div
+          *ngIf="
+            issuperviseur() ||
+            iscomptable() ||
+            iscaissier() ||
+            isdemandeur() ||
+            isuperadmin()
+          "
+        >
+          <li class="menu-title">
+            <i class="ri-more-fill"></i>
+            <span data-key="t-menu">Opérations</span>
+          </li>
+
+          <!-- end Générales -->
+          <li class="nav-item">
+            <a
+              class="nav-link menu-link"
+              href="#sidebarOPS"
+              data-bs-toggle="collapse"
+              role="button"
+              aria-expanded="false"
+              aria-controls="sidebarOPS"
+            >
+              <i class="ri-stack-line"></i>
+              <span data-key="t-apps">Générales</span>
+            </a>
+            <div class="collapse menu-dropdown" id="sidebarOPS">
+              <ul class="nav nav-sm flex-column">
+                <li class="nav-item">
+                  <a
+                    [routerLink]="root_demande_decaissement"
+                    class="nav-link"
+                    data-key="t-demande"
+                    >Demande de décaissement</a
+                  >
+                </li>
+
+                <div *ngIf="iscaissier() || issuperviseur() || isuperadmin()">
+                  <li class="nav-item">
+                    <a
+                      [routerLink]="root_operation"
+                      class="nav-link"
+                      data-key="t-caisse"
+                      >Opération caisse
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a
+                      [routerLink]="root_operationjustifiee"
+                      class="nav-link"
+                      data-key="t-operation"
+                      >Justificatif des opérations</a
+                    >
+                  </li>
+                </div>
+              </ul>
+            </div>
+          </li>
+        </div>
+
+        <div
+          *ngIf="
+            issuperviseur() || iscomptable() || iscaissier() || isuperadmin()
+          "
+        >
+          <li class="menu-title">
+            <i class="ri-more-fill"></i>
+            <span data-key="t-pages">Consultations</span>
+          </li>
+
+          <li class="nav-item">
+            <a
+              class="nav-link menu-link"
+              href="#sidebarConsultation"
+              data-bs-toggle="collapse"
+              role="button"
+              aria-expanded="false"
+              aria-controls="sidebarDashboards"
+            >
+              <i class="ri-dashboard-2-line"></i>
+              <span data-key="t-dashboards">consultation</span>
+            </a>
+            <div class="collapse menu-dropdown" id="sidebarConsultation">
+              <ul class="nav nav-sm flex-column">
+                <li class="nav-item">
+                  <a
+                    [routerLink]="root_detail_demande"
+                    class="nav-link"
+                    data-key="t-operationperiode"
+                  >
+                    Detail des demandes
+                  </a>
+                </li>
+
+                <li class="nav-item">
+                  <a
+                    [routerLink]="root_operationperiode"
+                    class="nav-link"
+                    data-key="t-operationperiode"
+                  >
+                    Journal de paiement
+                  </a>
+                </li>
+
+                <div *ngIf="issuperviseur() || iscaissier() || isuperadmin()">
+                  <li class="nav-item">
+                    <a
+                      [routerLink]="root_operationdetail"
+                      class="nav-link"
+                      data-key="t-operationdetail"
+                    >
+                      Opération detail de caisse
+                    </a>
+                  </li>
+                </div>
+
+                <div *ngIf="issuperviseur() || isuperadmin()">
+                  <li class="nav-item">
+                    <a
+                      [routerLink]="root_suivibudget"
+                      class="nav-link"
+                      data-key="t-budget"
+                    >
+                      Evolution budgetaire</a
+                    >
+                  </li>
+                  <li class="nav-item">
+                    <a
+                      [routerLink]="root_suivibudgetfiltre"
+                      class="nav-link"
+                      data-key="t-budgets"
+                    >
+                      Prévision budgetaire
+                    </a>
+                  </li>
+                </div>
+
+                <div *ngIf="issuperviseur() || isuperadmin() || iscaissier()">
+                  <li class="nav-item">
+                    <a
+                      [routerLink]="root_decaissementjustifiee"
+                      class="nav-link"
+                      data-key="t-decaissement"
+                    >
+                      Décaissement et justificatif
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a
+                      [routerLink]="root_nature_operation_departement"
+                      class="nav-link"
+                      data-key="t-budgets"
+                    >
+                      Statistiques
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a
+                      [routerLink]="root_cloture_caisse"
+                      class="nav-link"
+                      data-key="t-cloture"
+                    >
+                      Etat de clôture caisse
+                    </a>
+                  </li>
+                </div>
+              </ul>
+            </div>
+          </li>
+        </div>
+
+        <div
+          *ngIf="
+            issuperviseur() || isuperadmin() || iscaissier() || iscomptable()
+          "
+        >
+          <li class="menu-title">
+            <i class="ri-more-fill"></i>
+            <span data-key="t-pages">Comptabilisation</span>
+          </li>
+
+          <li class="nav-item">
+            <a
+              [routerLink]="root_comptabilisation"
+              class="nav-link"
+              data-key="t-comptabilisation"
+              >comptabilisation</a
+            >
+
+            <a class="nav-link" data-key="t-comptabilisation"></a>
+            <a class="nav-link" data-key="t-comptabilisation"></a>
+          </li>
+        </div>
+      </ul>
     </div>
+  </div>
 
-    <div class="sidebar-background"></div>
-    <!-- Left Sidebar End -->
-
+  <div class="sidebar-background"></div>
+  <!-- Left Sidebar End -->
 </div>
 
 <!-- Vertical Overlay-->
-<div class="vertical-overlay"></div>
+<div
+  class="vertical-overlay"
+  [class.show]="isMenuOpen"
+  (click)="closeMenu()"
+></div>

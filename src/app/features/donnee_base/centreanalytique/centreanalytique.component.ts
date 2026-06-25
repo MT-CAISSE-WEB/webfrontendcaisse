@@ -1,13 +1,20 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { centreanalytiqueModel } from '../models/centreanalytique.model';
 import { CentreAnalytiqueService } from '../services/centreanalytique.service';
 import { CommonModule } from '@angular/common';
-import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
+import {
+  MESSAGE_CHAMPS_OBLIGATOIRE,
+  MESSAGE_SUPPRESSION_DESCRIPTION,
+  TITLE_DELETE,
+} from '../../../_core/constantes/messages.contantes';
 import { Router } from '@angular/router';
-
-import { DataTablesModule } from 'angular-datatables';
-import { Subject } from 'rxjs';
 
 import { ToastrService } from 'ngx-toastr';
 
@@ -19,55 +26,36 @@ declare var $: any;
 
 @Component({
   selector: 'app-centreanalytique',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, DataTablesModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './centreanalytique.component.html',
-  styleUrl: './centreanalytique.component.css'
+  styleUrls: ['./centreanalytique.component.css'],
 })
-
-export class CentreanalytiqueComponent implements OnInit{
-  title = "Centres analytiques";
-  params : any = {};
-  breadCrumbs : any = {};
+export class CentreanalytiqueComponent implements OnInit {
+  title = 'Centres analytiques';
+  breadCrumbs: any = {};
   fb: FormBuilder = new FormBuilder();
-  centres : centreanalytiqueModel[] = [];
-  centre : centreanalytiqueModel = new centreanalytiqueModel();
-  msgErros : string = "";
+  centres: centreanalytiqueModel[] = [];
+  centre: centreanalytiqueModel = new centreanalytiqueModel();
+  msgErros: string = '';
   loading: Boolean = false;
-  centreanalytiqueForm : FormGroup = this.fb.group({});
+  centreanalytiqueForm: FormGroup = this.fb.group({});
+  ImportForm: FormGroup = this.fb.group({});
 
-
-  //Faire le check selection **********
-  objectsSelected : centreanalytiqueModel[] = [];
-  selectedItems : any[] = [];
-  // Détermine si toutes les lignes sont selectionnées
-  checkAllRow : any;
-  error : string = "";
+  //Faire le check selection
+  objectsSelected: centreanalytiqueModel[] = [];
+  selectedItems: any[] = [];
+  checkAllRow: any;
+  error: string = '';
 
   //Changement titre modal
-  actionModal: string = "create";
+  actionModal: string = 'create';
 
   //Message suppression
-  msgSup: string = "";
-  titleMsg: string ="";
+  msgSup: string = '';
+  titleMsg: string = '';
 
-  //Element à supprimer 
+  //Element à supprimer
   deletecentre: any = null;
-
-  // dtOptions: DataTables.Settings = {};
-  dtOptions: any = {};
-
-  dtTrigger: Subject<any> = new Subject<any>(); 
-
-
-
-/**
- * Constructor
- * @param centreanalytiqueservice - Service du centre analytique
- * @param router - Router pour la navigation
- */
-
-
-  ImportForm : FormGroup = this.fb.group({})
 
   // Ajout pour fonctions de recherche et pagination
   filteredData: any[] = [];
@@ -77,22 +65,33 @@ export class CentreanalytiqueComponent implements OnInit{
   pageSize: number = 15;
   totalPages: number = 1;
 
+  //  Variables pour l'import
+  selectedFile: File | null = null;
+  fileContent: any[] = [];
+  fileHeaders: string[] = [];
+  uploadProgress: number = 0;
+  uploadSpeed: string = '';
+  successMessage: string = '';
+  importErrors: string[] = [];
+  isDragover: boolean = false;
 
-  constructor(private centreanalytiqueservice: CentreAnalytiqueService,
-              private router: Router
-            , private toastr : ToastrService){}
+  constructor(
+    private centreanalytiqueservice: CentreAnalytiqueService,
+    private router: Router,
+    private toastr: ToastrService,
+    private cdr: ChangeDetectorRef, //  Injecter ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     //Afficher tous les centres
     this.getAllcentres();
     //Initialisation du formulaire
     this.initForm();
-    this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("ce centre analytique");
+    this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION('ce centre analytique');
     this.titleMsg = TITLE_DELETE;
-
-    //Initialiser le formulaire du fichier d'import
+    //  Initialisation du formulaire d'import
     this.initImportForm();
-}
+  }
 
   getAllcentres() {
     this.centreanalytiqueservice.getAll().subscribe({
@@ -102,319 +101,413 @@ export class CentreanalytiqueComponent implements OnInit{
           this.filteredData = [...this.centres];
           this.updatePagination();
         }
-      }
+      },
     });
   }
 
-  get user(){
+  get user() {
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
   //Création du formulaire
-  initForm(): void{
+  initForm(): void {
     this.centreanalytiqueForm = this.fb.group({
-      codecentreanalytique : ["", [Validators.required]],
-      libelle : ["", [Validators.required]],
-      idsociete : [this.user.idsociete, [Validators.required]],
-      actif : [true],
-      createdby : [this.user.prenom + " " + this.user.nom],
-      updatedby : [this.user.prenom + " " + this.user.nom]
-    })
+      codecentreanalytique: ['', [Validators.required]],
+      libelle: ['', [Validators.required]],
+      idsociete: [this.user.idsociete, [Validators.required]],
+      actif: [true],
+      createdby: [this.user.prenom + ' ' + this.user.nom],
+      updatedby: [this.user.prenom + ' ' + this.user.nom],
+    });
+  }
+
+  //  Création du formulaire d'importation
+  initImportForm(): void {
+    this.ImportForm = this.fb.group({
+      file: [null, [Validators.required]],
+    });
   }
 
   get form() {
     return this.centreanalytiqueForm.controls;
   }
 
-  dispatchcentres(_object: centreanalytiqueModel){
+  dispatchcentres(_object: centreanalytiqueModel) {
     const status = _object.actif === 1;
     this.centreanalytiqueForm.patchValue({
-      codecentreanalytique : _object.codecentreanalytique,
-      libelle : _object.libelle,
+      codecentreanalytique: _object.codecentreanalytique,
+      libelle: _object.libelle,
       idsociete: _object.idsociete,
-      actif : status
-    })
+      actif: status,
+    });
   }
 
   //validation required
   isValidField(label: string): string {
-    let status: string = "";
-    this.form[label].valid && this.form[label].touched ? status = 'is-valid' :
-      this.form[label].invalid && this.form[label].touched ? status = 'is-invalid' : status = '';
+    let status: string = '';
+    this.form[label].valid && this.form[label].touched
+      ? (status = 'is-valid')
+      : this.form[label].invalid && this.form[label].touched
+        ? (status = 'is-invalid')
+        : (status = '');
     return status;
   }
 
-  //vérifie si _id est inclus dans un tableau d'IDs stocké
   isChecked(id: string): boolean {
-    return this.selectedItems.some(x => x.idnature === id);
+    return this.selectedItems.some((x) => x.idcentreanalytique === id);
   }
 
   handleSelectOne(item: any, event: Event): void {
     const checked = (event.target as HTMLInputElement).checked;
 
     if (checked) {
-      if (!this.selectedItems.some(x => x.idnature === item.idnature)) {
+      if (
+        !this.selectedItems.some(
+          (x) => x.idcentreanalytique === item.idcentreanalytique,
+        )
+      ) {
         this.selectedItems.push(item);
       }
     } else {
       this.selectedItems = this.selectedItems.filter(
-        x => x.idnature !== item.idnature
+        (x) => x.idcentreanalytique !== item.idcentreanalytique,
       );
     }
   }
 
-  //Sélection/ Désélection de tous les éléments
   handleSelectAll(event: Event): void {
     const checked = (event.target as HTMLInputElement).checked;
     this.checkAllRow = checked;
 
     if (checked) {
-      this.objectsSelected = [...this.paginatedData]; // toutes les données filtrées
+      this.objectsSelected = [...this.paginatedData];
     } else {
       this.objectsSelected = [];
     }
   }
 
-
   //Soumission du formulaire
-  onSubmit(){
-    /** Check formulaire */
+  onSubmit() {
     this.msgErros = '';
     const controls = this.centreanalytiqueForm.controls;
     if (this.centreanalytiqueForm.invalid) {
-      Object.keys(controls).forEach(controlName => controls[controlName].markAsTouched());
+      Object.keys(controls).forEach((controlName) =>
+        controls[controlName].markAsTouched(),
+      );
       this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
       return;
     }
 
-    /** 2. prepare data */
     const formValue = this.centreanalytiqueForm.value;
 
     const _centres: centreanalytiqueModel = {
       ...this.centre,
       ...formValue,
-      actif: formValue.actif ? 1 : 0  
+      actif: formValue.actif ? 1 : 0,
     };
 
-    /** 3. choices action */
-    if(this.actionModal == "create")this.create(_centres);
+    if (this.actionModal == 'create') this.create(_centres);
     else this.update(_centres);
-    // if (!_centres.idcentreanalytiques) this.create(_centres);
-    // else this.update(_centres);
   }
 
-  //Enregistrement de données
   create(_centres: centreanalytiqueModel) {
-    const {idcentreanalytique, ...dataToSend} = _centres;
+    const { idcentreanalytique, ...dataToSend } = _centres;
     this.loading = true;
     this.centreanalytiqueservice.create(dataToSend).subscribe({
       next: (res) => {
         if (res.success) {
           this.closeModal('showModal');
           this.getAllcentres();
-          this.toastr.success("Fiche créée");
+          this.toastr.success('Fiche créée');
         } else {
-          this.error = "Erreur de création";
+          this.error = 'Erreur de création';
           this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
-        this.error = "Echec de création";
+        this.error = 'Echec de création';
         this.loading = false;
-        this.toastr.error(this.error);
-      }
-    })
+        this.toastr.error(err);
+      },
+    });
   }
 
-  //Modification de données
-  update(_centres: centreanalytiqueModel){
+  update(_centres: centreanalytiqueModel) {
     this.centreanalytiqueservice.update(_centres).subscribe({
       next: (res) => {
         if (res.success) {
           this.closeModal('showModal');
           this.getAllcentres();
-          this.toastr.success("Fiche modifiée");
+          this.toastr.success('Fiche modifiée');
         } else {
-          this.error = "Erreur de modification";
+          this.error = 'Erreur de modification';
           this.toastr.error(this.error);
         }
         this.loading = false;
       },
       error: (err) => {
-        this.error = "Echec de modification";
+        this.error = 'Echec de modification';
         this.loading = false;
-        this.toastr.error(this.error);
-      }
-    })
+        this.toastr.error(err);
+      },
+    });
   }
 
-  closeModal(modal: string){
+  closeModal(modal: string) {
     const modalEl = document.getElementById(modal);
-    modalEl?.classList.remove('show');
-    modalEl?.setAttribute('aria-hidden', 'true');
-    (document.querySelector('.modal-backdrop') as HTMLElement)?.remove();
+    if (modalEl) {
+      modalEl.classList.remove('show');
+      modalEl.setAttribute('aria-hidden', 'true');
+      modalEl.style.display = 'none';
+    }
+    document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
   }
 
-  modalCreate(){
-    this.actionModal = "create";
+  modalCreate() {
+    this.actionModal = 'create';
     this.initForm();
   }
 
-  modalUpdate(_object: centreanalytiqueModel){
+  modalUpdate(_object: centreanalytiqueModel) {
     this.centre = _object;
-    this.actionModal = "update";
+    this.actionModal = 'update';
     this.centreanalytiqueForm.reset();
     this.dispatchcentres(_object);
   }
 
-  modalview(_object: centreanalytiqueModel){
+  modalview(_object: centreanalytiqueModel) {
     this.centre = _object;
-    this.actionModal = "view";
+    this.actionModal = 'view';
     this.centreanalytiqueForm.reset();
     this.dispatchcentres(_object);
   }
 
-  modalDelete(item: centreanalytiqueModel){
+  modalDelete(item: centreanalytiqueModel) {
     this.deletecentre = item;
   }
 
-  deleteConfirmed(){
-    if(!this.deletecentre) return ;
-    this.centreanalytiqueservice.delete(this.deletecentre.idcentreanalytique).subscribe({
-      next: (res) => {
-        if (res.success) {
-          this.closeModal('delete');
-          this.getAllcentres();
-          this.toastr.success('Fiche supprimée');
-        } else {
-          this.error = "Erreur de Suppression";
-          this.toastr.error(this.error);
-        }
-        this.loading = false;
-      },
-      error: (err) => {
-        this.error = "Suppression échec";
-        this.loading = false;
-        this.toastr.error(this.error);
-
-      }
-    })
+  deleteConfirmed() {
+    if (!this.deletecentre) return;
+    this.centreanalytiqueservice
+      .delete(this.deletecentre.idcentreanalytique)
+      .subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.closeModal('delete');
+            this.getAllcentres();
+            this.toastr.success('Fiche supprimée');
+          } else {
+            this.error = 'Erreur de Suppression';
+            this.toastr.error(this.error);
+          }
+          this.loading = false;
+        },
+        error: (err) => {
+          this.error = 'Suppression échec';
+          this.loading = false;
+          this.toastr.error(err);
+        },
+      });
   }
 
-  deleteMultiple(){
+  deleteMultiple() {
     for (let i = 0; i < this.objectsSelected.length; i++) {
-      this.centreanalytiqueservice.delete(this.objectsSelected[i].idcentreanalytique).subscribe({})
+      this.centreanalytiqueservice
+        .delete(this.objectsSelected[i].idcentreanalytique)
+        .subscribe({});
     }
     this.toastr.success('Fiches supprimées');
     this.getAllcentres();
   }
 
-  exportToExcel(): void {
-    const element = document.getElementById('dataTable');
-  
-    if (!element) {
-      console.error('Table non trouvée');
-      return;
-    }
-  
-    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
-    const workbook: XLSX.WorkBook = {
-      Sheets: { 'Evolution Budget': worksheet },
-      SheetNames: ['Evolution Budget']
-    };
-  
-    const excelBuffer: any = XLSX.write(workbook, {
-      bookType: 'xlsx',
-      type: 'array'
-    });
-  
-    const data: Blob = new Blob(
-      [excelBuffer],
-      { type: 'application/octet-stream' }
-    );
-  
-    saveAs(data, `Evolution_budget_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.xlsx`);
-  }
-      
-  exportToCSV(): void {
-    const element = document.getElementById('dataTable');
-  
-    if (!element) {
-      console.error('Table non trouvée');
-      return;
-    }
-  
-    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
-    
-    // forcer le séparateur ;
-    const csv = XLSX.utils.sheet_to_csv(worksheet, {
-      FS: ';'
-    });
-  
-    const blob = new Blob([csv], {
-      type: 'text/csv;charset=utf-8;'
-    });
-
-    saveAs(blob, `centres_analytiques_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.csv`);
-    this.toastr.success('Fiches exportées avec succès');
-  }
-  
-  //Importation
-  importCentre(event: any){
+  //  Méthodes pour l'import avec prévisualisation
+  onFileSelected(event: any): void {
     const file = event.target.files[0];
-
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
+    if (file) {
+      this.selectedFile = file;
+      this.previewFile(file);
       this.ImportForm.patchValue({ file });
       this.ImportForm.get('file')?.updateValueAndValidity();
+      this.cdr.detectChanges();
     }
   }
 
-  //Création du formulaire d'importation
-  initImportForm(): void{
-    this.ImportForm = this.fb.group({
-      file : [null, [Validators.required]],
-    })
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragover = true;
   }
 
-  submitImportFile(input: HTMLInputElement): void {
-    if (!input.files || input.files.length === 0) {
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragover = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.isDragover = false;
+    const file = event.dataTransfer?.files[0];
+    if (file) {
+      this.selectedFile = file;
+      this.previewFile(file);
+      this.ImportForm.patchValue({ file });
+      this.ImportForm.get('file')?.updateValueAndValidity();
+      this.cdr.detectChanges();
+    }
+  }
+
+  removeFile(event: Event): void {
+    event.stopPropagation();
+    this.selectedFile = null;
+    this.fileContent = [];
+    this.fileHeaders = [];
+    this.uploadProgress = 0;
+    this.successMessage = '';
+    this.importErrors = [];
+    this.ImportForm.reset();
+
+    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    this.cdr.detectChanges();
+  }
+
+  previewFile(file: File): void {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      const lines = content.split('\n').filter((line) => line.trim());
+      if (lines.length > 0) {
+        const firstLine = lines[0];
+        let delimiter = '\t';
+        if (firstLine.includes(';')) delimiter = ';';
+        else if (firstLine.includes(',')) delimiter = ',';
+        else if (firstLine.includes('\t')) delimiter = '\t';
+
+        this.fileHeaders = lines[0].split(delimiter).map((h) => h.trim());
+        this.fileContent = lines
+          .slice(1)
+          .filter((line) => line.trim())
+          .map((line) => line.split(delimiter).map((c) => c.trim()));
+        this.cdr.detectChanges();
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  getFileIconClass(filename: string): string {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    switch (ext) {
+      case 'csv':
+        return 'ri-file-excel-2-line';
+      case 'xls':
+      case 'xlsx':
+        return 'ri-file-excel-2-line';
+      case 'pdf':
+        return 'ri-file-pdf-line';
+      default:
+        return 'ri-file-text-line';
+    }
+  }
+
+  getFileExtension(filename: string): string {
+    return filename.split('.').pop()?.toUpperCase() || '';
+  }
+
+  formatFileSize(size: number): string {
+    if (size < 1024) return size + ' B';
+    if (size < 1024 * 1024) return (size / 1024).toFixed(1) + ' KB';
+    return (size / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  getProgressStatus(): string {
+    if (this.uploadProgress < 30) return 'Lecture du fichier...';
+    if (this.uploadProgress < 60) return 'Traitement des données...';
+    if (this.uploadProgress < 90) return 'Validation des données...';
+    return 'Finalisation...';
+  }
+
+  //  Méthode d'import améliorée avec FormData et progression
+  submitImportFile(): void {
+    if (!this.selectedFile) {
+      this.toastr.warning('Veuillez sélectionner un fichier');
       return;
     }
-    const file = input.files[0];
-    const info = {
-      idsociete : this.user.idsociete,
-      createdby : this.user.prenom + " " + this.user.nom
-    }
 
-    this.centreanalytiqueservice.importCentreAnalytique(file, info).subscribe({
-      next: (res) => {
-        if (res.success) {
-          this.getAllcentres();
-          this.toastr.success('Importation effectuée avec succès');
-        } else {
-          this.error = "Echec de l'importation";
-          this.toastr.error(this.error);
+    const formData = new FormData();
+    formData.append('file', this.selectedFile);
+    formData.append('idsociete', this.user.idsociete);
+    formData.append('createdby', this.user.prenom + ' ' + this.user.nom);
+
+    this.uploadProgress = 0;
+    this.importErrors = [];
+    this.successMessage = '';
+
+    const progressInterval = setInterval(() => {
+      if (this.uploadProgress < 90) {
+        this.uploadProgress += Math.floor(Math.random() * 8) + 2;
+        if (this.uploadProgress > 90) {
+          this.uploadProgress = 90;
         }
-        this.loading = false;
-      },
-      error: (err) => {
-        this.error = "Echec de l'importation";
-        this.loading = false;
-        this.toastr.error(err);
+        this.cdr.detectChanges();
       }
-    })
+    }, 300);
+
+    this.centreanalytiqueservice
+      .importCentreAnalytiqueFormData(formData)
+      .subscribe({
+        next: (res) => {
+          this.uploadProgress = 100;
+          clearInterval(progressInterval);
+          this.successMessage = `${this.fileContent.length || 0} ligne(s) importée(s) avec succès !`;
+          this.toastr.success('Import terminé avec succès');
+          this.getAllcentres();
+          this.cdr.detectChanges();
+
+          setTimeout(() => {
+            this.uploadProgress = 0;
+            this.selectedFile = null;
+            this.fileContent = [];
+            this.fileHeaders = [];
+            this.successMessage = '';
+            this.importErrors = [];
+            this.ImportForm.reset();
+
+            const fileInput = document.getElementById(
+              'fileInput',
+            ) as HTMLInputElement;
+            if (fileInput) {
+              fileInput.value = '';
+            }
+            this.cdr.detectChanges();
+            this.closeModal('importcsv');
+          }, 3000);
+        },
+        error: (err) => {
+          this.uploadProgress = 0;
+          clearInterval(progressInterval);
+          this.importErrors = [
+            err.error?.message || "Erreur lors de l'import du fichier",
+          ];
+          this.toastr.error("Erreur lors de l'import");
+          console.error('Import error:', err);
+          this.cdr.detectChanges();
+        },
+      });
   }
 
-  // 🔎 Filtrer (Affectees)
+  // 🔎 Filtrer
   applyFilter() {
     const term = this.searchTerm.toLowerCase();
 
-    this.filteredData = this.centres.filter(item =>
-      item.codecentreanalytique?.toLowerCase().includes(term) ||
-      item.libelle?.toLowerCase().includes(term)
+    this.filteredData = this.centres.filter(
+      (item) =>
+        item.codecentreanalytique?.toLowerCase().includes(term) ||
+        item.libelle?.toLowerCase().includes(term),
     );
 
     this.currentPage = 1;
@@ -429,11 +522,8 @@ export class CentreanalytiqueComponent implements OnInit{
     const end = start + this.pageSize;
 
     this.paginatedData = this.filteredData.slice(start, end);
-
-    console.log('Données paginées :', this.paginatedData);
   }
 
-  // ▶ Page suivante
   nextPage() {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
@@ -441,7 +531,6 @@ export class CentreanalytiqueComponent implements OnInit{
     }
   }
 
-  // ◀ Page précédente
   prevPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
@@ -453,33 +542,72 @@ export class CentreanalytiqueComponent implements OnInit{
     this.getAllcentres();
   }
 
-
   exportData = {
     debut: null,
     fin: null,
-    format: 'excel'
-};
+    format: 'excel',
+  };
 
   exporter() {
     this.centreanalytiqueservice.exportCentres(this.exportData).subscribe({
       next: (blob: Blob) => {
-
         const url = window.URL.createObjectURL(blob);
-
         const a = document.createElement('a');
         a.href = url;
-
-        a.download = this.exportData.format === 'pdf'
-          ? 'centres_analytiques.pdf'
-          : 'centres_analytiques.xlsx';
-
+        a.download =
+          this.exportData.format === 'pdf'
+            ? 'centres_analytiques.pdf'
+            : 'centres_analytiques.xlsx';
         a.click();
-
         window.URL.revokeObjectURL(url);
       },
       error: () => {
-        this.toastr.error("Erreur export");
-      }
+        this.toastr.error('Erreur export');
+      },
     });
+  }
+
+  exportToExcel(): void {
+    const element = document.getElementById('dataTable');
+    if (!element) {
+      console.error('Table non trouvée');
+      return;
+    }
+    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
+    const workbook: XLSX.WorkBook = {
+      Sheets: { 'Centres Analytiques': worksheet },
+      SheetNames: ['Centres Analytiques'],
+    };
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
+    });
+    const data: Blob = new Blob([excelBuffer], {
+      type: 'application/octet-stream',
+    });
+    saveAs(
+      data,
+      `centres_analytiques_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.xlsx`,
+    );
+  }
+
+  exportToCSV(): void {
+    const element = document.getElementById('dataTable');
+    if (!element) {
+      console.error('Table non trouvée');
+      return;
+    }
+    const worksheet: XLSX.WorkSheet = XLSX.utils.table_to_sheet(element);
+    const csv = XLSX.utils.sheet_to_csv(worksheet, {
+      FS: ';',
+    });
+    const blob = new Blob([csv], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    saveAs(
+      blob,
+      `centres_analytiques_${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}.csv`,
+    );
+    this.toastr.success('Fiches exportées avec succès');
   }
 }
