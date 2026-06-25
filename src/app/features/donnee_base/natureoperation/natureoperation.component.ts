@@ -360,15 +360,15 @@ export class NatureoperationComponent implements OnInit{
     }
     const file = input.files[0];
     const info = {
-      idsociete : this.user.idsociete[0],
+      idsociete : this.user.idsociete,
       createdby : this.user.prenom + " " + this.user.nom
     }
 
     this.natureoperationservice.importNatureOperation(file, info).subscribe({
       next: (res) => {
         if (res.success) {
-          this.toastr.success('Importation effectuée avec succès');
           this.getAllNatureoperations();
+          this.toastr.success('Importation effectuée avec succès');
         } else {
           this.error = "Echec de l'importation";
           this.toastr.error(this.error);

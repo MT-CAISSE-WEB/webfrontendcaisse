@@ -385,7 +385,7 @@ export class CentreanalytiqueComponent implements OnInit{
     }
     const file = input.files[0];
     const info = {
-      idsociete : this.user.idsociete[0],
+      idsociete : this.user.idsociete,
       createdby : this.user.prenom + " " + this.user.nom
     }
 
