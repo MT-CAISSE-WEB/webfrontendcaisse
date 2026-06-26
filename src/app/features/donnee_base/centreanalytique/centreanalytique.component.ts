@@ -610,4 +610,26 @@ export class CentreanalytiqueComponent implements OnInit {
     );
     this.toastr.success('Fiches exportées avec succès');
   }
+
+  downloadCsvTemplate(): void {
+    const delimiter = ';';
+    const csvContent = `code${delimiter}libelle${delimiter}statut
+XXXXXX${delimiter}Exemple centre${delimiter}1
+XXXXXX${delimiter}Exemple centre${delimiter}1
+XXXXXX${delimiter}Exemple centre${delimiter}1`;
+
+    // BOM UTF-8 pour compatibilité Excel
+    const blob = new Blob(['\uFEFF' + csvContent], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'modele_centre_analytique.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    this.toastr.success('Modèle CSV téléchargé');
+  }
 }

@@ -847,4 +847,26 @@ export class AffectationNatureCentreComponent implements OnInit {
       },
     });
   }
+
+  downloadCsvTemplate(): void {
+    const delimiter = ';';
+    const csvContent = `code nature${delimiter}libelle nature${delimiter}code centre${delimiter}libelle centre
+XXXXXX${delimiter}Exemple nature${delimiter}XXXXXX${delimiter}Exemple centre
+XXXXXX${delimiter}Exemple nature${delimiter}XXXXXX${delimiter}Exemple centre
+XXXXXX${delimiter}Exemple nature${delimiter}XXXXXX${delimiter}Exemple centre`;
+
+    // BOM UTF-8 pour compatibilité Excel
+    const blob = new Blob(['\uFEFF' + csvContent], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'modele_affectation_nature_centre.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    this.toastr.success('Modèle CSV téléchargé');
+  }
 }
