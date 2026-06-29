@@ -7,3 +7,9 @@ export class parametreComptableModel extends MainModel{
     journal : string = "";
     url : string = "";
 }
+
+export interface Correspondance {
+  idcorrespondance : string;
+  centreAnalytique: string;
+  correspondance: string;
+}

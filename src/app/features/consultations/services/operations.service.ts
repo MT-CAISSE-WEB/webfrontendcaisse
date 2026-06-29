@@ -84,4 +84,11 @@ export class ConsultationOpService {
             { responseType: 'blob' }
         );
     }
+
+    /**
+     * Solde de caisse
+     */
+    get_soldeAllCaisse(){
+        return this.http.get<any>(URL_LOCAL.baseUrl + this.url + "/caisse/solde/");
+    }
 }
