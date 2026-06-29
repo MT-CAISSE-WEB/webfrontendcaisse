@@ -79,7 +79,7 @@
       </div>
 
       <div class="table-premium-wrap">
-        <!-- ✅ Conteneur avec scroll -->
+        <!-- Conteneur avec scroll -->
         <div class="table-scroll-container">
           <table class="table-premium">
             <thead>
@@ -91,6 +91,7 @@
                 <th>Devise</th>
                 <th>Date</th>
                 <th>Statut</th>
+                <th class="text-center" style="min-width: 120px">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -140,17 +141,35 @@
                       }}
                     </span>
                   </td>
+                  <td class="text-center">
+                    <!-- Bouton Décaisser - Moderne Glassmorphism -->
+                    <button
+                      class="btn-decaissement"
+                      [class.disabled]="
+                        item.statut !== 3 || item.decaisse === 1
+                      "
+                      [disabled]="item.statut !== 3 || item.decaisse === 1"
+                      title="Décaisser la demande"
+                      (click)="openOperationModal(item.iddemande)"
+                    >
+                      <span class="btn-decaissement-content">
+                        <i class="ri-money-dollar-circle-line"></i>
+                        <span class="btn-decaissement-text">Décaisser</span>
+                      </span>
+                      <span class="btn-decaissement-glow"></span>
+                    </button>
+                  </td>
                 </tr>
               }
               <tr *ngIf="loading">
-                <td colspan="7" class="text-center py-4">
+                <td colspan="8" class="text-center py-4">
                   <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Chargement...</span>
                   </div>
                 </td>
               </tr>
               <tr *ngIf="entetesDmd.length == 0 && !loading">
-                <td colspan="7" class="text-center py-5">
+                <td colspan="8" class="text-center py-5">
                   <div class="empty-state">
                     <i class="ri-inbox-2-line fs-1 text-muted"></i>
                     <p class="mt-2 text-muted mb-0">Aucune demande trouvée</p>
@@ -161,7 +180,7 @@
           </table>
         </div>
 
-        <!-- ✅ Indicateur de scroll (optionnel) -->
+        <!-- Indicateur de scroll -->
         <div class="scroll-hint" *ngIf="entetesDmd.length > 3">
           <i class="ri-arrow-left-right-line"></i>
           <span>Faites défiler pour voir toutes les colonnes</span>

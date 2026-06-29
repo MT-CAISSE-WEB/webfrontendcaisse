@@ -486,7 +486,7 @@ export class PlancomptableComponent implements OnInit {
     });
   }
 
-  // ✅ Méthodes pour l'aperçu du fichier
+  // Méthodes pour l'aperçu du fichier
   onFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
@@ -587,5 +587,27 @@ export class PlancomptableComponent implements OnInit {
     if (this.uploadProgress < 60) return 'Traitement des données...';
     if (this.uploadProgress < 90) return 'Validation...';
     return 'Finalisation...';
+  }
+
+  downloadCsvTemplate(): void {
+    const delimiter = ';';
+    const csvContent = `compte${delimiter}libelle${delimiter}ventillable${delimiter}auxiliaire${delimiter}suivibudgetaire${delimiter}suivibudgetairemensuel${delimiter}statut
+XXXXXX${delimiter}Exemple compte${delimiter}0${delimiter}0${delimiter}0${delimiter}0${delimiter}1
+XXXXXX${delimiter}Exemple compte${delimiter}0${delimiter}0${delimiter}0${delimiter}0${delimiter}1
+XXXXXX${delimiter}Exemple compte${delimiter}0${delimiter}0${delimiter}0${delimiter}0${delimiter}1`;
+
+    // BOM UTF-8 pour compatibilité Excel
+    const blob = new Blob(['\uFEFF' + csvContent], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'modele_plan_de_comptes.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    this.toastr.success('Modèle CSV téléchargé');
   }
 }

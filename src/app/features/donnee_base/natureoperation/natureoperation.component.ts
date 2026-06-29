@@ -686,4 +686,27 @@ export class NatureoperationComponent implements OnInit {
       },
     });
   }
+
+  // Télécharger le modèle
+  downloadCsvTemplate(): void {
+    const delimiter = ';';
+    const csvContent = `code${delimiter}libelle${delimiter}typeoperation${delimiter}decajustifier${delimiter}imputationtiers${delimiter}demandedecaissement${delimiter}Compte${delimiter}Statut
+XXXXXX${delimiter}Exemple nature${delimiter}0${delimiter}0${delimiter}0${delimiter}0${delimiter}XXXXXX${delimiter}1
+XXXXXX${delimiter}Exemple nature${delimiter}0${delimiter}0${delimiter}0${delimiter}0${delimiter}XXXXXX${delimiter}1
+XXXXXX${delimiter}Exemple nature${delimiter}0${delimiter}0${delimiter}0${delimiter}0${delimiter}XXXXXX${delimiter}1`;
+
+    // BOM UTF-8 pour compatibilité Excel
+    const blob = new Blob(['\uFEFF' + csvContent], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'modele_nature_operation.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    this.toastr.success('Modèle CSV téléchargé');
+  }
 }
