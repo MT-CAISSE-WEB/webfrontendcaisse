@@ -1407,6 +1407,21 @@
 }
 
 /* Style pour les file pills */
+
+.border-dashed {
+  border-style: dashed !important;
+  border-width: 2px !important;
+}
+
+.upload-area {
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #f8f9fa !important;
+    border-color: #405189 !important;
+  }
+}
+
 .file-pill {
   border: 1px solid rgba(203, 213, 225, 0.3);
   transition: all 0.2s ease;
