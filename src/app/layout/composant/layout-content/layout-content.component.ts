@@ -58,6 +58,7 @@ export class LayoutContentComponent implements OnInit {
   dateInput: string = '';
 
   today: Date = new Date();
+  todayString = this.today.toISOString().split('T')[0];
 
   billetageForm!: FormGroup;
 
@@ -70,7 +71,12 @@ export class LayoutContentComponent implements OnInit {
   //Caisse all solde
   caisseAllSolde: any = [];
 
+  admin: boolean = false;
   supervisor: boolean = false;
+  caissier: boolean = false;
+  comptable: boolean = false;
+  superadmin: boolean = false;
+  demandeur: boolean = false;
 
   activeTab = 0;
   billetageValidated: boolean = false; // pour savoir si le billetage est validé
@@ -202,6 +208,71 @@ export class LayoutContentComponent implements OnInit {
     return this.supervisor;
   }
 
+  isuperadmin(): boolean {
+    if (typeof window !== 'undefined') {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      for (let index = 0; index < user.roles.length; index++) {
+        const element = user.roles[index];
+        if (element['code'] === '00') {
+          this.superadmin = true;
+        }
+      }
+    }
+    return this.superadmin;
+  }
+
+  isadmin(): boolean {
+    if (typeof window !== 'undefined') {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      for (let index = 0; index < user.roles.length; index++) {
+        const element = user.roles[index];
+        if (element['code'] === '01') {
+          this.admin = true;
+        }
+      }
+    }
+    return this.admin;
+  }
+
+  iscomptable(): boolean {
+    if (typeof window !== 'undefined') {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      for (let index = 0; index < user.roles.length; index++) {
+        const element = user.roles[index];
+        if (element['code'] === '03') {
+          this.comptable = true;
+        }
+      }
+    }
+    return this.comptable;
+  }
+
+  iscaissier(): boolean {
+    if (typeof window !== 'undefined') {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      for (let index = 0; index < user.roles.length; index++) {
+        const element = user.roles[index];
+        if (element['code'] === '04') {
+          this.caissier = true;
+        }
+      }
+    }
+    return this.caissier;
+  }
+
+  isdemandeur(): boolean {
+    if (typeof window !== 'undefined') {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      for (let index = 0; index < user.roles.length; index++) {
+        const element = user.roles[index];
+        if (element['code'] === '05') {
+          this.demandeur = true;
+        }
+      }
+    }
+    return this.demandeur;
+  }
+
   //Les colonnes
   getColClass(): string {
     const count = this.caisseSolde.length;
@@ -270,6 +341,21 @@ export class LayoutContentComponent implements OnInit {
 
   formatDateForInput(date: string) {
     return date ? date.substring(0, 10) : '';
+  }
+
+  // ✅ Récupération du nom du jour
+  formatDayName(dateInput: string | Date): string {
+    const date = new Date(dateInput);
+    const days = [
+      'Dimanche',
+      'Lundi',
+      'Mardi',
+      'Mercredi',
+      'Jeudi',
+      'Vendredi',
+      'Samedi',
+    ];
+    return days[date.getDay()];
   }
 
   initBilletageForm(caisses: any[]) {
@@ -550,4 +636,95 @@ export class LayoutContentComponent implements OnInit {
   calculSolde(item: any): string {
     return this.formatCFA(this.getSolde(item));
   }
+
+  getRoleShortName(roleName: string): string {
+    switch (roleName) {
+      case 'Super administrateur':
+        return 'Super Admin';
+      case 'Administrateur system':
+        return 'Admin System';
+      case 'Superviseur caisse':
+        return 'Superviseur';
+      default:
+        return roleName;
+    }
+  }
+
+  // Custom message en fonction de l'utilisateur connecté
+  // Méthode pour obtenir le message d'accueil selon le rôle
+  getWelcomeMessage(): string {
+    const user = this.user;
+
+    // Vérifier les rôles
+    const isSuperAdmin = user.roles[0].libelle.includes('Super administrateur');
+
+    const isAdmin = user.roles[0].libelle.includes('Administrateur system');
+    const isCaissier = user.roles[0].libelle.includes('Caissier');
+    const isSuperviseur = user.roles[0].libelle.includes('Superviseur caisse');
+    const isDemandeur = user.roles[0].libelle.includes('Demandeur');
+    const isComptable = user.roles[0].libelle.includes('Comptable');
+
+    // Messages personnalisés
+    if (isSuperAdmin) {
+      return "Vous supervisez l'ensemble du système de caisse.";
+    }
+
+    if (isAdmin) {
+      return 'Gérez les paramètres et la configuration du système.';
+    }
+
+    if (isCaissier) {
+      return "Voici ce qui se passe aujourd'hui dans votre caisse.";
+    }
+
+    if (isSuperviseur) {
+      return "Supervisez l'activité des caisses en temps réel.";
+    }
+
+    if (isComptable) {
+      return 'Consultez les opérations comptables et les bilans.';
+    }
+
+    if (isDemandeur) {
+      return "Suivez l'état de vos demandes de décaissement.";
+    }
+
+    return 'Bienvenue sur votre espace de travail.';
+  }
+
+  // Méthode pour obtenir l'icône selon le rôle
+  getWelcomeIcon(): string {
+    const user = this.user;
+
+    // Vérifier les rôles
+    const isSuperAdmin = user.roles[0].libelle.includes('Super administrateur');
+    const isAdmin = user.roles[0].libelle.includes('Administrateur system');
+    const isCaissier = user.roles[0].libelle.includes('Caissier');
+    const isSuperviseur = user.roles[0].libelle.includes('Superviseur caisse');
+    const isDemandeur = user.roles[0].libelle.includes('Demandeur');
+    const isComptable = user.roles[0].libelle.includes('Comptable');
+
+    if (isSuperAdmin || isAdmin) {
+      return 'ri-settings-5-line';
+    }
+
+    if (isCaissier) {
+      return 'ri-time-line';
+    }
+
+    if (isSuperviseur) {
+      return 'ri-eye-line';
+    }
+
+    if (isComptable) {
+      return 'ri-calculator-line';
+    }
+
+    if (isDemandeur) {
+      return 'ri-file-request-line';
+    }
+
+    return 'ri-information-line';
+  }
+
 }

@@ -28,9 +28,9 @@ export class InterfaceSupervisorComponent implements OnInit {
   //Récuperer les soldes
   getSoldeAllCaisse() {
     this.service.get_soldeAllCaisse().subscribe({
-      next: (res) => {
-        console.log("Pour resultat ", res);
+      next: (res: any) => {
         if (res.success) {
+          console.log("données ", res.data);
           this.caisseAllSolde = res.data;
         } else {
           this.toastr.error(res.message || 'Erreur de chargement');
@@ -42,6 +42,14 @@ export class InterfaceSupervisorComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  getSolde(caisse: any): number {
+    return (
+      (caisse.soldeouverture || 0) +
+      (caisse.total_encaissement || 0) -
+      (caisse.total_decaissement || 0)
+    );
   }
 
 }

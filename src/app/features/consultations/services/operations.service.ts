@@ -89,6 +89,6 @@ export class ConsultationOpService {
      * Solde de caisse
      */
     get_soldeAllCaisse(){
-        return this.http.get<any>(URL_LOCAL.baseUrl + this.url + "/caisse/solde/");
+        return this.http.get<any>(URL_LOCAL.baseUrl + this.url + "/solde/allcaisse");
     }
 }

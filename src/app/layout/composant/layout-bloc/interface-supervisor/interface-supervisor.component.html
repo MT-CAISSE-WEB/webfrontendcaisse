@@ -1,5 +1,5 @@
 <div class="container mt-4">
-      <h2 class="mb-4">Soldes des caisses</h2>
+      <h4 class="mb-4">Soldes des caisses</h4>
 
       <!-- Indicateur de chargement -->
       <div *ngIf="loading" class="text-center py-5">
@@ -9,7 +9,7 @@
 
       <!-- Grille des cartes -->
       <div *ngIf="!loading" class="row g-4">
-        <!-- <div *ngFor="let caisse of caisseAllSolde" class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+        <div *ngFor="let caisse of caisseAllSolde" class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
           <div class="stat-card glass-stat">
             <div class="stat-icon-wrapper">
               <div class="stat-icon stat-icon-primary">
@@ -21,12 +21,15 @@
               <h5 class="stat-value">{{ caisse.libelle }}</h5>
               <p class="stat-detail">
                 <span class="text-muted">Solde :</span>
-                <strong>{{ caisse.soldeouverture | number:'1.0-0' }} {{ caisse.codedevise }}</strong>
+                <strong>
+                    {{ getSolde(caisse) | number:'1.0-0' }}
+                    {{ caisse.codedevise }}
+                  </strong>
               </p>
-              <p class="stat-detail small">
+              <!-- <p class="stat-detail small">
                 <span class="text-success">Encaissements : {{ caisse.total_encaissement | number:'1.0-0' }}</span><br>
                 <span class="text-danger">Décaissements : {{ caisse.total_decaissement | number:'1.0-0' }}</span>
-              </p>
+              </p> -->
               <p class="stat-detail small text-muted">
                 Dernière période : {{ caisse.derniere_date_periode | date:'dd/MM/yyyy' }}
               </p>
@@ -35,11 +38,11 @@
               <div class="progress-bar" style="width: 75%"></div>
             </div>
           </div>
-        </div> -->
+        </div>
       </div>
 
       <!-- Message si aucune caisse -->
       <div *ngIf="!loading && caisseAllSolde.length === 0" class="alert alert-info text-center">
-        Aucune caisse trouvée.
+        Aucune caisse trouvée pour afficher le solde.
       </div>
     </div>
