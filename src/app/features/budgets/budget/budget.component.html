@@ -2,15 +2,27 @@
 <div class="row">
   <div class="col-12">
     <div
-      class="page-title-box d-sm-flex align-items-center justify-content-between"
+      class="page-title-premium d-sm-flex align-items-center justify-content-between"
     >
-      <h4 class="mb-sm-0">{{ title }}</h4>
+      <div class="d-flex align-items-center gap-3">
+        <div class="title-icon-premium">
+          <i class="ri-money-dollar-circle-fill"></i>
+        </div>
+        <div>
+          <h4 class="mb-0 title-premium">{{ title }}</h4>
+          <span class="title-subtitle-premium">Gestion des budgets</span>
+        </div>
+      </div>
       <div class="page-title-right">
-        <ol class="breadcrumb m-0">
+        <ol class="breadcrumb-premium m-0">
           <li class="breadcrumb-item">
-            <a href="javascript: void(0);">Gestion du budget</a>
+            <a href="javascript: void(0);">
+              <i class="ri-home-4-line me-1"></i>Gestion du budget
+            </a>
           </li>
-          <li class="breadcrumb-item active">{{ title }}</li>
+          <li class="breadcrumb-item active">
+            <i class="ri-money-dollar-circle-fill"></i>{{ title }}
+          </li>
         </ol>
       </div>
     </div>
@@ -20,346 +32,252 @@
 
 <div class="row">
   <div class="col-lg-12">
-    <div class="card" id="orderList">
-      <div class="card-header border-0">
-        <div class="row align-items-center gy-3">
-          <div class="col-sm-auto">
-            <div class="d-flex gap-1 flex-wrap">
-              <button
-                type="button"
-                class="btn btn-sm btn-soft-success"
-                data-bs-toggle="modal"
-                (click)="modalCreate()"
-                id="create-btn"
-                data-bs-target="#showModal"
-              >
-                <i class="ri-add-line align-bottom me-1"></i>créer
-              </button>
-              <button type="button" class="btn btn-sm btn-soft-info">
-                <i class="ri-file-download-line align-bottom me-1"></i> import
-              </button>
-              <button
-                class="btn btn-sm btn-soft-danger"
-                [disabled]="!checkAllRow"
-                onClick="deleteMultiple()"
-              >
-                <i class="ri-delete-bin-2-line"></i>
-              </button>
-              <button type="button" class="btn btn-sm btn-info">
-                <i class="ri-refresh-fill align-bottom me-1"></i>actualiser
-              </button>
+    <div class="card-glass" id="orderList">
+      <!-- Header -->
+      <div class="card-header-glass border-0">
+        <div
+          class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3"
+        >
+          <div class="d-flex gap-2 flex-wrap">
+            <button
+              type="button"
+              class="btn-glass-primary"
+              data-bs-toggle="modal"
+              (click)="modalCreate()"
+              id="create-btn"
+              data-bs-target="#showModal"
+            >
+              <i class="ri-add-line align-bottom me-1"></i>Nouveau budget
+            </button>
+            <button
+              type="button"
+              class="btn-glass-secondary"
+              (click)="getAllBudgets()"
+            >
+              <i class="ri-refresh-fill align-bottom me-1"></i>Actualiser
+            </button>
+          </div>
+          <div class="search-container">
+            <div class="search-glass">
+              <i class="ri-search-line"></i>
+              <input
+                type="text"
+                [(ngModel)]="searchTerm"
+                (ngModelChange)="applyFilters()"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="Rechercher par code, libellé..."
+                autocomplete="off"
+              />
+              <div class="search-glow"></div>
             </div>
           </div>
         </div>
       </div>
-      <div class="card-body border border-dashed border-end-0 border-start-0">
-        <form>
-          <div class="row g-3">
-            <div class="col-xxl-5 col-sm-6">
-              <div class="search-box">
-                <input
-                  type="text"
-                  class="form-control form-control-sm search"
-                  placeholder="rechercher par code, libelle..."
-                  [(ngModel)]="searchTerm"
-                  (ngModelChange)="applyFilters()"
-                  [ngModelOptions]="{ standalone: true }"
-                />
-                <i class="ri-search-line search-icon"></i>
-              </div>
-            </div>
-            <!--end col-->
 
-            <!--end col-->
-            <div class="col-xxl-2 col-sm-4">
-              <div>
-                <select
-                  class="form-control form-control-sm"
-                  data-choices
-                  data-choices-search-false
-                  name="choices-single-default"
-                  id="idStatus"
-                >
-                  <option value="">Status</option>
-                  <option value="all" selected>tous</option>
-                  <option value="Pending">Actif</option>
-                  <option value="Pending">Inactif</option>
-                </select>
-              </div>
-            </div>
-            <!--end col-->
-
-            <!--end col-->
-            <div class="col-xxl-1 col-sm-2">
-              <div>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-primary w-100"
-                  onclick="SearchData()"
-                >
-                  <i class="ri-equalizer-fill me-1 align-bottom"></i>
-                  Filtrer
-                </button>
-              </div>
-            </div>
-            <!--end col-->
-          </div>
-          <!--end row-->
-        </form>
-      </div>
-      <div class="card-body pt-0">
-        <div>
-          <ul
-            class="nav nav-tabs nav-tabs-custom nav-success mb-3"
-            role="tablist"
+      <!-- Filtres -->
+      <div class="card-body-glass pt-0">
+        <div class="filter-chips-container">
+          <div
+            class="filter-chip-modern"
+            [class.active]="currentStatusFilter === 'ALL'"
+            (click)="applyStatusFilter('ALL')"
           >
-            <li class="nav-item">
-              <a
-                class="nav-link active All py-3"
-                [class.active]="currentStatusFilter === 'ALL'"
-                (click)="applyStatusFilter('ALL')"
-                data-bs-toggle="tab"
-                id="All"
-                href="#home1"
-                role="tab"
-                aria-selected="true"
-              >
-                <i class="ri-store-2-fill me-1 align-bottom"></i> Tous
-              </a>
-            </li>
-            <li class="nav-item">
-              <a
-                class="nav-link py-3 Delivered"
-                [class.active]="currentStatusFilter === 'ACTIF'"
-                (click)="applyStatusFilter('ACTIF')"
-                data-bs-toggle="tab"
-                id="Delivered"
-                href="#delivered"
-                role="tab"
-                aria-selected="false"
-              >
-                <i class="ri-checkbox-circle-line me-1 align-bottom"></i> Actif
-              </a>
-            </li>
-            <li class="nav-item">
-              <a
-                class="nav-link py-3 Pickups"
-                [class.active]="currentStatusFilter === 'INACTIF'"
-                (click)="applyStatusFilter('INACTIF')"
-                data-bs-toggle="tab"
-                id="Pickups"
-                href="#pickups"
-                role="tab"
-                aria-selected="false"
-              >
-                <i class="ri-truck-line me-1 align-bottom"></i> Inactif
-                <span class="badge bg-danger align-middle ms-1">{{
-                  totalInactifs
-                }}</span>
-              </a>
-            </li>
-          </ul>
+            <i class="ri-store-2-fill"></i>
+            <span>Tous</span>
+            <span class="count-badge">{{
+              getBudgetsAnnuels().length || 0
+            }}</span>
+          </div>
+          <div
+            class="filter-chip-modern"
+            [class.active]="currentStatusFilter === 'ACTIF'"
+            (click)="applyStatusFilter('ACTIF')"
+          >
+            <i class="ri-checkbox-circle-line"></i>
+            <span>Actif</span>
+            <span class="count-badge">{{ totalActifs }}</span>
+          </div>
+          <div
+            class="filter-chip-modern"
+            [class.active]="currentStatusFilter === 'INACTIF'"
+            (click)="applyStatusFilter('INACTIF')"
+          >
+            <i class="ri-close-circle-line"></i>
+            <span>Inactif</span>
+            <span class="count-badge">{{ totalInactifs }}</span>
+          </div>
+        </div>
 
-          <div class="table-responsive table-card mb-1">
-            <table class="table table-nowrap align-middle" id="orderTable">
-              <thead class="text-muted table-light">
-                <tr class="text-uppercase">
-                  <th scope="col" style="width: 25px">
-                    <div class="form-check">
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        [(ngModel)]="checkAllRow"
-                        id="checkAll"
-                        (ngModelChange)="handleSelectAll($event)"
-                      />
-                    </div>
-                  </th>
-                  <th class="sort" data-sort="id">Code</th>
-                  <th class="sort" data-sort="id">Libellé</th>
-                  <th class="sort" data-sort="customer_name">Entité</th>
-                  <th class="sort" data-sort="customer_name">Analytique</th>
-                  <th class="sort" data-sort="customer_name">Validé</th>
-                  <th class="sort" data-sort="customer_name">Date début</th>
-                  <th class="sort" data-sort="customer_name">Date fin</th>
-                  <th class="sort" data-sort="status">Status</th>
-                  <th class="sort" data-sort="status">Prévision</th>
-                  <th class="sort" data-sort="status">Devise</th>
-                  <th class="sort" data-sort="city">Action</th>
-                </tr>
-              </thead>
-              <tbody class="list form-check-all">
-                @if (hasAnnualBudgets) {
-                  @for (item of getBudgetsAnnuels(); track item.idbudget) {
-                    <!-- 🔹 LIGNE BUDGET ANNUEL -->
-                    <tr class="table-primary-subtle fw-semibold">
-                      <td>
+        <!-- Loading -->
+        <div *ngIf="loading" class="spinner-glass">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement...</span>
+          </div>
+          <p class="mt-2 text-muted">Chargement des budgets...</p>
+        </div>
+
+        <!-- Tableau -->
+        <div *ngIf="!loading" class="table-responsive">
+          <table class="table table-modern align-middle" id="orderTable">
+            <thead>
+              <tr>
+                <th style="width: 40px">#</th>
+                <th>Code</th>
+                <th>Libellé</th>
+                <th>Type</th>
+                <th>Entité</th>
+                <th>Analytique</th>
+                <th>Validé</th>
+                <th>Période</th>
+                <th>Prévision</th>
+                <th>Devise</th>
+                <th>Statut</th>
+                <th style="text-align: right; width: 120px">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (hasAnnualBudgets) {
+                @for (item of getBudgetsAnnuels(); track item.idbudget) {
+                  <!-- LIGNE BUDGET ANNUEL -->
+                  <tr [class.table-active]="isChecked(item.idbudget)">
+                    <td>{{ (currentPage - 1) * limit + $index + 1 }}</td>
+                    <td>
+                      <span class="code-badge">{{ item.codebudget }}</span>
+                    </td>
+                    <td>
+                      <span class="fw-medium">{{ item.libelle }}</span>
+                    </td>
+                    <td>
+                      <span class="badge-glass badge-glass-primary">
+                        {{ item.typebudget }}
+                      </span>
+                    </td>
+                    <td>{{ item.entite || "-" }}</td>
+                    <td>
+                      <span
+                        class="status-badge"
+                        [class]="
+                          getStatusInfo(item.isanalytique, 'boolean').class
+                        "
+                      >
+                        <span
+                          class="status-dot"
+                          [class]="
+                            getStatusInfo(item.isanalytique, 'boolean').class
+                          "
+                        ></span>
+                        {{ getStatusInfo(item.isanalytique, "boolean").text }}
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        class="status-badge"
+                        [class]="getStatusInfo(item.valide, 'triple').class"
+                      >
+                        <span
+                          class="status-dot"
+                          [class]="getStatusInfo(item.valide, 'triple').class"
+                        ></span>
+                        {{ getStatusInfo(item.valide, "triple").text }}
+                      </span>
+                    </td>
+                    <td>
+                      {{ formatPeriod(item.datedebut, item.datefin) }}
+                    </td>
+                    <td class="text-end fw-bold">
+                      {{ getPrevisionAnnuel(item) | number: "1.0-0" }}
+                    </td>
+                    <td class="text-end">{{ user.devise_ref_code }}</td>
+                    <td>
+                      <span
+                        class="status-badge"
+                        [class]="getStatusInfo(item.actif, 'boolean').class"
+                      >
+                        <span
+                          class="status-dot"
+                          [class]="getStatusInfo(item.actif, 'boolean').class"
+                        ></span>
+                        {{ item.actif === 1 ? "Actif" : "Inactif" }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="actions-group">
                         <button
-                          class="btn btn-sm btn-link p-0"
+                          class="action-btn action-view"
                           (click)="toggleExpand(item.idbudget)"
+                          title="Afficher/Masquer les mensuels"
                         >
                           <i
-                            class="ri-arrow-right-s-line fs-16"
+                            class="ri-arrow-right-s-line"
                             [class.ri-arrow-down-s-line]="
                               isExpanded[item.idbudget]
                             "
                           ></i>
                         </button>
-                      </td>
-                      <td>
-                        {{ item.codebudget }}
-                      </td>
-                      <td>{{ item.libelle }}</td>
-                      <td>{{ item.entite ? item.entite : "-" }}</td>
-                      <td>
-                        <span
-                          class="badge"
-                          [ngClass]="
-                            item.isanalytique === 1
-                              ? 'bg-success-subtle text-success'
-                              : 'bg-danger-subtle text-danger'
-                          "
+                        <button
+                          class="action-btn action-view"
+                          (click)="onClickAfficherLignesBudgetaire(item)"
+                          data-bs-toggle="modal"
+                          data-bs-target="#modalLignesBudget"
+                          title="Voir les lignes"
                         >
-                          {{ item.isanalytique === 1 ? "Oui" : "Non" }}
-                        </span>
-                      </td>
-                      <td>
-                        <span
-                          class="badge"
-                          [ngClass]="
-                            item.valide === 1
-                              ? 'bg-success-subtle text-success'
-                              : item.valide === 0
-                                ? 'bg-warning-subtle text-warning'
-                                : 'bg-danger-subtle text-danger'
-                          "
+                          <i class="ri-time-line"></i>
+                        </button>
+                        <button
+                          class="action-btn action-edit"
+                          (click)="modalUpdate(item)"
+                          data-bs-toggle="modal"
+                          data-bs-target="#showModal"
+                          title="Modifier"
                         >
-                          {{
-                            item.valide === 1
-                              ? "Oui"
-                              : item.valide === 0
-                                ? "En cours"
-                                : "Non"
-                          }}
-                        </span>
-                      </td>
-                      <td>{{ item.datedebut | date: "dd-MM-yyyy" }}</td>
-                      <td>{{ item.datefin | date: "dd-MM-yyyy" }}</td>
-
-                      <td>
-                        <span
-                          class="badge"
-                          [ngClass]="
-                            item.actif === 1
-                              ? 'bg-success-subtle text-success'
-                              : 'bg-danger-subtle text-danger'
-                          "
+                          <i class="ri-pencil-line"></i>
+                        </button>
+                        <button
+                          class="action-btn action-delete"
+                          (click)="modalDelete(item)"
+                          data-bs-toggle="modal"
+                          data-bs-target="#deleteOrder"
+                          title="Supprimer"
                         >
-                          {{ item.actif === 1 ? "Actif" : "Inactif" }}
-                        </span>
-                      </td>
-
-                      <td class="fw-bold text-end">
-                        {{ getPrevisionAnnuel(item) | number: "1.0-0" }}
-                      </td>
-                      <td class="fw-bold text-end">
-                        {{ user.devise_ref_code }}
-                      </td>
-                      <td>
-                        <div class="d-flex align-items-center gap-2">
-                          <!-- Bouton modifier -->
-                          <a
-                            class="text-primary"
-                            href="#showModal"
-                            data-bs-toggle="modal"
-                            (click)="modalUpdate(item)"
+                          <i class="ri-delete-bin-line"></i>
+                        </button>
+                        <button
+                          class="action-btn action-attachment"
+                          data-bs-toggle="modal"
+                          data-bs-target="#piecesJointesModal"
+                          (click)="openPiecesJointesModal(item)"
+                          title="Pièces jointes"
+                        >
+                          <i class="ri-attachment-2"></i>
+                          <span
+                            *ngIf="getPiecesCount(item.idbudget) > 0"
+                            class="badge-glass badge-glass-primary badge-count"
                           >
-                            <i class="ri-pencil-fill"></i>
-                          </a>
+                            {{ getPiecesCount(item.idbudget) }}
+                          </span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
 
-                          <div class="position-relative">
-                            <button
-                              type="button"
-                              class="btn btn-link text-dark p-0 edit-item-btn"
-                              (click)="openPiecesJointesModal(item)"
-                            >
-                              <i class="ri-attachment-2 fs-18 text-muted"></i>
-                              <span
-                                *ngIf="getPiecesCount(item.idbudget) > 0"
-                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary"
-                                style="
-                                  font-size: 9px;
-                                  margin-top: -2px;
-                                  margin-left: -6px;
-                                "
-                              >
-                                {{ getPiecesCount(item.idbudget) }}
-                              </span>
-                            </button>
-                          </div>
-
-                          <!-- Bouton supprimer -->
-                          <a
-                            *ngIf="
-                              getBudgetsMensuels(item.idbudget).length === 0
-                            "
-                            class="text-danger"
-                            (click)="modalDelete(item)"
-                            data-bs-toggle="modal"
-                            href="#deleteOrder"
-                          >
-                            <i class="ri-delete-bin-5-fill"></i>
-                          </a>
-
-                          <!-- Menu contextuel -->
-                          <div class="dropdown">
-                            <button
-                              class="btn btn-sm btn-outline-primary"
-                              type="button"
-                              data-bs-toggle="dropdown"
-                              aria-expanded="false"
-                            >
-                              <i class="ri-more-2-fill"></i>
-                            </button>
-
-                            <ul class="dropdown-menu dropdown-menu-end">
-                              <li>
-                                <a
-                                  class="dropdown-item"
-                                  href="#lignesBudgetairesModal"
-                                  data-bs-toggle="modal"
-                                  (click)="
-                                    onClickAfficherLignesBudgetaire(item)
-                                  "
-                                >
-                                  <i class="ri-time-line me-2"></i>
-                                  Consulter les lignes budgétaires
-                                </a>
-                              </li>
-                            </ul>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-
-                    <!-- 🔸 LIGNES BUDGETS MENSUELS -->
-                    @if (isExpanded[item.idbudget]) {
-                      <tr>
-                        <td colspan="12" class="bg-light">
-                          <table class="table table-sm table-borderless mb-0">
-                            <thead class="text-muted">
+                  <!-- LIGNES BUDGETS MENSUELS (enfants) -->
+                  @if (isExpanded[item.idbudget]) {
+                    <tr>
+                      <td colspan="12" class="p-0">
+                        <div class="table-child-container">
+                          <table class="table table-modern align-middle mb-0">
+                            <thead class="table-light">
                               <tr>
                                 <th>#</th>
                                 <th>Code</th>
                                 <th>Libellé</th>
-                                <th>Entité</th>
-                                <th>Analytique</th>
-                                <th>Validé</th>
                                 <th>Période</th>
+                                <th>Validé</th>
                                 <th>Prévision</th>
-                                <th>Devise</th>
-                                <th>Status</th>
-                                <th class="text-end">Action</th>
+                                <th>Statut</th>
+                                <th style="text-align: right; width: 100px">
+                                  Actions
+                                </th>
                               </tr>
                             </thead>
                             <tbody>
@@ -368,154 +286,121 @@
                                 track child.idbudget;
                                 let i = $index
                               ) {
-                                <tr>
+                                <tr
+                                  [class.table-active]="
+                                    isChecked(child.idbudget)
+                                  "
+                                >
                                   <td>{{ i + 1 }}</td>
-                                  <td>{{ child.codebudget }}</td>
-                                  <td>{{ child.libelle }}</td>
                                   <td>
-                                    {{ child.entite ? child.entite : "-" }}
+                                    <span class="code-badge">{{
+                                      child.codebudget
+                                    }}</span>
                                   </td>
                                   <td>
-                                    <span
-                                      class="badge"
-                                      [ngClass]="
-                                        child.isanalytique === 1
-                                          ? 'bg-success-subtle text-success'
-                                          : 'bg-danger-subtle text-danger'
-                                      "
-                                    >
-                                      {{
-                                        child.isanalytique === 1 ? "Oui" : "Non"
-                                      }}
-                                    </span>
-                                  </td>
-                                  <td>
-                                    <span
-                                      class="badge"
-                                      [ngClass]="
-                                        child.valide === 1
-                                          ? 'bg-success-subtle text-success'
-                                          : child.valide === 0
-                                            ? 'bg-warning-subtle text-warning'
-                                            : 'bg-danger-subtle text-danger'
-                                      "
-                                    >
-                                      {{
-                                        child.valide === 1
-                                          ? "Oui"
-                                          : child.valide === 0
-                                            ? "En cours"
-                                            : "Non"
-                                      }}
-                                    </span>
+                                    <span class="fw-medium">{{
+                                      child.libelle
+                                    }}</span>
                                   </td>
                                   <td>
                                     {{ child.datedebut | date: "MMM yyyy" }}
                                   </td>
-                                  <td class="text-end">
+                                  <td>
+                                    <span
+                                      class="status-badge"
+                                      [class]="
+                                        getStatusInfo(child.valide, 'triple')
+                                          .class
+                                      "
+                                    >
+                                      <span
+                                        class="status-dot"
+                                        [class]="
+                                          getStatusInfo(child.valide, 'triple')
+                                            .class
+                                        "
+                                      ></span>
+                                      {{
+                                        getStatusInfo(child.valide, "triple")
+                                          .text
+                                      }}
+                                    </span>
+                                  </td>
+                                  <td class="text-end fw-semibold">
                                     {{
                                       getPrevisionMensuel(child)
                                         | number: "1.0-0"
                                     }}
                                   </td>
-                                  <td>{{ user.devise_ref_code }}</td>
                                   <td>
                                     <span
-                                      class="badge"
-                                      [ngClass]="
-                                        child.actif === 1
-                                          ? 'bg-success-subtle text-success'
-                                          : 'bg-danger-subtle text-danger'
+                                      class="status-badge"
+                                      [class]="
+                                        getStatusInfo(child.actif, 'boolean')
+                                          .class
                                       "
                                     >
+                                      <span
+                                        class="status-dot"
+                                        [class]="
+                                          getStatusInfo(child.actif, 'boolean')
+                                            .class
+                                        "
+                                      ></span>
                                       {{
                                         child.actif === 1 ? "Actif" : "Inactif"
                                       }}
                                     </span>
                                   </td>
-                                  <td class="text-end">
-                                    <div
-                                      class="d-flex justify-content-end align-items-center gap-2"
-                                    >
-                                      <!-- Modifier -->
-                                      <a
-                                        href="#showModal"
+                                  <td>
+                                    <div class="actions-group">
+                                      <button
+                                        class="action-btn action-view"
+                                        (click)="
+                                          onClickAfficherLignesBudgetaire(child)
+                                        "
                                         data-bs-toggle="modal"
+                                        data-bs-target="#lignesBudgetairesModal"
+                                        title="Voir les lignes"
+                                      >
+                                        <i class="ri-time-line"></i>
+                                      </button>
+                                      <button
+                                        class="action-btn action-edit"
                                         (click)="modalUpdate(child)"
-                                        class="text-primary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#showModal"
+                                        title="Modifier"
                                         *ngIf="child.valide !== 1"
                                       >
-                                        <i class="ri-pencil-fill"></i>
-                                      </a>
-
-                                      <div class="position-relative">
-                                        <button
-                                          type="button"
-                                          class="btn btn-link text-dark p-0 edit-item-btn"
-                                          (click)="
-                                            openPiecesJointesModal(child)
-                                          "
-                                        >
-                                          <i
-                                            class="ri-attachment-2 fs-18 text-muted"
-                                          ></i>
-                                          <span
-                                            *ngIf="
-                                              getPiecesCount(child.idbudget) > 0
-                                            "
-                                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary"
-                                            style="
-                                              font-size: 9px;
-                                              margin-top: -2px;
-                                              margin-left: -6px;
-                                            "
-                                          >
-                                            {{ getPiecesCount(child.idbudget) }}
-                                          </span>
-                                        </button>
-                                      </div>
-
-                                      <!-- Supprimer -->
-                                      <a
-                                        class="text-danger"
+                                        <i class="ri-pencil-line"></i>
+                                      </button>
+                                      <button
+                                        class="action-btn action-delete"
                                         (click)="modalDelete(child)"
                                         data-bs-toggle="modal"
-                                        href="#deleteOrder"
+                                        data-bs-target="#deleteOrder"
+                                        title="Supprimer"
                                       >
-                                        <i class="ri-delete-bin-5-fill"></i>
-                                      </a>
-
-                                      <!-- Menu contextuel -->
-                                      <div class="dropdown">
-                                        <button
-                                          class="btn btn-sm btn-outline-primary"
-                                          type="button"
-                                          data-bs-toggle="dropdown"
-                                          aria-expanded="false"
+                                        <i class="ri-delete-bin-line"></i>
+                                      </button>
+                                      <button
+                                        class="action-btn action-attachment"
+                                        (click)="openPiecesJointesModal(child)"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#piecesJointesModal"
+                                        title="Pièces jointes"
+                                      >
+                                        <i class="ri-attachment-2"></i>
+                                        <span
+                                          *ngIf="
+                                            getPiecesCount(child.idbudget) > 0
+                                          "
+                                          class="badge-glass badge-glass-primary badge-count"
                                         >
-                                          <i class="ri-more-2-fill"></i>
-                                        </button>
-
-                                        <ul
-                                          class="dropdown-menu dropdown-menu-end"
-                                        >
-                                          <li>
-                                            <a
-                                              class="dropdown-item"
-                                              href="#lignesBudgetairesModal"
-                                              data-bs-toggle="modal"
-                                              (click)="
-                                                onClickAfficherLignesBudgetaire(
-                                                  child
-                                                )
-                                              "
-                                            >
-                                              <i class="ri-time-line me-2"></i>
-                                              Consulter les lignes budgétaires
-                                            </a>
-                                          </li>
-                                        </ul>
-                                      </div>
+                                          {{ getPiecesCount(child.idbudget) }}
+                                        </span>
+                                      </button>
                                     </div>
                                   </td>
                                 </tr>
@@ -525,8 +410,8 @@
                               ) {
                                 <tr>
                                   <td
-                                    colspan="5"
-                                    class="text-center text-muted py-2"
+                                    colspan="9"
+                                    class="text-center text-muted py-3"
                                   >
                                     Aucun budget mensuel rattaché
                                   </td>
@@ -534,925 +419,415 @@
                               }
                             </tbody>
                           </table>
-                        </td>
-                      </tr>
-                    }
+                        </div>
+                      </td>
+                    </tr>
                   }
-                } @else {
-                  <tr>
-                    <td colspan="9" class="text-center py-5">
-                      <i class="ri-inbox-2-line fs-1 text-muted"></i>
-                      <h6 class="mt-2">Aucun budget annuel disponible</h6>
-                      <p class="text-muted mb-0">
-                        Créez un budget annuel pour pouvoir y rattacher des
-                        budgets mensuels.
-                      </p>
-                    </td>
-                  </tr>
                 }
-              </tbody>
-            </table>
-            <div class="noresult" style="display: none">
-              <div class="text-center">
-                <h5 class="mt-2">Désole! Aucun resultat trouvé</h5>
-                <p class="text-muted">
-                  We've searched more than 150+ Orders We did not find any
-                  orders for you search.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="d-flex justify-content-end">
-            <div class="pagination-wrap hstack gap-2">
-              <button
-                [disabled]="currentPage == 1"
-                (click)="changePage(currentPage - 1)"
-                class="btn btn-sm btn-soft-primary pagination-prev"
-              >
-                Précédent
-              </button>
-              <ul class="pagination listjs-pagination mb-0"></ul>
-              <button
-                [disabled]="currentPage == totalPages"
-                (click)="changePage(currentPage + 1)"
-                class="btn btn-sm btn-soft-primary pagination-next"
-              >
-                Suivant
-              </button>
-            </div>
-          </div>
+              } @else {
+                <tr>
+                  <td colspan="12" class="text-center py-5">
+                    <div class="empty-state">
+                      <i class="ri-inbox-2-line"></i>
+                      <p>Aucun budget annuel disponible</p>
+                      <span class="empty-hint"
+                        >Créez un budget annuel pour pouvoir y rattacher des
+                        budgets mensuels.</span
+                      >
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
 
-        <div
-          class="modal fade"
-          id="showModal"
-          tabindex="-1"
-          aria-labelledby="exampleModalLabel"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-header bg-light p-3">
-                <h5 class="modal-title" id="exampleModalLabel">
-                  {{ actionModal === "create" ? "Création" : "Modification" }}
-                  Budget
-                </h5>
-                <button
-                  type="button"
-                  class="btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                  id="close-modal"
-                  (click)="closeModal('showModal')"
-                ></button>
+        <!-- Pagination -->
+        <div class="pagination-modern">
+          <div class="pagination-info">
+            <span>Affichage de</span>
+            <strong>{{ (currentPage - 1) * limit + 1 }}</strong>
+            <span>à</span>
+            <strong>{{
+              currentPage * limit > (filteredBudgets.length || 0)
+                ? filteredBudgets.length || 0
+                : currentPage * limit
+            }}</strong>
+            <span>sur</span>
+            <strong>{{ filteredBudgets.length || 0 }}</strong>
+            <span>budgets</span>
+          </div>
+          <div class="pagination-controls">
+            <button
+              class="page-control"
+              [disabled]="currentPage == 1"
+              (click)="changePage(currentPage - 1)"
+            >
+              <i class="ri-arrow-left-s-line"></i>
+            </button>
+            <span class="page-number">{{ currentPage }}</span>
+            <button
+              class="page-control"
+              [disabled]="currentPage == totalPages"
+              (click)="changePage(currentPage + 1)"
+            >
+              <i class="ri-arrow-right-s-line"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de création/modification -->
+<div
+  class="modal fade modal-lg"
+  id="showModal"
+  tabindex="-1"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow-lg border-0">
+      <div
+        class="modal-header"
+        style="
+          background: linear-gradient(135deg, #3b82f6 0%, #405189 100%);
+          border: 0;
+        "
+      >
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-money-dollar-circle-line text-white fs-5"></i>
+          </div>
+          <h5 class="modal-title text-white fw-semibold">
+            {{
+              actionModal === "create" ? "Nouveau budget" : "Modifier le budget"
+            }}
+          </h5>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <form [formGroup]="budgetForm">
+        <div class="modal-body p-4">
+          <!-- Section Identification -->
+          <div class="mb-4">
+            <h6
+              class="mb-3 fw-semibold small text-uppercase text-muted"
+              style="letter-spacing: 0.5px"
+            >
+              <i class="ri-id-card-line me-1"></i> Identification
+            </h6>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input
+                    type="text"
+                    class="form-control {{ isValidField('codebudget') }}"
+                    formControlName="codebudget"
+                    id="codebudget"
+                    placeholder="Code budget"
+                  />
+                  <label for="codebudget" class="small">Code</label>
+                </div>
               </div>
-              <form [formGroup]="budgetForm">
-                <div class="modal-body">
-                  <input type="hidden" id="id-field" />
-
-                  <div class="mb-3" id="modal-id">
-                    <label for="orderId" class="form-label form-label-sm"
-                      >Code</label
-                    >
-                    <input
-                      type="text"
-                      id="orderId"
-                      class="form-control form-control-sm {{
-                        isValidField('codebudget')
-                      }}"
-                      formControlName="codebudget"
-                      placeholder=""
-                      required
-                    />
-                  </div>
-
-                  <div class="mb-3">
-                    <label class="form-label form-label-sm" for=""
-                      >Type de budget</label
-                    >
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <select
+                    class="form-select"
+                    formControlName="typebudget"
+                    id="typebudget"
+                  >
+                    <option value="">-- Type de budget --</option>
+                    <option value="Annuel">Annuel</option>
+                    <option value="Mensuel">Mensuel</option>
+                  </select>
+                  <label for="typebudget" class="small">Type de budget</label>
+                </div>
+              </div>
+              @if (budgetForm.value.typebudget === "Mensuel") {
+                <div class="col-md-12">
+                  <div class="form-floating">
                     <select
-                      class="form-select form-control form-control-sm {{
-                        isValidField('typebudget')
-                      }}"
-                      aria-label="Default select example"
-                      id="typebudget-field"
-                      formControlName="typebudget"
+                      class="form-select"
+                      formControlName="idbudgetparent"
+                      id="idbudgetparent"
+                      (change)="onSelectionChange($event)"
                     >
-                      <option [ngValue]="null">-- Sélectionner --</option>
-                      <option value="Annuel">Annuel</option>
-                      <option value="Mensuel">Mensuel</option>
-                    </select>
-                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
-                  </div>
-
-                  @if (budgetForm.value.typebudget === "Mensuel") {
-                    <div class="mb-3">
-                      <label
-                        for="idbudgetparent-field"
-                        class="form-label form-label-sm"
-                        >Budget Parent</label
-                      >
-                      <select
-                        class="form-select form-control form-control-sm"
-                        aria-label="Default select example"
-                        id="idbudgetparent"
-                        formControlName="idbudgetparent"
-                        (change)="onSelectionChange($event)"
-                      >
-                        <option [ngValue]="null">-- Sélectionner --</option>
-                        @for (item of budgets; track $index) {
-                          @if (item.typebudget === "Annuel") {
-                            <option [value]="item.idbudget">
-                              {{ item.codebudget }} - {{ item.libelle }}
-                            </option>
-                          }
+                      <option value="">-- Budget parent --</option>
+                      @for (item of budgets; track $index) {
+                        @if (item.typebudget === "Annuel") {
+                          <option [value]="item.idbudget">
+                            {{ item.codebudget }} - {{ item.libelle }}
+                          </option>
                         }
-                      </select>
-                      <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
-                    </div>
-                  }
-
-                  <div class="mb-3" id="modal-id">
-                    <label
-                      for="libellebudgetId"
-                      class="form-label form-label-sm"
-                      >Libellé</label
+                      }
+                    </select>
+                    <label for="idbudgetparent" class="small"
+                      >Budget parent</label
                     >
-                    <input
-                      type="text"
-                      id="libellebudgetId"
-                      class="form-control form-control-sm {{
-                        isValidField('libelle')
-                      }}"
-                      formControlName="libelle"
-                      placeholder=""
-                      required
-                    />
                   </div>
+                </div>
+              }
+              <div class="col-12">
+                <div class="form-floating">
+                  <input
+                    type="text"
+                    class="form-control {{ isValidField('libelle') }}"
+                    formControlName="libelle"
+                    id="libelle"
+                    placeholder="Libellé"
+                  />
+                  <label for="libelle" class="small">Libellé</label>
+                </div>
+              </div>
+            </div>
+          </div>
 
+          <!-- Section Configuration -->
+          <div class="mb-4">
+            <h6
+              class="mb-3 fw-semibold small text-uppercase text-muted"
+              style="letter-spacing: 0.5px"
+            >
+              <i class="ri-settings-4-line me-1"></i> Configuration
+            </h6>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input
+                    type="date"
+                    class="form-control {{ isValidField('datedebut') }}"
+                    formControlName="datedebut"
+                    id="datedebut"
+                  />
+                  <label for="datedebut" class="small">Date début</label>
                   <div
-                    class="mb-3 d-flex align-items-center justify-content-between p-2 border rounded bg-light-subtle shadow-sm"
+                    class="invalid-feedback"
+                    *ngIf="hasError('datedebut', 'invalidMonthRange')"
                   >
-                    <div class="d-flex align-items-center">
-                      <i class="ri-settings-4-line me-2 text-primary fs-18"></i>
-                      <div>
-                        <h6 class="mb-0 fs-13">Gestion analytique</h6>
-                        <small class="text-muted"
-                          >Gérer les lignes budgétaires analytiquement ?</small
-                        >
-                      </div>
-                    </div>
-                    <div class="form-check form-switch form-switch-md">
-                      <input
-                        type="checkbox"
-                        class="form-check-input"
-                        id="customSwitchEntite"
-                        formControlName="isanalytique"
-                        role="switch"
-                      />
-                      <label
-                        class="form-check-label"
-                        for="customSwitchEntite"
-                      ></label>
-                    </div>
+                    Le budget mensuel doit couvrir un mois complet.
                   </div>
-
-                  @if (
-                    budgetForm.value.isanalytique === false ||
-                    (selectedBudget &&
-                      (selectedBudget.isanalytique === 0 ||
-                        selectedBudget.isanalytique === null))
-                  ) {
-                    <div class="mb-3">
-                      <label
-                        class="form-label form-label-sm"
-                        for="entite-field"
-                      >
-                        Entité
-                      </label>
-
-                      <select
-                        id="entite-field"
-                        class="form-select form-control form-control-sm {{
-                          isValidField('entite')
-                        }}"
-                        formControlName="entite"
-                      >
-                        <option [ngValue]="null">-- Sélectionner --</option>
-
-                        <option value="Département">Département</option>
-                        <option value="Site">Site</option>
-                      </select>
-
-                      <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
-                    </div>
-                  }
-
-                  <div class="mb-3">
-                    <div>
-                      <label for="datedebut_field" class="form-label mb-0"
-                        >Date début</label
-                      >
-                      <input
-                        type="date"
-                        id="datedebut_field"
-                        class="form-control form-control-sm {{
-                          isValidField('datedebut')
-                        }}"
-                        formControlName="datedebut"
-                      />
-
-                      <div
-                        class="invalid-feedback"
-                        *ngIf="hasError('datedebut', 'invalidMonthRange')"
-                      >
-                        Le budget mensuel doit couvrir un mois complet.
-                      </div>
-
-                      <div
-                        class="invalid-feedback"
-                        *ngIf="hasError('datedebut', 'outOfParentRange')"
-                      >
-                        La date de début est hors de la période du budget
-                        parent.
-                      </div>
-
-                      <div
-                        class="invalid-feedback"
-                        *ngIf="hasError('datedebut', 'duplicateMonthlyBudget')"
-                      >
-                        Un budget mensuel existe déjà pour ce mois.
-                      </div>
-
-                      <div
-                        class="invalid-feedback"
-                        *ngIf="hasError('datedebut', 'invalidAnnualStartDate')"
-                      >
-                        Pour un budget annuel, la date de début doit être le
-                        01/01 de l'année.
-                      </div>
-                      <div
-                        class="invalid-feedback"
-                        *ngIf="hasError('datedebut', 'duplicateAnnualBudget')"
-                      >
-                        Un budget annuel existe déjà pour ce site pour cette
-                        année.
-                      </div>
-                      <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
-                    </div>
-                  </div>
-                  <div class="mb-3">
-                    <div>
-                      <label for="datefin_field" class="form-label mb-0"
-                        >Date fin</label
-                      >
-                      <input
-                        type="date"
-                        id="datefin_field"
-                        class="form-control form-control-sm {{
-                          isValidField('datefin')
-                        }}"
-                        formControlName="datefin"
-                      />
-                      <div
-                        class="invalid-feedback"
-                        *ngIf="hasError('datefin', 'startAfterEnd')"
-                      >
-                        La date de fin doit être postérieure à la date de début.
-                      </div>
-
-                      <div
-                        class="invalid-feedback"
-                        *ngIf="hasError('datefin', 'invalidMonthRange')"
-                      >
-                        La date de fin doit correspondre au dernier jour du
-                        mois.
-                      </div>
-
-                      <div
-                        class="invalid-feedback"
-                        *ngIf="hasError('datefin', 'outOfParentRange')"
-                      >
-                        La date de fin est hors de la période du budget parent.
-                      </div>
-
-                      <div
-                        class="invalid-feedback"
-                        *ngIf="hasError('datefin', 'duplicateMonthlyBudget')"
-                      >
-                        Un budget mensuel existe déjà pour cette période.
-                      </div>
-
-                      <div
-                        class="invalid-feedback"
-                        *ngIf="hasError('datefin', 'invalidAnnualEndDate')"
-                      >
-                        Pour un budget annuel, la date de fin doit être le 31/12
-                        de la même année.
-                      </div>
-                      <div
-                        class="invalid-feedback"
-                        *ngIf="hasError('datefin', 'duplicateAnnualBudget')"
-                      >
-                        Un budget annuel existe déjà pour ce site pour cette
-                        année.
-                      </div>
-                      <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
-                    </div>
-                  </div>
-
-                  <!-- ==================== PIÈCES JOINTES (VERSION COMPACTE) ==================== -->
-                  <div class="attachments-section">
-                    <!-- Fichiers existants -->
-                    <div
-                      class="attachments-section"
-                      *ngIf="
-                        existingPieces.length > 0 || selectedFiles.length > 0
-                      "
-                    >
-                      <div class="section-header">
-                        <div class="section-title mb-2 flex items-center gap-2">
-                          <i class="ri-attachment-2"></i>
-                          <span>Pièces jointes</span>
-                          <span class="badge bg-primary rounded-pill">{{
-                            existingPieces.length + selectedFiles.length
-                          }}</span>
-                        </div>
-
-                        <!-- ⭐ Bouton Tout télécharger -->
-                        <button
-                          *ngIf="existingPieces.length > 0"
-                          type="button"
-                          class="btn-download-all"
-                          (click)="downloadAllFiles()"
-                          title="Télécharger toutes les pièces jointes"
-                        >
-                          <i class="ri-download-line"></i> Tout télécharger
-                        </button>
-
-                        <input
-                          type="file"
-                          #fileInput
-                          multiple
-                          (change)="onFilesSelected($event)"
-                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
-                          class="d-none"
-                        />
-                      </div>
-
-                      <!-- Scroll horizontal -->
-                      <div class="horizontal-scroll mb-2">
-                        <div
-                          *ngFor="let piece of existingPieces"
-                          class="file-pill"
-                        >
-                          <div class="pill-icon">
-                            <i [class]="getFileIcon(piece)"></i>
-                          </div>
-                          <div class="pill-info">
-                            <span class="pill-name">{{
-                              piece.nomfichier
-                            }}</span>
-                            <span class="pill-meta">{{
-                              formatFileSize(piece.taille)
-                            }}</span>
-                          </div>
-                          <div class="pill-actions">
-                            <button
-                              (click)="downloadPiece(piece)"
-                              title="Télécharger"
-                            >
-                              <i class="ri-download-line"></i>
-                            </button>
-                            <button
-                              (click)="removeExistingFile(piece)"
-                              [disabled]="pjDeleting === piece.idpiecejointe"
-                              title="Supprimer"
-                            >
-                              <span
-                                *ngIf="pjDeleting === piece.idpiecejointe"
-                                class="spinner-border spinner-border-sm"
-                              ></span>
-                              <i
-                                *ngIf="pjDeleting !== piece.idpiecejointe"
-                                class="ri-close-line"
-                              ></i>
-                            </button>
-                          </div>
-                        </div>
-
-                        <!-- Badge pour nouveaux fichiers -->
-                        <div
-                          *ngFor="let file of selectedFiles; let i = index"
-                          class="file-pill file-pill-new"
-                        >
-                          <div class="pill-icon">
-                            <i class="ri-file-line"></i>
-                          </div>
-                          <div class="pill-info">
-                            <span class="pill-name">{{ file.name }}</span>
-                            <span class="pill-meta"
-                              >{{ file.size / 1024 | number: "1.0-0" }} KB</span
-                            >
-                          </div>
-                          <div class="pill-actions">
-                            <button
-                              (click)="removeSelectedFile(i)"
-                              title="Retirer"
-                            >
-                              <i class="ri-close-line"></i>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Barre d'upload compacte -->
-                    <div class="upload-bar" (click)="fileInput.click()">
-                      <input
-                        type="file"
-                        #fileInput
-                        multiple
-                        (change)="onFilesSelected($event)"
-                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
-                        class="d-none"
-                      />
-                      <div class="upload-info">
-                        <i class="ri-cloud-upload-line"></i>
-                        <span *ngIf="selectedFiles.length === 0"
-                          >Ajouter des fichiers</span
-                        >
-                        <span *ngIf="selectedFiles.length > 0">
-                          <strong>{{ selectedFiles.length }}</strong> fichier(s)
-                          sélectionné(s)
-                        </span>
-                      </div>
-                      <div
-                        class="upload-badge"
-                        *ngIf="selectedFiles.length === 0"
-                      >
-                        PDF, DOC, XLS, JPG, CSV
-                      </div>
-                    </div>
-
-                    <!-- Aperçu des fichiers sélectionnés -->
-                    <div
-                      *ngIf="selectedFiles.length > 0"
-                      class="file-grid mt-2"
-                    >
-                      <div
-                        *ngFor="let file of selectedFiles; let i = index"
-                        class="file-card-compact"
-                      >
-                        <div class="file-info">
-                          <div class="file-icon-sm">
-                            <i class="ri-file-line"></i>
-                          </div>
-                          <div class="file-details">
-                            <div class="file-name" [title]="file.name">
-                              {{ file.name }}
-                            </div>
-                            <div class="file-meta">
-                              {{ file.size / 1024 | number: "1.0-0" }} KB
-                            </div>
-                          </div>
-                        </div>
-                        <div class="file-actions">
-                          <button
-                            type="button"
-                            class="btn-icon-sm btn btn-soft-danger"
-                            (click)="
-                              removeSelectedFile(i); $event.stopPropagation()
-                            "
-                            title="Retirer"
-                          >
-                            <i class="ri-close-line fs-6"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- État vide -->
-                    <div
-                      *ngIf="
-                        existingPieces.length === 0 &&
-                        selectedFiles.length === 0
-                      "
-                      class="text-center py-3"
-                    >
-                      <i
-                        class="ri-folder-open-line text-muted"
-                        style="font-size: 1.25rem"
-                      ></i>
-                      <p class="text-muted small mb-0 mt-1">
-                        Aucune pièce jointe
-                      </p>
-                    </div>
-                  </div>
-
-                  <div class="mb-3">
-                    <label
-                      class="form-label form-label-sm"
-                      for="idcircuitvalidation-field"
-                      [hidden]="true"
-                      >Circuit de validation</label
-                    >
-                    <input
-                      type="text"
-                      id="idcircuitvalidation-field"
-                      class="form-control form-control-sm {{
-                        isValidField('idcircuitvalidation')
-                      }}"
-                      formControlName="idcircuitvalidation"
-                      [value]="circuitValidation?.idcircuitvalidation"
-                      [hidden]="true"
-                    />
-
-                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
-                  </div>
-                  <div class="mb-3">
-                    <label
-                      class="form-label form-label-sm"
-                      [hidden]="true"
-                      for=""
-                      >Site</label
-                    >
-                    <input
-                      type="text"
-                      id="idsite-field"
-                      class="form-control form-control-sm {{
-                        isValidField('idsite')
-                      }}"
-                      formControlName="idsite"
-                      [value]="user.idsite"
-                      [hidden]="true"
-                    />
-                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
-                  </div>
-                  <div class="mb-3">
-                    <label
-                      class="form-label form-label-sm"
-                      for=""
-                      [hidden]="true"
-                      >Société</label
-                    >
-                    <input
-                      type="text"
-                      id="idsociete-field"
-                      class="form-control form-control-sm {{
-                        isValidField('idsociete')
-                      }}"
-                      formControlName="idsociete"
-                      [value]="user.idsociete"
-                      [hidden]="true"
-                    />
-                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
-                  </div>
-
-                  <div class="mb-3">
-                    <div class="form-check form-switch">
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        role="switch"
-                        value="1"
-                        formControlName="actif"
-                        id="flexSwitchCheckChecked"
-                        checked
-                      />
-                      <label
-                        class="form-check-label"
-                        for="flexSwitchCheckChecked"
-                        >Actif</label
-                      >
-                    </div>
-                  </div>
-                  <div *ngIf="msgErros" class="alert alert-danger mt-2">
-                    {{ msgErros }}
-                  </div>
-                </div>
-
-                <div class="modal-footer">
-                  <div class="hstack gap-2 justify-content-end">
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-light"
-                      data-bs-dismiss="modal"
-                    >
-                      Fermer
-                    </button>
-                    <button
-                      type="submit"
-                      class="btn btn-sm btn-success"
-                      id="add-btn"
-                      (click)="onSubmit()"
-                    >
-                      {{
-                        actionModal === "create" ? "Enregistrer" : "Modifier"
-                      }}
-                    </button>
-                    <!-- <button type="button" class="btn btn-success" id="edit-btn">Update</button> -->
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal fade" id="modalLignesBudget" tabindex="-1">
-          <div
-            class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"
-          >
-            <div class="modal-content shadow-lg rounded-4">
-              <!-- HEADER -->
-              <div class="modal-header bg-light">
-                <div>
-                  <h5 class="modal-title mb-0">Lignes budgétaires</h5>
-                  <small class="text-muted">
-                    {{ selectedBudgetForLignes?.codebudget }} —
-                    {{ selectedBudgetForLignes?.libelle }}
-                  </small>
-                </div>
-
-                <button
-                  type="button"
-                  class="btn-close"
-                  (click)="closeLignesBudgetModal()"
-                ></button>
-              </div>
-
-              <!-- BODY -->
-              <div class="modal-body p-0">
-                <table class="table table-hover mb-0 align-middle">
-                  <thead class="table-light">
-                    <tr>
-                      <th>Nature</th>
-                      <th class="text-end">Département</th>
-                      <th class="text-end">Site</th>
-                      <th class="text-end">Société</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    <tr *ngFor="let l of lignesBudgetDuBudget">
-                      <td>{{ l.nature_operation?.libelle }}</td>
-                      <td class="text-end fw-semibold">
-                        {{ l.montantprevisiondept | number: "1.0-0" }}
-                      </td>
-                      <td class="text-end">
-                        {{ l.montantprevisionsite | number: "1.0-0" }}
-                      </td>
-                      <td class="text-end">
-                        {{ l.montantprevisionsociete | number: "1.0-0" }}
-                      </td>
-                    </tr>
-
-                    <tr *ngIf="lignesBudgetDuBudget.length === 0">
-                      <td colspan="4" class="text-center text-muted py-4">
-                        Aucune ligne budgétaire pour ce budget
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <!-- FOOTER -->
-              <div class="modal-footer bg-light">
-                <button
-                  class="btn btn-outline-secondary"
-                  (click)="closeLignesBudgetModal()"
-                >
-                  Fermer
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Modal -->
-        <div
-          class="modal fade flip"
-          id="deleteOrder"
-          tabindex="-1"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-body p-5 text-center">
-                <div class="mt-4 text-center">
-                  <h4>{{ titleMsg }}</h4>
-                  <p class="text-muted fs-15 mb-4">{{ msgSup }}</p>
-                  <div class="hstack gap-2 justify-content-center remove">
-                    <button
-                      class="btn btn-sm btn-link link-success fw-medium text-decoration-none"
-                      id="deleteRecord-close"
-                      data-bs-dismiss="modal"
-                    >
-                      <i class="ri-close-line me-1 align-middle"></i> annuler
-                    </button>
-                    <button
-                      class="btn btn-sm btn-danger"
-                      (click)="deleteConfirmed()"
-                      id="delete-record"
-                    >
-                      Oui, supprimer
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!--end modal -->
-        <!-- Modal visionnage des validateurs -->
-        <div
-          class="modal fade"
-          id="lignesBudgetairesModal"
-          tabindex="-1"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content">
-              <!-- HEADER -->
-              <div class="modal-header bg-light p-3">
-                <h5 class="modal-title">
-                  Lignes budgétaire du budget:
-                  {{ selectedBudget?.codebudget }} -
-                  {{ selectedBudget?.libelle }}
-                </h5>
-                <button
-                  type="button"
-                  class="btn-close"
-                  data-bs-dismiss="modal"
-                  (click)="closeModal('lignesBudgetairesModal')"
-                ></button>
-              </div>
-
-              <!-- BODY -->
-              <div class="modal-body">
-                <!-- TABLE -->
-                <div class="table-responsive">
-                  <table
-                    class="table table-bordered table-striped align-middle table-compact"
+                  <div
+                    class="invalid-feedback"
+                    *ngIf="hasError('datedebut', 'outOfParentRange')"
                   >
-                    <thead class="table-light">
-                      <tr>
-                        <th style="width: 50px">#</th>
-                        <th>Code budgétaire</th>
-                        <th *ngIf="selectedBudget?.entite === 'Département'">
-                          Département
-                        </th>
-                        <th *ngIf="selectedBudget?.isanalytique === 1">Code</th>
-                        <th>
-                          {{
-                            selectedBudget?.isanalytique === 1
-                              ? "Centre analytique"
-                              : "Nature d'opération"
-                          }}
-                        </th>
-                        <th
-                          *ngIf="
-                            selectedBudget?.entite === 'Département' ||
-                            selectedBudget?.isanalytique === 1
-                          "
-                        >
-                          Prévision Département
-                        </th>
-                        <th>Prévision Site</th>
-                        <th>Prévision Société</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      <tr *ngFor="let ligne of lignesByBudget; let i = index">
-                        <td class="text-center">{{ i + 1 }}</td>
-                        <td>{{ ligne.codebudgetaire || "—" }}</td>
-                        <td *ngIf="selectedBudget?.entite === 'Département'">
-                          {{ ligne.departement?.libelle }}
-                        </td>
-                        <td *ngIf="selectedBudget?.isanalytique === 1">
-                          {{ ligne.centre_analytique?.codecentreanalytique }}
-                        </td>
-                        <td>
-                          {{
-                            selectedBudget?.isanalytique
-                              ? ligne.centre_analytique?.libelle
-                              : ligne.nature_operation?.libelle
-                          }}
-                        </td>
-
-                        <td
-                          *ngIf="
-                            selectedBudget?.entite === 'Département' ||
-                            selectedBudget?.isanalytique === 1
-                          "
-                        >
-                          {{
-                            ligne.montantprevisiondept | number: "1.0-0" : "fr"
-                          }}
-                        </td>
-
-                        <td>
-                          {{
-                            ligne.montantprevisionsite | number: "1.0-0" : "fr"
-                          }}
-                        </td>
-
-                        <td>
-                          {{
-                            ligne.montantprevisionsociete
-                              | number: "1.0-0" : "fr"
-                          }}
-                        </td>
-                      </tr>
-                      <tr *ngIf="lignesByBudget.length === 0">
-                        <td colspan="6" class="text-center text-muted py-3">
-                          Aucune ligne budgétaire n'est associée à ce budget.
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                    La date de début est hors de la période du budget parent.
+                  </div>
+                  <div
+                    class="invalid-feedback"
+                    *ngIf="hasError('datedebut', 'duplicateMonthlyBudget')"
+                  >
+                    Un budget mensuel existe déjà pour ce mois.
+                  </div>
+                  <div
+                    class="invalid-feedback"
+                    *ngIf="hasError('datedebut', 'invalidAnnualStartDate')"
+                  >
+                    Pour un budget annuel, la date de début doit être le 01/01
+                    de l'année.
+                  </div>
+                  <div
+                    class="invalid-feedback"
+                    *ngIf="hasError('datedebut', 'duplicateAnnualBudget')"
+                  >
+                    Un budget annuel existe déjà pour ce site pour cette année.
+                  </div>
                 </div>
-
-                <div *ngIf="msgErros" class="alert alert-danger mt-2">
-                  {{ msgErros }}
+              </div>
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input
+                    type="date"
+                    class="form-control {{ isValidField('datefin') }}"
+                    formControlName="datefin"
+                    id="datefin"
+                  />
+                  <label for="datefin" class="small">Date fin</label>
+                  <div
+                    class="invalid-feedback"
+                    *ngIf="hasError('datefin', 'startAfterEnd')"
+                  >
+                    La date de fin doit être postérieure à la date de début.
+                  </div>
+                  <div
+                    class="invalid-feedback"
+                    *ngIf="hasError('datefin', 'invalidMonthRange')"
+                  >
+                    La date de fin doit correspondre au dernier jour du mois.
+                  </div>
+                  <div
+                    class="invalid-feedback"
+                    *ngIf="hasError('datefin', 'outOfParentRange')"
+                  >
+                    La date de fin est hors de la période du budget parent.
+                  </div>
+                  <div
+                    class="invalid-feedback"
+                    *ngIf="hasError('datefin', 'duplicateMonthlyBudget')"
+                  >
+                    Un budget mensuel existe déjà pour cette période.
+                  </div>
+                  <div
+                    class="invalid-feedback"
+                    *ngIf="hasError('datefin', 'invalidAnnualEndDate')"
+                  >
+                    Pour un budget annuel, la date de fin doit être le 31/12 de
+                    la même année.
+                  </div>
+                  <div
+                    class="invalid-feedback"
+                    *ngIf="hasError('datefin', 'duplicateAnnualBudget')"
+                  >
+                    Un budget annuel existe déjà pour ce site pour cette année.
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        <!-- Modal Pièces Jointes - Version corrigée -->
-        <div
-          class="modal fade"
-          [class.show]="modalPJVisible"
-          [style.display]="modalPJVisible ? 'block' : 'none'"
-          id="piecesJointesModal"
-          tabindex="-1"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-              <div class="modal-header bg-primary-subtle">
-                <div class="d-flex align-items-center gap-2">
-                  <i class="ri-attachment-2 fs-20 text-primary"></i>
-                  <h5 class="modal-title">
-                    Pièces jointes - {{ selectedBudgetPJ?.codebudget }} -
-                    {{ selectedBudgetPJ?.libelle }}
-                  </h5>
-                </div>
-                <button
-                  type="button"
-                  class="btn-close"
-                  (click)="closePiecesJointesModal()"
-                  aria-label="Close"
-                ></button>
-              </div>
 
-              <div class="modal-body">
-                <!-- Zone d'upload -->
+          <!-- Section Suivi Budgétaire -->
+          <div class="mb-4">
+            <h6
+              class="mb-3 fw-semibold small text-uppercase text-muted"
+              style="letter-spacing: 0.5px"
+            >
+              <i class="ri-pie-chart-line me-1"></i> Suivi Budgétaire
+            </h6>
+            <div class="row g-3">
+              <div class="col-12">
                 <div
-                  class="upload-area mb-4 p-3 border border-dashed rounded-3 bg-light"
+                  class="permission-card"
+                  [class.active]="budgetForm.get('isanalytique')?.value == true"
                 >
                   <div
-                    class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+                    class="form-check form-switch d-flex align-items-center justify-content-between px-2"
                   >
-                    <div class="d-flex align-items-center gap-3">
-                      <i class="ri-upload-cloud-2-line fs-1 text-primary"></i>
-                      <div>
-                        <h6 class="mb-0">Ajouter des fichiers</h6>
-                        <p class="text-muted small mb-0">
-                          PDF, images, Excel, CSV (max 10MB)
-                        </p>
-                      </div>
-                    </div>
-                    <div>
-                      <input
-                        type="file"
-                        #fileInput
-                        multiple
-                        (change)="onFilesSelected($event)"
-                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
-                        class="d-none"
-                      />
-                      <button
-                        type="button"
-                        class="btn btn-primary btn-sm"
-                        (click)="fileInput.click()"
-                        [disabled]="pjUploading"
-                      >
-                        <i class="ri-add-line me-1"></i>
-                        Choisir des fichiers
-                      </button>
-                    </div>
+                    <label
+                      class="form-check-label small fw-medium"
+                      for="isanalytique"
+                    >
+                      <i class="ri-checkbox-circle-line me-1"></i> Suivi
+                      analytique
+                    </label>
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="isanalytique"
+                      formControlName="isanalytique"
+                    />
                   </div>
+                </div>
+              </div>
+              @if (
+                budgetForm.value.isanalytique === false ||
+                (selectedBudget &&
+                  (selectedBudget.isanalytique === 0 ||
+                    selectedBudget.isanalytique === null))
+              ) {
+                <div class="col-md-6">
+                  <div class="form-floating">
+                    <select
+                      class="form-select"
+                      formControlName="entite"
+                      id="entite"
+                    >
+                      <option value="">-- Entité --</option>
+                      <option value="Département">Département</option>
+                      <option value="Site">Site</option>
+                    </select>
+                    <label for="entite" class="small">Entité</label>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
 
-                  <!-- Aperçu des fichiers sélectionnés -->
-                  <div *ngIf="selectedFiles.length > 0" class="mt-3">
-                    <div class="d-flex flex-wrap gap-2">
-                      <div
-                        *ngFor="let file of selectedFiles; let i = index"
-                        class="file-preview bg-white rounded p-2 shadow-sm"
-                      >
+          <!-- Section Statut -->
+          <div class="mb-4">
+            <h6
+              class="mb-3 fw-semibold small text-uppercase text-muted"
+              style="letter-spacing: 0.5px"
+            >
+              <i class="ri-shield-check-line me-1"></i> Statut
+            </h6>
+            <div
+              class="permission-card"
+              [class.active]="budgetForm.get('actif')?.value == true"
+            >
+              <div
+                class="form-check form-switch d-flex align-items-center justify-content-between px-2"
+              >
+                <label class="form-check-label small fw-medium" for="actif">
+                  <i class="ri-checkbox-circle-line me-1"></i> Actif
+                </label>
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="actif"
+                  formControlName="actif"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Section Pièces Jointes -->
+          <div class="mb-4">
+            <h6
+              class="mb-3 fw-semibold small text-uppercase text-muted"
+              style="letter-spacing: 0.5px"
+            >
+              <i class="ri-attachment-2 me-1"></i> Pièces jointes
+            </h6>
+            <div
+              class="upload-area mb-3 p-3 border border-dashed rounded-3 bg-light"
+            >
+              <div
+                class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+              >
+                <div class="d-flex align-items-center gap-3">
+                  <i class="ri-upload-cloud-2-line fs-1 text-primary"></i>
+                  <div>
+                    <h6 class="mb-0">Ajouter des fichiers</h6>
+                    <p class="text-muted small mb-0">
+                      PDF, images, Excel, CSV (max 10MB)
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <input
+                    type="file"
+                    #fileInput
+                    multiple
+                    (change)="onFilesSelected($event)"
+                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
+                    class="d-none"
+                  />
+                  <button
+                    type="button"
+                    class="btn-glass-primary"
+                    (click)="fileInput.click()"
+                    [disabled]="pjUploading"
+                  >
+                    <i class="ri-add-line me-1"></i>
+                    Choisir des fichiers
+                  </button>
+                </div>
+              </div>
+
+              <!-- Aperçu des fichiers sélectionnés -->
+              @if (selectedFiles.length > 0) {
+                <div class="mt-3">
+                  <div class="d-flex flex-wrap gap-2">
+                    @for (file of selectedFiles; track $index; let i = $index) {
+                      <div class="file-pill bg-white rounded p-2 shadow-sm">
                         <div class="d-flex align-items-center gap-2">
                           <i class="ri-file-line fs-4 text-secondary"></i>
                           <div class="flex-grow-1">
@@ -1471,153 +846,582 @@
                           <button
                             class="btn btn-sm btn-link text-danger p-0"
                             (click)="removeSelectedFile(i)"
+                            title="Retirer"
                           >
                             <i class="ri-close-line"></i>
                           </button>
                         </div>
                       </div>
-                    </div>
-                    <div class="mt-2 text-end">
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <input
+            type="hidden"
+            formControlName="idcircuitvalidation"
+            [value]="circuitValidation?.idcircuitvalidation"
+          />
+          <input type="hidden" formControlName="idsite" [value]="user.idsite" />
+          <input
+            type="hidden"
+            formControlName="idsociete"
+            [value]="user.idsociete"
+          />
+
+          @if (msgErros) {
+            <div class="alert alert-danger mt-3">
+              {{ msgErros }}
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer border-0 p-4" style="background: transparent">
+          <div class="d-flex gap-3 justify-content-end w-100">
+            <button
+              type="button"
+              class="btn-glass-cancel"
+              data-bs-dismiss="modal"
+            >
+              <i class="ri-close-line me-1"></i> Annuler
+            </button>
+            <button
+              type="submit"
+              class="btn-glass-submit"
+              [disabled]="loading || budgetForm.invalid"
+              (click)="onSubmit()"
+            >
+              <span
+                *ngIf="loading"
+                class="spinner-border spinner-border-sm me-2"
+              ></span>
+              <i *ngIf="!loading" class="ri-save-line me-1"></i>
+              {{ actionModal === "create" ? "Enregistrer" : "Modifier" }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Lignes Budgétaires -->
+<div
+  class="modal fade modal-lg"
+  id="modalLignesBudget"
+  tabindex="-1"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content shadow-lg border-0">
+      <div
+        class="modal-header"
+        style="
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          border: 0;
+        "
+      >
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-time-line text-white fs-5"></i>
+          </div>
+          <div>
+            <h5 class="modal-title text-white fw-semibold">
+              Lignes budgétaires
+            </h5>
+            <span class="text-white-50 small">
+              {{ selectedBudgetForLignes?.codebudget }} —
+              {{ selectedBudgetForLignes?.libelle }}
+            </span>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="closeLignesBudgetModal()"
+        ></button>
+      </div>
+
+      <div class="modal-body p-0">
+        <div class="table-responsive">
+          <table class="table table-modern align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Nature</th>
+                @if (selectedBudgetForLignes?.entite === "Département") {
+                  <th class="text-end">Département</th>
+                }
+                @if (selectedBudgetForLignes?.isanalytique === 1) {
+                  <th class="text-end">Code</th>
+                }
+                <th>
+                  {{
+                    selectedBudgetForLignes?.isanalytique === 1
+                      ? "Centre analytique"
+                      : "Nature d'opération"
+                  }}
+                </th>
+                @if (
+                  selectedBudgetForLignes?.entite === "Département" ||
+                  selectedBudgetForLignes?.isanalytique === 1
+                ) {
+                  <th class="text-end">Prévision Département</th>
+                }
+                <th class="text-end">Prévision Site</th>
+                <th class="text-end">Prévision Société</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (
+                l of lignesBudgetDuBudget;
+                track l.idbudgetdepartementnature
+              ) {
+                <tr>
+                  <td>{{ l.nature_operation?.libelle }}</td>
+                  @if (selectedBudgetForLignes?.entite === "Département") {
+                    <td class="text-end fw-semibold">
+                      {{ l.montantprevisiondept | number: "1.0-0" }}
+                    </td>
+                  }
+                  @if (selectedBudgetForLignes?.isanalytique === 1) {
+                    <td class="text-end">
+                      {{ l.centre_analytique?.codecentreanalytique }}
+                    </td>
+                  }
+                  <td>
+                    {{
+                      selectedBudgetForLignes?.isanalytique === 1
+                        ? l.centre_analytique?.libelle
+                        : l.nature_operation?.libelle
+                    }}
+                  </td>
+                  @if (
+                    selectedBudgetForLignes?.entite === "Département" ||
+                    selectedBudgetForLignes?.isanalytique === 1
+                  ) {
+                    <td class="text-end">
+                      {{ l.montantprevisiondept | number: "1.0-0" }}
+                    </td>
+                  }
+                  <td class="text-end">
+                    {{ l.montantprevisionsite | number: "1.0-0" }}
+                  </td>
+                  <td class="text-end">
+                    {{ l.montantprevisionsociete | number: "1.0-0" }}
+                  </td>
+                </tr>
+              }
+              @if (lignesBudgetDuBudget.length === 0) {
+                <tr>
+                  <td colspan="6" class="text-center text-muted py-4">
+                    Aucune ligne budgétaire pour ce budget
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer border-0 p-4" style="background: transparent">
+        <button
+          type="button"
+          class="btn-glass-cancel"
+          (click)="closeLignesBudgetModal()"
+        >
+          <i class="ri-close-line me-1"></i> Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Pièces Jointes -->
+<div
+  class="modal fade"
+  id="piecesJointesModal"
+  tabindex="-1"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content shadow-lg border-0">
+      <div
+        class="modal-header"
+        style="
+          background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+          border: 0;
+        "
+      >
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-attachment-2 text-white fs-5"></i>
+          </div>
+          <div>
+            <h5 class="modal-title text-white fw-semibold">Pièces jointes</h5>
+            <span class="text-white-50 small" *ngIf="selectedBudgetPJ">
+              {{ selectedBudgetPJ.codebudget }} - {{ selectedBudgetPJ.libelle }}
+            </span>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="closePiecesJointesModal()"
+        ></button>
+      </div>
+
+      <div class="modal-body p-4">
+        <!-- Zone d'upload -->
+        <div
+          class="upload-area mb-4 p-3 border border-dashed rounded-3 bg-light"
+        >
+          <div
+            class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+          >
+            <div class="d-flex align-items-center gap-3">
+              <i class="ri-upload-cloud-2-line fs-1 text-primary"></i>
+              <div>
+                <h6 class="mb-0">Ajouter des fichiers</h6>
+                <p class="text-muted small mb-0">
+                  PDF, images, Excel, CSV (max 10MB)
+                </p>
+              </div>
+            </div>
+            <div>
+              <input
+                type="file"
+                #fileInput
+                multiple
+                (change)="onFilesSelected($event)"
+                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
+                class="d-none"
+              />
+              <button
+                type="button"
+                class="btn-glass-primary"
+                (click)="fileInput.click()"
+                [disabled]="pjUploading"
+              >
+                <i class="ri-add-line me-1"></i>
+                Choisir des fichiers
+              </button>
+            </div>
+          </div>
+
+          <!-- Aperçu des fichiers sélectionnés -->
+          @if (selectedFiles.length > 0) {
+            <div class="mt-3">
+              <div class="d-flex flex-wrap gap-2">
+                @for (file of selectedFiles; track $index; let i = $index) {
+                  <div class="file-pill bg-white rounded p-2 shadow-sm">
+                    <div class="d-flex align-items-center gap-2">
+                      <i class="ri-file-line fs-4 text-secondary"></i>
+                      <div class="flex-grow-1">
+                        <small
+                          class="fw-medium d-block text-truncate"
+                          style="max-width: 150px"
+                          >{{ file.name }}</small
+                        >
+                        <small class="text-muted"
+                          >{{ file.size / 1024 | number: "1.0-0" }} KB</small
+                        >
+                      </div>
                       <button
-                        class="btn btn-sm btn-success"
-                        (click)="uploadPieces()"
-                        [disabled]="pjUploading"
+                        class="btn btn-sm btn-link text-danger p-0"
+                        (click)="removeSelectedFile(i)"
+                        title="Retirer"
+                      >
+                        <i class="ri-close-line"></i>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+              <div class="mt-2 text-end">
+                <button
+                  class="btn-glass-submit"
+                  (click)="uploadPieces()"
+                  [disabled]="pjUploading"
+                >
+                  <span
+                    *ngIf="pjUploading"
+                    class="spinner-border spinner-border-sm me-2"
+                  ></span>
+                  Uploader {{ selectedFiles.length }} fichier(s)
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Liste des pièces jointes -->
+        <div class="pieces-list">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h6 class="mb-0">
+              <i class="ri-file-list-line me-1"></i>
+              Documents
+              <span class="badge-glass badge-glass-primary badge-count">{{
+                piecesJointes.length
+              }}</span>
+            </h6>
+            <button
+              *ngIf="piecesJointes.length > 0"
+              type="button"
+              class="btn-glass-secondary"
+              (click)="downloadAllFiles()"
+              title="Télécharger toutes les pièces jointes"
+            >
+              <i class="ri-download-line me-1"></i> Tout télécharger
+            </button>
+          </div>
+
+          @if (piecesJointesLoading) {
+            <div class="text-center py-4">
+              <div class="spinner-border spinner-border-sm text-primary"></div>
+              <p class="mt-2 small">Chargement des pièces jointes...</p>
+            </div>
+          }
+
+          @if (!piecesJointesLoading && piecesJointes.length === 0) {
+            <div class="text-center py-4 text-muted">
+              <i class="ri-folder-open-line fs-1"></i>
+              <p class="mt-2">Aucune pièce jointe pour ce budget</p>
+            </div>
+          }
+
+          @if (!piecesJointesLoading && piecesJointes.length > 0) {
+            <div class="row g-2">
+              @for (pj of piecesJointes; track $index; let i = $index) {
+                <div class="col-12">
+                  <div
+                    class="piece-item d-flex align-items-center justify-content-between p-2 border rounded-3 hover-shadow"
+                  >
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="piece-icon text-center" style="width: 40px">
+                        <i [class]="getFileIcon(pj)" class="fs-2"></i>
+                      </div>
+                      <div>
+                        <h6 class="mb-0 small fw-semibold">
+                          {{ pj.nomfichier }}
+                        </h6>
+                        <div class="d-flex gap-2 mt-1">
+                          <span
+                            class="badge-glass badge-glass-secondary"
+                            style="font-size: 10px"
+                          >
+                            {{ formatFileSize(pj.taille) }}
+                          </span>
+                          <span class="text-muted" style="font-size: 10px">
+                            {{ pj.createdat | date: "dd/MM/yyyy HH:mm" }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="d-flex gap-1">
+                      <button
+                        class="btn-glass-primary btn-sm"
+                        (click)="downloadPiece(pj)"
+                        title="Télécharger"
+                      >
+                        <i class="ri-download-line"></i>
+                      </button>
+                      <button
+                        class="btn-glass-danger btn-sm"
+                        (click)="deletePiece(pj)"
+                        [disabled]="pjDeleting === pj.idpiecejointe"
+                        title="Supprimer"
                       >
                         <span
-                          *ngIf="pjUploading"
-                          class="spinner-border spinner-border-sm me-1"
+                          *ngIf="pjDeleting === pj.idpiecejointe"
+                          class="spinner-border spinner-border-sm"
                         ></span>
-                        Uploader {{ selectedFiles.length }} fichier(s)
+                        <i
+                          *ngIf="pjDeleting !== pj.idpiecejointe"
+                          class="ri-delete-bin-line"
+                        ></i>
                       </button>
                     </div>
                   </div>
                 </div>
-
-                <!-- Liste des pièces jointes -->
-                <div class="pieces-list">
-                  <div
-                    class="d-flex align-items-center justify-content-between mb-3"
-                  >
-                    <h6 class="mb-0">
-                      <i class="ri-file-list-line me-1"></i>
-                      Documents
-                      <span class="badge-doc-count">{{
-                        piecesJointes.length
-                      }}</span>
-                    </h6>
-
-                    <button
-                      *ngIf="piecesJointes.length > 0"
-                      type="button"
-                      class="btn-link-download"
-                      (click)="downloadAllFiles()"
-                      title="Télécharger toutes les pièces jointes"
-                    >
-                      <i class="ri-download-line"></i>
-                      <span>Tout télécharger</span>
-                      <span class="link-underline"></span>
-                    </button>
-                  </div>
-
-                  <div *ngIf="piecesJointesLoading" class="text-center py-4">
-                    <div
-                      class="spinner-border spinner-border-sm text-primary"
-                    ></div>
-                    <p class="mt-2 small">Chargement des pièces jointes...</p>
-                  </div>
-
-                  <div
-                    *ngIf="!piecesJointesLoading && piecesJointes.length === 0"
-                    class="text-center py-4 text-muted"
-                  >
-                    <i class="ri-folder-open-line fs-1"></i>
-                    <p class="mt-2">Aucune pièce jointe pour cette demande</p>
-                  </div>
-
-                  <div
-                    class="row g-2"
-                    *ngIf="!piecesJointesLoading && piecesJointes.length > 0"
-                  >
-                    <div class="col-12" *ngFor="let pj of piecesJointes">
-                      <div
-                        class="piece-item d-flex align-items-center justify-content-between p-2 border rounded-3 hover-shadow"
-                      >
-                        <div class="d-flex align-items-center gap-3">
-                          <div
-                            class="piece-icon text-center"
-                            style="width: 40px"
-                          >
-                            <i [class]="getFileIcon(pj)" class="fs-2"></i>
-                          </div>
-                          <div>
-                            <h6 class="mb-0 small fw-semibold">
-                              {{ pj.nomfichier }}
-                            </h6>
-                            <div class="d-flex gap-2 mt-1">
-                              <span
-                                class="badge bg-light text-muted"
-                                style="font-size: 10px"
-                              >
-                                {{ formatFileSize(pj.taille) }}
-                              </span>
-                              <span class="text-muted" style="font-size: 10px">
-                                {{ pj.createdat | date: "dd/MM/yyyy HH:mm" }}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="d-flex gap-1">
-                          <button
-                            class="btn btn-sm btn-soft-primary"
-                            (click)="downloadPiece(pj)"
-                            title="Télécharger"
-                          >
-                            <i class="ri-download-line"></i>
-                          </button>
-                          <button
-                            class="btn btn-sm btn-soft-danger"
-                            (click)="deletePiece(pj)"
-                            [disabled]="pjDeleting === pj.idpiecejointe"
-                            title="Supprimer"
-                          >
-                            <span
-                              *ngIf="pjDeleting === pj.idpiecejointe"
-                              class="spinner-border spinner-border-sm"
-                            ></span>
-                            <i
-                              *ngIf="pjDeleting !== pj.idpiecejointe"
-                              class="ri-delete-bin-line"
-                            ></i>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="modal-footer">
-                <button
-                  type="button"
-                  class="btn btn-sm btn-light"
-                  (click)="closePiecesJointesModal()"
-                >
-                  Fermer
-                </button>
-              </div>
+              }
             </div>
-          </div>
+          }
         </div>
+      </div>
 
-        <!-- Backdrop -->
-        <div
-          *ngIf="modalPJVisible"
-          class="modal-backdrop fade show"
+      <div class="modal-footer border-0 p-4" style="background: transparent">
+        <button
+          type="button"
+          class="btn-glass-cancel"
+          data-bs-dismiss="modal"
           (click)="closePiecesJointesModal()"
-        ></div>
+        >
+          <i class="ri-close-line me-1"></i> Fermer
+        </button>
       </div>
     </div>
   </div>
-  <!--end col-->
 </div>
-<!--end row-->
+
+<!-- Modal de suppression -->
+<div class="modal fade" id="deleteOrder" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content delete-modal-card">
+      <div class="modal-body text-center p-4">
+        <div class="delete-icon-wrapper mb-4">
+          <i class="ri-delete-bin-line"></i>
+        </div>
+        <h5 class="delete-modal-title">{{ titleMsg }}</h5>
+        <p class="delete-modal-message">{{ msgSup }}</p>
+        <div class="d-flex gap-3 justify-content-center">
+          <button class="delete-btn-cancel" data-bs-dismiss="modal">
+            <i class="ri-close-line me-1"></i> Annuler
+          </button>
+          <button
+            class="delete-btn-confirm"
+            (click)="deleteConfirmed()"
+            data-bs-dismiss="modal"
+          >
+            <i class="ri-delete-bin-line me-1"></i> Supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Lignes Budgétaires (version détaillée) -->
+<div
+  class="modal fade"
+  id="lignesBudgetairesModal"
+  tabindex="-1"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content shadow-lg border-0">
+      <div
+        class="modal-header"
+        style="
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          border: 0;
+        "
+      >
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-time-line text-white fs-5"></i>
+          </div>
+          <h5 class="modal-title text-white fw-semibold">
+            Lignes budgétaires: {{ selectedBudget?.codebudget }} -
+            {{ selectedBudget?.libelle }}
+          </h5>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="closeModal('lignesBudgetairesModal')"
+        ></button>
+      </div>
+
+      <div class="modal-body p-4">
+        <div class="table-responsive">
+          <table class="table table-modern align-middle mb-0">
+            <thead>
+              <tr>
+                <th style="width: 50px">#</th>
+                <th>Code budgétaire</th>
+                @if (selectedBudget?.entite === "Département") {
+                  <th>Département</th>
+                }
+                @if (selectedBudget?.isanalytique === 1) {
+                  <th>Code</th>
+                }
+                <th>
+                  {{
+                    selectedBudget?.isanalytique === 1
+                      ? "Centre analytique"
+                      : "Nature d'opération"
+                  }}
+                </th>
+                @if (
+                  selectedBudget?.entite === "Département" ||
+                  selectedBudget?.isanalytique === 1
+                ) {
+                  <th class="text-end">Prévision Département</th>
+                }
+                <th class="text-end">Prévision Site</th>
+                <th class="text-end">Prévision Société</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (ligne of lignesByBudget; track $index; let i = $index) {
+                <tr>
+                  <td class="text-center">{{ i + 1 }}</td>
+                  <td>{{ ligne.codebudgetaire || "—" }}</td>
+                  @if (selectedBudget?.entite === "Département") {
+                    <td>{{ ligne.departement?.libelle }}</td>
+                  }
+                  @if (selectedBudget?.isanalytique === 1) {
+                    <td>{{ ligne.centre_analytique?.codecentreanalytique }}</td>
+                  }
+                  <td>
+                    {{
+                      selectedBudget?.isanalytique
+                        ? ligne.centre_analytique?.libelle
+                        : ligne.nature_operation?.libelle
+                    }}
+                  </td>
+                  @if (
+                    selectedBudget?.entite === "Département" ||
+                    selectedBudget?.isanalytique === 1
+                  ) {
+                    <td class="text-end">
+                      {{ ligne.montantprevisiondept | number: "1.0-0" }}
+                    </td>
+                  }
+                  <td class="text-end">
+                    {{ ligne.montantprevisionsite | number: "1.0-0" }}
+                  </td>
+                  <td class="text-end">
+                    {{ ligne.montantprevisionsociete | number: "1.0-0" }}
+                  </td>
+                </tr>
+              }
+              @if (lignesByBudget.length === 0) {
+                <tr>
+                  <td colspan="6" class="text-center text-muted py-3">
+                    Aucune ligne budgétaire n'est associée à ce budget.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        @if (msgErros) {
+          <div class="alert alert-danger mt-3">
+            {{ msgErros }}
+          </div>
+        }
+      </div>
+
+      <div class="modal-footer border-0 p-4" style="background: transparent">
+        <button
+          type="button"
+          class="btn-glass-cancel"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="closeModal('lignesBudgetairesModal')"
+        >
+          <i class="ri-close-line me-1"></i> Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
