@@ -1408,20 +1408,6 @@
 
 /* Style pour les file pills */
 
-.border-dashed {
-  border-style: dashed !important;
-  border-width: 2px !important;
-}
-
-.upload-area {
-  transition: all 0.2s ease;
-
-  &:hover {
-    background-color: #f8f9fa !important;
-    border-color: #405189 !important;
-  }
-}
-
 .file-pill {
   border: 1px solid rgba(203, 213, 225, 0.3);
   transition: all 0.2s ease;
@@ -1430,6 +1416,91 @@
 .file-pill:hover {
   border-color: rgba(59, 130, 246, 0.3);
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+/* ============================================
+   DRAG & DROP STYLES - GLASSMORPHISM #405189
+   ============================================ */
+
+/* Zone de dépôt - État par défaut */
+.upload-area {
+  border: 2px dashed rgba(64, 81, 137, 0.3) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 0.5rem !important;
+  transition: all 0.3s ease;
+  min-height: 80px;
+  cursor: pointer;
+  padding: 1.5rem !important;
+  user-select: none;
+}
+
+/* Zone de dépôt - Survol */
+.upload-area:hover {
+  border-color: rgba(64, 81, 137, 0.5) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 15px rgba(64, 81, 137, 0.1);
+}
+
+/* Zone de dépôt - État "drag-over" */
+.upload-area.drag-over {
+  border-color: #405189 !important;
+  border-style: solid !important;
+  background: rgba(64, 81, 137, 0.12) !important;
+  box-shadow: 0 0 20px rgba(64, 81, 137, 0.25);
+  transform: scale(1.01);
+}
+
+/* Animation de l'icône pendant le drag */
+.upload-area.drag-over .ri-upload-cloud-2-line {
+  color: #405189 !important;
+  animation: bounce 0.5s ease;
+}
+
+/* Pilules de fichiers - Style glassmorphism */
+.file-pill {
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 0.375rem !important;
+  transition: all 0.2s ease;
+  color: #212529 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Pilules de fichiers - Survol */
+.file-pill:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-color: rgba(64, 81, 137, 0.4) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(64, 81, 137, 0.15);
+}
+
+.file-pill .ri-file-line {
+  color: #405189 !important;
+}
+
+/* Bouton de suppression dans les pilules */
+.file-pill .btn-link.text-danger {
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.file-pill .btn-link.text-danger:hover {
+  opacity: 1;
+}
+
+/* Animation pour l'icône */
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
 }
 
 /* Style pour les pièces jointes */

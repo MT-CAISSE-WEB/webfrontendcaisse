@@ -878,6 +878,7 @@ export class BudgetComponent implements OnInit {
     this.actionModal = 'create';
     this.selectedBudget = undefined;
     this.existingPieces = [];
+    this.selectedFiles = [];
     // this.uploadedFiles = [];
     this.initForm();
   }
@@ -904,6 +905,7 @@ export class BudgetComponent implements OnInit {
 
     this.budgetForm.markAllAsTouched();
     this.budgetForm.updateValueAndValidity();
+    this.selectedFiles = [];
     this.loadExistingPieces(_object.idbudget);
   }
 
@@ -1264,6 +1266,8 @@ export class BudgetComponent implements OnInit {
     event.stopPropagation();
     this.isDragOver = true;
   }
+
+  selectedFile: File | null = null;
 
   onDragLeave(event: DragEvent): void {
     event.preventDefault();

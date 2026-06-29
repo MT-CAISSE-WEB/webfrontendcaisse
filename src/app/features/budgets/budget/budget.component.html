@@ -239,6 +239,7 @@
                           data-bs-toggle="modal"
                           data-bs-target="#deleteOrder"
                           title="Supprimer"
+                          *ngIf="getBudgetsMensuels(item.idbudget).length === 0"
                         >
                           <i class="ri-delete-bin-line"></i>
                         </button>
@@ -382,6 +383,7 @@
                                         data-bs-toggle="modal"
                                         data-bs-target="#deleteOrder"
                                         title="Supprimer"
+                                        *ngIf="child.valide !== 1"
                                       >
                                         <i class="ri-delete-bin-line"></i>
                                       </button>
@@ -789,6 +791,10 @@
             </h6>
             <div
               class="upload-area mb-3 p-3 border border-dashed rounded-3 bg-light"
+              [class.drag-over]="isDragOver"
+              (dragover)="onDragOver($event)"
+              (dragleave)="onDragLeave($event)"
+              (drop)="onDrop($event)"
             >
               <div
                 class="d-flex align-items-center justify-content-between flex-wrap gap-3"
@@ -948,6 +954,10 @@
         <!-- Zone d'upload -->
         <div
           class="upload-area mb-4 p-3 border border-dashed rounded-3 bg-light"
+          [class.drag-over]="isDragOver"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
         >
           <div
             class="d-flex align-items-center justify-content-between flex-wrap gap-3"
