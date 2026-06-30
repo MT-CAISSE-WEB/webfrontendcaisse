@@ -2,15 +2,29 @@
 <div class="row">
   <div class="col-12">
     <div
-      class="page-title-box d-sm-flex align-items-center justify-content-between"
+      class="page-title-premium d-sm-flex align-items-center justify-content-between"
     >
-      <h4 class="mb-sm-0">{{ title }}</h4>
+      <div class="d-flex align-items-center gap-3">
+        <div class="title-icon-premium">
+          <i class="ri-money-dollar-circle-fill"></i>
+        </div>
+        <div>
+          <h4 class="mb-0 title-premium">{{ title }}</h4>
+          <span class="title-subtitle-premium"
+            >Gestion des lignes budgétaires</span
+          >
+        </div>
+      </div>
       <div class="page-title-right">
-        <ol class="breadcrumb m-0">
+        <ol class="breadcrumb-premium m-0">
           <li class="breadcrumb-item">
-            <a href="javascript: void(0);">Données de base</a>
+            <a href="javascript: void(0);">
+              <i class="ri-home-4-line me-1"></i> Gestion du budget
+            </a>
           </li>
-          <li class="breadcrumb-item active">{{ title }}</li>
+          <li class="breadcrumb-item active">
+            <i class="ri-file-text-line"></i>{{ title }}
+          </li>
         </ol>
       </div>
     </div>
@@ -20,50 +34,48 @@
 
 <div class="row">
   <div class="col-lg-12">
-    <div class="card" id="orderList">
-      <div class="card-header border-0">
-        <div class="row align-items-center gy-3">
-          <div class="col-sm-auto">
-            <div class="d-flex gap-1 flex-wrap">
-              <button
-                type="button"
-                class="btn btn-sm btn-soft-success"
-                data-bs-toggle="modal"
-                (click)="modalCreate()"
-                id="create-btn"
-                data-bs-target="#showModal"
-              >
-                <i class="ri-add-line align-bottom me-1"></i>créer
-              </button>
-              <button type="button" class="btn btn-sm btn-soft-info">
-                <i class="ri-file-download-line align-bottom me-1"></i> import
-              </button>
-              <button
-                class="btn btn-sm btn-soft-danger"
-                [disabled]="!checkAllRow"
-                onClick="deleteMultiple()"
-              >
-                <i class="ri-delete-bin-2-line"></i>
-              </button>
-              <button type="button" class="btn btn-sm btn-info">
-                <i class="ri-refresh-fill align-bottom me-1"></i>actualiser
-              </button>
-            </div>
+    <div class="card-glass" id="orderList">
+      <!-- Header -->
+      <div class="card-header-glass border-0">
+        <div
+          class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3"
+        >
+          <div class="d-flex gap-2 flex-wrap">
+            <button
+              type="button"
+              class="btn-glass-primary"
+              data-bs-toggle="modal"
+              (click)="modalCreate()"
+              id="create-btn"
+              data-bs-target="#showModal"
+            >
+              <i class="ri-add-line align-bottom me-1"></i>Créer
+            </button>
+            <button
+              type="button"
+              class="btn-glass-secondary"
+              (click)="getAllBudgets(); getAllLigneBudgets()"
+            >
+              <i class="ri-refresh-fill align-bottom me-1"></i>Actualiser
+            </button>
           </div>
         </div>
       </div>
-      <div class="card-body border border-dashed border-end-0 border-start-0">
+
+      <!-- Filtres -->
+      <div class="card-body-glass pt-0">
         <form (ngSubmit)="onClickAfficher()" #filterForm="ngForm">
           <div class="row g-3">
             <div class="col-xxl-5 col-sm-6">
-              <div class="search-box">
+              <div class="search-glass">
+                <i class="ri-search-line"></i>
                 <select
                   class="form-select"
                   name="budget"
                   [(ngModel)]="selectedBudgetId"
                   required
                 >
-                  <option [ngValue]="null">-- Sélectionner --</option>
+                  <option [ngValue]="null">-- Sélectionner un budget --</option>
                   <option
                     *ngFor="let budget of budgets"
                     [ngValue]="budget.idbudget"
@@ -77,7 +89,7 @@
             <div class="col-xxl-1 col-sm-2">
               <button
                 type="submit"
-                class="btn btn-sm btn-primary py-2"
+                class="btn-glass-submit py-2"
                 [disabled]="!selectedBudgetId"
               >
                 <i class="ri-equalizer-fill me-1 align-bottom"></i>
@@ -87,1308 +99,1343 @@
           </div>
         </form>
       </div>
-      <div class="card-body pt-0">
-        <div>
-          <ul
-            class="nav nav-tabs nav-tabs-custom nav-success mb-3"
-            role="tablist"
-          ></ul>
 
-          <div class="table-responsive table-card mb-1">
-            <table class="table table-nowrap align-middle" id="orderTable">
-              <thead class="text-muted table-light">
-                <tr class="text-uppercase">
-                  <th scope="col" style="width: 25px">
-                    <div class="form-check">
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        [(ngModel)]="checkAllRow"
-                        id="checkAll"
-                        (ngModelChange)="handleSelectAll($event)"
-                      />
-                    </div>
-                  </th>
-                  <th class="sort" data-sort="id">Budget</th>
-                  <th
-                    *ngIf="!isAnalytique()"
-                    class="sort"
-                    data-sort="customer_name"
-                  >
-                    Département
-                  </th>
-                  <th *ngIf="isAnalytique()">Code</th>
-                  <th class="sort" data-sort="customer_name">
-                    {{
-                      selectedBudget?.isanalytique === 1
-                        ? "Centre analytique"
-                        : "Nature opération"
-                    }}
-                  </th>
-                  <th class="sort" data-sort="id">Code budgétaire</th>
-                  <th
-                    *ngIf="
-                      selectedBudget?.entite === 'Département' || isAnalytique()
-                    "
-                    class="sort"
-                    data-sort="customer_name"
-                  >
-                    Montant prev dept.
-                  </th>
-                  <th class="sort" data-sort="customer_name">
-                    Montant prev site
-                  </th>
-                  <th class="sort" data-sort="customer_name">
-                    Montant prev société
-                  </th>
-                  <th class="sort" data-sort="city">Action</th>
-                </tr>
-              </thead>
-              <tbody class="list form-check-all">
-                @if (loading) {
-                  <tr>
-                    <td colspan="8" class="text-center text-muted py-4">
+      <!-- Tableau -->
+      <div class="card-body-glass pt-0">
+        <div class="table-responsive">
+          <table class="table table-modern align-middle" id="orderTable">
+            <thead>
+              <tr>
+                <th style="width: 25px">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      [(ngModel)]="checkAllRow"
+                      id="checkAll"
+                      (ngModelChange)="handleSelectAll($event)"
+                    />
+                  </div>
+                </th>
+                <th>Budget</th>
+                <th *ngIf="!isAnalytique()">Département</th>
+                <th *ngIf="isAnalytique()">Code</th>
+                <th>
+                  {{
+                    selectedBudget?.isanalytique === 1
+                      ? "Centre analytique"
+                      : "Nature opération"
+                  }}
+                </th>
+                <th>Code budgétaire</th>
+                <th
+                  *ngIf="
+                    selectedBudget?.entite === 'Département' || isAnalytique()
+                  "
+                  class="text-end"
+                >
+                  Montant prev dept.
+                </th>
+                <th class="text-end">Montant prev site</th>
+                <th class="text-end">Montant prev société</th>
+                <th style="text-align: right; width: 80px">Action</th>
+              </tr>
+            </thead>
+            <tbody class="list form-check-all">
+              @if (loading) {
+                <tr>
+                  <td colspan="9" class="text-center text-muted py-4">
+                    <div class="spinner-glass">
                       <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Chargement...</span>
                       </div>
-                      <p class="mt-2">Chargement des données...</p>
-                    </td>
-                  </tr>
-                }
-                @if (paginatedLignes === null) {
-                  <tr>
-                    <td colspan="8" class="text-center text-muted py-4">
-                      Veuillez sélectionner un budget pour afficher les lignes
-                      budgétaires.
-                    </td>
-                  </tr>
-                }
-                <!-- En-tête Budget -->
-
-                <tr
-                  class="table-primary fw-bold"
-                  *ngIf="paginatedLignes !== null"
-                >
-                  <td colspan="8">
-                    <div
-                      class="d-flex justify-content-between align-items-center"
-                    >
-                      <div>
-                        Budget : {{ paginatedLignes.budget.codebudget }} -
-                        {{ paginatedLignes.budget.libelle }}
-                      </div>
-                      <div class="dropdown">
-                        <button
-                          class="btn btn-sm btn-outline-primary"
-                          type="button"
-                          data-bs-toggle="dropdown"
-                          aria-expanded="false"
-                          (click)="
-                            getAllValidateursBudget(
-                              paginatedLignes.budget.idbudget
-                            )
-                          "
-                        >
-                          <i class="ri-more-2-fill"></i>
-                        </button>
-
-                        <ul class="dropdown-menu dropdown-menu-end">
-                          <li>
-                            <a
-                              class="dropdown-item"
-                              href="#validateursBudgetModal"
-                              data-bs-toggle="modal"
-                            >
-                              <i class="ri-time-line me-2"></i>
-                              Historique de validation
-                            </a>
-                          </li>
-
-                          <li
-                            *ngIf="
-                              (user.typeentitesite === 1 ||
-                                user.typeentitesociete === 1) &&
-                              isValidateur() &&
-                              !isRejected()
-                            "
-                          >
-                            <hr class="dropdown-divider" />
-                          </li>
-
-                          <li
-                            *ngIf="
-                              (user.typeentitesite === 1 ||
-                                user.typeentitesociete === 1) &&
-                              isValidateur() &&
-                              !isRejected()
-                            "
-                          >
-                            <a
-                              class="dropdown-item text-success"
-                              data-bs-toggle="modal"
-                              href="#validateBudgetModal"
-                              (click)="
-                                openValidationBudget(paginatedLignes.budget)
-                              "
-                            >
-                              <i class="ri-check-line me-2"></i>
-                              Valider le budget
-                            </a>
-                          </li>
-                        </ul>
-                      </div>
+                      <p class="mt-2 text-muted">Chargement des données...</p>
                     </div>
                   </td>
                 </tr>
+              }
+              @if (paginatedLignes === null) {
+                <tr>
+                  <td colspan="9" class="text-center text-muted py-4">
+                    Veuillez sélectionner un budget pour afficher les lignes
+                    budgétaires.
+                  </td>
+                </tr>
+              }
 
-                <!-- Lignes du budget -->
-                @if (
-                  paginatedLignes !== null &&
-                  paginatedLignes.lignes.length === 0
+              <!-- En-tête Budget -->
+              <tr class="table-active fw-bold" *ngIf="paginatedLignes !== null">
+                <td colspan="9">
+                  <div
+                    class="d-flex justify-content-between align-items-center"
+                  >
+                    <div>
+                      Budget : {{ paginatedLignes.budget.codebudget }} -
+                      {{ paginatedLignes.budget.libelle }}
+                    </div>
+                    <div class="dropdown">
+                      <button
+                        class="btn-glass-secondary btn-sm"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        (click)="
+                          getAllValidateursBudget(
+                            paginatedLignes.budget.idbudget
+                          )
+                        "
+                      >
+                        <i class="ri-more-2-fill"></i>
+                      </button>
+
+                      <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                          <a
+                            class="dropdown-item"
+                            href="#validateursBudgetModal"
+                            data-bs-toggle="modal"
+                          >
+                            <i class="ri-time-line me-2"></i>
+                            Historique de validation
+                          </a>
+                        </li>
+
+                        <li
+                          *ngIf="
+                            (user.typeentitesite === 1 ||
+                              user.typeentitesociete === 1) &&
+                            isValidateur() &&
+                            !isRejected()
+                          "
+                        >
+                          <hr class="dropdown-divider" />
+                        </li>
+
+                        <li
+                          *ngIf="
+                            (user.typeentitesite === 1 ||
+                              user.typeentitesociete === 1) &&
+                            isValidateur() &&
+                            !isRejected()
+                          "
+                        >
+                          <a
+                            class="dropdown-item text-success"
+                            data-bs-toggle="modal"
+                            href="#validateBudgetModal"
+                            (click)="
+                              openValidationBudget(paginatedLignes.budget)
+                            "
+                          >
+                            <i class="ri-check-line me-2"></i>
+                            Valider le budget
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Lignes du budget -->
+              @if (
+                paginatedLignes !== null && paginatedLignes.lignes.length === 0
+              ) {
+                <tr>
+                  <td colspan="9" class="text-center text-muted py-4">
+                    <div class="empty-state">
+                      <i class="ri-inbox-2-line"></i>
+                      <p>Aucune ligne budgétaire</p>
+                      <span class="empty-hint"
+                        >Aucune ligne budgétaire n'est associée à ce
+                        budget.</span
+                      >
+                    </div>
+                  </td>
+                </tr>
+              }
+
+              @if (
+                paginatedLignes !== null && paginatedLignes.lignes.length > 0
+              ) {
+                @for (
+                  item of paginatedLignes.lignes;
+                  track item.idbudgetdepartementnature
                 ) {
-                  <tr>
-                    <td colspan="8" class="text-center text-muted py-4">
-                      Aucune ligne budgétaire n'est associée à ce budget.
+                  <tr
+                    [class.table-active]="
+                      isChecked(item.idbudgetdepartementnature)
+                    "
+                  >
+                    <th scope="row">
+                      <div class="form-check">
+                        <input
+                          class="form-check-input"
+                          [checked]="isChecked(item.idbudgetdepartementnature)"
+                          [(ngModel)]="
+                            selectedItems[item.idbudgetdepartementnature]
+                          "
+                          (ngModelChange)="handleSelectOne(item, $event)"
+                          type="checkbox"
+                        />
+                      </div>
+                    </th>
+                    <td>
+                      <span class="code-badge">{{
+                        paginatedLignes.budget.codebudget
+                      }}</span>
+                    </td>
+                    <td
+                      *ngIf="
+                        !isAnalytique() ||
+                        selectedBudget?.entite === 'Département'
+                      "
+                    >
+                      {{ item.departement?.libelle || "—" }}
+                    </td>
+                    <td *ngIf="isAnalytique()">
+                      {{ item.centre_analytique?.codecentreanalytique || "—" }}
+                    </td>
+                    <td>
+                      {{
+                        isAnalytique()
+                          ? item.centre_analytique?.libelle || "—"
+                          : item.nature_operation?.libelle || "—"
+                      }}
+                    </td>
+                    <td>
+                      <span class="code-badge">{{
+                        item.codebudgetaire || "—"
+                      }}</span>
+                    </td>
+                    <td
+                      *ngIf="
+                        selectedBudget?.entite === 'Département' ||
+                        isAnalytique()
+                      "
+                      class="text-end"
+                    >
+                      {{ item.montantprevisiondept | number: "1.0-0" : "fr" }}
+                    </td>
+                    <td class="text-end">
+                      {{ item.montantprevisionsite | number: "1.0-0" : "fr" }}
+                    </td>
+                    <td class="text-end">
+                      {{
+                        item.montantprevisionsociete | number: "1.0-0" : "fr"
+                      }}
+                    </td>
+                    <td>
+                      <div class="actions-group">
+                        <button
+                          class="action-btn action-edit"
+                          data-bs-toggle="modal"
+                          (click)="modalUpdate(item)"
+                          data-bs-target="#showModal"
+                          title="Modifier"
+                        >
+                          <i class="ri-pencil-line"></i>
+                        </button>
+                        <button
+                          class="action-btn action-delete"
+                          (click)="modalDelete(item)"
+                          data-bs-toggle="modal"
+                          data-bs-target="#deleteOrder"
+                          title="Supprimer"
+                        >
+                          <i class="ri-delete-bin-line"></i>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 }
-                @if (
-                  paginatedLignes !== null && paginatedLignes.lignes.length > 0
-                ) {
-                  @for (
-                    item of paginatedLignes.lignes;
-                    track item.idbudgetdepartementnature
-                  ) {
-                    <tr>
-                      <th scope="row">
-                        <div class="form-check">
-                          <input
-                            class="form-check-input"
-                            [checked]="
-                              isChecked(item.idbudgetdepartementnature)
-                            "
-                            [(ngModel)]="
-                              selectedItems[item.idbudgetdepartementnature]
-                            "
-                            (ngModelChange)="handleSelectOne(item, $event)"
-                            type="checkbox"
-                          />
-                        </div>
-                      </th>
-                      <td>{{ paginatedLignes.budget.codebudget }}</td>
-                      <td
-                        *ngIf="
-                          !isAnalytique() ||
-                          selectedBudget?.entite === 'Département'
-                        "
-                      >
-                        {{ item.departement?.libelle || "—" }}
-                      </td>
-                      <td *ngIf="isAnalytique()">
-                        {{
-                          item.centre_analytique?.codecentreanalytique || "—"
-                        }}
-                      </td>
-                      <td>
-                        {{
-                          isAnalytique()
-                            ? item.centre_analytique?.libelle || "—"
-                            : item.nature_operation?.libelle || "—"
-                        }}
-                      </td>
-                      <td>{{ item.codebudgetaire || "—" }}</td>
-                      <td
-                        *ngIf="
-                          selectedBudget?.entite === 'Département' ||
-                          isAnalytique()
-                        "
-                        class="text-end"
-                      >
-                        {{ item.montantprevisiondept | number: "1.0-0" : "fr" }}
-                      </td>
-                      <td class="text-end">
-                        {{ item.montantprevisionsite | number: "1.0-0" : "fr" }}
-                      </td>
-                      <td class="text-end">
-                        {{
-                          item.montantprevisionsociete | number: "1.0-0" : "fr"
-                        }}
-                      </td>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-                      <td class="text-end">
-                        <a
-                          href="#showModal"
-                          data-bs-toggle="modal"
-                          (click)="modalUpdate(item)"
-                          class="text-primary me-2"
-                        >
-                          <i class="ri-pencil-fill"></i>
-                        </a>
-                        <a
-                          class="text-danger"
-                          (click)="modalDelete(item)"
-                          data-bs-toggle="modal"
-                          href="#deleteOrder"
-                        >
-                          <i class="ri-delete-bin-5-fill"></i>
-                        </a>
-                      </td>
-                    </tr>
-                  }
-                }
-              </tbody>
-            </table>
-            <div class="noresult" style="display: none">
-              <div class="text-center">
-                <h5 class="mt-2">Désole! Aucun resultat trouvé</h5>
-                <p class="text-muted">
-                  We've searched more than 150+ Orders We did not find any
-                  orders for you search.
-                </p>
-              </div>
-            </div>
-          </div>
-          <!-- Remplacer la section de pagination par celle-ci -->
-          <div class="d-flex justify-content-between align-items-center mt-3">
+      <!-- Pagination (déplacée plus bas) -->
+      @if (paginatedLignes !== null) {
+        <div class="card-body-glass pt-0">
+          <div class="pagination-modern">
             <div class="pagination-info">
-              <!-- <span
-                class="text-muted"
-                *ngIf="paginatedLignes !== null && totalItems > 0"
-              >
-                Affichage de
-                {{ (currentPage - 1) * limit + 1 }} à
-                {{ Math.min(currentPage * limit, totalItems) }}
-                sur {{ totalItems }} ligne(s)
-              </span>
-              <span class="text-muted" *ngIf="paginatedLignes === null">
-                Aucun budget sélectionné
-              </span> -->
+              <span>Affichage de</span>
+              <strong>{{ (currentPage - 1) * limit + 1 }}</strong>
+              <span>à</span>
+              <strong>{{ Math.min(currentPage * limit, totalItems) }}</strong>
+              <span>sur</span>
+              <strong>{{ totalItems }}</strong>
+              <span>ligne(s)</span>
             </div>
-
-            <div class="d-flex gap-2 align-items-center">
-              <!-- Sélecteur du nombre d'éléments -->
+            <div class="pagination-controls">
               <select
-                class="form-select form-select-sm w-auto"
+                class="form-select form-select-sm pagination-select"
                 [(ngModel)]="limit"
                 (ngModelChange)="onLimitChange($event)"
-                style="width: auto"
-                *ngIf="paginatedLignes !== null"
               >
                 <option [value]="5">5 par page</option>
                 <option [value]="10">10 par page</option>
                 <option [value]="20">20 par page</option>
                 <option [value]="50">50 par page</option>
               </select>
-
-              <!-- Boutons de pagination -->
-              <div
-                class="btn-group"
-                role="group"
-                *ngIf="paginatedLignes !== null && totalPages > 0"
+              <button
+                class="page-control"
+                [disabled]="currentPage === 1"
+                (click)="changePage(1)"
+                title="Première page"
               >
-                <!-- Bouton Première page -->
+                <i class="ri-skip-back-line"></i>
+              </button>
+              <button
+                class="page-control"
+                [disabled]="currentPage === 1"
+                (click)="changePage(currentPage - 1)"
+                title="Précédent"
+              >
+                <i class="ri-arrow-left-s-line"></i>
+              </button>
+              <ng-container *ngFor="let page of getPageNumbers()">
                 <button
-                  class="btn btn-sm btn-outline-primary"
-                  [disabled]="currentPage === 1"
-                  (click)="changePage(1)"
+                  *ngIf="page !== -1"
+                  class="page-number"
+                  [class.active]="page === currentPage"
+                  (click)="changePage(page)"
                 >
-                  <i class="ri-skip-back-line"></i>
+                  {{ page }}
                 </button>
-
-                <!-- Bouton Précédent -->
-                <button
-                  class="btn btn-sm btn-outline-primary"
-                  [disabled]="currentPage === 1"
-                  (click)="changePage(currentPage - 1)"
-                >
-                  <i class="ri-arrow-left-s-line"></i>
-                </button>
-
-                <!-- Numéros de page -->
-                <ng-container *ngFor="let page of getPageNumbers()">
-                  <button
-                    *ngIf="page !== -1"
-                    class="btn btn-sm"
-                    [class.btn-primary]="page === currentPage"
-                    [class.btn-outline-primary]="page !== currentPage"
-                    (click)="changePage(page)"
-                  >
-                    {{ page }}
-                  </button>
-                  <span *ngIf="page === -1" class="px-2">...</span>
-                </ng-container>
-
-                <!-- Bouton Suivant -->
-                <button
-                  class="btn btn-sm btn-outline-primary"
-                  [disabled]="currentPage === totalPages"
-                  (click)="changePage(currentPage + 1)"
-                >
-                  <i class="ri-arrow-right-s-line"></i>
-                </button>
-
-                <!-- Bouton Dernière page -->
-                <button
-                  class="btn btn-sm btn-outline-primary"
-                  [disabled]="currentPage === totalPages"
-                  (click)="changePage(totalPages)"
-                >
-                  <i class="ri-skip-forward-line"></i>
-                </button>
-              </div>
+                <span *ngIf="page === -1" class="page-ellipsis">...</span>
+              </ng-container>
+              <button
+                class="page-control"
+                [disabled]="currentPage === totalPages"
+                (click)="changePage(currentPage + 1)"
+                title="Suivant"
+              >
+                <i class="ri-arrow-right-s-line"></i>
+              </button>
+              <button
+                class="page-control"
+                [disabled]="currentPage === totalPages"
+                (click)="changePage(totalPages)"
+                title="Dernière page"
+              >
+                <i class="ri-skip-forward-line"></i>
+              </button>
             </div>
           </div>
         </div>
+      }
+    </div>
+  </div>
+</div>
 
-        <!-- Modal création/modification lignes du budget -->
-        <div
-          class="modal fade"
-          id="showModal"
-          tabindex="-1"
-          aria-labelledby="exampleModalLabel"
-          aria-hidden="true"
-          data-bs-backdrop="static"
-          data-bs-keyboard="false"
-        >
-          <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-              <div class="modal-header bg-light p-3">
-                <h5 class="modal-title" id="exampleModalLabel">
-                  <span *ngIf="actionModal === 'create'">Création</span>
-                  <span *ngIf="actionModal === 'update'">Modification</span>
-                  ligne budgétaire
-                </h5>
-                <button
-                  type="button"
-                  class="btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                  id="close-modal"
-                  (click)="resetModeSaisie()"
-                ></button>
-              </div>
-              <form [formGroup]="ligneBudgetForm">
-                <div class="modal-body">
-                  <input type="hidden" id="id-field" />
-                  <div class="mb-3" id="modal-id">
-                    <label for="idbudget-field" class="form-label form-label-sm"
-                      >Budget</label
-                    >
-                    <select
-                      class="form-select form-control form-control-sm {{
-                        isValidField('idbudget')
-                      }}"
-                      aria-label="Default select example"
-                      id="idbudget-field"
-                      formControlName="idbudget"
-                      (change)="onSelectionChange($event)"
-                      [class.bg-light]="actionModal === 'update'"
-                    >
-                      >
-                      <option [ngValue]="null">-- Sélectionner --</option>
-                      @for (item of budgets; track $index) {
-                        <option [value]="item.idbudget">
-                          {{ item.codebudget }} - {{ item.libelle }}
-                        </option>
-                      }
-                    </select>
-                    <div class="invalid-feedback">{{ msgErros }}</div>
-                  </div>
-
-                  <div
-                    class="mb-3"
-                    *ngIf="selectedBudget?.entite === 'Département'"
-                  >
-                    <label class="form-label">Département</label>
-                    <select
-                      class="form-select"
-                      (change)="onDepartementChange($event)"
-                      formControlName="iddepartement"
-                      [class.bg-light]="actionModal === 'update'"
-                    >
-                      <option value="">-- Sélectionner --</option>
-                      <option
-                        *ngFor="let dep of appartenanceDepartement"
-                        [value]="dep.iddepartement"
-                      >
-                        {{ dep.libelle }}
-                      </option>
-                    </select>
-                  </div>
-
-                  <!-- Bouton de saisie -->
-                  <div
-                    class="btn-group mb-3"
-                    *ngIf="ligneBudgetForm.value.idbudget !== ''"
-                  >
-                    <button
-                      type="button"
-                      class="btn btn-sm"
-                      [class.btn-primary]="modeSaisie === 'ALL'"
-                      [class.btn-outline-primary]="modeSaisie !== 'ALL'"
-                      (click)="setMode('ALL')"
-                    >
-                      Saisie complète
-                    </button>
-
-                    <button
-                      type="button"
-                      class="btn btn-sm"
-                      [class.btn-primary]="modeSaisie === 'STEP'"
-                      [class.btn-outline-primary]="modeSaisie !== 'STEP'"
-                      [disabled]="actionModal === 'update'"
-                      (click)="setMode('STEP')"
-                    >
-                      Saisie progressive
-                    </button>
-                  </div>
-
-                  <div
-                    *ngIf="
-                      (modeSaisie === 'STEP' || modeSaisie === 'ALL') &&
-                      selectedBudget?.entite === 'Département'
-                    "
-                  >
-                    <div class="table-container">
-                      <table
-                        class="table table-bordered table-striped align-middle table-custom"
-                      >
-                        <thead class="table-light">
-                          <tr>
-                            <th>#</th>
-                            <th>
-                              {{
-                                isAnalytique()
-                                  ? "Centre analytique"
-                                  : "Nature opération"
-                              }}
-                            </th>
-                            <th class="text-nowrap">Code budgétaire</th>
-                            <th class="text-nowrap">
-                              Montant prévision département
-                            </th>
-                            <th class="text-nowrap">Montant prévision site</th>
-                            <th class="text-nowrap">
-                              Montant prévision société
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr *ngFor="let ligne of natureGrid; let i = index">
-                            <td>{{ i + 1 }}</td>
-                            <td class="text-nowrap">{{ ligne.libelle }}</td>
-                            <td>
-                              <input
-                                type="text"
-                                class="form-control form-control-sm input-custom"
-                                placeholder="Code budgétaire"
-                                [(ngModel)]="ligne.codebudgetaire"
-                                [ngModelOptions]="{ standalone: true }"
-                                [disabled]="actionModal === 'update'"
-                              />
-                            </td>
-                            <td>
-                              <input
-                                type="number"
-                                class="form-control form-control-sm input-custom"
-                                [disabled]="
-                                  selectedBudget?.validedept === 1 ||
-                                  user.typeentitedepartement !== 1
-                                "
-                                [(ngModel)]="ligne.montantDept"
-                                [ngModelOptions]="{ standalone: true }"
-                                (ngModelChange)="
-                                  onMontantChange(ligne, 'montantDept', $event)
-                                "
-                              />
-                            </td>
-                            <td>
-                              <input
-                                type="number"
-                                class="form-control form-control-sm input-custom"
-                                [disabled]="
-                                  selectedBudget?.validedept === 0 ||
-                                  selectedBudget?.validesite === 1 ||
-                                  user.typeentitesite !== 1
-                                "
-                                [(ngModel)]="ligne.montantSite"
-                                [ngModelOptions]="{ standalone: true }"
-                                (ngModelChange)="
-                                  onMontantChange(ligne, 'montantSite', $event)
-                                "
-                              />
-                            </td>
-                            <td>
-                              <input
-                                type="number"
-                                class="form-control form-control-sm input-custom"
-                                [disabled]="
-                                  selectedBudget?.validesite !== 1 ||
-                                  user.typeentitesociete !== 1 ||
-                                  selectedBudget?.validesociete === 1
-                                "
-                                [(ngModel)]="ligne.montantSociete"
-                                [ngModelOptions]="{ standalone: true }"
-                                (ngModelChange)="
-                                  onMontantChange(
-                                    ligne,
-                                    'montantSociete',
-                                    $event
-                                  )
-                                "
-                              />
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-
-                    <div
-                      *ngIf="modeSaisie === 'STEP'"
-                      class="d-flex align-items-end gap-2 mb-3"
-                    >
-                      <div class="flex-grow-1">
-                        <label class="form-label mb-1"
-                          >Nature d'opération</label
-                        >
-                        <select
-                          class="form-select form-select-sm"
-                          [(ngModel)]="selectedNatureId"
-                          [ngModelOptions]="{ standalone: true }"
-                        >
-                          <option [ngValue]="null">— Sélectionner —</option>
-
-                          <option
-                            *ngFor="let n of availableNatures"
-                            [ngValue]="n.idnature"
-                          >
-                            {{ n.libelle }}
-                          </option>
-                        </select>
-                      </div>
-
-                      <button
-                        class="btn btn-sm btn-outline-primary"
-                        [disabled]="!selectedNatureId"
-                        (click)="addSelectedNature()"
-                      >
-                        + Ajouter
-                      </button>
-                    </div>
-                  </div>
-
-                  <div
-                    *ngIf="
-                      natureGrid.length === 0 &&
-                      selectedBudget?.entite === 'Département' &&
-                      selectedDept
-                    "
-                  >
-                    <table
-                      class="table table-bordered table-striped align-middle"
-                    >
-                      <thead class="table-light">
-                        <tr>
-                          <th>#</th>
-                          <th>Nature opération</th>
-                          <th>Montant prévision département</th>
-                          <th>Montant prévision site</th>
-                          <th>Montant prévision société</th>
-                        </tr>
-                      </thead>
-                      <tbody class="list form-check-all">
-                        <tr>
-                          <td colspan="8" class="text-center text-muted py-4">
-                            Aucune nature d'opération n'a été affectée à ce
-                            département.
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <!-- Entité Site -->
-                  <div
-                    *ngIf="
-                      selectedBudget?.entite === 'Site' &&
-                      (modeSaisie === 'STEP' || modeSaisie === 'ALL')
-                    "
-                  >
-                    <div class="table-container">
-                      <table
-                        class="table table-bordered table-striped align-middle table-custom"
-                      >
-                        <thead class="table-light">
-                          <tr>
-                            <th>#</th>
-                            <th class="text-nowrap">Nature opération</th>
-                            <th class="text-nowrap">Code budgétaire</th>
-                            <th class="text-nowrap">Montant prévision site</th>
-                            <th class="text-nowrap">
-                              Montant prévision société
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @if (
-                            natureGrid.length === 0 &&
-                            selectedBudget?.entite === "Site"
-                          ) {
-                            <td colspan="4" class="text-center text-muted py-4">
-                              Aucune nature d'opération disponible pour ce site.
-                            </td>
-                          } @else {
-                            <tr *ngFor="let ligne of natureGrid; let i = index">
-                              <td>{{ i + 1 }}</td>
-                              <td class="text-nowrap">{{ ligne.libelle }}</td>
-
-                              <!-- SITE -->
-                              <td>
-                                <input
-                                  type="text"
-                                  class="form-control form-control-sm input-custom"
-                                  placeholder="Code budgétaire"
-                                  [(ngModel)]="ligne.codebudgetaire"
-                                  [ngModelOptions]="{ standalone: true }"
-                                  [disabled]="actionModal === 'update'"
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  type="number"
-                                  class="form-control form-control-sm input-custom"
-                                  [disabled]="
-                                    selectedBudget?.validesite === 1 ||
-                                    user.typeentitesite !== 1
-                                  "
-                                  [(ngModel)]="ligne.montantSite"
-                                  [ngModelOptions]="{ standalone: true }"
-                                  (ngModelChange)="
-                                    onMontantChange(
-                                      ligne,
-                                      'montantSite',
-                                      $event
-                                    )
-                                  "
-                                />
-                              </td>
-
-                              <!-- SOCIETE -->
-                              <td>
-                                <input
-                                  type="number"
-                                  class="form-control form-control-sm input-custom"
-                                  [disabled]="
-                                    selectedBudget?.validesite !== 1 ||
-                                    user.typeentitesociete !== 1 ||
-                                    selectedBudget?.validesociete === 1
-                                  "
-                                  [(ngModel)]="ligne.montantSociete"
-                                  [ngModelOptions]="{ standalone: true }"
-                                  (ngModelChange)="
-                                    onMontantChange(
-                                      ligne,
-                                      'montantSociete',
-                                      $event
-                                    )
-                                  "
-                                />
-                              </td>
-                            </tr>
-                          }
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  <div
-                    *ngIf="
-                      modeSaisie === 'STEP' && selectedBudget?.entite === 'Site'
-                    "
-                    class="d-flex align-items-end gap-2 mb-3"
-                  >
-                    <div class="flex-grow-1">
-                      <label class="form-label mb-1">Nature d'opération</label>
-                      <select
-                        class="form-select form-select-sm"
-                        [(ngModel)]="selectedNatureId"
-                        [ngModelOptions]="{ standalone: true }"
-                      >
-                        <option [ngValue]="null">— Sélectionner —</option>
-
-                        <option
-                          *ngFor="let n of availableNatures"
-                          [ngValue]="n.idnature"
-                        >
-                          {{ n.libelle }}
-                        </option>
-                      </select>
-                    </div>
-
-                    <button
-                      class="btn btn-sm btn-outline-primary"
-                      [disabled]="!selectedNatureId"
-                      (click)="addSelectedNature()"
-                    >
-                      + Ajouter
-                    </button>
-                  </div>
-
-                  <!-- Bugdet isanalytique -->
-                  <div
-                    *ngIf="
-                      (modeSaisie === 'STEP' || modeSaisie === 'ALL') &&
-                      selectedBudget?.isanalytique === 1
-                    "
-                  >
-                    <div class="table-container">
-                      <table
-                        class="table table-bordered table-striped align-middle table-custom"
-                      >
-                        <thead class="table-light">
-                          <tr>
-                            <th>#</th>
-                            <th *ngIf="isAnalytique()">Code</th>
-                            <th>
-                              {{
-                                isAnalytique()
-                                  ? "Centre analytique"
-                                  : "Nature opération"
-                              }}
-                            </th>
-                            <th class="text-nowrap">Code budgétaire</th>
-                            <th class="text-nowrap">
-                              Montant prévision département
-                            </th>
-                            <th class="text-nowrap">Montant prévision site</th>
-                            <th class="text-nowrap">
-                              Montant prévision société
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @if (natureGrid.length === 0 && isAnalytique()) {
-                            <td colspan="8" class="text-center text-muted py-4">
-                              Aucun centre analytique disponible.
-                            </td>
-                          } @else {
-                            <tr *ngFor="let ligne of natureGrid; let i = index">
-                              <td>{{ i + 1 }}</td>
-                              <td *ngIf="isAnalytique()">
-                                {{ ligne.codecentreanalytique }}
-                              </td>
-                              <td class="text-nowrap">{{ ligne.libelle }}</td>
-                              <td>
-                                <input
-                                  type="text"
-                                  class="form-control form-control-sm input-custom"
-                                  placeholder="Code budgétaire"
-                                  [(ngModel)]="ligne.codebudgetaire"
-                                  [ngModelOptions]="{ standalone: true }"
-                                  [disabled]="actionModal === 'update'"
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  type="number"
-                                  class="form-control form-control-sm input-custom"
-                                  [disabled]="
-                                    selectedBudget?.validedept === 1 ||
-                                    user.typeentitedepartement !== 1
-                                  "
-                                  [(ngModel)]="ligne.montantDept"
-                                  [ngModelOptions]="{ standalone: true }"
-                                  (ngModelChange)="
-                                    onMontantChange(
-                                      ligne,
-                                      'montantDept',
-                                      $event
-                                    )
-                                  "
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  type="number"
-                                  class="form-control form-control-sm input-custom"
-                                  [disabled]="
-                                    selectedBudget?.validesite === 1 ||
-                                    user.typeentitesite !== 1 ||
-                                    selectedBudget?.validedept === 0
-                                  "
-                                  [(ngModel)]="ligne.montantSite"
-                                  [ngModelOptions]="{ standalone: true }"
-                                  (ngModelChange)="
-                                    onMontantChange(
-                                      ligne,
-                                      'montantSite',
-                                      $event
-                                    )
-                                  "
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  type="number"
-                                  class="form-control form-control-sm input-custom"
-                                  [disabled]="
-                                    selectedBudget?.validesite !== 1 ||
-                                    user.typeentitesociete !== 1 ||
-                                    selectedBudget?.validesociete === 1
-                                  "
-                                  [(ngModel)]="ligne.montantSociete"
-                                  [ngModelOptions]="{ standalone: true }"
-                                  (ngModelChange)="
-                                    onMontantChange(
-                                      ligne,
-                                      'montantSociete',
-                                      $event
-                                    )
-                                  "
-                                />
-                              </td>
-                            </tr>
-                          }
-                        </tbody>
-                      </table>
-                    </div>
-
-                    <div
-                      *ngIf="modeSaisie === 'STEP'"
-                      class="d-flex align-items-end gap-2 mb-3"
-                    >
-                      <div class="flex-grow-1">
-                        <label class="form-label mb-1">Centre analytique</label>
-                        <select
-                          class="form-select form-select-sm"
-                          [(ngModel)]="selectedCentreId"
-                          [ngModelOptions]="{ standalone: true }"
-                        >
-                          <option [ngValue]="null">— Sélectionner —</option>
-
-                          <option
-                            *ngFor="let n of availableNatures"
-                            [ngValue]="n.idcentreanalytique"
-                          >
-                            {{ n.libelle }}
-                          </option>
-                        </select>
-                      </div>
-
-                      <button
-                        class="btn btn-sm btn-outline-primary"
-                        [disabled]="!selectedCentreId"
-                        (click)="addSelectedNature()"
-                      >
-                        + Ajouter
-                      </button>
-                    </div>
-                  </div>
-
-                  <div *ngIf="msgErros" class="alert alert-danger mt-2">
-                    {{ msgErros }}
-                  </div>
-                </div>
-
-                <div class="modal-footer">
-                  <div class="hstack gap-2 justify-content-end">
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-light"
-                      data-bs-dismiss="modal"
-                      (click)="resetModeSaisie()"
-                    >
-                      Fermer
-                    </button>
-
-                    <!-- MODE CREATE / UPDATE -->
-                    <button
-                      *ngIf="actionModal !== 'validate'"
-                      type="submit"
-                      class="btn btn-sm btn-success"
-                      (click)="onSubmit()"
-                      [disabled]="loading"
-                    >
-                      {{
-                        actionModal === "create" ? "Enregistrer" : "Modifier"
-                      }}
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
+<!-- Modal création/modification lignes du budget -->
+<div
+  class="modal fade modal-lg"
+  id="showModal"
+  tabindex="-1"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+  data-bs-backdrop="static"
+  data-bs-keyboard="false"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow-lg border-0">
+      <div
+        class="modal-header"
+        style="
+          background: linear-gradient(135deg, #3b82f6 0%, #405189 100%);
+          border: 0;
+        "
+      >
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-file-text-line text-white fs-5"></i>
           </div>
+          <h5 class="modal-title text-white fw-semibold">
+            <span *ngIf="actionModal === 'create'">Création</span>
+            <span *ngIf="actionModal === 'update'">Modification</span>
+            ligne budgétaire
+          </h5>
         </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          id="close-modal"
+          (click)="resetModeSaisie()"
+        ></button>
+      </div>
+      <form [formGroup]="ligneBudgetForm">
+        <div class="modal-body p-4">
+          <input type="hidden" id="id-field" />
+          <div class="mb-3" id="modal-id">
+            <label for="idbudget-field" class="form-label form-label-sm"
+              >Budget</label
+            >
+            <select
+              class="form-select form-control form-control-sm {{
+                isValidField('idbudget')
+              }}"
+              aria-label="Default select example"
+              id="idbudget-field"
+              formControlName="idbudget"
+              (change)="onSelectionChange($event)"
+              [class.bg-light]="actionModal === 'update'"
+            >
+              <option [ngValue]="null">-- Sélectionner --</option>
+              @for (item of budgets; track $index) {
+                <option [value]="item.idbudget">
+                  {{ item.codebudget }} - {{ item.libelle }}
+                </option>
+              }
+            </select>
+            <div class="invalid-feedback">{{ msgErros }}</div>
+          </div>
 
-        <div
-          class="modal fade"
-          id="validateBudgetModal"
-          tabindex="-1"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content">
-              <!-- HEADER -->
-              <div class="modal-header bg-light p-3">
-                <h5 class="modal-title">
-                  Validation du budget - {{ selectedBudget?.codebudget }}:
-                  {{ selectedBudget?.libelle }}
-                </h5>
-                <button
-                  type="button"
-                  class="btn-close"
-                  data-bs-dismiss="modal"
-                  (click)="closeModal('validateBudgetModal')"
-                ></button>
-              </div>
+          <div class="mb-3" *ngIf="selectedBudget?.entite === 'Département'">
+            <label class="form-label">Département</label>
+            <select
+              class="form-select"
+              (change)="onDepartementChange($event)"
+              formControlName="iddepartement"
+              [class.bg-light]="actionModal === 'update'"
+            >
+              <option value="">-- Sélectionner --</option>
+              <option
+                *ngFor="let dep of appartenanceDepartement"
+                [value]="dep.iddepartement"
+              >
+                {{ dep.libelle }}
+              </option>
+            </select>
+          </div>
 
-              <!-- BODY -->
-              <div class="modal-body">
-                <div class="my-3 fs-5">
-                  <p>
-                    <span class="fw-bold">Budget :</span>
-                    {{ selectedBudget?.libelle }}
-                  </p>
-                  <p>
-                    <span class="fw-bold">Type :</span>
-                    {{ selectedBudget?.typebudget }}
-                  </p>
-                  <p *ngIf="!isAnalytique()">
-                    <span class="fw-bold">Entité :</span>
-                    {{ selectedBudget?.entite }}
-                  </p>
-                  <p>
-                    <span class="fw-bold">Valide du :</span>
-                    {{ selectedBudget?.datedebut | date: "dd-MM-yyyy" }}
-                    {{
-                      "
-                    "
-                    }}
-                    <span class="fw-bold">au :</span>
-                    {{ selectedBudget?.datefin | date: "dd-MM-yyyy" }}
-                  </p>
-                </div>
+          <!-- Bouton de saisie -->
+          <div
+            class="btn-group mb-3"
+            *ngIf="ligneBudgetForm.value.idbudget !== ''"
+          >
+            <button
+              type="button"
+              class="btn-glass-primary btn-sm"
+              [class.btn-glass-secondary]="modeSaisie !== 'ALL'"
+              (click)="setMode('ALL')"
+            >
+              Saisie complète
+            </button>
+            <button
+              type="button"
+              class="btn-glass-primary btn-sm"
+              [class.btn-glass-secondary]="modeSaisie !== 'STEP'"
+              [disabled]="actionModal === 'update'"
+              (click)="setMode('STEP')"
+            >
+              Saisie progressive
+            </button>
+          </div>
 
-                <!-- TABLE -->
-                <div class="table-responsive">
-                  <table
-                    class="table table-bordered table-striped align-middle table-compact"
+          <!-- Tables de saisie -->
+          <div
+            *ngIf="
+              (modeSaisie === 'STEP' || modeSaisie === 'ALL') &&
+              selectedBudget?.entite === 'Département'
+            "
+          >
+            <div class="table-responsive">
+              <table class="table table-modern align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width: 30px">#</th>
+                    <th>Nature opération</th>
+                    <th>Code budgétaire</th>
+                    <th class="text-end">Montant prévision département</th>
+                    <th class="text-end">Montant prévision site</th>
+                    <th class="text-end">Montant prévision société</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (ligne of natureGrid; track $index; let i = $index) {
+                    <tr>
+                      <td>{{ i + 1 }}</td>
+                      <td>{{ ligne.libelle }}</td>
+                      <td>
+                        <input
+                          type="text"
+                          class="form-control form-control-sm"
+                          placeholder="Code budgétaire"
+                          [(ngModel)]="ligne.codebudgetaire"
+                          [ngModelOptions]="{ standalone: true }"
+                          [disabled]="actionModal === 'update'"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          class="form-control form-control-sm text-end"
+                          [disabled]="
+                            selectedBudget?.validedept === 1 ||
+                            user.typeentitedepartement !== 1
+                          "
+                          [(ngModel)]="ligne.montantDept"
+                          [ngModelOptions]="{ standalone: true }"
+                          (ngModelChange)="
+                            onMontantChange(ligne, 'montantDept', $event)
+                          "
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          class="form-control form-control-sm text-end"
+                          [disabled]="
+                            selectedBudget?.validedept === 0 ||
+                            selectedBudget?.validesite === 1 ||
+                            user.typeentitesite !== 1
+                          "
+                          [(ngModel)]="ligne.montantSite"
+                          [ngModelOptions]="{ standalone: true }"
+                          (ngModelChange)="
+                            onMontantChange(ligne, 'montantSite', $event)
+                          "
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          class="form-control form-control-sm text-end"
+                          [disabled]="
+                            selectedBudget?.validesite !== 1 ||
+                            user.typeentitesociete !== 1 ||
+                            selectedBudget?.validesociete === 1
+                          "
+                          [(ngModel)]="ligne.montantSociete"
+                          [ngModelOptions]="{ standalone: true }"
+                          (ngModelChange)="
+                            onMontantChange(ligne, 'montantSociete', $event)
+                          "
+                        />
+                      </td>
+                    </tr>
+                  }
+                  @if (
+                    natureGrid.length === 0 &&
+                    selectedBudget?.entite === "Département" &&
+                    selectedDept
+                  ) {
+                    <tr>
+                      <td colspan="6" class="text-center text-muted py-3">
+                        Aucune nature d'opération n'a été affectée à ce
+                        département.
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            @if (modeSaisie === "STEP") {
+              <div class="d-flex align-items-end gap-2 mb-3 mt-3">
+                <div class="flex-grow-1">
+                  <label class="form-label mb-1">Nature d'opération</label>
+                  <select
+                    class="form-select form-select-sm"
+                    [(ngModel)]="selectedNatureId"
+                    [ngModelOptions]="{ standalone: true }"
                   >
-                    <thead class="table-light">
+                    <option [ngValue]="null">— Sélectionner —</option>
+                    <option
+                      *ngFor="let n of availableNatures"
+                      [ngValue]="n.idnature"
+                    >
+                      {{ n.libelle }}
+                    </option>
+                  </select>
+                </div>
+                <button
+                  class="btn-glass-submit btn-sm"
+                  [disabled]="!selectedNatureId"
+                  (click)="addSelectedNature()"
+                >
+                  <i class="ri-add-line me-1"></i> Ajouter
+                </button>
+              </div>
+            }
+          </div>
+
+          <!-- Entité Site -->
+          <div
+            *ngIf="
+              selectedBudget?.entite === 'Site' &&
+              (modeSaisie === 'STEP' || modeSaisie === 'ALL')
+            "
+          >
+            <div class="table-responsive">
+              <table class="table table-modern align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width: 30px">#</th>
+                    <th>Nature opération</th>
+                    <th>Code budgétaire</th>
+                    <th class="text-end">Montant prévision site</th>
+                    <th class="text-end">Montant prévision société</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if (
+                    natureGrid.length === 0 && selectedBudget?.entite === "Site"
+                  ) {
+                    <tr>
+                      <td colspan="5" class="text-center text-muted py-3">
+                        Aucune nature d'opération disponible pour ce site.
+                      </td>
+                    </tr>
+                  } @else {
+                    @for (ligne of natureGrid; track $index; let i = $index) {
                       <tr>
-                        <th style="width: 50px">#</th>
-                        <th
-                          *ngIf="
-                            !isAnalytique() &&
-                            selectedBudget?.entite === 'Département'
-                          "
-                        >
-                          Département
-                        </th>
-                        <th *ngIf="isAnalytique()">Code</th>
-                        <th>
-                          {{
-                            isAnalytique()
-                              ? "Centre analytique"
-                              : "Nature d'opération"
-                          }}
-                        </th>
-
-                        <th
-                          *ngIf="
-                            isAnalytique() ||
-                            selectedBudget?.entite === 'Département'
-                          "
-                        >
-                          Prévision Département
-                        </th>
-                        <th>Prévision Site</th>
-                        <th>Prévision Société</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      <tr *ngFor="let ligne of validationLines; let i = index">
-                        <td class="text-center">{{ i + 1 }}</td>
-
-                        <td
-                          *ngIf="
-                            !isAnalytique() &&
-                            selectedBudget?.entite === 'Département'
-                          "
-                        >
-                          {{ ligne.departement }}
-                        </td>
-                        <td *ngIf="isAnalytique()">{{ ligne.code }}</td>
+                        <td>{{ i + 1 }}</td>
+                        <td>{{ ligne.libelle }}</td>
                         <td>
-                          {{ isAnalytique() ? ligne.centre : ligne.nature }}
-                        </td>
-
-                        <!-- MONTANT DÉPARTEMENT -->
-                        <td
-                          *ngIf="
-                            isAnalytique() ||
-                            selectedBudget?.entite === 'Département'
-                          "
-                        >
                           <input
-                            type="number"
-                            class="form-control form-control-sm text-end"
-                            [(ngModel)]="ligne.montantDept"
-                            [readonly]="isDeptReadonly()"
+                            type="text"
+                            class="form-control form-control-sm"
+                            placeholder="Code budgétaire"
+                            [(ngModel)]="ligne.codebudgetaire"
+                            [ngModelOptions]="{ standalone: true }"
+                            [disabled]="actionModal === 'update'"
                           />
                         </td>
-
-                        <!-- MONTANT SITE -->
                         <td>
                           <input
                             type="number"
                             class="form-control form-control-sm text-end"
+                            [disabled]="
+                              selectedBudget?.validesite === 1 ||
+                              user.typeentitesite !== 1
+                            "
                             [(ngModel)]="ligne.montantSite"
-                            [readonly]="isSiteReadonly()"
+                            [ngModelOptions]="{ standalone: true }"
                             (ngModelChange)="
-                              !isSiteReadonly() &&
-                                (ligne.montantSociete = ligne.montantSite)
+                              onMontantChange(ligne, 'montantSite', $event)
                             "
                           />
                         </td>
-
-                        <!-- MONTANT SOCIÉTÉ -->
                         <td>
                           <input
                             type="number"
                             class="form-control form-control-sm text-end"
+                            [disabled]="
+                              selectedBudget?.validesite !== 1 ||
+                              user.typeentitesociete !== 1 ||
+                              selectedBudget?.validesociete === 1
+                            "
                             [(ngModel)]="ligne.montantSociete"
-                            [readonly]="isSocieteReadonly()"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="
+                              onMontantChange(ligne, 'montantSociete', $event)
+                            "
                           />
                         </td>
                       </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+            @if (modeSaisie === "STEP") {
+              <div class="d-flex align-items-end gap-2 mb-3 mt-3">
+                <div class="flex-grow-1">
+                  <label class="form-label mb-1">Nature d'opération</label>
+                  <select
+                    class="form-select form-select-sm"
+                    [(ngModel)]="selectedNatureId"
+                    [ngModelOptions]="{ standalone: true }"
+                  >
+                    <option [ngValue]="null">— Sélectionner —</option>
+                    <option
+                      *ngFor="let n of availableNatures"
+                      [ngValue]="n.idnature"
+                    >
+                      {{ n.libelle }}
+                    </option>
+                  </select>
+                </div>
+                <button
+                  class="btn-glass-submit btn-sm"
+                  [disabled]="!selectedNatureId"
+                  (click)="addSelectedNature()"
+                >
+                  <i class="ri-add-line me-1"></i> Ajouter
+                </button>
+              </div>
+            }
+          </div>
 
-                      <!-- AUCUNE LIGNE -->
-                      <tr *ngIf="validationLines.length === 0">
-                        <td colspan="6" class="text-center text-muted py-3">
-                          Aucune ligne budgétaire
+          <!-- Budget analytique -->
+          <div
+            *ngIf="
+              (modeSaisie === 'STEP' || modeSaisie === 'ALL') &&
+              selectedBudget?.isanalytique === 1
+            "
+          >
+            <div class="table-responsive">
+              <table class="table table-modern align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width: 30px">#</th>
+                    <th>Code</th>
+                    <th>Centre analytique</th>
+                    <th>Code budgétaire</th>
+                    <th class="text-end">Montant prévision département</th>
+                    <th class="text-end">Montant prévision site</th>
+                    <th class="text-end">Montant prévision société</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if (natureGrid.length === 0 && isAnalytique()) {
+                    <tr>
+                      <td colspan="7" class="text-center text-muted py-3">
+                        Aucun centre analytique disponible.
+                      </td>
+                    </tr>
+                  } @else {
+                    @for (ligne of natureGrid; track $index; let i = $index) {
+                      <tr>
+                        <td>{{ i + 1 }}</td>
+                        <td>{{ ligne.codecentreanalytique || "—" }}</td>
+                        <td>{{ ligne.libelle }}</td>
+                        <td>
+                          <input
+                            type="text"
+                            class="form-control form-control-sm"
+                            placeholder="Code budgétaire"
+                            [(ngModel)]="ligne.codebudgetaire"
+                            [ngModelOptions]="{ standalone: true }"
+                            [disabled]="actionModal === 'update'"
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            class="form-control form-control-sm text-end"
+                            [disabled]="
+                              selectedBudget?.validedept === 1 ||
+                              user.typeentitedepartement !== 1
+                            "
+                            [(ngModel)]="ligne.montantDept"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="
+                              onMontantChange(ligne, 'montantDept', $event)
+                            "
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            class="form-control form-control-sm text-end"
+                            [disabled]="
+                              selectedBudget?.validesite === 1 ||
+                              user.typeentitesite !== 1 ||
+                              selectedBudget?.validedept === 0
+                            "
+                            [(ngModel)]="ligne.montantSite"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="
+                              onMontantChange(ligne, 'montantSite', $event)
+                            "
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            class="form-control form-control-sm text-end"
+                            [disabled]="
+                              selectedBudget?.validesite !== 1 ||
+                              user.typeentitesociete !== 1 ||
+                              selectedBudget?.validesociete === 1
+                            "
+                            [(ngModel)]="ligne.montantSociete"
+                            [ngModelOptions]="{ standalone: true }"
+                            (ngModelChange)="
+                              onMontantChange(ligne, 'montantSociete', $event)
+                            "
+                          />
                         </td>
                       </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                <!-- COMMENTAIRE REJET -->
-                <div *ngIf="showRejectComment" class="mt-3">
-                  <div class="mb-3">
-                    <form *ngIf="rejectForm" [formGroup]="rejectForm">
-                      <label class="form-label form-label-sm" for="motif-field"
-                        >Motif de refus</label
-                      >
-                      <select
-                        class="form-select form-control form-control-sm"
-                        aria-label="Sélectionner le budget"
-                        id="motif-field"
-                        formControlName="motif"
-                      >
-                        <option [ngValue]="null">-- Sélectionner --</option>
-
-                        <option
-                          *ngFor="let motif of motifs"
-                          [value]="motif.idmotif"
-                        >
-                          {{ motif.libellemotif }}
-                        </option>
-                      </select>
-                      <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
-                      <textarea
-                        class="form-control"
-                        rows="3"
-                        [(ngModel)]="rejectComment"
-                        [ngModelOptions]="{ standalone: true }"
-                        placeholder="Motif obligatoire"
-                      ></textarea>
-                    </form>
-                  </div>
-                </div>
-
-                <div *ngIf="msgErros" class="alert alert-danger mt-2">
-                  {{ msgErros }}
-                </div>
-              </div>
-
-              <!-- FOOTER -->
-              <div class="modal-footer">
-                <button
-                  class="btn btn-light btn-sm"
-                  data-bs-dismiss="modal"
-                  (click)="closeModal('validateBudgetModal')"
-                >
-                  Fermer
-                </button>
-
-                <button
-                  class="btn btn-outline-danger btn-sm"
-                  (click)="onRejectClick()"
-                >
-                  Rejeter
-                </button>
-
-                <button
-                  class="btn btn-success btn-sm"
-                  [disabled]="loading"
-                  (click)="onClickValidateBudget()"
-                >
-                  Valider
-                </button>
-              </div>
+                    }
+                  }
+                </tbody>
+              </table>
             </div>
+            @if (modeSaisie === "STEP") {
+              <div class="d-flex align-items-end gap-2 mb-3 mt-3">
+                <div class="flex-grow-1">
+                  <label class="form-label mb-1">Centre analytique</label>
+                  <select
+                    class="form-select form-select-sm"
+                    [(ngModel)]="selectedCentreId"
+                    [ngModelOptions]="{ standalone: true }"
+                  >
+                    <option [ngValue]="null">— Sélectionner —</option>
+                    <option
+                      *ngFor="let n of availableNatures"
+                      [ngValue]="n.idcentreanalytique"
+                    >
+                      {{ n.libelle }}
+                    </option>
+                  </select>
+                </div>
+                <button
+                  class="btn-glass-submit btn-sm"
+                  [disabled]="!selectedCentreId"
+                  (click)="addSelectedNature()"
+                >
+                  <i class="ri-add-line me-1"></i> Ajouter
+                </button>
+              </div>
+            }
           </div>
+
+          @if (msgErros) {
+            <div class="alert alert-danger mt-3">{{ msgErros }}</div>
+          }
         </div>
 
-        <!-- Modal visionnage des validateurs -->
-        <div
-          class="modal fade"
-          id="validateursBudgetModal"
-          tabindex="-1"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content">
-              <!-- HEADER -->
-              <div class="modal-header bg-light p-3">
-                <h5 class="modal-title">Validateurs du budget</h5>
-                <button
-                  type="button"
-                  class="btn-close"
-                  data-bs-dismiss="modal"
-                  (click)="closeModal('validateursBudgetModal')"
-                ></button>
-              </div>
+        <div class="modal-footer border-0 p-4" style="background: transparent">
+          <div class="d-flex gap-3 justify-content-end w-100">
+            <button
+              type="button"
+              class="btn-glass-cancel"
+              data-bs-dismiss="modal"
+              (click)="resetModeSaisie()"
+            >
+              <i class="ri-close-line me-1"></i> Fermer
+            </button>
+            <button
+              *ngIf="actionModal !== 'validate'"
+              type="submit"
+              class="btn-glass-submit"
+              (click)="onSubmit()"
+              [disabled]="loading"
+            >
+              <span
+                *ngIf="loading"
+                class="spinner-border spinner-border-sm me-2"
+              ></span>
+              <i *ngIf="!loading" class="ri-save-line me-1"></i>
+              {{ actionModal === "create" ? "Enregistrer" : "Modifier" }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- Modal validation budget + pièces jointes -->
+<div
+  class="modal fade"
+  id="validateBudgetModal"
+  tabindex="-1"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content shadow-lg border-0">
+      <!-- Header -->
+      <div
+        class="modal-header"
+        style="
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          border: 0;
+        "
+      >
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-check-line text-white fs-5"></i>
+          </div>
+          <h5 class="modal-title text-white fw-semibold">
+            Validation du budget - {{ selectedBudget?.codebudget }}:
+            {{ selectedBudget?.libelle }}
+          </h5>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          (click)="closeModal('validateBudgetModal')"
+        ></button>
+      </div>
 
-              <!-- BODY -->
-              <div class="modal-body">
-                <!-- TABLE -->
-                <div class="table-responsive">
-                  <table
-                    class="table table-bordered table-striped align-middle table-compact"
-                  >
-                    <thead class="table-light">
-                      <tr>
-                        <th style="width: 50px">#</th>
-                        <th>Circuit</th>
-                        <th>Validateur</th>
+      <!-- Onglets + Contenu -->
+      <div class="modal-body p-0">
+        <ul class="nav nav-tabs nav-tabs-glass-success" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link active"
+              id="validation-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#validation"
+              type="button"
+              role="tab"
+            >
+              <i class="ri-check-line me-1"></i> Validation
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="pieces-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#pieces"
+              type="button"
+              role="tab"
+              (click)="loadBudgetPiecesJointes()"
+            >
+              <i class="ri-attachment-2 me-1"></i> Pièces jointes
+              <span
+                *ngIf="budgetPiecesCount > 0"
+                class="badge-glass badge-count ms-1"
+              >
+                {{ budgetPiecesCount }}
+              </span>
+            </button>
+          </li>
+        </ul>
 
-                        <th>Statut</th>
-                        <th *ngIf="isRejected()">Motif</th>
-                        <th>Commentaire</th>
-                        <th>Date</th>
-                      </tr>
-                    </thead>
+        <div class="tab-content p-4">
+          <!-- Onglet Validation -->
+          <div
+            class="tab-pane fade show active"
+            id="validation"
+            role="tabpanel"
+          >
+            <div class="my-3">
+              <p>
+                <span class="fw-bold">Budget :</span>
+                {{ selectedBudget?.libelle }}
+              </p>
+              <p>
+                <span class="fw-bold">Type :</span>
+                {{ selectedBudget?.typebudget }}
+              </p>
+              <p *ngIf="!isAnalytique()">
+                <span class="fw-bold">Entité :</span>
+                {{ selectedBudget?.entite }}
+              </p>
+              <p>
+                <span class="fw-bold">Valide du :</span>
+                {{ selectedBudget?.datedebut | date: "dd/MM/yyyy" }}
+                <span class="fw-bold">au :</span>
+                {{ selectedBudget?.datefin | date: "dd/MM/yyyy" }}
+              </p>
+            </div>
 
-                    <tbody>
-                      <tr
-                        *ngFor="
-                          let validateur of validateursBudget;
-                          let i = index
+            <div class="table-responsive">
+              <table class="table table-modern align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width: 50px">#</th>
+                    <th
+                      *ngIf="
+                        !isAnalytique() &&
+                        selectedBudget?.entite === 'Département'
+                      "
+                    >
+                      Département
+                    </th>
+                    <th *ngIf="isAnalytique()">Code</th>
+                    <th>
+                      {{
+                        isAnalytique()
+                          ? "Centre analytique"
+                          : "Nature d'opération"
+                      }}
+                    </th>
+                    <th
+                      *ngIf="
+                        isAnalytique() ||
+                        selectedBudget?.entite === 'Département'
+                      "
+                      class="text-end"
+                    >
+                      Prévision Département
+                    </th>
+                    <th class="text-end">Prévision Site</th>
+                    <th class="text-end">Prévision Société</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (
+                    ligne of validationLines;
+                    track $index;
+                    let i = $index
+                  ) {
+                    <tr>
+                      <td class="text-center">{{ i + 1 }}</td>
+                      <td
+                        *ngIf="
+                          !isAnalytique() &&
+                          selectedBudget?.entite === 'Département'
                         "
                       >
-                        <td class="text-center">{{ i + 1 }}</td>
-
-                        <td>{{ validateur.codecircuitvalidation }}</td>
-                        <td>{{ validateur.nom }} {{ validateur.prenom }}</td>
-
-                        <td>
-                          <span
-                            class="badge"
-                            [ngClass]="
-                              validateur.decision.toLocaleLowerCase() ===
-                              'approuve'
-                                ? 'bg-success-subtle text-success'
-                                : validateur.decision.toLocaleLowerCase() ==
-                                    'rejete'
-                                  ? 'bg-danger-subtle text-danger'
-                                  : 'bg-warning-subtle text-warning-emphasis'
-                            "
-                          >
-                            {{ validateur.decision }}
-                          </span>
-                        </td>
-
-                        <td
-                          *ngIf="
-                            isRejected() && validateur.decision === 'rejete'
+                        {{ ligne.departement }}
+                      </td>
+                      <td *ngIf="isAnalytique()">{{ ligne.code }}</td>
+                      <td>
+                        {{ isAnalytique() ? ligne.centre : ligne.nature }}
+                      </td>
+                      <td
+                        *ngIf="
+                          isAnalytique() ||
+                          selectedBudget?.entite === 'Département'
+                        "
+                        class="text-end"
+                      >
+                        <input
+                          type="number"
+                          class="form-control form-control-sm text-end"
+                          [(ngModel)]="ligne.montantDept"
+                          [readonly]="isDeptReadonly()"
+                        />
+                      </td>
+                      <td class="text-end">
+                        <input
+                          type="number"
+                          class="form-control form-control-sm text-end"
+                          [(ngModel)]="ligne.montantSite"
+                          [readonly]="isSiteReadonly()"
+                          (ngModelChange)="
+                            !isSiteReadonly() &&
+                              (ligne.montantSociete = ligne.montantSite)
                           "
-                        >
-                          {{ motifOfBudgetRejected ?? "-" }}
-                        </td>
-
-                        <td>
-                          {{ validateur.commentaire ?? "Aucun commentaire" }}
-                        </td>
-
-                        <td>
-                          {{
-                            validateur.datevalidation
-                              ? (validateur.datevalidation
-                                | date: "dd-MM-yyyy HH:mm")
-                              : "-"
-                          }}
-                        </td>
-                      </tr>
-
-                      <tr *ngIf="validateursBudget.length === 0">
-                        <td colspan="6" class="text-center text-muted py-3">
-                          Aucun(s) validateur(s) pour ce budget.
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                <div *ngIf="msgErros" class="alert alert-danger mt-2">
-                  {{ msgErros }}
-                </div>
-              </div>
+                        />
+                      </td>
+                      <td class="text-end">
+                        <input
+                          type="number"
+                          class="form-control form-control-sm text-end"
+                          [(ngModel)]="ligne.montantSociete"
+                          [readonly]="isSocieteReadonly()"
+                        />
+                      </td>
+                    </tr>
+                  }
+                  @if (validationLines.length === 0) {
+                    <tr>
+                      <td colspan="6" class="text-center text-muted py-3">
+                        <div class="empty-state">
+                          <i class="ri-file-text-line"></i>
+                          <p>Aucune ligne budgétaire</p>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
             </div>
-          </div>
-        </div>
 
-        <!-- Modal -->
-        <div
-          class="modal fade flip"
-          id="deleteOrder"
-          tabindex="-1"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-body p-5 text-center">
-                <div class="mt-4 text-center">
-                  <h4>{{ titleMsg }}</h4>
-                  <p class="text-muted fs-15 mb-4">{{ msgSup }}</p>
-                  <div class="hstack gap-2 justify-content-center remove">
-                    <button
-                      class="btn btn-sm btn-link link-success fw-medium text-decoration-none"
-                      id="deleteRecord-close"
-                      data-bs-dismiss="modal"
-                      (click)="resetModeSaisie()"
+            @if (showRejectComment) {
+              <div class="mt-3">
+                <form *ngIf="rejectForm" [formGroup]="rejectForm">
+                  <label class="form-label form-label-sm" for="motif-field"
+                    >Motif de refus</label
+                  >
+                  <select
+                    class="form-select form-control form-control-sm mb-2"
+                    aria-label="Sélectionner le motif"
+                    id="motif-field"
+                    formControlName="motif"
+                  >
+                    <option [ngValue]="null">-- Sélectionner --</option>
+                    <option
+                      *ngFor="let motif of motifs"
+                      [value]="motif.idmotif"
                     >
-                      <i class="ri-close-line me-1 align-middle"></i> annuler
-                    </button>
-                    <button
-                      class="btn btn-sm btn-danger"
-                      (click)="deleteConfirmed()"
-                      id="delete-record"
-                    >
-                      Oui, supprimer
-                    </button>
+                      {{ motif.libellemotif }}
+                    </option>
+                  </select>
+                  <textarea
+                    class="form-control"
+                    rows="3"
+                    [(ngModel)]="rejectComment"
+                    [ngModelOptions]="{ standalone: true }"
+                    placeholder="Commentaire obligatoire"
+                  ></textarea>
+                </form>
+              </div>
+            }
+
+            @if (msgErros) {
+              <div class="alert alert-danger mt-3">{{ msgErros }}</div>
+            }
+          </div>
+
+          <!-- Onglet Pièces jointes -->
+          <div class="tab-pane fade" id="pieces" role="tabpanel">
+            @if (piecesJointesLoading) {
+              <div class="text-center py-5">
+                <div class="spinner-glass">
+                  <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">Chargement...</span>
                   </div>
+                  <p class="mt-2 text-muted">
+                    Chargement des pièces jointes...
+                  </p>
                 </div>
               </div>
-            </div>
+            }
+
+            @if (!piecesJointesLoading && budgetPiecesJointes.length === 0) {
+              <div class="text-center py-5 text-muted">
+                <div class="empty-state">
+                  <i class="ri-folder-open-line fs-1"></i>
+                  <p class="mt-2">Aucune pièce jointe</p>
+                  <span class="empty-hint"
+                    >Ce budget n'a pas de pièces jointes.</span
+                  >
+                </div>
+              </div>
+            }
+
+            @if (!piecesJointesLoading && budgetPiecesJointes.length > 0) {
+              <div class="pieces-list-modal">
+                <div
+                  class="d-flex align-items-center justify-content-between mb-4"
+                >
+                  <h6 class="mb-0 d-flex align-items-center gap-2">
+                    <i class="ri-file-list-line"></i>
+                    Documents attachés
+                  </h6>
+                  <button
+                    type="button"
+                    class="btn-glass-success btn-sm"
+                    (click)="downloadAllBudgetFiles()"
+                    title="Télécharger toutes les pièces jointes"
+                  >
+                    <i class="ri-download-line me-1"></i> Tout télécharger
+                  </button>
+                </div>
+
+                <div class="row g-3">
+                  @for (pj of budgetPiecesJointes; track $index) {
+                    <div class="col-md-6">
+                      <div
+                        class="piece-card-success p-3 rounded-3 border hover-shadow"
+                      >
+                        <div class="d-flex align-items-center gap-3">
+                          <div
+                            class="piece-icon-success text-center"
+                            style="width: 44px; height: 44px"
+                          >
+                            <i [class]="getFileIcon(pj)" class="fs-2"></i>
+                          </div>
+                          <div class="flex-grow-1 min-width-0">
+                            <h6 class="mb-1 small fw-semibold text-truncate">
+                              {{ pj.nomfichier }}
+                            </h6>
+                            <div class="d-flex gap-3 text-muted small">
+                              <span class="badge-glass">
+                                {{ formatFileSize(pj.taille) }}
+                              </span>
+                            </div>
+                          </div>
+                          <div class="d-flex gap-1">
+                            <button
+                              class="btn-action-glass btn-view-success"
+                              (click)="downloadBudgetPiece(pj)"
+                              title="Télécharger"
+                            >
+                              <i class="ri-download-line"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
           </div>
         </div>
-        <!--end modal -->
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer border-0 p-4" style="background: transparent">
+        <div class="d-flex gap-3 justify-content-end w-100">
+          <button
+            type="button"
+            class="btn-glass-cancel"
+            data-bs-dismiss="modal"
+            (click)="closeModal('validateBudgetModal')"
+          >
+            <i class="ri-close-line me-1"></i> Fermer
+          </button>
+          <button class="btn-glass-danger" (click)="onRejectClick()">
+            <i class="ri-close-circle-line me-1"></i> Rejeter
+          </button>
+          <button
+            class="btn-glass-validate"
+            [disabled]="loading"
+            (click)="onClickValidateBudget()"
+          >
+            <span
+              *ngIf="loading"
+              class="spinner-border spinner-border-sm me-2"
+            ></span>
+            <i *ngIf="!loading" class="ri-check-line me-1"></i> Valider
+          </button>
+        </div>
       </div>
     </div>
   </div>
-  <!--end col-->
 </div>
-<!--end row-->
+
+<!-- Modal validateurs + pièces jointes -->
+<div
+  class="modal fade"
+  id="validateursBudgetModal"
+  tabindex="-1"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content shadow-lg border-0">
+      <!-- Header -->
+      <div
+        class="modal-header"
+        style="
+          background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+          border: 0;
+        "
+      >
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-time-line text-white fs-5"></i>
+          </div>
+          <h5 class="modal-title text-white fw-semibold">
+            Gestion du budget: {{ selectedBudget?.codebudget }} -
+            {{ selectedBudget?.libelle }}
+          </h5>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          (click)="closeModal('validateursBudgetModal')"
+        ></button>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-modern align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 50px">#</th>
+              <th>Circuit</th>
+              <th>Validateur</th>
+              <th>Statut</th>
+              <th *ngIf="isRejected()">Motif</th>
+              <th>Commentaire</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (
+              validateur of validateursBudget;
+              track $index;
+              let i = $index
+            ) {
+              <tr>
+                <td class="text-center">{{ i + 1 }}</td>
+                <td>{{ validateur.codecircuitvalidation }}</td>
+                <td>{{ validateur.nom }} {{ validateur.prenom }}</td>
+                <td>
+                  <span
+                    class="status-badge"
+                    [class]="
+                      getStatusInfo(validateur.decision.toLowerCase()).class
+                    "
+                  >
+                    <span
+                      class="status-dot"
+                      [class]="
+                        getStatusInfo(validateur.decision.toLowerCase()).class
+                      "
+                    ></span>
+                    {{ validateur.decision }}
+                  </span>
+                </td>
+                <td *ngIf="isRejected() && validateur.decision === 'rejete'">
+                  {{ motifOfBudgetRejected ?? "-" }}
+                </td>
+                <td>
+                  {{ validateur.commentaire ?? "Aucun commentaire" }}
+                </td>
+                <td>
+                  {{
+                    validateur.datevalidation
+                      ? (validateur.datevalidation | date: "dd/MM/yyyy HH:mm")
+                      : "-"
+                  }}
+                </td>
+              </tr>
+            }
+            @if (validateursBudget.length === 0) {
+              <tr>
+                <td colspan="6" class="text-center text-muted py-3">
+                  <div class="empty-state">
+                    <i class="ri-user-unfollow-line"></i>
+                    <p>Aucun validateur</p>
+                    <span class="empty-hint"
+                      >Aucun validateur pour ce budget.</span
+                    >
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-footer border-0 p-4" style="background: transparent">
+        <button
+          type="button"
+          class="btn-glass-cancel"
+          data-bs-dismiss="modal"
+          (click)="closeModal('validateursBudgetModal')"
+        >
+          <i class="ri-close-line me-1"></i> Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal suppression -->
+<div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content delete-modal-card">
+      <div class="modal-body text-center p-4">
+        <div class="delete-icon-wrapper mb-4">
+          <i class="ri-delete-bin-line"></i>
+        </div>
+        <h5 class="delete-modal-title">{{ titleMsg }}</h5>
+        <p class="delete-modal-message">{{ msgSup }}</p>
+        <div class="d-flex gap-3 justify-content-center">
+          <button
+            class="delete-btn-cancel"
+            data-bs-dismiss="modal"
+            (click)="resetModeSaisie()"
+          >
+            <i class="ri-close-line me-1"></i> Annuler
+          </button>
+          <button
+            class="delete-btn-confirm"
+            (click)="deleteConfirmed()"
+            data-bs-dismiss="modal"
+          >
+            <i class="ri-delete-bin-line me-1"></i> Supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

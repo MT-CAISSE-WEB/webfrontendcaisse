@@ -2,232 +2,306 @@
 <div class="row">
     <div class="col-12">
         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">{{title}}</h4>
+            <h4 class="mb-sm-0">{{ title }}</h4>
             <div class="page-title-right">
                 <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Consultation</a></li>
-                    <li class="breadcrumb-item active">{{title}}</li>
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Comptabilité</a></li>
+                    <li class="breadcrumb-item active">{{ title }}</li>
                 </ol>
             </div>
         </div>
     </div>
 </div>
-<!-- end page title -->
 
 <div class="row">
     <div class="col-lg-12">
-        <div class="card" id="">
+        <div class="card">
             <div class="card-header border-0">
-                <div class="d-flex align-items-center">
-                    <h5 class="card-title mb-0 flex-grow-1">{{title}}</h5>
-                    <div class="flex-shrink-0">
-                        <div class="d-flex gap-2 flex-wrap">
-                            <div class="dropdown card-header-dropdown">
-                                <button class="btn btn-sm btn-info" style="min-width:120px; margin-right:8px;" data-bs-toggle="dropdown" data-bs-aria-haspopup="true" data-bs-aria-expanded="false"><i class="mdi mdi-chevron-down align-middle ms-1"></i>Extraire</button>
-                                <div class="dropdown-menu dropdown-menu-end">
-                                    <a class="dropdown-item" href="#" (click)="exportExcel()">Extraire vers excel</a>
-                                    <a class="dropdown-item" href="#">Extraction X3</a>
-                                </div>
-                            </div>
-                            <button type="button" class="btn btn-sm btn-secondary" style="min-width:120px; margin-right:8px;" data-bs-toggle="modal" data-bs-target="#comptabiliteModal">
-                                <i class="ri-funds-box-fill align-bottom me-1"></i>Comptabiliser
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <h5 class="card-title mb-0">Liste des écritures</h5>
+                    <div class="d-flex gap-2">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-info" data-bs-toggle="dropdown">
+                                <i class="mdi mdi-download me-1"></i> Extraire
                             </button>
-                            <button type="button" class="btn btn-sm btn-primary" style="min-width:120px; margin-right:8px;" data-bs-toggle="modal" data-bs-target="#criteriaModal">
-                                <i class="ri-filter-2-line align-bottom me-1"></i>Critères
-                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" (click)="exportExcel(false)">Exporter Excel (simple)</a></li>
+                                <li><a class="dropdown-item" (click)="exportExcel(true)">Valider & exporter</a></li>
+                            </ul>
                         </div>
+                        <button class="btn btn-sm btn-success" (click)="validateSelected()" [disabled]="selectedRows.size === 0">
+                            <i class="ri-checkbox-circle-line"></i> Valider sélection ({{ selectedRows.size }})
+                        </button>
+                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#comptabilisationModal">
+                            <i class="ri-funds-box-line"></i> Comptabiliser
+                        </button>
+                        <button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#criteriaModal">
+                            <i class="ri-filter-2-line"></i> Critères
+                        </button>
                     </div>
-                </div>
-
-                <!-- Modal Comptabilite -->
-                <div class="modal fade" id="comptabiliteModal" tabindex="-1" aria-labelledby="comptabiliteModalLabel" aria-hidden="true">
-                  <div class="modal-dialog modal-md modal-dialog-centered">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="comptabiliteModalLabel">Comptabiliser les operations</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                      </div>
-                      <div class="modal-body">
-                        <form [formGroup]="comptabiliteForm" (ngSubmit)="applyComptability()">
-                          <div class="row g-3">
-                            <div class="col-md-6">
-                              <label class="form-label">Date début</label>
-                              <input type="date" class="form-control form-control-sm" formControlName="datedebut" />
-                            </div>
-                            <div class="col-md-6">
-                              <label class="form-label">Date fin</label>
-                              <input type="date" class="form-control form-control-sm" formControlName="datefin" />
-                            </div>
-
-                            <div class="col-xxl-6 col-sm-6">
-                                <div class="mb-3 bg-light">
-                                    <div class="mb-2">
-                                        <div class="input-light">
-                                            <select class="form-select form-select-sm bg-light border-0" formControlName="operation">
-                                                <option value="" selected>Selectionner l'operation à comptabiliser</option>
-                                                @for(item of operations; track $index){
-                                                    <option value="{{item.idoperation}}"> {{item.codeoperation}} -- | | -- {{ formatCFA(item.montant)}} {{ item.devise.codedevise }} </option>
-                                                }
-                                            </select>
-                                        </div>
-                                        <div class="invalid-feedback">{{ msgErros }}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-xxl-6 col-sm-6">
-                                <div class="mb-3 bg-light">
-                                    <div class="mb-2">
-                                        <div class="input-light">
-                                            <select class="form-select form-select-sm bg-light border-0" formControlName="journal">
-                                                <option value="" selected>Choisir le journal</option>
-                                                @for(item of journaux; track $index){
-                                                    <option value="{{item.idjournal}}"> {{item.designation}} </option>
-                                                }
-                                            </select>
-                                        </div>
-                                        <div class="invalid-feedback">{{ msgErros }}</div>
-                                    </div>
-                                </div>
-                            </div>
-                          </div>
-                          <div class="mt-3 d-flex justify-content-end">
-                            <button type="button" class="btn btn-sm btn-light me-2" data-bs-dismiss="modal">Annuler</button>
-                            <button type="submit" class="btn btn-sm btn-primary">generer les écritures</button>
-                          </div>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Modal Critères -->
-                <div class="modal fade" id="criteriaModal" tabindex="-1" aria-labelledby="criteriaModalLabel" aria-hidden="true">
-                  <div class="modal-dialog modal-md modal-dialog-centered">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="criteriaModalLabel">Filtrer par critères</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                      </div>
-                      <div class="modal-body">
-                        <form [formGroup]="criteriaForm" (ngSubmit)="applyCriteria()">
-                          <div class="row g-3">
-                            <div class="col-md-6">
-                              <label class="form-label">Date début</label>
-                              <input type="date" class="form-control form-control-sm" formControlName="datedebut" />
-                            </div>
-                            <div class="col-md-6">
-                              <label class="form-label">Date fin</label>
-                              <input type="date" class="form-control form-control-sm" formControlName="datefin" />
-                            </div>
-
-                            <div class="col-xxl-6 col-sm-6">
-                                <div class="mb-3 bg-light">
-                                    <div class="mb-2">
-                                        <div class="input-light">
-                                            <select class="form-select form-select-sm bg-light border-0" formControlName="idsite">
-                                                <option value="" selected>Choisir le site</option>
-                                                @for(item of sites; track $index){
-                                                    <option value="{{item.idsite}}"> {{item.libelle}} </option>
-                                                }
-                                            </select>
-                                        </div>
-                                        <div class="invalid-feedback">{{ msgErros }}</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-xxl-6 col-sm-6">
-                                <div class="mb-3 bg-light">
-                                    <div class="mb-2">
-                                        <div class="input-light">
-                                            <select class="form-select form-select-sm bg-light border-0" formControlName="journal">
-                                                <option value="" selected>Choisir le journal</option>
-                                                @for(item of journaux; track $index){
-                                                    <option value="{{item.codejournal}}"> {{item.designation}} </option>
-                                                }
-                                            </select>
-                                        </div>
-                                        <div class="invalid-feedback">{{ msgErros }}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        
-                            <div class="col-md-12">
-                              <label class="form-label d-block">Écritures validées</label>
-                              <mat-radio-group formControlName="ecrituresdefinitives" class="d-flex gap-3">
-                                <mat-radio-button value="validee" class="me-2">Oui</mat-radio-button>
-                                <mat-radio-button value="en attente">Non</mat-radio-button>
-                              </mat-radio-group>
-                            </div>
-
-                          </div>
-                          <div class="mt-3 d-flex justify-content-end">
-                            <button type="button" class="btn btn-sm btn-light me-2" data-bs-dismiss="modal">Annuler</button>
-                            <button type="submit" class="btn btn-sm btn-primary">Appliquer</button>
-                          </div>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
                 </div>
             </div>
 
             <div class="card-body">
-                <div class="table-scroll">
-                    <div class="table-responsive table-card">
-                        <table class="table table-striped align-middle table-nowrap text-nowrap table-container table-custom table-compact">
-                            <thead class="text-muted">
-                                <tr>
-                                    <th class="sort text-uppercase" data-sort="site">Site</th>
-                                    <th class="sort text-uppercase" data-sort="document">N° document</th>
-                                    <th class="sort text-uppercase" data-sort="ecriture">N° piece</th>
-                                    <th class="sort text-uppercase" data-sort="numero">N° ecriture</th>
-                                    <th class="sort text-uppercase" data-sort="journal">Journal</th>
-                                    <th class="sort text-uppercase" data-sort="date">Date</th>
-                                    <th class="sort text-uppercase" data-sort="type">Type</th>
-                                    <th class="sort text-uppercase" data-sort="compte">Compte</th>
-                                    <th class="sort text-uppercase" data-sort="tiers">Tiers</th>
-                                    <th class="sort text-uppercase" data-sort="libelle">Libelle</th>
-                                    <th class="sort text-uppercase" data-sort="debit">Debit</th>
-                                    <th class="sort text-uppercase" data-sort="credit">Credit</th>
-                                    <th class="sort text-uppercase" data-sort="montant">Montant</th>
-                                    <th class="sort text-uppercase" data-sort="devise">Devise</th>
-                                    <th class="sort text-uppercase" data-sort="montant">Montant ref</th>
-                                    <th class="sort text-uppercase" data-sort="centre">Centre ana.</th>
-                                </tr>
-                            </thead>
-                            <tbody class="list form-check-all">
-                                @for(piece of ecritures; track $index){
-                                    <tr>
-                                        <td> {{ piece.codesite }} </td>
-                                        <td> {{ piece.ref_ecriture }} </td>
-                                        <td>  {{ piece.num_piece }} </td>
-                                        <td> {{ piece.numligne}} </td>
-                                        <td> {{ piece.journal}} </td>
-                                        <td> {{ formatDateFR(piece.date_operation) }} </td>
-                                        <td> {{ piece.typeecriture}} </td>
-                                        <td> {{ piece.compte }} </td>
-                                        <td> {{ piece.tiers }} </td>
-                                        <td> {{ piece.libelle}} </td>
-                                        <td> {{ piece.debit }} </td>
-                                        <td> {{ piece.credit }} </td>
-                                        <td> {{ piece.montant }} </td>
-                                        <td> {{ piece.devise }} </td>
-                                        <td></td>
-                                        <td> {{ piece.centreanalytique }}</td>
-                                        <td></td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                        <div *ngIf="!ecritures || ecritures.length == 0" class="text-center">
-                            <h6 class="mt-2">Désolé! Aucune écriture trouvé</h6>
-                            <p class="text-muted mb-0">Désole il n' y aucune donnée dans cette base</p>
-                        </div>
-                    </div>
+                <!-- Indicateur de chargement -->
+                <div *ngIf="loading" class="text-center py-4">
+                    <div class="spinner-border text-primary"></div>
+                    <p class="mt-2">Chargement des écritures...</p>
+                </div>
+
+                <!-- Tableau des écritures -->
+                <div *ngIf="!loading" class="table-responsive">
+                    <table class="table table-striped table-bordered align-middle table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 30px">
+                                    <input type="checkbox" [checked]="selectAll" (change)="toggleSelectAll()">
+                                </th>
+                                <th>Site</th>
+                                <th>N° document</th>
+                                <th>N° pièce</th>
+                                <th>N° écriture</th>
+                                <th>Journal</th>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Compte</th>
+                                <th>Tiers</th>
+                                <th>Libellé</th>
+                                <th class="text-end">Débit</th>
+                                <th class="text-end">Crédit</th>
+                                <th class="text-end">Montant</th>
+                                <th>Devise</th>
+                                <th class="text-end">Montant réf</th>
+                                <th>Centre ana.</th>
+                                <th>État</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let ecriture of ecritures">
+                                <td>
+                                    <input type="checkbox" [checked]="selectedRows.has(ecriture)" (change)="toggleSelectRow(ecriture)">
+                                </td>
+                                <td class="text-nowrap">{{ ecriture.codesite }}</td>
+                                <td class="text-nowrap">{{ ecriture.ref_ecriture }}</td>
+                                <td class="text-nowrap">{{ ecriture.num_piece }}</td>
+                                <td class="text-nowrap">{{ ecriture.numligne }}</td>
+                                <td class="text-nowrap">{{ ecriture.journal }}</td>
+                                <td class="text-nowrap">{{ formatDateFR(ecriture.date_operation) }}</td>
+                                <td class="text-nowrap">{{ ecriture.typeecriture }}</td>
+                                <td class="text-nowrap">{{ ecriture.compte }}</td>
+                                <td class="text-nowrap">{{ ecriture.tiers }}</td>
+                                <td class="text-nowrap">
+                                    {{ ecriture.libelle?.length > 75 ? (ecriture.libelle | slice:0:75) + '...' : ecriture.libelle }} {{ (ecriture.libelle?.length ?? 0) > 75 ? (ecriture.libelle | slice:0:75) + '...' : (ecriture.libelle ?? '') }}
+                                </td>
+                                <td class="text-end">{{ ecriture.debit | number:'1.2-2' }}</td>
+                                <td class="text-end">{{ ecriture.credit | number:'1.2-2' }}</td>
+                                <td class="text-end">{{ ecriture.montant | number:'1.2-2' }}</td>
+                                <td class="text-nowrap">{{ ecriture.devise }}</td>
+                                <td class="text-end">{{ ecriture.montantbase | number:'1.2-2' }}</td>
+                                <td class="text-nowrap">{{ ecriture.centreanalytique }}</td>
+                                <td>
+                                    <span class="badge" [ngClass]="{'bg-warning': ecriture.etat === 'en attente', 'bg-success': ecriture.etat === 'validee'}">
+                                        {{ ecriture.etat === 'en attente' ? 'En attente' : 'Validée' }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr *ngIf="!ecritures?.length">
+                                <td colspan="18" class="text-center text-muted py-4">Aucune écriture trouvée.</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<!-- MODAL COMPTABILISATION -->
+<div class="modal fade" id="comptabilisationModal" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Comptabilisation des opérations</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <ul class="nav nav-tabs mb-3">
+          <li class="nav-item">
+            <a class="nav-link" [class.active]="modeComptabilisation === 'unitaire'" (click)="modeComptabilisation = 'unitaire'">Une opération</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" [class.active]="modeComptabilisation === 'critere'" (click)="modeComptabilisation = 'critere'">Par critères</a>
+          </li>
+        </ul>
+
+        <!-- Mode unitaire -->
+        <div *ngIf="modeComptabilisation === 'unitaire'">
+          <label class="form-label">Choisir une opération non comptabilisée</label>
+          <select class="form-select form-select-sm" [(ngModel)]="selectedOperationId">
+            <option value="">-- Sélectionner --</option>
+            <option *ngFor="let op of operationsNonComptabilisees" [value]="op.idoperation">
+              {{ op.codeoperation }} - {{ op.montant }} {{ op.devise?.codedevise }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Mode par critères (formulaire dédié) -->
+        <div *ngIf="modeComptabilisation === 'critere'" [formGroup]="comptabiliteForm">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Site</label>
+              <select class="form-select form-select-sm" formControlName="idsite">
+                <option value="">Tous les sites</option>
+                <option *ngFor="let site of sites" [value]="site.idsite">{{ site.libelle }}</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Journal</label>
+              <select class="form-select form-select-sm" formControlName="journal">
+                <option value="">Tous les journaux</option>
+                <option *ngFor="let journal of journaux" [value]="journal.codejournal">{{ journal.designation }}</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Date début</label>
+              <input type="date" class="form-control form-control-sm" formControlName="datedebut">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Date fin</label>
+              <input type="date" class="form-control form-control-sm" formControlName="datefin">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
+        <button class="btn btn-primary btn-sm" 
+                (click)="modeComptabilisation === 'unitaire' ? comptabiliserOperationUnitaire() : comptabiliserParCriteres()">
+          Comptabiliser
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CRITÈRES -->
+<div class="modal fade" id="criteriaModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Filtrer les écritures</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="criteriaForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Date début</label>
+                            <input type="date" class="form-control" formControlName="datedebut">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Date fin</label>
+                            <input type="date" class="form-control" formControlName="datefin">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Site</label>
+                            <input type="text" class="form-control form-control-sm" formControlName="idsite" [matAutocomplete]="autoSite" placeholder="Rechercher un site">
+                            <mat-autocomplete #autoSite="matAutocomplete" [displayWith]="displaySite">
+                                <mat-option *ngFor="let site of filteredSites | async" [value]="site.idsite">
+                                    {{ site.libelle }}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Journal</label>
+                            <input type="text" class="form-control form-control-sm" formControlName="journal" [matAutocomplete]="autoJournal" placeholder="Rechercher un journal">
+                            <mat-autocomplete #autoJournal="matAutocomplete" [displayWith]="displayJournal">
+                                <mat-option *ngFor="let journal of filteredJournaux | async" [value]="journal.codejournal">
+                                    {{ journal.designation }}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label d-block">État des écritures</label>
+                            <mat-radio-group formControlName="etat" class="d-flex gap-4">
+                                <mat-radio-button value="en attente">En attente</mat-radio-button>
+                                <mat-radio-button value="validee">Validées</mat-radio-button>
+                                <mat-radio-button value="">Toutes</mat-radio-button>
+                            </mat-radio-group>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-sm btn-primary" (click)="applyCriteria()">Appliquer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL GÉNÉRATION / COMPTABILISATION (si besoin) -->
+<div class="modal fade" id="comptabiliteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Générer des écritures</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="comptabiliteForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label>Date début</label>
+                            <input type="date" class="form-control form-control-sm" formControlName="datedebut">
+                        </div>
+                        <div class="col-md-6">
+                            <label>Date fin</label>
+                            <input type="date" class="form-control form-control-sm" formControlName="datefin">
+                        </div>
+                        <div class="col-md-12">
+                            <label>Opération</label>
+                            <select class="form-select form-select-sm" formControlName="operation">
+                                <option value="">-- Sélectionner --</option>
+                                <option *ngFor="let op of operations" [value]="op.idoperation">
+                                    {{ op.codeoperation }} - {{ op.montant }} {{ op.devise?.codedevise }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label>Journal</label>
+                            <select class="form-select form-select-sm" formControlName="journal">
+                                <option value="">-- Choisir --</option>
+                                <option *ngFor="let j of journaux" [value]="j.idjournal">{{ j.designation }}</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary btn-sm" (click)="applyComptability()">Générer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation export avec validation -->
+<div class="modal-backdrop fade show" *ngIf="showConfirmModal"></div>
+<div class="modal show d-block" tabindex="-1" *ngIf="showConfirmModal" style="background: rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmation</h5>
+        <button type="button" class="btn-close" (click)="showConfirmModal = false"></button>
+      </div>
+      <div class="modal-body">
+        Voulez-vous valider (comptabiliser) les écritures avant export ?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="showConfirmModal = false">Annuler</button>
+        <button type="button" class="btn btn-primary" (click)="confirmExport()">Oui, valider et exporter</button>
+      </div>
+    </div>
+  </div>
 </div>

@@ -6,36 +6,36 @@ import { motifModel } from '../models/motif.model';
 import { ToastrService } from 'ngx-toastr';
 import { MotifService } from '../services/motif.service';
 import { MESSAGE_CHAMPS_OBLIGATOIRE, MESSAGE_SUPPRESSION_DESCRIPTION, TITLE_DELETE } from '../../../_core/constantes/messages.contantes';
-import { Compteur } from '../models/compteur.model';
 import { CompteurService } from '../services/compteur.service';
-import { journalModel } from '../../caisse_journal/models/journal.model';
 import { JournalService } from '../../caisse_journal/services/journal.service';
 import { url } from 'inspector';
-import { plancomptableModel } from '../../donnee_base/models/plancomptable.model';
 import { PlancomptableService } from '../../donnee_base/services/plancomptable.service';
 import { ParametreComptableService } from '../services/parametrecomptable.service';
-import { parametreComptableModel } from '../models/parametrecomptable.model';
+import { MotifComponent } from "../composant/motif/motif.component";
+import { ConfigComptableComponent } from "../composant/config-comptable/config-comptable.component";
+import { CompteurComponent } from "../composant/compteur/compteur.component";
+import { ParametreDiverseComponent } from "../composant/parametre-diverse/parametre-diverse.component";
 
 @Component({
   selector: 'app-parametre-page',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MotifComponent, ConfigComptableComponent, CompteurComponent, ParametreDiverseComponent],
   templateUrl: './parametre-page.component.html',
   styleUrl: './parametre-page.component.css'
 })
 export class ParametrePageComponent implements OnInit {
-
   title = 'Paramètres générales';
   //Changement titre modal
   actionModal: string = "create";
-  actionModalCompteur: string = "create";
 
   fb: FormBuilder = new FormBuilder();
   msgErros : string = "";
   loading: Boolean = false;
   motifForm : FormGroup = this.fb.group({});
+
   // Définissez des propriétés de pagination
   currentPage: number = 1;
   currentPageCompteur: number = 1;
+
   // Nombre d'éléments par page
   totalPages: number = 0;
   totalPagesCompteur: number = 0;
@@ -47,11 +47,11 @@ export class ParametrePageComponent implements OnInit {
   //Faire le check selection **********
   objectsSelected : motifModel[] = [];
   selectedItems : any[] = [];
-  optionsSequence2: string[] = [];
 
   // Détermine si toutes les lignes sont selectionnées
   checkAllRow : any;
   error : string = "";
+  params : any = {};
 
   //Message suppression
   msgSup: string = "";
@@ -60,12 +60,8 @@ export class ParametrePageComponent implements OnInit {
 
   //Element à supprimer
   deleteMotif: any = null;
-  params : any = {};
-  journaux: journalModel[] = [];
-  comptes : plancomptableModel[] = [];
 
-  paramForm : FormGroup = this.fb.group({});
-  currentParam: any;
+  activeTab: 'general' | 'notifications' | 'accounting' | 'counter' = 'general';
 
   constructor(private router: Router, private toastr : ToastrService, private motifservice: MotifService, private compteurService : CompteurService,
     private journalservice: JournalService, private plancomptableservice: PlancomptableService, private serviceparametre: ParametreComptableService
@@ -74,26 +70,18 @@ export class ParametrePageComponent implements OnInit {
    ngOnInit(): void {
     //Récupérer tous les motifs
     this.getAllMotif();
-    // Récupérer tous les compteurs
-    this.getAllCompteurs();
     //initialiser le formulaire
     this.initForm();
-    // Initialiser le formulaire du compteur
-    this.initFormCompteur();
-    // Charger les journaux
-    this.getAllJournaux();
-    // Initialiser le formulaire de paramètre
-    this.initFormParametre();
-    // Charger les comptes comptables
-    this.getAllComptes();
-    // Charger les paramètres comptables
-    this.getParam();
 
     // Suppresion du motif
     this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION("ce motif");
     this.msgSupCompteur = MESSAGE_SUPPRESSION_DESCRIPTION("ce compteur");
     this.titleMsg = TITLE_DELETE;
    }
+
+  setActiveTab(tab: 'general' | 'notifications' | 'accounting' | 'counter') {
+    this.activeTab = tab;
+  }
 
    //Recuperer tous les motifs
   getAllMotif(){
@@ -111,25 +99,6 @@ export class ParametrePageComponent implements OnInit {
         }
       }
     });
-  }
-
-  // //Listen
-  listenSequence(event: Event){
-    const value = (event.target as HTMLSelectElement).value;
-
-    this.compteurForm.get('sequence_2')?.reset();
-    this.compteurForm.get('prefixe_1')?.reset();
-    this.compteurForm.get('prefixe_2')?.reset();
-
-    if (value === 'societe') {
-      this.optionsSequence2 = ['site', 'constante'];
-    } else if (value === 'site') {
-      this.optionsSequence2 = ['constante'];
-    } else if (value === 'constante') {
-      this.optionsSequence2 = ['societe', 'site', 'constante'];
-    } else {
-      this.optionsSequence2 = [];
-    }
   }
 
   //Initialiser le formulaire
@@ -288,301 +257,5 @@ export class ParametrePageComponent implements OnInit {
     this.deleteMotif = item;
   }
 
-  // Le compteur
-  deleteCompteur: Compteur | null = null;
-  compteurForm: FormGroup = this.fb.group({});
-  compteurs: Compteur[] = [];
-  compteur: Compteur = {} as Compteur;
-
-  initFormCompteur(): void {
-    this.compteurForm = this.fb.group(
-      {
-        codemodelecompteur: ['', [Validators.required]],
-        libelle: ['', [Validators.required]],
-        typedocument: ['', [Validators.required]],
-        sequence_1: ['', [Validators.required]],
-        prefixe_1: [''],
-        sequence_2: ['', [Validators.required]],
-        prefixe_2: ['']
-      }
-    );
-  }
-
-  get formCompteur() {
-    return this.compteurForm.controls;
-  }
-
-  //validation required
-  isValidField(label: string): string {
-    let status: string = '';
-    this.formCompteur[label].valid && this.formCompteur[label].touched
-      ? (status = 'is-valid')
-      : this.formCompteur[label].invalid && this.formCompteur[label].touched
-        ? (status = 'is-invalid')
-        : (status = '');
-    return status;
-  }
-
-  dispatchBudget(_object: Compteur) {
-      this.compteurForm.patchValue({
-        codemodelecompteur: _object.codemodelecompteur,
-        libelle: _object.libelle,
-        typedocument: _object.typedocument,
-        sequence_1: _object.sequence_1,
-        prefixe_1: _object.prefixe_1,
-        sequence_2: _object.sequence_2,
-        prefixe_2: _object.prefixe_2
-      });
-  }
-
-    //Recharger la page
-  changeCompteurPage(page: number) {
-    this.currentPageCompteur = page;
-    this.getAllCompteurs(); // recharge les données
-  }
-
-  onSubmitCompteur() {
-      /** Check formulaire */
-      this.msgErros = '';
-      const controls = this.compteurForm.controls;
-      if (this.compteurForm.invalid) {
-        Object.keys(controls).forEach((controlName) =>
-          controls[controlName].markAsTouched()
-        );
-        this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
-        return;
-      }
-
-      /** 2. prepare data */
-      const formValue = this.compteurForm.getRawValue();
-      this.compteur.createdby = `${this.user.nom} ${this.user.prenom}`;
-      this.compteur.createdat = new Date();
-
-      const _compteur: Compteur = {
-        ...this.compteur,
-        ...formValue
-      };
-
-      /** 3. choices action */
-      if (this.actionModalCompteur == 'create') this.createCompteur(_compteur);
-      else {
-        this.updateCompteur({
-          idmodelecompteur: _compteur.idmodelecompteur,
-          codemodelecompteur: formValue.codemodelecompteur,
-          libelle: formValue.libelle,
-          typedocument: formValue.typedocument,
-          sequence_1: formValue.sequence_1,
-          prefixe_1: formValue.prefixe_1,
-          sequence_2: formValue.sequence_2,
-          prefixe_2: formValue.prefixe_2
-        });
-      }
-  }
-
-  createCompteur(_compteur: Compteur) {
-      const { idmodelecompteur, ...dataToSend } = _compteur;
-
-      this.loading = true;
-      this.compteurService.create(dataToSend).subscribe({
-        next: (res: any) => {
-          //console.log('Resultat:', res);
-          if (res.success) {
-            this.closeModal('showModalCompteur');
-            this.getAllCompteurs();
-            this.toastr.success('Compteur créé avec succès.');
-          } else {
-            this.error = 'Erreur de création';
-          }
-          this.loading = false;
-        },
-
-        error: (err: any) => {
-          this.msgErros = err.error.message;
-          this.toastr.error(this.msgErros ?? 'Erreur lors de la création.');
-          this.loading = false;
-        },
-      });
-  }
-
-  getAllCompteurs() {
-      this.params = {
-        page: this.currentPageCompteur,
-        limit: 5,
-      };
-      this.compteurService.getAll(this.params).subscribe({
-        next: (res: any) => {
-          if (res.success) {
-            this.compteurs = res.data.data as Compteur[];
-            this.totalPagesCompteur = res.data.page;
-          }
-        },
-        error: (err: any) => {
-          this.msgErros = err.error.message;
-          this.toastr.error(this.msgErros ?? 'Erreur lors de la récupération.');
-        },
-      });
-  }
-
-  updateCompteur(_compteur: any) {
-    _compteur.updatedby = this.user.nom + ' ' + this.user.prenom;
-    _compteur.updatedat = new Date();
-    this.compteurService.update(_compteur).subscribe({
-      next: (res: any) => {
-        if (res.success) {
-          this.closeModal('showModalCompteur');
-          this.getAllCompteurs();
-          this.toastr.success('Modification effectuée avec succès');
-        } else {
-          this.error = 'Erreur de modification';
-        }
-        this.loading = false;
-      },
-      error: (err: any) => {
-        this.msgErros = err.error.message;
-        this.toastr.error(this.msgErros ?? 'Erreur lors de la modification.');
-        this.loading = false;
-      },
-    });
-  }
-
-  modalCreateCompteur() {
-    this.actionModalCompteur = 'create';
-    this.initFormCompteur();
-  }
-
-  modalUpdateCompteur(_object: Compteur) {
-    this.compteur = _object;
-    this.actionModalCompteur = 'update';
-    this.compteurForm.reset();
-
-    this.dispatchBudget(_object);
-
-    this.compteurForm.get('codemodelecompteur')?.disable({ emitEvent: false });
-
-    this.compteurForm.markAllAsTouched();
-    this.compteurForm.updateValueAndValidity();
-
-
-  }
-
-  modalDeleteCompteur(item: Compteur) {
-    this.deleteCompteur = item;
-  }
-
-  deleteConfirmedCompteur() {
-    if (!this.deleteCompteur) return;
-    this.compteurService.delete(this.deleteCompteur.idmodelecompteur).subscribe({
-      next: (res: any) => {
-        console.log('Res:', res);
-        if (res.success) {
-          this.deleteCompteur = null;
-          this.closeModal('deleteModalCompteur');
-          this.getAllCompteurs();
-          this.toastr.success('Compteur supprimé avec succès.');
-        } else {
-          this.error = 'Erreur de Suppression';
-        }
-        this.loading = false;
-      },
-      error: (err: any) => {
-        this.msgErros = err.error.message;
-        this.toastr.error(this.msgErros ?? 'Erreur lors de la suppression.');
-        this.loading = false;
-      },
-    });
-  }
-
-  //charger les journaux
-  getAllJournaux() {
-    this.loading = true; // Démarrer le chargement
-    this.params = {
-      page: 1,
-      limit: 50,
-      search:  '',
-    };
-    this.journalservice.getAll(this.params).subscribe({
-      next: (res: any) => {
-        if (res.success) {
-          this.journaux = res.data.data;
-        }
-        this.loading = false; // Arrêter le chargement
-      },
-      error: (err: any) => {
-        this.loading = false; // Arrêter le chargement même en cas d'erreur
-        this.error = 'Erreur lors du chargement des données';
-        this.toastr.error('Erreur lors du chargement des données.');
-      }
-    });
-  }
-
-  // initialiser le formulaire de paramètre
-  initFormParametre() {
-    this.paramForm = this.fb.group({
-      societe: [this.user.idsociete],
-      journal: [''],
-      compteintermediaire: [''],
-      url: ['']
-    });
-  }
-
-  // Charger les comptes comptables
-  getAllComptes(){
-    this.plancomptableservice.getAll().subscribe({
-      next : (res) => {
-        if(res.success){
-          this.comptes = res.data;
-        }
-      }
-    });
-  }
-
-  editParam(type: string) {
-    const value = this.paramForm.get(type)?.value;
-
-    if (!value) {
-      this.toastr.warning("Configuration inexistante. Contactez l'administrateur.");
-      return;
-    }
-
-    const payload = {
-      societe: this.paramForm.get('societe')?.value,
-      type: type,
-      value: value
-    };
-
-    this.saveParam(payload);
-  }
-
-  // Save paramètre comptable 
-  saveParam(payload: any) {
-    this.serviceparametre.save(payload).subscribe({
-      next: (res: any) => {
-        if (res.success) {
-          this.toastr.success('Paramètre comptable enregistré avec succès.');
-        }
-      }
-    });
-  }
-
-  // Get paramètre comptable
-  getParam() {
-    const payload = {
-      societe: this.paramForm.get('societe')?.value
-    };
-
-    return this.serviceparametre.getAll(payload).subscribe({
-      next: (res: any) => {
-        if (res.success) {
-          // Handle the retrieved parameter values
-          this.currentParam = res.data[0];
-          this.paramForm.patchValue({
-            journal: this.currentParam.journal.id,
-            compteintermediaire: this.currentParam.compte.id,
-            url: this.currentParam.url
-          });
-        }
-      }
-    });
-  }
-
+  
 }

@@ -31,6 +31,8 @@ import { ValidateursBudget } from '../models/validateursbudget.model';
 import { ToastrService } from 'ngx-toastr';
 import { CentreAnalytiqueService } from '../../donnee_base/services/centreanalytique.service';
 import { centreanalytiqueModel } from '../../donnee_base/models/centreanalytique.model';
+import { BudgetPJService } from '../../PJ/service/budgetpj.service';
+import { PieceJointe } from '../../PJ/models/pj.model';
 
 @Component({
   selector: 'app-ligne-budget',
@@ -122,6 +124,7 @@ export class LigneBudgetComponent implements OnInit {
     private toastr: ToastrService,
     private router: Router,
     private centreAnalytiqueService: CentreAnalytiqueService,
+    private bugetPJService: BudgetPJService,
   ) {}
 
   ngOnInit(): void {
@@ -146,6 +149,9 @@ export class LigneBudgetComponent implements OnInit {
     this.rejectForm = this.fb.group({
       motif: [null, Validators.required],
     });
+
+    // Chargement des pj
+    this.loadBudgetPiecesJointes();
   }
 
   naturesSource: Array<{
@@ -1900,5 +1906,157 @@ export class LigneBudgetComponent implements OnInit {
           this.loading = false;
         },
       });
+  }
+
+  getStatusInfo(value: string | null | undefined): {
+    class: string;
+    text: string;
+  } {
+    if (value === null || value === undefined) {
+      return { class: 'status-non', text: 'En attente' };
+    }
+
+    // (0 = En cours, 1 = Oui, autre = Non)
+    if (value === 'approuve') return { class: 'status-oui', text: 'Approuvé' };
+    if (value === 'rejete') return { class: 'status-non', text: 'Rejeté' };
+    return { class: 'status-encours', text: 'En attente' };
+  }
+
+  // pièces jointes du budget
+  budgetPiecesJointes: PieceJointe[] = [];
+  piecesJointesLoading = false;
+  pjDeleting: string | null = null;
+  budgetPiecesCount = 0;
+
+  // Charger les pièces jointes du budget sélectionné
+  loadBudgetPiecesJointes(): void {
+    if (!this.selectedBudget) return;
+
+    this.piecesJointesLoading = true;
+    this.bugetPJService.getAll(this.selectedBudget.idbudget).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.budgetPiecesJointes = res.data;
+          this.budgetPiecesCount = res.data.length;
+        } else {
+          this.budgetPiecesJointes = [];
+          this.budgetPiecesCount = 0;
+        }
+        this.piecesJointesLoading = false;
+      },
+      error: (err) => {
+        console.error('Erreur chargement PJ:', err);
+        this.budgetPiecesJointes = [];
+        this.budgetPiecesCount = 0;
+        this.piecesJointesLoading = false;
+        this.toastr.error('Erreur lors du chargement des pièces jointes');
+      },
+    });
+  }
+
+  // Télécharger une pièce jointe
+  downloadBudgetPiece(piece: PieceJointe): void {
+    this.bugetPJService.downloadFile(piece.urlpiece).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = piece.nomfichier;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.toastr.success('Téléchargement démarré');
+      },
+      error: (err) => {
+        console.error('Erreur téléchargement:', err);
+        this.toastr.error('Erreur lors du téléchargement');
+      },
+    });
+  }
+
+  // Supprimer une pièce jointe
+  deleteBudgetPiece(piece: PieceJointe): void {
+    if (!confirm(`Supprimer définitivement "${piece.nomfichier}" ?`)) return;
+
+    this.pjDeleting = piece.idpiecejointe;
+    const userId = this.user.idutilisateur;
+
+    this.bugetPJService
+      .delete(this.selectedBudget!.idbudget, piece.idpiecejointe)
+      .subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.toastr.success('Fichier supprimé avec succès');
+            this.loadBudgetPiecesJointes(); // Recharger la liste
+          } else {
+            this.toastr.error('Erreur lors de la suppression');
+          }
+          this.pjDeleting = null;
+        },
+        error: (err) => {
+          console.error('Erreur suppression:', err);
+          this.toastr.error(
+            err.error?.message || 'Erreur lors de la suppression',
+          );
+          this.pjDeleting = null;
+        },
+      });
+  }
+
+  // Télécharger toutes les pièces jointes
+  downloadAllBudgetFiles(): void {
+    if (!this.selectedBudget) {
+      this.toastr.error('Aucun budget sélectionné');
+      return;
+    }
+
+    this.loading = true;
+    this.bugetPJService
+      .downloadAllFiles(this.selectedBudget.idbudget)
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `budget_${this.selectedBudget?.codebudget}_${this.selectedBudget?.libelle}_pieces_jointes.zip`;
+          link.click();
+          window.URL.revokeObjectURL(url);
+          this.toastr.success('Téléchargement démarré');
+          this.loading = false;
+        },
+        error: (err) => {
+          console.error('Erreur téléchargement ZIP:', err);
+          this.toastr.error(
+            err.error?.message || 'Erreur lors du téléchargement',
+          );
+          this.loading = false;
+        },
+      });
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  getFileIcon(pj: any): string {
+    let mimeType = pj?.mimeType || pj?.mimetype;
+    if (!mimeType) return 'ri-file-line';
+
+    const mime = mimeType.toLowerCase();
+    if (mime.includes('pdf')) return 'ri-file-pdf-line text-danger';
+    if (mime.includes('word')) return 'ri-file-word-line text-primary';
+    if (
+      mime.includes('excel') ||
+      mime.includes('csv') ||
+      mime.includes(
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      )
+    )
+      return 'ri-file-excel-line text-success';
+    if (mime.includes('image')) return 'ri-image-line text-warning';
+    return 'ri-file-line';
   }
 }

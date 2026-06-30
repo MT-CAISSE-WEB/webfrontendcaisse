@@ -1,543 +1,60 @@
-<!-- start page title -->
 <div class="row">
-    <div class="col-12">
-        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">{{title}}</h4>
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Paramètres</a></li>
-                    <li class="breadcrumb-item active">{{title}}</li>
-                </ol>
-            </div>
-        </div>
+  <div class="col-12">
+    <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+      <h4 class="mb-sm-0">{{ title }}</h4>
+      <div class="page-title-right">
+        <ol class="breadcrumb m-0">
+          <li class="breadcrumb-item"><a href="javascript: void(0);">Paramètres</a></li>
+          <li class="breadcrumb-item active">{{ title }}</li>
+        </ol>
+      </div>
     </div>
+  </div>
 </div>
-<!-- end page title -->
-
 
 <div class="row">
-    <div class="col-xxl-9">
-        <div class="card mt-xxl-n5">
-            <div class="card-header">
-                <ul class="nav nav-tabs-custom rounded card-header-tabs border-bottom-0" role="tablist">
-                    <li class="nav-item">
-                        <a class="nav-link active" data-bs-toggle="tab" href="#personalDetails" role="tab">
-                            <i class="fas fa-home"></i> Paramètres diverses
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" href="#experience" role="tab">
-                            <i class="far fa-envelope"></i> Notifications
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" href="#privacy" role="tab">
-                            <i class="far fa-envelope"></i> Configuration comptable
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" href="#compteur" role="tab">
-                            <i class="far fa-envelope"></i> Compteur
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            <div class="card-body p-4">
-                <div class="tab-content">
-                    <!--start paramètre 1-->
-                    <div class="tab-pane active" id="personalDetails" role="tabpanel">
-                        <div class="row">
-                            <div class="col-lg-12 col-sm-12">
-                                <div class="d-flex align-items-center mb-5">
-                                    <h6 class="card-title mb-0 flex-grow-1 text-primary">Motif de validation</h6>
-                                    <div class="flex-shrink-0">
-                                        <div class="d-flex gap-2 flex-wrap">
-                                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" (click)="modalCreate()" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1"></i>créer</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="table-wrapper">
-                                    <div class="table table-hover table-responsive table-card table-wrapper table-scroll">
-                                        @if (loading) {
-                                            <div class="text-center py-4">
-                                                <div class="spinner-border text-info"></div>
-                                            </div>
-                                        }
-                                        <table class="table align-middle table-nowrap" id="invoiceTable">
-                                            <thead class="text-muted sticky-top bg-light">
-                                                <tr>
-                                                    <th class="sort text-uppercase" data-sort="invoice_id">code motif</th>
-                                                    <th class="sort text-uppercase" data-sort="type">libelle motif</th>
-                                                    <th class="sort text-uppercase" data-sort="action">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="list form-check-all" id="invoice-list-data">
-                                                @for (item of motifs; track $index){
-                                                    <tr>
-                                                        <td class="numero">{{item.codemotif}}</td>
-                                                        <td class="devise">{{item.libellemotif}}</td>
-                                                        <td class="text-start">
-                                                            <ul class="list-inline hstack gap-2 mb-0">
-                                                                <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                                    <a href="#showModal" data-bs-toggle="modal" (click)="modalUpdate(item)" class="text-primary d-inline-block edit-item-btn">
-                                                                        <i class="ri-pencil-fill fs-16"></i>
-                                                                    </a>
-                                                                </li>
-                                                                <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
-                                                                    <a class="text-danger d-inline-block remove-item-btn" (click)="modalDelete(item)"  data-bs-toggle="modal" href="#deleteOrder">
-                                                                        <i class="ri-delete-bin-5-fill fs-16"></i>
-                                                                    </a>
-                                                                </li>
-                                                            </ul>
-                                                        </td>
-                                                    </tr>
-                                                }
-                                            </tbody>
-                                        </table>
-                                        <div class="" *ngIf="motifs.length == 0">
-                                            <div class="text-center">
-                                                <h6 class="mt-2">Désolé! Aucun motif trouvé </h6>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex justify-content-end mt-3">
-                                        <div class="pagination-wrap hstack gap-2">
-                                            <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
-                                                Précédent
-                                            </button>
-                                            <ul class="pagination listjs-pagination mb-0"> Page {{currentPage}} / {{totalPages}} </ul>
-                                            <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)" class="btn btn-sm btn-soft-primary pagination-next">
-                                                Suivant
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <hr class="my-5 border-secondary opacity-25">
-
-                            <div class="col-lg-12 col-sm-12">
-                                <div class="mb-4">
-                                    <div class="mt-4 mb-3 border-bottom pb-2">
-                                        <div class="float-end">
-                                            <a href="javascript:void(0);" class="link-primary">Désactiver tout</a>
-                                        </div>
-                                        <h5 class="card-title">Traitements spécifiques</h5>
-                                    </div>
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="flex-shrink-0 avatar-sm">
-                                            <div class="avatar-title bg-light text-primary rounded-3 fs-18">
-                                                <i class="ri-smartphone-line"></i>
-                                            </div>
-                                        </div>
-                                        <div class="flex-grow-1 ms-3">
-                                            <h6>Traitement specifique caisse</h6>
-                                            <p class="text-muted mb-0">Ce traitement permet de mettre à jour la ou les caisses de l'utilsateur à une date donnée.</p>
-                                        </div>
-                                        <div>
-                                            <a href="javascript:void(0);">désactiver</a>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="flex-shrink-0 avatar-sm">
-                                            <div class="avatar-title bg-light text-primary rounded-3 fs-18">
-                                                <i class="ri-tablet-line"></i>
-                                            </div>
-                                        </div>
-                                        <div class="flex-grow-1 ms-3">
-                                            <h6>Traitement spécifique 2</h6>
-                                            <p class="text-muted mb-0">Ce traitement permet de recalculer le solde disponible de chaque caisse de l'utilisateur.</p>
-                                        </div>
-                                        <div>
-                                            <a href="javascript:void(0);">désactiver</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!--end row-->
-
-                        <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content border-0">
-                                    <div class="modal-header p-3 bg-info-subtle">
-                                        <h5 class="modal-title" id="exampleModalLabel">{{ actionModal === "create" ? 'Création' : 'Modification'}} Motif </h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
-                                    </div>
-
-                                    <form [formGroup]="motifForm">
-                                        <div class="modal-body">
-                                            <div class="row g-3">
-                                                <div class="col-lg-3 col-sm-3">
-                                                    <label for="invoicenoInput">code</label>
-                                                    <input type="text" formControlName="codemotif" class="form-control form-control-sm bg-light border-0"  placeholder="code "/>
-                                                    <div class="invalid-feedback">{{ msgErros }}</div>
-                                                </div>
-                                                <!--end col-->
-
-                                                <div class="col-lg-9 col-sm-9">
-                                                    <label for="invoicenoInput">libelle </label>
-                                                    <input type="text" formControlName="libellemotif" class="form-control form-control-sm bg-light border-0"  placeholder="description "/>
-                                                    <div class="invalid-feedback">{{ msgErros }}</div>
-                                                </div>
-                                                <!--end col-->
-                                            </div>
-                                        </div>
-
-                                        <div class="modal-footer">
-                                            <div class="hstack gap-2 justify-content-end">
-                                                <div class="d-flex gap-2">
-                                                    <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
-                                                    <button type="submit" class="btn btn-sm btn-success" (click)="onSubmit()">
-                                                        {{ actionModal === "create" ? 'enregistrer' : 'modifier'}}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Modal -->
-                        <div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-body p-5 text-center">
-                                        <div class="mt-4 text-center">
-                                            <h4>{{titleMsg}}</h4>
-                                            <p class="text-muted fs-15 mb-4">{{msgSup}}</p>
-                                            <div class="hstack gap-2 justify-content-center remove">
-                                                <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> annuler</button>
-                                                <button class="btn btn-sm btn-danger" (click)="deleteConfirmed()" id="delete-record">Oui, supprimer</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!--end modal -->
-                    </div>
-                    <!--end paramètre 1-->
-
-                    <!--start Notification-->
-                    <div class="tab-pane" id="experience" role="tabpanel">
-                        <div class="mb-3">
-                            <div class="mt-4 mb-3 border-bottom pb-2">
-                                <div class="float-end">
-                                    <a href="javascript:void(0);" class="link-primary">Désactiver tout</a>
-                                </div>
-                                <h5 class="card-title">Traitements spécifiques</h5>
-                            </div>
-                            <ul class="list-unstyled mb-0">
-                                <li class="d-flex">
-                                    <div class="flex-grow-1">
-                                        <label for="directMessage" class="form-check-label fs-14">Notifications systèmes</label>
-                                        <p class="text-muted">Message de notification depuis votre portail</p>
-                                    </div>
-                                    <div class="flex-shrink-0">
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch" id="directMessage" checked />
-                                        </div>
-                                    </div>
-                                </li>
-                                <li class="d-flex mt-2">
-                                    <div class="flex-grow-1">
-                                        <label class="form-check-label fs-14" for="desktopNotification">
-                                            Notifications push
-                                        </label>
-                                        <p class="text-muted">Reçevoir les notifications en temps réel depuis votre bureau connecté.</p>
-                                    </div>
-                                    <div class="flex-shrink-0">
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch" id="desktopNotification" checked />
-                                        </div>
-                                    </div>
-                                </li>
-                                <li class="d-flex mt-2">
-                                    <div class="flex-grow-1">
-                                        <label class="form-check-label fs-14" for="emailNotification">
-                                            Reçevoir les notifications par mail
-                                        </label>
-                                        <p class="text-muted">Reçevoir les notifications depuis votre adresse mail de votre compte utilisateur.</p>
-                                    </div>
-                                    <div class="flex-shrink-0">
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch" id="emailNotification" />
-                                        </div>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <!--end Notification-->
-
-                    <!--start configuration comptable-->
-                    <div class="tab-pane" id="privacy" role="tabpanel">
-                        <div class="mb-4 pb-2">
-                            <div class="mt-4 mb-3 border-bottom pb-2">
-                                <h5 class="card-title">Valeures de comptabilisation</h5>
-                            </div>
-
-                            <form [formGroup]="paramForm">
-                                <div class="d-flex flex-column flex-sm-row mb-4 mb-sm-0">
-                                    <div class="flex-grow-1">
-                                        <h6 class="fs-14 mb-1">Journal d'operations diverses</h6>
-                                        <p class="text-muted">Permet de classer les opérations diverses de la caisse</p>
-                                    </div>
-
-                                    <div class="mx-3" style="min-width: 300px;">  
-                                        <select class="form-select form-select-sm" formControlName="journal">
-                                            <option value="">selectionner le journal</option>
-                                            <option *ngFor="let j of journaux" [value]="j.idjournal">
-                                                {{ j.codejournal }} - {{ j.designation }}
-                                            </option>
-                                        </select>
-                                    </div>
-
-                                    <div class="flex-shrink-0 ms-sm-3">
-                                        <a href="javascript:void(0);" (click)="editParam('journal')" class="btn btn-sm btn-primary">définir</a>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex flex-column flex-sm-row mb-4 mb-sm-0 mt-2">
-                                    <div class="flex-grow-1">
-                                        <h6 class="fs-14 mb-1">Compte intermediaire</h6>
-                                        <p class="text-muted">Permet de comptabiliser les operations diverses de la caisse</p>
-                                    </div>
-
-                                    <div class="mx-3" style="min-width: 300px;"> 
-                                        <select class="form-select form-select-sm" formControlName="compteintermediaire">
-                                            <option value="">selectionner le compte</option>
-                                            <option *ngFor="let c of comptes" [value]="c.idcompte">
-                                                {{ c.numcompte }} - {{ c.libelle }}
-                                            </option>
-                                        </select>
-                                    </div>
-
-                                    <div class="flex-shrink-0 ms-sm-3">
-                                        <a href="javascript:void(0);" (click)="editParam('compteintermediaire')" class="btn btn-sm btn-primary"> définir </a>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex flex-column flex-sm-row mb-4 mb-sm-0 mt-2">
-                                    <div class="flex-grow-1">
-                                        <h6 class="fs-14 mb-1">Dossier</h6>
-                                        <p class="text-muted mb-sm-0">Permet de stocker le fichier de comptabilisation généré par le système</p>
-                                    </div>
-
-                                    <div class="mx-3" style="min-width: 300px;">
-                                        <input type="file" class="form-control form-control-sm" formControlName="urldossier" placeholder="chemin dossier">
-                                    </div>
-
-                                    <div class="flex-shrink-0 ms-sm-3">
-                                        <a href="javascript:void(0);" (click)="editParam('urldossier')" class="btn btn-sm btn-primary">définir</a>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <!--end configuration comptable-->
-
-                    <div class="tab-pane active" id="compteur" role="tabpanel">
-                        <div class="row">
-                            <div class="col-lg-12 col-sm-12">
-                                <div class="d-flex align-items-center mb-5">
-                                    <h6 class="card-title mb-0 flex-grow-1 text-primary">Gestion du compteur</h6>
-                                    <div class="flex-shrink-0">
-                                        <div class="d-flex gap-2 flex-wrap">
-                                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" (click)="modalCreateCompteur()" data-bs-target="#showModalCompteur"><i class="ri-add-line align-bottom me-1"></i>créer</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="table-wrapper">
-                                    <div class="table table-hover table-responsive table-card table-wrapper table-scroll">
-                                        @if (loading) {
-                                            <div class="text-center py-4">
-                                                <div class="spinner-border text-info"></div>
-                                            </div>
-                                        }
-                                        <table class="table align-middle table-nowrap" id="invoiceTable">
-                                            <thead class="text-muted sticky-top bg-light">
-                                                <tr>
-                                                    <th class="sort text-uppercase" data-sort="invoice_id">Code</th>
-                                                    <th class="sort text-uppercase" data-sort="type">Libelle</th>
-                                                    <th class="sort text-uppercase" data-sort="type">Type doc</th>
-                                                    <th class="sort text-uppercase" data-sort="type">Séquence 1</th>
-                                                    <th class="sort text-uppercase" data-sort="type">Préfixe 1</th>
-                                                    <th class="sort text-uppercase" data-sort="type">Séquence 2</th>
-                                                    <th class="sort text-uppercase" data-sort="type">Préfixe 2</th>
-                                                    <th class="sort text-uppercase" data-sort="action">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="list form-check-all" id="invoice-list-data">
-                                                @for (item of compteurs; track $index){
-                                                    <tr>
-                                                        <td class="numero">{{item.codemodelecompteur}}</td>
-                                                        <td class="devise">{{item.libelle}}</td>
-                                                        <td class="devise">{{item.typedocument}}</td>
-                                                        <td class="devise">{{item.sequence_1}}</td>
-                                                        <td class="devise">{{item.prefixe_1}}</td>
-                                                        <td class="devise">{{item.sequence_2}}</td>
-                                                        <td class="devise">{{item.prefixe_2}}</td>
-                                                        <td class="text-start">
-                                                            <ul class="list-inline hstack gap-2 mb-0">
-                                                                <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                                    <a href="#showModalCompteur" data-bs-toggle="modal" (click)="modalUpdateCompteur(item)" class="text-primary d-inline-block edit-item-btn">
-                                                                        <i class="ri-pencil-fill fs-16"></i>
-                                                                    </a>
-                                                                </li>
-                                                                <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
-                                                                  <a class="text-danger d-inline-block remove-item-btn" (click)="modalDeleteCompteur(item)"  data-bs-toggle="modal" href="#deleteModalCompteur">
-                                                                    <i class="ri-delete-bin-5-fill fs-16"></i>
-                                                                  </a>
-                                                                </li>
-                                                            </ul>
-                                                        </td>
-                                                    </tr>
-                                                }
-                                            </tbody>
-                                        </table>
-                                        <div class="" *ngIf="compteurs.length == 0">
-                                            <div class="text-center">
-                                                <h6 class="mt-2">Désolé! Aucun compteur trouvé </h6>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex justify-content-end mt-3">
-                                        <div class="pagination-wrap hstack gap-2">
-                                            <button [disabled]="currentPageCompteur == 1" (click)="changePage(currentPageCompteur - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
-                                                Précédent
-                                            </button>
-                                            <ul class="pagination listjs-pagination mb-0"> Page {{currentPageCompteur}} / {{totalPagesCompteur}} </ul>
-                                            <button [disabled]="currentPageCompteur == totalPagesCompteur" (click)="changePage(currentPageCompteur + 1)" class="btn btn-sm btn-soft-primary pagination-next">
-                                                Suivant
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!--end row-->
-
-                        <div class="modal fade" id="showModalCompteur" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content border-0">
-                                    <div class="modal-header p-3 bg-info-subtle">
-                                        <h5 class="modal-title" id="exampleModalLabel">{{ actionModalCompteur === "create" ? 'Création' : 'Modification'}} du compteur </h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
-                                    </div>
-
-                                    <form [formGroup]="compteurForm">
-                                        <div class="modal-body">
-                                            <div class="row g-3">
-                                                <div class="col-lg-12 col-sm-3">
-                                                    <label for="invoicenoInput">Code</label>
-                                                    <input type="text" formControlName="codemodelecompteur" class="form-control form-control-sm bg-light border-0"  placeholder="Code"/>
-                                                    <div class="invalid-feedback">{{ msgErros }}</div>
-                                                </div>
-                                                <!--end col-->
-
-                                                <div class="col-lg-12 col-sm-6">
-                                                  <label for="invoicenoInput">Libelle</label>
-                                                  <input type="text" formControlName="libelle" class="form-control form-control-sm bg-light border-0"  placeholder="Libellé"/>
-                                                  <div class="invalid-feedback">{{ msgErros }}</div>
-                                                </div>
-
-                                                <div class="col-lg-12 col-sm-6">
-                                                  <label for="invoicenoInput">Type doc</label>
-                                                  <select id="typedocument-field" class="form-select form-control form-control-sm bg-light border-0 {{
-                                                      isValidField('typedocument')
-                                                    }}" formControlName="typedocument">
-                                                    <option [ngValue]="null">-- Sélectionner --</option>
-
-                                                    <option value="demande">Demande</option>
-                                                    <option value="opération de caisse">Opération de caisse</option>
-                                                  </select>
-                                                  <div class="invalid-feedback">{{ msgErros }}</div>
-                                                </div>
-
-                                                <div class="col-lg-12 col-sm-6">
-                                                  <label for="invoicenoInput">Séquence 1</label>
-                                                  <select id="typedocument-field" class="form-select form-control form-control-sm bg-light border-0 {{
-                                                      isValidField('sequence_1')
-                                                    }}" formControlName="sequence_1" (change)="listenSequence($event)">
-                                                    <option [ngValue]="null">-- Sélectionner --</option>
-
-                                                    <option value="societe">Societé</option>
-                                                    <option value="site">Site</option>
-                                                    <option value="constante">Constante</option>
-                                                  </select>
-                                                  <div class="invalid-feedback">{{ msgErros }}</div>
-                                                </div>
-
-                                                <div class="col-lg-12 col-sm-6" *ngIf="compteurForm.get('sequence_1')?.value === 'constante'">
-                                                  <label for="invoicenoInput">Préxife 1</label>
-                                                  <input type="text" formControlName="prefixe_1" class="form-control form-control-sm bg-light border-0"  placeholder="Préfixe 1"/>
-                                                  <div class="invalid-feedback">{{ msgErros }}</div>
-                                                </div>
-
-
-                                                <div class="col-lg-12 col-sm-6">
-                                                  <label for="invoicenoInput">Séquence 2</label>
-                                                  <select id="typedocument-field" [disabled]="!optionsSequence2.length" class="form-select form-control form-control-sm bg-light border-0 {{
-                                                      isValidField('sequence_2')
-                                                    }}" formControlName="sequence_2">
-                                                    <option [ngValue]="null">-- Sélectionner --</option>
-
-                                                    <option *ngFor="let opt of optionsSequence2" [value]="opt">
-                                                        {{ opt | titlecase }}
-                                                    </option>
-                                                  </select>
-                                                  <div class="invalid-feedback">{{ msgErros }}</div>
-                                                </div>
-
-                                                <div class="col-lg-12 col-sm-6" *ngIf="compteurForm.get('sequence_2')?.value === 'constante'">
-                                                  <label for="invoicenoInput">Préxife 2</label>
-                                                  <input type="text" formControlName="prefixe_2" class="form-control form-control-sm bg-light border-0"  placeholder="Préfixe 2"/>
-                                                  <div class="invalid-feedback">{{ msgErros }}</div>
-                                                </div>
-                                                <!--end col-->
-                                            </div>
-                                        </div>
-
-                                        <div class="modal-footer">
-                                            <div class="hstack gap-2 justify-content-end">
-                                                <div class="d-flex gap-2">
-                                                    <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
-                                                    <button type="submit" class="btn btn-sm btn-success" (click)="onSubmitCompteur()">
-                                                        {{ actionModalCompteur === "create" ? 'Enregistrer' : 'Modifier'}}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Modal -->
-                        <div class="modal fade flip" id="deleteModalCompteur" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-body p-5 text-center">
-                                        <div class="mt-4 text-center">
-                                            <h4>{{titleMsg}}</h4>
-                                            <p class="text-muted fs-15 mb-4">{{msgSupCompteur}}</p>
-                                            <div class="hstack gap-2 justify-content-center remove">
-                                                <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> annuler</button>
-                                                <button class="btn btn-sm btn-danger" (click)="deleteConfirmedCompteur()" id="delete-record">Oui, supprimer</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!--end modal -->
-                    </div>
-                </div>
-            </div>
+  <div class="col-xxl-9">
+    <div class="card mt-xxl-n5">
+      <div class="card-header">
+        <ul class="nav nav-tabs-custom rounded card-header-tabs border-bottom-0" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link" [class.active]="activeTab === 'general'" (click)="setActiveTab('general')" role="tab">
+              <i class="fas fa-home"></i> Paramètres diverses
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" [class.active]="activeTab === 'notifications'" (click)="setActiveTab('notifications')" role="tab">
+              <i class="far fa-envelope"></i> Notifications
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" [class.active]="activeTab === 'accounting'" (click)="setActiveTab('accounting')" role="tab">
+              <i class="far fa-envelope"></i> Configuration comptable
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" [class.active]="activeTab === 'counter'" (click)="setActiveTab('counter')" role="tab">
+              <i class="far fa-envelope"></i> Compteur
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="card-body p-4">
+        <div class="tab-content">
+          <div class="tab-pane" [class.active]="activeTab === 'general'" role="tabpanel">
+            <app-parametre-diverse></app-parametre-diverse>
+          </div>
+          <div class="tab-pane" [class.active]="activeTab === 'notifications'" role="tabpanel">
+            <app-motif></app-motif>
+          </div>
+          <div class="tab-pane" [class.active]="activeTab === 'accounting'" role="tabpanel">
+            <app-config-comptable></app-config-comptable>
+          </div>
+          <div class="tab-pane" [class.active]="activeTab === 'counter'" role="tabpanel">
+            <app-compteur></app-compteur>
+          </div>
         </div>
+      </div>
     </div>
-    <!--end col-->
+  </div>
 </div>

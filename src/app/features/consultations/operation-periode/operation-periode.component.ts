@@ -16,7 +16,7 @@ import { blob } from 'stream/consumers';
   styleUrl: './operation-periode.component.css'
 })
 export class OperationPeriodeComponent implements OnInit {
-  title = "Journal de paiement";
+  title = "Journal de caisse";
   op: any = [];
   fb: FormBuilder = new FormBuilder();
 
@@ -118,7 +118,8 @@ export class OperationPeriodeComponent implements OnInit {
       idcaisse: this.searchForm.get('caisse')?.value || null,
       idsite: this.searchForm.get('idsite')?.value || null,
       datedebut: this.searchForm.get('datedebut')?.value || null,
-      datefin: this.searchForm.get('datefin')?.value || null
+      datefin: this.searchForm.get('datefin')?.value || null,
+      utilisateur: this.user.prenom + ' ' + this.user.nom
     };
 
     this.service.printJournalCaisse(donnees).subscribe({
