@@ -1,50 +1,1232 @@
-.table-scroll {
-    max-height: 400px;      /* hauteur du tableau */
-    overflow-y: auto;       /* scroll vertical */
-    overflow-x: hidden;
+/* ============================================
+   CAISSE - STYLE SOCIÉTÉ APPLIQUÉ
+   ============================================ */
+
+/* ============================================
+   1. PAGE TITLE PREMIUM
+   ============================================ */
+
+.page-title-premium {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.08),
+    rgba(102, 126, 234, 0.05)
+  );
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 20px;
+  padding: 20px 28px;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 }
 
-
-.table-container {
-  max-width: 100%;
-  overflow-x: auto;
-  /* Pour activer le défilement horizontal */
-  overflow-y: auto;
-  /* Pour activer le défilement vertical si nécessaire */
-  max-height: 400px;
-  /* Limite la hauteur de la table, ajuste selon les besoins */
+@media (min-width: 769px) {
+  .page-title-premium {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.92);
+  }
 }
 
-.table-custom th {
+@media (max-width: 768px) {
+  .page-title-premium {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.7);
+  }
+}
+
+.title-icon-premium {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.12),
+    rgba(102, 126, 234, 0.08)
+  );
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  flex-shrink: 0;
+}
+
+.title-icon-premium i {
+  font-size: 1.3rem;
+  color: #405189;
+}
+
+.title-premium {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.02em;
+}
+
+.title-subtitle-premium {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-top: 2px;
+}
+
+.breadcrumb-premium {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 4px 14px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 40px;
+  border: 1px solid rgba(59, 130, 246, 0.08);
+}
+
+@media (min-width: 769px) {
+  .breadcrumb-premium {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.8);
+  }
+}
+
+@media (max-width: 768px) {
+  .breadcrumb-premium {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+}
+
+.breadcrumb-premium .breadcrumb-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.breadcrumb-premium .breadcrumb-item + .breadcrumb-item::before {
+  content: "›";
+  color: #cbd5e1;
+  font-size: 1.2rem;
+  font-weight: 300;
+  padding: 0 8px;
+}
+
+.breadcrumb-premium .breadcrumb-item a {
+  color: #405189;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.breadcrumb-premium .breadcrumb-item a:hover {
+  color: #2563eb;
+}
+
+.breadcrumb-premium .breadcrumb-item.active {
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ============================================
+   2. CARD PRINCIPALE
+   ============================================ */
+
+.card-glass {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+@media (min-width: 769px) {
+  .card-glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: white;
+    border-color: rgba(203, 213, 225, 0.15);
+  }
+}
+
+.card-header-glass {
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.1);
+}
+
+.card-body-glass {
+  padding: 20px 24px;
+}
+
+/* ============================================
+   3. BOUTONS
+   ============================================ */
+
+.btn-glass-primary {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 30px;
+  padding: 0.4rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #405189;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+}
+
+@media (min-width: 769px) {
+  .btn-glass-primary {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+.btn-glass-primary:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #405189;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  color: #405189;
+}
+
+.btn-glass-secondary {
+  background: rgba(203, 213, 225, 0.3);
+  border: 1px solid rgba(203, 213, 225, 0.4);
+  border-radius: 30px;
+  padding: 0.4rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (min-width: 769px) {
+  .btn-glass-secondary {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+.btn-glass-secondary:hover {
+  background: rgba(203, 213, 225, 0.5);
+  border-color: #94a3b8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  color: #1e293b;
+}
+
+.btn-glass-danger {
+  background: linear-gradient(
+    135deg,
+    rgba(220, 53, 69, 0.15) 0%,
+    rgba(185, 28, 28, 0.15) 100%
+  );
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  border-radius: 30px;
+  padding: 0.4rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #8b0000;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+}
+
+@media (min-width: 769px) {
+  .btn-glass-danger {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+.btn-glass-danger:hover {
+  background: rgba(246, 59, 130, 0.2);
+  border-color: #8b0000;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  color: #8b0000;
+}
+
+/* Effet au survol */
+.btn-glass-danger:hover:not(:disabled) {
+  background: rgba(var(--danger-color-rgb, 220, 53, 69), 0.25);
+  border-color: rgba(var(--danger-color-rgb, 220, 53, 69), 0.5);
+  color: #8b0000;
+}
+
+/* État désactivé */
+.btn-glass-danger:disabled {
+  background: rgba(var(--danger-color-rgb, 220, 53, 69), 0.05);
+  border-color: rgba(var(--danger-color-rgb, 220, 53, 69), 0.15);
+  color: rgba(var(--danger-color-rgb, 220, 53, 69), 0.5);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ============================================
+   4. SEARCH
+   ============================================ */
+
+.search-container {
+  position: relative;
+}
+
+.search-glass {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+@media (min-width: 769px) {
+  .search-glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.8);
+  }
+}
+
+.search-glass i {
+  position: absolute;
+  left: 16px;
+  font-size: 1rem;
+  color: rgba(186, 184, 184, 0.7);
+  z-index: 1;
+}
+
+.search-glass input {
+  width: 260px;
+  padding: 10px 16px 10px 42px;
+  background: transparent;
+  border: none;
+  font-size: 0.8rem;
+  color: #1e293b;
+  outline: none;
+}
+
+.search-glass input::placeholder {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.search-glass input:focus {
+  width: 300px;
+}
+
+.search-glow {
+  display: none;
+}
+
+.search-glass:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.15);
+}
+
+.search-glass:focus-within {
+  border-color: #405189;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-glass:focus-within i {
+  color: #405189;
+}
+
+/* ============================================
+   5. FILTER CHIPS
+   ============================================ */
+
+.filter-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.filter-chip-modern {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(203, 213, 225, 0.5);
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+@media (min-width: 769px) {
+  .filter-chip-modern {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+.filter-chip-modern i {
+  font-size: 1rem;
+  color: #64748b;
+}
+
+.filter-chip-modern .count-badge {
+  background: #e2e8f0;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.filter-chip-modern:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.filter-chip-modern.active {
+  background: linear-gradient(135deg, #3b82f6, #405189);
+  border-color: #405189;
+  color: white;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+}
+
+.filter-chip-modern.active i {
+  color: white;
+}
+
+.filter-chip-modern.active .count-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
+/* ============================================
+   6. TABLEAU
+   ============================================ */
+
+.table-responsive {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.table-modern {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 0;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+@media (min-width: 769px) {
+  .table-modern {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: white;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-modern {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+}
+
+.table-modern thead {
+  background: rgba(59, 130, 246, 0.04);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.table-modern thead th {
+  padding: 12px 16px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #64748b;
+  border-bottom: none;
   white-space: nowrap;
-  /* Empêche les libellés de se casser en plusieurs lignes */
-  /* text-align: center; */
 }
 
-.button-custom:hover {
-  background-color: #218838;
+.table-modern tbody tr {
+  border-bottom: 1px solid rgba(226, 232, 240, 0.4);
 }
 
-.table-custom {
-  border-radius: 0.375rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.table-modern tbody tr:last-child {
+  border-bottom: none;
 }
 
-.table-light {
-  background-color: #f8f9fa;
+.table-modern tbody tr:hover {
+  background: rgba(59, 130, 246, 0.04);
 }
 
-/* .table th, .table td {
-    padding: 1rem 0.75rem;
-  } */
-
-.table-bordered {
-  border: 1px solid #dee2e6;
-}
-
-.table-compact th,
-.table-compact td {
-  padding: 0.25rem 0.5rem;
-  /* valeur UX optimale */
+.table-modern tbody td {
+  padding: 12px 16px;
   vertical-align: middle;
+  font-size: 0.85rem;
+  color: #1e293b;
+  border-bottom: none;
+}
+
+/* ============================================
+   7. CODE BADGE
+   ============================================ */
+
+.code-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  background: rgba(59, 130, 246, 0.08);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #405189;
+  letter-spacing: 0.3px;
+}
+
+/* ============================================
+   8. STATUS BADGE
+   ============================================ */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot.active {
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+}
+
+.status-dot.inactive {
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
+}
+
+.status-badge.status-active {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.status-badge.status-inactive {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+/* ============================================
+   9. ACTIONS GROUP
+   ============================================ */
+
+.actions-group {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.action-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.action-btn i {
+  font-size: 1rem;
+}
+
+.action-edit:hover {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.action-duplicate:hover {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.action-recalculate:hover {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.action-delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+/* ============================================
+   10. EMPTY STATE
+   ============================================ */
+
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.empty-state i {
+  font-size: 2.5rem;
+  color: #cbd5e1;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 4px;
+}
+
+.empty-state .empty-hint {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+/* ============================================
+   11. PAGINATION
+   ============================================ */
+
+.pagination-modern {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.pagination-info {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.pagination-info strong {
+  color: #475569;
+  font-weight: 600;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.page-control {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  border-radius: 8px;
+  background: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748b;
+}
+
+.page-control:hover:not(:disabled) {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.04);
+}
+
+.page-control:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.page-number {
+  min-width: 34px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #1e293b;
+}
+
+/* ============================================
+   12. MODALS
+   ============================================ */
+
+.modal-content {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08) !important;
+  overflow: hidden;
+  animation: slideUp 0.3s ease-out;
+}
+
+@media (min-width: 769px) {
+  .modal-content {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: white !important;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  padding: 18px 24px !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.1) !important;
+}
+
+.modal-body {
+  padding: 24px !important;
+}
+
+.modal-footer {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-top: 1px solid rgba(226, 232, 240, 0.05) !important;
+  padding: 16px 24px !important;
+}
+
+.icon-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================
+   13. FORM FLOATING - ANIMATION CONSERVÉE ✅
+   ============================================ */
+
+.form-floating > .form-control,
+.form-floating > .form-select {
+  height: 58px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  background: #ffffff;
+}
+
+.form-floating > .form-control:focus,
+.form-floating > .form-select:focus {
+  border-color: #405189;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-floating > .form-control.is-invalid {
+  border-color: #ef4444;
+}
+
+.form-floating > .form-control.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-floating > label {
+  padding: 1rem 0.75rem;
+  color: #64748b;
+  font-weight: 400;
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label,
+.form-floating > .form-select ~ label {
+  transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+  color: #405189;
+}
+
+/* ============================================
+   14. PERMISSION CARD
+   ============================================ */
+
+.permission-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 8px;
+  cursor: pointer;
+}
+
+.permission-card:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.permission-card.active {
+  background: #eff6ff;
+  border-color: #405189;
+}
+
+.permission-card .form-check-input:checked {
+  background-color: #405189;
+  border-color: #405189;
+}
+
+/* ============================================
+   15. BOUTONS MODAL
+   ============================================ */
+
+.btn-glass-cancel {
+  background: rgba(100, 116, 139, 0.12);
+  border: 1px solid rgba(100, 116, 139, 0.25);
+  padding: 0.5rem 1.5rem;
+  border-radius: 40px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (min-width: 769px) {
+  .btn-glass-cancel {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+.btn-glass-cancel:hover {
+  background: rgba(100, 116, 139, 0.2);
+  border-color: rgba(100, 116, 139, 0.4);
+  color: #1e293b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.btn-glass-submit {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  padding: 0.5rem 1.8rem;
+  border-radius: 40px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #405189;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (min-width: 769px) {
+  .btn-glass-submit {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+.btn-glass-submit:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: #405189;
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25);
+  color: #405189;
+}
+
+.btn-glass-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-glass-submit .spinner-border {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-width: 2px;
+}
+
+/* ============================================
+   16. DELETE MODAL
+   ============================================ */
+
+/* ============================================
+   MODAL DE SUPPRESSION - STYLE UNIQUE
+   ============================================ */
+
+.delete-modal-card {
+  background: white;
+  border-radius: 24px;
+  border: 1px solid rgba(203, 213, 225, 0.15);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  padding: 0;
+}
+
+.delete-modal-card .modal-body {
+  padding: 32px 24px !important;
+}
+
+.delete-icon-wrapper {
+  width: 72px;
+  height: 72px;
+  background: rgba(239, 68, 68, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.delete-icon-wrapper i {
+  font-size: 2rem;
+  color: #ef4444;
+}
+
+.delete-modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.delete-modal-message {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  text-align: center;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.delete-btn-cancel {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 30px;
+  padding: 8px 24px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.delete-btn-cancel:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.delete-btn-confirm {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: none;
+  border-radius: 30px;
+  padding: 8px 24px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+}
+
+.delete-btn-confirm:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+}
+
+/* ============================================
+   17. SPINNER
+   ============================================ */
+
+.spinner-glass {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+.spinner-glass .spinner-border {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-width: 2px;
+  color: #405189;
+}
+
+.spinner-glass p {
+  margin-top: 12px;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+/* ============================================
+   18. PROGRESS BAR (Recalcul)
+   ============================================ */
+
+.progress {
+  border-radius: 10px;
+  overflow: hidden;
+  background: #e2e8f0;
+  height: 10px;
+}
+
+.progress-bar {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-radius: 10px;
+  font-size: 0;
+  transition: width 0.4s ease;
+}
+
+.progress-bar-striped {
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.15) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.15) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 1rem 1rem;
+}
+
+.progress-bar-animated {
+  animation: progress-bar-stripes 1s linear infinite;
+}
+
+@keyframes progress-bar-stripes {
+  0% {
+    background-position: 1rem 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+/* ============================================
+   19. SCROLLBAR
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3b82f6, #667eea);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #2563eb, #5b6fd4);
+}
+
+/* ============================================
+   20. RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .page-title-premium {
+    padding: 16px 20px;
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 12px;
+  }
+
+  .card-header-glass {
+    padding: 12px 16px;
+  }
+
+  .card-body-glass {
+    padding: 12px 16px;
+  }
+
+  .table-modern {
+    font-size: 0.75rem;
+  }
+
+  .table-modern thead th,
+  .table-modern tbody td {
+    padding: 6px 10px;
+  }
+
+  .code-badge {
+    font-size: 0.65rem;
+    padding: 1px 8px;
+  }
+
+  .status-badge {
+    font-size: 0.55rem;
+    padding: 2px 8px;
+  }
+
+  .actions-group {
+    gap: 2px;
+  }
+
+  .action-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+
+  .pagination-modern {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pagination-info {
+    font-size: 0.65rem;
+  }
+
+  .search-glass input {
+    width: 180px;
+  }
+
+  .search-glass input:focus {
+    width: 200px;
+  }
+
+  .filter-chip-modern {
+    padding: 6px 12px;
+    font-size: 0.7rem;
+  }
+
+  .modal-dialog {
+    margin: 10px;
+  }
+
+  .modal-content {
+    border-radius: 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title-premium {
+    padding: 12px 16px;
+  }
+
+  .title-premium {
+    font-size: 1rem;
+  }
+
+  .title-subtitle-premium {
+    font-size: 0.6rem;
+  }
+
+  .breadcrumb-premium {
+    font-size: 0.65rem;
+    padding: 4px 10px;
+  }
+
+  .table-modern {
+    font-size: 0.65rem;
+  }
+
+  .table-modern thead th,
+  .table-modern tbody td {
+    padding: 4px 8px;
+  }
+
+  .action-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 0.65rem;
+  }
+
+  .filter-chip-modern {
+    padding: 4px 10px;
+    font-size: 0.6rem;
+  }
+
+  .btn-glass-primary,
+  .btn-glass-secondary {
+    font-size: 0.6rem;
+    padding: 4px 12px;
+  }
+
+  .modal-body {
+    padding: 16px !important;
+  }
+
+  .form-floating > .form-control,
+  .form-floating > .form-select {
+    height: 48px;
+    font-size: 0.8rem;
+  }
+
+  .delete-modal-card {
+    padding: 24px 16px;
+  }
+
+  .delete-icon-wrapper {
+    width: 60px;
+    height: 60px;
+  }
+
+  .delete-icon-wrapper i {
+    font-size: 1.6rem;
+  }
+
+  .delete-modal-title {
+    font-size: 1rem;
+  }
+
+  .delete-modal-message {
+    font-size: 0.75rem;
+  }
+
+  .delete-btn-cancel,
+  .delete-btn-confirm {
+    padding: 6px 16px;
+    font-size: 0.65rem;
+  }
 }

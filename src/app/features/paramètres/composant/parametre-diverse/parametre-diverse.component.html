@@ -1,0 +1,175 @@
+<!--start paramètre 1-->
+<div class="tab-pane active" id="personalDetails" role="tabpanel">
+    <div class="row">
+        <div class="col-lg-12 col-sm-12">
+            <div class="d-flex align-items-center mb-5">
+                <h6 class="card-title mb-0 flex-grow-1 text-primary">Motif de validation</h6>
+                <div class="flex-shrink-0">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" (click)="modalCreate()" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1"></i>créer</button>
+                    </div>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <div class="table table-hover table-responsive table-card table-wrapper table-scroll">
+                    @if (loading) {
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-info"></div>
+                        </div>
+                    }
+                    <table class="table align-middle table-nowrap" id="invoiceTable">
+                        <thead class="text-muted sticky-top bg-light">
+                            <tr>
+                                <th class="sort text-uppercase" data-sort="invoice_id">code motif</th>
+                                <th class="sort text-uppercase" data-sort="type">libelle motif</th>
+                                <th class="sort text-uppercase" data-sort="action">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="list form-check-all" id="invoice-list-data">
+                            @for (item of motifs; track $index){
+                                <tr>
+                                    <td class="numero">{{item.codemotif}}</td>
+                                    <td class="devise">{{item.libellemotif}}</td>
+                                    <td class="text-start">
+                                        <ul class="list-inline hstack gap-2 mb-0">
+                                            <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
+                                                <a href="#showModal" data-bs-toggle="modal" (click)="modalUpdate(item)" class="text-primary d-inline-block edit-item-btn">
+                                                    <i class="ri-pencil-fill fs-16"></i>
+                                                </a>
+                                            </li>
+                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
+                                                <a class="text-danger d-inline-block remove-item-btn" (click)="modalDelete(item)"  data-bs-toggle="modal" href="#deleteOrder">
+                                                    <i class="ri-delete-bin-5-fill fs-16"></i>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <div class="" *ngIf="motifs.length == 0">
+                        <div class="text-center">
+                            <h6 class="mt-2">Désolé! Aucun motif trouvé </h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mt-3">
+                    <div class="pagination-wrap hstack gap-2">
+                        <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
+                            Précédent
+                        </button>
+                        <ul class="pagination listjs-pagination mb-0"> Page {{currentPage}} / {{totalPages}} </ul>
+                        <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)" class="btn btn-sm btn-soft-primary pagination-next">
+                            Suivant
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-5 border-secondary opacity-25">
+
+        <div class="col-lg-12 col-sm-12">
+            <div class="mb-4">
+                <div class="mt-4 mb-3 border-bottom pb-2">
+                    <div class="float-end">
+                        <a href="javascript:void(0);" class="link-primary">Désactiver tout</a>
+                    </div>
+                    <h5 class="card-title">Traitements spécifiques</h5>
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="flex-shrink-0 avatar-sm">
+                        <div class="avatar-title bg-light text-primary rounded-3 fs-18">
+                            <i class="ri-smartphone-line"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6>Traitement specifique caisse</h6>
+                        <p class="text-muted mb-0">Ce traitement permet de mettre à jour la ou les caisses de l'utilsateur à une date donnée.</p>
+                    </div>
+                    <div>
+                        <a href="javascript:void(0);">désactiver</a>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="flex-shrink-0 avatar-sm">
+                        <div class="avatar-title bg-light text-primary rounded-3 fs-18">
+                            <i class="ri-tablet-line"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6>Traitement spécifique 2</h6>
+                        <p class="text-muted mb-0">Ce traitement permet de recalculer le solde disponible de chaque caisse de l'utilisateur.</p>
+                    </div>
+                    <div>
+                        <a href="javascript:void(0);">désactiver</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--end row-->
+
+    <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0">
+                <div class="modal-header p-3 bg-info-subtle">
+                    <h5 class="modal-title" id="exampleModalLabel">{{ actionModal === "create" ? 'Création' : 'Modification'}} Motif </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+                </div>
+
+                <form [formGroup]="motifForm">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-lg-3 col-sm-3">
+                                <label for="invoicenoInput">code</label>
+                                <input type="text" formControlName="codemotif" class="form-control form-control-sm bg-light border-0"  placeholder="code "/>
+                                <div class="invalid-feedback">{{ msgErros }}</div>
+                            </div>
+                            <!--end col-->
+
+                            <div class="col-lg-9 col-sm-9">
+                                <label for="invoicenoInput">libelle </label>
+                                <input type="text" formControlName="libellemotif" class="form-control form-control-sm bg-light border-0"  placeholder="description "/>
+                                <div class="invalid-feedback">{{ msgErros }}</div>
+                            </div>
+                            <!--end col-->
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <div class="hstack gap-2 justify-content-end">
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
+                                <button type="submit" class="btn btn-sm btn-success" (click)="onSubmit()">
+                                    {{ actionModal === "create" ? 'enregistrer' : 'modifier'}}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body p-5 text-center">
+                    <div class="mt-4 text-center">
+                        <h4>{{titleMsg}}</h4>
+                        <p class="text-muted fs-15 mb-4">{{msgSup}}</p>
+                        <div class="hstack gap-2 justify-content-center remove">
+                            <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> annuler</button>
+                            <button class="btn btn-sm btn-danger" (click)="deleteConfirmed()" id="delete-record">Oui, supprimer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--end modal -->
+</div>
+<!--end paramètre 1-->

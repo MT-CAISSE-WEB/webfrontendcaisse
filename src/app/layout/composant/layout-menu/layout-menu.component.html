@@ -1,5 +1,5 @@
 <!-- ========== App Menu ========== -->
-<div class="app-menu navbar-menu" [class.menu-open]="isMenuOpen">
+<div class="app-menu navbar-menu">
   <!-- LOGO -->
   <div class="navbar-brand-box">
     <!-- Dark Logo-->
@@ -510,6 +510,15 @@
                   </li>
                   <li class="nav-item">
                     <a
+                      [routerLink]="root_solde_caisse"
+                      class="nav-link"
+                      data-key="t-solde"
+                    >
+                      Solde de caisse par date
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a
                       [routerLink]="root_cloture_caisse"
                       class="nav-link"
                       data-key="t-cloture"
@@ -554,8 +563,4 @@
 </div>
 
 <!-- Vertical Overlay-->
-<div
-  class="vertical-overlay"
-  [class.show]="isMenuOpen"
-  (click)="closeMenu()"
-></div>
+<div class="vertical-overlay"></div>

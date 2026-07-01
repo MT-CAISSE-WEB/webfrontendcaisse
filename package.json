@@ -37,6 +37,8 @@
     "express": "^4.18.2",
     "file-saver": "^2.0.5",
     "fs": "^0.0.1-security",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "ngx-echarts": "^19.0.0",
     "ngx-toastr": "^19.1.0",
     "rxjs": "~7.8.0",
