@@ -961,9 +961,9 @@ export class DemandeDecaissementComponent implements OnInit {
     if (statut === 1) return 'status-encours'; // En cours
     if (statut === 2) return 'status-warning'; // À revoir
     if (statut === 3 && decaisse === 0) return 'status-oui'; // Validée (non payée)
-    if (statut === 3 && decaisse === 1) return 'status-non'; // Payée
+    if (statut === 3 && decaisse === 1) return 'status-payee'; // Payée
     if (statut === 4) return 'status-non'; // Rejetée
-    return 'status-encours'; // Par défaut
+    return 'status-enattente'; // Par défaut
   }
 
   /**
