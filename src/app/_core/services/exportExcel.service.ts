@@ -83,4 +83,19 @@ export class ExcelService {
     this.saveFile(excelBuffer, fileName);
   }
 
+  exportRawData(data: any[], fileName: string) {
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = { Sheets: { Ecritures: worksheet}, SheetNames: ['Ecritures' ]};
+      const excelBuffer = XLSX.write(workbook, {bookType: 'xlsx', type: 'array' });
+      this.saveFile(excelBuffer,fileName);
+  }
+
+  exportSageX3(rows: any[][], fileName: string) {
+    const worksheet = XLSX.utils.aoa_to_sheet(rows);
+    const workbook: XLSX.WorkBook = {Sheets: {ImportX3: worksheet}, SheetNames: ['ImportX3']};
+    const excelBuffer = XLSX.write(workbook,{bookType: 'xlsx',type: 'array'});
+
+    this.saveFile(excelBuffer,fileName);
+  }
+
 }

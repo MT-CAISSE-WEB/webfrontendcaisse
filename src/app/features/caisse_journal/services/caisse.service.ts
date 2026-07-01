@@ -1,44 +1,46 @@
-import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
-import { QueryResultModel } from "../../../_core/models/query-result.model";
-import { URL_LOCAL } from "../../../_core/routes/backend.root";
-import { Injectable } from "@angular/core";
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { QueryResultModel } from '../../../_core/models/query-result.model';
+import { URL_LOCAL } from '../../../_core/routes/backend.root';
+import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CaisseService {
-    url : string = 'caisse' ;
+  url: string = 'caisse';
 
-    constructor(private http: HttpClient) {}
-
-    /**
-   * get All
-   * @param params
-   */
-    getAll(params: any = {}): Observable<QueryResultModel> {
-        return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url, {
-        params,
-        });
-    }
+  constructor(private http: HttpClient) {}
 
   /**
    * get All
    * @param params
    */
-    getAllactif(): Observable<QueryResultModel> {
-        return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url + "/actif");
-    }
+  getAll(params: any = {}): Observable<QueryResultModel> {
+    return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url, {
+      params,
+    });
+  }
+
+  /**
+   * get All
+   * @param params
+   */
+  getAllactif(): Observable<QueryResultModel> {
+    return this.http.get<QueryResultModel>(
+      URL_LOCAL.baseUrl + this.url + '/actif',
+    );
+  }
 
   /**
    * create
    * @param _object
-   * 
+   *
    */
   create(_object: any): Observable<any> {
     return this.http.post<any>(
-      URL_LOCAL.baseUrl + this.url + "/create",
-      _object
+      URL_LOCAL.baseUrl + this.url + '/create',
+      _object,
     );
   }
 
@@ -48,8 +50,8 @@ export class CaisseService {
    */
   update(_object: any): Observable<any> {
     return this.http.put<any>(
-      URL_LOCAL.baseUrl + this.url + "/update/" + _object.idcaisse,
-      _object
+      URL_LOCAL.baseUrl + this.url + '/update/' + _object.idcaisse,
+      _object,
     );
   }
 
@@ -59,19 +61,16 @@ export class CaisseService {
    */
   delete(id: string): Observable<any> {
     return this.http.delete<any>(
-      URL_LOCAL.baseUrl + this.url + "/delete/" + id
+      URL_LOCAL.baseUrl + this.url + '/delete/' + id,
     );
   }
-
 
   /**
    * get one
    * @param id
    */
   getOne(id: string): Observable<any> {
-    return this.http.get<any>(
-      URL_LOCAL.baseUrl + this.url + "/" + id
-    );
+    return this.http.get<any>(URL_LOCAL.baseUrl + this.url + '/' + id);
   }
 
   /**
@@ -79,9 +78,7 @@ export class CaisseService {
    * @param id
    */
   getRecentCaisse(id: string): Observable<any> {
-    return this.http.get<any>(
-      URL_LOCAL.baseUrl + this.url + "/periode/" + id
-    );
+    return this.http.get<any>(URL_LOCAL.baseUrl + this.url + '/periode/' + id);
   }
 
   /**
@@ -89,9 +86,7 @@ export class CaisseService {
    * @param id
    */
   getCloseCaisse(id: string): Observable<any> {
-    return this.http.get<any>(
-      URL_LOCAL.baseUrl + this.url + "/close/" + id
-    );
+    return this.http.get<any>(URL_LOCAL.baseUrl + this.url + '/close/' + id);
   }
 
   /**
@@ -100,8 +95,8 @@ export class CaisseService {
    */
   open(id: string, _object: any): Observable<any> {
     return this.http.put<any>(
-      URL_LOCAL.baseUrl + this.url + "/open/" + id,
-      _object
+      URL_LOCAL.baseUrl + this.url + '/open/' + id,
+      _object,
     );
   }
 
@@ -111,8 +106,8 @@ export class CaisseService {
    */
   close(id: string, _object: any): Observable<any> {
     return this.http.put<any>(
-      URL_LOCAL.baseUrl + this.url + "/close/" + id,
-      _object
+      URL_LOCAL.baseUrl + this.url + '/close/' + id,
+      _object,
     );
   }
 
@@ -122,8 +117,8 @@ export class CaisseService {
    */
   createBilletage(_object: any): Observable<any> {
     return this.http.post<any>(
-      URL_LOCAL.baseUrl + this.url + "/billetage",
-      _object
+      URL_LOCAL.baseUrl + this.url + '/billetage',
+      _object,
     );
   }
 
@@ -131,9 +126,7 @@ export class CaisseService {
    * get solde
    */
   getSolde(): Observable<any> {
-    return this.http.get<any>(
-      URL_LOCAL.baseUrl + this.url + "/solde/user"
-    );
+    return this.http.get<any>(URL_LOCAL.baseUrl + this.url + '/solde/user');
   }
 
   /**
@@ -141,20 +134,18 @@ export class CaisseService {
    */
   recalculate(body: any): Observable<any> {
     return this.http.post<any>(
-      URL_LOCAL.baseUrl + this.url + "/recalculate",
-      body
+      URL_LOCAL.baseUrl + this.url + '/recalculate',
+      body,
     );
   }
-
 
   /**
    * Solde de caisse par date
    */
   get_soldeCaisse(payload: any) {
     return this.http.post<any>(
-      URL_LOCAL.baseUrl + this.url + "/tresorerie",
-      payload
+      URL_LOCAL.baseUrl + this.url + '/tresorerie',
+      payload,
     );
   }
-
 }

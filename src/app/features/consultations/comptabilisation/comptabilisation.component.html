@@ -25,7 +25,9 @@
                                 <i class="mdi mdi-download me-1"></i> Extraire
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" (click)="exportExcel(false)">Exporter Excel (simple)</a></li>
+                                <li><a class="dropdown-item" (click)="exportExcel(false)">Vers Excel (simple)</a></li>
+                                <li><a class="dropdown-item" (click)="exportSageX3()">Vers sage X3</a></li>
+                                <li><a class="dropdown-item" (click)="exportSage1000()">Vers sage 1000</a></li>
                                 <li><a class="dropdown-item" (click)="exportExcel(true)">Valider & exporter</a></li>
                             </ul>
                         </div>
@@ -71,8 +73,10 @@
                                 <th class="text-end">Crédit</th>
                                 <th class="text-end">Montant</th>
                                 <th>Devise</th>
+                                <th>Taux</th>
                                 <th class="text-end">Montant réf</th>
                                 <th>Centre ana.</th>
+                                <th>Centre ana(2).</th>
                                 <th>État</th>
                             </tr>
                         </thead>
@@ -90,15 +94,26 @@
                                 <td class="text-nowrap">{{ ecriture.typeecriture }}</td>
                                 <td class="text-nowrap">{{ ecriture.compte }}</td>
                                 <td class="text-nowrap">{{ ecriture.tiers }}</td>
-                                <td class="text-nowrap">
-                                    {{ ecriture.libelle?.length > 75 ? (ecriture.libelle | slice:0:75) + '...' : ecriture.libelle }} {{ (ecriture.libelle?.length ?? 0) > 75 ? (ecriture.libelle | slice:0:75) + '...' : (ecriture.libelle ?? '') }}
+                                <td
+                                    [attr.data-bs-toggle]="'tooltip'"
+                                    [attr.data-bs-placement]="'top'"
+                                    [attr.title]="ecriture.libelle"
+                                    style="max-width: 400px; cursor: pointer;"
+                                >
+                                    {{
+                                        (ecriture.libelle?.length ?? 0) > 75
+                                            ? (ecriture.libelle | slice:0:75) + '...'
+                                            : (ecriture.libelle ?? '')
+                                    }}
                                 </td>
                                 <td class="text-end">{{ ecriture.debit | number:'1.2-2' }}</td>
                                 <td class="text-end">{{ ecriture.credit | number:'1.2-2' }}</td>
                                 <td class="text-end">{{ ecriture.montant | number:'1.2-2' }}</td>
                                 <td class="text-nowrap">{{ ecriture.devise }}</td>
-                                <td class="text-end">{{ ecriture.montantbase | number:'1.2-2' }}</td>
+                                <td class="text-nowrap">{{ ecriture.taux }}</td>
+                                <td class="text-end"> {{ formatCFA(ecriture.montantref) }}</td>
                                 <td class="text-nowrap">{{ ecriture.centreanalytique }}</td>
+                                <td class="text-nowrap">{{ ecriture.centreanalytiquesecond }}</td>
                                 <td>
                                     <span class="badge" [ngClass]="{'bg-warning': ecriture.etat === 'en attente', 'bg-success': ecriture.etat === 'validee'}">
                                         {{ ecriture.etat === 'en attente' ? 'En attente' : 'Validée' }}

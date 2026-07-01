@@ -1,340 +1,772 @@
 <!-- start page title -->
 <div class="row">
-    <div class="col-12">
-        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">{{title}}</h4>
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Caisse & journal</a></li>
-                    <li class="breadcrumb-item active">{{title}}</li>
-                </ol>
-            </div>
+  <div class="col-12">
+    <div
+      class="page-title-premium d-sm-flex align-items-center justify-content-between"
+    >
+      <div class="d-flex align-items-center gap-3">
+        <div class="title-icon-premium">
+          <i class="ri-wallet-3-fill"></i>
         </div>
+        <div>
+          <h4 class="mb-0 title-premium">{{ title }}</h4>
+          <span class="title-subtitle-premium">Gestion des caisses</span>
+        </div>
+      </div>
+      <div class="page-title-right">
+        <ol class="breadcrumb-premium m-0">
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);"
+              ><i class="ri-home-4-line me-1"></i>Caisse & journal</a
+            >
+          </li>
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);">Comptabilité</a>
+          </li>
+          <li class="breadcrumb-item active">
+            <i class="ri-wallet-3-fill"></i>{{ title }}
+          </li>
+        </ol>
+      </div>
     </div>
+  </div>
 </div>
 <!-- end page title -->
 
 <div class="row">
-    <div class="col-lg-12">
-        <div class="card" id="orderList">
-            <div class="card-header border-0">
-                <div class="row align-items-center gy-3">
-                    <div class="col-sm-auto">
-                        <div class="d-flex gap-1 flex-wrap">
-                            <button type="button" class="btn btn-sm btn-soft-success" data-bs-toggle="modal" (click)="modalCreate()" id="create-btn" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1"></i>créer</button>
-                            <button type="button" class="btn btn-sm btn-soft-info"><i class="ri-file-download-line align-bottom me-1"></i> import</button>
-                            <button class="btn btn-sm btn-soft-danger" [disabled]="objectsSelected.length === 0" (click)="deleteMultiple()" title="Supprimer la sélection"><i class="ri-delete-bin-2-line"></i></button>
-                            <button type="button" class="btn btn-sm btn-info" (click)="refreshData()" title="Actualiser les données"><i class="ri-refresh-fill align-bottom me-1"></i>actualiser</button>
-                            <!-- bouton global de recalcul supprimé : action déplacée par ligne -->
-                        </div>
-                    </div>
-                </div>
+  <div class="col-lg-12">
+    <div class="card-glass" id="orderList">
+      <!-- Header -->
+      <div class="card-header-glass border-0">
+        <div
+          class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3"
+        >
+          <div class="d-flex gap-2 flex-wrap">
+            <button
+              type="button"
+              class="btn-glass-primary"
+              data-bs-toggle="modal"
+              (click)="modalCreate()"
+              id="create-btn"
+              data-bs-target="#showModal"
+            >
+              <i class="ri-add-line align-bottom me-1"></i>Nouvelle caisse
+            </button>
+
+            <!-- BOUTON SUPPRESSION MULTIPLE -->
+            <button
+              type="button"
+              class="btn-glass-danger"
+              (click)="deleteMultiple()"
+              [disabled]="objectsSelected.length === 0"
+              title="Supprimer les caisses sélectionnées"
+            >
+              <i class="ri-delete-bin-6-line align-bottom me-1"></i>Supprimer la
+              sélection
+            </button>
+
+            <button
+              type="button"
+              class="btn-glass-secondary"
+              (click)="refreshData()"
+            >
+              <i class="ri-refresh-fill align-bottom me-1"></i>Actualiser
+            </button>
+          </div>
+          <div class="search-container">
+            <div class="search-glass">
+              <i class="ri-search-line"></i>
+              <input
+                type="text"
+                placeholder="Rechercher par code, libellé..."
+                autocomplete="off"
+              />
+              <div class="search-glow"></div>
             </div>
-            <div class="card-body border border-dashed border-end-0 border-start-0 bg-light">
-                <form>
-                    <div class="row g-3">
-                        <div class="col-xxl-12 col-sm-12">
-                            <div class="search-box">
-                                <input type="text" class="form-control form-control-sm search" placeholder="rechercher par code, libelle...">
-                                <i class="ri-search-line search-icon"></i>
-                            </div>
-                        </div>
-                        <!--end col-->
-                    </div>
-                    <!--end row-->
-                </form>
-            </div>
-            <div class="card-body pt-0">
-                <div>
-                    <ul class="nav nav-tabs nav-tabs-custom nav-success mb-3" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link py-3" [class.active]="activeFilter === 'all'" data-bs-toggle="tab" id="All" role="tab" [attr.aria-selected]="activeFilter === 'all'" (click)="setActiveFilter('all')">
-                                <i class="ri-store-2-fill me-1 align-bottom"></i> Tous <span class="badge bg-secondary align-middle ms-1">{{getStatusCount('')}}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link py-3" [class.active]="activeFilter === 'active'" data-bs-toggle="tab" id="Delivered" role="tab" [attr.aria-selected]="activeFilter === 'active'" (click)="setActiveFilter('active')">
-                                <i class="ri-checkbox-circle-line me-1 align-bottom"></i> Actif <span class="badge bg-success align-middle ms-1">{{getStatusCount(1)}}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link py-3" [class.active]="activeFilter === 'inactive'" data-bs-toggle="tab" id="Pickups" role="tab" [attr.aria-selected]="activeFilter === 'inactive'" (click)="setActiveFilter('inactive')">
-                                <i class="ri-truck-line me-1 align-bottom"></i> Inactif <span class="badge bg-danger align-middle ms-1">{{getStatusCount(0)}}</span>
-                            </a>
-                        </li>
-                    </ul>
+          </div>
+        </div>
+      </div>
 
-                    <div class="table-responsive table-card mb-1">
-                        <table class="table table-nowrap table-container table-custom table-compact align-middle align-middle" id="orderTable" *ngIf="!loading">
-                            <thead class="text-muted table-light">
-                                <tr class="text-uppercase">
-                                    <th scope="col" style="width: 25px;">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" [(ngModel)]="checkAllRow" id="checkAll" (ngModelChange)="handleSelectAll($event)">
-                                        </div>
-                                    </th>
-                                    <th class="sort" data-sort="id">Code</th>
-                                    <th class="sort" data-sort="libelle">Libelle</th>
-                                    <th class="sort" data-sort="devise">Devise</th>
-                                    <th class="sort" data-sort="compte">Compte</th>
-                                    <th class="sort" data-sort="journal">Journal</th>
-                                    <th class="sort" data-sort="status">Status</th>
-                                    <th class="sort" data-sort="city">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody class="list form-check-all">
-                                @for (item of caisses; track $index){
-                                    <tr>
-                                    <th scope="row">
-                                        <div class="form-check">
-                                            <input class="form-check-input" [checked]="isChecked(item.idcaisse)" [(ngModel)]="selectedItems[$index]" (ngModelChange)="handleSelectOne(item, $event)" type="checkbox" name="itemGroup_{{ $index }}">
-                                        </div>
-                                    </th>
-                                    <td class="code"><a href="#" class="fw-medium link-primary">{{item.codecaisse}}</a></td>
-                                    <td class="customer_name">{{item.libelle}}</td>
-                                    <td class="customer_name">{{item.devise.codedevise || ''}}</td>
-                                    <td class="customer_name">{{item.compte.numcompte || ''}}</td>
-                                    <td class="customer_name">{{item.journal.codejournal || ''}}</td>
-                                    <td class="status">
-                                        <span *ngIf="item.actif == 1" class="badge bg-success-subtle text-success text-uppercase"> Actif </span>
-                                        <span *ngIf="item.actif == 0" class="badge bg-danger-subtle text-danger text-uppercase"> Inactif </span>
-                                    </td>
-                                    <td>
-                                        <ul class="list-inline hstack gap-2 mb-0">
-                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="View">
-                                                <a href="#" class="text-primary d-inline-block">
-                                                    <i class="ri-eye-fill fs-16"></i>
-                                                </a>
-                                            </li>
-                                            <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                <a href="#showModal" data-bs-toggle="modal" (click)="modalUpdate(item)" class="text-primary d-inline-block edit-item-btn">
-                                                    <i class="ri-pencil-fill fs-16"></i>
-                                                </a>
-                                            </li>
-                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
-                                                <a class="text-danger d-inline-block remove-item-btn" (click)="deleteCaisseItem(item)" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
-                                                    <i class="ri-delete-bin-5-fill fs-16"></i>
-                                                </a>
-                                            </li>
-                                            <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Recalculer le solde">
-                                                <button type="button" class="btn btn-sm btn-warning p-0" (click)="openRecalcModal(item)">
-                                                    <i class="ri-refresh-line fs-16"></i>
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </td>
-                                </tr>
-                                }
-                                
-                            </tbody>
-                        </table>
-                        <div class="text-center" *ngIf="loading">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Chargement...</span>
-                            </div>
-                            <p class="mt-2">Chargement des données...</p>
-                        </div>
-                        <div class="noresult" style="display: none">
-                            <div class="text-center">
-                                <h5 class="mt-2">Désole! Aucun resultat trouvé</h5>
-                                <p class="text-muted">We've searched more than 150+ Orders We did not find any orders for you search.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-end">
-                        <div class="pagination-wrap hstack gap-2">
-                            <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
-                                Précédent
-                            </button>
-                            <ul class="pagination listjs-pagination mb-0"></ul>
-                            <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)" class="btn btn-sm btn-soft-primary pagination-next">
-                                Suivant
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header bg-light p-3">
-                                <h5 class="modal-title" id="exampleModalLabel">{{ actionModal === "create" ? 'Création' : 'Modification'}} {{title}}</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
-                            </div>
-                            <form [formGroup]="caisseForm">
-                                <div class="modal-body">
-                                    <input type="hidden" id="id-field"/>
-
-                                    <div class="row">
-                                        <div class="col-md-3 col-sm-3">
-                                            <div class="mb-3" id="modal-id">
-                                                <label for="orderId" class="form-label form-label-sm">code</label>
-                                                <input type="text" id="orderId" class="form-control form-control-sm {{ isValidField('codecaisse')}}" formControlName="codecaisse" placeholder="" required/>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-9 col-sm-9">
-                                            <div class="mb-3" id="modal-id">
-                                                <label for="orderId" class="form-label form-label-sm">libelle</label>
-                                                <input type="text" id="orderId" class="input-sm form-control form-control-sm {{ isValidField('libelle')}}" formControlName="libelle" placeholder="" required/>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row mt-2">
-                                        <div class="col-md-4 col-sm-4">
-                                            <div class="mb-3" id="modal-id">
-                                                <label for="orderId" class="form-label form-label-sm">devise</label>
-                                                <div class="input-light input-light-sm">
-                                                    <select class="form-control form-control-sm bg-light border-0" formControlName="iddevise"  id="choices-payment-status" required id="devise">
-                                                        <option value="">devise</option>
-                                                        @for (item of devises; track $index){
-                                                            <option value="{{item.iddevise}}">{{item.codedevise}}</option>
-                                                        }
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-4 col-sm-4">
-                                            <div class="mb-3" id="modal-id">
-                                                <label for="orderId" class="form-label form-label-sm">compte</label>
-                                                <div class="input-light input-light-sm">
-                                                    <select class="form-control form-control-sm bg-light border-0" formControlName="idcompte"  id="choices-payment-status" required id="compte">
-                                                        <option value="">-- Sélectionner --</option>
-                                                        @for ( item of comptes; track $index ) {
-                                                            <option [value]="item.idcompte">{{ item.numcompte }} - {{ item.libelle }}</option>
-                                                        }
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-4 col-sm-4">
-                                            <div class="mb-3" id="modal-id">
-                                                <label for="orderId" class="form-label form-label-sm">journal</label>
-                                                <div class="input-light input-light-sm">
-                                                    <select class="form-control form-control-sm bg-light border-0" formControlName="idjournal" id="choices-payment-status" required id="journal">
-                                                        <option value="">journal</option>
-                                                        @for (journal of journaux; track $index) {
-                                                            <option value="{{journal.idjournal}}">{{journal.codejournal}} {{journal.designation}}</option>
-                                                        }
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                    <div class="row">
-                                        <div class="col-md-4 col-sm-4">
-                                            <div class="mb-3" id="modal-id">
-                                                <div class="input-light input-light-sm">
-                                                    <label for="date-field">Date init.</label>
-                                                    <input type="date" formControlName="dateinitialisation" class="form-control form-control-sm bg-light border-0 {{ isValidField('dateinitialisation')}}" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date" required>
-                                                    <div class="invalid-feedback">{{ msgErros }}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-4 col-sm-4">
-                                            <div class="mb-3" id="modal-id">
-                                                <label for="orderId" class="form-label form-label-sm">solde initial</label>
-                                                <input type="text" formControlName="soldeinitialisation" class="form-control form-control-sm bg-light border-0 {{ isValidField('soldeinitialisation')}}"  placeholder=""/>
-                                                <div class="invalid-feedback">{{ msgErros }}</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-4 col-sm-4">
-                                            <div class="mb-3" id="modal-id">
-                                                <div class="mb-3" id="modal-id">
-                                                    <label for="orderId" class="form-label form-label-sm">seuil minimal</label>
-                                                    <input type="text" formControlName="seuilminimal" class="form-control form-control-sm bg-light border-0 {{ isValidField('seuilminimal')}}"  placeholder=""/>
-                                                <div class="invalid-feedback">{{ msgErros }}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                
-
-                                    <div class="mb-3">
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch" value="1" formControlName="actif" id="flexSwitchCheckChecked" checked>
-                                            <label class="form-check-label" for="flexSwitchCheckChecked">Actif</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                </div>
-
-                                <div class="modal-footer">
-                                    <div class="hstack gap-2 justify-content-end">
-                                        <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
-                                        <button type="submit" class="btn btn-sm btn-success" id="add-btn" (click)="onSubmit()">
-                                            {{ actionModal === "create" ? 'enregistrer' : 'modifier'}}
-                                        </button>
-                                        <!-- <button type="button" class="btn btn-success" id="edit-btn">Update</button> -->
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Modal -->
-                <div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-body p-5 text-center">
-                                <div class="mt-4 text-center">
-                                    <h4>{{titleMsg}}</h4>
-                                    <p class="text-muted fs-15 mb-4">{{msgSup}}</p>
-                                    <div class="hstack gap-2 justify-content-center remove">
-                                        <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> annuler</button>
-                                        <button class="btn btn-sm btn-danger" (click)="deleteConfirmed()" id="delete-record">Oui, supprimer</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--end modal -->
-                <!-- Recalcul solde modal -->
-                <ng-template #recalcModalTemplate>
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header bg-light p-3">
-                                <h5 class="modal-title">Recalculer le solde de la caisse</h5>
-                                <button type="button" class="btn-close" aria-label="Close" (click)="closeRecalcModal()"></button>
-                            </div>
-                            <form [formGroup]="recalcForm">
-                                <div class="modal-body">
-                                    <div class="mb-3">
-                                        <label class="form-label form-label-sm">Caisse</label>
-                                        <div class="mb-2">{{ recalcCaisse?.codecaisse || '-' }} - {{ recalcCaisse?.libelle || '-' }}</div>
-                                        <label class="form-label form-label-sm">Date de départ</label>
-                                        <input type="date" formControlName="startDate" class="form-control form-control-sm" [disabled]="recalcLoading" />
-                                        <div *ngIf="recalcForm.get('startDate')?.invalid && recalcForm.get('startDate')?.touched" class="text-danger small">Veuillez sélectionner une date.</div>
-                                        <small class="text-muted">Le recalcul sera effectué de cette date jusqu'à la date actuelle.</small>
-                                    </div>
-
-                                    <div *ngIf="recalcLoading" class="mb-3">
-                                        <label class="form-label form-label-sm">Chargement en cours</label>
-                                        <div class="progress" style="height: 14px;">
-                                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" [style.width.%]="recalcProgress" aria-valuemin="0" aria-valuemax="100">{{ recalcProgress }}%</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-sm btn-light" [disabled]="recalcLoading" (click)="closeRecalcModal()">Annuler</button>
-                                    <button type="button" class="btn btn-sm btn-warning" [disabled]="recalcLoading" (click)="submitRecalc()">Recalculer</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </ng-template>
-            </div>
+      <!-- Filtres -->
+      <div class="card-body-glass pt-0">
+        <div class="filter-chips-container">
+          <div
+            class="filter-chip-modern"
+            [class.active]="activeFilter === 'all'"
+            (click)="setActiveFilter('all')"
+          >
+            <i class="ri-store-2-fill"></i>
+            <span>Tous</span>
+            <span class="count-badge">{{ allCaisses.length || 0 }}</span>
+          </div>
+          <div
+            class="filter-chip-modern"
+            [class.active]="activeFilter === 'active'"
+            (click)="setActiveFilter('active')"
+          >
+            <i class="ri-checkbox-circle-line"></i>
+            <span>Actif</span>
+            <span class="count-badge">{{ getStatusCount(1) }}</span>
+          </div>
+          <div
+            class="filter-chip-modern"
+            [class.active]="activeFilter === 'inactive'"
+            (click)="setActiveFilter('inactive')"
+          >
+            <i class="ri-close-circle-line"></i>
+            <span>Inactif</span>
+            <span class="count-badge">{{ getStatusCount(0) }}</span>
+          </div>
         </div>
 
+        <!-- Loading -->
+        <div *ngIf="loading" class="spinner-glass">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement...</span>
+          </div>
+          <p class="mt-2 text-muted">Chargement des caisses...</p>
+        </div>
+
+        <!-- Tableau avec checkboxes -->
+        <div *ngIf="!loading" class="table-responsive">
+          <table class="table table-modern align-middle" id="orderTable">
+            <thead>
+              <tr>
+                <!-- CHECKBOX POUR TOUT SÉLECTIONNER -->
+                <th style="width: 40px">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      [checked]="checkAllRow"
+                      [indeterminate]="
+                        objectsSelected.length > 0 &&
+                        objectsSelected.length < caisses.length
+                      "
+                      (change)="handleSelectAll($any($event.target).checked)"
+                    />
+                  </div>
+                </th>
+                <th>#</th>
+                <th>Code</th>
+                <th>Libellé</th>
+                <th>Devise</th>
+                <th>Compte</th>
+                <th>Journal</th>
+                <th>Statut</th>
+                <th style="text-align: right; width: 160px">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of caisses; track $index) {
+                <tr [class.table-active]="isChecked(item.idcaisse)">
+                  <!-- CHECKBOX POUR CHAQUE LIGNE -->
+                  <td>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        [checked]="isChecked(item.idcaisse)"
+                        (change)="
+                          handleSelectOne(item, $any($event.target).checked)
+                        "
+                      />
+                    </div>
+                  </td>
+                  <td>{{ (currentPage - 1) * limit + $index + 1 }}</td>
+                  <td>
+                    <span class="code-badge">{{ item.codecaisse }}</span>
+                  </td>
+                  <td>
+                    <span class="fw-medium">{{ item.libelle }}</span>
+                  </td>
+                  <td>
+                    <span class="badge-glass badge-glass-primary">
+                      {{ item.devise?.codedevise || "-" }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="text-muted">{{
+                      item.compte?.numcompte || "-"
+                    }}</span>
+                  </td>
+                  <td>
+                    <span class="text-muted">{{
+                      item.journal.codejournal || "-"
+                    }}</span>
+                  </td>
+                  <td>
+                    <span
+                      *ngIf="item.actif == 1"
+                      class="status-badge status-active"
+                    >
+                      <span class="status-dot active"></span> Actif
+                    </span>
+                    <span
+                      *ngIf="item.actif == 0"
+                      class="status-badge status-inactive"
+                    >
+                      <span class="status-dot inactive"></span> Inactif
+                    </span>
+                  </td>
+                  <td>
+                    <div class="actions-group">
+                      <button
+                        class="action-btn action-edit"
+                        (click)="modalUpdate(item)"
+                        data-bs-toggle="modal"
+                        data-bs-target="#showModal"
+                        title="Modifier"
+                      >
+                        <i class="ri-pencil-line"></i>
+                      </button>
+                      <button
+                        class="action-btn action-recalculate"
+                        (click)="openRecalcModal(item)"
+                        title="Recalculer le solde"
+                      >
+                        <i class="ri-refresh-line"></i>
+                      </button>
+                      <button
+                        class="action-btn action-delete"
+                        (click)="deleteCaisseItem(item)"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteOrder"
+                        title="Supprimer"
+                      >
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+              @if (caisses.length === 0) {
+                <tr>
+                  <td colspan="9" class="text-center py-5">
+                    <div class="empty-state">
+                      <i class="ri-wallet-3-line"></i>
+                      <p>Aucune caisse trouvée</p>
+                      <span class="empty-hint"
+                        >Commencez par créer une nouvelle caisse</span
+                      >
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-modern">
+          <div class="pagination-info">
+            <span>Affichage de</span>
+            <strong>{{ (currentPage - 1) * limit + 1 }}</strong>
+            <span>à</span>
+            <strong>{{
+              currentPage * limit > (caisses.length || 0)
+                ? caisses.length || 0
+                : currentPage * limit
+            }}</strong>
+            <span>sur</span>
+            <strong>{{ caisses.length || 0 }}</strong>
+            <span>caisses</span>
+          </div>
+          <div class="pagination-controls">
+            <button
+              class="page-control"
+              [disabled]="currentPage == 1"
+              (click)="changePage(currentPage - 1)"
+            >
+              <i class="ri-arrow-left-s-line"></i>
+            </button>
+            <span class="page-number">{{ currentPage }}</span>
+            <button
+              class="page-control"
+              [disabled]="currentPage == totalPages"
+              (click)="changePage(currentPage + 1)"
+            >
+              <i class="ri-arrow-right-s-line"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de création/modification -->
+      <div
+        class="modal fade modal-lg"
+        id="showModal"
+        tabindex="-1"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content shadow-lg border-0">
+            <div
+              class="modal-header"
+              style="
+                background: linear-gradient(135deg, #3b82f6 0%, #405189 100%);
+                border: 0;
+              "
+            >
+              <div class="d-flex align-items-center gap-2">
+                <div class="icon-circle">
+                  <i class="ri-wallet-3-line text-white fs-5"></i>
+                </div>
+                <h5 class="modal-title text-white fw-semibold">
+                  {{
+                    actionModal === "create"
+                      ? "Nouvelle caisse"
+                      : actionModal === "update"
+                        ? "Modifier caisse"
+                        : "Dupliquer caisse"
+                  }}
+                </h5>
+              </div>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+
+            <form [formGroup]="caisseForm" (ngSubmit)="onSubmit()">
+              <div class="modal-body p-4">
+                <!-- Section identification -->
+                <div class="mb-4">
+                  <h6
+                    class="mb-3 fw-semibold small text-uppercase text-muted"
+                    style="letter-spacing: 0.5px"
+                  >
+                    <i class="ri-id-card-line me-1"></i> Identification
+                  </h6>
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <div class="form-floating">
+                        <input
+                          type="text"
+                          class="form-control {{ isValidField('codecaisse') }}"
+                          formControlName="codecaisse"
+                          id="codecaisse"
+                          placeholder="Code caisse"
+                          maxlength="10"
+                        />
+                        <label for="codecaisse" class="small">Code</label>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-floating">
+                        <input
+                          type="text"
+                          class="form-control {{ isValidField('libelle') }}"
+                          formControlName="libelle"
+                          id="libelle"
+                          placeholder="Libellé"
+                        />
+                        <label for="libelle" class="small">Libellé</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section configuration -->
+                <div class="mb-4">
+                  <h6
+                    class="mb-3 fw-semibold small text-uppercase text-muted"
+                    style="letter-spacing: 0.5px"
+                  >
+                    <i class="ri-settings-4-line me-1"></i> Configuration
+                  </h6>
+                  <div class="row g-3">
+                    <div class="col-md-4">
+                      <div class="form-floating">
+                        <select
+                          class="form-select"
+                          formControlName="iddevise"
+                          id="iddevise"
+                        >
+                          <option value="">-- Devise --</option>
+                          <option
+                            *ngFor="let d of devises"
+                            [value]="d.iddevise"
+                          >
+                            {{ d.codedevise }}
+                          </option>
+                        </select>
+                        <label for="iddevise" class="small">Devise</label>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="form-floating">
+                        <select
+                          class="form-select"
+                          formControlName="idcompte"
+                          id="idcompte"
+                        >
+                          <option value="">-- Compte --</option>
+                          <option
+                            *ngFor="let c of comptes"
+                            [value]="c.idcompte"
+                          >
+                            {{ c.numcompte }} - {{ c.libelle }}
+                          </option>
+                        </select>
+                        <label for="idcompte" class="small">Compte</label>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="form-floating">
+                        <select
+                          class="form-select"
+                          formControlName="idjournal"
+                          id="idjournal"
+                        >
+                          <option value="">-- Journal --</option>
+                          <option
+                            *ngFor="let j of journaux"
+                            [value]="j.idjournal"
+                          >
+                            {{ j.codejournal }} - {{ j.designation }}
+                          </option>
+                        </select>
+                        <label for="idjournal" class="small">Journal</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section initialisation -->
+                <div class="mb-4">
+                  <h6
+                    class="mb-3 fw-semibold small text-uppercase text-muted"
+                    style="letter-spacing: 0.5px"
+                  >
+                    <i class="ri-calendar-line me-1"></i> Initialisation
+                  </h6>
+                  <div class="row g-3">
+                    <div class="col-md-4">
+                      <div class="form-floating">
+                        <input
+                          type="date"
+                          class="form-control {{
+                            isValidField('dateinitialisation')
+                          }}"
+                          formControlName="dateinitialisation"
+                          id="dateinitialisation"
+                          placeholder="Date initialisation"
+                        />
+                        <label for="dateinitialisation" class="small"
+                          >Date initialisation</label
+                        >
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="form-floating">
+                        <input
+                          type="number"
+                          class="form-control {{
+                            isValidField('soldeinitialisation')
+                          }}"
+                          formControlName="soldeinitialisation"
+                          id="soldeinitialisation"
+                          placeholder="Solde initial"
+                          step="0.01"
+                        />
+                        <label for="soldeinitialisation" class="small"
+                          >Solde initial</label
+                        >
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="form-floating">
+                        <input
+                          type="number"
+                          class="form-control {{
+                            isValidField('seuilminimal')
+                          }}"
+                          formControlName="seuilminimal"
+                          id="seuilminimal"
+                          placeholder="Seuil minimal"
+                          step="0.01"
+                        />
+                        <label for="seuilminimal" class="small"
+                          >Seuil minimal</label
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section statut -->
+                <div>
+                  <h6
+                    class="mb-3 fw-semibold small text-uppercase text-muted"
+                    style="letter-spacing: 0.5px"
+                  >
+                    <i class="ri-shield-check-line me-1"></i> Statut
+                  </h6>
+                  <div class="row g-3">
+                    <div class="col-12">
+                      <div
+                        class="permission-card"
+                        [class.active]="caisseForm.get('actif')?.value == true"
+                      >
+                        <div
+                          class="form-check form-switch d-flex align-items-center justify-content-between px-2"
+                        >
+                          <label
+                            class="form-check-label small fw-medium"
+                            for="actif"
+                          >
+                            <i class="ri-checkbox-circle-line me-1"></i> Actif
+                          </label>
+                          <input
+                            class="form-check-input"
+                            type="checkbox"
+                            id="actif"
+                            formControlName="actif"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <input type="hidden" formControlName="idsociete" />
+                <div *ngIf="msgErros" class="alert alert-danger mt-3">
+                  {{ msgErros }}
+                </div>
+              </div>
+
+              <div
+                class="modal-footer border-0 p-4"
+                style="background: transparent"
+              >
+                <div class="d-flex gap-3 justify-content-end w-100">
+                  <button
+                    type="button"
+                    class="btn-glass-cancel"
+                    data-bs-dismiss="modal"
+                  >
+                    <i class="ri-close-line me-1"></i> Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    class="btn-glass-submit"
+                    [disabled]="loading || caisseForm.invalid"
+                  >
+                    <span
+                      *ngIf="loading"
+                      class="spinner-border spinner-border-sm me-2"
+                    ></span>
+                    <i *ngIf="!loading" class="ri-save-line me-1"></i>
+                    {{
+                      actionModal === "create"
+                        ? "Créer la caisse"
+                        : actionModal === "update"
+                          ? "Modifier la caisse"
+                          : "Dupliquer la caisse"
+                    }}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de suppression -->
+      <div class="modal fade" id="deleteOrder" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+          <div class="modal-content delete-modal-card">
+            <div class="modal-body text-center p-4">
+              <div class="delete-icon-wrapper mb-4">
+                <i class="ri-delete-bin-line"></i>
+              </div>
+              <h5 class="delete-modal-title">{{ titleMsg }}</h5>
+              <p class="delete-modal-message">{{ msgSup }}</p>
+              <div class="d-flex gap-3 justify-content-center">
+                <button
+                  class="delete-btn-cancel"
+                  (click)="closeModal('deleteOrder')"
+                >
+                  <i class="ri-close-line me-1"></i> Annuler
+                </button>
+                <button class="delete-btn-confirm" (click)="deleteConfirmed()">
+                  <i class="ri-delete-bin-line me-1"></i> Supprimer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Recalcul solde -->
+      <div class="modal fade" id="recalcModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content shadow-lg border-0">
+            <div
+              class="modal-header"
+              style="
+                background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                border: 0;
+              "
+            >
+              <div class="d-flex align-items-center gap-2">
+                <div class="icon-circle">
+                  <i class="ri-refresh-line text-white fs-5"></i>
+                </div>
+                <div>
+                  <h5 class="modal-title text-white fw-semibold">
+                    Recalculer le solde
+                  </h5>
+                  <span class="text-white-50 small"
+                    >Mise à jour du solde de la caisse</span
+                  >
+                </div>
+              </div>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+                (click)="closeRecalcModal()"
+              ></button>
+            </div>
+
+            <form [formGroup]="recalcForm">
+              <div class="modal-body p-4">
+                <div class="mb-4">
+                  <div
+                    class="d-flex align-items-center gap-3 p-3 bg-light rounded-3"
+                  >
+                    <div class="icon-circle bg-soft-warning">
+                      <i class="ri-wallet-3-line text-warning"></i>
+                    </div>
+                    <div>
+                      <div class="fw-semibold">
+                        {{ recalcCaisse?.codecaisse || "-" }}
+                      </div>
+                      <div class="text-muted small">
+                        {{ recalcCaisse?.libelle || "-" }}
+                      </div>
+                    </div>
+                    <span class="badge-glass badge-glass-warning ms-auto">
+                      <i class="ri-information-line me-1"></i> Recalcul
+                    </span>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <div class="form-floating">
+                    <input
+                      type="date"
+                      class="form-control"
+                      formControlName="startDate"
+                      id="startDate"
+                      placeholder="Date de départ"
+                    />
+                    <label for="startDate" class="small"
+                      ><i class="ri-calendar-line me-1"></i> Date de
+                      départ</label
+                    >
+                  </div>
+                  <div
+                    class="invalid-feedback"
+                    *ngIf="
+                      recalcForm.get('startDate')?.invalid &&
+                      recalcForm.get('startDate')?.touched
+                    "
+                  >
+                    Veuillez sélectionner une date de départ
+                  </div>
+                  <small class="text-muted d-block mt-1">
+                    <i class="ri-information-line me-1"></i>
+                    Le recalcul sera effectué de cette date jusqu'à la date
+                    actuelle.
+                  </small>
+                </div>
+
+                <div *ngIf="recalcLoading" class="mb-3">
+                  <div
+                    class="d-flex align-items-center justify-content-between mb-2"
+                  >
+                    <span class="fw-semibold small text-uppercase text-muted">
+                      <i class="ri-loader-4-line spin me-1"></i> Progression
+                    </span>
+                    <span class="fw-bold text-warning"
+                      >{{ recalcProgress }}%</span
+                    >
+                  </div>
+                  <div
+                    class="progress"
+                    style="height: 10px; border-radius: 10px"
+                  >
+                    <div
+                      class="progress-bar progress-bar-striped progress-bar-animated"
+                      role="progressbar"
+                      [style.width.%]="recalcProgress"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                      style="
+                        background: linear-gradient(135deg, #f59e0b, #d97706);
+                        border-radius: 10px;
+                      "
+                    ></div>
+                  </div>
+                </div>
+
+                <div *ngIf="msgErros" class="alert alert-danger mt-3">
+                  <i class="ri-error-warning-line me-1"></i> {{ msgErros }}
+                </div>
+              </div>
+
+              <div
+                class="modal-footer border-0 p-4"
+                style="background: transparent"
+              >
+                <div class="d-flex gap-3 justify-content-end w-100">
+                  <button
+                    type="button"
+                    class="btn-glass-cancel"
+                    data-bs-dismiss="modal"
+                    (click)="closeRecalcModal()"
+                    [disabled]="recalcLoading"
+                  >
+                    <i class="ri-close-line me-1"></i> Annuler
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-glass-submit"
+                    [disabled]="recalcLoading || recalcForm.invalid"
+                    (click)="submitRecalc()"
+                    style="
+                      background: linear-gradient(135deg, #f59e0b, #d97706);
+                      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);
+                      color: #ffffff;
+                    "
+                  >
+                    <span
+                      *ngIf="recalcLoading"
+                      class="spinner-border spinner-border-sm me-2"
+                    ></span>
+                    <i *ngIf="!recalcLoading" class="ri-refresh-line me-1"></i>
+                    {{
+                      recalcLoading
+                        ? "Recalcul en cours..."
+                        : "Recalculer le solde"
+                    }}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <!--end modal -->
     </div>
-    <!--end col-->
+  </div>
+  <!--end col-->
 </div>
 <!--end row-->

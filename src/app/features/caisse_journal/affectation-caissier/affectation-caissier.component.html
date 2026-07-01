@@ -1,203 +1,360 @@
 <!-- start page title -->
 <div class="row">
-    <div class="col-12">
-        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">{{title}}</h4>
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Caisse & journal</a></li>
-                    <li class="breadcrumb-item active">{{title}}</li>
-                </ol>
-            </div>
+  <div class="col-12">
+    <div
+      class="page-title-premium d-sm-flex align-items-center justify-content-between"
+    >
+      <div class="d-flex align-items-center gap-3">
+        <div class="title-icon-premium">
+          <i class="ri-user-3-fill"></i>
         </div>
+        <div>
+          <h4 class="mb-0 title-premium">{{ title }}</h4>
+          <span class="title-subtitle-premium"
+            >Gestion des affectations caissiers</span
+          >
+        </div>
+      </div>
+      <div class="page-title-right">
+        <ol class="breadcrumb-premium m-0">
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);"
+              ><i class="ri-home-4-line me-1"></i>Caisse & journal</a
+            >
+          </li>
+          <li class="breadcrumb-item active">
+            <i class="ri-user-3-fill"></i>{{ title }}
+          </li>
+        </ol>
+      </div>
     </div>
+  </div>
 </div>
 <!-- end page title -->
 
 <div class="row">
-    <div class="col-lg-12">
-        <div class="card" id="">
-            <div class="card-header border-0">
-                <div class="d-flex align-items-center">
-                    <h5 class="card-title mb-0 flex-grow-1">{{title}}</h5>
-                    <div class="flex-shrink-0">
-                        <div class="d-flex gap-2 flex-wrap">
-                            <button class="btn btn-sm btn-danger"><i class="ri-delete-bin-2-line"></i></button>
-                            <button type="button" class="btn btn-sm btn-primary waves-effect waves-light" (click)="modalCreate()" data-bs-toggle="modal" data-bs-target="#showModal">
-                                <i class="ri-add-line align-bottom me-1"></i> nouvelle 
-                            </button>
-                        </div>
-                    </div>
-                </div>
+  <div class="col-lg-12">
+    <div class="card-glass" id="orderList">
+      <!-- Header -->
+      <div class="card-header-glass border-0">
+        <div
+          class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3"
+        >
+          <div class="d-flex gap-2 flex-wrap">
+            <button
+              type="button"
+              class="btn-glass-primary"
+              (click)="modalCreate()"
+              data-bs-toggle="modal"
+              data-bs-target="#showModal"
+            >
+              <i class="ri-add-line align-bottom me-1"></i>Nouvelle affectation
+            </button>
+          </div>
+          <form [formGroup]="searchForm">
+            <div class="search-container">
+              <div class="search-glass">
+                <i class="ri-search-line"></i>
+                <input
+                  type="text"
+                  placeholder="Rechercher par caisse et utilisateur..."
+                  autocomplete="off"
+                  formControlName="search"
+                  (input)="applyFilters(filters)"
+                />
+                <div class="search-glow"></div>
+              </div>
             </div>
-            <div class="card-body bg-light-subtle border border-dashed border-start-0 border-end-0">
-                <form [formGroup]="searchForm">
-                    <div class="row g-3">
-                        <div class="col-xxl-5 col-sm-12">
-                            <div class="search-box search-box-sm">
-                                <input type="text" class="form-control form-control-sm search bg-light border-light" formControlName="search" placeholder="rechercher par caisse et utilisateur...">
-                                <i class="ri-search-line search-icon"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <!--end row-->
-                </form>
-            </div>
-            <div class="card-body">
-                <div>
-                    <div class="table-responsive table-card">
-                        <table class="table align-middle table-nowrap table-container table-custom table-compact" id="invoiceTable">
-                            <colgroup>
-                                <col style="width: 05%">
-                                <col style="width: 35%">
-                                <col style="width: 35%">
-                                <col style="width: 10%">
-                                <col style="width: 15%">
-                            </colgroup>
-                            <thead class="text-muted">
-                                <tr>
-                                    <th scope="col" style="width: 50px;">
-                                        <div class="form-check form-check-sm">
-                                            <input class="form-check-input" type="checkbox" id="checkAll" value="option">
-                                        </div>
-                                    </th>
-                                    <th class="sort text-uppercase" data-sort="invoice_id">caisse</th>
-                                    <th class="sort text-uppercase" data-sort="type">caissier</th>
-                                    <th class="sort text-uppercase" data-sort="status">Statut</th>
-                                    <th class="sort text-uppercase" data-sort="action">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody class="list form-check-all" id="invoice-list-data">
-                                @for (ligne of usercaisses; track $index){
-                                    <tr class="bg-light text-center">
-                                        <th scope="row">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox">
-                                            </div>
-                                        </th>
-                                        <td class="caisse"> {{ligne.caisse.codecaisse}} - {{ligne.caisse.libelle}} </td>
-                                        <td class="user"> {{ligne.utilisateur.prenom}} - {{ligne.utilisateur.nom}}  </td>
-                                        <td class="actif" *ngIf="ligne.actif! == 1"><span class="badge bg-info-subtle text-info"> actif </span>  </td>
-                                        <td class="actif" *ngIf="ligne.actif! == 0"><span class="badge bg-secondary-subtle text-secondary"> inactif </span>  </td>
-                                        <td>
-                                            <ul class="list-inline hstack gap-2 mb-0">
-                                                <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="View">
-                                                    <a href="#" class="text-primary d-inline-block">
-                                                        <i class="ri-eye-fill fs-16"></i>
-                                                    </a>
-                                                </li>
-                                                <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                    <a class="text-primary d-inline-block edit-item-btn" (click)="modalUpdate(ligne)" data-bs-toggle="modal" href="#showModal">
-                                                        <i class="ri-pencil-fill fs-16"></i>
-                                                    </a>
-                                                </li>
-                                                <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
-                                                    <a class="text-danger d-inline-block remove-item-btn" (click)="modalDelete(ligne)" data-bs-toggle="modal" href="#deleteOrder">
-                                                        <i class="ri-delete-bin-5-fill fs-16"></i>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                        <div class="" *ngIf="usercaisses.length === 0">
-                            <div class="text-center">
-                                <h5 class="mt-2">Désolé! Aucune opération trouvé</h5>
-                                <p class="text-muted mb-0">Désole il n' y aucune donnée dans cette base</p>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-end">
-                            <div class="pagination-wrap hstack gap-2">
-                                <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
-                                    Précédent
-                                </button>
-                                <ul class="pagination listjs-pagination mb-0">Page {{currentPage}} / {{totalPages}}</ul>
-                                <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)" class="btn btn-sm btn-soft-primary pagination-next">
-                                    Suivant
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </form>
         </div>
+      </div>
+
+      <!-- Corps de la carte -->
+      <div class="card-body-glass pt-0">
+        <!-- Tableau -->
+        <div class="table-responsive">
+          <table class="table table-modern align-middle" id="invoiceTable">
+            <thead>
+              <tr>
+                <th>Caisse</th>
+                <th>Caissier</th>
+                <th>Statut</th>
+                <th style="text-align: right; width: 15%">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (ligne of usercaisses; track $index) {
+                <tr>
+                  <td>
+                    <span class="code-badge"
+                      >{{ ligne.caisse.codecaisse || "-" }} -
+                      {{ ligne.caisse.libelle || "-" }}</span
+                    >
+                  </td>
+                  <td>
+                    <span class="fw-medium"
+                      >{{ ligne.utilisateur.prenom || "-" }} -
+                      {{ ligne.utilisateur.nom || "-" }}</span
+                    >
+                  </td>
+                  <td>
+                    @if (ligne.actif == 1) {
+                      <span class="status-badge status-active">
+                        <span class="status-dot active"></span> Actif
+                      </span>
+                    } @else {
+                      <span class="status-badge status-inactive">
+                        <span class="status-dot inactive"></span> Inactif
+                      </span>
+                    }
+                  </td>
+                  <td>
+                    <div class="actions-group">
+                      <button
+                        class="action-btn action-edit"
+                        (click)="modalUpdate(ligne)"
+                        data-bs-toggle="modal"
+                        data-bs-target="#showModal"
+                        title="Modifier"
+                      >
+                        <i class="ri-pencil-line"></i>
+                      </button>
+                      <button
+                        class="action-btn action-delete"
+                        (click)="modalDelete(ligne)"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteOrder"
+                        title="Supprimer"
+                      >
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+              @if (usercaisses.length === 0) {
+                <tr>
+                  <td colspan="5" class="text-center py-5">
+                    <div class="empty-state">
+                      <i class="ri-user-3-line"></i>
+                      <p>Aucune affectation trouvée</p>
+                      <span class="empty-hint"
+                        >Commencez par créer une nouvelle affectation</span
+                      >
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-modern">
+          <div class="pagination-info">
+            <span>Affichage de</span>
+            <strong>{{ (currentPage - 1) * limit + 1 }}</strong>
+            <span>à</span>
+            <strong>{{
+              currentPage * limit > (usercaisses.length || 0)
+                ? usercaisses.length || 0
+                : currentPage * limit
+            }}</strong>
+            <span>sur</span>
+            <strong>{{ usercaisses.length || 0 }}</strong>
+            <span>affectations</span>
+          </div>
+          <div class="pagination-controls">
+            <button
+              class="page-control"
+              [disabled]="currentPage == 1"
+              (click)="changePage(currentPage - 1)"
+            >
+              <i class="ri-arrow-left-s-line"></i>
+            </button>
+            <span class="page-number">{{ currentPage }}</span>
+            <button
+              class="page-control"
+              [disabled]="currentPage == totalPages"
+              (click)="changePage(currentPage + 1)"
+            >
+              <i class="ri-arrow-right-s-line"></i>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 
-<!-- Modal -->
-<div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-body p-5 text-center">
-                <div class="mt-4 text-center">
-                    <h4>{{titleMsg}}</h4>
-                    <p class="text-muted fs-15 mb-4">{{msgSup}}</p>
-                    <div class="hstack gap-2 justify-content-center remove">
-                        <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> annuler</button>
-                        <button class="btn btn-sm btn-danger" (click)="deleteConfirmed()" id="delete-record">Oui, supprimer</button>
-                    </div>
-                </div>
-            </div>
+<!-- Modal de suppression -->
+<div class="modal fade" id="deleteOrder" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content delete-modal-card">
+      <div class="modal-body text-center p-4">
+        <div class="delete-icon-wrapper mb-4">
+          <i class="ri-delete-bin-line"></i>
         </div>
+        <h5 class="delete-modal-title">{{ titleMsg }}</h5>
+        <p class="delete-modal-message">{{ msgSup }}</p>
+        <div class="d-flex gap-3 justify-content-center">
+          <button class="delete-btn-cancel" (click)="closeModal('deleteOrder')">
+            <i class="ri-close-line me-1"></i> Annuler
+          </button>
+          <button class="delete-btn-confirm" (click)="deleteConfirmed()">
+            <i class="ri-delete-bin-line me-1"></i> Supprimer
+          </button>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
-<!--end modal -->
 
-
-<div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-light p-3">
-                <h5 class="modal-title" id="exampleModalLabel">Affectation caisse</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
-            </div>
-            <form [formGroup]="usercaisseForm">
-                <div class="modal-body">
-                    <input type="hidden" id="id-field"/>
-
-                    <div class="mb-3">
-                        <div class="input-light">
-                            <select class="form-select form-select-sm bg-light border-0" formControlName="idcaisse">
-                                <option value="" selected>Choisir la caisse</option>
-                                @for(item of caisses; track $index;){
-                                    <option value="{{item.idcaisse}}"> {{item.codecaisse}} - {{ item.libelle}} </option>
-                                }
-                            </select>
-                        </div>
-                        <div class="invalid-feedback">{{ msgErros }}</div>
-                    </div>
-
-                    <div class="mb-2">
-                        <div class="input-light">
-                            <select class="form-control form-control-sm bg-light border-0" formControlName="idutilisateur">
-                                <option value="" selected>Choisir le caissier</option>
-                                @for(item of users; track $index){
-                                    <option value="{{item.idutilisateur}}"> {{item.prenom}} - {{ item.nom}} </option>
-                                }
-                            </select>
-                        </div>
-                        <div class="invalid-feedback">{{ msgErros }}</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" value="1" formControlName="actif" id="flexSwitchCheckChecked" checked>
-                            <label class="form-check-label" for="flexSwitchCheckChecked">Actif</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <div class="hstack gap-2 justify-content-end">
-                        <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
-                        <button type="submit" class="btn btn-sm btn-success" id="add-btn" (click)="onSubmit()" [disabled]="this.usercaisseForm.invalid">
-                            <i class="ri-check-double-line"></i>  {{ actionModal === "create" ? 'enregistrer' : 'modifier'}}
-                        </button>
-                    </div>
-                </div>
-            </form>
+<!-- Modal de création/modification -->
+<div
+  class="modal fade modal-lg"
+  id="showModal"
+  tabindex="-1"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow-lg border-0">
+      <div
+        class="modal-header"
+        style="
+          background: linear-gradient(135deg, #3b82f6 0%, #405189 100%);
+          border: 0;
+        "
+      >
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-user-3-line text-white fs-5"></i>
+          </div>
+          <h5 class="modal-title text-white fw-semibold">
+            {{
+              actionModal === "create"
+                ? "Nouvelle affectation"
+                : "Modifier l'affectation"
+            }}
+          </h5>
         </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <form [formGroup]="usercaisseForm" (ngSubmit)="onSubmit()">
+        <div class="modal-body p-4">
+          <div class="mb-4">
+            <h6
+              class="mb-3 fw-semibold small text-uppercase text-muted"
+              style="letter-spacing: 0.5px"
+            >
+              <i class="ri-id-card-line me-1"></i> Affectation
+            </h6>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <select
+                    class="form-select"
+                    formControlName="idcaisse"
+                    id="idcaisse"
+                  >
+                    <option value="">-- Caisse --</option>
+                    @for (item of caisses; track $index) {
+                      <option [value]="item.idcaisse">
+                        {{ item.codecaisse }} - {{ item.libelle }}
+                      </option>
+                    }
+                  </select>
+                  <label for="idcaisse" class="small">Caisse</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <select
+                    class="form-select"
+                    formControlName="idutilisateur"
+                    id="idutilisateur"
+                  >
+                    <option value="">-- Caissier --</option>
+                    @for (item of users; track $index) {
+                      <option [value]="item.idutilisateur">
+                        {{ item.prenom }} - {{ item.nom }}
+                      </option>
+                    }
+                  </select>
+                  <label for="idutilisateur" class="small">Caissier</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <h6
+              class="mb-3 fw-semibold small text-uppercase text-muted"
+              style="letter-spacing: 0.5px"
+            >
+              <i class="ri-shield-check-line me-1"></i> Statut
+            </h6>
+            <div class="row g-3">
+              <div class="col-12">
+                <div
+                  class="permission-card"
+                  [class.active]="usercaisseForm.get('actif')?.value == true"
+                >
+                  <div
+                    class="form-check form-switch d-flex align-items-center justify-content-between px-2"
+                  >
+                    <label class="form-check-label small fw-medium" for="actif">
+                      <i class="ri-checkbox-circle-line me-1"></i> Actif
+                    </label>
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="actif"
+                      formControlName="actif"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <input type="hidden" formControlName="idutilisateurcaisse" />
+          <div *ngIf="msgErros" class="alert alert-danger mt-3">
+            {{ msgErros }}
+          </div>
+        </div>
+
+        <div class="modal-footer border-0 p-4" style="background: transparent">
+          <div class="d-flex gap-3 justify-content-end w-100">
+            <button
+              type="button"
+              class="btn-glass-cancel"
+              data-bs-dismiss="modal"
+            >
+              <i class="ri-close-line me-1"></i> Annuler
+            </button>
+            <button
+              type="submit"
+              class="btn-glass-submit"
+              [disabled]="loading || usercaisseForm.invalid"
+            >
+              <span
+                *ngIf="loading"
+                class="spinner-border spinner-border-sm me-2"
+              ></span>
+              <i *ngIf="!loading" class="ri-save-line me-1"></i>
+              {{ actionModal === "create" ? "Enregistrer" : "Modifier" }}
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
+  </div>
 </div>

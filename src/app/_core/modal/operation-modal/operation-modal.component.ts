@@ -763,8 +763,6 @@ export class OperationModalComponent implements OnInit {
       beneficiaire: demande.demandeur.nom + ' ' + demande.demandeur.prenom,
     });
 
-    console.log('Demandes:', demande);
-
     /** Reset lignes */
     const lignesFA = this.operationForm.get('lignes') as FormArray;
     lignesFA.clear();
@@ -1368,6 +1366,7 @@ export class OperationModalComponent implements OnInit {
   formatNumber(value: number): string {
     return OperationModalUtils.formatNumber(value);
   }
+
   loadDemandePiecesJointes(iddemande: string): void {
     this.demandePiecesJointesLoading = true;
     this.pjDemandeService.getAll(iddemande).subscribe({
@@ -1386,6 +1385,7 @@ export class OperationModalComponent implements OnInit {
       },
     });
   }
+
   downloadPiece(piece: PieceJointe): void {
     this.pjService.downloadFile(piece.urlpiece).subscribe({
       next: (blob) => {
@@ -2016,4 +2016,5 @@ XXXXXX${delimiter}Exemple nature${delimiter}XXXXXX${delimiter}Exemple tiers${del
     window.URL.revokeObjectURL(url);
     this.toastr.success('Modèle CSV téléchargé');
   }
+
 }

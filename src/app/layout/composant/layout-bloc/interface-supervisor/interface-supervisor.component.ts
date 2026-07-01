@@ -30,7 +30,6 @@ export class InterfaceSupervisorComponent implements OnInit {
     this.service.get_soldeAllCaisse().subscribe({
       next: (res: any) => {
         if (res.success) {
-          console.log("données ", res.data);
           this.caisseAllSolde = res.data;
         } else {
           this.toastr.error(res.message || 'Erreur de chargement');

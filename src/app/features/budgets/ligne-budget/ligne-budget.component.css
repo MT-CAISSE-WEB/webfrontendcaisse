@@ -1,54 +1,1281 @@
-.table-container {
-  max-width: 100%;
-  overflow-x: auto;
-  /* Pour activer le défilement horizontal */
-  overflow-y: auto;
-  /* Pour activer le défilement vertical si nécessaire */
-  max-height: 400px;
-  /* Limite la hauteur de la table, ajuste selon les besoins */
+/* ============================================
+   IMPORT DES STYLES GLASSMORPHISM
+   (Copie des styles du budget.component.css)
+   ============================================ */
+
+/* Page Title Premium */
+.page-title-premium {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.08),
+    rgba(102, 126, 234, 0.05)
+  );
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 20px;
+  padding: 20px 28px;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 }
 
-.table-custom th {
-  white-space: nowrap;
-  /* Empêche les libellés de se casser en plusieurs lignes */
-  text-align: center;
+@media (min-width: 769px) {
+  .page-title-premium {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.92);
+  }
 }
 
-.input-custom {
-  border-radius: 0.375rem;
-  background-color: #f9f9f9;
+@media (max-width: 768px) {
+  .page-title-premium {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.7);
+  }
+}
+
+.title-icon-premium {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.12),
+    rgba(102, 126, 234, 0.08)
+  );
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  flex-shrink: 0;
+}
+
+.title-icon-premium i {
+  font-size: 1.3rem;
+  color: #405189;
+}
+
+.title-premium {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.02em;
+}
+
+.title-subtitle-premium {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-top: 2px;
+}
+
+.breadcrumb-premium {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 4px 14px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 40px;
+  border: 1px solid rgba(59, 130, 246, 0.08);
+}
+
+@media (min-width: 769px) {
+  .breadcrumb-premium {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.8);
+  }
+}
+
+.breadcrumb-premium .breadcrumb-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.breadcrumb-premium .breadcrumb-item + .breadcrumb-item::before {
+  content: "›";
+  color: #cbd5e1;
+  font-size: 1.2rem;
+  font-weight: 300;
+  padding: 0 8px;
+}
+
+.breadcrumb-premium .breadcrumb-item a {
+  color: #405189;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.breadcrumb-premium .breadcrumb-item a:hover {
+  color: #2563eb;
+}
+
+.breadcrumb-premium .breadcrumb-item.active {
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Card Glass */
+.card-glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+@media (min-width: 769px) {
+  .card-glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: white;
+  }
+}
+
+.card-header-glass {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.4);
+  background: transparent;
+}
+
+.card-body-glass {
+  padding: 1.5rem;
+}
+
+/* Boutons Glass */
+.btn-glass-primary {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 30px;
+  padding: 0.4rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #405189;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   transition: all 0.3s ease;
 }
 
-.input-custom:focus {
-  background-color: #e2e6ea;
-  border-color: #80bdff;
+.btn-glass-primary:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #405189;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
 }
 
-.button-custom:hover {
-  background-color: #218838;
+.btn-glass-validate {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 30px;
+  padding: 0.4rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #10b981;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
 }
 
-.table-custom {
-  border-radius: 0.375rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.btn-glass-validate:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
 }
 
-.table-light {
-  background-color: #f8f9fa;
+.btn-glass-secondary {
+  background: rgba(203, 213, 225, 0.3);
+  border: 1px solid rgba(203, 213, 225, 0.4);
+  border-radius: 30px;
+  padding: 0.4rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
 }
 
-/* .table th, .table td {
-    padding: 1rem 0.75rem;
-  } */
-
-.table-bordered {
-  border: 1px solid #dee2e6;
+.btn-glass-secondary:hover {
+  background: rgba(203, 213, 225, 0.5);
+  border-color: #94a3b8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.table-compact th,
-.table-compact td {
-  padding: 0.25rem 0.5rem;
-  /* valeur UX optimale */
+.btn-glass-danger {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 30px;
+  padding: 0.4rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #ef4444;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+}
+
+.btn-glass-danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+
+.btn-glass-cancel {
+  background: rgba(100, 116, 139, 0.12);
+  border: 1px solid rgba(100, 116, 139, 0.25);
+  border-radius: 30px;
+  padding: 0.4rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+}
+
+.btn-glass-cancel:hover {
+  background: rgba(100, 116, 139, 0.2);
+  border-color: rgba(100, 116, 139, 0.4);
+  color: #1e293b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.btn-glass-submit {
+  background: rgba(64, 81, 137, 0.15);
+  border: 1px solid rgba(64, 81, 137, 0.3);
+  border-radius: 30px;
+  padding: 0.4rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #405189;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+}
+
+.btn-glass-submit:hover:not(:disabled) {
+  background: rgba(64, 81, 137, 0.25);
+  border-color: #405189;
+  box-shadow: 0 4px 12px rgba(64, 81, 137, 0.25);
+}
+
+.btn-glass-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Search Glass */
+.search-glass {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+@media (min-width: 769px) {
+  .search-glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.8);
+  }
+}
+
+.search-glass i {
+  position: absolute;
+  left: 16px;
+  font-size: 1rem;
+  color: rgba(186, 184, 184, 0.7);
+  z-index: 1;
+}
+
+.search-glass .form-select {
+  width: 100%;
+  padding: 10px 16px 10px 42px;
+  background: transparent;
+  border: none;
+  font-size: 0.85rem;
+  color: #1e293b;
+  border: 3px solid rgba(0, 0, 0, 0.04);
+  outline: none;
+}
+
+.search-glass .form-select:focus {
+  box-shadow: none;
+}
+
+.search-glass:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.15);
+}
+
+.search-glass:focus-within {
+  border-color: #405189;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Table Modern */
+.table-responsive {
+  border-radius: 12px;
+  overflow: auto;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.table-modern {
+  min-width: 1200px;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+@media (min-width: 769px) {
+  .table-modern {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: white;
+  }
+}
+
+.table-modern thead {
+  background: rgba(59, 130, 246, 0.04);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.table-modern thead th {
+  padding: 12px 16px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #64748b;
+  border-bottom: none;
+  white-space: nowrap;
+}
+
+.table-modern tbody tr {
+  border-bottom: 1px solid rgba(226, 232, 240, 0.4);
+}
+
+.table-modern tbody tr:last-child {
+  border-bottom: none;
+}
+
+.table-modern tbody tr:hover {
+  background: rgba(59, 130, 246, 0.04);
+}
+
+.table-modern tbody td {
+  padding: 12px 16px;
   vertical-align: middle;
+  font-size: 0.85rem;
+  color: #1e293b;
+  border-bottom: none;
+}
+
+/* Code Badge */
+.code-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  background: rgba(59, 130, 246, 0.08);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #405189;
+  letter-spacing: 0.3px;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot.status-oui {
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+}
+
+.status-dot.status-non {
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
+}
+
+.status-dot.status-encours {
+  background: #e5ac01;
+  box-shadow: 0 0 6px rgba(230, 161, 12, 0.868);
+}
+
+.status-badge.status-oui {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.status-badge.status-non {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.status-badge.status-encours {
+  background: #fff2c6;
+  color: #e5ac01;
+}
+
+/* Actions Group */
+.actions-group {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.action-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.action-btn i {
+  font-size: 1rem;
+}
+
+.action-btn:hover {
+  transform: scale(1.1);
+}
+
+.action-edit:hover {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.action-delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+/* Pagination Modern */
+.pagination-modern {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.pagination-info {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.pagination-info strong {
+  color: #475569;
+  font-weight: 600;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.page-control {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  border-radius: 8px;
+  background: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.page-control:hover:not(:disabled) {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.04);
+}
+
+.page-control:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.page-number {
+  min-width: 30px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #1e293b;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.page-number:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.page-number.active {
+  background: #405189;
+  color: white;
+}
+
+.page-ellipsis {
+  padding: 0 8px;
+  color: #94a3b8;
+}
+
+.pagination-select {
+  border-radius: 8px;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  background: white;
+  color: #1e293b;
+}
+
+/* Empty State */
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.empty-state i {
+  font-size: 2.5rem;
+  color: #cbd5e1;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 4px;
+}
+
+.empty-state .empty-hint {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+/* Spinner Glass */
+.spinner-glass {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+/* Modal création/modification */
+/* ============================================
+   MODAL AVEC DÉFILEMENT POUR GRANDS TABLEAUX
+   ============================================ */
+
+#showModal .modal-dialog {
+  max-height: 85vh;
+  display: flex;
+  align-items: center;
+  margin: 1.75rem auto;
+}
+
+#showModal .modal-content {
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#showModal .modal-body {
+  max-height: calc(
+    85vh - 140px
+  ); /* 140px = header (60px) + footer (60px) + padding */
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+/* Défilement vertical pour les tableaux dans la modal */
+#showModal .table-responsive {
+  max-height: 500px;
+  overflow-y: auto;
+  border: none;
+}
+
+/* Empêche la double barre de défilement */
+#showModal .table-responsive .table-modern {
+  margin-bottom: 0;
+}
+
+/* Style de la barre de défilement dans la modal */
+#showModal .modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+#showModal .modal-body::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+#showModal .modal-body::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3b82f6, #405189);
+  border-radius: 10px;
+}
+
+#showModal .modal-body::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #2563eb, #5b6fd4);
+}
+
+/* ============================================
+   MODAL VALIDATION BUDGET - DÉFILEMENT
+   ============================================ */
+
+#validateBudgetModal .modal-dialog {
+  max-height: 85vh;
+  display: flex;
+  align-items: center;
+  margin: 1.75rem auto;
+}
+
+#validateBudgetModal .modal-content {
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#validateBudgetModal .modal-body {
+  max-height: calc(
+    85vh - 140px
+  ); /* 140px = header (60px) + footer (60px) + padding */
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+/* Défilement vertical pour le tableau */
+#validateBudgetModal .table-responsive {
+  max-height: 400px;
+  overflow-y: auto;
+  border: none;
+}
+
+/* Style de la barre de défilement (thème vert) */
+#validateBudgetModal .modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+#validateBudgetModal .modal-body::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+#validateBudgetModal .modal-body::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-radius: 10px;
+}
+
+#validateBudgetModal .modal-body::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+/* ============================================
+   ONGLETS VERTS POUR MODAL VALIDATION
+   ============================================ */
+
+.nav-tabs-glass-success {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+  padding: 0 1.5rem;
+  background: transparent;
+}
+
+.nav-tabs-glass-success .nav-link {
+  border: none;
+  padding: 12px 20px;
+  color: #64748b;
+  background: transparent;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-tabs-glass-success .nav-link:hover {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.nav-tabs-glass-success .nav-link.active {
+  color: #10b981;
+  background: transparent;
+  border-bottom-color: #10b981;
+}
+
+/* ============================================
+   PIÈCES JOINTE - THÈME VERT
+   ============================================ */
+
+.piece-card-success {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  transition: all 0.3s ease;
+  cursor: default;
+}
+
+.piece-card-success:hover {
+  background: rgba(16, 185, 129, 0.05);
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+}
+
+.piece-icon-success {
+  width: 44px;
+  height: 44px;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.piece-icon-success i {
+  color: #10b981;
+  font-size: 1.1rem;
+}
+
+/* Boutons d'action - Version verte */
+.btn-action-glass.btn-view-success {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.btn-action-glass.btn-view-success:hover {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+.btn-action-glass.btn-delete-success {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.btn-action-glass.btn-delete-success:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+/* Bouton Valider - Vert */
+.btn-glass-validate {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 30px;
+  padding: 0.4rem 1.2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #10b981;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+}
+
+.btn-glass-validate:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.btn-glass-validate:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Bouton Success (Tout télécharger) */
+.btn-glass-success {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 30px;
+  padding: 0.4rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #10b981;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+}
+
+.btn-glass-success:hover {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+/* Badge vert */
+.badge-glass-success {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #059669;
+}
+
+.badge-count {
+  background: #dc2626;
+  color: #ffffff;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================
+   DÉFILEMENT POUR MODAL VALIDATION
+   ============================================ */
+
+#validateBudgetModal .modal-dialog {
+  max-height: 85vh;
+  display: flex;
+  align-items: center;
+  margin: 1.75rem auto;
+}
+
+#validateBudgetModal .modal-content {
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#validateBudgetModal .modal-body {
+  max-height: calc(85vh - 140px);
+  overflow-y: auto;
+  padding: 0;
+}
+
+#validateBudgetModal .tab-content {
+  max-height: calc(85vh - 180px);
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+/* ============================================
+   ONGLETS GLASSMORPHISM POUR MODAL VALIDATEURS
+   ============================================ */
+
+.nav-tabs-glass {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.4);
+  padding: 0 1.5rem;
+  background: transparent;
+}
+
+.nav-tabs-glass .nav-link {
+  border: none;
+  padding: 12px 20px;
+  color: #64748b;
+  background: transparent;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-tabs-glass .nav-link:hover {
+  color: #405189;
+  background: rgba(64, 81, 137, 0.05);
+}
+
+.nav-tabs-glass .nav-link.active {
+  color: #405189;
+  background: transparent;
+  border-bottom-color: #405189;
+}
+
+/* ============================================
+   PIÈCES JOINTE DANS MODAL VALIDATEURS
+   ============================================ */
+
+.pieces-list-modal {
+  min-height: 300px;
+}
+
+.piece-card-glass {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(226, 232, 240, 0.4);
+  transition: all 0.3s ease;
+  cursor: default;
+}
+
+.piece-card-glass:hover {
+  background: rgba(64, 81, 137, 0.05);
+  border-color: rgba(64, 81, 137, 0.2);
+  box-shadow: 0 4px 12px rgba(64, 81, 137, 0.1);
+}
+
+.piece-icon-glass {
+  width: 44px;
+  height: 44px;
+  background: rgba(64, 81, 137, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.piece-icon-glass i {
+  color: #405189;
+  font-size: 1.1rem;
+}
+
+/* Boutons d'action dans les cartes de pièces jointes */
+.btn-action-glass {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.btn-action-glass.btn-view {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.btn-action-glass.btn-view:hover {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.btn-action-glass.btn-delete {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.btn-action-glass.btn-delete:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.btn-action-glass:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Animation pour les onglets */
+.tab-pane {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Défilement pour la modal */
+#validateursBudgetModal .modal-dialog {
+  max-height: 85vh;
+  display: flex;
+  align-items: center;
+  margin: 1.75rem auto;
+}
+
+#validateursBudgetModal .modal-content {
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#validateursBudgetModal .modal-body {
+  max-height: calc(85vh - 140px);
+  overflow-y: auto;
+  padding: 0;
+}
+
+#validateursBudgetModal .tab-content {
+  max-height: calc(85vh - 180px);
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+/* Style de la barre de défilement */
+#validateursBudgetModal .modal-body::-webkit-scrollbar,
+#validateursBudgetModal .tab-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+#validateursBudgetModal .modal-body::-webkit-scrollbar-track,
+#validateursBudgetModal .tab-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+#validateursBudgetModal .modal-body::-webkit-scrollbar-thumb,
+#validateursBudgetModal .tab-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #64748b, #475569);
+  border-radius: 10px;
+}
+
+#validateursBudgetModal .modal-body::-webkit-scrollbar-thumb:hover,
+#validateursBudgetModal .tab-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #475569, #374151);
+}
+
+/* Delete Modal */
+.delete-modal-card {
+  background: white;
+  border-radius: 24px;
+  border: 1px solid rgba(203, 213, 225, 0.15);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  padding: 32px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.delete-icon-wrapper {
+  width: 72px;
+  height: 72px;
+  background: rgba(239, 68, 68, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.delete-icon-wrapper i {
+  font-size: 2rem;
+  color: #ef4444;
+}
+
+.delete-modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.delete-modal-message {
+  font-size: 0.85rem;
+  color: rgba(88, 88, 88, 0.6);
+  text-align: center;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.delete-btn-cancel {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 30px;
+  padding: 8px 24px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.delete-btn-cancel:hover {
+  background: #475569;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.delete-btn-confirm {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: none;
+  border-radius: 30px;
+  padding: 8px 24px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+  transition: all 0.2s ease;
+}
+
+.delete-btn-confirm:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+}
+
+/* Icon Circle */
+.icon-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Form Controls */
+.form-control-sm {
+  border-radius: 8px;
+  border: 2px solid rgba(226, 232, 240, 0.6);
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.form-control-sm:focus {
+  border-color: #405189;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page-title-premium {
+    padding: 16px;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .card-header-glass {
+    padding: 1rem;
+    flex-direction: column;
+  }
+
+  .card-body-glass {
+    padding: 1rem;
+  }
+
+  .search-glass .form-select {
+    width: 180px;
+  }
+
+  .table-modern {
+    font-size: 0.8rem;
+  }
+
+  .table-modern thead th,
+  .table-modern tbody td {
+    padding: 8px 12px;
+  }
+
+  .code-badge {
+    font-size: 0.7rem;
+    padding: 1px 8px;
+  }
+
+  .status-badge {
+    font-size: 0.6rem;
+    padding: 2px 8px;
+  }
+
+  .actions-group {
+    gap: 2px;
+  }
+
+  .action-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+
+  .pagination-modern {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pagination-info {
+    font-size: 0.7rem;
+  }
+
+  .pagination-controls {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .page-number {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
+
+  .modal-content {
+    margin: 0.5rem;
+  }
 }

@@ -165,6 +165,34 @@ export class BudgetComponent implements OnInit {
 
   lignesByBudget: LigneBudgetModel[] = [];
 
+  // Sélection multiple
+  areAllChildrenSelected(parentId: string): boolean {
+    const children = this.getBudgetsMensuels(parentId);
+    return (
+      children.length > 0 &&
+      children.every((child) => this.isChecked(child.idbudget))
+    );
+  }
+
+  toggleSelectAllChildren(parentId: string, checked: boolean): void {
+    const children = this.getBudgetsMensuels(parentId);
+    if (checked) {
+      children.forEach((child) => {
+        if (!this.isChecked(child.idbudget)) {
+          this.objectsSelected.push(child);
+        }
+      });
+    } else {
+      children.forEach((child) => {
+        this.objectsSelected = this.objectsSelected.filter(
+          (obj) => obj.idbudget !== child.idbudget,
+        );
+      });
+    }
+    this.checkAllRow =
+      this.objectsSelected.length === this.filteredBudgets.length;
+  }
+
   // Afficher les lignes budgétaires du budget
   onClickAfficherLignesBudgetaire(budget: BudgetModel): void {
     if (!budget) return;
@@ -850,6 +878,7 @@ export class BudgetComponent implements OnInit {
     this.actionModal = 'create';
     this.selectedBudget = undefined;
     this.existingPieces = [];
+    this.selectedFiles = [];
     // this.uploadedFiles = [];
     this.initForm();
   }
@@ -876,6 +905,7 @@ export class BudgetComponent implements OnInit {
 
     this.budgetForm.markAllAsTouched();
     this.budgetForm.updateValueAndValidity();
+    this.selectedFiles = [];
     this.loadExistingPieces(_object.idbudget);
   }
 
@@ -954,7 +984,7 @@ export class BudgetComponent implements OnInit {
     this.selectedFiles = [];
     this.pjUploading = false;
     this.pjDeleting = null;
-    this.existingPieces = []; // ⭐ Nettoyer après fermeture
+    this.existingPieces = []; // Nettoyer après fermeture
     // this.uploadedFiles = [];
     document.body.style.overflow = ''; // Restaure le scroll
   }
@@ -1237,6 +1267,8 @@ export class BudgetComponent implements OnInit {
     this.isDragOver = true;
   }
 
+  selectedFile: File | null = null;
+
   onDragLeave(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
@@ -1313,5 +1345,75 @@ export class BudgetComponent implements OnInit {
         this.loading = false;
       },
     });
+  }
+
+  /**
+   * Formate une période de dates de manière moderne et professionnelle
+   * @param startDate Date de début
+   * @param endDate Date de fin
+   * @returns Chaîne formatée (ex: "Janv. 2024 - Déc. 2024" ou "01/01/2024 - 31/12/2024")
+   */
+  formatPeriod(startDate: string | Date, endDate: string | Date): string {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Si c'est une année complète (01/01 au 31/12)
+    if (
+      start.getMonth() === 0 &&
+      start.getDate() === 1 &&
+      end.getMonth() === 11 &&
+      end.getDate() === 31 &&
+      start.getFullYear() === end.getFullYear()
+    ) {
+      return start.getFullYear().toString();
+    }
+
+    // Si c'est un mois complet
+    const lastDayOfMonth = new Date(
+      start.getFullYear(),
+      start.getMonth() + 1,
+      0,
+    ).getDate();
+    if (
+      start.getDate() === 1 &&
+      end.getDate() === lastDayOfMonth &&
+      start.getMonth() === end.getMonth() &&
+      start.getFullYear() === end.getFullYear()
+    ) {
+      return start.toLocaleDateString('fr-FR', {
+        month: 'long',
+        year: 'numeric',
+      });
+    }
+
+    // Format moderne pour les autres périodes
+    return `${start.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })} - ${end.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}`;
+  }
+
+  /**
+   * Obtient les infos de badge pour un statut
+   * @param value Valeur du statut (0, 1, ou autre)
+   * @param type Type de statut ('boolean' pour Oui/Non, 'triple' pour Oui/En cours/Non)
+   * @returns Objet avec la classe CSS et le texte à afficher
+   */
+  getStatusInfo(
+    value: Number | number | null | undefined,
+    type: 'boolean' | 'triple',
+  ): { class: string; text: string } {
+    if (value === null || value === undefined) {
+      return { class: 'status-non', text: 'Non' };
+    }
+
+    if (type === 'boolean') {
+      return {
+        class: value === 1 ? 'status-oui' : 'status-non',
+        text: value === 1 ? 'Oui' : 'Non',
+      };
+    } else {
+      // (0 = En cours, 1 = Oui, autre = Non)
+      if (value === 1) return { class: 'status-oui', text: 'Oui' };
+      if (value === 0) return { class: 'status-encours', text: 'En cours' };
+      return { class: 'status-non', text: 'Non' };
+    }
   }
 }

@@ -74,8 +74,10 @@ export class ComptabilisationComponent implements OnInit {
     { header: 'Crédit', field: 'credit' },
     { header: 'Montant', field: 'montant' },
     { header: 'Devise', field: 'devise' },
-    { header: 'Montant réf', field: 'montantbase' },
-    { header: 'Centre ana.', field: 'centreanalytique' }
+    { header: 'Taux', field: 'taux' },
+    { header: 'Montant réf', field: 'montantref' },
+    { header: 'Centre ana.', field: 'centreanalytique' },
+    { header: 'Centre ana.(2)', field: 'centreanalytiquesecond' }
   ];
 
   // Nouvelles propriétés
@@ -497,6 +499,188 @@ export class ComptabilisationComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  private getTypeCompte(ecriture: any): string {
+      if (ecriture.tiers) {
+          return 'X';
+      }
+
+      if (ecriture.centreanalytique) {
+          return 'A';
+      }
+
+      return 'G';
+  }
+
+  private getSens(ecriture: any): string {
+      if (ecriture.debit > 0) {
+          return 'D';
+      }
+
+      return 'C';
+  }
+
+  private prepareSage1000Data(): any[] {
+    const result: any[] = [];
+    this.ecritures.forEach(ecriture => {
+        const hasAnalytique = !!ecriture.centreanalytique || !!ecriture.centreanalytiquesecond;
+        // Ligne G
+        result.push({
+            'Journal': ecriture.journal,
+            'Date': this.formatDateForExcel(ecriture.date_operation),
+            'Compte': ecriture.compte,
+            'Num piece': ecriture.num_piece,
+            'Reference': ecriture.ref_ecriture,
+            'Tiers': ecriture.tiers || '',
+            'Type compte': ecriture.tiers ? 'X' : 'G',
+            'Libellé': ecriture.libelle,
+            'Montant ref': ecriture.montantref,
+            'Montant devise': ecriture.montantdevise,
+            'Type de pièce': 'OD',
+            'Sens': ecriture.debit > 0 ? 'D' : 'C',
+            'Devise': ecriture.devise,
+            'Taux': ecriture.taux,
+            'Montant Debit': ecriture.debit,
+            'Montant credit': ecriture.credit,
+            'Centre analytique': '',
+            'Centre analytique 2': ''
+        });
+
+        // Ligne A
+        if (hasAnalytique) {
+            result.push({
+                'Journal': ecriture.journal,
+                'Date': this.formatDateForExcel(ecriture.date_operation),
+                'Compte': ecriture.compte,
+                'Num piece': ecriture.num_piece,
+                'Reference': ecriture.ref_ecriture,
+                'Tiers': ecriture.tiers || '',
+                'Type compte': 'A',
+                'Libellé': ecriture.libelle,
+                'Montant ref': ecriture.montantref,
+                'Montant devise': ecriture.montantdevise,
+                'Type de pièce': 'OD',
+                'Sens': ecriture.debit > 0 ? 'D' : 'C',
+                'Devise': ecriture.devise,
+                'Taux': ecriture.taux,
+                'Montant Debit': ecriture.debit,
+                'Montant credit': ecriture.credit,
+                'Centre analytique': ecriture.centreanalytique || '',
+                'Centre analytique 2': ecriture.centreanalytiquesecond || ''
+            });
+          }
+    });
+
+    return result;
+  }
+
+  exportSage1000() {
+    if (!this.ecritures.length) {
+      this.toastr.warning('Aucune écriture à exporter');
+      return;
+    }
+
+    const data = this.prepareSage1000Data();
+    this.excelService.exportRawData(data, 'sage1000_ecritures');
+  }
+
+  private formatDateX3(dateInput: string | Date): string {
+    const date = new Date(dateInput);
+    const jour = String(date.getDate()).padStart(2, '0');
+    const mois = String(date.getMonth() + 1).padStart(2, '0');
+    const annee = date.getFullYear();
+
+    return `${jour}${mois}${annee}`;
+  }
+
+  private prepareSageX3Data(): any[][] {
+    const rows: any[][] = [];
+    const groupes = this.ecritures.reduce((acc: any, ecriture: any) => {
+      const key = ecriture.num_piece;
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(ecriture);
+      return acc;
+    }, {});
+
+    Object.keys(groupes).forEach(numPiece => {
+      const lignes = groupes[numPiece];
+      const entete = lignes[0];
+
+      // Ligne G
+      rows.push([
+        'G',
+        'FF',
+        entete.num_piece,
+        entete.codesite,
+        entete.journal,
+        this.formatDateX3(entete.date_operation),
+        entete.ref_ecriture,
+        entete.devise,
+        entete.taux || 1,
+        'STDCO',
+        entete.libelle || ''
+      ]);
+
+      let numeroLigne = 1;
+      lignes.forEach((ecriture: any) => {
+        const montant =
+          Number(ecriture.debit) > 0
+            ? Number(ecriture.debit)
+            : Number(ecriture.credit);
+
+        const sens = Number(ecriture.debit) > 0 ? 1 : -1;
+
+        // Ligne D
+        rows.push([
+          'D',
+          numeroLigne,
+          1,
+          numeroLigne,
+          ecriture.codesite,
+          ecriture.tiers || '',
+          ecriture.compte,
+          '',
+          ecriture.libelle || '',
+          sens,
+          montant
+        ]);
+
+        // Ligne analytique
+        if (ecriture.centreanalytique || ecriture.centreanalytiquesecond) {
+          rows.push([
+            'A',
+            numeroLigne,
+            'AXE1',
+            ecriture.centreanalytique || '',
+            'AXE2',
+            ecriture.centreanalytiquesecond || '',
+            0,
+            montant
+          ]);
+        }
+
+        numeroLigne++;
+
+      });
+
+    });
+
+    return rows;
+  }
+
+  exportSageX3() {
+    if (!this.ecritures.length) {
+      this.toastr.warning(
+        'Aucune écriture à exporter.'
+      );
+      return;
+    }
+
+    const rows = this.prepareSageX3Data();
+    this.excelService.exportSageX3(rows,'sage_x3_ecritures');
   }
 
 }
