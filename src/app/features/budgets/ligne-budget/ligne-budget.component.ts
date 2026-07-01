@@ -409,6 +409,7 @@ export class LigneBudgetComponent implements OnInit {
         next: (res: any) => {
           if (res.success) {
             const userDepartements: any[] = res.data[0];
+
             const allowedIds = new Set(
               userDepartements.map((item) => item.iddepartement),
             );

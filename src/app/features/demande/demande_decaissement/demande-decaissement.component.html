@@ -2,15 +2,29 @@
 <div class="row">
   <div class="col-12">
     <div
-      class="page-title-box d-sm-flex align-items-center justify-content-between"
+      class="page-title-premium d-sm-flex align-items-center justify-content-between"
     >
-      <h4 class="mb-sm-0">{{ title }}</h4>
+      <div class="d-flex align-items-center gap-3">
+        <div class="title-icon-premium">
+          <i class="ri-money-dollar-circle-fill"></i>
+        </div>
+        <div>
+          <h4 class="mb-0 title-premium">{{ title }}</h4>
+          <span class="title-subtitle-premium"
+            >Gestion des demandes de décaissement</span
+          >
+        </div>
+      </div>
       <div class="page-title-right">
-        <ol class="breadcrumb m-0">
+        <ol class="breadcrumb-premium m-0">
           <li class="breadcrumb-item">
-            <a href="javascript: void(0);">Données de base</a>
+            <a href="javascript: void(0);">
+              <i class="ri-home-4-line me-1"></i> Données de base
+            </a>
           </li>
-          <li class="breadcrumb-item active">{{ title }}</li>
+          <li class="breadcrumb-item active">
+            <i class="ri-file-text-line"></i>{{ title }}
+          </li>
         </ol>
       </div>
     </div>
@@ -20,1151 +34,1033 @@
 
 <div class="row">
   <div class="col-lg-12">
-    <div class="card" id="orderList">
-      <div class="card-header border-0">
-        <div class="row align-items-center gy-3">
-          <div class="col-sm-auto">
-            <div class="d-flex gap-1 flex-wrap">
-              <a
-                [routerLink]="root_edit"
-                class="btn btn-sm btn-soft-success"
-                id="create-btn"
-                ><i class="ri-add-line align-bottom me-1"></i> Créer
-              </a>
-              <button type="button" class="btn btn-sm btn-soft-info">
-                <i class="ri-file-download-line align-bottom me-1"></i> import
-              </button>
-              <button
-                class="btn btn-sm btn-soft-danger"
-                [disabled]=""
-                onClick="deleteMultiple()"
-              >
-                <i class="ri-delete-bin-2-line"></i>
-              </button>
-              <button type="button" class="btn btn-sm btn-info">
-                <i class="ri-refresh-fill align-bottom me-1"></i>actualiser
-              </button>
-            </div>
+    <div class="card-glass" id="demandeList">
+      <!-- Header -->
+      <div class="card-header-glass border-0">
+        <div
+          class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+        >
+          <div class="d-flex gap-2 flex-wrap">
+            <a
+              [routerLink]="root_edit"
+              class="btn-glass-primary"
+              id="create-btn"
+            >
+              <i class="ri-add-line align-bottom me-1"></i>Créer
+            </a>
+            <button type="button" class="btn-glass-secondary">
+              <i class="ri-file-download-line align-bottom me-1"></i> Import
+            </button>
+            <button class="btn-glass-danger" [disabled]="true">
+              <i class="ri-delete-bin-2-line"></i>
+            </button>
+            <button
+              type="button"
+              class="btn-glass-secondary"
+              (click)="loadAllDemandes()"
+            >
+              <i class="ri-refresh-fill align-bottom me-1"></i> Actualiser
+            </button>
           </div>
         </div>
       </div>
-      <div class="card-body border border-dashed border-end-0 border-start-0">
+
+      <!-- Filtres -->
+      <div class="card-body-glass pt-0">
         <form>
           <div class="row g-3">
             <div class="col-xxl-5 col-sm-6">
-              <div class="search-box">
+              <div class="search-glass">
+                <i class="ri-search-line"></i>
                 <input
                   type="text"
-                  class="form-control form-control-sm search"
+                  class="form-control search"
                   placeholder="Rechercher par code, libellé,..."
                   [formControl]="searchControl"
                 />
-                <i class="ri-search-line search-icon"></i>
               </div>
             </div>
-            <!--end col-->
           </div>
-          <!--end row-->
         </form>
       </div>
-      <div class="card-body pt-0 mt-3">
-        <div>
-          <div class="table-responsive table-card mb-1">
-            <table
-              class="table table-hover table-nowrap align-middle table-scroll table-container table-custom table-compact"
-              id="orderTable"
-            >
-              <thead class="text-muted table-light">
-                <tr class="text-uppercase">
-                  <th scope="col" style="width: 25px">
+
+      <!-- Tableau -->
+      <div class="card-body-glass pt-0">
+        <div class="table-responsive">
+          <table class="table table-modern align-middle" id="demandeTable">
+            <thead>
+              <tr>
+                <th style="width: 25px">
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      [checked]="allSelected"
+                    />
+                  </div>
+                </th>
+                <th>Code</th>
+                <th>Département</th>
+                <th>Type</th>
+                <th class="text-end">Montant</th>
+                <th>Devise</th>
+                <th>Date</th>
+                <th>Statut</th>
+                <th style="width: 120px">Action</th>
+              </tr>
+            </thead>
+            <tbody class="list form-check-all">
+              @for (item of entetesDmd; track item.iddemande) {
+                <tr [class.table-active]="isChecked(item.iddemande)">
+                  <th scope="row">
                     <div class="form-check">
                       <input
                         class="form-check-input"
+                        [checked]="isChecked(item.iddemande)"
+                        [(ngModel)]="selectedItems[$index]"
+                        (ngModelChange)="handleSelectOne(item, $event)"
                         type="checkbox"
-                        id="checkAll"
-                        [checked]="allSelected"
+                        [id]="'item-' + $index"
                       />
                     </div>
                   </th>
-                  <th class="sort" data-sort="id">Code</th>
-                  <th class="sort" data-sort="id">Département</th>
-                  <th class="sort" data-sort="customer_name">Type</th>
-                  <th class="sort" data-sort="status">Montant</th>
-                  <th class="sort" data-sort="customer_name">Devise</th>
-                  <th class="sort" data-sort="customer_name">Date</th>
-                  <th class="sort" data-sort="status">Statut</th>
-                  <th class="sort" data-sort="city">Action</th>
-                </tr>
-              </thead>
-              <tbody class="list form-check-all">
-                @for (item of entetesDmd; track item.iddemande) {
-                  <tr class="fs-12">
-                    <th scope="row">
-                      <div class="form-check">
-                        <input
-                          class="form-check-input"
-                          [checked]="isChecked(item.iddemande)"
-                          [(ngModel)]="selectedItems[$index]"
-                          (ngModelChange)="handleSelectOne(item, $event)"
-                          type="checkbox"
-                          name="itemGroup_{{ $index }}"
-                        />
-                      </div>
-                    </th>
-                    <td class="numero">
-                      <a href="#" class="fw-medium link-primary">{{
-                        item.codedemande
-                      }}</a>
-                    </td>
-                    <td class="departement">{{ item.departement?.libelle }}</td>
-                    <td class="typedemande">{{ item.typedemande! }}</td>
-                    <td
-                      class="montant text-end"
-                      *ngIf="item.devise!.codedevise != 'USD'"
-                    >
+                  <td>
+                    <span class="code-badge">{{ item.codedemande }}</span>
+                  </td>
+                  <td>{{ item.departement?.libelle || "-" }}</td>
+                  <td>{{ item.typedemande || "-" }}</td>
+                  <td class="text-end">
+                    @if (item.devise?.codedevise !== "USD") {
                       {{ formatCFA(getTotalDemande(item)) }}
-                    </td>
-                    <td
-                      class="montant text-end"
-                      *ngIf="item.devise!.codedevise == 'USD'"
-                    >
+                    } @else {
                       {{ formatNumber(getTotalDemande(item)) }}
-                    </td>
-                    <td class="devise">{{ item.devise!.codedevise }}</td>
-                    <td class="text-muted text-uppercase fs-11">
-                      {{ formatDateFR(item.datedemande!) }}
-                    </td>
-                    <td class="devise" *ngIf="item.statut! == 0">
-                      <span class="badge bg-primary-subtle text-primary">
-                        non valide
-                      </span>
-                    </td>
-                    <td class="devise text-primary" *ngIf="item.statut! == 1">
-                      <span class="badge bg-info-subtle text-info">
-                        en cours
-                      </span>
-                    </td>
-                    <td
-                      class="devise text-warning"
-                      *ngIf="item.statut! == 2 && item.decaisse! == 0"
+                    }
+                  </td>
+                  <td>{{ item.devise?.codedevise || "-" }}</td>
+                  <td class="text-muted small">
+                    {{ formatDateFR(item.datedemande || "") }}
+                  </td>
+                  <td>
+                    <span
+                      class="status-badge"
+                      [class]="
+                        getDemandeStatusClass(item.statut, item.decaisse)
+                      "
                     >
-                      <span class="badge bg-warning-subtle text-warning">
-                        a revoir
-                      </span>
-                    </td>
-                    <td
-                      class="devise text-warning"
-                      *ngIf="item.statut! == 2 && item.decaisse! == 1"
-                    >
-                      <span class="badge bg-warning-subtle text-warning">
-                        a revoir
-                      </span>
-                    </td>
-                    <td
-                      class="devise text-success"
-                      *ngIf="item.statut! == 3 && item.decaisse! == 0"
-                    >
-                      <span class="badge bg-success-subtle text-success">
-                        validée
-                      </span>
-                    </td>
-                    <td
-                      class="devise text-secondary"
-                      *ngIf="item.statut! == 3 && item.decaisse! == 1"
-                    >
-                      <span class="badge bg-secondary-subtle text-secondary">
-                        payée
-                      </span>
-                    </td>
-                    <td class="devise text-danger" *ngIf="item.statut! == 4">
-                      <span class="badge bg-danger-subtle text-danger">
-                        rejetée
-                      </span>
-                    </td>
-
-                    <td>
-                      <ul class="list-inline hstack gap-2 mb-0">
-                        <li
-                          class="list-inline-item edit"
-                          data-bs-toggle="tooltip"
-                          data-bs-trigger="hover"
-                          data-bs-placement="top"
-                          title="Edit"
+                      <span
+                        class="status-dot"
+                        [class]="
+                          getDemandeStatusClass(item.statut, item.decaisse)
+                        "
+                      ></span>
+                      {{ getDemandeStatusLabel(item.statut, item.decaisse) }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="actions-group">
+                      <button
+                        class="action-btn action-edit"
+                        [routerLink]="['edit', item.iddemande]"
+                        title="Modifier"
+                      >
+                        <i class="ri-pencil-line"></i>
+                      </button>
+                      <button
+                        class="action-btn action-view"
+                        (click)="openPiecesJointesModal(item)"
+                        title="Pièces jointes"
+                      >
+                        <i class="ri-attachment-2"></i>
+                        @if (getPiecesCount(item.iddemande) > 0) {
+                          <span class="badge-glass badge-count">{{
+                            getPiecesCount(item.iddemande)
+                          }}</span>
+                        }
+                      </button>
+                      <button
+                        class="action-btn action-delete"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteOrder"
+                        (click)="modalDelete(item)"
+                        [disabled]="item.statut === 3"
+                        title="Supprimer"
+                      >
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                      <div class="dropdown d-inline-block">
+                        <button
+                          class="action-btn action-more"
+                          type="button"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                          (click)="loadValidateurs(item)"
+                          title="Plus"
                         >
-                          <a
-                            [routerLink]="['edit', item.iddemande]"
-                            class="text-primary d-inline-block edit-item-btn"
-                          >
-                            <i class="ri-pencil-fill fs-16"></i>
-                          </a>
-                        </li>
-                        <li
-                          class="list-inline-item edit"
-                          data-bs-toggle="tooltip"
-                          data-bs-trigger="hover"
-                          data-bs-placement="top"
-                          title="Pièces jointes"
-                        >
-                          <div class="d-flex align-items-center gap-2">
-                            <!-- Icône avec badge de comptage -->
-                            <div class="position-relative">
-                              <button
-                                type="button"
-                                class="btn btn-link text-dark p-0 edit-item-btn"
-                                (click)="openPiecesJointesModal(item)"
+                          <i class="ri-more-2-fill"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                          @if (item.circuitExist === 1 && isValidateur()) {
+                            <li>
+                              <a
+                                class="dropdown-item"
+                                data-bs-toggle="modal"
+                                (click)="openValidationModal(item)"
+                                [attr.data-bs-target]="
+                                  '#validationModal' + $index
+                                "
                               >
-                                <i class="ri-attachment-2 fs-18 text-muted"></i>
-                                <span
-                                  *ngIf="getPiecesCount(item.iddemande) > 0"
-                                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary"
-                                  style="
-                                    font-size: 9px;
-                                    margin-top: -2px;
-                                    margin-left: -6px;
-                                  "
-                                >
-                                  {{ getPiecesCount(item.iddemande) }}
-                                </span>
-                              </button>
-                            </div>
-                          </div>
-                        </li>
-
-                        <li
-                          class="list-inline-item"
-                          data-bs-toggle="tooltip"
-                          data-bs-trigger="hover"
-                          data-bs-placement="top"
-                          title="Suppression non autorisée"
-                        >
-                          <button
-                            type="button"
-                            class="btn btn-link text-danger p-0"
-                            data-bs-toggle="modal"
-                            data-bs-target="#deleteOrder"
-                            (click)="modalDelete(item)"
-                            [disabled]="item.statut === 3"
-                            title="Suppression"
-                          >
-                            <i class="ri-delete-bin-5-fill fs-16"></i>
-                          </button>
-                        </li>
-
-                        <li class="list-inline-item">
-                          <div class="d-flex gap-1 align-items-center">
-                            <div class="dropdown">
-                              <button
-                                class="btn btn-link text-muted p-1 mt-n2 py-0 text-decoration-none fs-15"
-                                (click)="loadValidateurs(item)"
-                                data-bs-toggle="dropdown"
-                                aria-haspopup="true"
-                                aria-expanded="true"
+                                <i class="ri-eye-fill me-2"></i> Validation
+                              </a>
+                            </li>
+                          }
+                          @if (item.circuitExist === 1) {
+                            <li>
+                              <a
+                                class="dropdown-item"
+                                data-bs-toggle="modal"
+                                (click)="openValidateur(item)"
+                                data-bs-target="#historiqueModal"
                               >
-                                <i class="bx bx-dots-vertical-rounded"></i>
-                              </button>
+                                <i class="ri-time-line me-2"></i> Historique
+                              </a>
+                            </li>
+                          }
+                          <li>
+                            <a
+                              class="dropdown-item"
+                              data-bs-toggle="modal"
+                              (click)="openDetail(item)"
+                              data-bs-target="#detailBudget"
+                            >
+                              <i class="ri-currency-fill me-2"></i> Détail
+                              budget
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
 
-                              <div class="dropdown-menu dropdown-menu-end">
-                                <a
-                                  *ngIf="
-                                    item.circuitExist! == 1 && isValidateur()
-                                  "
-                                  class="dropdown-item"
-                                  data-bs-toggle="modal"
-                                  (click)="openValidationModal(item)"
-                                  [attr.data-bs-target]="
-                                    '#validationModal' + $index
-                                  "
-                                  ><i
-                                    class="ri-eye-fill align-bottom me-2 text-muted"
-                                  ></i
-                                  >Validation</a
-                                >
-                                <a
-                                  *ngIf="item.circuitExist! == 1"
-                                  class="dropdown-item"
-                                  data-bs-toggle="modal"
-                                  (click)="openValidateur(item)"
-                                  [attr.data-bs-target]="'#historiqueModal'"
-                                  ><i
-                                    class="ri-pencil-fill align-bottom me-2 text-muted"
-                                  ></i
-                                  >Historique de validation</a
-                                >
-                                <a
-                                  class="dropdown-item"
-                                  data-bs-toggle="modal"
-                                  (click)="openDetail(item)"
-                                  [attr.data-bs-target]="'#detailBudget'"
-                                  ><i
-                                    class="ri-currency-fill align-bottom me-2 text-muted"
-                                  ></i
-                                  >Detail budget</a
-                                >
-                                <div class="dropdown-divider"></div>
-                              </div>
-                            </div>
+                <!-- Modal Validation -->
+                <div
+                  class="modal fade"
+                  [attr.id]="'validationModal' + $index"
+                  tabindex="-1"
+                  aria-hidden="true"
+                >
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content shadow-lg border-0">
+                      <div
+                        class="modal-header"
+                        style="
+                          background: linear-gradient(
+                            135deg,
+                            #64748b 0%,
+                            #475569 100%
+                          );
+                          border: 0;
+                        "
+                      >
+                        <div class="d-flex align-items-center gap-2">
+                          <div class="icon-circle">
+                            <i class="ri-check-line text-white fs-5"></i>
                           </div>
-                        </li>
-                      </ul>
-                    </td>
-                  </tr>
-
-                  <!-- Modal -->
-                  <div
-                    class="modal fade"
-                    [attr.id]="'validationModal' + $index"
-                    tabindex="-1"
-                    aria-hidden="true"
-                  >
-                    <div class="modal-dialog modal-dialog-centered">
-                      <div class="modal-content">
-                        <div class="modal-header p-3 bg-info-subtle">
-                          <h5>Validation de la demande</h5>
-                          <button
-                            type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Close"
-                            id="close-modal"
-                          ></button>
+                          <h5 class="modal-title text-white fw-semibold">
+                            Validation - {{ item.codedemande }}
+                          </h5>
                         </div>
-                        <form [formGroup]="validForm" (ngSubmit)="onSubmit()">
-                          <div class="modal-body text-center">
-                            <!-- Décision -->
-                            <div
-                              class="d-flex flex-column align-items-center gap-3 mt-3"
+                        <button
+                          type="button"
+                          class="btn-close btn-close-white"
+                          data-bs-dismiss="modal"
+                          aria-label="Close"
+                        ></button>
+                      </div>
+                      <form [formGroup]="validForm" (ngSubmit)="onSubmit()">
+                        <div class="modal-body p-4">
+                          <input
+                            type="hidden"
+                            [value]="item.iddemande"
+                            formControlName="iddemande"
+                          />
+                          <div
+                            class="d-flex flex-column align-items-center gap-3 mt-3"
+                          >
+                            <label
+                              class="radio-line form-check form-check-sm form-radio-success w-75"
+                              [class.active]="
+                                validForm.get('decision')?.value === 'accepter'
+                              "
                             >
                               <input
-                                type="hidden"
-                                value="{{ item.iddemande }}"
-                                formControlName="iddemande"
+                                class="form-check-input"
+                                type="radio"
+                                formControlName="decision"
+                                value="accepter"
                               />
-
-                              <label
-                                class="radio-line form-check form-check-sm form-radio-success w-75"
-                                [class.active]="
-                                  validForm.get('decision')?.value ===
-                                  'accepter'
-                                "
+                              <span class="form-check-label fw-semibold"
+                                >Accepter</span
                               >
-                                <input
-                                  class="form-check-input"
-                                  type="radio"
-                                  formControlName="decision"
-                                  value="accepter"
-                                />
-                                <span class="form-check-label fw-semibold">
-                                  ✔ Accepter
-                                </span>
-                              </label>
-
-                              <label
-                                class="radio-line form-check form-check-sm form-radio-warning w-75"
-                                [class.active]="
-                                  validForm.get('decision')?.value ===
-                                  'complement'
-                                "
-                              >
-                                <input
-                                  class="form-check-input"
-                                  type="radio"
-                                  formControlName="decision"
-                                  value="complement"
-                                />
-                                <span class="form-check-label fw-semibold">
-                                  Complément d'information
-                                </span>
-                              </label>
-
-                              <label
-                                class="radio-line form-check form-check-sm form-radio-danger w-75"
-                                [class.active]="
-                                  validForm.get('decision')?.value === 'refuser'
-                                "
-                              >
-                                <input
-                                  class="form-check-input"
-                                  type="radio"
-                                  formControlName="decision"
-                                  value="refuser"
-                                />
-                                <span class="form-check-label fw-semibold">
-                                  ✖ Rejeter
-                                </span>
-                              </label>
-                            </div>
-
-                            <!-- Motif de refus -->
-                            <div
-                              *ngIf="
+                            </label>
+                            <label
+                              class="radio-line form-check form-check-sm form-radio-warning w-75"
+                              [class.active]="
                                 validForm.get('decision')?.value ===
-                                  'refuser' ||
-                                validForm.get('decision')?.value ===
-                                  'complement'
+                                'complement'
                               "
-                              class="mt-3 w-75 mx-auto"
                             >
+                              <input
+                                class="form-check-input"
+                                type="radio"
+                                formControlName="decision"
+                                value="complement"
+                              />
+                              <span class="form-check-label fw-semibold"
+                                >Complément d'information</span
+                              >
+                            </label>
+                            <label
+                              class="radio-line form-check form-check-sm form-radio-danger w-75"
+                              [class.active]="
+                                validForm.get('decision')?.value === 'refuser'
+                              "
+                            >
+                              <input
+                                class="form-check-input"
+                                type="radio"
+                                formControlName="decision"
+                                value="refuser"
+                              />
+                              <span class="form-check-label fw-semibold"
+                                >Rejeter</span
+                              >
+                            </label>
+                          </div>
+                          @if (
+                            validForm.get("decision")?.value === "refuser" ||
+                            validForm.get("decision")?.value === "complement"
+                          ) {
+                            <div class="mt-3 w-75 mx-auto">
+                              <label class="form-label small">Motif</label>
                               <select
                                 class="form-select form-select-sm bg-light border-0"
                                 formControlName="motif"
                               >
-                                <option value="null">Choisir le motif</option>
-                                @for (item of motifs; track $index) {
-                                  <option value="{{ item.idmotif }}">
-                                    {{ item.libellemotif }}
+                                <option [ngValue]="null">
+                                  Choisir le motif
+                                </option>
+                                @for (motif of motifs; track motif.idmotif) {
+                                  <option [value]="motif.idmotif">
+                                    {{ motif.libellemotif }}
                                   </option>
                                 }
                               </select>
-
+                              <label class="form-label small mt-2"
+                                >Commentaire</label
+                              >
                               <textarea
-                                class="form-control form-control-sm mt-3"
+                                class="form-control form-control-sm"
                                 formControlName="comment"
                                 rows="3"
-                                placeholder="Veuillez saisir le motif du refus"
-                              >
-                              </textarea>
-
-                              <div
-                                class="text-danger small mt-1"
-                                *ngIf="
-                                  validForm.get('motif')?.touched &&
-                                  validForm.get('motif')?.invalid
-                                "
-                              >
-                                Le motif est obligatoire (minimum 5 caractères).
-                              </div>
+                                placeholder="Commentaire"
+                              ></textarea>
+                              @if (
+                                validForm.get("motif")?.touched &&
+                                validForm.get("motif")?.invalid
+                              ) {
+                                <div class="text-danger small mt-1">
+                                  Le motif est obligatoire
+                                </div>
+                              }
                             </div>
+                          }
+                        </div>
+                        <div
+                          class="modal-footer border-0 p-4"
+                          style="background: transparent"
+                        >
+                          <div class="d-flex gap-3 justify-content-end w-100">
+                            <button
+                              type="button"
+                              class="btn-glass-cancel"
+                              data-bs-dismiss="modal"
+                            >
+                              <i class="ri-close-line me-1"></i> Annuler
+                            </button>
+                            <button
+                              type="submit"
+                              class="btn-glass-submit"
+                              [disabled]="validForm.invalid"
+                            >
+                              <i class="ri-send-plane-line me-1"></i> Envoyer
+                            </button>
                           </div>
-
-                          <div class="modal-footer">
-                            <div class="hstack gap-2 justify-content-end">
-                              <button
-                                type="button"
-                                class="btn btn-sm btn-light"
-                                data-bs-dismiss="modal"
-                              >
-                                Annuler
-                              </button>
-
-                              <button
-                                type="submit"
-                                class="btn btn-sm btn-success"
-                                [disabled]="validForm.invalid"
-                                data-bs-dismiss="modal"
-                              >
-                                Envoyer
-                              </button>
-                            </div>
-                          </div>
-                        </form>
-                      </div>
+                        </div>
+                      </form>
                     </div>
                   </div>
-                }
-                <tr *ngIf="loading">
-                  <td colspan="8">
-                    <div class="text-center py-4">
-                      <div class="spinner-border text-info"></div>
-                      <h6 class="mt-2">Chargement...</h6>
+                </div>
+              }
+              @if (loading) {
+                <tr>
+                  <td colspan="9">
+                    <div class="spinner-glass">
+                      <div
+                        class="spinner-border text-primary"
+                        role="status"
+                      ></div>
+                      <p class="mt-2 text-muted">Chargement...</p>
                     </div>
                   </td>
                 </tr>
-              </tbody>
-            </table>
-            <div class="noresult" *ngIf="entetesDmd.length == 0 && !loading">
-              <div class="text-center">
-                <h6 class="mt-2">Désole! Aucun resultat trouvé</h6>
-                <p class="text-muted">
-                  Désole il n' y aucune demande dans cette base
+              }
+            </tbody>
+          </table>
+        </div>
+        @if (entetesDmd.length === 0 && !loading) {
+          <div class="empty-state">
+            <i class="ri-inbox-2-line"></i>
+            <p>Aucune demande trouvée</p>
+            <span class="empty-hint"
+              >Aucune demande de décaissement disponible</span
+            >
+          </div>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (entetesDmd.length > 0) {
+        <div class="card-body-glass pt-0">
+          <div class="pagination-modern">
+            <div class="pagination-info">
+              <span>Affichage de</span>
+              <strong>{{ (currentPage - 1) * limit + 1 }}</strong>
+              <span>à</span>
+              <strong>{{
+                Math.min(currentPage * limit, entetesDmd.length)
+              }}</strong>
+              <span>sur</span> <strong>{{ entetesDmd.length }}</strong>
+              <span>demande(s)</span>
+            </div>
+            <div class="pagination-controls">
+              <select
+                class="form-select form-select-sm pagination-select"
+                [(ngModel)]="limit"
+                (ngModelChange)="changePage(1)"
+              >
+                <option [value]="5">5 par page</option>
+                <option [value]="10">10 par page</option>
+                <option [value]="20">20 par page</option>
+                <option [value]="50">50 par page</option>
+              </select>
+              <button
+                class="page-control"
+                [disabled]="currentPage === 1"
+                (click)="changePage(1)"
+                title="Première page"
+              >
+                <i class="ri-skip-back-line"></i>
+              </button>
+              <button
+                class="page-control"
+                [disabled]="currentPage === 1"
+                (click)="changePage(currentPage - 1)"
+                title="Précédent"
+              >
+                <i class="ri-arrow-left-s-line"></i>
+              </button>
+              @for (page of getPageNumbers(); track $index) {
+                @if (page !== -1) {
+                  <button
+                    class="page-number"
+                    [class.active]="page === currentPage"
+                    (click)="changePage(page)"
+                  >
+                    {{ page }}
+                  </button>
+                } @else {
+                  <span class="page-ellipsis">...</span>
+                }
+              }
+              <button
+                class="page-control"
+                [disabled]="currentPage === totalPages"
+                (click)="changePage(currentPage + 1)"
+                title="Suivant"
+              >
+                <i class="ri-arrow-right-s-line"></i>
+              </button>
+              <button
+                class="page-control"
+                [disabled]="currentPage === totalPages"
+                (click)="changePage(totalPages)"
+                title="Dernière page"
+              >
+                <i class="ri-skip-forward-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Modal suppression -->
+<div class="modal fade flip" id="deleteOrder" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content delete-modal-card">
+      <div class="modal-body text-center p-4">
+        <div class="delete-icon-wrapper mb-4">
+          <i class="ri-delete-bin-line"></i>
+        </div>
+        <h5 class="delete-modal-title">{{ titleMsg }}</h5>
+        <p class="delete-modal-message">{{ msgSup }}</p>
+        <div class="d-flex gap-3 justify-content-center">
+          <button class="delete-btn-cancel" data-bs-dismiss="modal">
+            <i class="ri-close-line me-1"></i> Annuler
+          </button>
+          <button
+            class="delete-btn-confirm"
+            (click)="deleteConfirmed()"
+            data-bs-dismiss="modal"
+          >
+            <i class="ri-delete-bin-line me-1"></i> Supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Historique -->
+<div
+  class="modal fade flip"
+  id="historiqueModal"
+  tabindex="-1"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content shadow-lg border-0">
+      <div
+        class="modal-header"
+        style="
+          background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+          border: 0;
+        "
+      >
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-time-line text-white fs-5"></i>
+          </div>
+          <h5 class="modal-title text-white fw-semibold">
+            Historique de validation
+          </h5>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="table-responsive">
+          <table class="table table-modern align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th style="width: 40px">#</th>
+                <th>Circuit</th>
+                <th>Validateur</th>
+                <th>Statut</th>
+                <th>Motif</th>
+                <th>Commentaire</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (v of validateurs; track $index; let i = $index) {
+                <tr>
+                  <td class="text-center">{{ i + 1 }}</td>
+                  <td>{{ v.codecircuitvalidation || "-" }}</td>
+                  <td>{{ v.nom }} {{ v.prenom }}</td>
+                  <td>
+                    <span
+                      class="status-badge"
+                      [class]="getStatusInfo(v.decision?.toLowerCase()).class"
+                    >
+                      <span
+                        class="status-dot"
+                        [class]="getStatusInfo(v.decision?.toLowerCase()).class"
+                      ></span>
+                      {{ getStatusLabel(v.decision) }}
+                    </span>
+                  </td>
+                  <td>{{ v.libellemotif || "-" }}</td>
+                  <td>{{ v.commentaire || "Aucun" }}</td>
+                  <td>
+                    {{
+                      v.datevalidation
+                        ? (v.datevalidation | date: "dd/MM/yyyy HH:mm")
+                        : "-"
+                    }}
+                  </td>
+                </tr>
+              }
+              @if (validateurs.length === 0) {
+                <tr>
+                  <td colspan="7">
+                    <div class="empty-state">
+                      <i class="ri-user-unfollow-line"></i>
+                      <p>Aucun validateur</p>
+                      <span class="empty-hint"
+                        >Aucun validateur pour cette demande</span
+                      >
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer border-0 p-4" style="background: transparent">
+        <button type="button" class="btn-glass-cancel" data-bs-dismiss="modal">
+          <i class="ri-close-line me-1"></i> Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Détail budget -->
+<div class="modal fade" id="detailBudget" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content shadow-lg border-0">
+      <div
+        class="modal-header"
+        style="
+          background: linear-gradient(135deg, #405189 0%, #3b82f6 100%);
+          border: 0;
+        "
+      >
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-currency-fill text-white fs-5"></i>
+          </div>
+          <h5 class="modal-title text-white fw-semibold">Détail du budget</h5>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body p-4">
+        @if (detailBudgets) {
+          <div class="row g-3">
+            <div class="col-lg-3 col-sm-6 col-6">
+              <p class="text-muted mb-1 small text-uppercase fw-semibold">
+                Numéro demande
+              </p>
+              <h5 class="fs-14 mb-0">#{{ detailBudgets?.codedemande }}</h5>
+            </div>
+            <div class="col-lg-2 col-sm-6 col-6">
+              <p class="text-muted mb-1 small text-uppercase fw-semibold">
+                Date demande
+              </p>
+              <h5 class="fs-14 mb-0">
+                {{ formatDateFR(detailBudgets?.datedemande) }}
+              </h5>
+            </div>
+            <div class="col-lg-2 col-sm-6 col-6">
+              <p class="text-muted mb-1 small text-uppercase fw-semibold">
+                Montant
+              </p>
+              <h5 class="fs-14 mb-0">
+                {{ getMontantAffiche(detailBudgets?.totaldemande) }}
+                {{ detailBudgets.codedevise }}
+              </h5>
+            </div>
+            <div class="col-lg-3 col-sm-6 col-6">
+              <p class="text-muted mb-1 small text-uppercase fw-semibold">
+                Département
+              </p>
+              <h5 class="fs-14 mb-0 text-truncate">
+                {{ detailBudgets?.dept_lib }}
+              </h5>
+            </div>
+            <div class="col-lg-2 col-sm-6 col-6">
+              <p class="text-muted mb-1 small text-uppercase fw-semibold">
+                Payée
+              </p>
+              @if (detailBudgets?.decaisse == 1) {
+                <span class="badge-glass badge-success">Oui</span>
+              } @else {
+                <span class="badge-glass badge-warning">Non</span>
+              }
+            </div>
+            <div class="col-lg-12">
+              <div class="p-2">
+                <div class="hstack gap-3 flex-wrap">
+                  <div class="text-primary small">
+                    Code budget:
+                    {{ detailBudgets?.budget?.codebudget || "aucun" }}
+                  </div>
+                  <div class="vr"></div>
+                  <div class="text-muted small">
+                    Type:
+                    <span class="text-body fw-medium">{{
+                      detailBudgets?.budget?.typebudget || "aucun"
+                    }}</span>
+                  </div>
+                  <div class="vr"></div>
+                  <div class="text-muted small">
+                    Du:
+                    <span class="text-body fw-medium">{{
+                      formatDateFR(detailBudgets?.budget?.datedebut)
+                    }}</span>
+                  </div>
+                  <div class="text-muted small">
+                    au:
+                    <span class="text-body fw-medium">{{
+                      formatDateFR(detailBudgets?.budget?.datefin)
+                    }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-12">
+              <div class="table-responsive">
+                <table class="table table-modern align-middle mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Code budget</th>
+                      @if (detailBudgets.budget?.isanalytique === 1) {
+                        <th>Centre analytique</th>
+                      } @else {
+                        <th>Nature opération</th>
+                      }
+                      <th class="text-end">Prévision</th>
+                      <th class="text-end">Préengagé</th>
+                      <th class="text-end">Engagé</th>
+                      <th class="text-end">Decaissé</th>
+                      <th class="text-end">Disponible</th>
+                      <th class="text-end">Mt demande</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (det of detailBudgets?.details; track $index) {
+                      <tr>
+                        <td>{{ det?.codebudgetaire || "-" }}</td>
+                        @if (detailBudgets.budget?.isanalytique === 1) {
+                          <td>{{ det?.centre_lib || "-" }}</td>
+                        } @else {
+                          <td>{{ det?.nature_lib || "-" }}</td>
+                        }
+                        <td class="text-end">
+                          {{ formatCFA(det?.prevision) }}
+                        </td>
+                        <td class="text-end">
+                          {{ formatCFA(det?.preengage) }}
+                        </td>
+                        <td class="text-end">{{ formatCFA(det?.engage) }}</td>
+                        <td class="text-end">{{ formatCFA(det?.realise) }}</td>
+                        <td class="text-end">
+                          <span class="me-2">{{
+                            formatCFA(
+                              calculateSoldeBudget(
+                                det?.prevision,
+                                det?.engage,
+                                det?.preengage,
+                                det?.realise
+                              )
+                            )
+                          }}</span>
+                          @if (
+                            calculateSoldeBudget(
+                              det?.prevision,
+                              det?.engage,
+                              det?.preengage,
+                              det?.realise
+                            ) < (det?.montant_ref || 0)
+                          ) {
+                            <span
+                              class="badge-glass badge-danger"
+                              style="
+                                width: 10px;
+                                height: 10px;
+                                border-radius: 50%;
+                                display: inline-block;
+                              "
+                            ></span>
+                          } @else {
+                            <span
+                              class="badge-glass badge-success"
+                              style="
+                                width: 10px;
+                                height: 10px;
+                                border-radius: 50%;
+                                display: inline-block;
+                              "
+                            ></span>
+                          }
+                        </td>
+                        <td class="text-end">
+                          <span class="badge-glass badge-success">{{
+                            formatCFA(det?.montant_ref)
+                          }}</span>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <div class="empty-state">
+            <i class="ri-inbox-2-line"></i>
+            <p>Pas de budget pour cette demande</p>
+          </div>
+        }
+      </div>
+      <div class="modal-footer border-0 p-4" style="background: transparent">
+        <button type="button" class="btn-glass-cancel" data-bs-dismiss="modal">
+          <i class="ri-close-line me-1"></i> Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Pièces Jointes -->
+<div
+  class="modal fade"
+  [class.show]="modalPJVisible"
+  [style.display]="modalPJVisible ? 'block' : 'none'"
+  id="piecesJointesModal"
+  tabindex="-1"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content shadow-lg border-0">
+      <div
+        class="modal-header"
+        style="
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          border: 0;
+        "
+      >
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-attachment-2 text-white fs-5"></i>
+          </div>
+          <h5 class="modal-title text-white fw-semibold">
+            Pièces jointes - {{ selectedDemandePJ?.codedemande }}
+          </h5>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          (click)="closePiecesJointesModal()"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body p-4">
+        <!-- Zone d'upload -->
+        <div
+          class="upload-area mb-4 p-3 border border-dashed rounded-3"
+          style="
+            background: rgba(16, 185, 129, 0.05);
+            border-color: rgba(16, 185, 129, 0.2);
+          "
+        >
+          <div
+            class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+          >
+            <div class="d-flex align-items-center gap-3">
+              <i class="ri-upload-cloud-2-line fs-1" style="color: #10b981"></i>
+              <div>
+                <h6 class="mb-0">Ajouter des fichiers</h6>
+                <p class="text-muted small mb-0">
+                  PDF, images, Excel, CSV (max 10MB)
                 </p>
               </div>
             </div>
-          </div>
-          <div class="d-flex justify-content-end">
-            <div class="pagination-wrap hstack gap-2">
+            <div>
+              <input
+                type="file"
+                #fileInput
+                multiple
+                (change)="onFilesSelected($event)"
+                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
+                class="d-none"
+              />
               <button
-                [disabled]="currentPage == 1"
-                (click)="changePage(currentPage - 1)"
-                class="btn btn-sm btn-soft-primary pagination-prev"
+                type="button"
+                class="btn-glass-success btn-sm"
+                (click)="fileInput.click()"
+                [disabled]="pjUploading"
               >
-                Précédent
-              </button>
-              <ul class="pagination listjs-pagination mb-0">
-                Page
-                {{
-                  currentPage
-                }}
-                /
-                {{
-                  totalPages
-                }}
-              </ul>
-              <button
-                [disabled]="currentPage == totalPages"
-                (click)="changePage(currentPage + 1)"
-                class="btn btn-sm btn-soft-primary pagination-next"
-              >
-                Suivant
+                <i class="ri-add-line me-1"></i> Choisir des fichiers
               </button>
             </div>
           </div>
-        </div>
-
-        <!-- Modal -->
-        <div
-          class="modal fade flip"
-          id="deleteOrder"
-          tabindex="-1"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-body p-5 text-center">
-                <div class="mt-4 text-center">
-                  <h4>{{ titleMsg }}</h4>
-                  <p class="text-muted fs-15 mb-4">{{ msgSup }}</p>
-                  <div class="hstack gap-2 justify-content-center remove">
-                    <button
-                      class="btn btn-sm btn-link link-success fw-medium text-decoration-none"
-                      id="deleteRecord-close"
-                      data-bs-dismiss="modal"
-                    >
-                      <i class="ri-close-line me-1 align-middle"></i> annuler
-                    </button>
-                    <button
-                      class="btn btn-sm btn-danger"
-                      (click)="deleteConfirmed()"
-                      id="delete-record"
-                    >
-                      Oui, supprimer
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!--end modal -->
-
-        <!-- Modal Circuit validateurs -->
-        <div
-          class="modal fade flip"
-          [attr.id]="'historiqueModal'"
-          tabindex="-1"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-              <div class="modal-header bg-info-subtle">
-                <button
-                  type="button"
-                  class="btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                  id="close-modal"
-                ></button>
-              </div>
-              <div class="modal-body">
-                <div class="table-responsive">
-                  <table
-                    class="table table-sm align-middle table-nowrap table-container table-custom"
-                  >
-                    <thead class="table-light">
-                      <tr>
-                        <th>#</th>
-                        <th>Circuit</th>
-                        <th>Validateur</th>
-                        <th>Statut</th>
-                        <th>Motif</th>
-                        <th>Commentaire</th>
-                        <th>Date</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <!-- ROLES LIST -->
-                      <tr
-                        class="role-row fs-12"
-                        *ngFor="let v of validateurs; let i = index"
-                      >
-                        <td>{{ i + 1 }}</td>
-                        <td>{{ v.codecircuitvalidation }}</td>
-                        <td>{{ v.nom }} {{ v.prenom }}</td>
-                        <td>
-                          <span
-                            class="badge bg-success"
-                            *ngIf="v.decision === 'approuve'"
-                          >
-                            Validé
-                          </span>
-                          <span
-                            class="badge bg-warning"
-                            *ngIf="v.decision === 'en attente'"
-                          >
-                            En attente
-                          </span>
-                          <span
-                            class="badge bg-secondary"
-                            *ngIf="v.decision === 'revoir'"
-                          >
-                            Complément d'info
-                          </span>
-                          <span
-                            class="badge bg-danger"
-                            *ngIf="v.decision === 'rejete'"
-                          >
-                            Rejeté
-                          </span>
-                        </td>
-                        <td *ngIf="v.libellemotif">{{ v.libellemotif }}</td>
-                        <td *ngIf="!v.libellemotif">aucun</td>
-                        <td *ngIf="v.commentaire">{{ v.commentaire }}</td>
-                        <td *ngIf="!v.commentaire">aucun commentaire</td>
-                        <td *ngIf="!v.datevalidation">aucune</td>
-                        <td *ngIf="v.datevalidation">
-                          {{
-                            v.datevalidation!
-                              ? (v.datevalidation | date: "dd-MM-yyyy HH:mm")
-                              : "-"
-                          }}
-                        </td>
-                      </tr>
-                      <tr *ngIf="validateurs.length === 0">
-                        <td colspan="6" class="text-center text-muted">
-                          Aucun validateur trouvé
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!--end modal -->
-
-        <!-- Modal Detail budget -->
-        <div
-          class="modal fade"
-          [attr.id]="'detailBudget'"
-          tabindex="-1"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-              <div class="modal-header bg-info-subtle">
-                <button
-                  type="button"
-                  class="btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                  id="close-modal"
-                ></button>
-              </div>
-              <div class="modal-body">
-                <div class="row g-3" *ngIf="detailBudgets">
-                  <div class="col-lg-3 col-sm-3 col-4">
-                    <p class="text-muted mb-2 text-uppercase fw-semibold">
-                      Numero demande
-                    </p>
-                    <h5 class="fs-14 mb-0">
-                      #<span id="invoice-no">{{
-                        detailBudgets?.codedemande
-                      }}</span>
-                    </h5>
-                  </div>
-                  <!--end col-->
-                  <div class="col-lg-2 col-sm-2 col-4">
-                    <p class="text-muted mb-2 text-uppercase fw-semibold">
-                      Date demande
-                    </p>
-                    <h5 class="fs-14 mb-0">
-                      <span id="invoice-date">{{
-                        formatDateFR(detailBudgets?.datedemande)
-                      }}</span>
-                    </h5>
-                  </div>
-                  <!--end col-->
-                  <div class="col-lg-2 col-sm-2 col-4">
-                    <p class="text-muted mb-2 text-uppercase fw-semibold">
-                      Montant
-                    </p>
-                    <h5 class="fs-14 mb-0">
-                      <span id="total-amount"
-                        >{{ getMontantAffiche(detailBudgets?.totaldemande) }}
-                      </span>
-                      {{ detailBudgets.codedevise }}
-                    </h5>
-                  </div>
-                  <!--end col-->
-                  <div class="col-lg-4 col-sm-4 col-4">
-                    <p class="text-muted mb-2 text-uppercase fw-semibold">
-                      Département
-                    </p>
-                    <h5 class="fs-14 mb-0">
-                      <span id="total-amount"
-                        >{{ detailBudgets?.dept_lib }}
-                      </span>
-                    </h5>
-                  </div>
-                  <!--end col-->
-                  <div class="col-lg-1 col-sm-1 col-4">
-                    <p class="text-muted mb-2 text-uppercase fw-semibold">
-                      Payée
-                    </p>
-                    <span
-                      *ngIf="detailBudgets?.decaisse == 1"
-                      class="badge bg-success-subtle text-success fs-11"
-                      id="payment-status"
-                    >
-                      Oui
-                    </span>
-                    <span
-                      *ngIf="detailBudgets?.decaisse == 0"
-                      class="badge bg-warning-subtle text-warning fs-11"
-                      id="payment-status"
-                    >
-                      Non
-                    </span>
-                  </div>
-                  <!--end col-->
-                  <div class="col-lg-12 col-sm-12 col-12">
-                    <div class="d-flex">
-                      <div class="flex-grow-1 p-2">
-                        <div class="hstack gap-3 flex-wrap">
-                          <div class="text-primary d-block">
-                            Code budget :
-                            {{ detailBudgets?.budget?.codebudget || "aucun" }}
-                          </div>
-                          <div class="vr"></div>
-                          <div class="text-muted">
-                            Type :
-                            <span class="text-body fw-medium"
-                              >{{
-                                detailBudgets?.budget?.typebudget || "aucun"
-                              }}
-                            </span>
-                          </div>
-                          <div class="vr"></div>
-                          <div class="text-muted">
-                            Du :
-                            <span class="text-body fw-medium">
-                              {{
-                                formatDateFR(detailBudgets?.budget?.datedebut)
-                              }}
-                            </span>
-                          </div>
-                          <div class="text-muted">
-                            au :
-                            <span class="text-body fw-medium">
-                              {{ formatDateFR(detailBudgets?.budget?.datefin) }}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-lg-12 col-sm-12 col-12">
-                    <div class="table-responsive">
-                      <table class="table mb-0">
-                        <thead class="align-middle">
-                          <tr class="table-active">
-                            <th scope="col">Code budget</th>
-                            <th
-                              scope="col"
-                              *ngIf="
-                                detailBudgets.budget?.isanalytique ||
-                                detailBudgets.budget?.isanalytique === 1
-                              "
-                            >
-                              Centre ana
-                            </th>
-                            <th
-                              scope="col"
-                              *ngIf="
-                                !detailBudgets.budget?.isanalytique ||
-                                detailBudgets.budget?.isanalytique !== 1
-                              "
-                            >
-                              Nature operation
-                            </th>
-                            <th scope="col">Prévision</th>
-                            <th scope="col">Préengagé</th>
-                            <th scope="col">Engagé</th>
-                            <th scope="col">Decaissé</th>
-                            <th scope="col">Disponible</th>
-                            <th scope="col">Mt demande</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @for (det of detailBudgets?.details; track $index) {
-                            <tr>
-                              <td class="text-start">
-                                {{ det?.codebudgetaire }}
-                              </td>
-                              <td
-                                class="text-start"
-                                *ngIf="
-                                  detailBudgets.budget?.isanalytique ||
-                                  detailBudgets.budget?.isanalytique === 1
-                                "
-                              >
-                                {{ det?.centre_lib }}
-                              </td>
-                              <td
-                                class="text-start"
-                                *ngIf="
-                                  !detailBudgets.budget?.isanalytique ||
-                                  detailBudgets.budget?.isanalytique !== 1
-                                "
-                              >
-                                {{ det?.nature_lib }}
-                              </td>
-                              <td class="text-end">
-                                {{ formatCFA(det?.prevision) }}
-                              </td>
-                              <td class="text-end">
-                                {{ formatCFA(det?.preengage) }}
-                              </td>
-                              <td class="text-end">
-                                {{ formatCFA(det?.engage) }}
-                              </td>
-                              <td class="text-end">
-                                {{ formatCFA(det?.realise) }}
-                              </td>
-                              <td class="text-end">
-                                <span class="me-2"
-                                  >{{
-                                    formatCFA(
-                                      calculateSoldeBudget(
-                                        det?.prevision,
-                                        det?.engage,
-                                        det?.preengage,
-                                        det?.realise
-                                      )
-                                    )
-                                  }}
-                                </span>
-                                <span
-                                  class="badge bg-danger rounded-circle"
-                                  style="width: 10px; height: 10px"
-                                  *ngIf="
-                                    calculateSoldeBudget(
-                                      det?.prevision,
-                                      det?.engage,
-                                      det?.preengage,
-                                      det?.realise
-                                    ) < det?.montant_ref
-                                  "
-                                >
-                                  <i class="me-2 mdi mdi-circle-medium"></i>
-                                </span>
-                                <span
-                                  class="badge bg-success rounded-circle"
-                                  style="width: 10px; height: 10px"
-                                  *ngIf="
-                                    calculateSoldeBudget(
-                                      det?.prevision,
-                                      det?.engage,
-                                      det?.preengage,
-                                      det?.realise
-                                    ) >= det?.montant_ref
-                                  "
-                                >
-                                  <i class="me-2 mdi mdi-circle-medium"></i>
-                                </span>
-                              </td>
-                              <td class="text-end">
-                                <span
-                                  class="badge bg-success-subtle text-success"
-                                  style="width: 80px; height: 20px"
-                                >
-                                  {{ formatCFA(det?.montant_ref) }}
-                                </span>
-                              </td>
-                            </tr>
-                          }
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-                <div class="row g-3" *ngIf="!detailBudgets">
-                  <div class="col-lg-12 col-sm-12 col-12">
-                    <p class="text-muted mb-2 text-uppercase fw-semibold">
-                      Pas de budget sur cette demande
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="modal-footer">
-                <div class="hstack gap-2 justify-content-end">
-                  <div class="d-flex gap-2">
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-light"
-                      data-bs-dismiss="modal"
-                    >
-                      Fermer
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!--end modal -->
-
-          <!-- Spinner global -->
-          <div
-            *ngIf="loading"
-            class="position-fixed top-50 start-50 translate-middle"
-            style="z-index: 1051"
-          >
-            <div
-              class="spinner-border text-primary"
-              role="status"
-              style="width: 3rem; height: 3rem"
-            >
-              <span class="visually-hidden">Chargement...</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Modal Pièces Jointes - Version corrigée -->
-        <div
-          class="modal fade"
-          [class.show]="modalPJVisible"
-          [style.display]="modalPJVisible ? 'block' : 'none'"
-          id="piecesJointesModal"
-          tabindex="-1"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-              <div class="modal-header bg-primary-subtle">
-                <div class="d-flex align-items-center gap-2">
-                  <i class="ri-attachment-2 fs-20 text-primary"></i>
-                  <h5 class="modal-title">
-                    Pièces jointes - {{ selectedDemandePJ?.codedemande }}
-                  </h5>
-                </div>
-                <button
-                  type="button"
-                  class="btn-close"
-                  (click)="closePiecesJointesModal()"
-                  aria-label="Close"
-                ></button>
-              </div>
-
-              <div class="modal-body">
-                <!-- Zone d'upload -->
-                <div
-                  class="upload-area mb-4 p-3 border border-dashed rounded-3 bg-light"
-                >
+          @if (selectedFiles.length > 0) {
+            <div class="mt-3">
+              <div class="d-flex flex-wrap gap-2">
+                @for (file of selectedFiles; track $index; let i = $index) {
                   <div
-                    class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+                    class="file-preview bg-white rounded p-2 shadow-sm"
+                    style="border: 1px solid rgba(16, 185, 129, 0.1)"
                   >
-                    <div class="d-flex align-items-center gap-3">
-                      <i class="ri-upload-cloud-2-line fs-1 text-primary"></i>
-                      <div>
-                        <h6 class="mb-0">Ajouter des fichiers</h6>
-                        <p class="text-muted small mb-0">
-                          PDF, images, Excel, CSV (max 10MB)
-                        </p>
+                    <div class="d-flex align-items-center gap-2">
+                      <i class="ri-file-line fs-4 text-secondary"></i>
+                      <div class="flex-grow-1">
+                        <small
+                          class="fw-medium d-block text-truncate"
+                          style="max-width: 150px"
+                          >{{ file.name }}</small
+                        >
+                        <small class="text-muted"
+                          >{{ file.size / 1024 | number: "1.0-0" }} KB</small
+                        >
                       </div>
-                    </div>
-                    <div>
-                      <input
-                        type="file"
-                        #fileInput
-                        multiple
-                        (change)="onFilesSelected($event)"
-                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
-                        class="d-none"
-                      />
                       <button
-                        type="button"
-                        class="btn btn-primary btn-sm"
-                        (click)="fileInput.click()"
-                        [disabled]="pjUploading"
+                        class="btn btn-sm btn-link text-danger p-0"
+                        (click)="removeSelectedFile(i)"
                       >
-                        <i class="ri-add-line me-1"></i>
-                        Choisir des fichiers
+                        <i class="ri-close-line"></i>
                       </button>
                     </div>
                   </div>
-
-                  <!-- Aperçu des fichiers sélectionnés -->
-                  <div *ngIf="selectedFiles.length > 0" class="mt-3">
-                    <div class="d-flex flex-wrap gap-2">
-                      <div
-                        *ngFor="let file of selectedFiles; let i = index"
-                        class="file-preview bg-white rounded p-2 shadow-sm"
-                      >
-                        <div class="d-flex align-items-center gap-2">
-                          <i class="ri-file-line fs-4 text-secondary"></i>
-                          <div class="flex-grow-1">
-                            <small
-                              class="fw-medium d-block text-truncate"
-                              style="max-width: 150px"
-                              >{{ file.name }}</small
-                            >
-                            <small class="text-muted"
-                              >{{
-                                file.size / 1024 | number: "1.0-0"
-                              }}
-                              KB</small
-                            >
-                          </div>
-                          <button
-                            class="btn btn-sm btn-link text-danger p-0"
-                            (click)="removeSelectedFile(i)"
-                          >
-                            <i class="ri-close-line"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="mt-2 text-end">
-                      <button
-                        class="btn btn-sm btn-success"
-                        (click)="uploadPieces()"
-                        [disabled]="pjUploading"
-                      >
-                        <span
-                          *ngIf="pjUploading"
-                          class="spinner-border spinner-border-sm me-1"
-                        ></span>
-                        Uploader {{ selectedFiles.length }} fichier(s)
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Liste des pièces jointes -->
-                <div class="pieces-list">
-                  <div
-                    class="d-flex align-items-center justify-content-between mb-3"
-                  >
-                    <h6 class="mb-0">
-                      <i class="ri-file-list-line me-1"></i>
-                      Documents
-                      <span class="badge-doc-count">{{
-                        piecesJointes.length
-                      }}</span>
-                    </h6>
-
-                    <button
-                      *ngIf="piecesJointes.length > 0"
-                      type="button"
-                      class="btn-link-download"
-                      (click)="downloadAllFiles()"
-                      title="Télécharger toutes les pièces jointes"
-                    >
-                      <i class="ri-download-line"></i>
-                      <span>Tout télécharger</span>
-                      <span class="link-underline"></span>
-                    </button>
-                  </div>
-
-                  <div *ngIf="piecesJointesLoading" class="text-center py-4">
-                    <div
-                      class="spinner-border spinner-border-sm text-primary"
-                    ></div>
-                    <p class="mt-2 small">Chargement des pièces jointes...</p>
-                  </div>
-
-                  <div
-                    *ngIf="!piecesJointesLoading && piecesJointes.length === 0"
-                    class="text-center py-4 text-muted"
-                  >
-                    <i class="ri-folder-open-line fs-1"></i>
-                    <p class="mt-2">Aucune pièce jointe pour cette demande</p>
-                  </div>
-
-                  <div
-                    class="row g-2"
-                    *ngIf="!piecesJointesLoading && piecesJointes.length > 0"
-                  >
-                    <div class="col-12" *ngFor="let pj of piecesJointes">
-                      <div
-                        class="piece-item d-flex align-items-center justify-content-between p-2 border rounded-3 hover-shadow"
-                      >
-                        <div class="d-flex align-items-center gap-3">
-                          <div
-                            class="piece-icon text-center"
-                            style="width: 40px"
-                          >
-                            <i [class]="getFileIcon(pj)" class="fs-2"></i>
-                          </div>
-                          <div>
-                            <h6 class="mb-0 small fw-semibold">
-                              {{ pj.nomfichier }}
-                            </h6>
-                            <div class="d-flex gap-2 mt-1">
-                              <span
-                                class="badge bg-light text-muted"
-                                style="font-size: 10px"
-                              >
-                                {{ formatFileSize(pj.taille) }}
-                              </span>
-                              <span class="text-muted" style="font-size: 10px">
-                                {{ pj.createdat | date: "dd/MM/yyyy HH:mm" }}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="d-flex gap-1">
-                          <button
-                            class="btn btn-sm btn-soft-primary"
-                            (click)="downloadPiece(pj)"
-                            title="Télécharger"
-                          >
-                            <i class="ri-download-line"></i>
-                          </button>
-                          <button
-                            class="btn btn-sm btn-soft-danger"
-                            (click)="deletePiece(pj)"
-                            [disabled]="pjDeleting === pj.idpiecejointe"
-                            title="Supprimer"
-                          >
-                            <span
-                              *ngIf="pjDeleting === pj.idpiecejointe"
-                              class="spinner-border spinner-border-sm"
-                            ></span>
-                            <i
-                              *ngIf="pjDeleting !== pj.idpiecejointe"
-                              class="ri-delete-bin-line"
-                            ></i>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                }
               </div>
-
-              <div class="modal-footer">
+              <div class="mt-2 text-end">
                 <button
-                  type="button"
-                  class="btn btn-sm btn-light"
-                  (click)="closePiecesJointesModal()"
+                  class="btn-glass-success btn-sm"
+                  (click)="uploadPieces()"
+                  [disabled]="pjUploading"
                 >
-                  Fermer
+                  @if (pjUploading) {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                  }
+                  Uploader {{ selectedFiles.length }} fichier(s)
                 </button>
               </div>
             </div>
-          </div>
+          }
         </div>
 
-        <!-- Backdrop -->
-        <div
-          *ngIf="modalPJVisible"
-          class="modal-backdrop fade show"
+        <!-- Liste des pièces jointes -->
+        <div class="pieces-list-modal">
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <h6 class="mb-0 d-flex align-items-center gap-2">
+              <i class="ri-file-list-line"></i> Documents
+              <span class="badge-glass badge-count">{{
+                piecesJointes.length
+              }}</span>
+            </h6>
+            @if (piecesJointes.length > 0) {
+              <button
+                type="button"
+                class="btn-glass-success btn-sm"
+                (click)="downloadAllFiles()"
+                title="Télécharger toutes les pièces jointes"
+              >
+                <i class="ri-download-line me-1"></i> Tout télécharger
+              </button>
+            }
+          </div>
+          @if (piecesJointesLoading) {
+            <div class="text-center py-5">
+              <div class="spinner-glass">
+                <div class="spinner-border text-success" role="status"></div>
+                <p class="mt-2 text-muted">Chargement des pièces jointes...</p>
+              </div>
+            </div>
+          } @else if (piecesJointes.length === 0) {
+            <div class="text-center py-5 text-muted">
+              <div class="empty-state">
+                <i class="ri-folder-open-line fs-1"></i>
+                <p class="mt-2">Aucune pièce jointe pour cette demande</p>
+              </div>
+            </div>
+          } @else {
+            <div class="row g-3">
+              @for (pj of piecesJointes; track $index) {
+                <div class="col-md-6">
+                  <div
+                    class="piece-card-success p-3 rounded-3 border hover-shadow"
+                  >
+                    <div class="d-flex align-items-center gap-3">
+                      <div
+                        class="piece-icon-success text-center"
+                        style="width: 44px; height: 44px"
+                      >
+                        <i [class]="getFileIcon(pj)" class="fs-2"></i>
+                      </div>
+                      <div class="flex-grow-1 min-width-0">
+                        <h6 class="mb-1 small fw-semibold text-truncate">
+                          {{ pj.nomfichier }}
+                        </h6>
+                        <div class="d-flex gap-3 text-muted small">
+                          <span class="badge-glass">{{
+                            formatFileSize(pj.taille)
+                          }}</span
+                          ><span>{{
+                            pj.createdat | date: "dd/MM/yyyy HH:mm"
+                          }}</span>
+                        </div>
+                      </div>
+                      <div class="d-flex gap-1">
+                        <button
+                          class="btn-action-glass btn-view-success"
+                          (click)="downloadPiece(pj)"
+                          title="Télécharger"
+                        >
+                          <i class="ri-download-line"></i>
+                        </button>
+                        <button
+                          class="btn-action-glass btn-delete-success"
+                          (click)="deletePiece(pj)"
+                          [disabled]="pjDeleting === pj.idpiecejointe"
+                          title="Supprimer"
+                        >
+                          @if (pjDeleting === pj.idpiecejointe) {
+                            <span
+                              class="spinner-border spinner-border-sm"
+                            ></span>
+                          } @else {
+                            <i class="ri-delete-bin-line"></i>
+                          }
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+      <div class="modal-footer border-0 p-4" style="background: transparent">
+        <button
+          type="button"
+          class="btn-glass-cancel"
           (click)="closePiecesJointesModal()"
-        ></div>
+        >
+          <i class="ri-close-line me-1"></i> Fermer
+        </button>
       </div>
     </div>
-    <!--end col-->
   </div>
-  <!--end row-->
 </div>
+<div
+  *ngIf="modalPJVisible"
+  class="modal-backdrop fade show"
+  (click)="closePiecesJointesModal()"
+></div>

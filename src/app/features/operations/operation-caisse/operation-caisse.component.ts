@@ -299,7 +299,6 @@ export class OperationCaisseComponent implements OnInit {
       },
     });
   }
-
   creationOperation() {
     const modalRef = this.modalService.open(OperationModalComponent, {
       centered: true,
@@ -315,9 +314,7 @@ export class OperationCaisseComponent implements OnInit {
           this.create(data.operation, data.files);
         }
       })
-      .catch((err) => {
-        this.toastr.error("Erreur ", err);
-      });
+      .catch(() => {});
   }
 
   //Recuperer toutes les opérations

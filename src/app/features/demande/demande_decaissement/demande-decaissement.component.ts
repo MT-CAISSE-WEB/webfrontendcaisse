@@ -790,4 +790,100 @@ export class DemandeDecaissementComponent implements OnInit {
       },
     });
   }
+
+  // Récupère la classe CSS pour le statut de la demande
+  getDemandeStatusClass(
+    statut: number | null | undefined,
+    decaisse: number | null | undefined,
+  ): string {
+    if (statut === 0) return 'status-encours';
+    if (statut === 1) return 'status-encours';
+    if (statut === 2) return 'status-warning';
+    if (statut === 3 && decaisse === 0) return 'status-oui';
+    if (statut === 3 && decaisse === 1) return 'status-non';
+    if (statut === 4) return 'status-non';
+    return 'status-encours';
+  }
+
+  Math = Math;
+
+  // Récupère le libellé du statut
+  getDemandeStatusLabel(
+    statut: number | null | undefined,
+    decaisse: number | null | undefined,
+  ): string {
+    if (statut === 0) return 'Non validé';
+    if (statut === 1) return 'En cours';
+    if (statut === 2) return 'À revoir';
+    if (statut === 3 && decaisse === 0) return 'Validée';
+    if (statut === 3 && decaisse === 1) return 'Payée';
+    if (statut === 4) return 'Rejetée';
+    return 'Inconnu';
+  }
+
+  // Récupère la classe CSS pour le statut des validateurs
+  getStatusInfo(decision: string): { class: string } {
+    switch (decision) {
+      case 'approuve':
+      case 'validé':
+      case 'accepter':
+        return { class: 'status-oui' };
+      case 'revoir':
+      case 'complement':
+        return { class: 'status-warning' };
+      case 'rejete':
+      case 'refuser':
+        return { class: 'status-non' };
+      default:
+        return { class: 'status-encours' };
+    }
+  }
+
+  // Récupère le libellé du statut
+  getStatusLabel(decision: string): string {
+    switch (decision) {
+      case 'approuve':
+      case 'validé':
+        return 'Validé';
+      case 'revoir':
+        return 'Complément';
+      case 'complement':
+        return "Complément d'info";
+      case 'rejete':
+      case 'refuser':
+        return 'Rejeté';
+      case 'en attente':
+        return 'En attente';
+      default:
+        return decision || 'Inconnu';
+    }
+  }
+
+  // Génère les numéros de page pour la pagination
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxVisible = 5;
+    let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
+    let end = Math.min(this.totalPages, start + maxVisible - 1);
+
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    if (start > 1) {
+      pages.push(1);
+      if (start > 2) pages.push(-1); // Ellipsis
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (end < this.totalPages) {
+      if (end < this.totalPages - 1) pages.push(-1); // Ellipsis
+      pages.push(this.totalPages);
+    }
+
+    return pages;
+  }
 }
