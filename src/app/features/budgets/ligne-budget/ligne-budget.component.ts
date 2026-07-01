@@ -1522,7 +1522,7 @@ export class LigneBudgetComponent implements OnInit {
       idcentreanalytique: null,
 
       idbudget: this.selectedBudget!.idbudget,
-      iddepartement: l.iddepartement, // ✅ SOURCE GRID
+      iddepartement: l.iddepartement, // SOURCE GRID
       idnature: l.idnature,
 
       montantprevisiondept: 0,
@@ -1574,14 +1574,26 @@ export class LigneBudgetComponent implements OnInit {
       next: () => {
         this.getAllLigneBudgets();
         this.loading = false;
-
+        const message =
+          this.actionModal === 'update'
+            ? 'Lignes budgétaires mises à jour avec succès'
+            : 'Lignes budgétaires créées avec succès';
         if (this.actionModal === 'update') {
           this.closeModal('showModal');
         }
+        this.toastr.success(message);
       },
       error: (err) => {
         this.msgErros = err.error?.error || 'Erreur serveur';
         this.loading = false;
+        const message =
+          this.actionModal === 'update'
+            ? 'Echec lors de la mise à jour des lignes budgétaires'
+            : 'Echec lors de la création des lignes budgétaires';
+        if (this.actionModal === 'update') {
+          this.closeModal('showModal');
+        }
+        this.toastr.error(this.msgErros || message);
       },
     });
   }

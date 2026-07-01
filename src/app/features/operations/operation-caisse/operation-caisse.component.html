@@ -161,15 +161,6 @@
             <table class="table table-modern align-middle" id="operationTable">
               <thead>
                 <tr>
-                  <th style="width: 40px">
-                    <div class="form-check">
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        id="checkAll"
-                      />
-                    </div>
-                  </th>
                   <th>Numéro</th>
                   <th>Opération</th>
                   <th class="text-end">Montant</th>
@@ -181,17 +172,6 @@
               <tbody>
                 @for (item of operations; track $index) {
                   <tr class="fs-12">
-                    <td>
-                      <div class="form-check">
-                        <input
-                          class="form-check-input"
-                          [checked]="isChecked(item.idoperation)"
-                          [(ngModel)]="selectedItems[$index]"
-                          (ngModelChange)="handleSelectOne(item, $event)"
-                          type="checkbox"
-                        />
-                      </div>
-                    </td>
                     <td>
                       <span class="code-badge">{{ item.codeoperation }}</span>
                     </td>
