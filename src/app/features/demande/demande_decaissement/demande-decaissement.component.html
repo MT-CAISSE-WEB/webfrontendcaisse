@@ -19,11 +19,11 @@
         <ol class="breadcrumb-premium m-0">
           <li class="breadcrumb-item">
             <a href="javascript: void(0);">
-              <i class="ri-home-4-line me-1"></i> Données de base
+              <i class="ri-home-4-line me-1"></i> Générales
             </a>
           </li>
           <li class="breadcrumb-item active">
-            <i class="ri-file-text-line"></i>{{ title }}
+            <i class="ri-file-text-line"></i> {{ title }}
           </li>
         </ol>
       </div>
@@ -48,12 +48,6 @@
             >
               <i class="ri-add-line align-bottom me-1"></i>Créer
             </a>
-            <button type="button" class="btn-glass-secondary">
-              <i class="ri-file-download-line align-bottom me-1"></i> Import
-            </button>
-            <button class="btn-glass-danger" [disabled]="true">
-              <i class="ri-delete-bin-2-line"></i>
-            </button>
             <button
               type="button"
               class="btn-glass-secondary"
@@ -90,15 +84,6 @@
           <table class="table table-modern align-middle" id="demandeTable">
             <thead>
               <tr>
-                <th style="width: 25px">
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      [checked]="allSelected"
-                    />
-                  </div>
-                </th>
                 <th>Code</th>
                 <th>Département</th>
                 <th>Type</th>
@@ -110,25 +95,20 @@
               </tr>
             </thead>
             <tbody class="list form-check-all">
-              @for (item of entetesDmd; track item.iddemande) {
+              @for (item of paginatedDemandes; track item.iddemande) {
                 <tr [class.table-active]="isChecked(item.iddemande)">
-                  <th scope="row">
-                    <div class="form-check">
-                      <input
-                        class="form-check-input"
-                        [checked]="isChecked(item.iddemande)"
-                        [(ngModel)]="selectedItems[$index]"
-                        (ngModelChange)="handleSelectOne(item, $event)"
-                        type="checkbox"
-                        [id]="'item-' + $index"
-                      />
-                    </div>
-                  </th>
+                  <!-- 2. Code de la demande -->
                   <td>
                     <span class="code-badge">{{ item.codedemande }}</span>
                   </td>
+
+                  <!-- 3. Département -->
                   <td>{{ item.departement?.libelle || "-" }}</td>
+
+                  <!-- 4. Type de demande -->
                   <td>{{ item.typedemande || "-" }}</td>
+
+                  <!-- 5. Montant (formaté selon la devise) -->
                   <td class="text-end">
                     @if (item.devise?.codedevise !== "USD") {
                       {{ formatCFA(getTotalDemande(item)) }}
@@ -136,10 +116,16 @@
                       {{ formatNumber(getTotalDemande(item)) }}
                     }
                   </td>
+
+                  <!-- 6. Devise -->
                   <td>{{ item.devise?.codedevise || "-" }}</td>
+
+                  <!-- 7. Date de la demande -->
                   <td class="text-muted small">
                     {{ formatDateFR(item.datedemande || "") }}
                   </td>
+
+                  <!-- 8. Statut (avec badge coloré) -->
                   <td>
                     <span
                       class="status-badge"
@@ -156,8 +142,11 @@
                       {{ getDemandeStatusLabel(item.statut, item.decaisse) }}
                     </span>
                   </td>
+
+                  <!-- 9. Actions -->
                   <td>
                     <div class="actions-group">
+                      <!-- Modifier -->
                       <button
                         class="action-btn action-edit"
                         [routerLink]="['edit', item.iddemande]"
@@ -165,6 +154,8 @@
                       >
                         <i class="ri-pencil-line"></i>
                       </button>
+
+                      <!-- Pièces jointes -->
                       <button
                         class="action-btn action-view"
                         (click)="openPiecesJointesModal(item)"
@@ -177,6 +168,8 @@
                           }}</span>
                         }
                       </button>
+
+                      <!-- Supprimer -->
                       <button
                         class="action-btn action-delete"
                         data-bs-toggle="modal"
@@ -187,6 +180,8 @@
                       >
                         <i class="ri-delete-bin-line"></i>
                       </button>
+
+                      <!-- Menu déroulant -->
                       <div class="dropdown d-inline-block">
                         <button
                           class="action-btn action-more"
@@ -199,6 +194,7 @@
                           <i class="ri-more-2-fill"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
+                          <!-- Validation (si circuit existe et utilisateur est validateur) -->
                           @if (item.circuitExist === 1 && isValidateur()) {
                             <li>
                               <a
@@ -213,6 +209,8 @@
                               </a>
                             </li>
                           }
+
+                          <!-- Historique (si circuit existe) -->
                           @if (item.circuitExist === 1) {
                             <li>
                               <a
@@ -225,6 +223,8 @@
                               </a>
                             </li>
                           }
+
+                          <!-- Détail budget -->
                           <li>
                             <a
                               class="dropdown-item"
@@ -249,26 +249,28 @@
                   tabindex="-1"
                   aria-hidden="true"
                 >
-                  <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content shadow-lg border-0">
-                      <div
-                        class="modal-header"
-                        style="
-                          background: linear-gradient(
-                            135deg,
-                            #64748b 0%,
-                            #475569 100%
-                          );
-                          border: 0;
-                        "
-                      >
-                        <div class="d-flex align-items-center gap-2">
+                  <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div
+                      class="modal-content shadow-lg border-0 modal-content-glass"
+                    >
+                      <!-- Header - Thème gris premium -->
+                      <div class="modal-header modal-header-theme-gray">
+                        <div class="d-flex align-items-center gap-3">
                           <div class="icon-circle">
                             <i class="ri-check-line text-white fs-5"></i>
                           </div>
-                          <h5 class="modal-title text-white fw-semibold">
-                            Validation - {{ item.codedemande }}
-                          </h5>
+                          <div>
+                            <h5 class="modal-title text-white fw-semibold">
+                              Validation - {{ item.codedemande }}
+                            </h5>
+                            <span
+                              class="text-white-50 small"
+                              style="font-size: 0.7rem; opacity: 0.8"
+                            >
+                              <i class="ri-time-line me-1"></i>
+                              {{ formatDateFR(item.datedemande || "") }}
+                            </span>
+                          </div>
                         </div>
                         <button
                           type="button"
@@ -277,6 +279,7 @@
                           aria-label="Close"
                         ></button>
                       </div>
+
                       <form [formGroup]="validForm" (ngSubmit)="onSubmit()">
                         <div class="modal-body p-4">
                           <input
@@ -284,98 +287,222 @@
                             [value]="item.iddemande"
                             formControlName="iddemande"
                           />
-                          <div
-                            class="d-flex flex-column align-items-center gap-3 mt-3"
-                          >
-                            <label
-                              class="radio-line form-check form-check-sm form-radio-success w-75"
-                              [class.active]="
-                                validForm.get('decision')?.value === 'accepter'
-                              "
-                            >
-                              <input
-                                class="form-check-input"
-                                type="radio"
-                                formControlName="decision"
-                                value="accepter"
-                              />
-                              <span class="form-check-label fw-semibold"
-                                >Accepter</span
-                              >
-                            </label>
-                            <label
-                              class="radio-line form-check form-check-sm form-radio-warning w-75"
-                              [class.active]="
-                                validForm.get('decision')?.value ===
-                                'complement'
-                              "
-                            >
-                              <input
-                                class="form-check-input"
-                                type="radio"
-                                formControlName="decision"
-                                value="complement"
-                              />
-                              <span class="form-check-label fw-semibold"
-                                >Complément d'information</span
-                              >
-                            </label>
-                            <label
-                              class="radio-line form-check form-check-sm form-radio-danger w-75"
-                              [class.active]="
-                                validForm.get('decision')?.value === 'refuser'
-                              "
-                            >
-                              <input
-                                class="form-check-input"
-                                type="radio"
-                                formControlName="decision"
-                                value="refuser"
-                              />
-                              <span class="form-check-label fw-semibold"
-                                >Rejeter</span
-                              >
-                            </label>
+
+                          <!-- Informations de la demande -->
+                          <div class="demande-info-card mb-4 p-3 rounded-3">
+                            <div class="row g-3">
+                              <div class="col-md-4">
+                                <span
+                                  class="text-muted small text-uppercase fw-semibold d-block"
+                                  >Code</span
+                                >
+                                <span class="fw-semibold">{{
+                                  item.codedemande
+                                }}</span>
+                              </div>
+                              <div class="col-md-4">
+                                <span
+                                  class="text-muted small text-uppercase fw-semibold d-block"
+                                  >Département</span
+                                >
+                                <span>{{
+                                  item.departement?.libelle || "-"
+                                }}</span>
+                              </div>
+                              <div class="col-md-4">
+                                <span
+                                  class="text-muted small text-uppercase fw-semibold d-block"
+                                  >Montant</span
+                                >
+                                <span class="fw-bold text-primary">
+                                  @if (item.devise?.codedevise !== "USD") {
+                                    {{ formatCFA(getTotalDemande(item)) }}
+                                  } @else {
+                                    {{ formatNumber(getTotalDemande(item)) }}
+                                  }
+                                  {{ item.devise?.codedevise || "" }}
+                                </span>
+                              </div>
+                            </div>
                           </div>
+
+                          <!-- Options de décision -->
+                          <div class="decision-options-container">
+                            <p
+                              class="text-muted small text-uppercase fw-semibold mb-3"
+                            >
+                              <i class="ri-git-commit-line me-1"></i> Choisissez
+                              votre décision
+                            </p>
+                            <div
+                              class="d-flex flex-column align-items-center gap-3"
+                            >
+                              <!-- Option Accepter -->
+                              <label
+                                class="radio-line radio-line-success w-100"
+                                [class.active]="
+                                  validForm.get('decision')?.value ===
+                                  'accepter'
+                                "
+                              >
+                                <input
+                                  class="form-check-input"
+                                  type="radio"
+                                  formControlName="decision"
+                                  value="accepter"
+                                />
+                                <div
+                                  class="d-flex align-items-center gap-3 w-100"
+                                >
+                                  <div class="radio-icon-wrapper success">
+                                    <i class="ri-check-line"></i>
+                                  </div>
+                                  <div>
+                                    <span
+                                      class="form-check-label fw-semibold d-block"
+                                      >Accepter</span
+                                    >
+                                    <small class="text-muted"
+                                      >Valider la demande de décaissement</small
+                                    >
+                                  </div>
+                                </div>
+                              </label>
+
+                              <!-- Option Complément d'information -->
+                              <label
+                                class="radio-line radio-line-warning w-100"
+                                [class.active]="
+                                  validForm.get('decision')?.value ===
+                                  'complement'
+                                "
+                              >
+                                <input
+                                  class="form-check-input"
+                                  type="radio"
+                                  formControlName="decision"
+                                  value="complement"
+                                />
+                                <div
+                                  class="d-flex align-items-center gap-3 w-100"
+                                >
+                                  <div class="radio-icon-wrapper warning">
+                                    <i class="ri-information-line"></i>
+                                  </div>
+                                  <div>
+                                    <span
+                                      class="form-check-label fw-semibold d-block"
+                                      >Complément d'information</span
+                                    >
+                                    <small class="text-muted"
+                                      >Demander des informations
+                                      supplémentaires</small
+                                    >
+                                  </div>
+                                </div>
+                              </label>
+
+                              <!-- Option Rejeter -->
+                              <label
+                                class="radio-line radio-line-danger w-100"
+                                [class.active]="
+                                  validForm.get('decision')?.value === 'refuser'
+                                "
+                              >
+                                <input
+                                  class="form-check-input"
+                                  type="radio"
+                                  formControlName="decision"
+                                  value="refuser"
+                                />
+                                <div
+                                  class="d-flex align-items-center gap-3 w-100"
+                                >
+                                  <div class="radio-icon-wrapper danger">
+                                    <i class="ri-close-line"></i>
+                                  </div>
+                                  <div>
+                                    <span
+                                      class="form-check-label fw-semibold d-block"
+                                      >Rejeter</span
+                                    >
+                                    <small class="text-muted"
+                                      >Refuser la demande de décaissement</small
+                                    >
+                                  </div>
+                                </div>
+                              </label>
+                            </div>
+                          </div>
+
+                          <!-- Champs Motif et Commentaire -->
                           @if (
                             validForm.get("decision")?.value === "refuser" ||
                             validForm.get("decision")?.value === "complement"
                           ) {
-                            <div class="mt-3 w-75 mx-auto">
-                              <label class="form-label small">Motif</label>
-                              <select
-                                class="form-select form-select-sm bg-light border-0"
-                                formControlName="motif"
+                            <div class="motif-section mt-4 p-3 rounded-3">
+                              <p
+                                class="text-muted small text-uppercase fw-semibold mb-3"
                               >
-                                <option [ngValue]="null">
-                                  Choisir le motif
-                                </option>
-                                @for (motif of motifs; track motif.idmotif) {
-                                  <option [value]="motif.idmotif">
-                                    {{ motif.libellemotif }}
-                                  </option>
-                                }
-                              </select>
-                              <label class="form-label small mt-2"
-                                >Commentaire</label
-                              >
-                              <textarea
-                                class="form-control form-control-sm"
-                                formControlName="comment"
-                                rows="3"
-                                placeholder="Commentaire"
-                              ></textarea>
-                              @if (
-                                validForm.get("motif")?.touched &&
-                                validForm.get("motif")?.invalid
-                              ) {
-                                <div class="text-danger small mt-1">
-                                  Le motif est obligatoire
+                                <i class="ri-file-text-line me-1"></i>
+                                Justification
+                              </p>
+                              <div class="row g-3">
+                                <div class="col-12">
+                                  <label class="form-label small fw-semibold"
+                                    >Motif</label
+                                  >
+                                  <select
+                                    class="form-select form-select-lg"
+                                    formControlName="motif"
+                                    [class.is-invalid]="
+                                      validForm.get('motif')?.touched &&
+                                      validForm.get('motif')?.invalid
+                                    "
+                                  >
+                                    <option [ngValue]="null" disabled>
+                                      -- Sélectionnez un motif --
+                                    </option>
+                                    @for (
+                                      motif of motifs;
+                                      track motif.idmotif
+                                    ) {
+                                      <option [value]="motif.idmotif">
+                                        {{ motif.libellemotif }}
+                                      </option>
+                                    }
+                                  </select>
+                                  @if (
+                                    validForm.get("motif")?.touched &&
+                                    validForm.get("motif")?.invalid
+                                  ) {
+                                    <div class="text-danger small mt-1">
+                                      <i class="ri-error-warning-line me-1"></i>
+                                      Le motif est obligatoire
+                                    </div>
+                                  }
                                 </div>
-                              }
+                                <div class="col-12">
+                                  <label class="form-label small fw-semibold"
+                                    >Commentaire</label
+                                  >
+                                  <textarea
+                                    class="form-control"
+                                    formControlName="comment"
+                                    rows="3"
+                                    placeholder="Expliquez votre décision..."
+                                    [class.is-invalid]="
+                                      validForm.get('comment')?.touched &&
+                                      validForm.get('comment')?.invalid
+                                    "
+                                  ></textarea>
+                                </div>
+                              </div>
                             </div>
                           }
                         </div>
+
+                        <!-- Footer -->
                         <div
                           class="modal-footer border-0 p-4"
                           style="background: transparent"
@@ -391,8 +518,13 @@
                             <button
                               type="submit"
                               class="btn-glass-submit"
-                              [disabled]="validForm.invalid"
+                              [disabled]="validForm.invalid || loading"
                             >
+                              @if (loading) {
+                                <span
+                                  class="spinner-border spinner-border-sm me-1"
+                                ></span>
+                              }
                               <i class="ri-send-plane-line me-1"></i> Envoyer
                             </button>
                           </div>
@@ -402,23 +534,10 @@
                   </div>
                 </div>
               }
-              @if (loading) {
-                <tr>
-                  <td colspan="9">
-                    <div class="spinner-glass">
-                      <div
-                        class="spinner-border text-primary"
-                        role="status"
-                      ></div>
-                      <p class="mt-2 text-muted">Chargement...</p>
-                    </div>
-                  </td>
-                </tr>
-              }
             </tbody>
           </table>
         </div>
-        @if (entetesDmd.length === 0 && !loading) {
+        @if (filteredDemandes.length === 0 && !loading) {
           <div class="empty-state">
             <i class="ri-inbox-2-line"></i>
             <p>Aucune demande trouvée</p>
@@ -438,9 +557,9 @@
               <strong>{{ (currentPage - 1) * limit + 1 }}</strong>
               <span>à</span>
               <strong>{{
-                Math.min(currentPage * limit, entetesDmd.length)
+                Math.min(currentPage * limit, filteredDemandes.length)
               }}</strong>
-              <span>sur</span> <strong>{{ entetesDmd.length }}</strong>
+              <span>sur</span> <strong>{{ filteredDemandes.length }}</strong>
               <span>demande(s)</span>
             </div>
             <div class="pagination-controls">
@@ -534,7 +653,7 @@
   </div>
 </div>
 
-<!-- Modal Historique -->
+<!-- Modal Historique (style externalisé) -->
 <div
   class="modal fade flip"
   id="historiqueModal"
@@ -543,13 +662,8 @@
 >
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content shadow-lg border-0">
-      <div
-        class="modal-header"
-        style="
-          background: linear-gradient(135deg, #64748b 0%, #475569 100%);
-          border: 0;
-        "
-      >
+      <div class="modal-header modal-header-theme-gray">
+        <!-- 🆕 Classe CSS -->
         <div class="d-flex align-items-center gap-2">
           <div class="icon-circle">
             <i class="ri-time-line text-white fs-5"></i>
@@ -634,17 +748,12 @@
   </div>
 </div>
 
-<!-- Modal Détail budget -->
+<!-- Modal Détail budget (style externalisé) -->
 <div class="modal fade" id="detailBudget" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-xl">
     <div class="modal-content shadow-lg border-0">
-      <div
-        class="modal-header"
-        style="
-          background: linear-gradient(135deg, #405189 0%, #3b82f6 100%);
-          border: 0;
-        "
-      >
+      <div class="modal-header modal-header-theme-blue">
+        <!-- 🆕 Classe CSS -->
         <div class="d-flex align-items-center gap-2">
           <div class="icon-circle">
             <i class="ri-currency-fill text-white fs-5"></i>
@@ -845,12 +954,12 @@
   tabindex="-1"
   aria-hidden="true"
 >
-  <div class="modal-dialog modal-dialog-centered modal-xl">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content shadow-lg border-0">
       <div
         class="modal-header"
         style="
-          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          background: linear-gradient(135deg, #3b82f6 0%, #405189 100%);
           border: 0;
         "
       >
@@ -858,31 +967,37 @@
           <div class="icon-circle">
             <i class="ri-attachment-2 text-white fs-5"></i>
           </div>
-          <h5 class="modal-title text-white fw-semibold">
-            Pièces jointes - {{ selectedDemandePJ?.codedemande }}
-          </h5>
+          <div>
+            <h5 class="modal-title text-white fw-semibold">Pièces jointes</h5>
+            <span class="text-white-50 small" *ngIf="selectedDemandePJ">
+              {{ selectedDemandePJ.codedemande }} -
+              {{ selectedDemandePJ.libelledemande }}
+            </span>
+          </div>
         </div>
         <button
           type="button"
           class="btn-close btn-close-white"
-          (click)="closePiecesJointesModal()"
+          data-bs-dismiss="modal"
           aria-label="Close"
+          (click)="closePiecesJointesModal()"
         ></button>
       </div>
+
       <div class="modal-body p-4">
         <!-- Zone d'upload -->
         <div
-          class="upload-area mb-4 p-3 border border-dashed rounded-3"
-          style="
-            background: rgba(16, 185, 129, 0.05);
-            border-color: rgba(16, 185, 129, 0.2);
-          "
+          class="upload-area mb-4 p-3 border border-dashed rounded-3 bg-light"
+          [class.drag-over]="isDragOver"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
         >
           <div
             class="d-flex align-items-center justify-content-between flex-wrap gap-3"
           >
             <div class="d-flex align-items-center gap-3">
-              <i class="ri-upload-cloud-2-line fs-1" style="color: #10b981"></i>
+              <i class="ri-upload-cloud-2-line fs-1 text-primary"></i>
               <div>
                 <h6 class="mb-0">Ajouter des fichiers</h6>
                 <p class="text-muted small mb-0">
@@ -901,22 +1016,22 @@
               />
               <button
                 type="button"
-                class="btn-glass-success btn-sm"
+                class="btn-glass-primary"
                 (click)="fileInput.click()"
                 [disabled]="pjUploading"
               >
-                <i class="ri-add-line me-1"></i> Choisir des fichiers
+                <i class="ri-add-line me-1"></i>
+                Choisir des fichiers
               </button>
             </div>
           </div>
+
+          <!-- Aperçu des fichiers sélectionnés -->
           @if (selectedFiles.length > 0) {
             <div class="mt-3">
               <div class="d-flex flex-wrap gap-2">
                 @for (file of selectedFiles; track $index; let i = $index) {
-                  <div
-                    class="file-preview bg-white rounded p-2 shadow-sm"
-                    style="border: 1px solid rgba(16, 185, 129, 0.1)"
-                  >
+                  <div class="file-pill bg-white rounded p-2 shadow-sm">
                     <div class="d-flex align-items-center gap-2">
                       <i class="ri-file-line fs-4 text-secondary"></i>
                       <div class="flex-grow-1">
@@ -932,6 +1047,7 @@
                       <button
                         class="btn btn-sm btn-link text-danger p-0"
                         (click)="removeSelectedFile(i)"
+                        title="Retirer"
                       >
                         <i class="ri-close-line"></i>
                       </button>
@@ -941,13 +1057,14 @@
               </div>
               <div class="mt-2 text-end">
                 <button
-                  class="btn-glass-success btn-sm"
+                  class="btn-glass-submit"
                   (click)="uploadPieces()"
                   [disabled]="pjUploading"
                 >
-                  @if (pjUploading) {
-                    <span class="spinner-border spinner-border-sm me-1"></span>
-                  }
+                  <span
+                    *ngIf="pjUploading"
+                    class="spinner-border spinner-border-sm me-2"
+                  ></span>
                   Uploader {{ selectedFiles.length }} fichier(s)
                 </button>
               </div>
@@ -956,89 +1073,88 @@
         </div>
 
         <!-- Liste des pièces jointes -->
-        <div class="pieces-list-modal">
-          <div class="d-flex align-items-center justify-content-between mb-4">
-            <h6 class="mb-0 d-flex align-items-center gap-2">
-              <i class="ri-file-list-line"></i> Documents
-              <span class="badge-glass badge-count">{{
+        <div class="pieces-list">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h6 class="mb-0">
+              <i class="ri-file-list-line me-1"></i>
+              Documents
+              <span class="badge-glass-primary">{{
                 piecesJointes.length
               }}</span>
             </h6>
-            @if (piecesJointes.length > 0) {
-              <button
-                type="button"
-                class="btn-glass-success btn-sm"
-                (click)="downloadAllFiles()"
-                title="Télécharger toutes les pièces jointes"
-              >
-                <i class="ri-download-line me-1"></i> Tout télécharger
-              </button>
-            }
+            <button
+              *ngIf="piecesJointes.length > 0"
+              type="button"
+              class="btn-glass-secondary"
+              (click)="downloadAllFiles()"
+              title="Télécharger toutes les pièces jointes"
+            >
+              <i class="ri-download-line me-1"></i> Tout télécharger
+            </button>
           </div>
+
           @if (piecesJointesLoading) {
-            <div class="text-center py-5">
-              <div class="spinner-glass">
-                <div class="spinner-border text-success" role="status"></div>
-                <p class="mt-2 text-muted">Chargement des pièces jointes...</p>
-              </div>
+            <div class="text-center py-4">
+              <div class="spinner-border spinner-border-sm text-primary"></div>
+              <p class="mt-2 small">Chargement des pièces jointes...</p>
             </div>
-          } @else if (piecesJointes.length === 0) {
-            <div class="text-center py-5 text-muted">
-              <div class="empty-state">
-                <i class="ri-folder-open-line fs-1"></i>
-                <p class="mt-2">Aucune pièce jointe pour cette demande</p>
-              </div>
+          }
+
+          @if (!piecesJointesLoading && piecesJointes.length === 0) {
+            <div class="text-center py-4 text-muted">
+              <i class="ri-folder-open-line fs-1"></i>
+              <p class="mt-2">Aucune pièce jointe pour ce budget</p>
             </div>
-          } @else {
-            <div class="row g-3">
-              @for (pj of piecesJointes; track $index) {
-                <div class="col-md-6">
+          }
+
+          @if (!piecesJointesLoading && piecesJointes.length > 0) {
+            <div class="row g-2">
+              @for (pj of piecesJointes; track $index; let i = $index) {
+                <div class="col-12">
                   <div
-                    class="piece-card-success p-3 rounded-3 border hover-shadow"
+                    class="piece-item d-flex align-items-center justify-content-between p-2 border rounded-3 hover-shadow"
                   >
                     <div class="d-flex align-items-center gap-3">
-                      <div
-                        class="piece-icon-success text-center"
-                        style="width: 44px; height: 44px"
-                      >
+                      <div class="piece-icon text-center" style="width: 40px">
                         <i [class]="getFileIcon(pj)" class="fs-2"></i>
                       </div>
-                      <div class="flex-grow-1 min-width-0">
-                        <h6 class="mb-1 small fw-semibold text-truncate">
+                      <div>
+                        <h6 class="mb-0 small fw-semibold">
                           {{ pj.nomfichier }}
                         </h6>
-                        <div class="d-flex gap-3 text-muted small">
-                          <span class="badge-glass">{{
-                            formatFileSize(pj.taille)
-                          }}</span
-                          ><span>{{
-                            pj.createdat | date: "dd/MM/yyyy HH:mm"
-                          }}</span>
+                        <div class="d-flex mt-1">
+                          <span
+                            class="badge-glass badge-glass-secondary"
+                            style="font-size: 10px"
+                          >
+                            {{ formatFileSize(pj.taille) }}
+                          </span>
                         </div>
                       </div>
-                      <div class="d-flex gap-1">
-                        <button
-                          class="btn-action-glass btn-view-success"
-                          (click)="downloadPiece(pj)"
-                          title="Télécharger"
-                        >
-                          <i class="ri-download-line"></i>
-                        </button>
-                        <button
-                          class="btn-action-glass btn-delete-success"
-                          (click)="deletePiece(pj)"
-                          [disabled]="pjDeleting === pj.idpiecejointe"
-                          title="Supprimer"
-                        >
-                          @if (pjDeleting === pj.idpiecejointe) {
-                            <span
-                              class="spinner-border spinner-border-sm"
-                            ></span>
-                          } @else {
-                            <i class="ri-delete-bin-line"></i>
-                          }
-                        </button>
-                      </div>
+                    </div>
+                    <div class="d-flex gap-1">
+                      <button
+                        class="btn-glass-primary btn-sm"
+                        (click)="downloadPiece(pj)"
+                        title="Télécharger"
+                      >
+                        <i class="ri-download-line"></i>
+                      </button>
+                      <button
+                        class="btn-glass-danger btn-sm"
+                        (click)="deletePiece(pj)"
+                        [disabled]="pjDeleting === pj.idpiecejointe"
+                        title="Supprimer"
+                      >
+                        <span
+                          *ngIf="pjDeleting === pj.idpiecejointe"
+                          class="spinner-border spinner-border-sm"
+                        ></span>
+                        <i
+                          *ngIf="pjDeleting !== pj.idpiecejointe"
+                          class="ri-delete-bin-line"
+                        ></i>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -1047,10 +1163,12 @@
           }
         </div>
       </div>
+
       <div class="modal-footer border-0 p-4" style="background: transparent">
         <button
           type="button"
           class="btn-glass-cancel"
+          data-bs-dismiss="modal"
           (click)="closePiecesJointesModal()"
         >
           <i class="ri-close-line me-1"></i> Fermer

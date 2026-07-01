@@ -1301,4 +1301,93 @@ export class EditDemandeComponent implements OnInit {
       },
     });
   }
+
+  // ============================================
+  // MÉTHODES À AJOUTER DANS LE COMPOSANT
+  // ============================================
+
+  // Propriétés
+  isDragOver = false;
+
+  /**
+   * Récupère la classe CSS du statut de la demande
+   */
+  getDemandeStatusClass(): string {
+    if (!this.demande) return 'status-encours';
+    const statut = this.demande.statut;
+    const decaisse = this.demande.decaisse;
+
+    if (statut === 0) return 'status-enattente';
+    if (statut === 1) return 'status-encours';
+    if (statut === 2) return 'status-warning';
+    if (statut === 3 && decaisse === 0) return 'status-oui';
+    if (statut === 3 && decaisse === 1) return 'status-non';
+    if (statut === 4) return 'status-non';
+    return 'status-encours';
+  }
+
+  /**
+   * Récupère le libellé du statut de la demande
+   */
+  getDemandeStatusLabel(): string {
+    if (!this.demande) return 'Non défini';
+    const statut = this.demande.statut;
+    const decaisse = this.demande.decaisse;
+
+    if (statut === 0) return 'En attente';
+    if (statut === 1) return 'En cours';
+    if (statut === 2) return 'À revoir';
+    if (statut === 3 && decaisse === 0) return 'Validée';
+    if (statut === 3 && decaisse === 1) return 'Payée';
+    if (statut === 4) return 'Rejetée';
+    return 'Inconnu';
+  }
+
+  /**
+   * Gestion du drag over pour les fichiers
+   */
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = true;
+  }
+
+  /**
+   * Gestion du drag leave pour les fichiers
+   */
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+  }
+
+  /**
+   * Gestion du drop de fichiers
+   */
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const newFiles = Array.from(files);
+      const allowedExtensions = [
+        '.pdf',
+        '.jpg',
+        '.jpeg',
+        '.png',
+        '.doc',
+        '.docx',
+        '.xls',
+        '.xlsx',
+        '.csv',
+      ];
+      const validFiles = newFiles.filter((file) => {
+        const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+        return allowedExtensions.includes(ext) && file.size <= 10 * 1024 * 1024;
+      });
+      this.uploadedFiles.push(...validFiles);
+    }
+  }
 }
