@@ -452,9 +452,10 @@ export class OprationJustifieeComponent implements OnInit {
   fillCaisseFromRetour(piece: any) {
     const caissesForm = this.operationForm.get('caisses') as FormArray;
 
+    // Trouver la caisse correspondante - caster en FormGroup
     const caisseForm = caissesForm.controls.find(
       (c: any) => c.value.idcaisse === piece.idcaisse,
-    );
+    ) as FormGroup;
 
     if (!caisseForm) {
       console.warn('Aucune caisse correspondante trouvée');
@@ -469,24 +470,9 @@ export class OprationJustifieeComponent implements OnInit {
       taux: taux,
       montantref: montant * taux,
     });
-  }
 
-  selectRetour(piece: any) {
-    const caissesForm = this.operationForm.get('caisses') as FormArray;
-    this.selectedRetour = piece;
-    this.operationForm.get('retourcaisse')?.setValue(true);
-    // sécurité : si les caisses ne sont pas encore chargées
-    if (!caissesForm || caissesForm.length === 0) {
-      console.warn('Caisses non chargées, chargement en cours...');
-
-      this.loadCaissesForm().subscribe(() => {
-        this.fillCaisseFromRetour(piece);
-      });
-      return;
-    }
-
-    //si déjà chargé
-    this.fillCaisseFromRetour(piece);
+    // Forcer le calcul du montant de référence
+    this.applyAutoCalcul(caisseForm);
   }
 
   //A la selection de la devise de justificatif
@@ -731,43 +717,43 @@ export class OprationJustifieeComponent implements OnInit {
   }
 
   //Selectionner le justificatif
-  selectJustificatif(piece: any) {
-    const justificatif = this.justificatifFiltered.find(
-      (j) => j.idjustificatifoperation === piece.idjustificatifoperation,
-    );
+  // selectJustificatif(piece: any) {
+  //   const justificatif = this.justificatifFiltered.find(
+  //     (j) => j.idjustificatifoperation === piece.idjustificatifoperation,
+  //   );
 
-    if (!justificatif) return;
-    this.loadDetailJustificatif(justificatif);
-  }
+  //   if (!justificatif) return;
+  //   this.loadDetailJustificatif(justificatif);
+  // }
 
-  dispatchDetail(_object: any) {
-    // Patch des champs simples
-    this.operationForm.patchValue({
-      tauxoperation: _object.justificatif.taux,
-      devisejustificatif: _object.justificatif.iddevise,
-      commentaire: _object.justificatif.commentaire,
-      datejustificatif: this.formatDateForInput(_object.justificatif.date),
-    });
+  // dispatchDetail(_object: any) {
+  //   // Patch des champs simples
+  //   this.operationForm.patchValue({
+  //     tauxoperation: _object.justificatif.taux,
+  //     devisejustificatif: _object.justificatif.iddevise,
+  //     commentaire: _object.justificatif.commentaire,
+  //     datejustificatif: this.formatDateForInput(_object.justificatif.date),
+  //   });
 
-    this.lignes.clear();
-    _object.details.forEach((l: any) => {
-      const ligneGroup = this.fb.group({
-        idligne: [l.iddetailsjustificatifoperation ?? null],
-        idnature: [l.idnature ?? null, Validators.required],
-        idcentreanalytique: [{ value: l.idcentreanalytique, disabled: true }],
-        idtiers: [{ value: l.idtiers ?? null, disabled: true }],
-        montantdetail: [
-          { value: l.montantdetail ?? '', disabled: false },
-          Validators.required,
-        ],
+  //   this.lignes.clear();
+  //   _object.details.forEach((l: any) => {
+  //     const ligneGroup = this.fb.group({
+  //       idligne: [l.iddetailsjustificatifoperation ?? null],
+  //       idnature: [l.idnature ?? null, Validators.required],
+  //       idcentreanalytique: [{ value: l.idcentreanalytique, disabled: true }],
+  //       idtiers: [{ value: l.idtiers ?? null, disabled: true }],
+  //       montantdetail: [
+  //         { value: l.montantdetail ?? '', disabled: false },
+  //         Validators.required,
+  //       ],
 
-        //centres propres à la ligne
-        centres: this.fb.control<any[]>([]),
-      });
+  //       //centres propres à la ligne
+  //       centres: this.fb.control<any[]>([]),
+  //     });
 
-      this.lignes.push(ligneGroup);
-    });
-  }
+  //     this.lignes.push(ligneGroup);
+  //   });
+  // }
 
   //validation required
   isValidField(label: string): string {
@@ -1553,4 +1539,147 @@ export class OprationJustifieeComponent implements OnInit {
     });
     return total;
   }
+
+  // ============================================
+  // MÉTHODES MODIFIÉES
+  // ============================================
+
+  /**
+   * Sélectionne un retour en caisse
+   * - Remplit la saisie du justificatif avec les infos du retour
+   * - Désélectionne la pièce justificative si elle était sélectionnée
+   */
+  selectRetour(piece: any) {
+    // Désélectionner la pièce justificative
+    this.selectedJustificatif = null;
+    this.selectedRetour = piece;
+    this.operationForm.get('retourcaisse')?.setValue(true);
+
+    // 🔥 Récupérer l'ID de la devise à partir du code
+    const deviseCode = piece.caisse?.devise; // "CDF"
+    let deviseId = null;
+
+    if (deviseCode) {
+      // Chercher la devise dans la liste
+      const devise = this.devises.find((d) => d.codedevise === deviseCode);
+      if (devise) {
+        deviseId = devise.iddevise;
+      } else {
+        // Si pas trouvé, essayer en majuscule
+        const deviseMaj = this.devises.find(
+          (d) => d.codedevise === deviseCode.toUpperCase(),
+        );
+        if (deviseMaj) {
+          deviseId = deviseMaj.iddevise;
+        }
+      }
+    }
+
+    // Remplir le formulaire
+    this.operationForm.patchValue({
+      devisejustificatif: deviseId,
+      datejustificatif: this.formatDateForInput(new Date().toISOString()),
+      tauxoperation: piece.taux || 1,
+      commentaire: `Retour caisse - ${piece.caisse?.codecaisse || ''}`,
+    });
+
+    // Charger le taux si devise trouvée
+    if (deviseId) {
+      this.loadLastdeviseTaux(deviseId);
+    }
+
+    // Gérer les caisses
+    const caissesForm = this.operationForm.get('caisses') as FormArray;
+    if (!caissesForm || caissesForm.length === 0) {
+      this.loadCaissesForm().subscribe({
+        next: () => {
+          this.fillCaisseFromRetour(piece);
+          this.updateTotalsAndValidate();
+        },
+        error: () => (this.loadingModal = false),
+      });
+      return;
+    }
+
+    this.fillCaisseFromRetour(piece);
+    this.updateTotalsAndValidate();
+  }
+
+  /**
+   * Sélectionne une pièce justificative
+   * - Remplit la saisie du justificatif avec les infos de la pièce
+   * - Désélectionne le retour en caisse
+   * - Réinitialise le retour caisse
+   */
+  selectJustificatif(piece: any) {
+    // 1. Désélectionner le retour en caisse
+    this.selectedRetour = null;
+
+    // 2. Désactiver le retour caisse
+    this.operationForm.get('retourcaisse')?.setValue(false);
+    this.showCaisses = false;
+
+    // 3. Vider les caisses
+    this.clearAllCaisses();
+
+    // 4. Marquer la pièce justificative comme sélectionnée
+    this.selectedJustificatif = piece;
+
+    // 5. Récupérer le justificatif complet
+    const justificatif = this.justificatifFiltered.find(
+      (j) => j.idjustificatifoperation === piece.idjustificatifoperation,
+    );
+
+    if (!justificatif) return;
+
+    // 6. Charger les détails du justificatif
+    this.loadDetailJustificatif(justificatif);
+  }
+  /**
+   * Remplit le formulaire avec les détails d'un justificatif
+   */
+  dispatchDetail(_object: any) {
+    // Patch des champs simples
+    this.operationForm.patchValue({
+      tauxoperation: _object.justificatif.taux,
+      devisejustificatif: _object.justificatif.iddevise,
+      commentaire: _object.justificatif.commentaire,
+      datejustificatif: this.formatDateForInput(_object.justificatif.date),
+    });
+
+    // Déclencher le chargement du taux si la devise est définie
+    if (_object.justificatif.iddevise) {
+      this.loadLastdeviseTaux(_object.justificatif.iddevise);
+    }
+
+    // Vider les lignes existantes
+    this.lignes.clear();
+
+    // Ajouter les lignes du justificatif
+    _object.details.forEach((l: any) => {
+      const ligneGroup = this.fb.group({
+        idligne: [l.iddetailsjustificatifoperation ?? null],
+        idnature: [l.idnature ?? null, Validators.required],
+        idcentreanalytique: [{ value: l.idcentreanalytique, disabled: true }],
+        idtiers: [{ value: l.idtiers ?? null, disabled: true }],
+        montantdetail: [
+          { value: l.montantdetail ?? '', disabled: false },
+          Validators.required,
+        ],
+        centres: this.fb.control<any[]>([]),
+      });
+
+      this.lignes.push(ligneGroup);
+    });
+
+    // Mettre à jour les totaux
+    this.updateTotalsAndValidate();
+  }
+
+  // ============================================
+  // NOUVELLE PROPRIÉTÉ
+  // ============================================
+
+  // Pièce justificative sélectionnée
+  selectedJustificatif: any = null;
 }

@@ -768,7 +768,7 @@
 .modal-header-theme-blue {
   background: linear-gradient(135deg, #3b82f6 0%, #405189 100%);
   border: 0;
-  border-radius: 20px 20px 0 0;
+  border-radius: 8px 8px 0 0;
   padding: 1.25rem 1.5rem;
 }
 

@@ -304,6 +304,7 @@
                     ) {
                       <tr
                         class="clickable-row"
+                        [class.active]="selectedJustificatif === piece"
                         (click)="selectJustificatif(piece)"
                       >
                         <td class="text-center fw-semibold">
