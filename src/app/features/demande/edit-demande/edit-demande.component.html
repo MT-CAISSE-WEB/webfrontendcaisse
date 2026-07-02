@@ -2,15 +2,29 @@
 <div class="row">
   <div class="col-12">
     <div
-      class="page-title-box d-sm-flex align-items-center justify-content-between"
+      class="page-title-premium d-sm-flex align-items-center justify-content-between"
     >
-      <h4 class="mb-sm-0">{{ title }} de la demande</h4>
+      <div class="d-flex align-items-center gap-3">
+        <div class="title-icon-premium">
+          <i class="ri-file-edit-line"></i>
+        </div>
+        <div>
+          <h4 class="mb-0 title-premium">{{ title }} de la demande</h4>
+          <span class="title-subtitle-premium"
+            >Remplissez les informations ci-dessous</span
+          >
+        </div>
+      </div>
       <div class="page-title-right">
-        <ol class="breadcrumb m-0">
+        <ol class="breadcrumb-premium m-0">
           <li class="breadcrumb-item">
-            <a href="javascript: void(0);">Générales </a>
+            <a href="javascript: void(0);">
+              <i class="ri-home-4-line me-1"></i>Générales
+            </a>
           </li>
-          <li class="breadcrumb-item active">{{ title }} de la demande</li>
+          <li class="breadcrumb-item active">
+            <i class="ri-file-edit-line"></i>{{ title }}
+          </li>
         </ol>
       </div>
     </div>
@@ -20,125 +34,142 @@
 
 <div class="row">
   <div class="col-lg-12">
-    <div class="card" id="orderList">
-      <div class="card-header border-0">
-        <div class="row align-items-center gy-3">
-          <div class="col-sm-auto">
-            <div class="d-flex gap-1 flex-wrap">
-              <button type="button" class="btn btn-sm btn-soft-info">
-                <i class="ri-file-download-line align-bottom me-1"></i> import
-              </button>
-              <button type="button" class="btn btn-sm btn-info">
-                <i class="ri-refresh-fill align-bottom me-1"></i>actualiser
-              </button>
-              <button
-                type="button"
-                [disabled]="title !== 'Création' && demande.statut === 3"
-                class="btn btn-sm btn-success"
-                (click)="submit()"
-              >
-                <i class="bx bx-comment-check align-bottom me-1"></i>
-                enregistrer
-              </button>
-              <button
-                *ngIf="title === 'Création'"
-                type="button"
-                class="btn btn-sm btn-primary"
-                (click)="resetForm()"
-              >
-                <i class="ri-add-fill align-bottom me-1"></i>
-              </button>
-            </div>
+    <div class="card-glass" id="orderList">
+      <!-- Header avec actions -->
+      <div class="card-header-glass border-0">
+        <div
+          class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+        >
+          <div class="d-flex gap-2 flex-wrap">
+            <button
+              type="button"
+              [disabled]="title !== 'Création' && demande.statut === 3"
+              class="btn-glass-submit"
+              (click)="submit()"
+            >
+              <i class="ri-save-line align-bottom me-1"></i>
+              {{ title === "Création" ? "Enregistrer" : "Mettre à jour" }}
+            </button>
+            <button
+              *ngIf="title === 'Création'"
+              type="button"
+              class="btn-glass-secondary"
+              (click)="resetForm()"
+            >
+              <i class="ri-refresh-line align-bottom me-1"></i> Réinitialiser
+            </button>
+            <button
+              type="button"
+              class="btn-glass-secondary"
+              (click)="rafreshpage()"
+            >
+              <i class="ri-refresh-fill align-bottom me-1"></i> Actualiser
+            </button>
+          </div>
+          <div class="d-flex gap-2">
+            <span class="status-badge" [class]="getDemandeStatusClass()">
+              <span class="status-dot" [class]="getDemandeStatusClass()"></span>
+              {{ getDemandeStatusLabel() }}
+            </span>
           </div>
         </div>
       </div>
 
-      <div class="card-body pt-0 mt-3">
+      <div class="card-body-glass pt-0 mt-2">
         <form [formGroup]="demandeForm">
-          <!-- ==================== STEP 1 : ENTÊTE ==================== -->
-          <div class="row g-3">
-            <div class="col-lg-2 col-sm-4">
-              <div class="mb-3">
-                <label class="form-label">Code demande</label>
-                <input
-                  type="text"
-                  class="form-control form-control-sm bg-light"
-                  formControlName="codedemande"
-                  readonly="readonly"
-                />
-              </div>
+          <!-- ==================== SECTION ENTÊTE ==================== -->
+          <div class="section-header">
+            <div class="section-header-left">
+              <i class="ri-information-line"></i>
+              <h6 class="mb-0">Informations générales</h6>
             </div>
-
-            <div class="col-lg-5 col-sm-8">
-              <div class="mb-3">
-                <label class="form-label">Libellé demande</label>
-                <input
-                  type="text"
-                  class="form-control form-control-sm bg-light {{
-                    isValidField('libelledemande')
-                  }}"
-                  formControlName="libelledemande"
-                />
-              </div>
-            </div>
-
-            <div class="col-lg-2 col-sm-6">
-              <div class="mb-3">
-                <label class="form-label">Date demande</label>
-                <input
-                  type="date"
-                  class="form-control form-control-sm bg-light {{
-                    isValidField('datedemande')
-                  }}"
-                  formControlName="datedemande"
-                />
-              </div>
-            </div>
-
-            <div class="col-lg-3 col-sm-6">
-              <div class="mb-3">
-                <label class="form-label">Type demande</label>
-                <select
-                  class="form-select form-select-sm bg-light {{
-                    isValidField('typedemande')
-                  }}"
-                  formControlName="typedemande"
-                >
-                  <option value="">-- Sélectionner --</option>
-                  <option value="decaissement">Décaissement</option>
-                </select>
-              </div>
-            </div>
+            <span class="section-badge">Étape 1/3</span>
           </div>
 
           <div class="row g-3">
             <div class="col-lg-2 col-sm-4">
-              <div class="mb-3">
+              <div class="form-floating">
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="codedemande"
+                  id="codedemande"
+                  readonly
+                />
+                <label for="codedemande">Code demande</label>
+              </div>
+            </div>
+
+            <div class="col-lg-5 col-sm-8">
+              <div class="form-floating">
+                <input
+                  type="text"
+                  class="form-control {{ isValidField('libelledemande') }}"
+                  formControlName="libelledemande"
+                  id="libelledemande"
+                  placeholder="Libellé de la demande"
+                />
+                <label for="libelledemande">Libellé demande</label>
+              </div>
+            </div>
+
+            <div class="col-lg-2 col-sm-6">
+              <div class="form-floating">
+                <input
+                  type="date"
+                  class="form-control {{ isValidField('datedemande') }}"
+                  formControlName="datedemande"
+                  id="datedemande"
+                />
+                <label for="datedemande">Date demande</label>
+              </div>
+            </div>
+
+            <div class="col-lg-3 col-sm-6">
+              <div class="form-floating">
                 <select
-                  class="form-select form-select-sm bg-light {{
-                    isValidField('devise')
-                  }}"
-                  formControlName="devise"
+                  class="form-select {{ isValidField('typedemande') }}"
+                  formControlName="typedemande"
+                  id="typedemande"
                 >
-                  <option value="">-- Sélectionner devise --</option>
+                  <option value="">-- Sélectionner --</option>
+                  <option value="decaissement">Décaissement</option>
+                </select>
+                <label for="typedemande">Type demande</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-1">
+            <div class="col-lg-2 col-sm-4">
+              <div class="form-floating">
+                <select
+                  class="form-select {{ isValidField('devise') }}"
+                  formControlName="devise"
+                  id="devise"
+                >
+                  <option value="">-- Devise --</option>
                   @for (item of devises; track $index) {
                     <option value="{{ item.iddevise }}">
                       {{ item.codedevise }}
                     </option>
                   }
                 </select>
+                <label for="devise">Devise</label>
               </div>
             </div>
 
             <div class="col-xxl-3 col-sm-4">
-              <div class="mb-3 bg-light">
+              <div class="form-floating">
                 <input
                   type="text"
-                  placeholder="Selectionner le departement"
+                  placeholder="Sélectionner le département"
                   formControlName="departement"
                   [matAutocomplete]="autoDepartement"
-                  class="form-select form-select-sm bg-light"
+                  class="form-control"
+                  id="departement"
                 />
+                <label for="departement">Département</label>
                 <mat-autocomplete
                   #autoDepartement="matAutocomplete"
                   [displayWith]="displayDepartement"
@@ -157,451 +188,433 @@
             </div>
 
             <div class="col-lg-2 col-sm-2">
-              <div class="input-group input-group-sm mb-3">
-                <label class="input-group-text">taux</label>
+              <div class="form-floating">
                 <input
                   type="number"
-                  class="form-control form-control-sm bg-light"
+                  class="form-control"
                   formControlName="taux"
+                  id="taux"
+                  step="0.01"
                 />
+                <label for="taux">Taux</label>
               </div>
             </div>
           </div>
 
-          <!-- ==================== STEP 2 : LIGNES ==================== -->
-          <div class="row g-3">
-            <div class="table-responsive">
-              <table class="table table-sm table-borderless table-nowrap mb-0">
-                <colgroup>
-                  <col style="width: 05%" />
-                  <col style="width: 20%" />
-                  <col style="width: 20%" />
-                  <col style="width: 20%" />
-                  <col style="width: 20%" />
-                  <col style="width: 10%" />
-                  <col style="width: 05%" />
-                </colgroup>
-                <thead class="align-middle">
-                  <tr class="table-active">
-                    <th scope="col" style="width: 15px">N°</th>
-                    <th scope="col">Nature opération</th>
-                    <th scope="col">Centre analytique</th>
-                    <th scope="col">Tiers</th>
-                    <th scope="col">Code budget</th>
-                    <th scope="col" class="text-end" style="width: 150px">
-                      Montant
-                    </th>
-                    <th scope="col" class="text-end" style="width: 105px"></th>
-                  </tr>
-                </thead>
-                <tbody id="newlink">
-                  @for (ligne of lignes.controls; track $index) {
-                    <tr class="product" [formGroup]="ligne">
-                      <th scope="row" class="product-id">{{ $index + 1 }}</th>
-                      <td class="text-start">
-                        <div class="input-light">
-                          <input
-                            type="text"
-                            formControlName="natureop"
-                            placeholder="Selectionner nature opération"
-                            [matAutocomplete]="autoNature"
-                            class="form-control form-control-sm bg-light"
-                          />
+          <!-- ==================== SECTION LIGNES ==================== -->
+          <div class="section-header mt-4">
+            <div class="section-header-left">
+              <i class="ri-list-check"></i>
+              <h6 class="mb-0">Lignes de la demande</h6>
+            </div>
+            <span class="section-badge">Étape 2/3</span>
+          </div>
 
-                          <mat-autocomplete
-                            #autoNature="matAutocomplete"
-                            [displayWith]="displayNature"
-                          >
-                            @for (
-                              item of ligneFilteredMap.get($index)?.natures
-                                | async;
-                              track item.idnature
-                            ) {
-                              <mat-option [value]="item">
-                                {{ item.libelle }}
-                              </mat-option>
-                            }
-                          </mat-autocomplete>
-                          <div class="invalid-feedback">{{ msgErros }}</div>
-                        </div>
-                      </td>
-                      <td class="text-start">
-                        <div class="input-light">
-                          <input
-                            type="text"
-                            formControlName="centre"
-                            placeholder="Selectionner centre analytique"
-                            [matAutocomplete]="autoCentre"
-                            class="form-control form-control-sm bg-light"
-                          />
-
-                          <mat-autocomplete
-                            #autoCentre="matAutocomplete"
-                            [displayWith]="displayCentre"
-                          >
-                            @for (
-                              item of ligneFilteredMap.get($index)?.centres
-                                | async;
-                              track item.idcentreanalytique
-                            ) {
-                              <mat-option [value]="item">
-                                {{ item.codecentreanalytique }} --
-                                {{ item.libelle }}
-                              </mat-option>
-                            }
-                          </mat-autocomplete>
-                          <div class="invalid-feedback">{{ msgErros }}</div>
-                        </div>
-                      </td>
-                      <td class="text-start">
-                        <div class="input-light">
-                          <input
-                            type="text"
-                            formControlName="tiers"
-                            placeholder="Selectionner tiers"
-                            [matAutocomplete]="autoTiers"
-                            class="form-control form-control-sm bg-light"
-                          />
-
-                          <mat-autocomplete
-                            #autoTiers="matAutocomplete"
-                            [displayWith]="displayTiers"
-                          >
-                            @for (
-                              item of ligneFilteredMap.get($index)?.tiers
-                                | async;
-                              track item.idtiers
-                            ) {
-                              <mat-option [value]="item">
-                                {{ item.designation }}
-                              </mat-option>
-                            }
-                          </mat-autocomplete>
-                          <div class="invalid-feedback">{{ msgErros }}</div>
-                        </div>
-                      </td>
-                      <td class="text-start">
-                        <div class="input-light">
-                          <input
-                            type="text"
-                            formControlName="codebudget"
-                            placeholder="Selectionner code budget"
-                            [matAutocomplete]="autoLigne"
-                            class="form-control form-control-sm bg-light"
-                          />
-
-                          <mat-autocomplete
-                            #autoLigne="matAutocomplete"
-                            [displayWith]="displayLigne"
-                          >
-                            @for (
-                              item of ligneFilteredMap.get($index)?.codebudget
-                                | async;
-                              track item.idbudgetdepartementnature
-                            ) {
-                              <mat-option [value]="item">
-                                {{ item.codebudgetaire }}
-                              </mat-option>
-                            }
-                          </mat-autocomplete>
-                          <div class="invalid-feedback">{{ msgErros }}</div>
-                        </div>
-                      </td>
-                      <td>
+          <div class="table-responsive">
+            <table class="table table-modern align-middle">
+              <thead>
+                <tr>
+                  <th style="width: 50px">N°</th>
+                  <th>Nature opération</th>
+                  <th>Centre analytique</th>
+                  <th>Tiers</th>
+                  <th>Code budget</th>
+                  <th class="text-end" style="width: 150px">Montant</th>
+                  <th class="text-end" style="width: 110px">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="newlink">
+                @for (ligne of lignes.controls; track $index) {
+                  <tr class="product" [formGroup]="ligne">
+                    <td class="text-center fw-bold">{{ $index + 1 }}</td>
+                    <td>
+                      <div class="input-glass">
                         <input
-                          type="number"
-                          class="form-control form-control-sm bg-light border-0"
-                          formControlName="montantdemande"
+                          type="text"
+                          formControlName="natureop"
+                          placeholder="Nature opération"
+                          [matAutocomplete]="autoNature"
+                          class="form-control form-control-sm"
                         />
-                      </td>
-                      <td class="product-removal align-right">
-                        <button
-                          type="button"
-                          class="btn btn-sm btn-danger"
-                          (click)="removeLigne($index)"
+                        <mat-autocomplete
+                          #autoNature="matAutocomplete"
+                          [displayWith]="displayNature"
                         >
-                          <i class="ri-delete-bin-2-line align-bottom"></i>
-                        </button>
+                          @for (
+                            item of ligneFilteredMap.get($index)?.natures
+                              | async;
+                            track item.idnature
+                          ) {
+                            <mat-option [value]="item">
+                              {{ item.libelle }}
+                            </mat-option>
+                          }
+                        </mat-autocomplete>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="input-glass">
+                        <input
+                          type="text"
+                          formControlName="centre"
+                          placeholder="Centre analytique"
+                          [matAutocomplete]="autoCentre"
+                          class="form-control form-control-sm"
+                        />
+                        <mat-autocomplete
+                          #autoCentre="matAutocomplete"
+                          [displayWith]="displayCentre"
+                        >
+                          @for (
+                            item of ligneFilteredMap.get($index)?.centres
+                              | async;
+                            track item.idcentreanalytique
+                          ) {
+                            <mat-option [value]="item">
+                              {{ item.codecentreanalytique }} --
+                              {{ item.libelle }}
+                            </mat-option>
+                          }
+                        </mat-autocomplete>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="input-glass">
+                        <input
+                          type="text"
+                          formControlName="tiers"
+                          placeholder="Tiers"
+                          [matAutocomplete]="autoTiers"
+                          class="form-control form-control-sm"
+                        />
+                        <mat-autocomplete
+                          #autoTiers="matAutocomplete"
+                          [displayWith]="displayTiers"
+                        >
+                          @for (
+                            item of ligneFilteredMap.get($index)?.tiers | async;
+                            track item.idtiers
+                          ) {
+                            <mat-option [value]="item">
+                              {{ item.designation }}
+                            </mat-option>
+                          }
+                        </mat-autocomplete>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="input-glass">
+                        <input
+                          type="text"
+                          formControlName="codebudget"
+                          placeholder="Code budget"
+                          [matAutocomplete]="autoLigne"
+                          class="form-control form-control-sm"
+                        />
+                        <mat-autocomplete
+                          #autoLigne="matAutocomplete"
+                          [displayWith]="displayLigne"
+                        >
+                          @for (
+                            item of ligneFilteredMap.get($index)?.codebudget
+                              | async;
+                            track item.idbudgetdepartementnature
+                          ) {
+                            <mat-option [value]="item">
+                              {{ item.codebudgetaire }}
+                            </mat-option>
+                          }
+                        </mat-autocomplete>
+                      </div>
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        class="form-control form-control-sm text-end"
+                        formControlName="montantdemande"
+                        placeholder="0"
+                      />
+                    </td>
+                    <td>
+                      <div class="actions-group">
                         <button
                           type="button"
+                          class="action-btn action-view"
                           data-bs-toggle="modal"
                           [attr.data-bs-target]="'#detailModal' + $index"
-                          class="btn btn-sm btn-primary"
+                          title="Détails"
                         >
-                          <i class="ri-pencil-fill align-bottom"></i>
+                          <i class="ri-pencil-line"></i>
                         </button>
-                      </td>
-                    </tr>
-
-                    <!-- Modal -->
-                    <div
-                      class="modal fade flip"
-                      [attr.id]="'detailModal' + $index"
-                      tabindex="-1"
-                      aria-hidden="true"
-                    >
-                      <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                          <div class="modal-header bg-light p-3">
-                            <h5 class="modal-title">Détail de la demande</h5>
-                            <button
-                              type="button"
-                              class="btn-close"
-                              data-bs-dismiss="modal"
-                              aria-label="Close"
-                            ></button>
-                          </div>
-
-                          <div [formGroup]="lignesFormArray.at($index)">
-                            <div class="modal-body">
-                              <div formArrayName="details" class="mt-2">
-                                <div class="table-responsive">
-                                  <table
-                                    class="table table-sm table-borderless table-nowrap mb-0"
-                                  >
-                                    <colgroup>
-                                      <col style="width: 05%" />
-                                      <col style="width: 50%" />
-                                      <col style="width: 20%" />
-                                      <col style="width: 20%" />
-                                      <col style="width: 05%" />
-                                    </colgroup>
-                                    <thead class="align-middle">
-                                      <tr class="table-active">
-                                        <th scope="col" style="width: 15px">
-                                          N°
-                                        </th>
-                                        <th scope="col">Description</th>
-                                        <th scope="col">Quantité</th>
-                                        <th scope="col" style="width: 120px">
-                                          Montant
-                                        </th>
-                                        <th
-                                          scope="col"
-                                          class="text-end"
-                                          style="width: 150px"
-                                        ></th>
-                                      </tr>
-                                    </thead>
-                                    <tbody id="newlink">
-                                      <tr
-                                        *ngFor="
-                                          let detail of getDetailsArray($index)
-                                            .controls;
-                                          let j = index
-                                        "
-                                        [formGroupName]="j"
-                                      >
-                                        <th scope="row" class="product-id">
-                                          {{ j + 1 }}
-                                        </th>
-                                        <td class="text-start">
-                                          <div class="input-light">
-                                            <input
-                                              type="textarea"
-                                              class="form-control form-control-sm"
-                                              formControlName="description"
-                                            />
-                                          </div>
-                                        </td>
-                                        <td class="text-start">
-                                          <div class="input-light">
-                                            <input
-                                              type="number"
-                                              class="form-control form-control-sm"
-                                              formControlName="quantite"
-                                            />
-                                          </div>
-                                        </td>
-                                        <td class="text-start">
-                                          <div class="input-light">
-                                            <input
-                                              type="number"
-                                              class="form-control form-control-sm"
-                                              formControlName="montant"
-                                            />
-                                          </div>
-                                        </td>
-                                        <td class="product-removal align-right">
-                                          <button
-                                            type="button"
-                                            class="btn btn-sm btn-danger"
-                                            (click)="removeDetail($index, j)"
-                                          >
-                                            <i
-                                              class="ri-delete-bin-2-line align-bottom"
-                                            ></i>
-                                          </button>
-                                        </td>
-                                      </tr>
-                                    </tbody>
-                                  </table>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div class="modal-footer">
-                              <div class="hstack gap-2 justify-content-end">
-                                <div class="d-flex gap-2">
-                                  <button
-                                    type="submit"
-                                    class="btn btn-sm btn-secondary"
-                                    (click)="addDetail($index)"
-                                  >
-                                    Ajouter
-                                  </button>
-                                  <button
-                                    type="button"
-                                    class="btn btn-sm btn-light"
-                                    data-bs-dismiss="modal"
-                                  >
-                                    Fermer
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                </tbody>
-                <tbody>
-                  <tr>
-                    <td colspan="5">
-                      <button
-                        type="button"
-                        [disabled]="!departement"
-                        class="btn btn-sm btn-primary"
-                        (click)="addLigne()"
-                      >
-                        <i class="bx bx-zoom-in align-bottom me-1"></i>
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <!-- ==================== PIÈCES JOINTES ==================== -->
-            <div class="card mt-3">
-              <div class="card-header bg-light">
-                <h6 class="mb-0">
-                  <i class="ri-attachment-2 me-2"></i>
-                  Pièces jointes
-                </h6>
-              </div>
-              <div class="card-body">
-                <!-- Fichiers existants (modification) -->
-                <div *ngIf="existingPieces.length > 0" class="mb-4">
-                  <div
-                    class="d-flex align-items-center justify-content-between mb-3"
-                  >
-                    <label class="form-label fw-semibold"
-                      >Documents existants</label
-                    >
-
-                    <button
-                      *ngIf="existingPieces.length > 0"
-                      type="button"
-                      class="btn-link-download"
-                      (click)="downloadAllFiles()"
-                      title="Télécharger toutes les pièces jointes"
-                    >
-                      <i class="ri-download-line"></i>
-                      <span>Tout télécharger</span>
-                      <span class="link-underline"></span>
-                    </button>
-                  </div>
-
-                  <div class="row g-2">
-                    <div class="col-12" *ngFor="let piece of existingPieces">
-                      <div
-                        class="d-flex align-items-center justify-content-between p-2 border rounded-3"
-                      >
-                        <div class="d-flex align-items-center gap-3">
-                          <i [class]="getFileIcon(piece)" class="fs-3"></i>
-                          <div>
-                            <span class="fw-medium">{{
-                              piece.nomfichier
-                            }}</span>
-                            <small class="text-muted d-block">{{
-                              formatFileSize(piece.taille)
-                            }}</small>
-                          </div>
-                        </div>
                         <button
                           type="button"
-                          class="btn btn-sm btn-outline-danger"
-                          (click)="removeExistingFile(piece)"
-                          [disabled]="pjDeleting === piece.idpiecejointe"
+                          class="action-btn action-delete"
+                          (click)="removeLigne($index)"
+                          title="Supprimer"
                         >
-                          <span
-                            *ngIf="pjDeleting === piece.idpiecejointe"
-                            class="spinner-border spinner-border-sm"
-                          ></span>
-                          <i
-                            *ngIf="pjDeleting !== piece.idpiecejointe"
-                            class="ri-delete-bin-line"
-                          ></i>
+                          <i class="ri-delete-bin-line"></i>
                         </button>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Modal Détails -->
+                  <div
+                    class="modal fade"
+                    [attr.id]="'detailModal' + $index"
+                    tabindex="-1"
+                    aria-hidden="true"
+                  >
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                      <div
+                        class="modal-content shadow-lg border-0 modal-content-glass"
+                      >
+                        <div class="modal-header modal-header-theme-blue">
+                          <div class="d-flex align-items-center gap-2">
+                            <div class="icon-circle">
+                              <i class="ri-list-check text-white fs-5"></i>
+                            </div>
+                            <h5 class="modal-title text-white fw-semibold">
+                              Détails ligne {{ $index + 1 }}
+                            </h5>
+                          </div>
+                          <button
+                            type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                          ></button>
+                        </div>
+
+                        <div [formGroup]="lignesFormArray.at($index)">
+                          <div class="modal-body p-4">
+                            <div class="table-responsive">
+                              <table
+                                class="table table-modern align-middle mb-0"
+                              >
+                                <thead>
+                                  <tr>
+                                    <th style="width: 50px">N°</th>
+                                    <th>Description</th>
+                                    <th style="width: 120px">Quantité</th>
+                                    <th style="width: 150px">Montant</th>
+                                    <th style="width: 50px"></th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  @for (
+                                    detail of getDetailsArray($index).controls;
+                                    track $index;
+                                    let j = $index
+                                  ) {
+                                    <tr [formGroupName]="j">
+                                      <td class="text-center fw-bold">
+                                        {{ j + 1 }}
+                                      </td>
+                                      <td>
+                                        <input
+                                          type="text"
+                                          class="form-control form-control-sm"
+                                          formControlName="description"
+                                          placeholder="Description"
+                                        />
+                                      </td>
+                                      <td>
+                                        <input
+                                          type="number"
+                                          class="form-control form-control-sm text-end"
+                                          formControlName="quantite"
+                                          placeholder="0"
+                                        />
+                                      </td>
+                                      <td>
+                                        <input
+                                          type="number"
+                                          class="form-control form-control-sm text-end"
+                                          formControlName="montant"
+                                          placeholder="0"
+                                        />
+                                      </td>
+                                      <td>
+                                        <button
+                                          type="button"
+                                          class="action-btn action-delete"
+                                          (click)="removeDetail($index, j)"
+                                          title="Supprimer"
+                                        >
+                                          <i class="ri-delete-bin-line"></i>
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  }
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+
+                          <div class="modal-footer border-0 p-4">
+                            <div class="d-flex gap-3 justify-content-end w-100">
+                              <button
+                                type="button"
+                                class="btn-glass-secondary"
+                                (click)="addDetail($index)"
+                              >
+                                <i class="ri-add-line me-1"></i> Ajouter
+                              </button>
+                              <button
+                                type="button"
+                                class="btn-glass-cancel"
+                                data-bs-dismiss="modal"
+                              >
+                                <i class="ri-close-line me-1"></i> Fermer
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-
-                <!-- Zone d'upload -->
-                <div>
-                  <label class="form-label fw-semibold"
-                    >Ajouter des fichiers</label
-                  >
-                  <div
-                    class="upload-zone border border-dashed rounded-3 p-4 text-center bg-light"
-                  >
-                    <input
-                      type="file"
-                      #fileInput
-                      multiple
-                      (change)="onFilesSelected($event)"
-                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
-                      class="d-none"
-                    />
-                    <i class="ri-upload-cloud-2-line fs-1 text-muted"></i>
-                    <p class="mt-2 mb-1">
-                      Cliquez pour sélectionner des fichiers
-                    </p>
+                }
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="7">
                     <button
                       type="button"
-                      class="btn btn-sm btn-primary"
-                      (click)="fileInput.click()"
-                      [disabled]="pjUploading"
+                      class="btn-glass-primary"
+                      [disabled]="!departement"
+                      (click)="addLigne()"
                     >
-                      <i class="ri-add-line me-1"></i>
-                      Choisir des fichiers
+                      <i class="ri-add-line align-bottom me-1"></i> Ajouter une
+                      ligne
                     </button>
-                    <small class="text-muted d-block mt-2">
-                      PDF, images, Excel, Word, CSV (max 10MB)
-                    </small>
-                  </div>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
 
-                  <!-- Aperçu fichiers sélectionnés -->
-                  <div *ngIf="uploadedFiles.length > 0" class="mt-3">
-                    <label class="form-label fw-semibold"
-                      >Fichiers à uploader ({{ uploadedFiles.length }})</label
+          <!-- ==================== SECTION PIÈCES JOINTES ==================== -->
+          <div class="section-header mt-4">
+            <div class="section-header-left">
+              <i class="ri-attachment-2"></i>
+              <h6 class="mb-0">Pièces jointes</h6>
+            </div>
+            <span class="section-badge">Optionnel</span>
+          </div>
+
+          <div class="card-glass p-3">
+            <!-- Fichiers existants -->
+            <div *ngIf="existingPieces.length > 0" class="mb-4">
+              <div
+                class="d-flex align-items-center justify-content-between mb-3"
+              >
+                <span class="fw-semibold small text-uppercase text-muted">
+                  <i class="ri-file-list-line me-1"></i>
+                  Documents existants ({{ existingPieces.length }})
+                </span>
+                <button
+                  type="button"
+                  class="btn-glass-secondary btn-sm"
+                  (click)="downloadAllFiles()"
+                  title="Télécharger toutes les pièces jointes"
+                >
+                  <i class="ri-download-line me-1"></i> Tout télécharger
+                </button>
+              </div>
+
+              <div class="row g-2">
+                @for (piece of existingPieces; track $index) {
+                  <div class="col-md-6">
+                    <div
+                      class="piece-item d-flex align-items-center justify-content-between p-2 border rounded-3"
                     >
-                    <div class="row g-2">
-                      <div
-                        class="col-12"
-                        *ngFor="let file of uploadedFiles; let i = index"
+                      <div class="d-flex align-items-center gap-3 min-width-0">
+                        <i [class]="getFileIcon(piece)" class="fs-3"></i>
+                        <div class="min-width-0">
+                          <span class="fw-medium text-truncate d-block">{{
+                            piece.nomfichier
+                          }}</span>
+                          <small class="text-muted">{{
+                            formatFileSize(piece.taille)
+                          }}</small>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        class="action-btn action-delete"
+                        (click)="removeExistingFile(piece)"
+                        [disabled]="pjDeleting === piece.idpiecejointe"
+                        title="Supprimer"
                       >
+                        @if (pjDeleting === piece.idpiecejointe) {
+                          <span class="spinner-border spinner-border-sm"></span>
+                        } @else {
+                          <i class="ri-delete-bin-line"></i>
+                        }
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Zone d'upload -->
+            <div>
+              <div
+                class="upload-area p-4 text-center"
+                [class.drag-over]="isDragOver"
+                (dragover)="onDragOver($event)"
+                (dragleave)="onDragLeave($event)"
+                (drop)="onDrop($event)"
+              >
+                <input
+                  type="file"
+                  #fileInput
+                  multiple
+                  (change)="onFilesSelected($event)"
+                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
+                  class="d-none"
+                />
+                <i class="ri-upload-cloud-2-line fs-1 text-primary"></i>
+                <p class="mt-2 mb-1 fw-medium">
+                  Glissez-déposez vos fichiers ici
+                </p>
+                <p class="text-muted small mb-3">ou</p>
+                <button
+                  type="button"
+                  class="btn-glass-primary"
+                  (click)="fileInput.click()"
+                  [disabled]="pjUploading"
+                >
+                  <i class="ri-add-line me-1"></i> Choisir des fichiers
+                </button>
+                <p class="text-muted small mt-2 mb-0">
+                  PDF, images, Excel, Word, CSV (max 10MB)
+                </p>
+              </div>
+
+              <!-- Aperçu fichiers sélectionnés -->
+              @if (uploadedFiles.length > 0) {
+                <div class="mt-3">
+                  <span class="fw-semibold small text-uppercase text-muted">
+                    Fichiers à uploader ({{ uploadedFiles.length }})
+                  </span>
+                  <div class="row g-2 mt-2">
+                    @for (file of uploadedFiles; track $index; let i = $index) {
+                      <div class="col-md-6">
                         <div
-                          class="d-flex align-items-center justify-content-between p-2 border rounded-3"
+                          class="file-pill d-flex align-items-center justify-content-between p-2 border rounded-3"
                         >
-                          <div class="d-flex align-items-center gap-3">
+                          <div
+                            class="d-flex align-items-center gap-3 min-width-0"
+                          >
                             <i class="ri-file-line fs-3 text-secondary"></i>
-                            <div>
-                              <span class="fw-medium">{{ file.name }}</span>
-                              <small class="text-muted d-block"
+                            <div class="min-width-0">
+                              <span class="fw-medium text-truncate d-block">{{
+                                file.name
+                              }}</span>
+                              <small class="text-muted"
                                 >{{
                                   file.size / 1024 | number: "1.0-0"
                                 }}
@@ -611,27 +624,37 @@
                           </div>
                           <button
                             type="button"
-                            class="btn btn-sm btn-outline-danger"
+                            class="action-btn action-delete"
                             (click)="removeSelectedFile(i)"
+                            title="Retirer"
                           >
                             <i class="ri-close-line"></i>
                           </button>
                         </div>
                       </div>
-                    </div>
+                    }
                   </div>
                 </div>
-              </div>
+              }
             </div>
-            <!-- ==================== STEP 3 : FINISH ==================== -->
-            <div>
-              <div class="alert alert-success">
-                Vérifiez toutes les informations avant de terminer.
-              </div>
+          </div>
 
-              <!-- <div *ngIf="demande.statut === 3" class="alert alert-warning">
-                  ⚠️ Cette demande est validée et ne peut plus être modifiée.
-                </div> -->
+          <!-- ==================== SECTION FINALISATION ==================== -->
+          <div class="section-header mt-4">
+            <div class="section-header-left">
+              <i class="ri-check-double-line"></i>
+              <h6 class="mb-0">Finalisation</h6>
+            </div>
+            <span class="section-badge">Étape 3/3</span>
+          </div>
+
+          <div class="alert-glass-info">
+            <i class="ri-information-line"></i>
+            <div>
+              <strong>Vérification</strong>
+              <p class="mb-0">
+                Vérifiez toutes les informations avant de soumettre la demande.
+              </p>
             </div>
           </div>
         </form>
