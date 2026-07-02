@@ -1,196 +1,256 @@
 <div class="tab-pane active" id="compteur" role="tabpanel">
-                        <div class="row">
-                            <div class="col-lg-12 col-sm-12">
-                                <div class="d-flex align-items-center mb-5">
-                                    <h6 class="card-title mb-0 flex-grow-1 text-primary">Gestion du compteur</h6>
-                                    <div class="flex-shrink-0">
-                                        <div class="d-flex gap-2 flex-wrap">
-                                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" (click)="modalCreateCompteur()" data-bs-target="#showModalCompteur"><i class="ri-add-line align-bottom me-1"></i>créer</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="table-wrapper">
-                                    <div class="table table-hover table-responsive table-card table-wrapper table-scroll">
-                                        @if (loading) {
-                                            <div class="text-center py-4">
-                                                <div class="spinner-border text-info"></div>
-                                            </div>
-                                        }
-                                        <table class="table align-middle table-nowrap" id="invoiceTable">
-                                            <thead class="text-muted sticky-top bg-light">
-                                                <tr>
-                                                    <th class="sort text-uppercase" data-sort="invoice_id">Code</th>
-                                                    <th class="sort text-uppercase" data-sort="type">Libelle</th>
-                                                    <th class="sort text-uppercase" data-sort="type">Type doc</th>
-                                                    <th class="sort text-uppercase" data-sort="type">Séquence 1</th>
-                                                    <th class="sort text-uppercase" data-sort="type">Préfixe 1</th>
-                                                    <th class="sort text-uppercase" data-sort="type">Séquence 2</th>
-                                                    <th class="sort text-uppercase" data-sort="type">Préfixe 2</th>
-                                                    <th class="sort text-uppercase" data-sort="action">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="list form-check-all" id="invoice-list-data">
-                                                @for (item of compteurs; track $index){
-                                                    <tr>
-                                                        <td class="numero">{{item.codemodelecompteur}}</td>
-                                                        <td class="devise">{{item.libelle}}</td>
-                                                        <td class="devise">{{item.typedocument}}</td>
-                                                        <td class="devise">{{item.sequence_1}}</td>
-                                                        <td class="devise">{{item.prefixe_1}}</td>
-                                                        <td class="devise">{{item.sequence_2}}</td>
-                                                        <td class="devise">{{item.prefixe_2}}</td>
-                                                        <td class="text-start">
-                                                            <ul class="list-inline hstack gap-2 mb-0">
-                                                                <li class="list-inline-item edit" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Edit">
-                                                                    <a href="#showModalCompteur" data-bs-toggle="modal" (click)="modalUpdateCompteur(item)" class="text-primary d-inline-block edit-item-btn">
-                                                                        <i class="ri-pencil-fill fs-16"></i>
-                                                                    </a>
-                                                                </li>
-                                                                <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Remove">
-                                                                  <a class="text-danger d-inline-block remove-item-btn" (click)="modalDeleteCompteur(item)"  data-bs-toggle="modal" href="#deleteModalCompteur">
-                                                                    <i class="ri-delete-bin-5-fill fs-16"></i>
-                                                                  </a>
-                                                                </li>
-                                                            </ul>
-                                                        </td>
-                                                    </tr>
-                                                }
-                                            </tbody>
-                                        </table>
-                                        <div class="" *ngIf="compteurs.length == 0">
-                                            <div class="text-center">
-                                                <h6 class="mt-2">Désolé! Aucun compteur trouvé </h6>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex justify-content-end mt-3">
-                                        <div class="pagination-wrap hstack gap-2">
-                                            <button [disabled]="currentPageCompteur == 1" (click)="changePage(currentPageCompteur - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
-                                                Précédent
-                                            </button>
-                                            <ul class="pagination listjs-pagination mb-0"> Page {{currentPageCompteur}} / {{totalPagesCompteur}} </ul>
-                                            <button [disabled]="currentPageCompteur == totalPagesCompteur" (click)="changePage(currentPageCompteur + 1)" class="btn btn-sm btn-soft-primary pagination-next">
-                                                Suivant
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!--end row-->
+  <!-- ========== BARRE D'OUTILS ========== -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div class="search-container">
+      <div class="search-glass">
+        <i class="ri-search-line"></i>
+        <input type="text" placeholder="Rechercher un compteur..." />
+      </div>
+    </div>
+    <button
+      class="btn-glass-primary"
+      data-bs-toggle="modal"
+      (click)="modalCreateCompteur()"
+      data-bs-target="#showModalCompteur"
+    >
+      <i class="ri-add-line"></i> Créer un compteur
+    </button>
+  </div>
 
-                        <div class="modal fade" id="showModalCompteur" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content border-0">
-                                    <div class="modal-header p-3 bg-info-subtle">
-                                        <h5 class="modal-title" id="exampleModalLabel">{{ actionModalCompteur === "create" ? 'Création' : 'Modification'}} du compteur </h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
-                                    </div>
+  <!-- ========== TABLEAU MODERNE ========== -->
+  <div class="table-responsive">
+    <!-- Spinner de chargement -->
+    <div *ngIf="loading" class="spinner-glass">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
 
-                                    <form [formGroup]="compteurForm">
-                                        <div class="modal-body">
-                                            <div class="row g-3">
-                                                <div class="col-lg-12 col-sm-3">
-                                                    <label for="invoicenoInput">Code</label>
-                                                    <input type="text" formControlName="codemodelecompteur" class="form-control form-control-sm bg-light border-0"  placeholder="Code"/>
-                                                    <div class="invalid-feedback">{{ msgErros }}</div>
-                                                </div>
-                                                <!--end col-->
+    <!-- Tableau (si données) -->
+    <table *ngIf="!loading && compteurs.length > 0" class="table-modern">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Libellé</th>
+          <th>Type doc</th>
+          <th>Séquence 1</th>
+          <th>Préfixe 1</th>
+          <th>Séquence 2</th>
+          <th>Préfixe 2</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of compteurs; track $index">
+          <td><span class="code-badge">{{item.codemodelecompteur}}</span></td>
+          <td>{{item.libelle}}</td>
+          <td>{{item.typedocument}}</td>
+          <td>{{item.sequence_1}}</td>
+          <td>{{item.prefixe_1}}</td>
+          <td>{{item.sequence_2}}</td>
+          <td>{{item.prefixe_2}}</td>
+          <td>
+            <div class="actions-group">
+              <button
+                class="action-btn action-edit"
+                data-bs-toggle="tooltip"
+                title="Modifier"
+                (click)="modalUpdateCompteur(item)"
+                data-bs-toggle="modal"
+                data-bs-target="#showModalCompteur"
+              >
+                <i class="ri-pencil-fill"></i>
+              </button>
+              <button
+                class="action-btn action-delete"
+                data-bs-toggle="tooltip"
+                title="Supprimer"
+                (click)="modalDeleteCompteur(item)"
+                data-bs-toggle="modal"
+                data-bs-target="#deleteModalCompteur"
+              >
+                <i class="ri-delete-bin-fill"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-                                                <div class="col-lg-12 col-sm-6">
-                                                  <label for="invoicenoInput">Libelle</label>
-                                                  <input type="text" formControlName="libelle" class="form-control form-control-sm bg-light border-0"  placeholder="Libellé"/>
-                                                  <div class="invalid-feedback">{{ msgErros }}</div>
-                                                </div>
+    <!-- État vide -->
+    <div *ngIf="!loading && compteurs.length === 0" class="empty-state">
+      <i class="ri-file-search-line"></i>
+      <p>Aucun compteur trouvé</p>
+      <span class="empty-hint">Créez un nouveau compteur pour commencer.</span>
+    </div>
+  </div>
 
-                                                <div class="col-lg-12 col-sm-6">
-                                                  <label for="invoicenoInput">Type doc</label>
-                                                  <select id="typedocument-field" class="form-select form-control form-control-sm bg-light border-0 {{
-                                                      isValidField('typedocument')
-                                                    }}" formControlName="typedocument">
-                                                    <option [ngValue]="null">-- Sélectionner --</option>
+  <!-- ========== PAGINATION MODERNE ========== -->
+  <div *ngIf="!loading && compteurs.length > 0" class="pagination-modern">
+    <div class="pagination-info">
+      Page <strong>{{currentPageCompteur}}</strong> sur <strong>{{totalPagesCompteur}}</strong>
+    </div>
+    <div class="pagination-controls">
+      <button
+        class="btn-glass-pagination"
+        [disabled]="currentPageCompteur == 1"
+        (click)="changePage(currentPageCompteur - 1)"
+      >
+        <i class="ri-arrow-left-s-line"></i> Précédent
+      </button>
+      <button
+        class="btn-glass-pagination"
+        [disabled]="currentPageCompteur == totalPagesCompteur"
+        (click)="changePage(currentPageCompteur + 1)"
+      >
+        Suivant <i class="ri-arrow-right-s-line"></i>
+      </button>
+    </div>
+  </div>
 
-                                                    <option value="demande">Demande</option>
-                                                    <option value="opération de caisse">Opération de caisse</option>
-                                                  </select>
-                                                  <div class="invalid-feedback">{{ msgErros }}</div>
-                                                </div>
+  <!-- ========== MODALE CRÉATION / MODIFICATION ========== -->
+  <div class="modal fade" id="showModalCompteur" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modal-content-glass">
+        <div class="modal-header modal-header-glass">
+          <h5 class="modal-title modal-title-glass">
+            <i class="ri-tools-line me-2"></i>
+            {{ actionModalCompteur === "create" ? 'Création' : 'Modification'}} du compteur
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form [formGroup]="compteurForm">
+          <div class="modal-body modal-body-glass">
+            <div class="row g-3">
+              <!-- Code -->
+              <div class="col-lg-12">
+                <div class="form-floating">
+                  <input
+                    type="text"
+                    formControlName="codemodelecompteur"
+                    class="form-control"
+                    placeholder="Code"
+                  />
+                  <label>Code</label>
+                  <div class="invalid-feedback">{{ msgErros }}</div>
+                </div>
+              </div>
+              <!-- Libellé -->
+              <div class="col-lg-12">
+                <div class="form-floating">
+                  <input
+                    type="text"
+                    formControlName="libelle"
+                    class="form-control"
+                    placeholder="Libellé"
+                  />
+                  <label>Libellé</label>
+                  <div class="invalid-feedback">{{ msgErros }}</div>
+                </div>
+              </div>
+              <!-- Type document -->
+              <div class="col-lg-12">
+                <div class="form-floating">
+                  <select formControlName="typedocument" class="form-select">
+                    <option value="">-- Sélectionner --</option>
+                    <option value="demande">Demande</option>
+                    <option value="opération de caisse">Opération de caisse</option>
+                  </select>
+                  <label>Type doc</label>
+                  <div class="invalid-feedback">{{ msgErros }}</div>
+                </div>
+              </div>
+              <!-- Séquence 1 -->
+              <div class="col-lg-12">
+                <div class="form-floating">
+                  <select
+                    formControlName="sequence_1"
+                    class="form-select"
+                    (change)="listenSequence($event)"
+                  >
+                    <option value="">-- Sélectionner --</option>
+                    <option value="societe">Societé</option>
+                    <option value="site">Site</option>
+                    <option value="constante">Constante</option>
+                  </select>
+                  <label>Séquence 1</label>
+                  <div class="invalid-feedback">{{ msgErros }}</div>
+                </div>
+              </div>
+              <!-- Préfixe 1 (conditionnel) -->
+              <div *ngIf="compteurForm.get('sequence_1')?.value === 'constante'" class="col-lg-12">
+                <div class="form-floating">
+                  <input
+                    type="text"
+                    formControlName="prefixe_1"
+                    class="form-control"
+                    placeholder="Préfixe 1"
+                  />
+                  <label>Préfixe 1</label>
+                  <div class="invalid-feedback">{{ msgErros }}</div>
+                </div>
+              </div>
+              <!-- Séquence 2 -->
+              <div class="col-lg-12">
+                <div class="form-floating">
+                  <select
+                    formControlName="sequence_2"
+                    class="form-select"
+                    [disabled]="!optionsSequence2.length"
+                  >
+                    <option value="">-- Sélectionner --</option>
+                    <option *ngFor="let opt of optionsSequence2" [value]="opt">
+                      {{ opt | titlecase }}
+                    </option>
+                  </select>
+                  <label>Séquence 2</label>
+                  <div class="invalid-feedback">{{ msgErros }}</div>
+                </div>
+              </div>
+              <!-- Préfixe 2 (conditionnel) -->
+              <div *ngIf="compteurForm.get('sequence_2')?.value === 'constante'" class="col-lg-12">
+                <div class="form-floating">
+                  <input
+                    type="text"
+                    formControlName="prefixe_2"
+                    class="form-control"
+                    placeholder="Préfixe 2"
+                  />
+                  <label>Préfixe 2</label>
+                  <div class="invalid-feedback">{{ msgErros }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer modal-footer-glass">
+            <button type="button" class="btn-glass-cancel" data-bs-dismiss="modal">
+              <i class="ri-close-line"></i> Annuler
+            </button>
+            <button type="submit" class="btn-glass-submit" (click)="onSubmitCompteur()">
+              {{ actionModalCompteur === "create" ? 'Enregistrer' : 'Modifier'}}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
-                                                <div class="col-lg-12 col-sm-6">
-                                                  <label for="invoicenoInput">Séquence 1</label>
-                                                  <select id="typedocument-field" class="form-select form-control form-control-sm bg-light border-0 {{
-                                                      isValidField('sequence_1')
-                                                    }}" formControlName="sequence_1" (change)="listenSequence($event)">
-                                                    <option [ngValue]="null">-- Sélectionner --</option>
-
-                                                    <option value="societe">Societé</option>
-                                                    <option value="site">Site</option>
-                                                    <option value="constante">Constante</option>
-                                                  </select>
-                                                  <div class="invalid-feedback">{{ msgErros }}</div>
-                                                </div>
-
-                                                <div class="col-lg-12 col-sm-6" *ngIf="compteurForm.get('sequence_1')?.value === 'constante'">
-                                                  <label for="invoicenoInput">Préxife 1</label>
-                                                  <input type="text" formControlName="prefixe_1" class="form-control form-control-sm bg-light border-0"  placeholder="Préfixe 1"/>
-                                                  <div class="invalid-feedback">{{ msgErros }}</div>
-                                                </div>
-
-
-                                                <div class="col-lg-12 col-sm-6">
-                                                  <label for="invoicenoInput">Séquence 2</label>
-                                                  <select id="typedocument-field" [disabled]="!optionsSequence2.length" class="form-select form-control form-control-sm bg-light border-0 {{
-                                                      isValidField('sequence_2')
-                                                    }}" formControlName="sequence_2">
-                                                    <option [ngValue]="null">-- Sélectionner --</option>
-
-                                                    <option *ngFor="let opt of optionsSequence2" [value]="opt">
-                                                        {{ opt | titlecase }}
-                                                    </option>
-                                                  </select>
-                                                  <div class="invalid-feedback">{{ msgErros }}</div>
-                                                </div>
-
-                                                <div class="col-lg-12 col-sm-6" *ngIf="compteurForm.get('sequence_2')?.value === 'constante'">
-                                                  <label for="invoicenoInput">Préxife 2</label>
-                                                  <input type="text" formControlName="prefixe_2" class="form-control form-control-sm bg-light border-0"  placeholder="Préfixe 2"/>
-                                                  <div class="invalid-feedback">{{ msgErros }}</div>
-                                                </div>
-                                                <!--end col-->
-                                            </div>
-                                        </div>
-
-                                        <div class="modal-footer">
-                                            <div class="hstack gap-2 justify-content-end">
-                                                <div class="d-flex gap-2">
-                                                    <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
-                                                    <button type="submit" class="btn btn-sm btn-success" (click)="onSubmitCompteur()">
-                                                        {{ actionModalCompteur === "create" ? 'Enregistrer' : 'Modifier'}}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Modal -->
-                        <div class="modal fade flip" id="deleteModalCompteur" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-body p-5 text-center">
-                                        <div class="mt-4 text-center">
-                                            <h4>{{titleMsg}}</h4>
-                                            <p class="text-muted fs-15 mb-4">{{msgSupCompteur}}</p>
-                                            <div class="hstack gap-2 justify-content-center remove">
-                                                <button class="btn btn-sm btn-link link-success fw-medium text-decoration-none" id="deleteRecord-close" data-bs-dismiss="modal"><i class="ri-close-line me-1 align-middle"></i> annuler</button>
-                                                <button class="btn btn-sm btn-danger" (click)="deleteConfirmedCompteur()" id="delete-record">Oui, supprimer</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!--end modal -->
-                    </div>
+  <!-- ========== MODALE DE SUPPRESSION ========== -->
+  <div class="modal fade" id="deleteModalCompteur" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="delete-modal-card text-center">
+        <div class="delete-icon-wrapper mb-3">
+          <i class="ri-delete-bin-6-line"></i>
+        </div>
+        <h5 class="delete-modal-title">{{titleMsg}}</h5>
+        <p class="delete-modal-message">{{msgSupCompteur}}</p>
+        <div class="d-flex justify-content-center gap-3">
+          <button class="delete-btn-cancel" data-bs-dismiss="modal">
+            <i class="ri-close-line"></i> Annuler
+          </button>
+          <button class="delete-btn-confirm" (click)="deleteConfirmedCompteur()">
+            Oui, supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

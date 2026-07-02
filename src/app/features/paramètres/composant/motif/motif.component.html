@@ -1,51 +1,73 @@
-<!--start Notification-->
-<div class="tab-pane" id="experience" role="tabpanel">
-    <div class="mb-3">
-        <div class="mt-4 mb-3 border-bottom pb-2">
-            <div class="float-end">
-                <a href="javascript:void(0);" class="link-primary">Désactiver tout</a>
-            </div>
-            <h5 class="card-title">Traitements spécifiques</h5>
-        </div>
-        <ul class="list-unstyled mb-0">
-            <li class="d-flex">
-                <div class="flex-grow-1">
-                    <label for="directMessage" class="form-check-label fs-14">Notifications systèmes</label>
-                    <p class="text-muted">Message de notification depuis votre portail</p>
-                </div>
-                <div class="flex-shrink-0">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="directMessage" checked />
-                    </div>
-                </div>
-            </li>
-            <li class="d-flex mt-2">
-                <div class="flex-grow-1">
-                    <label class="form-check-label fs-14" for="desktopNotification">
-                        Notifications push
-                    </label>
-                    <p class="text-muted">Reçevoir les notifications en temps réel depuis votre bureau connecté.</p>
-                </div>
-                <div class="flex-shrink-0">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="desktopNotification" checked />
-                    </div>
-                </div>
-            </li>
-            <li class="d-flex mt-2">
-                <div class="flex-grow-1">
-                    <label class="form-check-label fs-14" for="emailNotification">
-                        Reçevoir les notifications par mail
-                    </label>
-                    <p class="text-muted">Reçevoir les notifications depuis votre adresse mail de votre compte utilisateur.</p>
-                </div>
-                <div class="flex-shrink-0">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="emailNotification" />
-                    </div>
-                </div>
-            </li>
-        </ul>
+<!-- ========== NOTIFICATIONS – INTERFACE PREMIUM ========== -->
+<div class="notif-container">
+
+  <!-- En-tête -->
+  <div class="notif-head">
+    <div class="notif-head-left">
+      <span class="notif-head-icon"><i class="ri-notification-3-line"></i></span>
+      <div>
+        <h2 class="notif-head-title">Préférences de notifications</h2>
+        <p class="notif-head-desc">Gérez comment vous souhaitez être informé</p>
+      </div>
     </div>
+    <button class="notif-head-btn" (click)="desactiverTout()">
+      <i class="ri-close-line"></i> Désactiver tout
+    </button>
+  </div>
+
+  <!-- Liste des paramètres -->
+  <div class="notif-list">
+
+    <!-- Notification système -->
+    <div class="notif-card">
+      <div class="notif-card-body">
+        <div class="notif-card-icon system">
+          <i class="ri-computer-line"></i>
+        </div>
+        <div class="notif-card-text">
+          <span class="notif-card-title">Notifications systèmes</span>
+          <span class="notif-card-desc">Messages de notification depuis votre portail</span>
+        </div>
+      </div>
+      <label class="notif-switch">
+        <input type="checkbox" [(ngModel)]="notifSysteme">
+        <span class="notif-switch-knob"></span>
+      </label>
+    </div>
+
+    <!-- Notification push -->
+    <div class="notif-card">
+      <div class="notif-card-body">
+        <div class="notif-card-icon push">
+          <i class="ri-smartphone-line"></i>
+        </div>
+        <div class="notif-card-text">
+          <span class="notif-card-title">Notifications push</span>
+          <span class="notif-card-desc">Recevez les notifications en temps réel sur votre bureau</span>
+        </div>
+      </div>
+      <label class="notif-switch">
+        <input type="checkbox" [(ngModel)]="notifPush" checked>
+        <span class="notif-switch-knob"></span>
+      </label>
+    </div>
+
+    <!-- Notification email -->
+    <div class="notif-card">
+      <div class="notif-card-body">
+        <div class="notif-card-icon email">
+          <i class="ri-mail-line"></i>
+        </div>
+        <div class="notif-card-text">
+          <span class="notif-card-title">Notifications par email</span>
+          <span class="notif-card-desc">Recevez les notifications sur votre adresse mail</span>
+        </div>
+      </div>
+      <label class="notif-switch">
+        <input type="checkbox" [(ngModel)]="notifEmail">
+        <span class="notif-switch-knob"></span>
+      </label>
+    </div>
+
+  </div>
 </div>
-<!--end Notification-->

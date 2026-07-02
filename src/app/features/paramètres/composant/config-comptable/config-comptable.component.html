@@ -1,226 +1,237 @@
-<!-- Configuration comptable -->
-<div class="tab-pane" id="privacy" role="tabpanel">
-  <div class="mb-4 pb-2">
-    <div class="mt-4 mb-3 border-bottom pb-2">
-      <h5 class="card-title">Valeurs de comptabilisation</h5>
+<!-- ========== SECTION : VALEURS DE COMPTABILISATION ========== -->
+  <div class="acc-section">
+    <div class="acc-section-header">
+      <div class="acc-section-icon">
+        <i class="ri-calculator-line"></i>
+      </div>
+      <div>
+        <h5 class="acc-section-title">Valeurs de comptabilisation</h5>
+        <p class="acc-section-subtitle">Configuration des journaux et comptes</p>
+      </div>
     </div>
 
-    <form [formGroup]="paramForm">
-      <div class="d-flex flex-column flex-sm-row mb-4 mb-sm-0">
-        <div class="flex-grow-1">
-          <h6 class="fs-14 mb-1">Journal d'opérations diverses</h6>
-          <p class="text-muted">Permet de classer les opérations diverses de la caisse</p>
+    <form [formGroup]="paramForm" class="acc-form">
+      <!-- Journal -->
+      <div class="acc-field-row">
+        <div class="acc-field-label">
+          <span class="acc-field-name">Journal d'opérations diverses</span>
+          <span class="acc-field-hint">Classe les opérations diverses de la caisse</span>
         </div>
-
-        <div class="mx-3" style="min-width: 300px;">
-          <select class="form-select form-select-sm" formControlName="journal">
+        <div class="acc-field-input">
+          <select class="acc-select" formControlName="journal">
             <option value="">Sélectionner le journal</option>
             <option *ngFor="let j of journaux" [value]="j.idjournal">
               {{ j.codejournal }} - {{ j.designation }}
             </option>
           </select>
         </div>
-
-        <div class="flex-shrink-0 ms-sm-3">
-          <a href="javascript:void(0);" (click)="editParam('journal')" class="btn btn-sm btn-primary">Définir</a>
-        </div>
+        <button class="acc-btn-define" (click)="editParam('journal')">
+          <i class="ri-check-line"></i> <span>Définir</span>
+        </button>
       </div>
 
-      <div class="d-flex flex-column flex-sm-row mb-4 mb-sm-0 mt-2">
-        <div class="flex-grow-1">
-          <h6 class="fs-14 mb-1">Compte intermediaire</h6>
-          <p class="text-muted">Permet de comptabiliser les opérations diverses de la caisse</p>
+      <!-- Compte intermédiaire -->
+      <div class="acc-field-row">
+        <div class="acc-field-label">
+          <span class="acc-field-name">Compte intermédiaire</span>
+          <span class="acc-field-hint">Comptabilise les opérations diverses</span>
         </div>
-
-        <div class="mx-3" style="min-width: 300px;">
-          <select class="form-select form-select-sm" formControlName="compteintermediaire">
+        <div class="acc-field-input">
+          <select class="acc-select" formControlName="compteintermediaire">
             <option value="">Sélectionner le compte</option>
             <option *ngFor="let c of comptes" [value]="c.idcompte">
               {{ c.numcompte }} - {{ c.libelle }}
             </option>
           </select>
         </div>
-
-        <div class="flex-shrink-0 ms-sm-3">
-          <a href="javascript:void(0);" (click)="editParam('compteintermediaire')" class="btn btn-sm btn-primary">Définir</a>
-        </div>
+        <button class="acc-btn-define" (click)="editParam('compteintermediaire')">
+          <i class="ri-check-line"></i> <span>Définir</span>
+        </button>
       </div>
 
-      <div class="d-flex flex-column flex-sm-row mb-4 mb-sm-0 mt-2">
-        <div class="flex-grow-1">
-          <h6 class="fs-14 mb-1">Dossier</h6>
-          <p class="text-muted mb-sm-0">Permet de stocker le fichier de comptabilisation généré par le système</p>
+      <!-- Dossier -->
+      <div class="acc-field-row">
+        <div class="acc-field-label">
+          <span class="acc-field-name">Dossier</span>
+          <span class="acc-field-hint">Stocke le fichier de comptabilisation généré</span>
         </div>
-
-        <div class="mx-3" style="min-width: 300px;">
-          <input type="file" class="form-control form-control-sm" formControlName="urldossier" placeholder="Chemin dossier">
+        <div class="acc-field-input">
+          <input type="file" class="acc-file" formControlName="urldossier" />
         </div>
-
-        <div class="flex-shrink-0 ms-sm-3">
-          <a href="javascript:void(0);" (click)="editParam('urldossier')" class="btn btn-sm btn-primary">Définir</a>
-        </div>
+        <button class="acc-btn-define" (click)="editParam('urldossier')">
+          <i class="ri-check-line"></i> <span>Définir</span>
+        </button>
       </div>
     </form>
   </div>
 
-  <!-- Paramètres analytiques -->
-  <div class="mb-4">
-    <div class="mt-4 mb-3 border-bottom pb-2">
-      <div class="float-end">
-        <a href="javascript:void(0);" class="link-primary">Désactiver tout</a>
+  <!-- ========== SECTION : PARAMÈTRES ANALYTIQUES ========== -->
+  <div class="acc-section">
+    <div class="acc-section-header">
+      <div class="acc-section-icon">
+        <i class="ri-bar-chart-grouped-line"></i>
       </div>
-      <h5 class="card-title">Paramètres d'analytique</h5>
+      <div>
+        <h5 class="acc-section-title">Paramètres d'analytique</h5>
+        <p class="acc-section-subtitle">Axes et options analytiques</p>
+      </div>
+      <button class="acc-btn-outline" (click)="desactiverTout()">
+        <i class="ri-close-line"></i> Désactiver tout
+      </button>
     </div>
 
-    <!-- Carte Axe second -->
-    <div class="card shadow-sm mb-4 border-0">
-      <div class="card-body py-3">
-        <div class="d-flex align-items-center">
-          <div class="flex-grow-1">
-            <h6 class="mb-1">
-              <i class="ri-bar-chart-2-line me-2 text-primary"></i>
-              Activer l'axe second
-            </h6>
-            <p class="text-muted mb-0 small">Permet d'activer l'analytique secondaire pour les opérations</p>
-          </div>
-          <div class="flex-shrink-0">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" role="switch"
-                     id="axeSecondSwitch"
-                     [(ngModel)]="axeSecondEnabled"
-                     (change)="toggleAxeSecond()">
-            </div>
+    <!-- Libellés des axes -->
+    <div class="acc-axis-row">
+      <div class="acc-axis-item">
+        <label class="acc-axis-label">Axe 1</label>
+        <input type="text" class="acc-input" [(ngModel)]="libelleAxe1" placeholder="Ex: Nature" />
+      </div>
+      <div class="acc-axis-item">
+        <label class="acc-axis-label">Axe 2</label>
+        <input type="text" class="acc-input" [(ngModel)]="libelleAxe2" placeholder="Ex: Destination" />
+      </div>
+      <button class="acc-btn-define" (click)="saveAxisLabels()">
+        <i class="ri-check-line"></i> <span>Enregistrer</span>
+      </button>
+    </div>
+
+    <!-- Activation axe second -->
+    <div class="acc-switch-card">
+      <div class="acc-switch-body">
+        <i class="ri-bar-chart-2-line acc-switch-icon"></i>
+        <div class="acc-switch-text">
+          <span class="acc-switch-title">Activer l'axe second</span>
+          <span class="acc-switch-desc">Active l'analytique secondaire pour les opérations</span>
+        </div>
+      </div>
+      <label class="acc-toggle">
+        <input type="checkbox" [(ngModel)]="axeSecondEnabled" (change)="toggleAxeSecond()" />
+        <span class="acc-toggle-slider"></span>
+      </label>
+    </div>
+
+    <!-- Options dépendantes -->
+    <div class="acc-options-card" [class.acc-disabled]="!axeSecondEnabled">
+      <div class="acc-option">
+        <div class="acc-option-body">
+          <i class="ri-store-2-line acc-option-icon"></i>
+          <div>
+            <span class="acc-option-title">Analytique rattaché au site</span>
+            <span class="acc-option-desc">L'axe secondaire suit le centre du site</span>
           </div>
         </div>
+        <label class="acc-toggle">
+          <input type="checkbox" [disabled]="!axeSecondEnabled" [(ngModel)]="entiteSiteEnabled" (change)="onEntiteSiteChange()" />
+          <span class="acc-toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="acc-option">
+        <div class="acc-option-body">
+          <i class="ri-table-line acc-option-icon"></i>
+          <div>
+            <span class="acc-option-title">Table de correspondance</span>
+            <span class="acc-option-desc">Utilise une table de correspondance dédiée</span>
+          </div>
+        </div>
+        <label class="acc-toggle">
+          <input type="checkbox" [disabled]="!axeSecondEnabled" [(ngModel)]="correspondanceEnabled" (change)="onCorrespondanceToggle()" />
+          <span class="acc-toggle-slider"></span>
+        </label>
+      </div>
+
+      <div *ngIf="!axeSecondEnabled" class="acc-info-box">
+        <i class="ri-information-line"></i>
+        Veuillez activer l'axe second pour débloquer ces options.
       </div>
     </div>
 
-    <!-- Options d'analytique (dépendent de l'axe second) -->
-    <div class="card shadow-sm border-0" [class.bg-light]="!axeSecondEnabled">
-      <div class="card-body">
-        <div class="d-flex align-items-center mb-4">
-          <div class="flex-grow-1">
-            <label class="form-check-label fs-14">
-              <i class="ri-store-2-line me-2 text-primary"></i>
-              Analytique rattaché au site
-            </label>
-            <p class="text-muted mb-0 small">L'axe secondaire prendra en compte le centre analytique rattaché sur le site</p>
-          </div>
-          <div class="flex-shrink-0">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" role="switch"
-                     id="entiteSiteSwitch"
-                     [disabled]="!axeSecondEnabled"
-                     [(ngModel)]="entiteSiteEnabled"
-                     (change)="onEntiteSiteChange()">
-            </div>
-          </div>
-        </div>
-
-        <div class="d-flex align-items-center mb-3">
-          <div class="flex-grow-1">
-            <label class="form-check-label fs-14">
-              <i class="ri-table-line me-2 text-primary"></i>
-              Analytique / table de correspondance
-            </label>
-            <p class="text-muted mb-0 small">L'axe secondaire prendra en compte les informations relatives sur la table de correspondance</p>
-          </div>
-          <div class="flex-shrink-0">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" role="switch"
-                     id="correspondanceSwitch"
-                     [disabled]="!axeSecondEnabled"
-                     [(ngModel)]="correspondanceEnabled"
-                     (change)="onCorrespondanceToggle()">
-            </div>
-          </div>
-        </div>
-
-        <!-- Message d'information si axe second désactivé -->
-        <div *ngIf="!axeSecondEnabled" class="alert alert-info mt-3 mb-0 py-2 small">
-          <i class="ri-information-line me-1"></i>
-          Veuillez activer l'axe second pour pouvoir choisir une option d'analytique.
-        </div>
-      </div>
-    </div>
-
-    <!-- Table de correspondance (affichée uniquement si le switch est activé) -->
-    <div *ngIf="correspondanceEnabled" class="mt-4">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h6 class="mb-0">
-          <i class="ri-list-check me-2 text-primary"></i>
-          Correspondances centre analytique
-        </h6>
-        <button class="btn btn-sm btn-primary" (click)="openAddForm()" [disabled]="showForm || !axeSecondEnabled">
-          <i class="ri-add-line"></i> Ajouter
-        </button>
-      </div>
-
-      <!-- Formulaire d'ajout/modification -->
-      <div *ngIf="showForm" class="card p-3 mb-3 bg-light border-0 shadow-sm">
-        <div class="row g-3 align-items-end">
-          <div class="col-md-4">
-            <label class="form-label">Centre analytique <span class="text-danger">*</span></label>
-            <select class="form-select form-select-sm"
-                    [(ngModel)]="currentCorrespondance.idcentreanalytique"
-                    name="centreAnalytique">
-              <option value="" disabled selected>-- Sélectionnez un centre --</option>
-              <option *ngFor="let centre of centres" [value]="centre.idcentreanalytique">
-                {{ centre.codecentreanalytique }} -- {{ centre.libelle }}
-              </option>
-            </select>
-            <div *ngIf="centreError" class="text-danger small">{{ centreError }}</div>
-          </div>
-
-          <div class="col-md-4">
-            <label class="form-label">Correspondance</label>
-            <input type="text" class="form-control form-control-sm"
-                   [(ngModel)]="currentCorrespondance.correspondance"
-                   placeholder="Champ libre">
-          </div>
-
-          <div class="col-md-4 d-flex gap-2">
-            <button class="btn btn-sm btn-success" (click)="isEditing ? updateCorrespondance() : addCorrespondance()">
-              {{ isEditing ? 'Modifier' : 'Ajouter' }}
-            </button>
-            <button class="btn btn-sm btn-secondary" (click)="cancelForm()">Annuler</button>
-          </div>
+    <!-- Table de correspondance -->
+    <div *ngIf="correspondanceEnabled" class="acc-correspondance-section">
+      <div class="acc-correspondance-header">
+        <h6 class="acc-subtitle"><i class="ri-list-check me-2"></i>Correspondances centre analytique</h6>
+        <div class="acc-header-actions">
+          <button class="acc-btn-outline" (click)="importCorrespondances()" title="Importer des correspondances">
+            <i class="ri-upload-line"></i> Importer
+          </button>
+          <button class="acc-btn-add" (click)="openAddForm()" [disabled]="showForm || !axeSecondEnabled">
+            <i class="ri-add-line"></i> Ajouter
+          </button>
         </div>
       </div>
 
-      <!-- Tableau des correspondances -->
-      <div class="table-responsive" *ngIf="!loadingComptable">
-        <table class="table table-sm table-hover table-bordered align-middle">
-          <thead class="table-light">
+      <!-- Formulaire ajout (inchangé) -->
+      <div *ngIf="showForm" class="acc-inline-form">
+        <div class="acc-inline-field">
+          <select class="acc-select" [(ngModel)]="currentCorrespondance.idcentreanalytique" name="centreAnalytique">
+            <option value="" disabled selected>Centre analytique</option>
+            <option *ngFor="let centre of centres" [value]="centre.idcentreanalytique">
+              {{ centre.codecentreanalytique }} — {{ centre.libelle }}
+            </option>
+          </select>
+          <div *ngIf="centreError" class="acc-error">{{ centreError }}</div>
+        </div>
+        <div class="acc-inline-field">
+          <input type="text" class="acc-input" [(ngModel)]="currentCorrespondance.correspondance" placeholder="Correspondance" />
+        </div>
+        <div class="acc-inline-actions">
+          <button class="acc-btn-define" (click)="isEditing ? updateCorrespondance() : addCorrespondance()">
+            {{ isEditing ? 'Modifier' : 'Ajouter' }}
+          </button>
+          <button class="acc-btn-cancel" (click)="cancelForm()">Annuler</button>
+        </div>
+      </div>
+
+      <!-- Tableau -->
+      <div class="acc-table-wrapper" *ngIf="!loadingComptable">
+        <table class="acc-table">
+          <thead>
             <tr>
               <th>Centre analytique</th>
               <th>Correspondance</th>
-              <th style="width: 100px;" class="text-center">Actions</th>
+              <th class="acc-actions-col">Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let item of correspondances">
+            <tr *ngFor="let item of paginatedCorrespondances">
               <td>{{ item.codecentreanalytique }}</td>
               <td>{{ item.correspondance }}</td>
-              <td class="text-center">
-                <button class="btn btn-sm btn-outline-primary me-1" (click)="editCorrespondance(item)">
-                  <i class="ri-pencil-line"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-danger" (click)="deleteCorrespondance(item.idcorrespondance!)">
-                  <i class="ri-delete-bin-line"></i>
-                </button>
+              <td class="acc-actions-col">
+                <div class="acc-actions-group">
+                  <button class="acc-icon-btn acc-icon-edit" (click)="editCorrespondance(item)" title="Modifier">
+                    <i class="ri-pencil-line"></i>
+                  </button>
+                  <button class="acc-icon-btn acc-icon-delete" (click)="deleteCorrespondance(item.idcorrespondance!)" title="Supprimer">
+                    <i class="ri-delete-bin-line"></i>
+                  </button>
+                </div>
               </td>
             </tr>
             <tr *ngIf="correspondances.length === 0">
-              <td colspan="3" class="text-center text-muted">Aucune correspondance définie.</td>
+              <td colspan="3">
+                <div class="acc-empty">
+                  <i class="ri-file-search-line"></i>
+                  <span>Aucune correspondance</span>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
+
+        <!-- Pagination -->
+        <div *ngIf="totalPagesCorrespondance > 1" class="acc-pagination">
+          <button class="acc-pagination-btn" [disabled]="currentPageCorrespondance === 1" (click)="changeCorrespondancePage(currentPageCorrespondance - 1)">
+            <i class="ri-arrow-left-s-line"></i>
+          </button>
+          <span class="acc-pagination-info">{{ currentPageCorrespondance }} / {{ totalPagesCorrespondance }}</span>
+          <button class="acc-pagination-btn" [disabled]="currentPageCorrespondance === totalPagesCorrespondance" (click)="changeCorrespondancePage(currentPageCorrespondance + 1)">
+            <i class="ri-arrow-right-s-line"></i>
+          </button>
+        </div>
       </div>
 
-      <div *ngIf="loadingComptable" class="text-center py-3">
-        <div class="spinner-border spinner-border-sm text-primary"></div>
+      <div *ngIf="loadingComptable" class="acc-spinner">
+        <div class="spinner-border text-primary" role="status"></div>
       </div>
     </div>
   </div>
-</div>

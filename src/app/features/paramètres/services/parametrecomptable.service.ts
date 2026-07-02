@@ -84,5 +84,19 @@ export class ParametreComptableService {
     return this.http.delete(URL_LOCAL.baseUrl + this.url + `/correspondances/${id}`);
   }
 
+  saveAxisLabels(data: { societe: number; libelleaxe1: string; libelleaxe2: string }) {
+    return this.http.post(URL_LOCAL.baseUrl + this.url + `/save-axis-labels`, data);
+  }
+
+  /**
+ * Importe une liste de correspondances
+ * @param data - Tableau d'objets { idcentreanalytique, correspondance }
+ * @returns Observable de la réponse API
+ */
+  importCorrespondances(data: any[]): Observable<any> {
+    // Adaptez l'URL selon votre API
+    return this.http.post(URL_LOCAL.baseUrl + this.url + `/import-correspondances`, data);
+  }
+
   
 }

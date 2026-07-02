@@ -2,15 +2,29 @@
 <div class="row">
   <div class="col-12">
     <div
-      class="page-title-box d-sm-flex align-items-center justify-content-between"
+      class="page-title-premium d-sm-flex align-items-center justify-content-between"
     >
-      <h4 class="mb-sm-0">{{ title }}</h4>
+      <div class="d-flex align-items-center gap-3">
+        <div class="title-icon-premium">
+          <i class="ri-bank-card-fill"></i>
+        </div>
+        <div>
+          <h4 class="mb-0 title-premium">{{ title }}</h4>
+          <span class="title-subtitle-premium"
+            >Gestion des opérations de caisse</span
+          >
+        </div>
+      </div>
       <div class="page-title-right">
-        <ol class="breadcrumb m-0">
+        <ol class="breadcrumb-premium m-0">
           <li class="breadcrumb-item">
-            <a href="javascript: void(0);">Générales</a>
+            <a href="javascript: void(0);">
+              <i class="ri-home-4-line me-1"></i>Générales
+            </a>
           </li>
-          <li class="breadcrumb-item active">{{ title }}</li>
+          <li class="breadcrumb-item active">
+            <i class="ri-bank-card-fill"></i>{{ title }}
+          </li>
         </ol>
       </div>
     </div>
@@ -20,82 +34,90 @@
 
 <div class="row">
   <div class="col-lg-12">
-    <div class="card" id="">
-      <div class="card-header border-0">
-        <div class="d-flex align-items-center">
-          <h5 class="card-title mb-0 flex-grow-1">{{ title }}</h5>
-          <div class="flex-shrink-0">
-            <div class="d-flex gap-2 flex-wrap">
+    <div class="card-glass" id="operationList">
+      <!-- Header avec actions -->
+      <div class="card-header-glass border-0">
+        <div
+          class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+        >
+          <div class="d-flex gap-2 flex-wrap">
+            <button
+              class="btn-glass-primary"
+              [disabled]="!isAnyOpen"
+              (click)="creationOperation()"
+            >
+              <i class="ri-add-line align-bottom me-1"></i>Nouvelle opération
+            </button>
+            <div class="btn-group-glass" role="group">
               <button
-                class="btn btn-sm btn-danger"
-                [disabled]="!isAnyOpen"
-                (click)="creationOperation()"
+                type="button"
+                class="btn-glass-toggle"
+                [class.active]="viewMode === 'table'"
+                (click)="setViewMode('table')"
               >
-                <i class="ri-add-line align-bottom me-1"></i>nouvelle operation
+                <i class="ri-table-line"></i> Table
               </button>
-              <div class="btn-group" role="group" aria-label="view mode">
-                <button
-                  type="button"
-                  class="btn btn-sm"
-                  [class.btn-outline-primary]="viewMode === 'table'"
-                  [class.btn-light]="viewMode !== 'table'"
-                  (click)="setViewMode('table')"
-                >
-                  Table
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-sm"
-                  [class.btn-outline-primary]="viewMode === 'details'"
-                  [class.btn-light]="viewMode !== 'details'"
-                  (click)="setViewMode('details')"
-                >
-                  Détails
-                </button>
-              </div>
+              <button
+                type="button"
+                class="btn-glass-toggle"
+                [class.active]="viewMode === 'details'"
+                (click)="setViewMode('details')"
+              >
+                <i class="ri-layout-grid-line"></i> Détails
+              </button>
             </div>
+          </div>
+          <div class="d-flex gap-2">
+            <span
+              class="status-badge"
+              [class]="isAnyOpen ? 'status-oui' : 'status-non'"
+            >
+              <span
+                class="status-dot"
+                [class]="isAnyOpen ? 'status-oui' : 'status-non'"
+              ></span>
+              {{ isAnyOpen ? "Caisse ouverte" : "Caisse fermée" }}
+            </span>
           </div>
         </div>
       </div>
-      <div
-        class="card-body bg-light-subtle border border-dashed border-start-0 border-end-0"
-      >
+
+      <!-- Filtres -->
+      <div class="card-body-glass pt-0">
         <form [formGroup]="searchForm">
           <div class="row g-3">
             <div class="col-xxl-5 col-sm-12">
-              <div class="d-flex flex-wrap gap-2 align-items-center">
-                <div class="search-box search-box-sm flex-grow-1">
-                  <input
-                    type="text"
-                    class="form-control form-control-sm search bg-light border-light"
-                    formControlName="search"
-                    placeholder="rechercher par numero, montant et devise..."
-                  />
-                  <i class="ri-search-line search-icon"></i>
-                </div>
+              <div class="search-glass">
+                <i class="ri-search-line"></i>
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="search"
+                  placeholder="Rechercher par numéro, montant, devise..."
+                />
               </div>
             </div>
             <div class="col-xxl-7 col-sm-12">
               <div class="row g-2">
                 <div class="col-md-4">
                   <select
-                    class="form-select form-select-sm"
+                    class="form-select form-select-glass"
                     formControlName="typepaiement"
                   >
-                    <option value="">Tous types</option>
-                    <option value="encaissement">encaissement</option>
-                    <option value="decaissement">decaissement</option>
+                    <option value="">Tous les types</option>
+                    <option value="encaissement">Encaissement</option>
+                    <option value="decaissement">Décaissement</option>
                     <option value="decaissementaj">
-                      decaissement à justifier
+                      Décaissement à justifier
                     </option>
                   </select>
                 </div>
                 <div class="col-md-4">
                   <select
-                    class="form-select form-select-sm"
+                    class="form-select form-select-glass"
                     formControlName="devise"
                   >
-                    <option value="">Toutes devises</option>
+                    <option value="">Toutes les devises</option>
                     @for (d of devises; track $index) {
                       <option value="{{ d.iddevise }}">
                         {{ d.codedevise }}
@@ -104,471 +126,267 @@
                   </select>
                 </div>
                 <div class="col-md-4">
-                  <div class="search-box search-box-sm flex-grow-1">
+                  <div class="search-glass">
+                    <i class="ri-calendar-line"></i>
                     <input
                       type="date"
-                      class="form-control form-control-sm bg-light border-light"
+                      class="form-control"
                       formControlName="date"
                       placeholder="Date"
                     />
-                    <i class="ri-search-line search-icon"></i>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <!--end row-->
         </form>
       </div>
 
-      <div class="card-body">
-        <div
-          *ngIf="loading && operations.length === 0"
-          class="text-center py-5"
-        >
-          <div class="spinner-border text-info" role="status"></div>
-          <h6 class="mt-3">Chargement des opérations...</h6>
+      <!-- Loading -->
+      <div *ngIf="loading && operations.length === 0" class="text-center py-5">
+        <div class="spinner-glass">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="mt-2 text-muted">Chargement des opérations...</p>
         </div>
-        <div *ngIf="!loading || operations.length > 0">
-          <div *ngIf="viewMode === 'table'">
-            <div class="table-responsive table-card">
-              <table
-                class="table align-middle table-nowrap table-container table-custom table-compact"
-                id="invoiceTable"
-              >
-                <thead class="text-muted">
-                  <tr>
-                    <th scope="col" style="width: 50px">
-                      <div class="form-check form-check-sm">
-                        <input
-                          class="form-check-input"
-                          type="checkbox"
-                          id="checkAll"
-                          value="option"
-                        />
-                      </div>
-                    </th>
-                    <th class="sort text-uppercase" data-sort="invoice_id">
-                      numero
-                    </th>
-                    <th class="sort text-uppercase" data-sort="type">
-                      operation
-                    </th>
-                    <th class="sort text-uppercase" data-sort="invoice_amount">
-                      Montant
-                    </th>
-                    <th class="sort text-uppercase" data-sort="status">
-                      Devise
-                    </th>
-                    <th class="sort text-uppercase" data-sort="date">Date</th>
-                    <th class="sort text-uppercase" data-sort="action">
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-                <tbody class="list form-check-all" id="invoice-list-data">
-                  @for (item of operations; track $index) {
-                    <tr class="fs-12">
-                      <th scope="row">
-                        <div class="form-check">
-                          <input
-                            class="form-check-input"
-                            [checked]="isChecked(item.idoperation)"
-                            [(ngModel)]="selectedItems[$index]"
-                            (ngModelChange)="handleSelectOne(item, $event)"
-                            type="checkbox"
-                            name="itemGroup_{{ $index }}"
-                          />
-                        </div>
-                      </th>
-                      <td class="numero">
-                        <a href="#" class="fw-medium link-primary">{{
-                          item.codeoperation
-                        }}</a>
-                      </td>
-                      <td
-                        class="typepaiement text-danger"
-                        *ngIf="item.idoperationorigine"
-                      >
-                        <i
-                          class="ri-close-circle-line fs-13 align-middle me-1"
-                        ></i>
-                        Annulation :
-                        {{ item.caisses[0]?.codtypeoperation }}
-                      </td>
+      </div>
 
-                      <td
-                        class="typepaiement text-success"
-                        *ngIf="
-                          !item.idoperationorigine &&
-                          item.caisses[0]?.codtypeoperation == 'encaissement'
-                        "
-                      >
-                        {{ item.caisses[0]?.codtypeoperation }}
-                        <i
-                          class="ri-arrow-right-up-line fs-13 align-middle"
-                        ></i>
-                      </td>
-
-                      <td
-                        class="typepaiement text-warning"
-                        *ngIf="
-                          !item.idoperationorigine &&
-                          item.caisses[0]?.codtypeoperation == 'decaissement'
-                        "
-                      >
-                        {{ item.caisses[0]?.codtypeoperation }}
-                        <i
-                          class="ri-arrow-right-down-line fs-13 align-middle"
-                        ></i>
-                      </td>
-
-                      <td
-                        class="typepaiement text-primary"
-                        *ngIf="
-                          !item.idoperationorigine &&
-                          item.caisses[0]?.codtypeoperation == 'decaissementaj'
-                        "
-                      >
-                        decaissement à justifier
-                        <i
-                          class="ri-arrow-right-down-line fs-13 align-middle"
-                        ></i>
-                      </td>
-                      <td
-                        class="montant text-center"
-                        *ngIf="item.devise.codedevise != 'USD'"
-                      >
+      <!-- Contenu principal -->
+      <div
+        *ngIf="!loading || operations.length > 0"
+        class="card-body-glass pt-0"
+      >
+        <!-- Vue Table -->
+        <div *ngIf="viewMode === 'table'">
+          <div class="table-responsive">
+            <table class="table table-modern align-middle" id="operationTable">
+              <thead>
+                <tr>
+                  <th>Numéro</th>
+                  <th>Opération</th>
+                  <th class="text-end">Montant</th>
+                  <th>Devise</th>
+                  <th>Date</th>
+                  <th style="text-align: right; width: 180px">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of operations; track $index) {
+                  <tr class="fs-12">
+                    <td>
+                      <span class="code-badge">{{ item.codeoperation }}</span>
+                    </td>
+                    <td>
+                      <span class="type-badge" [class]="getTypeClass(item)">
+                        <i [class]="getTypeIcon(item)"></i>
+                        {{ getTypeLabel(item) }}
+                      </span>
+                    </td>
+                    <td class="text-end fw-semibold">
+                      @if (item.devise.codedevise != "USD") {
                         {{ formatCFA(item.montant) }}
-                      </td>
-                      <td
-                        class="montant text-center"
-                        *ngIf="item.devise.codedevise == 'USD'"
-                      >
+                      } @else {
                         {{ formatNumber(item.montant) }}
-                      </td>
-                      <td class="devise">{{ item.devise.codedevise }}</td>
-                      <td class="text-muted text-uppercase fs-11">
-                        {{ formatDateFR(item.dateoperation) }}
-                      </td>
-                      <td>
-                        <ul class="list-inline hstack gap-2 mb-0">
-                          <li
-                            class="list-inline-item"
-                            data-bs-toggle="tooltip"
-                            data-bs-trigger="hover"
-                            data-bs-placement="top"
-                            title="View"
-                          >
-                            <button
-                              type="button"
-                              class="btn btn-link text-primary p-0"
-                              (click)="openEditModal(editModalTpl, item)"
-                            >
-                              <i class="ri-eye-fill fs-16"></i>
-                            </button>
-                          </li>
-                          <li
-                            class="list-inline-item edit"
-                            data-bs-toggle="tooltip"
-                            data-bs-trigger="hover"
-                            data-bs-placement="top"
-                            title="Imprimer"
-                          >
-                            <button
-                              type="button"
-                              (click)="printRecu(item)"
-                              class="btn btn-link text-secondary p-0 edit-item-btn"
-                            >
-                              <i class="ri-printer-fill fs-16"></i>
-                            </button>
-                          </li>
-                          <li
-                            class="list-inline-item edit"
-                            data-bs-toggle="tooltip"
-                            data-bs-trigger="hover"
-                            data-bs-placement="top"
-                            title="Ecriture"
-                          >
-                            <button
-                              type="button"
-                              class="btn btn-link text-dark p-0 edit-item-btn"
-                              (click)="
-                                openEcritureModal(ecritureModalTpl, item)
-                              "
-                            >
-                              <i class="ri-price-tag-3-fill fs-16"></i>
-                            </button>
-                          </li>
-                          <li
-                            class="list-inline-item edit"
-                            data-bs-toggle="tooltip"
-                            data-bs-trigger="hover"
-                            data-bs-placement="top"
-                            title="Pièces jointes"
-                          >
-                            <div class="d-flex align-items-center gap-2">
-                              <!-- Icône avec badge de comptage -->
-                              <div class="position-relative">
-                                <button
-                                  type="button"
-                                  class="btn btn-link text-dark p-0 edit-item-btn"
-                                  (click)="openPiecesJointesModal(item)"
-                                >
-                                  <i
-                                    class="ri-attachment-2 fs-18 text-muted"
-                                  ></i>
-                                  <span
-                                    *ngIf="getPiecesCount(item.idoperation) > 0"
-                                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary"
-                                    style="
-                                      font-size: 9px;
-                                      margin-top: -2px;
-                                      margin-left: -6px;
-                                    "
-                                  >
-                                    {{ getPiecesCount(item.idoperation) }}
-                                  </span>
-                                </button>
-                              </div>
-                            </div>
-                          </li>
-                          <li
-                            class="list-inline-item edit"
-                            data-bs-toggle="tooltip"
-                            data-bs-trigger="hover"
-                            data-bs-placement="top"
-                            title="Annuler"
-                          >
-                            <button
-                              type="button"
-                              class="btn btn-link p-0 edit-item-btn"
-                              (click)="openCancelModal(cancelModalTpl, item)"
-                              [class.text-secondary]="
-                                item.annulee === 1 || item.idoperationannulation
-                              "
-                              [class.text-warning]="
-                                !(
-                                  item.annulee === 1 ||
-                                  item.idoperationannulation
-                                )
-                              "
-                              [style.pointer-events]="
-                                item.annulee === 1 || item.idoperationannulation
-                                  ? 'none'
-                                  : 'auto'
-                              "
-                              [style.opacity]="
-                                item.annulee === 1 || item.idoperationannulation
-                                  ? '0.4'
-                                  : '1'
-                              "
-                            >
-                              <i class="bx bx-x-circle fs-16"></i>
-                            </button>
-                          </li>
-                          <li
-                            class="list-inline-item"
-                            data-bs-toggle="tooltip"
-                            data-bs-trigger="hover"
-                            data-bs-placement="top"
-                            title="Remove"
-                          >
-                            <button
-                              type="button"
-                              class="btn btn-link text-danger p-0"
-                              data-bs-toggle="modal"
-                              data-bs-target="#deleteOrder"
-                              (click)="modalDelete(item)"
-                              title="Suppression"
-                              disabled
-                            >
-                              <i class="ri-delete-bin-5-fill fs-16"></i>
-                            </button>
-                          </li>
-                        </ul>
-                      </td>
-                    </tr>
-                  }
-                  <tr *ngIf="loading">
-                    <td colspan="8">
-                      <div class="text-center py-4">
-                        <div class="spinner-border text-info"></div>
-                        <h6 class="mt-2">Chargement...</h6>
+                      }
+                    </td>
+                    <td>{{ item.devise.codedevise }}</td>
+                    <td class="text-muted small">
+                      {{ formatDateFR(item.dateoperation) }}
+                    </td>
+                    <td>
+                      <div class="actions-group">
+                        <button
+                          class="action-btn action-view"
+                          (click)="openEditModal(editModalTpl, item)"
+                          title="Voir"
+                        >
+                          <i class="ri-eye-line"></i>
+                        </button>
+                        <button
+                          class="action-btn action-print"
+                          (click)="printRecu(item)"
+                          title="Imprimer"
+                        >
+                          <i class="ri-printer-line"></i>
+                        </button>
+                        <button
+                          class="action-btn action-accounting"
+                          (click)="openEcritureModal(ecritureModalTpl, item)"
+                          title="Écritures"
+                        >
+                          <i class="ri-price-tag-3-line"></i>
+                        </button>
+                        <button
+                          class="action-btn action-attachment"
+                          (click)="openPiecesJointesModal(item)"
+                          title="Pièces jointes"
+                        >
+                          <i class="ri-attachment-2"></i>
+                          @if (getPiecesCount(item.idoperation) > 0) {
+                            <span class="badge-count">{{
+                              getPiecesCount(item.idoperation)
+                            }}</span>
+                          }
+                        </button>
+                        <button
+                          class="action-btn action-cancel"
+                          (click)="openCancelModal(cancelModalTpl, item)"
+                          [class.disabled]="
+                            item.annulee === 1 || item.idoperationannulation
+                          "
+                          title="Annuler"
+                        >
+                          <i class="bx bx-x-circle"></i>
+                        </button>
                       </div>
                     </td>
                   </tr>
-                </tbody>
-              </table>
-
-              <div class="" *ngIf="operations.length == 0 && !loading">
-                <div class="text-center">
-                  <h6 class="mt-2">Désolé! Aucune opération trouvé</h6>
-                  <p class="text-muted mb-0">
-                    Désole il n' y aucune donnée dans cette base
-                  </p>
-                </div>
-              </div>
-            </div>
+                }
+                @if (operations.length === 0 && !loading) {
+                  <tr>
+                    <td colspan="7">
+                      <div class="empty-state">
+                        <i class="ri-inbox-2-line"></i>
+                        <p>Aucune opération trouvée</p>
+                        <span class="empty-hint"
+                          >Aucune opération disponible dans cette base</span
+                        >
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
           </div>
+        </div>
 
-          <div *ngIf="viewMode === 'details'">
-            <div class="row">
-              @for (item of operations; track $index) {
-                <div class="col-12 mb-3">
-                  <div class="card" id="card-{{ item.idoperation }}">
-                    <div class="card-body">
-                      <div
-                        class="d-flex justify-content-between align-items-start"
-                      >
-                        <div>
-                          <h6 class="mb-1">{{ item.codeoperation }}</h6>
-                          <div class="text-muted mb-2">
-                            {{ formatDateFR(item.dateoperation) }} •
-                            {{ item.montant | number: "1.2-2" }} •
-                            {{ item.devise?.codedevise }}
-                          </div>
-                        </div>
-                        <div class="hstack gap-2">
-                          <button
-                            type="button"
-                            class="btn btn-link text-primary p-0"
-                            (click)="openEditModal(editModalTpl, item)"
-                            title="Voir"
-                          >
-                            <i class="ri-eye-fill fs-16"></i>
-                          </button>
-                          <button
-                            type="button"
-                            class="btn btn-link text-secondary p-0"
-                            (click)="printRecu(item)"
-                            title="Imprimer"
-                          >
-                            <i class="ri-printer-fill fs-16"></i>
-                          </button>
-                          <button
-                            type="button"
-                            class="btn btn-link text-dark p-0"
-                            (click)="openEcritureModal(ecritureModalTpl, item)"
-                            title="Écriture"
-                          >
-                            <i class="ri-price-tag-3-fill fs-16"></i>
-                          </button>
-                          <div class="d-flex align-items-center gap-2">
-                            <!-- Icône avec badge de comptage -->
-                            <div class="position-relative">
-                              <button
-                                type="button"
-                                class="btn btn-link text-dark p-0 edit-item-btn"
-                                (click)="openPiecesJointesModal(item)"
-                              >
-                                <i class="ri-attachment-2 fs-18 text-muted"></i>
-                                <span
-                                  *ngIf="getPiecesCount(item.idoperation) > 0"
-                                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary"
-                                  style="
-                                    font-size: 9px;
-                                    margin-top: -2px;
-                                    margin-left: -6px;
-                                  "
-                                >
-                                  {{ getPiecesCount(item.idoperation) }}
-                                </span>
-                              </button>
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            class="btn btn-link p-0"
-                            (click)="openCancelModal(cancelModalTpl, item)"
-                            [class.text-secondary]="
+        <!-- Vue Détails -->
+        <div *ngIf="viewMode === 'details'">
+          <div class="row">
+            @for (item of operations; track $index) {
+              <div class="col-12 mb-3">
+                <div class="card-glass-detail" id="card-{{ item.idoperation }}">
+                  <div class="card-body-glass p-3">
+                    <div
+                      class="d-flex justify-content-between align-items-start flex-wrap gap-2"
+                    >
+                      <div>
+                        <div class="d-flex align-items-center gap-2">
+                          <span class="code-badge">{{
+                            item.codeoperation
+                          }}</span>
+                          <span class="type-badge" [class]="getTypeClass(item)">
+                            <i [class]="getTypeIcon(item)"></i>
+                            {{ getTypeLabel(item) }}
+                          </span>
+                          <span
+                            class="status-badge"
+                            [class]="
                               item.annulee === 1 || item.idoperationannulation
+                                ? 'status-non'
+                                : 'status-oui'
                             "
-                            [class.text-warning]="
-                              !(
+                          >
+                            <span
+                              class="status-dot"
+                              [class]="
                                 item.annulee === 1 || item.idoperationannulation
-                              )
-                            "
-                            [style.pointer-events]="
+                                  ? 'status-non'
+                                  : 'status-oui'
+                              "
+                            ></span>
+                            {{
                               item.annulee === 1 || item.idoperationannulation
-                                ? 'none'
-                                : 'auto'
-                            "
-                            [style.opacity]="
-                              item.annulee === 1 || item.idoperationannulation
-                                ? '0.4'
-                                : '1'
-                            "
-                            title="Annuler"
-                          >
-                            <i class="bx bx-x-circle fs-16"></i>
-                          </button>
-                          <button
-                            type="button"
-                            class="btn btn-link text-danger p-0"
-                            title="Suppression"
-                            disabled
-                          >
-                            <i class="ri-delete-bin-5-fill fs-16"></i>
-                          </button>
+                                ? "Annulée"
+                                : "Active"
+                            }}
+                          </span>
+                        </div>
+                        <div class="text-muted small mt-1">
+                          {{ formatDateFR(item.dateoperation) }} •
+                          <span class="fw-semibold">
+                            @if (item.devise.codedevise != "USD") {
+                              {{ formatCFA(item.montant) }}
+                            } @else {
+                              {{ formatNumber(item.montant) }}
+                            }
+                          </span>
+                          {{ item.devise?.codedevise }}
                         </div>
                       </div>
+                      <div class="actions-group">
+                        <button
+                          class="action-btn action-view"
+                          (click)="openEditModal(editModalTpl, item)"
+                          title="Voir"
+                        >
+                          <i class="ri-eye-line"></i>
+                        </button>
+                        <button
+                          class="action-btn action-print"
+                          (click)="printRecu(item)"
+                          title="Imprimer"
+                        >
+                          <i class="ri-printer-line"></i>
+                        </button>
+                        <button
+                          class="action-btn action-accounting"
+                          (click)="openEcritureModal(ecritureModalTpl, item)"
+                          title="Écritures"
+                        >
+                          <i class="ri-price-tag-3-line"></i>
+                        </button>
+                        <button
+                          class="action-btn action-attachment"
+                          (click)="openPiecesJointesModal(item)"
+                          title="Pièces jointes"
+                        >
+                          <i class="ri-attachment-2"></i>
+                          @if (getPiecesCount(item.idoperation) > 0) {
+                            <span class="badge-count">{{
+                              getPiecesCount(item.idoperation)
+                            }}</span>
+                          }
+                        </button>
+                        <button
+                          class="action-btn action-cancel"
+                          (click)="openCancelModal(cancelModalTpl, item)"
+                          [class.disabled]="
+                            item.annulee === 1 || item.idoperationannulation
+                          "
+                          title="Annuler"
+                        >
+                          <i class="bx bx-x-circle"></i>
+                        </button>
+                      </div>
+                    </div>
 
-                      <div
-                        class="row bg-light rounded-3 p-3 mt-3 align-items-center"
-                      >
+                    <div class="detail-info-card mt-3 p-3 rounded-3">
+                      <div class="row g-3 align-items-center">
                         <div class="col-md-6">
-                          <div
-                            class="d-flex flex-wrap align-items-center gap-2"
-                          >
-                            <span
-                              class="badge"
-                              [ngClass]="
-                                item.caisses[0]?.codtypeoperation ===
-                                'encaissement'
-                                  ? 'bg-success'
-                                  : 'bg-primary'
-                              "
-                              >{{
-                                item.caisses[0]?.codtypeoperation ===
-                                "decaissementaj"
-                                  ? "decaissement à justifier"
-                                  : item.caisses[0]?.codtypeoperation ||
-                                    "Type inconnu"
-                              }}</span
-                            >
-                            <span
-                              class="badge"
-                              [ngClass]="
-                                item.annulee === 1 || item.idoperationannulation
-                                  ? 'bg-danger'
-                                  : 'bg-light text-dark'
-                              "
-                              >{{
-                                item.annulee === 1 || item.idoperationannulation
-                                  ? "Annulée"
-                                  : "Active"
-                              }}</span
-                            >
-                          </div>
-                          <div class="mt-2 text-muted">
-                            <strong>Description :</strong>
-                            <span>{{ item.lignes[0]?.libelle || "-" }}</span>
+                          <div class="d-flex flex-wrap gap-2">
+                            <span class="detail-label">Description :</span>
+                            <span class="detail-value">{{
+                              item.lignes[0]?.libelle || "-"
+                            }}</span>
                           </div>
                         </div>
                         <div class="col-md-6 text-end">
-                          <div
-                            class="d-inline-block text-start bg-white p-2 rounded shadow-sm mb-2 ms-2"
-                          >
-                            <div class="fs-13 text-muted">
-                              Caisse de paiement
-                            </div>
+                          <div class="caisses-payment">
+                            <span class="detail-label"
+                              >Caisse de paiement :</span
+                            >
                             @for (caisse of item.caisses; track $index) {
-                              <div class="fw-medium">
+                              <span class="caisse-tag">
                                 {{ caisse?.caisse?.libelle || "-" }}
-                                {{ caisse?.montant | number: "1.2-2" }}
+                                <span class="caisse-amount">
+                                  @if (item.devise.codedevise != "USD") {
+                                    {{ formatCFA(caisse.montant) }}
+                                  } @else {
+                                    {{ formatNumber(caisse.montant) }}
+                                  }
+                                </span>
                                 {{ caisse.caisse?.devise }}
-                              </div>
+                              </span>
                             }
                           </div>
                         </div>
@@ -576,888 +394,787 @@
                     </div>
                   </div>
                 </div>
-              }
-            </div>
-          </div>
-
-          <div class="d-flex justify-content-end mt-3">
-            <div class="pagination-wrap hstack gap-2">
-              <button
-                [disabled]="currentPage == 1"
-                (click)="changePage(currentPage - 1)"
-                class="btn btn-sm btn-soft-primary pagination-prev"
-              >
-                Précédent
-              </button>
-              <ul class="pagination listjs-pagination mb-0">
-                Page
-                {{
-                  currentPage
-                }}
-                /
-                {{
-                  totalPages
-                }}
-              </ul>
-              <button
-                [disabled]="currentPage == totalPages"
-                (click)="changePage(currentPage + 1)"
-                class="btn btn-sm btn-soft-primary pagination-next"
-              >
-                Suivant
-              </button>
-            </div>
-          </div>
-
-          <!-- Modal -->
-          <div
-            class="modal fade flip"
-            id="deleteOrder"
-            tabindex="-1"
-            aria-hidden="true"
-          >
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content">
-                <div class="modal-body p-5 text-center">
-                  <div class="mt-4 text-center">
-                    <h4>{{ titleMsg }}</h4>
-                    <p class="text-muted fs-15 mb-4">{{ msgSup }}</p>
-                    <div class="hstack gap-2 justify-content-center remove">
-                      <button
-                        class="btn btn-sm btn-link link-success fw-medium text-decoration-none"
-                        id="deleteRecord-close"
-                        data-bs-dismiss="modal"
-                      >
-                        <i class="ri-close-line me-1 align-middle"></i> annuler
-                      </button>
-                      <button
-                        class="btn btn-sm btn-danger"
-                        (click)="deleteConfirmed()"
-                        id="delete-record"
-                      >
-                        Oui, supprimer
-                      </button>
-                    </div>
-                  </div>
-                </div>
               </div>
-            </div>
-          </div>
-          <!--end modal -->
-
-          <ng-template #cancelModalTpl let-modal>
-            <div class="p-4 text-center">
-              <h4>Annulation d'opération</h4>
-              <p class="text-muted fs-15 mb-4">
-                Êtes-vous sûr de vouloir annuler cette opération ?
-              </p>
-              <div class="hstack gap-2 justify-content-center remove">
-                <button
-                  class="btn btn-sm btn-link link-success fw-medium text-decoration-none"
-                  (click)="modal.dismiss()"
-                >
-                  non
-                </button>
-                <button
-                  class="btn btn-sm btn-danger"
-                  (click)="cancelConfirmed()"
-                >
-                  Oui, annuler
-                </button>
-              </div>
-            </div>
-          </ng-template>
-        </div>
-      </div>
-    </div>
-    <!--end col-->
-
-    <div class="row">
-      <div class="col-xl-4 col-md-4">
-        <!-- card -->
-        <div class="card card-animate">
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              <div class="flex-grow-1">
-                <p class="text-uppercase fw-medium text-muted mb-0">
-                  Décaissement
-                </p>
-              </div>
-              <div class="flex-shrink-0">
-                <h5 class="text-success fs-14 mb-0">
-                  <i class="ri-arrow-right-up-line fs-13 align-middle"></i>
-                  +89.24 %
-                </h5>
-              </div>
-            </div>
-            <div class="d-flex align-items-end justify-content-between mt-4">
-              <div>
-                <h4 class="fs-22 fw-semibold ff-secondary mb-4">
-                  <span class="counter-value">{{
-                    formatCFA(totalDecaissementJour) || 0
-                  }}</span>
-                  {{ user.devise_ref_code }}
-                </h4>
-                <span class="badge bg-warning me-1">{{
-                  formatCFA(nbrDecaissementJour) || 0
-                }}</span>
-                <span class="text-muted">Décaissement</span>
-              </div>
-              <div class="avatar-sm flex-shrink-0">
-                <span class="avatar-title bg-light rounded fs-3">
-                  <i
-                    data-feather="file-text"
-                    class="text-success icon-dual-success"
-                  ></i>
-                </span>
-              </div>
-            </div>
-          </div>
-          <!-- end card body -->
-        </div>
-        <!-- end card -->
-      </div>
-      <!-- end col -->
-
-      <div class="col-xl-4 col-md-4">
-        <!-- card -->
-        <div class="card card-animate">
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              <div class="flex-grow-1">
-                <p class="text-uppercase fw-medium text-muted mb-0">
-                  Plus couteux
-                </p>
-              </div>
-              <div class="flex-shrink-0">
-                <h5 class="text-danger fs-14 mb-0">
-                  <i class="ri-arrow-right-down-line fs-13 align-middle"></i>
-                  +8.09 %
-                </h5>
-              </div>
-            </div>
-            <div class="d-flex align-items-end justify-content-between mt-4">
-              <div>
-                <h4 class="fs-22 fw-semibold ff-secondary mb-4">
-                  <span
-                    class="counter-value"
-                    data-target="maxDecaissementJour?.montant || 0 "
-                    >{{ formatCFA(maxDecaissementJour?.montantref) || 0 }}</span
-                  >
-                  {{ user.devise_ref_code }}
-                </h4>
-                <span class="badge bg-warning me-1">
-                  {{ formatCFA(maxDecaissementJour?.montant) || 0 }}
-                </span>
-                <span class="text-muted text-small">{{
-                  maxDecaissementJour?.devise?.codedevise
-                }}</span>
-                <!-- <span class="badge bg-warning me-1">2</span> <span class="text-muted">Nature operation</span> -->
-              </div>
-              <div class="avatar-sm flex-shrink-0">
-                <span class="avatar-title bg-light rounded fs-3">
-                  <i
-                    data-feather="check-square"
-                    class="text-success icon-dual-success"
-                  ></i>
-                </span>
-              </div>
-            </div>
-          </div>
-          <!-- end card body -->
-        </div>
-        <!-- end card -->
-      </div>
-      <!-- end col -->
-
-      <div class="col-xl-4 col-md-4">
-        <!-- card -->
-        <div class="card card-animate">
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              <div class="flex-grow-1">
-                <p class="text-uppercase fw-medium text-muted mb-0">
-                  Moins couteux
-                </p>
-              </div>
-              <div class="flex-shrink-0">
-                <h5 class="text-danger fs-14 mb-0">
-                  <i class="ri-arrow-right-down-line fs-13 align-middle"></i>
-                  +9.01 %
-                </h5>
-              </div>
-            </div>
-            <div class="d-flex align-items-end justify-content-between mt-4">
-              <div>
-                <h4 class="fs-22 fw-semibold ff-secondary mb-4">
-                  <span class="counter-value" data-target="136.98">{{
-                    formatCFA(minDecaissementJour?.montantref) || 0
-                  }}</span>
-                  {{ user.devise_ref_code }}
-                </h4>
-                <span class="badge bg-warning me-1">{{
-                  formatCFA(minDecaissementJour?.montant) || 0
-                }}</span>
-                <span class="text-muted">{{
-                  minDecaissementJour?.devise?.codedevise
-                }}</span>
-              </div>
-              <div class="avatar-sm flex-shrink-0">
-                <span class="avatar-title bg-light rounded fs-3">
-                  <i
-                    data-feather="clock"
-                    class="text-success icon-dual-success"
-                  ></i>
-                </span>
-              </div>
-            </div>
-          </div>
-          <!-- end card body -->
-        </div>
-        <!-- end card -->
-      </div>
-      <!-- end col -->
-    </div>
-    <!-- end row-->
-
-    <ng-template #editModalTpl let-modal>
-      <div class="modal-header p-3 bg-info-subtle">
-        <h5 class="modal-title">Details {{ title }}</h5>
-        <button
-          type="button"
-          class="btn-close"
-          (click)="modal.close()"
-          aria-label="Close"
-        ></button>
-      </div>
-
-      <div class="modal-body" *ngIf="operationdetail as op">
-        <div class="row gx-lg-5">
-          <div class="col-xl-12">
-            <div class="mt-xl-0 mt-5">
-              <div class="d-flex">
-                <div class="flex-grow-1">
-                  <h5>{{ op.codeoperation }}</h5>
-
-                  <div class="hstack gap-3 flex-wrap">
-                    <div class="text-primary d-block">Opération</div>
-
-                    <div class="vr"></div>
-
-                    <div class="text-muted">
-                      Type :
-                      <span class="text-body fw-medium">
-                        {{ op.caisses[0]?.codtypeoperation }}
-                      </span>
-                    </div>
-
-                    <div class="vr"></div>
-
-                    <div class="text-muted">
-                      Date :
-                      <span class="text-body fw-medium">
-                        {{ formatDateFR(op.dateoperation || "") }}
-                      </span>
-                    </div>
-
-                    <div class="vr"></div>
-
-                    <div class="text-muted">
-                      Devise :
-                      <span class="text-body fw-medium">
-                        {{ op.devise?.codedevise }}
-                        - {{ op.devise?.intitule }}
-                      </span>
-                    </div>
-
-                    <div class="vr"></div>
-
-                    <div class="text-muted">
-                      Payé à :
-                      <span class="text-body fw-medium">
-                        {{ op.beneficiaire }}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div class="mb-2">
-                    <span class="badge bg-light text-dark fs-6">
-                      {{ op.lignes[0]?.libelle || "Sans libellé" }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Resume -->
-              <div class="row mt-4">
-                <div class="col-lg-4 col-sm-4">
-                  <div class="p-2 border border-dashed rounded">
-                    <div class="d-flex align-items-center">
-                      <div class="avatar-sm me-2">
-                        <div
-                          class="avatar-title rounded bg-transparent text-success fs-24"
-                        >
-                          <i class="ri-money-dollar-circle-fill"></i>
-                        </div>
-                      </div>
-
-                      <div class="flex-grow-1">
-                        <p class="text-muted mb-1">Montant total</p>
-
-                        <h5 class="mb-0">
-                          {{ op.montant | number: "1.2-2" }}
-                          {{ op.devise?.codedevise }}
-                        </h5>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="col-lg-4 col-sm-4">
-                  <div class="p-2 border border-dashed rounded">
-                    <div class="flex-grow-1">
-                      <p class="text-muted mb-1">Société</p>
-
-                      <h6 class="mb-0">
-                        {{ op.site?.libelle }}
-                      </h6>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="col-lg-4 col-sm-4">
-                  <div class="p-2 border border-dashed rounded">
-                    <div class="flex-grow-1">
-                      <p class="text-muted mb-1">Site</p>
-
-                      <h6 class="mb-0">
-                        {{ op.site?.libelle }}
-                      </h6>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Lignes opération -->
-              <div class="product-content mt-5">
-                <h5 class="fs-14 mb-3">Lignes de l'opération</h5>
-
-                <div class="table-responsive">
-                  <table
-                    class="table table-bordered align-middle table-custom table-compact"
-                  >
-                    <thead class="table-light">
-                      <tr>
-                        <th>Nature opération</th>
-                        <th>Centre analytique</th>
-                        <th>Tiers</th>
-                        <th class="text-end">Montant</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      @for (item of op.lignes; track $index) {
-                        <tr>
-                          <td>
-                            {{ item.nature?.libelle || "-" }}
-                          </td>
-
-                          <td>
-                            {{ item.centre?.libelle || "-" }}
-                          </td>
-
-                          <td>
-                            {{ item.tiers?.designation || "-" }}
-                          </td>
-
-                          <td class="text-end">
-                            {{ item.montantoperation | number: "1.2-2" }}
-                            {{ op.devise?.codedevise }}
-                          </td>
-                        </tr>
-                      }
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <!-- Caisses de paiement -->
-              <div class="product-content mt-4">
-                <h5 class="fs-14 mb-3">Caisses de paiement</h5>
-
-                <div class="table-responsive">
-                  <table
-                    class="table table-bordered align-middle table-custom table-compact"
-                  >
-                    <thead class="table-light">
-                      <tr>
-                        <th>Type opération</th>
-                        <th>Caisse</th>
-                        <th class="text-end">Montant</th>
-                        <th>Devise</th>
-                        <th>Taux</th>
-                        <th class="text-end">Montant référence</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      @for (caisse of op.caisses; track $index) {
-                        <tr>
-                          <td>
-                            {{ caisse.codtypeoperation }}
-                          </td>
-
-                          <td>
-                            {{ caisse.caisse?.libelle || "-" }}
-                          </td>
-
-                          <td class="text-end">
-                            {{ caisse.montant | number: "1.2-2" }}
-                          </td>
-
-                          <td>
-                            {{ op.devise?.codedevise }}
-                          </td>
-
-                          <td>
-                            {{ caisse.taux }}
-                          </td>
-
-                          <td class="text-end">
-                            {{ caisse.montantref | number: "1.2-2" }}
-                          </td>
-                        </tr>
-                      }
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+            }
           </div>
         </div>
-      </div>
 
-      <div class="modal-footer">
-        <div class="hstack gap-2 justify-content-end">
-          <div class="d-flex gap-2">
+        <!-- Pagination -->
+        <div class="pagination-modern">
+          <div class="pagination-info">
+            <span>Affichage de</span>
+            <strong>{{ (currentPage - 1) * limit + 1 }}</strong>
+            <span>à</span>
+            <strong>{{
+              Math.min(currentPage * limit, operations.length)
+            }}</strong>
+            <span>sur</span> <strong>{{ operations.length }}</strong>
+            <span>opération(s)</span>
+          </div>
+          <div class="pagination-controls">
             <button
-              type="button"
-              class="btn btn-sm btn-light"
-              (click)="modal.close()"
+              class="page-control"
+              [disabled]="currentPage == 1"
+              (click)="changePage(currentPage - 1)"
             >
-              Fermer
+              <i class="ri-arrow-left-s-line"></i>
             </button>
-          </div>
-        </div>
-      </div>
-    </ng-template>
-
-    <ng-template #ecritureModalTpl let-modal>
-      <div class="modal-header p-3 bg-info-subtle">
-        <h5 class="modal-title">Ecritures comptables</h5>
-        <button
-          type="button"
-          class="btn-close"
-          (click)="modal.close()"
-          aria-label="Close"
-        ></button>
-      </div>
-
-      <div class="modal-body" *ngIf="operationecriture as op">
-        <div class="row gx-lg-5">
-          <div class="col-xl-12">
-            <div class="mt-xl-0 mt-5">
-              <div class="d-flex">
-                <div class="flex-grow-1">
-                  <h5>{{ op.codeoperation }}</h5>
-
-                  <div class="hstack gap-3 flex-wrap">
-                    <div class="text-primary d-block">Opération</div>
-
-                    <div class="vr"></div>
-
-                    <div class="text-muted">
-                      Type :
-                      <span class="text-body fw-medium">
-                        {{ op.caisses[0]?.codtypeoperation }}
-                      </span>
-                    </div>
-
-                    <div class="vr"></div>
-
-                    <div class="text-muted">
-                      Date :
-                      <span class="text-body fw-medium">
-                        {{ formatDateFR(op.dateoperation || "") }}
-                      </span>
-                    </div>
-
-                    <div class="vr"></div>
-
-                    <div class="text-muted">
-                      Devise :
-                      <span class="text-body fw-medium">
-                        {{ op.devise?.codedevise }}
-                        - {{ op.devise?.intitule }}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div class="mb-2">
-                    <span class="badge bg-light text-dark fs-6">
-                      {{ op.lignes[0]?.libelle || "Sans libellé" }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="product-content mt-4">
-                <h5 class="fs-14 mb-3">Écritures comptables</h5>
-
-                <div class="table-responsive">
-                  <table
-                    class="table table-bordered align-middle table-custom table-compact"
-                  >
-                    <thead class="table-light">
-                      <tr>
-                        <th>Date</th>
-                        <th>Journal</th>
-                        <th>Pièce</th>
-                        <th>Compte</th>
-                        <th>Libellé</th>
-                        <th class="text-end">Débit</th>
-                        <th class="text-end">Crédit</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      @for (ecriture of op.ecritures; track $index) {
-                        <!-- Lignes comptables -->
-                        @for (ligne of ecriture.lignes; track $index) {
-                          <tr>
-                            <td>
-                              {{ formatDateFR(ecriture.dateoperation) }}
-                            </td>
-
-                            <td>
-                              {{ ecriture.journal }}
-                            </td>
-
-                            <td>
-                              {{ ecriture.numpiece }}
-                            </td>
-
-                            <td>
-                              {{ ligne.compte?.compte }}
-                            </td>
-
-                            <td>
-                              {{ ligne.libelle }}
-                            </td>
-
-                            <td class="text-end">
-                              {{ ligne.debit | number: "1.2-2" }}
-                            </td>
-
-                            <td class="text-end">
-                              {{ ligne.credit | number: "1.2-2" }}
-                            </td>
-                          </tr>
-                        }
-                      }
-
-                      @if (!op.ecritures.length) {
-                        <tr>
-                          <td colspan="7" class="text-center text-muted">
-                            Aucune écriture comptable
-                          </td>
-                        </tr>
-                      }
-                    </tbody>
-
-                    <tfoot class="table-light">
-                      <tr>
-                        <th colspan="5" class="text-end">Total</th>
-
-                        <th class="text-end">
-                          {{ getTotalDebit(op.ecritures) | number: "1.2-2" }}
-                        </th>
-
-                        <th class="text-end">
-                          {{ getTotalCredit(op.ecritures) | number: "1.2-2" }}
-                        </th>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <div class="hstack gap-2 justify-content-end">
-          <div class="d-flex gap-2">
-            <button
-              type="button"
-              class="btn btn-sm btn-light"
-              (click)="modal.close()"
+            <span class="page-number"
+              >{{ currentPage }} / {{ totalPages }}</span
             >
-              Fermer
-            </button>
-          </div>
-        </div>
-      </div>
-    </ng-template>
-
-    <!-- Modal Pièces jointes -->
-    <div
-      class="modal fade"
-      [class.show]="modalPJVisible"
-      [style.display]="modalPJVisible ? 'block' : 'none'"
-      id="piecesJointesModal"
-      tabindex="-1"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-          <div class="modal-header bg-primary-subtle">
-            <div class="d-flex align-items-center gap-2">
-              <i class="ri-attachment-2 fs-20 text-primary"></i>
-              <h5 class="modal-title">
-                Pièces jointes - {{ selectedOperationPJ?.codeoperation }}
-              </h5>
-            </div>
             <button
-              type="button"
-              class="btn-close"
-              (click)="closePiecesJointesModal()"
-              aria-label="Close"
-            ></button>
-          </div>
-
-          <div class="modal-body">
-            <!-- Section principale des pièces jointes -->
-            <div class="attachments-section">
-              <!-- En-tête avec compteur et bouton tout télécharger -->
-              <div class="section-header">
-                <div class="section-title mb-2 flex items-center gap-2">
-                  <i class="ri-attachment-2"></i>
-                  <span>Pièces jointes</span>
-                  <span class="badge bg-primary rounded-pill">{{
-                    totalPiecesCount
-                  }}</span>
-                </div>
-
-                <!-- Bouton Tout télécharger -->
-                <button
-                  *ngIf="totalPiecesCount > 0"
-                  type="button"
-                  class="btn-download-all"
-                  (click)="
-                    selectedOperationPJ?.iddemande
-                      ? downloadAllFiles2()
-                      : downloadAllFiles()
-                  "
-                  title="Télécharger toutes les pièces jointes"
-                >
-                  <i class="ri-download-line"></i> Tout télécharger
-                </button>
-
-                <input
-                  type="file"
-                  #fileInput
-                  multiple
-                  (change)="onFilesSelected($event)"
-                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
-                  class="d-none"
-                />
-              </div>
-
-              <!-- SECTION 1: PIÈCES JOINTES DE LA DEMANDE -->
-              <div *ngIf="hasDemande && demandePiecesJointes.length > 0">
-                <div class="subsection-title mb-2">
-                  <i class="ri-file-copy-line text-info"></i>
-                  <span>Pièces jointes de la demande</span>
-                  <span class="badge bg-info rounded-pill">{{
-                    demandePiecesJointes.length
-                  }}</span>
-                  <span class="text-muted small ms-2" *ngIf="demandeInfo">
-                    ({{ demandeInfo.codedemande }})
-                  </span>
-                </div>
-
-                <!-- Scroll horizontal pour les PJ de la demande -->
-                <div class="horizontal-scroll mb-3">
-                  <div
-                    *ngFor="let pj of demandePiecesJointes"
-                    class="file-pill file-pill-readonly"
-                  >
-                    <div class="pill-icon">
-                      <i [class]="getFileIcon(pj)"></i>
-                    </div>
-                    <div class="pill-info">
-                      <span class="pill-name">{{ pj.nomfichier }}</span>
-                      <span class="pill-meta">{{
-                        formatFileSize(pj.taille)
-                      }}</span>
-                    </div>
-                    <div class="pill-actions">
-                      <button (click)="downloadPiece(pj)" title="Télécharger">
-                        <i class="ri-download-line"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- SECTION 2: PIÈCES JOINTES DE L'OPÉRATION -->
-              <div *ngIf="operationPiecesJointes.length > 0">
-                <div
-                  class="subsection-title mb-2"
-                  [class.mt-3]="hasDemande && demandePiecesJointes.length > 0"
-                >
-                  <i class="ri-folder-image-line text-primary"></i>
-                  <span>Pièces jointes de l'opération</span>
-                  <span class="badge bg-secondary rounded-pill">{{
-                    operationPiecesJointes.length
-                  }}</span>
-                </div>
-
-                <!-- Scroll horizontal pour les PJ de l'opération -->
-                <div class="horizontal-scroll mb-3">
-                  <div
-                    *ngFor="let pj of operationPiecesJointes"
-                    class="file-pill"
-                  >
-                    <div class="pill-icon">
-                      <i [class]="getFileIcon(pj)"></i>
-                    </div>
-                    <div class="pill-info">
-                      <span class="pill-name">{{ pj.nomfichier }}</span>
-                      <span class="pill-meta">{{
-                        formatFileSize(pj.taille)
-                      }}</span>
-                    </div>
-                    <div class="pill-actions">
-                      <button (click)="downloadPiece(pj)" title="Télécharger">
-                        <i class="ri-download-line"></i>
-                      </button>
-                      <button
-                        (click)="deletePiece(pj)"
-                        [disabled]="pjDeleting === pj.idpiecejointe"
-                        title="Supprimer"
-                      >
-                        <span
-                          *ngIf="pjDeleting === pj.idpiecejointe"
-                          class="spinner-border spinner-border-sm"
-                        ></span>
-                        <i
-                          *ngIf="pjDeleting !== pj.idpiecejointe"
-                          class="ri-close-line"
-                        ></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Barre d'upload compacte -->
-              <div class="upload-bar" (click)="fileInput.click()">
-                <div class="upload-info">
-                  <i class="ri-cloud-upload-line"></i>
-                  <span *ngIf="selectedFiles.length === 0"
-                    >Ajouter des fichiers à l'opération</span
-                  >
-                  <span *ngIf="selectedFiles.length > 0">
-                    <strong>{{ selectedFiles.length }}</strong> fichier(s)
-                    sélectionné(s)
-                  </span>
-                </div>
-                <div class="upload-badge" *ngIf="selectedFiles.length === 0">
-                  PDF, DOC, XLS, JPG, CSV
-                </div>
-              </div>
-
-              <!-- Aperçu des fichiers sélectionnés -->
-              <div *ngIf="selectedFiles.length > 0" class="file-grid mt-2">
-                <div
-                  *ngFor="let file of selectedFiles; let i = index"
-                  class="file-card-compact"
-                >
-                  <div class="file-info">
-                    <div class="file-icon-sm">
-                      <i class="ri-file-line"></i>
-                    </div>
-                    <div class="file-details">
-                      <div class="file-name" [title]="file.name">
-                        {{ file.name }}
-                      </div>
-                      <div class="file-meta">
-                        {{ file.size / 1024 | number: "1.0-0" }} KB
-                      </div>
-                    </div>
-                  </div>
-                  <div class="file-actions">
-                    <button
-                      type="button"
-                      class="btn-icon-sm btn btn-soft-danger"
-                      (click)="removeSelectedFile(i); $event.stopPropagation()"
-                      title="Retirer"
-                    >
-                      <i class="ri-close-line fs-6"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- État vide -->
-              <div
-                *ngIf="
-                  !piecesJointesLoading &&
-                  totalPiecesCount === 0 &&
-                  selectedFiles.length === 0
-                "
-                class="text-center py-3"
-              >
-                <i
-                  class="ri-folder-open-line text-muted"
-                  style="font-size: 1.25rem"
-                ></i>
-                <p class="text-muted small mb-0 mt-1">
-                  Aucune pièce jointe disponible
-                </p>
-              </div>
-
-              <!-- Chargement -->
-              <div *ngIf="piecesJointesLoading" class="text-center py-4">
-                <div
-                  class="spinner-border spinner-border-sm text-primary"
-                ></div>
-                <p class="mt-2 small">Chargement des pièces jointes...</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-sm btn-light"
-              (click)="closePiecesJointesModal()"
+              class="page-control"
+              [disabled]="currentPage == totalPages"
+              (click)="changePage(currentPage + 1)"
             >
-              Fermer
+              <i class="ri-arrow-right-s-line"></i>
             </button>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Backdrop -->
-    <div
-      *ngIf="modalPJVisible"
-      class="modal-backdrop fade show"
-      (click)="closePiecesJointesModal()"
-    ></div>
   </div>
 </div>
+
+<!-- ==================== STATISTIQUES ==================== -->
+<div class="row mt-4">
+  <div class="col-xl-4 col-md-4">
+    <div class="card-glass-stats">
+      <div class="card-body-glass p-3">
+        <div class="d-flex align-items-center">
+          <div class="flex-grow-1">
+            <p class="stats-label">Décaissement</p>
+          </div>
+          <div class="flex-shrink-0">
+            <span class="stats-trend positive">
+              <i class="ri-arrow-right-up-line"></i> +89.24%
+            </span>
+          </div>
+        </div>
+        <div class="d-flex align-items-end justify-content-between mt-3">
+          <div>
+            <h4 class="stats-value">
+              {{ formatCFA(totalDecaissementJour) || 0 }}
+              <span class="stats-currency">{{ user.devise_ref_code }}</span>
+            </h4>
+            <span class="stats-badge"
+              >{{ formatCFA(nbrDecaissementJour) || 0 }} décaissement(s)</span
+            >
+          </div>
+          <div class="stats-icon">
+            <i class="ri-arrow-right-down-line"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-4 col-md-4">
+    <div class="card-glass-stats">
+      <div class="card-body-glass p-3">
+        <div class="d-flex align-items-center">
+          <div class="flex-grow-1">
+            <p class="stats-label">Plus couteux</p>
+          </div>
+          <div class="flex-shrink-0">
+            <span class="stats-trend negative">
+              <i class="ri-arrow-right-down-line"></i> +8.09%
+            </span>
+          </div>
+        </div>
+        <div class="d-flex align-items-end justify-content-between mt-3">
+          <div>
+            <h4 class="stats-value">
+              {{ formatCFA(maxDecaissementJour?.montantref) || 0 }}
+              <span class="stats-currency">{{ user.devise_ref_code }}</span>
+            </h4>
+            <span class="stats-badge">
+              {{ formatCFA(maxDecaissementJour?.montant) || 0 }}
+              {{ maxDecaissementJour?.devise?.codedevise }}
+            </span>
+          </div>
+          <div class="stats-icon">
+            <i class="ri-arrow-up-line"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-4 col-md-4">
+    <div class="card-glass-stats">
+      <div class="card-body-glass p-3">
+        <div class="d-flex align-items-center">
+          <div class="flex-grow-1">
+            <p class="stats-label">Moins couteux</p>
+          </div>
+          <div class="flex-shrink-0">
+            <span class="stats-trend negative">
+              <i class="ri-arrow-right-down-line"></i> +9.01%
+            </span>
+          </div>
+        </div>
+        <div class="d-flex align-items-end justify-content-between mt-3">
+          <div>
+            <h4 class="stats-value">
+              {{ formatCFA(minDecaissementJour?.montantref) || 0 }}
+              <span class="stats-currency">{{ user.devise_ref_code }}</span>
+            </h4>
+            <span class="stats-badge">
+              {{ formatCFA(minDecaissementJour?.montant) || 0 }}
+              {{ minDecaissementJour?.devise?.codedevise }}
+            </span>
+          </div>
+          <div class="stats-icon">
+            <i class="ri-arrow-down-line"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODALE PIÈCES JOINTES ==================== -->
+<ng-template #piecesJointesModalTpl let-modal>
+  <div class="modal-content-glass">
+    <!-- Header - Thème Orange pour les opérations -->
+    <div class="modal-header modal-header-theme-orange">
+      <div class="d-flex align-items-center gap-3">
+        <div class="icon-circle">
+          <i class="ri-attachment-2 text-white fs-5"></i>
+        </div>
+        <div>
+          <h5 class="modal-title text-white fw-semibold">Pièces jointes</h5>
+          <span
+            class="text-white-50 small"
+            style="font-size: 0.7rem; opacity: 0.8"
+          >
+            <i class="ri-file-list-line me-1"></i>
+            {{ selectedOperationPJ?.codeoperation }}
+          </span>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="btn-close btn-close-white"
+        (click)="modal.close()"
+        aria-label="Close"
+      ></button>
+    </div>
+
+    <div class="modal-body p-4">
+      <!-- Section principale des pièces jointes -->
+      <div class="attachments-section-glass">
+        <!-- En-tête avec compteur et bouton tout télécharger -->
+        <div class="section-header-glass">
+          <div class="section-title-glass">
+            <i class="ri-attachment-2"></i>
+            <span>Documents</span>
+            <span class="badge-glass badge-glass-primary badge-count-sm">
+              {{ totalPiecesCount }}
+            </span>
+          </div>
+          <button
+            *ngIf="totalPiecesCount > 0"
+            type="button"
+            class="btn-glass-primary"
+            (click)="
+              selectedOperationPJ?.iddemande
+                ? downloadAllFiles2()
+                : downloadAllFiles()
+            "
+            [disabled]="downloadingAll"
+            title="Télécharger toutes les pièces jointes"
+          >
+            @if (downloadingAll) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            <i class="ri-download-line me-1"></i> Tout télécharger
+          </button>
+        </div>
+
+        <!-- SECTION 1: PIÈCES JOINTES DE LA DEMANDE -->
+        <div *ngIf="hasDemande && demandePiecesJointes.length > 0" class="mb-3">
+          <div class="subsection-title-glass">
+            <i class="ri-file-copy-line text-info"></i>
+            <span>Pièces jointes de la demande</span>
+            <span class="badge-glass badge-glass-info badge-count-sm">
+              {{ demandePiecesJointes.length }}
+            </span>
+            <span class="text-muted small ms-2" *ngIf="demandeInfo">
+              ({{ demandeInfo.codedemande }})
+            </span>
+          </div>
+
+          <!-- Scroll horizontal pour les PJ de la demande -->
+          <div class="horizontal-scroll-glass">
+            <div
+              *ngFor="let pj of demandePiecesJointes"
+              class="file-pill-glass file-pill-readonly"
+            >
+              <div class="pill-icon-glass">
+                <i [class]="getFileIcon(pj)"></i>
+              </div>
+              <div class="pill-info-glass">
+                <span class="pill-name-glass" [title]="pj.nomfichier">
+                  {{ pj.nomfichier }}
+                </span>
+                <span class="pill-meta-glass">
+                  {{ formatFileSize(pj.taille) }}
+                </span>
+              </div>
+              <div class="pill-actions-glass">
+                <button
+                  class="pill-action-btn pill-action-download"
+                  (click)="downloadPiece(pj)"
+                  title="Télécharger"
+                >
+                  <i class="ri-download-line"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: PIÈCES JOINTES DE L'OPÉRATION -->
+        <div *ngIf="operationPiecesJointes.length > 0">
+          <div
+            class="subsection-title-glass"
+            [class.mt-3]="hasDemande && demandePiecesJointes.length > 0"
+          >
+            <i class="ri-folder-image-line text-primary"></i>
+            <span>Pièces jointes de l'opération</span>
+            <span class="badge-glass badge-glass-secondary badge-count-sm">
+              {{ operationPiecesJointes.length }}
+            </span>
+          </div>
+
+          <!-- Scroll horizontal pour les PJ de l'opération -->
+          <div class="horizontal-scroll-glass">
+            <div
+              *ngFor="let pj of operationPiecesJointes"
+              class="file-pill-glass file-pill-editable"
+            >
+              <div class="pill-icon-glass">
+                <i [class]="getFileIcon(pj)"></i>
+              </div>
+              <div class="pill-info-glass">
+                <span class="pill-name-glass" [title]="pj.nomfichier">
+                  {{ pj.nomfichier }}
+                </span>
+                <span class="pill-meta-glass">
+                  {{ formatFileSize(pj.taille) }}
+                </span>
+              </div>
+              <div class="pill-actions-glass">
+                <button
+                  class="pill-action-btn pill-action-download"
+                  (click)="downloadPiece(pj)"
+                  title="Télécharger"
+                >
+                  <i class="ri-download-line"></i>
+                </button>
+                <button
+                  class="pill-action-btn pill-action-delete"
+                  (click)="deletePiece(pj)"
+                  [disabled]="pjDeleting === pj.idpiecejointe"
+                  title="Supprimer"
+                >
+                  @if (pjDeleting === pj.idpiecejointe) {
+                    <span class="spinner-border spinner-border-sm"></span>
+                  } @else {
+                    <i class="ri-close-line"></i>
+                  }
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barre d'upload -->
+        <div
+          class="upload-bar-glass"
+          [class.drag-over]="isDragOver"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+        >
+          <input
+            type="file"
+            #fileInput
+            multiple
+            (change)="onFilesSelected($event)"
+            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
+            class="d-none"
+          />
+          <div class="upload-info-glass" (click)="fileInput.click()">
+            <div class="upload-icon-glass">
+              <i class="ri-upload-cloud-2-line"></i>
+            </div>
+            <div>
+              <span class="upload-title-glass">
+                @if (selectedFiles.length === 0) {
+                  Ajouter des fichiers à l'opération
+                } @else {
+                  <strong>{{ selectedFiles.length }}</strong> fichier(s)
+                  sélectionné(s)
+                }
+              </span>
+              <span
+                class="upload-hint-glass"
+                *ngIf="selectedFiles.length === 0"
+              >
+                PDF, DOC, XLS, JPG, CSV (max 10MB)
+              </span>
+            </div>
+          </div>
+          @if (selectedFiles.length > 0) {
+            <button
+              class="btn-glass-upload"
+              (click)="uploadPieces(); $event.stopPropagation()"
+              [disabled]="pjUploading"
+            >
+              @if (pjUploading) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              }
+              <i class="ri-upload-cloud-2-line me-1"></i>
+              Uploader {{ selectedFiles.length }}
+            </button>
+          }
+        </div>
+
+        <!-- Aperçu des fichiers sélectionnés -->
+        <div *ngIf="selectedFiles.length > 0" class="file-grid-glass mt-3">
+          <div
+            *ngFor="let file of selectedFiles; let i = index"
+            class="file-card-glass"
+          >
+            <div class="file-info-glass">
+              <div class="file-icon-sm-glass">
+                <i class="ri-file-line"></i>
+              </div>
+              <div class="file-details-glass">
+                <div class="file-name-glass" [title]="file.name">
+                  {{ file.name }}
+                </div>
+                <div class="file-meta-glass">
+                  {{ file.size / 1024 | number: "1.0-0" }} KB
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="file-remove-btn-glass"
+              (click)="removeSelectedFile(i); $event.stopPropagation()"
+              title="Retirer"
+            >
+              <i class="ri-close-line"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- État vide -->
+        <div
+          *ngIf="
+            !piecesJointesLoading &&
+            totalPiecesCount === 0 &&
+            selectedFiles.length === 0
+          "
+          class="empty-state-glass"
+        >
+          <i class="ri-folder-open-line"></i>
+          <p>Aucune pièce jointe disponible</p>
+          <span class="empty-hint-glass">
+            Ajoutez des fichiers en cliquant sur la zone ci-dessus
+          </span>
+        </div>
+
+        <!-- Chargement -->
+        <div *ngIf="piecesJointesLoading" class="spinner-glass-sm">
+          <div
+            class="spinner-border spinner-border-sm text-primary"
+            role="status"
+          ></div>
+          <p class="mt-2 small text-muted">Chargement des pièces jointes...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer border-0 p-4">
+      <button type="button" class="btn-glass-cancel" (click)="modal.close()">
+        <i class="ri-close-line me-1"></i> Fermer
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- Backdrop -->
+<div
+  *ngIf="modalPJVisible"
+  class="modal-backdrop fade show"
+  style="z-index: 9998"
+  (click)="closePiecesJointesModal()"
+></div>
+
+<!-- ==================== MODAL DÉTAILS ==================== -->
+<ng-template #editModalTpl let-modal>
+  <div class="modal-content-glass">
+    <div class="modal-header modal-header-theme-blue">
+      <div class="d-flex align-items-center gap-2">
+        <div class="icon-circle">
+          <i class="ri-eye-line text-white fs-5"></i>
+        </div>
+        <h5 class="modal-title text-white fw-semibold">Détails {{ title }}</h5>
+      </div>
+      <button
+        type="button"
+        class="btn-close btn-close-white"
+        (click)="modal.close()"
+        aria-label="Close"
+      ></button>
+    </div>
+
+    <div class="modal-body p-4" *ngIf="operationdetail as op">
+      <!-- En-tête de l'opération -->
+      <div class="operation-header">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <h5 class="mb-0 fw-bold">{{ op.codeoperation }}</h5>
+          <span class="type-badge" [class]="getTypeClass(op)">
+            <i [class]="getTypeIcon(op)"></i>
+            {{ getTypeLabel(op) }}
+          </span>
+          <span
+            class="status-badge"
+            [class]="
+              op.annulee === 1 || op.idoperationannulation
+                ? 'status-non'
+                : 'status-oui'
+            "
+          >
+            <span
+              class="status-dot"
+              [class]="
+                op.annulee === 1 || op.idoperationannulation
+                  ? 'status-non'
+                  : 'status-oui'
+              "
+            ></span>
+            {{
+              op.annulee === 1 || op.idoperationannulation
+                ? "Annulée"
+                : "Active"
+            }}
+          </span>
+        </div>
+
+        <div class="operation-meta mt-2">
+          <div class="hstack gap-3 flex-wrap">
+            <div class="text-muted small">
+              Type :
+              <span class="fw-medium">{{
+                op.caisses[0]?.codtypeoperation
+              }}</span>
+            </div>
+            <div class="vr"></div>
+            <div class="text-muted small">
+              Date :
+              <span class="fw-medium">{{
+                formatDateFR(op.dateoperation || "")
+              }}</span>
+            </div>
+            <div class="vr"></div>
+            <div class="text-muted small">
+              Devise :
+              <span class="fw-medium"
+                >{{ op.devise?.codedevise }} - {{ op.devise?.intitule }}</span
+              >
+            </div>
+            <div class="vr"></div>
+            <div class="text-muted small">
+              Payé à : <span class="fw-medium">{{ op.beneficiaire }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-2">
+          <span class="badge-glass badge-glass-secondary">{{
+            op.lignes[0]?.libelle || "Sans libellé"
+          }}</span>
+        </div>
+      </div>
+
+      <!-- Résumé -->
+      <div class="row mt-4 g-3">
+        <div class="col-lg-4 col-sm-4">
+          <div class="resume-card">
+            <div class="d-flex align-items-center">
+              <div class="resume-icon">
+                <i class="ri-money-dollar-circle-fill"></i>
+              </div>
+              <div>
+                <p class="resume-label">Montant total</p>
+                <h5 class="resume-value">
+                  {{ op.montant | number: "1.2-2" }}
+                  {{ op.devise?.codedevise }}
+                </h5>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 col-sm-4">
+          <div class="resume-card">
+            <div class="d-flex align-items-center">
+              <div class="resume-icon">
+                <i class="ri-building-line"></i>
+              </div>
+              <div>
+                <p class="resume-label">Société</p>
+                <h6 class="resume-value">{{ op.site?.libelle }}</h6>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 col-sm-4">
+          <div class="resume-card">
+            <div class="d-flex align-items-center">
+              <div class="resume-icon">
+                <i class="ri-map-pin-line"></i>
+              </div>
+              <div>
+                <p class="resume-label">Site</p>
+                <h6 class="resume-value">{{ op.site?.libelle }}</h6>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lignes -->
+      <div class="section-detail mt-4">
+        <h6 class="section-detail-title">
+          <i class="ri-list-check me-2"></i> Lignes de l'opération
+        </h6>
+        <div class="table-responsive">
+          <table class="table table-modern align-middle">
+            <thead>
+              <tr>
+                <th>Nature opération</th>
+                <th>Centre analytique</th>
+                <th>Tiers</th>
+                <th class="text-end">Montant</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of op.lignes; track $index) {
+                <tr>
+                  <td>{{ item.nature?.libelle || "-" }}</td>
+                  <td>{{ item.centre?.libelle || "-" }}</td>
+                  <td>{{ item.tiers?.designation || "-" }}</td>
+                  <td class="text-end fw-semibold">
+                    {{ item.montantoperation | number: "1.2-2" }}
+                    {{ op.devise?.codedevise }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Caisses -->
+      <div class="section-detail mt-4">
+        <h6 class="section-detail-title">
+          <i class="ri-wallet-3-line me-2"></i> Caisses de paiement
+        </h6>
+        <div class="table-responsive">
+          <table class="table table-modern align-middle">
+            <thead>
+              <tr>
+                <th>Type opération</th>
+                <th>Caisse</th>
+                <th class="text-end">Montant</th>
+                <th>Devise</th>
+                <th>Taux</th>
+                <th class="text-end">Montant référence</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (caisse of op.caisses; track $index) {
+                <tr>
+                  <td>
+                    <span
+                      class="type-badge"
+                      [class]="
+                        caisse.codtypeoperation === 'encaissement'
+                          ? 'type-enc'
+                          : 'type-dec'
+                      "
+                      >{{ caisse.codtypeoperation }}</span
+                    >
+                  </td>
+                  <td>{{ caisse.caisse?.libelle || "-" }}</td>
+                  <td class="text-end">
+                    {{ caisse.montant | number: "1.2-2" }}
+                  </td>
+                  <td>{{ op.devise?.codedevise }}</td>
+                  <td>{{ caisse.taux }}</td>
+                  <td class="text-end fw-semibold">
+                    {{ caisse.montantref | number: "1.2-2" }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer border-0 p-4">
+      <button type="button" class="btn-glass-cancel" (click)="modal.close()">
+        <i class="ri-close-line me-1"></i> Fermer
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- ==================== MODAL ÉCRITURES ==================== -->
+<ng-template #ecritureModalTpl let-modal>
+  <div class="modal-content-glass">
+    <div class="modal-header modal-header-theme-green">
+      <div class="d-flex align-items-center gap-2">
+        <div class="icon-circle">
+          <i class="ri-price-tag-3-line text-white fs-5"></i>
+        </div>
+        <h5 class="modal-title text-white fw-semibold">Écritures comptables</h5>
+      </div>
+      <button
+        type="button"
+        class="btn-close btn-close-white"
+        (click)="modal.close()"
+        aria-label="Close"
+      ></button>
+    </div>
+
+    <div class="modal-body p-4" *ngIf="operationecriture as op">
+      <div class="operation-header">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <h5 class="mb-0 fw-bold">{{ op.codeoperation }}</h5>
+          <span class="type-badge" [class]="getTypeClass(op)">
+            <i [class]="getTypeIcon(op)"></i>
+            {{ getTypeLabel(op) }}
+          </span>
+        </div>
+        <div class="operation-meta mt-2">
+          <div class="hstack gap-3 flex-wrap">
+            <div class="text-muted small">
+              Date :
+              <span class="fw-medium">{{
+                formatDateFR(op.dateoperation || "")
+              }}</span>
+            </div>
+            <div class="vr"></div>
+            <div class="text-muted small">
+              Devise :
+              <span class="fw-medium"
+                >{{ op.devise?.codedevise }} - {{ op.devise?.intitule }}</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-detail mt-4">
+        <h6 class="section-detail-title">
+          <i class="ri-file-list-3-line me-2"></i> Écritures comptables
+        </h6>
+        <div class="table-responsive">
+          <table class="table table-modern align-middle">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Journal</th>
+                <th>Pièce</th>
+                <th>Compte</th>
+                <th>Libellé</th>
+                <th class="text-end">Débit</th>
+                <th class="text-end">Crédit</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (ecriture of op.ecritures; track $index) {
+                @for (ligne of ecriture.lignes; track $index) {
+                  <tr>
+                    <td>{{ formatDateFR(ecriture.dateoperation) }}</td>
+                    <td>{{ ecriture.journal }}</td>
+                    <td>{{ ecriture.numpiece }}</td>
+                    <td>{{ ligne.compte?.compte }}</td>
+                    <td>{{ ligne.libelle }}</td>
+                    <td class="text-end text-success">
+                      {{ ligne.debit | number: "1.2-2" }}
+                    </td>
+                    <td class="text-end text-danger">
+                      {{ ligne.credit | number: "1.2-2" }}
+                    </td>
+                  </tr>
+                }
+              }
+              @if (!op.ecritures.length) {
+                <tr>
+                  <td colspan="7" class="text-center text-muted py-3">
+                    <i class="ri-inbox-line me-1"></i> Aucune écriture comptable
+                  </td>
+                </tr>
+              }
+            </tbody>
+            <tfoot class="table-light">
+              <tr>
+                <th colspan="5" class="text-end fw-semibold">Total</th>
+                <th class="text-end fw-semibold text-success">
+                  {{ getTotalDebit(op.ecritures) | number: "1.2-2" }}
+                </th>
+                <th class="text-end fw-semibold text-danger">
+                  {{ getTotalCredit(op.ecritures) | number: "1.2-2" }}
+                </th>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer border-0 p-4">
+      <button type="button" class="btn-glass-cancel" (click)="modal.close()">
+        <i class="ri-close-line me-1"></i> Fermer
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- ==================== MODAL ANNULATION ==================== -->
+<ng-template #cancelModalTpl let-modal>
+  <div class="modal-content-glass">
+    <div class="modal-body text-center p-5">
+      <div class="cancel-icon-wrapper mb-4">
+        <i class="bx bx-x-circle"></i>
+      </div>
+      <h5 class="cancel-modal-title">Annulation d'opération</h5>
+      <p class="cancel-modal-message">
+        Êtes-vous sûr de vouloir annuler cette opération ?
+        <br />
+        <span class="text-muted small">Cette action est irréversible.</span>
+      </p>
+      <div class="d-flex gap-3 justify-content-center mt-4">
+        <button class="cancel-btn-secondary" (click)="modal.dismiss()">
+          <i class="ri-close-line me-1"></i> Non
+        </button>
+        <button class="cancel-btn-danger" (click)="cancelConfirmed()">
+          <i class="bx bx-x-circle me-1"></i> Oui, annuler
+        </button>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- ==================== MODALE PIÈCES JOINTES ==================== -->
+<!-- [Gardez votre modale PJ existante - elle est déjà bien conçue] -->

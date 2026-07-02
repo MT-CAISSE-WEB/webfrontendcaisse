@@ -24,6 +24,10 @@ export class ParametreDiverseComponent implements OnInit {
   msgSup = '';
   selectedItem: any;
 
+  traitementCaisseActif: boolean = true;
+  traitementSoldeActif: boolean = false;
+
+
   constructor(
     private fb: FormBuilder,
     private motifService: MotifService,
@@ -137,4 +141,19 @@ export class ParametreDiverseComponent implements OnInit {
       if (modal) modal.hide();
     }
   }
+
+  toggleTraitement(type: string) {
+    if (type === 'caisse') {
+      this.traitementCaisseActif = !this.traitementCaisseActif;
+      // appel API si besoin
+    } else if (type === 'solde') {
+      this.traitementSoldeActif = !this.traitementSoldeActif;
+    }
+  }
+
+  desactiverToutTraitements() {
+    this.traitementCaisseActif = false;
+    this.traitementSoldeActif = false;
+  }
+  
 }

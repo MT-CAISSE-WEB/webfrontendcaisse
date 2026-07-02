@@ -1,5 +1,5 @@
 import { AsyncPipe, CommonModule, CurrencyPipe } from '@angular/common';
-import { Component, OnInit, TemplateRef } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -222,6 +222,7 @@ export class OperationCaisseComponent implements OnInit {
   totalPiecesCount = 0;
   hasDemande = false;
   demandeInfo: any = null;
+  @ViewChild('piecesJointesModalTpl') piecesJointesModalTpl!: TemplateRef<any>;
 
   constructor(
     private natureoperationservice: NatureoperationService,
@@ -965,16 +966,39 @@ export class OperationCaisseComponent implements OnInit {
 
   modalPJVisible = false;
   // Ouvre le modal des pièces jointes
+  /**
+   * Ouvre le modal des pièces jointes avec ng-template
+   */
   openPiecesJointesModal(op: operationModel): void {
     this.selectedOperationPJ = op;
-    console.log('Op:', op);
     this.selectedFiles = [];
-    // this.loadPiecesJointes(op.idoperation);
     this.loadAllPiecesJointes(op.idoperation);
-    this.modalPJVisible = true;
-    document.body.style.overflow = 'hidden'; // Empêche le scroll
-  }
 
+    const container = this.getModalContainer(op);
+    const options: any = {
+      centered: true,
+      size: 'lg',
+      backdrop: 'static',
+    };
+    if (container) {
+      options.container = container;
+    }
+
+    const modalRef = this.modalService.open(
+      this.piecesJointesModalTpl,
+      options,
+    );
+
+    // Gérer la fermeture de la modale
+    modalRef.result.then(
+      () => {
+        this.closePiecesJointesModal();
+      },
+      () => {
+        this.closePiecesJointesModal();
+      },
+    );
+  }
   /**
    * Charge toutes les pièces jointes (opération + demande associée)
    */
@@ -1020,37 +1044,17 @@ export class OperationCaisseComponent implements OnInit {
     this.demandeInfo = null;
   }
 
+  /**
+   * Ferme le modal des pièces jointes
+   */
   closePiecesJointesModal(): void {
-    this.modalPJVisible = false;
+    this.modalService.dismissAll();
     this.selectedOperationPJ = null;
     this.resetPiecesData();
     this.selectedFiles = [];
     this.pjUploading = false;
     this.pjDeleting = null;
-    document.body.style.overflow = '';
   }
-
-  // Charge les pièces jointes d'une demande
-  // loadPiecesJointes(idoperation: string): void {
-  //   this.piecesJointesLoading = true;
-  //   this.pjService.getAll(idoperation).subscribe({
-  //     next: (res) => {
-  //       if (res.success) {
-  //         this.piecesJointes = res.data;
-  //         this.piecesCountMap.set(idoperation, this.piecesJointes.length);
-  //       } else {
-  //         this.piecesJointes = [];
-  //       }
-  //       this.piecesJointesLoading = false;
-  //     },
-  //     error: (err) => {
-  //       console.error('Erreur chargement PJ:', err);
-  //       this.piecesJointes = [];
-  //       this.piecesJointesLoading = false;
-  //       this.toastr.error('Erreur lors du chargement des pièces jointes');
-  //     },
-  //   });
-  // }
 
   // Sélection des fichiers
   onFilesSelected(event: Event): void {
@@ -1307,5 +1311,101 @@ export class OperationCaisseComponent implements OnInit {
         this.downloadingAll = false;
       },
     });
+  }
+
+  Math = Math;
+  // ============================================
+  // MÉTHODES À AJOUTER DANS LE COMPOSANT
+  // ============================================
+
+  /**
+   * Récupère la classe CSS pour le type d'opération
+   */
+  getTypeClass(item: any): string {
+    if (item.idoperationorigine) return 'type-annul';
+    const type = item.caisses[0]?.codtypeoperation;
+    if (type === 'encaissement') return 'type-enc';
+    if (type === 'decaissement') return 'type-dec';
+    if (type === 'decaissementaj') return 'type-decaj';
+    return '';
+  }
+
+  /**
+   * Récupère l'icône pour le type d'opération
+   */
+  getTypeIcon(item: any): string {
+    if (item.idoperationorigine) return 'ri-close-circle-line';
+    const type = item.caisses[0]?.codtypeoperation;
+    if (type === 'encaissement') return 'ri-arrow-right-up-line';
+    if (type === 'decaissement' || type === 'decaissementaj')
+      return 'ri-arrow-right-down-line';
+    return '';
+  }
+
+  /**
+   * Récupère le libellé pour le type d'opération
+   */
+  getTypeLabel(item: any): string {
+    if (item.idoperationorigine) return 'Annulation';
+    const type = item.caisses[0]?.codtypeoperation;
+    if (type === 'encaissement') return 'Encaissement';
+    if (type === 'decaissement') return 'Décaissement';
+    if (type === 'decaissementaj') return 'Décaissement à justifier';
+    return type || 'Inconnu';
+  }
+
+  // ============================================
+  // MÉTHODES POUR LA MODALE PJ
+  // ============================================
+
+  // Propriétés
+  isDragOver = false;
+
+  /**
+   * Gestion du drag over pour les fichiers
+   */
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = true;
+  }
+
+  /**
+   * Gestion du drag leave pour les fichiers
+   */
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+  }
+
+  /**
+   * Gestion du drop de fichiers
+   */
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const newFiles = Array.from(files);
+      const allowedExtensions = [
+        '.pdf',
+        '.jpg',
+        '.jpeg',
+        '.png',
+        '.doc',
+        '.docx',
+        '.xls',
+        '.xlsx',
+        '.csv',
+      ];
+      const validFiles = newFiles.filter((file) => {
+        const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+        return allowedExtensions.includes(ext) && file.size <= 10 * 1024 * 1024;
+      });
+      this.selectedFiles.push(...validFiles);
+    }
   }
 }
