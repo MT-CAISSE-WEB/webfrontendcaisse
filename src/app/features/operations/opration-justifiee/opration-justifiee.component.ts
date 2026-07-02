@@ -300,6 +300,17 @@ export class OprationJustifieeComponent implements OnInit {
   reset() {
     this.operationForm.reset();
     this.lignes.clear();
+    this.ope = null;
+    this.justificatifFiltered = [];
+
+    // Vider les pièces jointes
+    this.resetPiecesData();
+    this.selectedFiles = [];
+    // réinitialiser l'onglet actif
+    this.activePjTab = 'saisie';
+
+    // Message de confirmation
+    this.toastr.info('Formulaire réinitialisé avec succès');
   }
 
   get user() {
