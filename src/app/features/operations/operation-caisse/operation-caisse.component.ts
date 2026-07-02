@@ -965,7 +965,6 @@ export class OperationCaisseComponent implements OnInit {
   }
 
   modalPJVisible = false;
-  // Ouvre le modal des pièces jointes
   /**
    * Ouvre le modal des pièces jointes avec ng-template
    */

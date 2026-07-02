@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -35,6 +35,9 @@ import {
 import { OperationCalculService } from '../service/operation-calcul.service';
 import { OperationValidatorService } from '../service/operation-validator.service';
 import { CaisseRegleService } from '../service/caisse-regle.service';
+import { OperationPJService } from '../../PJ/service/operationpj.service';
+import { PieceJointe } from '../../PJ/models/pj.model';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-opration-justifiee',
@@ -137,6 +140,8 @@ export class OprationJustifieeComponent implements OnInit {
     private caisseuserservice: AffectationCaisseService,
     private service: DemandeService,
     private justificatifservice: JustificatifService,
+    private pjService: OperationPJService,
+    private modalService: NgbModal,
   ) {}
 
   ngOnInit(): void {
@@ -294,6 +299,7 @@ export class OprationJustifieeComponent implements OnInit {
   //Rénitialiser le formulaire
   reset() {
     this.operationForm.reset();
+    this.lignes.clear();
   }
 
   get user() {
@@ -397,6 +403,9 @@ export class OprationJustifieeComponent implements OnInit {
       const operation = this.operations.find((op) => op.idoperation === opId);
       if (!operation) return;
 
+      // l'opération sélectionnée
+      this.selectedOperationPJ = operation;
+
       const totalcaissemontantref =
         operation.caisses?.reduce((sum: number, caisse: any) => {
           if (caisse.codtypeoperation === 'decaissementaj') {
@@ -418,6 +427,9 @@ export class OprationJustifieeComponent implements OnInit {
 
       // Déclencher la gestion dynamique des devises
       this.gererDevisesDynamiquement();
+
+      // Charger les pièces jointes de l'opération sélectionnée
+      this.loadAllPiecesJointes(operation.idoperation);
     });
   }
 
@@ -814,6 +826,10 @@ export class OprationJustifieeComponent implements OnInit {
                     .includes('decaissementaj'),
                 ) && op.justifiee <= 1,
             );
+            // Initialiser selectedOperationPJ avec la première opération filtrée
+            if (this.operationsFiltrees.length > 0) {
+              this.selectedOperationPJ = this.operationsFiltrees[0];
+            }
           }
           this.loading = false;
           // Fin du loading global - dépend seulement des opérations
@@ -1555,6 +1571,8 @@ export class OprationJustifieeComponent implements OnInit {
     this.selectedRetour = piece;
     this.operationForm.get('retourcaisse')?.setValue(true);
 
+    this.lignes.clear();
+
     // 🔥 Récupérer l'ID de la devise à partir du code
     const deviseCode = piece.caisse?.devise; // "CDF"
     let deviseId = null;
@@ -1682,4 +1700,405 @@ export class OprationJustifieeComponent implements OnInit {
 
   // Pièce justificative sélectionnée
   selectedJustificatif: any = null;
+
+  // gestion des pièces jointes
+  modalPJVisible = false;
+  // Propriétés pour les pièces jointes
+  operationPiecesJointes: PieceJointe[] = [];
+  demandePiecesJointes: PieceJointe[] = [];
+  piecesJointes: PieceJointe[] = [];
+  piecesJointesLoading = false;
+  selectedFiles: File[] = [];
+  selectedOperationPJ: operationModel | null = null;
+  pjUploading = false;
+  pjDeleting: string | null = null;
+  piecesCountMap: Map<string, number> = new Map(); // Cache pour les compteurs
+  newlyCreatedOperation: operationModel | null = null;
+  operationPiecesCount = 0;
+  demandePiecesCount = 0;
+  totalPiecesCount = 0;
+  hasDemande = false;
+  demandeInfo: any = null;
+  activePjTab: 'saisie' | 'pieces' = 'saisie';
+  isDragOver = false;
+  /**
+   * Gestion du drag over pour les fichiers
+   */
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = true;
+  }
+
+  /**
+   * Gestion du drag leave pour les fichiers
+   */
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+  }
+
+  /**
+   * Gestion du drop de fichiers
+   */
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const newFiles = Array.from(files);
+      const allowedExtensions = [
+        '.pdf',
+        '.jpg',
+        '.jpeg',
+        '.png',
+        '.doc',
+        '.docx',
+        '.xls',
+        '.xlsx',
+        '.csv',
+      ];
+      const validFiles = newFiles.filter((file) => {
+        const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+        return allowedExtensions.includes(ext) && file.size <= 10 * 1024 * 1024;
+      });
+      this.selectedFiles.push(...validFiles);
+    }
+  }
+
+  /**
+   * Charge toutes les pièces jointes (opération + demande associée)
+   */
+  loadAllPiecesJointes(idoperation: string): void {
+    this.piecesJointesLoading = true;
+    this.pjService.getOperationWithDemandePieces(idoperation).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.operationPiecesJointes = res.data.operationPJ || [];
+          this.demandePiecesJointes = res.data.demandePJ || [];
+          this.operationPiecesCount = res.data.operationCount || 0;
+          this.demandePiecesCount = res.data.demandeCount || 0;
+          this.totalPiecesCount = res.data.totalCount || 0;
+          this.hasDemande = res.data.hasDemande || false;
+          this.demandeInfo = res.data.demandeInfo;
+
+          // METTRE À JOUR LE CACHE
+          this.piecesCountMap.set(idoperation, this.totalPiecesCount);
+        } else {
+          this.resetPiecesData();
+        }
+        this.piecesJointesLoading = false;
+      },
+      error: (err) => {
+        console.error('Erreur chargement PJ:', err);
+        this.resetPiecesData();
+        this.piecesJointesLoading = false;
+        this.toastr.error('Erreur lors du chargement des pièces jointes');
+      },
+    });
+  }
+
+  /**
+   * Réinitialise les données des pièces jointes
+   */
+  resetPiecesData(): void {
+    this.operationPiecesJointes = [];
+    this.demandePiecesJointes = [];
+    this.operationPiecesCount = 0;
+    this.demandePiecesCount = 0;
+    this.totalPiecesCount = 0;
+    this.hasDemande = false;
+    this.demandeInfo = null;
+  }
+
+  /**
+   * Ferme le modal des pièces jointes
+   */
+  closePiecesJointesModal(): void {
+    this.modalService.dismissAll();
+    this.selectedOperationPJ = null;
+    this.resetPiecesData();
+    this.selectedFiles = [];
+    this.pjUploading = false;
+    this.pjDeleting = null;
+  }
+
+  // Sélection des fichiers
+  onFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+      this.selectedFiles = Array.from(input.files);
+    }
+  }
+
+  // Supprime un fichier de la liste de sélection
+  removeSelectedFile(index: number): void {
+    this.selectedFiles.splice(index, 1);
+  }
+
+  // Upload des fichiers
+  uploadPieces(): void {
+    if (!this.selectedOperationPJ) {
+      this.toastr.error('Aucune opération sélectionnée');
+      return;
+    }
+
+    if (this.selectedFiles.length === 0) {
+      this.toastr.warning('Aucun fichier sélectionné');
+      return;
+    }
+
+    console.log(
+      "Upload des fichiers pour l'opération:",
+      this.selectedOperationPJ,
+    );
+
+    this.pjUploading = true;
+    const userId = this.user.idutilisateur;
+
+    this.pjService
+      .create(this.selectedOperationPJ.idoperation, this.selectedFiles, userId)
+      .subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.toastr.success(
+              `${res.data.length} fichier(s) uploadé(s) avec succès`,
+            );
+            this.selectedFiles = [];
+            // this.loadPiecesJointes(this.selectedOperationPJ!.idoperation);
+            this.loadAllPiecesJointes(this.selectedOperationPJ!.idoperation);
+          } else {
+            this.toastr.error("Erreur lors de l'upload");
+          }
+          this.pjUploading = false;
+        },
+        error: (err) => {
+          console.error('Erreur upload:', err);
+          this.toastr.error(err.error?.message || "Erreur lors de l'upload");
+          this.pjUploading = false;
+        },
+      });
+  }
+
+  // Téléchargement d'un fichier
+  downloadPiece(piece: PieceJointe): void {
+    this.pjService.downloadFile(piece.urlpiece).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = piece.nomfichier;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.toastr.success('Téléchargement démarré');
+      },
+      error: (err) => {
+        console.error('Erreur téléchargement:', err);
+        this.toastr.error('Erreur lors du téléchargement');
+      },
+    });
+  }
+
+  // Suppression d'un fichier
+  deletePiece(piece: PieceJointe): void {
+    if (!confirm(`Supprimer "${piece.nomfichier}" ?`)) return;
+
+    this.pjDeleting = piece.idpiecejointe;
+    const userId = this.user.idutilisateur;
+
+    this.pjService
+      .delete(this.selectedOperationPJ!.idoperation, piece.idpiecejointe)
+      .subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.toastr.success('Fichier supprimé');
+            // this.loadPiecesJointes(this.selectedOperationPJ!.idoperation);
+            this.loadAllPiecesJointes(this.selectedOperationPJ!.idoperation);
+          } else {
+            this.toastr.error('Erreur lors de la suppression');
+          }
+          this.pjDeleting = null;
+        },
+        error: (err) => {
+          console.error('Erreur suppression:', err);
+          this.toastr.error(
+            err.error?.message || 'Erreur lors de la suppression',
+          );
+          this.pjDeleting = null;
+        },
+      });
+  }
+
+  // Formatage de la taille des fichiers
+  formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  // Récupère l'icône selon le type MIME (version 100% sécurisée)
+  getFileIcon(pj: any): string {
+    // Essaie plusieurs possibilités
+    let mimeType = pj?.mimeType || pj?.mimetype || pj?.MimeType || pj?.MIMETYPE;
+
+    if (!mimeType || typeof mimeType !== 'string') {
+      return 'ri-file-line text-secondary';
+    }
+
+    const mime = mimeType.toLowerCase();
+
+    if (mime.includes('pdf')) return 'ri-file-pdf-line text-danger';
+    if (mime.includes('word')) return 'ri-file-word-line text-primary';
+    if (mime.includes('excel') || mime.includes('csv'))
+      return 'ri-file-excel-line text-success';
+    if (mime.includes('image')) return 'ri-profile-line text-warning';
+    if (mime.includes('text')) return 'ri-file-text-line';
+    if (
+      mime.includes(
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      )
+    )
+      return 'ri-file-excel-line text-success';
+
+    return 'ri-file-line text-secondary';
+  }
+
+  downloadAllFiles(): void {
+    if (!this.selectedOperationPJ) {
+      this.toastr.error('Aucune opération sélectionnée');
+      return;
+    }
+
+    const idoperation = this.selectedOperationPJ?.idoperation;
+    const codeoperation =
+      this.selectedOperationPJ?.codeoperation || 'operation';
+
+    if (!idoperation) {
+      this.toastr.error('ID opération non trouvé');
+      return;
+    }
+
+    this.loading = true;
+    this.pjService.downloadAllFiles(idoperation).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const timestamp = new Date()
+          .toISOString()
+          .slice(0, 19)
+          .replace(/:/g, '-');
+        const filename = `operation_${codeoperation}_${timestamp}.zip`;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        this.toastr.success('Téléchargement démarré');
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Erreur téléchargement ZIP:', err);
+        this.toastr.error(
+          err.error?.message || 'Erreur lors du téléchargement',
+        );
+        this.loading = false;
+      },
+    });
+  }
+
+  downloadingAll: boolean = false;
+
+  downloadAllFiles2(): void {
+    const idoperation = this.selectedOperationPJ?.idoperation;
+    const iddemande = this.selectedOperationPJ?.iddemande;
+    const codeoperation =
+      this.selectedOperationPJ?.codeoperation || 'operation';
+
+    const hasOperationPJ = this.operationPiecesJointes.length > 0;
+    const hasDemandePJ = this.demandePiecesJointes.length > 0;
+
+    const totalFiles =
+      (hasDemandePJ ? this.demandePiecesJointes.length : 0) +
+      (hasOperationPJ ? this.operationPiecesJointes.length : 0);
+
+    if (totalFiles === 0) {
+      this.toastr.warning('Aucune pièce jointe à télécharger');
+      return;
+    }
+
+    // Cas 1: Seulement la demande a des PJ
+    if (hasDemandePJ && !hasOperationPJ) {
+      console.log('📥 Téléchargement uniquement des PJ de la demande');
+      this.downloadingAll = true;
+
+      this.pjService.downloadAllOperationFiles(undefined, iddemande).subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          const timestamp = new Date()
+            .toISOString()
+            .slice(0, 19)
+            .replace(/:/g, '-');
+          const filename = `demande_${iddemande}_${timestamp}.zip`;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+          this.toastr.success(
+            `${this.demandePiecesJointes.length} fichier(s) téléchargé(s)`,
+          );
+          this.downloadingAll = false;
+        },
+        error: (err) => {
+          this.toastr.error(
+            err.error?.message || 'Erreur lors du téléchargement',
+          );
+          this.downloadingAll = false;
+        },
+      });
+      return;
+    }
+
+    // Cas 2: Opération avec ou sans demande
+    if (!idoperation) {
+      this.toastr.error("ID de l'opération non trouvé");
+      return;
+    }
+
+    this.downloadingAll = true;
+
+    this.pjService.downloadAllOperationFiles(idoperation, iddemande).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const timestamp = new Date()
+          .toISOString()
+          .slice(0, 19)
+          .replace(/:/g, '-');
+        const filename = `operation_${codeoperation}_${timestamp}.zip`;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        this.toastr.success(`${totalFiles} fichier(s) téléchargé(s)`);
+        this.downloadingAll = false;
+      },
+      error: (err) => {
+        this.toastr.error(
+          err.error?.message || 'Erreur lors du téléchargement',
+        );
+        this.downloadingAll = false;
+      },
+    });
+  }
 }
