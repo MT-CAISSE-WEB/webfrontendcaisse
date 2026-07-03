@@ -1,214 +1,404 @@
-<!-- En-tête avec titre et actions -->
-<div class="sticky-top bg-white pt-3 pb-2 mb-4 shadow-sm z-10" style="top: 0;">
-  <div class="container-fluid px-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-center">
-      <div>
-        <h1 class="h3 mb-0">{{ title }}</h1>
-        <nav aria-label="breadcrumb">
-          <ol class="breadcrumb mb-0 mt-2">
-            <li class="breadcrumb-item"><a routerLink="/">Consultations </a></li>
-            <li class="breadcrumb-item active">{{ title }}</li>
-          </ol>
-        </nav>
+<!-- ============================================ -->
+<!-- PAGE TITLE PREMIUM -->
+<!-- ============================================ -->
+<div class="row">
+  <div class="col-12">
+    <div
+      class="page-title-premium d-sm-flex align-items-center justify-content-between"
+    >
+      <div class="d-flex align-items-center gap-3">
+        <div class="title-icon-premium">
+          <i class="ri-bank-line"></i>
+        </div>
+        <div>
+          <h4 class="mb-0 title-premium">{{ title }}</h4>
+          <span class="title-subtitle-premium"
+            >Suivi des soldes de caisse par période</span
+          >
+        </div>
       </div>
-      <div class="mt-2 mt-sm-0">
-        <button class="btn btn-outline-secondary btn-sm me-2" (click)="exportToExcel()">
-            <i class="ri-file-excel-line"></i> Excel
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn-glass-excel btn-sm" (click)="exportToExcel()">
+          <i class="ri-file-excel-line me-1"></i> Excel
         </button>
-        <button class="btn btn-outline-danger btn-sm" (click)="exportToPDF()">
-            <i class="ri-file-pdf-line"></i> PDF
+        <button class="btn-glass-danger btn-sm" (click)="exportToPDF()">
+          <i class="ri-file-pdf-line me-1"></i> PDF
         </button>
       </div>
     </div>
   </div>
 </div>
 
-<div class="container-fluid px-4">
-  <!-- Filtres – carte flottante -->
-  <div class="card shadow-sm mb-4 border-0">
-    <div class="card-header bg-white py-3">
-      <h5 class="mb-0"><i class="ri-filter-3-line me-2"></i>Filtrer les données</h5>
-    </div>
-    <div class="card-body">
-      <form [formGroup]="searchForm">
-        <div class="row g-3">
-          <div class="col-md-4">
-            <label class="form-label fw-semibold">Date début</label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="ri-calendar-line"></i></span>
-              <input type="date" class="form-control form-control-sm" formControlName="dateDebut">
-            </div>
+<!-- ============================================ -->
+<!-- FILTERS CARD -->
+<!-- ============================================ -->
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card-glass">
+      <div class="card-header-glass border-0">
+        <div class="d-flex align-items-center gap-2">
+          <div class="section-icon-glass">
+            <i class="ri-filter-3-line"></i>
           </div>
-          <div class="col-md-4">
-            <label class="form-label fw-semibold">Date fin</label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="ri-calendar-line"></i></span>
-              <input type="date" class="form-control form-control-sm" formControlName="dateFin">
-            </div>
-          </div>
-          <div class="col-md-4">
-            <label class="form-label fw-semibold">Caisse</label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="ri-bank-line"></i></span>
-              <select class="form-select form-select-sm" formControlName="caisse">
-                <option value="">Toutes les caisses</option>
-                <option *ngFor="let c of caisses" [value]="c.idcaisse">
-                  {{ c.codecaisse }} – {{ c.libelle }}
-                </option>
-              </select>
-            </div>
-          </div>
+          <h5 class="card-title-glass mb-0">Filtres de recherche</h5>
         </div>
-        <div class="row mt-4">
-          <div class="col-12 text-end">
-            <button class="btn btn-sm btn-primary px-4" (click)="onSubmit()" [disabled]="loading">
-              <i class="ri-search-line me-1"></i> Rechercher
-            </button>
-            <button class="btn btn-sm btn-link text-muted ms-2" (click)="resetFilters()" *ngIf="searchForm.dirty">
-              Réinitialiser
-            </button>
+      </div>
+      <div class="card-body-glass">
+        <form [formGroup]="searchForm">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="form-floating">
+                <input
+                  type="date"
+                  class="form-control"
+                  formControlName="dateDebut"
+                  id="dateDebut"
+                  placeholder=" "
+                />
+                <label for="dateDebut">
+                  <i class="ri-calendar-line me-1"></i> Date début
+                </label>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-floating">
+                <input
+                  type="date"
+                  class="form-control"
+                  formControlName="dateFin"
+                  id="dateFin"
+                  placeholder=" "
+                />
+                <label for="dateFin">
+                  <i class="ri-calendar-line me-1"></i> Date fin
+                </label>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-floating">
+                <select
+                  class="form-select form-select-glass"
+                  formControlName="caisse"
+                  id="caisseSelect"
+                >
+                  <option value="">Toutes les caisses</option>
+                  @for (c of caisses; track c.idcaisse) {
+                    <option [value]="c.idcaisse">
+                      {{ c.codecaisse }} — {{ c.libelle }}
+                    </option>
+                  }
+                </select>
+                <label for="caisseSelect">
+                  <i class="ri-bank-line me-1"></i> Caisse
+                </label>
+              </div>
+            </div>
           </div>
-        </div>
-      </form>
+          <div class="row mt-4">
+            <div class="col-12 text-end">
+              <button
+                class="btn-glass-primary btn-sm px-4"
+                (click)="onSubmit()"
+                [disabled]="loading"
+              >
+                <i class="ri-search-line me-1"></i> Rechercher
+              </button>
+              <button
+                class="btn-glass-cancel btn-sm ms-2"
+                (click)="resetFilters()"
+                *ngIf="searchForm.dirty"
+              >
+                <i class="ri-restart-line me-1"></i> Réinitialiser
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
+</div>
 
-  <!-- Zone de résultats -->
-  <div *ngIf="loading" class="text-center py-5">
+<!-- ============================================ -->
+<!-- LOADING STATE -->
+<!-- ============================================ -->
+@if (loading && datas.length === 0) {
+  <div class="text-center py-5">
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Chargement...</span>
     </div>
     <p class="mt-2 text-muted">Recherche en cours...</p>
   </div>
+}
 
-  <div *ngIf="!loading && datas.length === 0" class="alert alert-info text-center py-5">
-    <i class="ri-information-line ri-2x"></i>
-    <p class="mb-0 mt-2">Aucune donnée trouvée pour cette période.</p>
+<!-- ============================================ -->
+<!-- EMPTY STATE -->
+<!-- ============================================ -->
+@if (!loading && datas.length === 0) {
+  <div class="empty-state">
+    <i class="ri-inbox-2-line"></i>
+    <p>Aucune donnée trouvée</p>
+    <span class="empty-hint"
+      >Aucune donnée ne correspond à vos critères de recherche</span
+    >
   </div>
+}
 
-  <div *ngIf="!loading && datas.length > 0">
-    <!-- Totaux globaux (cards) -->
-    <div class="row g-3 mb-4">
-      <div class="col-md-3">
-        <div class="card border-0 bg-gradient-primary text-white shadow-sm">
-          <div class="card-body d-flex align-items-center">
-            <div class="flex-shrink-0 me-3">
-              <i class="ri-wallet-line ri-2x"></i>
+<!-- ============================================ -->
+<!-- RESULTS: TOTAUX GLOBAUX -->
+<!-- ============================================ -->
+@if (!loading && datas.length > 0) {
+  <div class="row g-3 mb-4">
+    <!-- Total d'ouverture -->
+    <div class="col-md-3">
+      <div class="card-glass">
+        <div class="card-header-glass border-0 bg-gradient-primary">
+          <div class="d-flex align-items-center gap-2">
+            <div class="section-icon-glass">
+              <i class="ri-wallet-line"></i>
             </div>
-            <div>
-              <h6 class="mb-0 fw-light">Total d'ouverture</h6>
-              <h3 class="mb-0">{{ formatCFA(totaux.solde_ouverture_ref)  }} <span class="text-muted small">{{ user.devise_ref_code }}</span></h3>
-            </div>
+            <h6 class="card-title-glass text-white mb-0">Total d'ouverture</h6>
           </div>
         </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card border-0 bg-gradient-success text-white shadow-sm">
-          <div class="card-body d-flex align-items-center">
-            <div class="flex-shrink-0 me-3">
-              <i class="ri-arrow-down-circle-line ri-2x"></i>
-            </div>
-            <div>
-              <h6 class="mb-0 fw-light">Total encaissements</h6>
-              <h3 class="mb-0">{{ formatCFA(totaux.total_encaissement_ref) }} <span class="text-muted small">{{ user.devise_ref_code }}</span></h3>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card border-0 bg-gradient-danger text-white shadow-sm">
-          <div class="card-body d-flex align-items-center">
-            <div class="flex-shrink-0 me-3">
-              <i class="ri-arrow-up-circle-line ri-2x"></i>
-            </div>
-            <div>
-              <h6 class="mb-0 fw-light">Total décaissements</h6>
-              <h3 class="mb-0">{{ formatCFA(totaux.total_decaissement_ref) }} <span class="text-muted small">{{ user.devise_ref_code }}</span></h3>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="card border-0 bg-gradient-info text-white shadow-sm">
-          <div class="card-body d-flex align-items-center">
-            <div class="flex-shrink-0 me-3">
-              <i class="ri-calculator-line ri-2x"></i>
-            </div>
-            <div>
-              <h6 class="mb-0 fw-light">Solde global</h6>
-              <h3 class="mb-0">{{ formatCFA(totaux.solde_global_ref) }} <span class="text-muted small">{{ user.devise_ref_code }}</span></h3>
-            </div>
-          </div>
+        <div class="card-body-glass text-center py-4">
+          <h3 class="mb-0 fw-bold">
+            {{ formatCFA(totaux.solde_ouverture_ref) }}
+            <span class="text-muted small">{{ user.devise_ref_code }}</span>
+          </h3>
         </div>
       </div>
     </div>
 
-    <!-- Accordéon par jour -->
-    <div class="accordion" id="accordionPeriodes">
-      <div *ngFor="let item of datas; let i = index" class="accordion-item mb-3 border rounded-3 shadow-sm">
-        <h2 class="accordion-header" [id]="'heading'+i">
-          <button class="accordion-button" [class.collapsed]="i !== 0" type="button" data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse'+i" [attr.aria-expanded]="i === 0" [attr.aria-controls]="'collapse'+i">
-            <div class="d-flex w-100 justify-content-between align-items-center me-3">
-              <span>
-                <i class="ri-calendar-event-line me-2"></i>
-                <strong>{{ item.dateperiode | date:'EEEE d MMMM yyyy' }}</strong>
-              </span>
-              <span class="badge bg-success rounded-pill ms-3">
-                {{ item.caisses.length }} caisse(s)
-              </span>
+    <!-- Total encaissements -->
+    <div class="col-md-3">
+      <div class="card-glass">
+        <div class="card-header-glass border-0 bg-gradient-success">
+          <div class="d-flex align-items-center gap-2">
+            <div class="section-icon-glass">
+              <i class="ri-arrow-down-circle-line"></i>
             </div>
-          </button>
-        </h2>
-        
-        <div [id]="'collapse'+i" class="accordion-collapse collapse" [class.show]="i === 0" [attr.aria-labelledby]="'heading'+i" data-bs-parent="#accordionPeriodes">
-          <div class="accordion-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                  <tr>
-                    <th>Caisse</th>
-                    <th class="text-end">Solde ouverture</th>
-                    <th class="text-end">Encaissements</th>
-                    <th class="text-end">Décaissements</th>
-                    <th class="text-end bg-soft-success">Solde théorique</th>
-                    <th class="text-end">Solde clôture prév.</th>
-                    <th class="text-center">Statut</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let c of item.caisses">
-                    <td>
-                      <strong>{{ c.codecaisse }}</strong><br>
-                      <small class="text-muted">{{ c.libelle }}</small>
-                    </td>
-                    <td class="text-end">{{ formatCFA(c.soldeouverture)  }} <span class="text-muted small">{{ c.codedevise }}</span></td>
-                    <td class="text-end text-success">{{ formatCFA(c.total_encaissement) }} <span class="text-muted small">{{ c.codedevise }}</span></td>
-                    <td class="text-end text-danger">{{ formatCFA(c.total_decaissement) }} <span class="text-muted small">{{ c.codedevise }}</span></td>
-                    <td class="text-end fw-bold bg-soft-success">{{ formatCFA(c.solde_theorique) }} <span class="text-muted small">{{ c.codedevise }}</span></td>
-                    <td class="text-end">{{ formatCFA(c.solde_previsionnel_fermeture) }} <span class="text-muted small">{{ c.codedevise }}</span></td>
-                    <td class="text-center">
-                      <span class="badge" [class.bg-success]="c.statut === 'OUVERT'" [class.bg-secondary]="c.statut !== 'OUVERT'">
-                        {{ c.statut || 'FERMÉ' }}
+            <h6 class="card-title-glass text-white mb-0">
+              Total encaissements
+            </h6>
+          </div>
+        </div>
+        <div class="card-body-glass text-center py-4">
+          <h3 class="mb-0 fw-bold text-success">
+            {{ formatCFA(totaux.total_encaissement_ref) }}
+            <span class="text-muted small">{{ user.devise_ref_code }}</span>
+          </h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total décaissements -->
+    <div class="col-md-3">
+      <div class="card-glass">
+        <div class="card-header-glass border-0 bg-gradient-danger">
+          <div class="d-flex align-items-center gap-2">
+            <div class="section-icon-glass">
+              <i class="ri-arrow-up-circle-line"></i>
+            </div>
+            <h6 class="card-title-glass text-white mb-0">
+              Total décaissements
+            </h6>
+          </div>
+        </div>
+        <div class="card-body-glass text-center py-4">
+          <h3 class="mb-0 fw-bold text-danger">
+            {{ formatCFA(totaux.total_decaissement_ref) }}
+            <span class="text-muted small">{{ user.devise_ref_code }}</span>
+          </h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Solde global -->
+    <div class="col-md-3">
+      <div class="card-glass">
+        <div class="card-header-glass border-0 bg-gradient-info">
+          <div class="d-flex align-items-center gap-2">
+            <div class="section-icon-glass">
+              <i class="ri-calculator-line"></i>
+            </div>
+            <h6 class="card-title-glass text-white mb-0">Solde global</h6>
+          </div>
+        </div>
+        <div class="card-body-glass text-center py-4">
+          <h3 class="mb-0 fw-bold">
+            {{ formatCFA(totaux.solde_global_ref) }}
+            <span class="text-muted small">{{ user.devise_ref_code }}</span>
+          </h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- RESULTS: ACCORDÉON PAR PÉRIODE -->
+  <!-- ============================================ -->
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card-glass">
+        <div class="card-header-glass border-0">
+          <div class="d-flex align-items-center gap-2">
+            <div class="section-icon-glass">
+              <i class="ri-calendar-event-line"></i>
+            </div>
+            <h5 class="card-title-glass mb-0">Détail par période</h5>
+          </div>
+        </div>
+        <div class="card-body-glass pt-0">
+          <div
+            class="accordion lefticon-accordion custom-accordionwithicon accordion-border-box"
+            id="periodesAccordion"
+          >
+            @for (item of datas; track $index; let i = $index) {
+              <div class="accordion-item-glass">
+                <h2 class="accordion-header" [id]="'heading' + i">
+                  <button
+                    class="accordion-button-glass"
+                    [class.collapsed]="i !== 0"
+                    type="button"
+                    (click)="toggleAccordion(i)"
+                  >
+                    <div class="accordion-header-content">
+                      <span class="accordion-date">
+                        <i class="ri-calendar-line me-1"></i>
+                        {{ item.dateperiode | date: "EEEE d MMMM yyyy" }}
                       </span>
-                    </td>
-                  </tr>
-                </tbody>
-                <tfoot class="table-secondary" *ngIf="item.totauxGlobaux">
-                  <tr>
-                    <th>Totaux ({{ user.devise_ref_code }})</th>
-                    <th class="text-end">{{ formatCFA(item.totauxGlobaux.soldeouverture_ref) }}</th>
-                    <th class="text-end">{{ formatCFA(item.totauxGlobaux.total_encaissement_ref) }}</th>
-                    <th class="text-end">{{ formatCFA(item.totauxGlobaux.total_decaissement_ref) }}</th>
-                    <th class="text-end">{{ formatCFA(item.totauxGlobaux.solde_global_ref) }}</th>
-                    <th class="text-end">{{ formatCFA(item.totauxGlobaux.solde_global_ref) }}</th>
-                    <th></th>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
+                      <span class="accordion-divider"></span>
+                      <span class="badge-glass badge-glass-info badge-count-sm">
+                        {{ item.caisses.length }} caisse(s)
+                      </span>
+                    </div>
+                    <i class="ri-arrow-down-s-line accordion-arrow"></i>
+                  </button>
+                </h2>
+                <div
+                  [id]="'collapse' + i"
+                  class="accordion-collapse collapse"
+                  [class.show]="i === 0"
+                >
+                  <div class="accordion-body-glass p-0">
+                    <div class="table-responsive-modern">
+                      <table class="table table-modern align-middle mb-0">
+                        <thead class="table-light-glass">
+                          <tr>
+                            <th>Caisse</th>
+                            <th class="text-end">Solde ouverture</th>
+                            <th class="text-end">Encaissements</th>
+                            <th class="text-end">Décaissements</th>
+                            <th class="text-end bg-soft-success">
+                              Solde théorique
+                            </th>
+                            <th class="text-end">Solde clôture prév.</th>
+                            <th class="text-center">Statut</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (c of item.caisses; track c.idcaisse) {
+                            <tr>
+                              <td>
+                                <strong>{{ c.codecaisse }}</strong
+                                ><br />
+                                <small class="text-muted">{{
+                                  c.libelle
+                                }}</small>
+                              </td>
+                              <td class="text-end">
+                                {{ formatCFA(c.soldeouverture) }}
+                                <span class="text-muted small">{{
+                                  c.codedevise
+                                }}</span>
+                              </td>
+                              <td class="text-end text-success fw-semibold">
+                                {{ formatCFA(c.total_encaissement) }}
+                                <span class="text-muted small">{{
+                                  c.codedevise
+                                }}</span>
+                              </td>
+                              <td class="text-end text-danger fw-semibold">
+                                {{ formatCFA(c.total_decaissement) }}
+                                <span class="text-muted small">{{
+                                  c.codedevise
+                                }}</span>
+                              </td>
+                              <td class="text-end fw-bold bg-soft-success">
+                                {{ formatCFA(c.solde_theorique) }}
+                                <span class="text-muted small">{{
+                                  c.codedevise
+                                }}</span>
+                              </td>
+                              <td class="text-end">
+                                {{ formatCFA(c.solde_previsionnel_fermeture) }}
+                                <span class="text-muted small">{{
+                                  c.codedevise
+                                }}</span>
+                              </td>
+                              <td class="text-center">
+                                <span
+                                  class="badge-glass"
+                                  [class.badge-glass-success]="
+                                    c.statut === 'OUVERT'
+                                  "
+                                  [class.badge-glass-secondary]="
+                                    c.statut !== 'OUVERT'
+                                  "
+                                >
+                                  {{ c.statut || "FERMÉ" }}
+                                </span>
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                        @if (item.totauxGlobaux) {
+                          <tfoot class="table-light-glass">
+                            <tr>
+                              <th>Totaux ({{ user.devise_ref_code }})</th>
+                              <th class="text-end">
+                                {{
+                                  formatCFA(
+                                    item.totauxGlobaux.solde_ouverture_ref
+                                  )
+                                }}
+                              </th>
+                              <th class="text-end">
+                                {{
+                                  formatCFA(
+                                    item.totauxGlobaux.total_encaissement_ref
+                                  )
+                                }}
+                              </th>
+                              <th class="text-end">
+                                {{
+                                  formatCFA(
+                                    item.totauxGlobaux.total_decaissement_ref
+                                  )
+                                }}
+                              </th>
+                              <th class="text-end">
+                                {{
+                                  formatCFA(item.totauxGlobaux.solde_global_ref)
+                                }}
+                              </th>
+                              <th class="text-end">
+                                {{
+                                  formatCFA(item.totauxGlobaux.solde_global_ref)
+                                }}
+                              </th>
+                              <th></th>
+                            </tr>
+                          </tfoot>
+                        }
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+}

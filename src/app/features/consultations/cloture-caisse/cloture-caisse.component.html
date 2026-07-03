@@ -1,146 +1,287 @@
-<!-- start page title -->
+<!-- ============================================ -->
+<!-- PAGE TITLE PREMIUM -->
+<!-- ============================================ -->
 <div class="row">
-    <div class="col-12">
-        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">{{title}}</h4>
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Consultation</a></li>
-                    <li class="breadcrumb-item active">{{title}}</li>
-                </ol>
-            </div>
+  <div class="col-12">
+    <div
+      class="page-title-premium d-sm-flex align-items-center justify-content-between"
+    >
+      <div class="d-flex align-items-center gap-3">
+        <div class="title-icon-premium">
+          <i class="ri-lock-2-line"></i>
         </div>
+        <div>
+          <h4 class="mb-0 title-premium">{{ title }}</h4>
+          <span class="title-subtitle-premium"
+            >État de clôture des caisses</span
+          >
+        </div>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn-glass-excel btn-sm" (click)="onExportExcel()">
+          <i class="ri-file-excel-line me-1"></i> Export Excel
+        </button>
+        <button class="btn-glass-danger btn-sm" (click)="printJournalCaisse()">
+          <i class="ri-file-pdf-line me-1"></i> Imprimer PDF
+        </button>
+        <button class="btn-glass-primary btn-sm" (click)="openCriteriaModal()">
+          <i class="ri-filter-2-line me-1"></i> Critères
+        </button>
+      </div>
     </div>
+  </div>
 </div>
-<!-- end page title -->
 
+<!-- ============================================ -->
+<!-- RESULTS CARD -->
+<!-- ============================================ -->
 <div class="row">
-    <div class="col-lg-12">
-        <div class="card" id="">
-            <div class="card-header border-0">
-                <div class="d-flex align-items-center">
-                    <h5 class="card-title mb-0 flex-grow-1">{{title}}</h5>
-                    <div class="flex-shrink-0">
-                        <div class="d-flex gap-2 flex-wrap">
-                            <button class="btn btn-sm btn-success" (click)="onExportExcel()"> Export Excel </button>
-                            <button class="btn btn-sm btn-danger" (click)="onPrintPDF()"> <i class="ri-file-download-line align-bottom me-1"></i> Imprimer PDF </button>
-                            <button class="btn btn-sm btn-soft-secondary" data-bs-toggle="modal" data-bs-target="#showModal">
-                                <i class="ri-add-line align-bottom me-1"></i>critères
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-body">
-                <table class="table table-bordered table-sm table-hover">
-
-                    <thead class="table-light">
-                        <tr>
-                            <th>Date</th>
-                            <th>Caisse</th>
-                            <th>Devise</th>
-                            <th>Solde Ouverture</th>
-                            <th>Solde Fermeture</th>
-                            <th>Montant Physique</th>
-                            <th>Ecart</th>
-                            <th>Statut</th>
-                            <th>Date cloture</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <tr *ngFor="let item of op">
-                            <td>{{ item.date | date:'dd/MM/yyyy' }}</td>
-                            <td>{{ item.caisse.libelle }}</td>
-                            <td>{{ item.devise }}</td>
-                            <td class="text-end">{{ formatCFA(item.soldes.ouverture)}}</td>
-                            <td class="text-end">{{ formatCFA(item.soldes.fermeture) }}</td>
-                            <td class="text-end">{{ formatCFA(item.soldes.physique) }}</td>
-
-                            <!-- Mise en évidence écart -->
-                            <td [ngClass]="{'text-danger text-end': item.soldes.ecart !== 0, 'text-success text-end': item.soldes.ecart === 0}">
-                                {{ formatCFA(item.soldes.ecart)}}
-                            </td>
-
-                            <td>
-                                <span class="badge bg-success" *ngIf="item.statut === 'cloturee'">Fermé</span>
-                                <span class="badge bg-warning" *ngIf="item.statut === 'ouverte'">Ouvert</span>
-                            </td>
-                            <td>{{ item.validation.date | date:'dd/MM/yyyy' }}</td>
-                        </tr>
-                    </tbody>
-
-                </table>
-                <div class="mt-3 text-end">
-                    <strong>Total Fermeture :</strong> {{ formatCFA(totalFermeture) }} <br>
-                    <strong>Total Physique :</strong> {{ formatCFA(totalPhysique) }} <br>
-                    <strong>Total Ecart :</strong> 
-                    <span [ngClass]="{'text-danger': totalEcart > 0, 'text-success': totalEcart === 0}">
-                        {{ formatCFA(totalEcart) }}
-                    </span>
-                </div>
-            </div>
+  <div class="col-lg-12">
+    <div class="card-glass">
+      <div class="card-header-glass border-0">
+        <div class="d-flex align-items-center gap-2">
+          <div class="section-icon-glass">
+            <i class="ri-table-line"></i>
+          </div>
+          <h5 class="card-title-glass mb-0">Liste des clôtures</h5>
+          <span class="badge-glass badge-glass-info badge-count-sm ms-2">
+            {{ op.length }}
+          </span>
         </div>
+      </div>
+      <div class="card-body-glass pt-0">
+        @if (loading && op.length === 0) {
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Chargement...</span>
+            </div>
+            <p class="mt-2 text-muted">Recherche en cours...</p>
+          </div>
+        }
+
+        @if (!loading && op.length === 0) {
+          <div class="empty-state">
+            <i class="ri-inbox-2-line"></i>
+            <p>Aucune clôture trouvée</p>
+            <span class="empty-hint"
+              >Aucune donnée ne correspond à vos critères</span
+            >
+          </div>
+        }
+
+        @if (!loading && op.length > 0) {
+          <div class="table-responsive-modern">
+            <table class="table table-modern align-middle mb-0">
+              <thead class="table-light-glass">
+                <tr>
+                  <th>Date</th>
+                  <th>Caisse</th>
+                  <th>Devise</th>
+                  <th class="text-end">Solde Ouverture</th>
+                  <th class="text-end">Solde Fermeture</th>
+                  <th class="text-end">Montant Physique</th>
+                  <th class="text-end">Écart</th>
+                  <th class="text-center">Statut</th>
+                  <th>Date clôture</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of op; track $index) {
+                  <tr>
+                    <td>{{ item.date | date: "dd/MM/yyyy" }}</td>
+                    <td>
+                      <span class="code-badge">{{ item.caisse.code }}</span>
+                      <br />
+                      <small class="text-muted">{{
+                        item.caisse.libelle
+                      }}</small>
+                    </td>
+                    <td>
+                      <span class="badge-glass badge-glass-devise">{{
+                        item.devise
+                      }}</span>
+                    </td>
+                    <td class="text-end">
+                      {{ formatCFA(item.soldes.ouverture) }}
+                    </td>
+                    <td class="text-end">
+                      {{ formatCFA(item.soldes.fermeture) }}
+                    </td>
+                    <td class="text-end">
+                      {{ formatCFA(item.soldes.physique) }}
+                    </td>
+                    <td
+                      class="text-end"
+                      [class.text-danger]="item.soldes.ecart !== 0"
+                      [class.text-success]="item.soldes.ecart === 0"
+                    >
+                      {{ formatCFA(item.soldes.ecart) }}
+                    </td>
+                    <td class="text-center">
+                      @if (item.statut === "cloturee") {
+                        <span class="badge-glass badge-glass-success">
+                          <i class="ri-lock-line me-1"></i> Fermé
+                        </span>
+                      } @else {
+                        <span class="badge-glass badge-glass-warning">
+                          <i class="ri-unlock-line me-1"></i> Ouvert
+                        </span>
+                      }
+                    </td>
+                    <td>{{ item.validation.date | date: "dd/MM/yyyy" }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Totaux -->
+          <div
+            class="d-flex justify-content-end mt-4 pt-3 border-top border-light"
+          >
+            <div class="totals-summary">
+              <div class="total-item mb-2">
+                <span class="total-label">Total Fermeture :</span>
+                <span class="total-value">{{ formatCFA(totalFermeture) }}</span>
+              </div>
+              <div class="total-item mb-2">
+                <span class="total-label">Total Physique :</span>
+                <span class="total-value">{{ formatCFA(totalPhysique) }}</span>
+              </div>
+              <div class="total-item">
+                <span class="total-label">Total Écart :</span>
+                <span
+                  class="total-value"
+                  [class.text-danger]="totalEcart > 0"
+                  [class.text-success]="totalEcart === 0"
+                >
+                  {{ formatCFA(totalEcart) }}
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
     </div>
+  </div>
 </div>
 
+<!-- ============================================ -->
+<!-- MODAL: CRITÈRES -->
+<!-- ============================================ -->
+<div
+  class="modal-overlay"
+  [class.show]="showCriteriaModal"
+  (click)="closeCriteriaModal()"
+>
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-content-glass">
+      <div class="modal-header modal-header-theme-blue">
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-filter-2-line text-white fs-5"></i>
+          </div>
+          <h5 class="modal-title text-white fw-semibold">
+            Critères de recherche
+          </h5>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          (click)="closeCriteriaModal()"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
 
-<!-- Modal -->
-<div class="modal fade" id="showModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-info-subtle">
-                <h5 class="modal-title" id="exampleModalLabel">Critères {{title}}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+      <form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
+        <div class="modal-body p-4">
+          <div class="row g-3">
+            <div class="col-12">
+              <div class="form-floating">
+                <select
+                  class="form-select form-select-glass"
+                  formControlName="idcaisse"
+                  id="caisseSelect"
+                >
+                  <option value="">Choisir la caisse</option>
+                  @for (item of caissesUser; track $index) {
+                    <option value="{{ item.caisse.idcaisse }}">
+                      {{ item.caisse.codecaisse }} — {{ item.caisse.libelle }}
+                    </option>
+                  }
+                </select>
+                <label for="caisseSelect">
+                  <i class="ri-bank-line me-1"></i> Caisse
+                </label>
+                <div
+                  class="invalid-feedback d-block"
+                  *ngIf="
+                    searchForm.get('idcaisse')?.invalid &&
+                    searchForm.get('idcaisse')?.touched
+                  "
+                >
+                  Sélectionner une caisse
+                </div>
+              </div>
             </div>
 
-            <form [formGroup]="searchForm">
-                <div class="modal-body p-3">
-                    <div class="row mt-4">
-                        <div class="col-lg-12 col-sm-12">
-                            <div class="mb-3">
-                                <label for="choices-payment-status">caisse </label>
-                                <div class="input-light">
-                                    <select formControlName="idcaisse" class="form-select form-select-sm bg-light border-0">
-                                        <option value="">choisir la caisse</option>
-                                        @for (item of caissesUser; track $index){
-                                            <option value="{{item.caisse.idcaisse}}">{{item.caisse.codecaisse}} -- {{item.caisse.libelle}}</option>
-                                        }
-                                    </select>
-                                    <div class="invalid-feedback">Sélectionner une caisse</div>
-                                </div>
-                            </div>
-                        </div>
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input
+                  type="date"
+                  class="form-control"
+                  formControlName="datedebut"
+                  id="dateDebut"
+                  placeholder=" "
+                  required
+                />
+                <label for="dateDebut">
+                  <i class="ri-calendar-line me-1"></i> Date début
+                </label>
+              </div>
+            </div>
 
-                        <div class="col-lg-6 col-sm-6">
-                            <div class="mb-3">
-                                <label for="date-field">date debut</label>
-                                <input type="date" formControlName="datedebut" class="form-control form-control-sm bg-light border-0" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date" required>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-6 col-sm-6">
-                            <div class="mb-3">
-                                <label for="date-field">date fin</label>
-                                <input type="date" formControlName="datefin" class="form-control form-control-sm bg-light border-0" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date" required>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <div class="hstack gap-2 justify-content-end">
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
-                            <button type="submit" class="btn btn-sm btn-success" (click)="onSubmit()" [disabled]="searchForm.invalid">
-                                rechercher
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </form>
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input
+                  type="date"
+                  class="form-control"
+                  formControlName="datefin"
+                  id="dateFin"
+                  placeholder=" "
+                  required
+                />
+                <label for="dateFin">
+                  <i class="ri-calendar-line me-1"></i> Date fin
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <div class="modal-footer border-0 p-4">
+          <div class="d-flex gap-3 justify-content-end w-100">
+            <button
+              type="button"
+              class="btn-glass-cancel"
+              (click)="closeCriteriaModal()"
+            >
+              <i class="ri-close-line me-1"></i> Fermer
+            </button>
+            <button
+              type="submit"
+              class="btn-glass-submit"
+              [disabled]="searchForm.invalid || loading"
+            >
+              @if (loading) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              }
+              <i class="ri-search-line me-1"></i> Rechercher
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
+  </div>
 </div>
-<!--end modal -->

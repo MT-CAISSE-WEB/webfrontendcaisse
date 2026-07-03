@@ -1,170 +1,284 @@
-<!-- start page title -->
+<!-- ============================================ -->
+<!-- PAGE TITLE PREMIUM -->
+<!-- ============================================ -->
 <div class="row">
-    <div class="col-12">
-        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">{{title}}</h4>
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Consultation</a></li>
-                    <li class="breadcrumb-item active">{{title}}</li>
-                </ol>
-            </div>
+  <div class="col-12">
+    <div
+      class="page-title-premium d-sm-flex align-items-center justify-content-between"
+    >
+      <div class="d-flex align-items-center gap-3">
+        <div class="title-icon-premium">
+          <i class="ri-file-list-3-line"></i>
         </div>
+        <div>
+          <h4 class="mb-0 title-premium">{{ title }}</h4>
+          <span class="title-subtitle-premium"
+            >Recherche et consultation des opérations détaillées</span
+          >
+        </div>
+      </div>
+      <div class="page-title-right">
+        <ol class="breadcrumb-premium m-0">
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);">
+              <i class="ri-home-4-line me-1"></i>Consultation
+            </a>
+          </li>
+          <li class="breadcrumb-item active">
+            <i class="ri-file-list-3-line"></i>{{ title }}
+          </li>
+        </ol>
+      </div>
     </div>
+  </div>
 </div>
-<!-- end page title -->
 
+<!-- ============================================ -->
+<!-- SEARCH CARD -->
+<!-- ============================================ -->
 <div class="row">
-    <div class="col-lg-12">
-        <div class="card" id="">
-            <form [formGroup]="searchForm">
-                <div class="card-header border-0">
-                    <div class="d-flex align-items-center">
-                        <h5 class="card-title mb-0 flex-grow-1">{{title}}</h5>
-                        <div class="flex-shrink-0">
-                            <div class="d-flex gap-2 flex-wrap">
-                                <button type="button" (click)="onSubmit()" class="btn btn-sm btn-primary w-100">
-                                <i class="ri-equalizer-fill me-1 align-bottom"></i>filtrer</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body bg-light-subtle border border-dashed border-start-0 border-end-0">
-                    <div class="row g-3">
-                        <div class="col-xxl-5 col-sm-4">
-                            <div class="search-box search-box-sm">
-                                <input type="text" class="form-control form-control-sm search bg-light border-light" formControlName="numero" placeholder="rechercher par numero">
-                                <i class="ri-search-line search-icon"></i>
-                            </div>
-                        </div>
-                        <!--end col-->
-                        <div class="col-xxl-3 col-sm-4">
-                            <input type="date" formControlName="datedebut" class="form-control form-control-sm bg-light border-light" id="datepicker-range" placeholder="date debut">
-                        </div>
-                        <div class="col-xxl-3 col-sm-4">
-                            <input type="date" formControlName="datefin" class="form-control form-control-sm bg-light border-light" id="datepicker-range" placeholder="date fin">
-                        </div>
-                        <!--end col-->
-                        <div class="col-xxl-3 col-sm-4">
-                            <app-custom-field-select
-                                mode="backend"
-                                formControlName="nature"
-                                valueField="idnature"
-                                codeField="codenature"
-                                labelField="libelle"
-                                [columns]="columnsnature"
-                                placeholder="Rechercher une nature operation..."
-                                (loadData)="searchNature($event)"
-                                (valueChange)="onSelectNature($event)"
-                                [data]="natureoperationsFiltered">
-                            </app-custom-field-select>
-                        </div>
-                        <!--end col-->
-                        <div class="col-xxl-3 col-sm-4">
-                            <app-custom-field-select
-                                mode="backend"
-                                formControlName="centre"
-                                valueField="idcentreanalytique"
-                                codeField="codecentreanalytique"
-                                labelField="libelle"
-                                [columns]="columnscentre"
-                                placeholder="Rechercher un centre analytique..."
-                                (loadData)="searchCentre($event)"
-                                (valueChange)="onSelectCentre($event)"
-                                [data]="centresFiltered">
-                            </app-custom-field-select>
-                        </div>
-                        <!--end col-->
-                        <div class="col-xxl-3 col-sm-4">
-                            <app-custom-field-select
-                                mode="backend"
-                                formControlName="tiers"
-                                valueField="idtiers"
-                                codeField="codetiers"
-                                labelField="designation"
-                                [columns]="columnstiers"
-                                placeholder="Rechercher un tiers..."
-                                (loadData)="searchTiers($event)"
-                                (valueChange)="onSelectTiers($event)"
-                                [data]="filteredTiers">
-                            </app-custom-field-select>
-                        </div>
-
-                        <!-- <div class="col-xxl-3 col-sm-4">
-                            <div class="input-light">
-                                <select class="form-select form-select-sm" formControlName="tiers">
-                                    <option value="" selected>Selectionner un tiers</option>
-                                    <option value="">Tous les tiers</option>
-                                    <option value="all">Comptabilisé</option>
-                                </select>
-                            </div>
-                        </div> -->
-                        <!--end col-->
-                    </div>
-                    <!--end row-->
-                </div>
-            </form>
-
-            <div class="card-body">
-                <div>
-                    <div class="table-responsive table-card">
-                        <table class="table table-hover table-nowrap align-middle table-scroll table-container table-custom table-compact" id="invoiceTable">
-                            <thead class="text-muted table-light">
-                                <tr class="text-uppercase">
-                                    <th scope="col" data-sort="site">Site</th>
-                                    <th scope="col" data-sort="numero">Numero pièce</th>
-                                    <th scope="col" data-sort="date">Date operation</th>
-                                    <th scope="col" data-sort="nature">Nature operation</th>
-                                    <th scope="col" data-sort="centre">Centre analytique</th>
-                                    <th scope="col" data-sort="tiers">Tiers</th>
-                                    <th scope="col" data-sort="tiers">Montant</th>
-                                    <th scope="col" data-sort="devise">Devise</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for(item of op; track $index){
-                                    <tr>
-                                        <td> {{item?.site}} </td>
-                                        <td> {{item?.piece}} </td>
-                                        <td> {{item?.date_operation | date:'dd/MM/yyyy'}} </td>
-                                        <td> {{item?.nature_operation }} </td> 
-                                        <td> {{item?.centrelibelle }} </td>
-                                        <td> {{item?.tiers || 'Aucun tiers'}} </td>
-                                        <td *ngIf="item?.devise != 'USD'"> {{ formatCFA(item?.montantligne) }} </td>
-                                        <td *ngIf="item?.devise == 'USD'"> {{ formatNumber(item?.montantligne) }} </td>
-                                        <td> {{item?.devise}} </td>
-                                    </tr>
-                                }
-                                <tr *ngIf="loading">
-                                    <td colspan="8">
-                                        <div class="text-center py-4">
-                                            <div class="spinner-border text-info"></div>
-                                            <h6 class="mt-2">Chargement...</h6>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div class="" *ngIf="op?.length == 0">
-                            <div class="text-center">
-                                <h5 class="mt-2">Désolé! Aucune donnée trouvé</h5>
-                                <p class="text-muted mb-0">Désole il n' y aucune donnée pour vos critères</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-end mt-3">
-                        <div class="pagination-wrap hstack gap-2">
-                            <button [disabled]="currentPage == 1" (click)="changePage(currentPage - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
-                                Précédent
-                            </button>
-                            <ul class="pagination listjs-pagination mb-0"> Page {{currentPage}} / {{totalPages}} </ul>
-                            <button [disabled]="currentPage == totalPages" (click)="changePage(currentPage + 1)" class="btn btn-sm btn-soft-primary pagination-next">
-                                Suivant
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <div class="col-lg-12">
+    <div class="search-card">
+      <form [formGroup]="searchForm">
+        <!-- Header -->
+        <div class="search-card-header">
+          <div class="search-card-title">
+            <i class="ri-search-2-line"></i>
+            <h5>Critères de recherche</h5>
+          </div>
+          <div class="search-card-actions">
+            <button
+              type="button"
+              class="btn-glass-secondary"
+              (click)="resetForm()"
+              [disabled]="loading"
+            >
+              <i class="ri-restart-line"></i> Réinitialiser
+            </button>
+            <button
+              type="button"
+              class="btn-glass-primary"
+              (click)="onSubmit()"
+              [disabled]="loading || searchForm.invalid"
+            >
+              <i class="ri-equalizer-fill"></i> Filtrer
+            </button>
+          </div>
         </div>
+
+        <!-- Body -->
+        <div class="search-card-body">
+          <div class="search-grid">
+            <!-- Numéro -->
+            <div class="field-group">
+              <input
+                type="text"
+                class="field-control"
+                formControlName="numero"
+                id="numeroSearch"
+                placeholder="Numéro de pièce"
+              />
+              <i class="ri-hashtag field-icon"></i>
+            </div>
+
+            <!-- Date début -->
+            <div class="field-group">
+              <input
+                type="date"
+                class="field-control"
+                formControlName="datedebut"
+                id="dateDebut"
+                placeholder="Date début"
+              />
+              <i class="ri-calendar-line field-icon"></i>
+            </div>
+
+            <!-- Date fin -->
+            <div class="field-group">
+              <input
+                type="date"
+                class="field-control"
+                formControlName="datefin"
+                id="dateFin"
+                placeholder="Date fin"
+              />
+              <i class="ri-calendar-line field-icon"></i>
+            </div>
+
+            <!-- Centre -->
+            <div class="field-group">
+              <app-custom-field-select
+                mode="backend"
+                formControlName="centre"
+                valueField="idcentreanalytique"
+                codeField="codecentreanalytique"
+                labelField="libelle"
+                [columns]="columnscentre"
+                placeholder="Centre analytique"
+                (loadData)="searchCentre($event)"
+                (valueChange)="onSelectCentre($event)"
+                [data]="centresFiltered"
+                class="field-select"
+              ></app-custom-field-select>
+            </div>
+
+            <!-- Tiers -->
+            <div class="field-group">
+              <app-custom-field-select
+                mode="backend"
+                formControlName="tiers"
+                valueField="idtiers"
+                codeField="codetiers"
+                labelField="designation"
+                [columns]="columnstiers"
+                placeholder="Tiers"
+                (loadData)="searchTiers($event)"
+                (valueChange)="onSelectTiers($event)"
+                [data]="filteredTiers"
+                class="field-select"
+              ></app-custom-field-select>
+            </div>
+
+            <!-- Nature -->
+            <div class="field-group">
+              <app-custom-field-select
+                mode="backend"
+                formControlName="nature"
+                valueField="idnature"
+                codeField="codenature"
+                labelField="libelle"
+                [columns]="columnsnature"
+                placeholder="Nature opération"
+                (loadData)="searchNature($event)"
+                (valueChange)="onSelectNature($event)"
+                [data]="natureoperationsFiltered"
+                class="field-select"
+              ></app-custom-field-select>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- RESULTS CARD -->
+<!-- ============================================ -->
+<div class="row mt-3">
+  <div class="col-lg-12">
+    <div class="card-glass">
+      <div class="card-header-glass border-0">
+        <div class="d-flex align-items-center gap-2">
+          <div class="section-icon-glass">
+            <i class="ri-table-line"></i>
+          </div>
+          <h5 class="card-title-glass mb-0">Résultats ({{ op.length }})</h5>
+        </div>
+      </div>
+
+      <div class="card-body-glass pt-0">
+        @if (loading && op.length === 0) {
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Chargement...</span>
+            </div>
+            <p class="mt-2 text-muted">Recherche en cours...</p>
+          </div>
+        }
+
+        @if (op.length > 0) {
+          <div class="table-responsive-modern">
+            <table class="table table-modern align-middle">
+              <thead class="table-light-glass">
+                <tr>
+                  <th>Site</th>
+                  <th>N° Pièce</th>
+                  <th>Date opération</th>
+                  <th>Nature</th>
+                  <th>Centre analytique</th>
+                  <th>Tiers</th>
+                  <th class="text-end">Montant</th>
+                  <th>Devise</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of op; track $index) {
+                  <tr>
+                    <td>
+                      <span class="badge-glass badge-glass-info">{{
+                        item?.site
+                      }}</span>
+                    </td>
+                    <td>
+                      <span class="code-badge">{{ item?.piece }}</span>
+                    </td>
+                    <td>{{ item?.date_operation | date: "dd/MM/yyyy" }}</td>
+                    <td>{{ item?.nature_operation }}</td>
+                    <td>{{ item?.centrelibelle }}</td>
+                    <td>{{ item?.tiers || "Aucun tiers" }}</td>
+                    <td class="text-end fw-semibold">
+                      @if (item?.devise !== "USD") {
+                        {{ formatCFA(item?.montantligne) }}
+                      } @else {
+                        {{ formatNumber(item?.montantligne) }}
+                      }
+                    </td>
+                    <td>
+                      <span class="badge-glass badge-glass-devise">{{
+                        item?.devise
+                      }}</span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else if (!loading) {
+          <div class="empty-state">
+            <i class="ri-inbox-2-line"></i>
+            <p>Aucune opération trouvée</p>
+            <span class="empty-hint"
+              >Aucune donnée ne correspond à vos critères de recherche</span
+            >
+          </div>
+        }
+
+        <!-- Pagination -->
+        @if (op.length > 0) {
+          <div
+            class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top border-light"
+          >
+            <div class="text-muted">
+              Affichage de {{ (currentPage - 1) * limit + 1 }} à
+              {{ Math.min(currentPage * limit, op.length) }} sur
+              {{ op.length }} résultats
+            </div>
+            <div class="d-flex gap-2">
+              <button
+                type="button"
+                class="btn-glass-secondary btn-sm"
+                [disabled]="currentPage === 1"
+                (click)="changePage(currentPage - 1)"
+              >
+                <i class="ri-arrow-left-s-line me-1"></i> Précédent
+              </button>
+              <div class="pagination-info">
+                Page <span class="fw-semibold">{{ currentPage }}</span> /
+                {{ totalPages }}
+              </div>
+              <button
+                type="button"
+                class="btn-glass-secondary btn-sm"
+                [disabled]="currentPage === totalPages"
+                (click)="changePage(currentPage + 1)"
+              >
+                Suivant <i class="ri-arrow-right-s-line ms-1"></i>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
 </div>

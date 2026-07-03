@@ -1,96 +1,1166 @@
-.table-hover tbody tr:hover {
-    background-color: rgba(113, 140, 180, 0.08); /* bleu Bootstrap */
-    cursor: pointer;
+/* ============================================
+   PAGE TITLE PREMIUM
+   ============================================ */
+.page-title-premium {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.08),
+    rgba(102, 126, 234, 0.05)
+  );
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 20px;
+  padding: 20px 28px;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 }
 
-.table-scroll {
-    max-height: 400px;      /* hauteur du tableau */
-    overflow-y: auto;       /* scroll vertical */
-    overflow-x: hidden;
+@media (min-width: 769px) {
+  .page-title-premium {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.92);
+  }
 }
 
+.title-icon-premium {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.12),
+    rgba(102, 126, 234, 0.08)
+  );
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  flex-shrink: 0;
+}
 
-.table-container {
-  max-width: 100%;
-  overflow-x: auto;
-  /* Pour activer le défilement horizontal */
+.title-icon-premium i {
+  font-size: 1.3rem;
+  color: #405189;
+}
+
+.title-premium {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.02em;
+}
+
+.title-subtitle-premium {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-top: 2px;
+}
+
+/* ============================================
+   CARD GLASS
+   ============================================ */
+.card-glass {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 769px) {
+  .card-glass {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.85);
+  }
+}
+
+.card-header-glass {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.4);
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.card-body-glass {
+  padding: 1.5rem;
   overflow-y: auto;
-  /* Pour activer le défilement vertical si nécessaire */
-  max-height: 400px;
-  /* Limite la hauteur de la table, ajuste selon les besoins */
 }
 
-.table-custom th {
+.card-body-glass::-webkit-scrollbar {
+  width: 5px;
+}
+
+.card-body-glass::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 10px;
+}
+
+.card-body-glass::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3b82f6, #405189);
+  border-radius: 10px;
+}
+
+/* ============================================
+   SECTION ICON
+   ============================================ */
+.section-icon-glass {
+  width: 32px;
+  height: 32px;
+  background: rgba(59, 130, 246, 0.08);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.section-icon-glass i {
+  font-size: 1rem;
+  color: #405189;
+}
+
+.card-title-glass {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0;
+}
+
+/* ============================================
+   BUTTONS GLASS (sans transition)
+   ============================================ */
+.btn-glass-primary,
+.btn-glass-secondary {
+  border-radius: 30px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+}
+
+.btn-glass-primary {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #405189;
+}
+
+.btn-glass-primary:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #405189;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.btn-glass-secondary {
+  background: rgba(203, 213, 225, 0.3);
+  border: 1px solid rgba(203, 213, 225, 0.4);
+  color: #475569;
+}
+
+.btn-glass-secondary:hover:not(:disabled) {
+  background: rgba(203, 213, 225, 0.5);
+  border-color: #94a3b8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  color: #1e293b;
+}
+
+.btn-glass-success {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 30px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #10b981;
+}
+
+.btn-glass-success:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+.btn-glass-success:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-glass-danger {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 30px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #ef4444;
+}
+
+.btn-glass-danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+
+/* ============================================
+   DROPDOWN GLASS
+   ============================================ */
+.dropdown-glass {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-toggle::after {
+  display: none;
+}
+
+.dropdown-menu-glass {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  display: none;
+  min-width: 200px;
+  padding: 0.5rem 0;
+  margin: 0.125rem 0 0;
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(226, 232, 240, 0.4);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.dropdown-menu-glass.show {
+  display: block;
+}
+
+.dropdown-item-glass {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  clear: both;
+  font-weight: 400;
+  color: #475569;
+  text-align: inherit;
+  text-decoration: none;
   white-space: nowrap;
-  /* Empêche les libellés de se casser en plusieurs lignes */
-  /* text-align: center; */
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: none;
+  display: flex;
+  align-items: center;
 }
 
-.table td, .table th {
-    white-space: nowrap;
+.dropdown-item-glass:hover {
+  background: rgba(59, 130, 246, 0.08);
+  color: #405189;
 }
 
-.button-custom:hover {
-  background-color: #218838;
+/* ============================================
+   TABLE MODERN
+   ============================================ */
+.table-responsive-modern {
+  border-radius: 10px;
+  overflow: auto;
+  border: 1px solid rgba(226, 232, 240, 0.4);
+  margin-bottom: 1rem;
 }
 
-.table-custom {
-  border-radius: 0.375rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.table-modern {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.6);
+  margin-bottom: 0;
 }
 
-.table-light {
-  background-color: #f8f9fa;
+.table-modern thead {
+  background: rgba(59, 130, 246, 0.03);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.4);
 }
 
-/* .table th, .table td {
-    padding: 1rem 0.75rem;
-  } */
-
-.table-bordered {
-  border: 1px solid #dee2e6;
+.table-modern thead th {
+  padding: 8px 12px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  border-bottom: none;
+  white-space: nowrap;
 }
 
+.table-modern tbody tr {
+  border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+  transition: none;
+}
 
-.table-compact td {
-  padding: 0.25rem 0.5rem;
-  /* valeur UX optimale */
+.table-modern tbody tr:last-child {
+  border-bottom: none;
+}
+
+.table-modern tbody td {
+  padding: 8px 12px;
   vertical-align: middle;
+  font-size: 0.75rem;
+  color: #1e293b;
+  border-bottom: none;
 }
 
-/* Réduire hauteur globale */
-::ng-deep .mat-mdc-form-field {
-  height: 40px;
+.table-light-glass {
+  background: rgba(59, 130, 246, 0.03);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.4);
 }
 
-/* Réduire le champ interne */
-::ng-deep .mat-mdc-text-field-wrapper {
-  height: 40px;
-  padding: 0 8px;
+.selected-row {
+  background-color: rgba(59, 130, 246, 0.08) !important;
 }
 
-/* Input plus compact */
-::ng-deep .mat-mdc-input-element {
-  font-size: 12px;
-  padding: 4px 0;
+/* ============================================
+   BADGES
+   ============================================ */
+.badge-glass {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.65rem;
+  font-weight: 600;
 }
 
-/* Label plus petit */
-::ng-deep .mat-mdc-floating-label {
-  font-size: 12px;
+.badge-count-sm {
+  font-size: 0.55rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
 }
 
-.cdk-overlay-container {
-  z-index: 2000 !important;
+.badge-glass-info {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
 }
 
-.small-autocomplete {
-  z-index: 2000 !important;
+.badge-glass-success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
 }
 
-/* .modal-backdrop {
-  z-index: 1040;
+.badge-glass-warning {
+  background: rgba(251, 191, 36, 0.15);
+  color: #f59e0b;
 }
-.modal.show {
+
+.badge-glass-secondary {
+  background: rgba(100, 116, 139, 0.15);
+  color: #64748b;
+}
+
+.badge-glass-devise {
+  background: rgba(100, 116, 139, 0.12);
+  color: #64748b;
+}
+
+.code-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  background: rgba(59, 130, 246, 0.08);
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #405189;
+}
+
+/* ============================================
+   CHECKBOX GLASS
+   ============================================ */
+.glass-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  width: 20px;
+}
+
+.glass-checkbox .form-check-input {
+  margin-top: 0;
+  margin-left: 0;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  background: rgba(255, 255, 255, 0.7);
+  appearance: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: none;
+}
+
+.glass-checkbox .form-check-input:checked {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #405189;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='%23405189' fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd'/%3e%3c/svg%3e");
+}
+
+.glass-checkbox .form-check-input:focus {
+  box-shadow: none;
+  border-color: #405189;
+}
+
+.glass-checkbox .form-check-label {
+  display: none;
+}
+
+/* ============================================
+   TABS GLASS
+   ============================================ */
+.tabs-glass {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.4);
+  margin-bottom: 1.5rem;
+}
+
+.tab-button-glass {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: none;
+}
+
+.tab-button-glass:hover {
+  color: #405189;
+  background: rgba(59, 130, 246, 0.04);
+}
+
+.tab-button-glass.active {
+  color: #405189;
+  border-bottom-color: #405189;
+}
+
+/* ============================================
+   RADIO GROUP GLASS
+   ============================================ */
+.radio-group-glass {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.radio-label-glass {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.radio-custom-glass {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  position: relative;
+  transition: none;
+}
+
+.radio-label-glass input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.radio-label-glass input:checked ~ .radio-custom-glass {
+  border-color: #405189;
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.radio-label-glass input:checked ~ .radio-custom-glass::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #405189;
+}
+
+.radio-text {
+  line-height: 1;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.empty-state i {
+  font-size: 2.5rem;
+  color: #cbd5e1;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 4px;
+}
+
+.empty-state .empty-hint {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+/* ============================================
+   MODALS (sans transition)
+   ============================================ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
   z-index: 1050;
-} */
+}
+
+.modal-overlay.show {
+  display: flex;
+}
+
+.modal-container {
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  pointer-events: auto;
+}
+
+.modal-container.modal-lg {
+  max-width: 700px;
+}
+
+.modal-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+.modal-container::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 10px;
+}
+
+.modal-content-glass {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(226, 232, 240, 0.3);
+}
+
+@media (min-width: 769px) {
+  .modal-content-glass {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.98);
+  }
+}
+
+.modal-header-theme-blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #405189 100%);
+  border: 0;
+  border-radius: 20px 20px 0 0;
+  padding: 1.25rem 1.5rem;
+}
+
+.modal-header-theme-red {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border: 0;
+  border-radius: 20px 20px 0 0;
+  padding: 1.25rem 1.5rem;
+}
+
+.icon-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-footer {
+  border-top: 1px solid rgba(226, 232, 240, 0.3);
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0 0 20px 20px;
+}
+
+.btn-close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  line-height: 1;
+}
+
+.btn-close-white {
+  filter: brightness(0) invert(1);
+}
+
+.btn-close:hover {
+  opacity: 0.8;
+}
+
+/* ============================================
+   ALERT GLASS
+   ============================================ */
+.alert-glass-warning {
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  color: #92400e;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+}
+
+/* ============================================
+   FORM FLOATING (ANIMATIONS CONSERVÉES)
+   ============================================ */
+.form-floating > .form-control,
+.form-floating > .form-select,
+.form-floating > mat-form-field {
+  height: 58px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  background: #ffffff;
+  font-size: 0.85rem;
+}
+
+.form-floating > .form-control:focus,
+.form-floating > .form-select:focus {
+  border-color: #405189;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-floating > label {
+  padding: 1rem 0.75rem;
+  color: #64748b;
+  font-weight: 400;
+  font-size: 0.85rem;
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  transform-origin: 0 0;
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label,
+.form-floating > .form-select ~ label {
+  transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+  color: #405189;
+}
+
+/* Mat Autocomplete adjustments */
+:host ::ng-deep .mat-form-field {
+  width: 100%;
+}
+
+:host ::ng-deep .mat-form-field-appearance-fill .mat-form-field-infix {
+  padding: 0.75rem 0;
+}
+
+:host ::ng-deep .mat-form-field-appearance-fill .mat-form-field-label {
+  padding: 0.75rem 0.75rem 0;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+:host
+  ::ng-deep
+  .mat-form-field-appearance-fill
+  .mat-form-field-label.mat-focused {
+  color: #405189;
+}
+
+:host ::ng-deep .mat-form-field-appearance-fill .mat-form-field-infix::after {
+  display: none;
+}
+
+:host ::ng-deep .mat-form-field-appearance-fill .mat-form-field-underline {
+  display: none;
+}
+
+:host ::ng-deep .mat-form-field-appearance-fill .mat-form-field-ripple {
+  display: none;
+}
+
+/* ============================================
+   FORM SELECT GLASS
+   ============================================ */
+.form-select-glass {
+  height: 58px;
+  border-radius: 12px;
+  border: 1px solid rgba(226, 232, 240, 0.4);
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0.5rem 1rem;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.form-select-glass:focus {
+  border-color: #405189;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* ============================================
+   MODALS - BUTTONS
+   ============================================ */
+.btn-glass-cancel {
+  background: rgba(100, 116, 139, 0.12);
+  border: 1px solid rgba(100, 116, 139, 0.25);
+  border-radius: 30px;
+  padding: 0.4rem 1.2rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-glass-cancel:hover:not(:disabled) {
+  background: rgba(100, 116, 139, 0.2);
+  border-color: rgba(100, 116, 139, 0.4);
+  color: #1e293b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.btn-glass-submit {
+  background: rgba(64, 81, 137, 0.15);
+  border: 1px solid rgba(64, 81, 137, 0.3);
+  border-radius: 30px;
+  padding: 0.4rem 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #405189;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-glass-submit:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: #405189;
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25);
+}
+
+.btn-glass-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .page-title-premium {
+    padding: 16px;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .card-glass {
+    margin-bottom: 1rem;
+  }
+
+  .card-header-glass {
+    padding: 1rem;
+  }
+
+  .card-body-glass {
+    padding: 1rem;
+  }
+
+  .title-premium {
+    font-size: 1.1rem;
+  }
+
+  .title-icon-premium {
+    width: 36px;
+    height: 36px;
+  }
+
+  .dropdown-menu-glass {
+    position: static;
+    display: block;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .table-modern th,
+  .table-modern td {
+    padding: 6px 8px;
+    font-size: 0.7rem;
+  }
+
+  .tabs-glass {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .tab-button-glass {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .radio-group-glass {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .modal-container.modal-lg {
+    max-width: 95vw;
+    margin: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title-premium {
+    padding: 12px;
+  }
+
+  .title-premium {
+    font-size: 0.95rem;
+  }
+
+  .title-subtitle-premium {
+    font-size: 0.65rem;
+  }
+
+  .card-glass {
+    max-height: 500px;
+  }
+
+  .btn-glass-primary,
+  .btn-glass-secondary,
+  .btn-glass-success,
+  .btn-glass-danger {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.65rem;
+  }
+
+  .form-floating > .form-control,
+  .form-floating > .form-select {
+    height: 50px;
+    font-size: 0.8rem;
+  }
+
+  .form-floating > label {
+    font-size: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .table-modern th,
+  .table-modern td {
+    padding: 4px 6px;
+    font-size: 0.65rem;
+  }
+
+  .badge-glass {
+    font-size: 0.6rem;
+    padding: 1px 6px;
+  }
+}
+
+/* Intégration mat-form-field avec form-floating */
+/* ============================================
+   FIELD GROUP SIMPLE - SANS ANIMATION
+   ============================================ */
+
+.field-group-simple {
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+/* ✅ Label statique au-dessus du champ */
+.field-label-simple {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #1e293b;
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.3px;
+}
+
+.field-label-simple i {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+/* ✅ Wrapper pour l'icône */
+.field-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* ✅ Champ de saisie */
+.field-input-simple {
+  width: 100%;
+  height: 42px;
+  padding: 0 2.5rem 0 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #1e293b;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.field-input-simple:hover {
+  background: white;
+  border-color: #cbd5e1;
+}
+
+.field-input-simple:focus {
+  background: white;
+  border-color: #405189;
+  box-shadow: 0 0 0 3px rgba(64, 81, 137, 0.1);
+}
+
+.field-input-simple::placeholder {
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.field-input-simple.is-valid {
+  border-color: #10b981;
+}
+
+.field-input-simple.is-invalid {
+  border-color: #ef4444;
+}
+
+.field-input-simple.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* ✅ Icône de recherche à droite */
+.field-input-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 1rem;
+  pointer-events: none;
+  transition: color 0.2s ease;
+}
+
+.field-input-simple:focus ~ .field-input-icon {
+  color: #405189;
+}
+
+/* ============================================
+   AUTOCOMPLETE - STYLE MODERNE
+   ============================================ */
+
+/* ✅ Panel de l'autocomplete */
+.autocomplete-simple {
+  position: absolute !important;
+  top: calc(100% + 4px) !important;
+  left: 0 !important;
+  right: 0 !important;
+  background: white !important;
+  border-radius: 8px !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  max-height: 200px !important;
+  overflow-y: auto !important;
+  z-index: 9999 !important;
+  padding: 0.25rem !important;
+}
+
+/* ✅ Options */
+.autocomplete-option-simple {
+  padding: 0.4rem 0.75rem !important;
+  font-size: 0.85rem !important;
+  color: #1e293b !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  min-height: 32px !important;
+}
+
+.autocomplete-option-simple:hover {
+  background: #f1f5f9 !important;
+}
+
+.autocomplete-option-simple.mat-active {
+  background: #e0e7ff !important;
+  color: #405189 !important;
+}
+
+/* ✅ Scrollbar */
+.autocomplete-simple::-webkit-scrollbar {
+  width: 4px;
+}
+
+.autocomplete-simple::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.autocomplete-simple::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.autocomplete-simple::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ============================================
+   OVERRIDE MATERIAL CSS
+   ============================================ */
+
+/* ✅ Supprimer le padding par défaut */
+.cdk-overlay-pane .mat-autocomplete-panel {
+  min-width: 100% !important;
+}
+
+.mat-autocomplete-panel {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  border: 1px solid #e2e8f0 !important;
+  background: white !important;
+}
+
+.mat-option {
+  font-size: 0.85rem !important;
+  padding: 0.4rem 0.75rem !important;
+  min-height: 32px !important;
+  line-height: 32px !important;
+  color: #1e293b !important;
+}
+
+.mat-option:hover {
+  background: #f1f5f9 !important;
+}
+
+.mat-option.mat-active {
+  background: #e0e7ff !important;
+  color: #405189 !important;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .field-input-simple {
+    height: 38px;
+    font-size: 0.8rem;
+    padding: 0 2.2rem 0 0.75rem;
+  }
+
+  .field-label-simple {
+    font-size: 0.75rem;
+  }
+
+  .field-input-icon {
+    font-size: 0.9rem;
+    right: 0.6rem;
+  }
+
+  .autocomplete-simple {
+    max-height: 160px !important;
+  }
+
+  .autocomplete-option-simple {
+    font-size: 0.8rem !important;
+    padding: 0.3rem 0.6rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .field-input-simple {
+    height: 34px;
+    font-size: 0.75rem;
+    padding: 0 2rem 0 0.6rem;
+  }
+
+  .field-label-simple {
+    font-size: 0.7rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .field-input-icon {
+    font-size: 0.8rem;
+    right: 0.5rem;
+  }
+
+  .autocomplete-simple {
+    max-height: 140px !important;
+  }
+
+  .autocomplete-option-simple {
+    font-size: 0.75rem !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+}

@@ -1,306 +1,659 @@
-<!-- start page title -->
+<!-- ============================================ -->
+<!-- PAGE TITLE PREMIUM -->
+<!-- ============================================ -->
 <div class="row">
-    <div class="col-12">
-        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">{{ title }}</h4>
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Comptabilité</a></li>
-                    <li class="breadcrumb-item active">{{ title }}</li>
-                </ol>
-            </div>
+  <div class="col-12">
+    <div
+      class="page-title-premium d-sm-flex align-items-center justify-content-between"
+    >
+      <div class="d-flex align-items-center gap-3">
+        <div class="title-icon-premium">
+          <i class="ri-book-line"></i>
         </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-lg-12">
-        <div class="card">
-            <div class="card-header border-0">
-                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                    <h5 class="card-title mb-0">Liste des écritures</h5>
-                    <div class="d-flex gap-2">
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-info" data-bs-toggle="dropdown">
-                                <i class="mdi mdi-download me-1"></i> Extraire
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" (click)="exportExcel(false)">Exporter Excel (simple)</a></li>
-                                <li><a class="dropdown-item" (click)="exportExcel(true)">Valider & exporter</a></li>
-                            </ul>
-                        </div>
-                        <button class="btn btn-sm btn-success" (click)="validateSelected()" [disabled]="selectedRows.size === 0">
-                            <i class="ri-checkbox-circle-line"></i> Valider sélection ({{ selectedRows.size }})
-                        </button>
-                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#comptabilisationModal">
-                            <i class="ri-funds-box-line"></i> Comptabiliser
-                        </button>
-                        <button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#criteriaModal">
-                            <i class="ri-filter-2-line"></i> Critères
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-body">
-                <!-- Indicateur de chargement -->
-                <div *ngIf="loading" class="text-center py-4">
-                    <div class="spinner-border text-primary"></div>
-                    <p class="mt-2">Chargement des écritures...</p>
-                </div>
-
-                <!-- Tableau des écritures -->
-                <div *ngIf="!loading" class="table-responsive">
-                    <table class="table table-striped table-bordered align-middle table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="width: 30px">
-                                    <input type="checkbox" [checked]="selectAll" (change)="toggleSelectAll()">
-                                </th>
-                                <th>Site</th>
-                                <th>N° document</th>
-                                <th>N° pièce</th>
-                                <th>N° écriture</th>
-                                <th>Journal</th>
-                                <th>Date</th>
-                                <th>Type</th>
-                                <th>Compte</th>
-                                <th>Tiers</th>
-                                <th>Libellé</th>
-                                <th class="text-end">Débit</th>
-                                <th class="text-end">Crédit</th>
-                                <th class="text-end">Montant</th>
-                                <th>Devise</th>
-                                <th class="text-end">Montant réf</th>
-                                <th>Centre ana.</th>
-                                <th>État</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let ecriture of ecritures">
-                                <td>
-                                    <input type="checkbox" [checked]="selectedRows.has(ecriture)" (change)="toggleSelectRow(ecriture)">
-                                </td>
-                                <td class="text-nowrap">{{ ecriture.codesite }}</td>
-                                <td class="text-nowrap">{{ ecriture.ref_ecriture }}</td>
-                                <td class="text-nowrap">{{ ecriture.num_piece }}</td>
-                                <td class="text-nowrap">{{ ecriture.numligne }}</td>
-                                <td class="text-nowrap">{{ ecriture.journal }}</td>
-                                <td class="text-nowrap">{{ formatDateFR(ecriture.date_operation) }}</td>
-                                <td class="text-nowrap">{{ ecriture.typeecriture }}</td>
-                                <td class="text-nowrap">{{ ecriture.compte }}</td>
-                                <td class="text-nowrap">{{ ecriture.tiers }}</td>
-                                <td class="text-nowrap">
-                                    {{ ecriture.libelle?.length > 75 ? (ecriture.libelle | slice:0:75) + '...' : ecriture.libelle }} {{ (ecriture.libelle?.length ?? 0) > 75 ? (ecriture.libelle | slice:0:75) + '...' : (ecriture.libelle ?? '') }}
-                                </td>
-                                <td class="text-end">{{ ecriture.debit | number:'1.2-2' }}</td>
-                                <td class="text-end">{{ ecriture.credit | number:'1.2-2' }}</td>
-                                <td class="text-end">{{ ecriture.montant | number:'1.2-2' }}</td>
-                                <td class="text-nowrap">{{ ecriture.devise }}</td>
-                                <td class="text-end">{{ ecriture.montantbase | number:'1.2-2' }}</td>
-                                <td class="text-nowrap">{{ ecriture.centreanalytique }}</td>
-                                <td>
-                                    <span class="badge" [ngClass]="{'bg-warning': ecriture.etat === 'en attente', 'bg-success': ecriture.etat === 'validee'}">
-                                        {{ ecriture.etat === 'en attente' ? 'En attente' : 'Validée' }}
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr *ngIf="!ecritures?.length">
-                                <td colspan="18" class="text-center text-muted py-4">Aucune écriture trouvée.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <div>
+          <h4 class="mb-0 title-premium">Ecritures comptables</h4>
+          <span class="title-subtitle-premium"
+            >Gestion et comptabilisation des écritures</span
+          >
         </div>
-    </div>
-</div>
-
-<!-- MODAL COMPTABILISATION -->
-<div class="modal fade" id="comptabilisationModal" tabindex="-1" data-bs-backdrop="static">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Comptabilisation des opérations</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">
-        <ul class="nav nav-tabs mb-3">
-          <li class="nav-item">
-            <a class="nav-link" [class.active]="modeComptabilisation === 'unitaire'" (click)="modeComptabilisation = 'unitaire'">Une opération</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" [class.active]="modeComptabilisation === 'critere'" (click)="modeComptabilisation = 'critere'">Par critères</a>
-          </li>
-        </ul>
-
-        <!-- Mode unitaire -->
-        <div *ngIf="modeComptabilisation === 'unitaire'">
-          <label class="form-label">Choisir une opération non comptabilisée</label>
-          <select class="form-select form-select-sm" [(ngModel)]="selectedOperationId">
-            <option value="">-- Sélectionner --</option>
-            <option *ngFor="let op of operationsNonComptabilisees" [value]="op.idoperation">
-              {{ op.codeoperation }} - {{ op.montant }} {{ op.devise?.codedevise }}
-            </option>
-          </select>
-        </div>
-
-        <!-- Mode par critères (formulaire dédié) -->
-        <div *ngIf="modeComptabilisation === 'critere'" [formGroup]="comptabiliteForm">
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label">Site</label>
-              <select class="form-select form-select-sm" formControlName="idsite">
-                <option value="">Tous les sites</option>
-                <option *ngFor="let site of sites" [value]="site.idsite">{{ site.libelle }}</option>
-              </select>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Journal</label>
-              <select class="form-select form-select-sm" formControlName="journal">
-                <option value="">Tous les journaux</option>
-                <option *ngFor="let journal of journaux" [value]="journal.codejournal">{{ journal.designation }}</option>
-              </select>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Date début</label>
-              <input type="date" class="form-control form-control-sm" formControlName="datedebut">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Date fin</label>
-              <input type="date" class="form-control form-control-sm" formControlName="datefin">
-            </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <!-- Dropdown Export -->
+        <div class="dropdown-glass">
+          <button
+            class="btn-glass-primary btn-sm dropdown-toggle"
+            (click)="toggleExportDropdown()"
+          >
+            <i class="ri-download-line me-1"></i> Extraire
+          </button>
+          <div class="dropdown-menu-glass" [class.show]="showExportDropdown">
+            <button
+              class="dropdown-item-glass"
+              (click)="exportExcel(false); toggleExportDropdown()"
+            >
+              <i class="ri-file-excel-line me-2"></i> Vers Excel (simple)
+            </button>
+            <button
+              class="dropdown-item-glass"
+              (click)="exportSageX3(); toggleExportDropdown()"
+            >
+              <i class="ri-file-line me-2"></i> Vers Sage X3
+            </button>
+            <button
+              class="dropdown-item-glass"
+              (click)="exportSage1000(); toggleExportDropdown()"
+            >
+              <i class="ri-file-line me-2"></i> Vers Sage 1000
+            </button>
+            <button
+              class="dropdown-item-glass"
+              (click)="exportExcel(true); toggleExportDropdown()"
+            >
+              <i class="ri-check-line me-2"></i> Valider & exporter
+            </button>
           </div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
-        <button class="btn btn-primary btn-sm" 
-                (click)="modeComptabilisation === 'unitaire' ? comptabiliserOperationUnitaire() : comptabiliserParCriteres()">
-          Comptabiliser
+
+        <button
+          class="btn-glass-success btn-sm"
+          (click)="validateSelected()"
+          [disabled]="selectedRows.size === 0"
+        >
+          <i class="ri-checkbox-circle-line me-1"></i> Valider sélection ({{
+            selectedRows.size
+          }})
+        </button>
+        <button
+          class="btn-glass-primary btn-sm"
+          (click)="openComptabilisationModal()"
+        >
+          <i class="ri-funds-box-line me-1"></i> Comptabiliser
+        </button>
+        <button
+          class="btn-glass-secondary btn-sm"
+          (click)="openCriteriaModal()"
+        >
+          <i class="ri-filter-2-line me-1"></i> Critères
         </button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL CRITÈRES -->
-<div class="modal fade" id="criteriaModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Filtrer les écritures</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form [formGroup]="criteriaForm">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Date début</label>
-                            <input type="date" class="form-control" formControlName="datedebut">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Date fin</label>
-                            <input type="date" class="form-control" formControlName="datefin">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Site</label>
-                            <input type="text" class="form-control form-control-sm" formControlName="idsite" [matAutocomplete]="autoSite" placeholder="Rechercher un site">
-                            <mat-autocomplete #autoSite="matAutocomplete" [displayWith]="displaySite">
-                                <mat-option *ngFor="let site of filteredSites | async" [value]="site.idsite">
-                                    {{ site.libelle }}
-                                </mat-option>
-                            </mat-autocomplete>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Journal</label>
-                            <input type="text" class="form-control form-control-sm" formControlName="journal" [matAutocomplete]="autoJournal" placeholder="Rechercher un journal">
-                            <mat-autocomplete #autoJournal="matAutocomplete" [displayWith]="displayJournal">
-                                <mat-option *ngFor="let journal of filteredJournaux | async" [value]="journal.codejournal">
-                                    {{ journal.designation }}
-                                </mat-option>
-                            </mat-autocomplete>
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label d-block">État des écritures</label>
-                            <mat-radio-group formControlName="etat" class="d-flex gap-4">
-                                <mat-radio-button value="en attente">En attente</mat-radio-button>
-                                <mat-radio-button value="validee">Validées</mat-radio-button>
-                                <mat-radio-button value="">Toutes</mat-radio-button>
-                            </mat-radio-group>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" class="btn btn-sm btn-primary" (click)="applyCriteria()">Appliquer</button>
-            </div>
+<!-- ============================================ -->
+<!-- RESULTS CARD -->
+<!-- ============================================ -->
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card-glass">
+      <div class="card-header-glass border-0">
+        <div class="d-flex align-items-center gap-2">
+          <div class="section-icon-glass">
+            <i class="ri-file-list-3-line"></i>
+          </div>
+          <h5 class="card-title-glass mb-0">Liste des écritures</h5>
+          <span class="badge-glass badge-glass-info badge-count-sm ms-2">
+            {{ ecritures.length }}
+          </span>
         </div>
+      </div>
+      <div class="card-body-glass pt-0">
+        @if (loading) {
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Chargement...</span>
+            </div>
+            <p class="mt-2 text-muted">Chargement des écritures...</p>
+          </div>
+        }
+
+        @if (!loading) {
+          <div class="table-responsive-modern">
+            <table class="table table-modern align-middle mb-0">
+              <thead class="table-light-glass">
+                <tr>
+                  <th style="width: 40px">
+                    <div class="form-check glass-checkbox">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        [checked]="selectAll"
+                        (change)="toggleSelectAll()"
+                        id="selectAllCheckbox"
+                      />
+                      <label
+                        class="form-check-label"
+                        for="selectAllCheckbox"
+                      ></label>
+                    </div>
+                  </th>
+                  <th>Site</th>
+                  <th>N° document</th>
+                  <th>N° pièce</th>
+                  <th>N° écriture</th>
+                  <th>Journal</th>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Compte</th>
+                  <th>Tiers</th>
+                  <th>Libellé</th>
+                  <th class="text-end">Débit</th>
+                  <th class="text-end">Crédit</th>
+                  <th class="text-end">Montant</th>
+                  <th>Devise</th>
+                  <th>Taux</th>
+                  <th class="text-end">Montant réf</th>
+                  <th>Centre ana.</th>
+                  <th>Centre ana(2)</th>
+                  <th>État</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (ecriture of ecritures; track $index) {
+                  <tr [class.selected-row]="selectedRows.has(ecriture)">
+                    <td>
+                      <div class="form-check glass-checkbox">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          [checked]="selectedRows.has(ecriture)"
+                          (change)="toggleSelectRow(ecriture)"
+                          [id]="'rowCheckbox-' + $index"
+                        />
+                        <label
+                          class="form-check-label"
+                          [for]="'rowCheckbox-' + $index"
+                        ></label>
+                      </div>
+                    </td>
+                    <td class="text-nowrap">{{ ecriture.codesite }}</td>
+                    <td class="text-nowrap">
+                      <span class="code-badge">{{
+                        ecriture.ref_ecriture
+                      }}</span>
+                    </td>
+                    <td class="text-nowrap">
+                      <span class="code-badge">{{ ecriture.num_piece }}</span>
+                    </td>
+                    <td class="text-nowrap">
+                      <span class="code-badge">{{ ecriture.numligne }}</span>
+                    </td>
+                    <td class="text-nowrap">
+                      <span class="badge-glass badge-glass-info">{{
+                        ecriture.journal
+                      }}</span>
+                    </td>
+                    <td class="text-nowrap">
+                      {{ formatDateFR(ecriture.date_operation) }}
+                    </td>
+                    <td class="text-nowrap">
+                      <span class="badge-glass badge-glass-secondary">{{
+                        ecriture.typeecriture
+                      }}</span>
+                    </td>
+                    <td class="text-nowrap">{{ ecriture.compte }}</td>
+                    <td class="text-nowrap">{{ ecriture.tiers }}</td>
+                    <td
+                      class="text-nowrap"
+                      [attr.title]="ecriture.libelle"
+                      style="max-width: 300px; cursor: pointer"
+                    >
+                      {{
+                        (ecriture.libelle.length || 0) > 50
+                          ? (ecriture.libelle | slice: 0 : 50) + "..."
+                          : ecriture.libelle || ""
+                      }}
+                    </td>
+                    <td class="text-end">
+                      {{ ecriture.debit | number: "1.2-2" }}
+                    </td>
+                    <td class="text-end">
+                      {{ ecriture.credit | number: "1.2-2" }}
+                    </td>
+                    <td class="text-end">
+                      {{ ecriture.montant | number: "1.2-2" }}
+                    </td>
+                    <td class="text-nowrap">
+                      <span class="badge-glass badge-glass-devise">{{
+                        ecriture.devise
+                      }}</span>
+                    </td>
+                    <td class="text-nowrap">{{ ecriture.taux }}</td>
+                    <td class="text-end">
+                      {{ formatCFA(ecriture.montantref) }}
+                    </td>
+                    <td class="text-nowrap">{{ ecriture.centreanalytique }}</td>
+                    <td class="text-nowrap">
+                      {{ ecriture.centreanalytiquesecond }}
+                    </td>
+                    <td>
+                      @if (ecriture.etat === "en attente") {
+                        <span class="badge-glass badge-glass-warning">
+                          <i class="ri-time-line me-1"></i> En attente
+                        </span>
+                      } @else {
+                        <span class="badge-glass badge-glass-success">
+                          <i class="ri-check-line me-1"></i> Validée
+                        </span>
+                      }
+                    </td>
+                  </tr>
+                }
+                @if (ecritures.length === 0) {
+                  <tr>
+                    <td colspan="20" class="text-center text-muted py-4">
+                      <div class="empty-state">
+                        <i class="ri-inbox-2-line"></i>
+                        <p>Aucune écriture trouvée</p>
+                        <span class="empty-hint"
+                          >Aucune donnée ne correspond à vos critères</span
+                        >
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
     </div>
+  </div>
 </div>
 
-<!-- MODAL GÉNÉRATION / COMPTABILISATION (si besoin) -->
-<div class="modal fade" id="comptabiliteModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Générer des écritures</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form [formGroup]="comptabiliteForm">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label>Date début</label>
-                            <input type="date" class="form-control form-control-sm" formControlName="datedebut">
-                        </div>
-                        <div class="col-md-6">
-                            <label>Date fin</label>
-                            <input type="date" class="form-control form-control-sm" formControlName="datefin">
-                        </div>
-                        <div class="col-md-12">
-                            <label>Opération</label>
-                            <select class="form-select form-select-sm" formControlName="operation">
-                                <option value="">-- Sélectionner --</option>
-                                <option *ngFor="let op of operations" [value]="op.idoperation">
-                                    {{ op.codeoperation }} - {{ op.montant }} {{ op.devise?.codedevise }}
-                                </option>
-                            </select>
-                        </div>
-                        <div class="col-md-12">
-                            <label>Journal</label>
-                            <select class="form-select form-select-sm" formControlName="journal">
-                                <option value="">-- Choisir --</option>
-                                <option *ngFor="let j of journaux" [value]="j.idjournal">{{ j.designation }}</option>
-                            </select>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" class="btn btn-primary btn-sm" (click)="applyComptability()">Générer</button>
-            </div>
+<!-- ============================================ -->
+<!-- MODAL: COMPTABILISATION -->
+<!-- ============================================ -->
+<div
+  class="modal-overlay"
+  [class.show]="showComptaModal"
+  (click)="showComptaModal = false"
+>
+  <div class="modal-container modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-content-glass">
+      <div class="modal-header modal-header-theme-blue">
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-funds-box-line text-white fs-5"></i>
+          </div>
+          <h5 class="modal-title text-white fw-semibold">
+            Comptabilisation des opérations
+          </h5>
         </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          (click)="showComptaModal = false"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body p-4">
+        <!-- Tabs -->
+        <div class="tabs-glass mb-4">
+          <button
+            class="tab-button-glass"
+            [class.active]="modeComptabilisation === 'unitaire'"
+            (click)="modeComptabilisation = 'unitaire'"
+          >
+            <i class="ri-file-line me-1"></i> Une opération
+          </button>
+          <button
+            class="tab-button-glass"
+            [class.active]="modeComptabilisation === 'critere'"
+            (click)="modeComptabilisation = 'critere'"
+          >
+            <i class="ri-filter-line me-1"></i> Par critères
+          </button>
+        </div>
+
+        <!-- Mode unitaire -->
+        @if (modeComptabilisation === "unitaire") {
+          <div class="form-floating">
+            <select
+              class="form-select form-select-glass"
+              [(ngModel)]="selectedOperationId"
+            >
+              <option value="">
+                -- Sélectionner une opération non comptabilisée --
+              </option>
+              @for (op of operationsNonComptabilisees; track op.idoperation) {
+                <option [value]="op.idoperation">
+                  {{ op.codeoperation }} - {{ formatCFA(op.montant) }}
+                  {{ op.devise?.codedevise }}
+                </option>
+              }
+            </select>
+            <label>
+              <i class="ri-file-text-line me-1"></i> Opération à comptabiliser
+            </label>
+          </div>
+        }
+
+        <!-- Mode par critères -->
+        @if (modeComptabilisation === "critere") {
+          <form [formGroup]="comptabiliteForm">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <select class="form-select form-select-glass">
+                    <option value="">Tous les sites</option>
+                    @for (site of sites; track site.idsite) {
+                      <option [value]="site.idsite">{{ site.libelle }}</option>
+                    }
+                  </select>
+                  <label> <i class="ri-building-line me-1"></i> Site </label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <select
+                    class="form-select form-select-glass"
+                    formControlName="journal"
+                  >
+                    <option value="">Tous les journaux</option>
+                    @for (journal of journaux; track journal.idjournal) {
+                      <option [value]="journal.idjournal">
+                        {{ journal.designation }}
+                      </option>
+                    }
+                  </select>
+                  <label>
+                    <i class="ri-book-open-line me-1"></i> Journal
+                  </label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input
+                    type="date"
+                    class="form-control"
+                    formControlName="datedebut"
+                    id="dateDebutCompta"
+                    placeholder=" "
+                  />
+                  <label for="dateDebutCompta">
+                    <i class="ri-calendar-line me-1"></i> Date début
+                  </label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input
+                    type="date"
+                    class="form-control"
+                    formControlName="datefin"
+                    id="dateFinCompta"
+                    placeholder=" "
+                  />
+                  <label for="dateFinCompta">
+                    <i class="ri-calendar-line me-1"></i> Date fin
+                  </label>
+                </div>
+              </div>
+            </div>
+          </form>
+        }
+      </div>
+
+      <div class="modal-footer border-0 p-4">
+        <div class="d-flex gap-3 justify-content-end w-100">
+          <button
+            type="button"
+            class="btn-glass-cancel"
+            (click)="showComptaModal = false"
+          >
+            <i class="ri-close-line me-1"></i> Annuler
+          </button>
+          <button
+            type="button"
+            class="btn-glass-submit"
+            (click)="
+              modeComptabilisation === 'unitaire'
+                ? comptabiliserOperationUnitaire()
+                : comptabiliserParCriteres()
+            "
+          >
+            <i class="ri-check-line me-1"></i> Comptabiliser
+          </button>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 
-<!-- Modal de confirmation export avec validation -->
-<div class="modal-backdrop fade show" *ngIf="showConfirmModal"></div>
-<div class="modal show d-block" tabindex="-1" *ngIf="showConfirmModal" style="background: rgba(0,0,0,0.5);">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Confirmation</h5>
-        <button type="button" class="btn-close" (click)="showConfirmModal = false"></button>
+<!-- ============================================ -->
+<!-- MODAL: CRITÈRES -->
+<!-- ============================================ -->
+<div
+  class="modal-overlay"
+  [class.show]="showCriteriaModal"
+  (click)="closeCriteriaModal()"
+>
+  <div class="modal-container modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-content-glass">
+      <div class="modal-header modal-header-theme-blue">
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-filter-2-line text-white fs-5"></i>
+          </div>
+          <h5 class="modal-title text-white fw-semibold">
+            Filtrer les écritures
+          </h5>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          (click)="closeCriteriaModal()"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body">
-        Voulez-vous valider (comptabiliser) les écritures avant export ?
+
+      <form [formGroup]="criteriaForm">
+        <div class="modal-body p-4">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input
+                  type="date"
+                  class="form-control"
+                  formControlName="datedebut"
+                  id="dateDebutCriteria"
+                  placeholder=" "
+                />
+                <label for="dateDebutCriteria">
+                  <i class="ri-calendar-line me-1"></i> Date début
+                </label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input
+                  type="date"
+                  class="form-control"
+                  formControlName="datefin"
+                  id="dateFinCriteria"
+                  placeholder=" "
+                />
+                <label for="dateFinCriteria">
+                  <i class="ri-calendar-line me-1"></i> Date fin
+                </label>
+              </div>
+            </div>
+            <!-- Site -->
+            <div class="col-md-6">
+              <div class="field-group-simple">
+                <label class="field-label-simple">
+                  <i class="ri-building-line me-1"></i> Site
+                </label>
+                <div class="field-input-wrapper">
+                  <input
+                    type="text"
+                    class="field-input-simple"
+                    formControlName="idsite"
+                    [matAutocomplete]="autoSite"
+                    placeholder="Rechercher un site..."
+                  />
+                  <i class="ri-search-line field-input-icon"></i>
+                </div>
+                <mat-autocomplete
+                  #autoSite="matAutocomplete"
+                  [displayWith]="displaySite"
+                  class="autocomplete-simple"
+                >
+                  @for (site of filteredSites | async; track site.idsite) {
+                    <mat-option
+                      [value]="site"
+                      class="autocomplete-option-simple"
+                    >
+                      {{ site.libelle }}
+                    </mat-option>
+                  }
+                </mat-autocomplete>
+              </div>
+            </div>
+
+            <!-- Journal -->
+            <div class="col-md-6">
+              <div class="field-group-simple">
+                <label class="field-label-simple">
+                  <i class="ri-book-2-line me-1"></i> Journal
+                </label>
+                <div class="field-input-wrapper">
+                  <input
+                    type="text"
+                    class="field-input-simple"
+                    formControlName="journal"
+                    [matAutocomplete]="autoJournal"
+                    placeholder="Rechercher un journal..."
+                  />
+                  <i class="ri-search-line field-input-icon"></i>
+                </div>
+                <mat-autocomplete
+                  #autoJournal="matAutocomplete"
+                  [displayWith]="displayJournal"
+                  class="autocomplete-simple"
+                >
+                  @for (
+                    journal of filteredJournaux | async;
+                    track journal.idjournal
+                  ) {
+                    <mat-option
+                      [value]="journal"
+                      class="autocomplete-option-simple"
+                    >
+                      {{ journal.designation }}
+                    </mat-option>
+                  }
+                </mat-autocomplete>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="form-floating">
+                <div class="radio-group-glass">
+                  <label class="radio-label-glass">
+                    <input
+                      type="radio"
+                      formControlName="etat"
+                      value="en attente"
+                      checked
+                    />
+                    <span class="radio-custom-glass"></span>
+                    <span class="radio-text">En attente</span>
+                  </label>
+                  <label class="radio-label-glass">
+                    <input
+                      type="radio"
+                      formControlName="etat"
+                      value="validee"
+                    />
+                    <span class="radio-custom-glass"></span>
+                    <span class="radio-text">Validées</span>
+                  </label>
+                  <label class="radio-label-glass">
+                    <input type="radio" formControlName="etat" value="" />
+                    <span class="radio-custom-glass"></span>
+                    <span class="radio-text">Toutes</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer border-0 p-4">
+          <div class="d-flex gap-3 justify-content-end w-100">
+            <button
+              type="button"
+              class="btn-glass-cancel"
+              (click)="closeCriteriaModal()"
+            >
+              <i class="ri-close-line me-1"></i> Annuler
+            </button>
+            <button
+              type="button"
+              class="btn-glass-submit"
+              (click)="applyCriteria()"
+            >
+              <i class="ri-search-line me-1"></i> Appliquer
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- MODAL: CONFIRMATION EXPORT -->
+<!-- ============================================ -->
+<div
+  class="modal-overlay"
+  [class.show]="showConfirmModal"
+  (click)="showConfirmModal = false"
+>
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-content-glass">
+      <div class="modal-header modal-header-theme-red">
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-alert-line text-white fs-5"></i>
+          </div>
+          <h5 class="modal-title text-white fw-semibold">Confirmation</h5>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          (click)="showConfirmModal = false"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="showConfirmModal = false">Annuler</button>
-        <button type="button" class="btn btn-primary" (click)="confirmExport()">Oui, valider et exporter</button>
+      <div class="modal-body p-4">
+        <div class="alert alert-glass-warning mb-0">
+          <i class="ri-information-line me-2"></i>
+          Voulez-vous valider (comptabiliser) les écritures avant export ?
+        </div>
+      </div>
+      <div class="modal-footer border-0 p-4">
+        <div class="d-flex gap-3 justify-content-end w-100">
+          <button
+            type="button"
+            class="btn-glass-cancel"
+            (click)="showConfirmModal = false"
+          >
+            <i class="ri-close-line me-1"></i> Annuler
+          </button>
+          <button
+            type="button"
+            class="btn-glass-submit"
+            (click)="confirmExport()"
+          >
+            <i class="ri-check-line me-1"></i> Oui, valider et exporter
+          </button>
+        </div>
       </div>
     </div>
   </div>
