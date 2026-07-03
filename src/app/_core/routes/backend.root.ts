@@ -6,14 +6,14 @@ export const ROUTE_CONFIG = 'config';
 export const URL_MAIN_PROD = PREFIX + BASE_URL;
 export const URL_MAIN_TEST = PREFIX + BASE_URL;
 export const URL_MAIN_DEV = PREFIX + BASE_URL;
-export const URL_MAIN_LOCAL = 'http://62.171.159.141:5000/';
-export const URL_MAIN_LOCAL_SOCKET = 'http://62.171.159.141:5000/';
+export const URL_MAIN_LOCAL = 'http://172.24.0.8:5000/';
+export const URL_MAIN_LOCAL_SOCKET = 'http://172.24.0.8:5000/';
 
 export const URL_LOCAL = {
   type: 'local',
-  baseUrl: 'http://62.171.159.141:5000/api/',
-  baseUrlFiles: 'http://62.171.159.141:5000/uploads/',
-  baseUrlPdfs: 'http://62.171.159.141:5000/pdfs/',
+  baseUrl: 'http://172.24.0.8:5000/api/',
+  baseUrlFiles: 'http://172.24.0.8:5000/uploads/',
+  baseUrlPdfs: 'http://172.24.0.8:5000/pdfs/',
 };
 
 export const URL_DEV = {
