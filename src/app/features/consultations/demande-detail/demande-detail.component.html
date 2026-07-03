@@ -1,145 +1,302 @@
 <!-- start page title -->
 <div class="row">
-    <div class="col-12">
-        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">{{title}}</h4>
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Consultation</a></li>
-                    <li class="breadcrumb-item active">{{title}}</li>
-                </ol>
-            </div>
+  <div class="col-12">
+    <div
+      class="page-title-premium d-sm-flex align-items-center justify-content-between"
+    >
+      <div class="d-flex align-items-center gap-3">
+        <div class="title-icon-premium">
+          <i class="ri-file-list-3-line"></i>
         </div>
+        <div>
+          <h4 class="mb-0 title-premium">{{ title }}</h4>
+          <span class="title-subtitle-premium"
+            >Consultation détaillée des demandes</span
+          >
+        </div>
+      </div>
+      <div class="page-title-right">
+        <ol class="breadcrumb-premium m-0">
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);">
+              <i class="ri-home-4-line me-1"></i>Consultation
+            </a>
+          </li>
+          <li class="breadcrumb-item active">
+            <i class="ri-file-list-3-line"></i>{{ title }}
+          </li>
+        </ol>
+      </div>
     </div>
+  </div>
 </div>
 <!-- end page title -->
 
 <div class="row">
-    <div class="col-lg-12">
-        <div class="card" id="">
-            <form [formGroup]="searchForm">
-                <div class="card-header border-0">
-                    <div class="d-flex align-items-center">
-                        <h5 class="card-title mb-0 flex-grow-1">{{title}}</h5>
-                        <div class="flex-shrink-0">
-                            <div class="d-flex gap-2 flex-wrap">
-                                <button class="btn btn-sm btn-soft-secondary" (click)="onSubmit()"><i class="ri-add-line align-bottom me-1"></i>actualiser</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body bg-light-subtle border border-dashed border-start-0 border-end-0">
-                    <div class="row g-3">
-                        <div class="col-xxl-5 col-sm-4">
-                            <div class="search-box search-box-sm">
-                                <input type="text" class="form-control form-control-sm search bg-light border-light" formControlName="codedemande" placeholder="rechercher par numero demande">
-                                <i class="ri-search-line search-icon"></i>
-                            </div>
-                        </div>
-
-                        <div class="col-xxl-3 col-sm-4">
-                            <input type="date" formControlName="datedebut" class="form-control form-control-sm bg-light border-light" id="datepicker-range" placeholder="date debut">
-                        </div>
-
-                        <div class="col-xxl-3 col-sm-4">
-                            <input type="date" formControlName="datefin" class="form-control form-control-sm bg-light border-light" id="datepicker-range" placeholder="date fin">
-                        </div>
-                        <!--end col-->
-                        <div class="col-xxl-3 col-sm-4">
-                            <div class="input-light">
-                                <input type="text" placeholder="nature operation" formControlName="natureop"
-                                        [matAutocomplete]="autoNature" class="form-select form-select-sm bg-light">
-                                <mat-autocomplete #autoNature="matAutocomplete" [displayWith]="displayNature" panelClass="small-autocomplete">
-                                    @for (nature of filteredNatureoperations | async; track nature.idnature) {
-                                        <mat-option [value]="nature.libelle">
-                                            {{nature.libelle}}
-                                        </mat-option>
-                                    }
-                                </mat-autocomplete>
-                            </div>
-                        </div>
-
-                        <div class="col-xxl-3 col-sm-4">
-                            <div class="input-light">
-                                <input type="text" placeholder="tiers" formControlName="tiers"
-                                        [matAutocomplete]="autoTiers" class="form-select form-select-sm bg-light">
-                                <mat-autocomplete #autoTiers="matAutocomplete" [displayWith]="displayTiers">
-                                    @for (tiers of filteredTiers | async; track tiers.idtiers) {
-                                        <mat-option [value]="tiers.designation">
-                                            {{tiers.designation}}
-                                        </mat-option>
-                                    }
-                                </mat-autocomplete>
-                            </div>
-                        </div>
-
-                        <div class="col-xxl-3 col-sm-4">
-                            <div class="input-light">
-                                <input type="text" placeholder="centre analytique" formControlName="centre"
-                                        [matAutocomplete]="autoCentre" class="form-select form-select-sm bg-light">
-                                <mat-autocomplete #autoCentre="matAutocomplete" [displayWith]="displayCentre">
-                                    @for (centre of filteredCentres | async; track centre.idcentreanalytique) {
-                                        <mat-option [value]="centre.idcentreanalytique">
-                                            {{centre.libelle}}
-                                        </mat-option>
-                                    }
-                                </mat-autocomplete>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
-
-            <div class="card-body">
-                <div>
-                    <div class="table-responsive table-card">
-                        <table class="table table-hover table-nowrap align-middle table-scroll table-container table-custom table-compact" id="invoiceTable">
-                            <thead class="text-muted table-light">
-                                <tr>
-                                    <th scope="col" data-sort="site">Site</th>
-                                    <th scope="col" data-sort="numero">Numero pièce</th>
-                                    <th scope="col" data-sort="date">Date demande</th>
-                                    <th scope="col" data-sort="nature">Nature operation</th>
-                                    <th scope="col" data-sort="centre">Centre analytique</th>
-                                    <th scope="col" data-sort="tiers">Tiers</th>
-                                    <th scope="col" data-sort="tiers">Montant</th>
-                                    <th scope="col" data-sort="devise">Devise</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for(item of demandes; track $index){
-                                    <tr>
-                                        <td> {{item?.site}} </td>
-                                        <td> {{item?.codedemande}} </td>
-                                        <td> {{item?.datedemande | date:'dd/MM/yyyy'}} </td>
-                                        <td> {{item?.nature_operation }} </td> 
-                                        <td> {{item?.centre_analytique }} </td>
-                                        <td> {{item?.tiers || 'Aucun tiers'}} </td>
-                                        <td> {{item?.montantdemande }} </td>
-                                        <td> {{item?.codedevise }} </td>
-                                    </tr>
-                                }
-                                <tr *ngIf="loading">
-                                    <td colspan="8">
-                                        <div class="text-center py-4">
-                                            <div class="spinner-border text-info"></div>
-                                            <h6 class="mt-2">Chargement...</h6>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div class="noresult" *ngIf="demandes.length == 0 && !loading">
-                            <div class="text-center">
-                                <h6 class="mt-2">Désole! Aucun resultat trouvé</h6>
-                                <p class="text-muted">
-                                    Désole il n' y aucune requête reçue
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  <div class="col-lg-12">
+    <div class="card-glass" id="demandeDetail">
+      <form [formGroup]="searchForm">
+        <!-- Header -->
+        <div class="card-header-glass border-0">
+          <div
+            class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+          >
+            <div class="d-flex align-items-center gap-2">
+              <div class="section-icon-glass">
+                <i class="ri-search-line"></i>
+              </div>
+              <h5 class="card-title-glass mb-0">Filtres de recherche</h5>
+              <span class="badge-glass badge-glass-info badge-count-sm">
+                {{ demandes.length }}
+              </span>
             </div>
+            <div class="d-flex gap-2 flex-wrap">
+              <button
+                type="button"
+                class="btn-glass-primary btn-sm"
+                (click)="onSubmit()"
+              >
+                <i class="ri-refresh-fill align-bottom me-1"></i> Actualiser
+              </button>
+              <button
+                type="button"
+                class="btn-glass-secondary btn-sm"
+                (click)="resetFilters()"
+              >
+                <i class="ri-close-line align-bottom me-1"></i> Réinitialiser
+              </button>
+            </div>
+          </div>
         </div>
+
+        <!-- Filtres -->
+        <div class="card-body-glass pt-0">
+          <div class="row g-3">
+            <div class="col-lg-2 col-sm-4">
+              <div class="search-glass">
+                <i class="ri-file-text-line"></i>
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="codedemande"
+                  placeholder="Numéro demande"
+                />
+              </div>
+            </div>
+
+            <div class="col-lg-2 col-sm-4">
+              <div class="search-glass">
+                <i class="ri-calendar-line"></i>
+                <input
+                  type="date"
+                  class="form-control"
+                  formControlName="datedebut"
+                  placeholder="Date début"
+                />
+              </div>
+            </div>
+
+            <div class="col-lg-2 col-sm-4">
+              <div class="search-glass">
+                <i class="ri-calendar-2-line"></i>
+                <input
+                  type="date"
+                  class="form-control"
+                  formControlName="datefin"
+                  placeholder="Date fin"
+                />
+              </div>
+            </div>
+
+            <div class="col-lg-2 col-sm-6">
+              <div class="search-glass">
+                <i class="ri-list-check"></i>
+                <input
+                  type="text"
+                  placeholder="Nature opération"
+                  formControlName="natureop"
+                  [matAutocomplete]="autoNature"
+                  class="form-control"
+                />
+                <mat-autocomplete
+                  #autoNature="matAutocomplete"
+                  [displayWith]="displayNature"
+                  panelClass="small-autocomplete"
+                >
+                  @for (
+                    nature of filteredNatureoperations | async;
+                    track nature.idnature
+                  ) {
+                    <mat-option [value]="nature">
+                      {{ nature.libelle }}
+                    </mat-option>
+                  }
+                </mat-autocomplete>
+              </div>
+            </div>
+
+            <div class="col-lg-2 col-sm-6">
+              <div class="search-glass">
+                <i class="ri-user-line"></i>
+                <input
+                  type="text"
+                  placeholder="Tiers"
+                  formControlName="tiers"
+                  [matAutocomplete]="autoTiers"
+                  class="form-control"
+                />
+                <mat-autocomplete
+                  #autoTiers="matAutocomplete"
+                  [displayWith]="displayTiers"
+                >
+                  @for (tiers of filteredTiers | async; track tiers.idtiers) {
+                    <mat-option [value]="tiers">
+                      {{ tiers.designation }}
+                    </mat-option>
+                  }
+                </mat-autocomplete>
+              </div>
+            </div>
+
+            <div class="col-lg-2 col-sm-6">
+              <div class="search-glass">
+                <i class="ri-building-line"></i>
+                <input
+                  type="text"
+                  placeholder="Centre analytique"
+                  formControlName="centre"
+                  [matAutocomplete]="autoCentre"
+                  class="form-control"
+                />
+                <mat-autocomplete
+                  #autoCentre="matAutocomplete"
+                  [displayWith]="displayCentre"
+                >
+                  @for (
+                    centre of filteredCentres | async;
+                    track centre.idcentreanalytique
+                  ) {
+                    <mat-option [value]="centre">
+                      {{ centre.libelle }}
+                    </mat-option>
+                  }
+                </mat-autocomplete>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <!-- Tableau -->
+      <div class="card-body-glass pt-0">
+        <div class="table-responsive">
+          <table
+            class="table table-modern align-middle"
+            id="demandeDetailTable"
+          >
+            <thead>
+              <tr>
+                <th>Site</th>
+                <th>N° pièce</th>
+                <th>Date demande</th>
+                <th>Nature opération</th>
+                <th>Centre analytique</th>
+                <th>Tiers</th>
+                <th class="text-end">Montant</th>
+                <th>Devise</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of demandes; track $index) {
+                <tr>
+                  <td>
+                    <span class="code-badge-sm">{{ item?.site || "-" }}</span>
+                  </td>
+                  <td>
+                    <span class="code-badge">{{ item?.codedemande }}</span>
+                  </td>
+                  <td class="text-muted small">
+                    {{ item?.datedemande | date: "dd/MM/yyyy" }}
+                  </td>
+                  <td>{{ item?.nature_operation || "-" }}</td>
+                  <td>{{ item?.centre_analytique || "-" }}</td>
+                  <td>{{ item?.tiers || "Aucun tiers" }}</td>
+                  <td class="text-end fw-semibold">
+                    {{ item?.montantdemande | number: "1.2-2" }}
+                  </td>
+                  <td>
+                    <span class="badge-glass badge-glass-secondary">
+                      {{ item?.codedevise || "-" }}
+                    </span>
+                  </td>
+                </tr>
+              }
+              @if (loading) {
+                <tr>
+                  <td colspan="8">
+                    <div class="spinner-glass">
+                      <div
+                        class="spinner-border text-primary"
+                        role="status"
+                      ></div>
+                      <p class="mt-2 text-muted">Chargement...</p>
+                    </div>
+                  </td>
+                </tr>
+              }
+              @if (demandes.length === 0 && !loading) {
+                <tr>
+                  <td colspan="8">
+                    <div class="empty-state">
+                      <i class="ri-inbox-2-line"></i>
+                      <p>Aucune demande trouvée</p>
+                      <span class="empty-hint"
+                        >Aucune demande ne correspond à vos critères de
+                        recherche</span
+                      >
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (demandes.length > 0) {
+          <div class="pagination-modern">
+            <div class="pagination-info">
+              <span>Affichage de</span>
+              <strong>{{ (currentPage - 1) * limit + 1 }}</strong>
+              <span>à</span>
+              <strong>{{
+                Math.min(currentPage * limit, demandes.length)
+              }}</strong>
+              <span>sur</span> <strong>{{ demandes.length }}</strong>
+              <span>demande(s)</span>
+            </div>
+            <div class="pagination-controls">
+              <button
+                class="page-control"
+                [disabled]="currentPage == 1"
+                (click)="changePage(currentPage - 1)"
+              >
+                <i class="ri-arrow-left-s-line"></i>
+              </button>
+              <span class="page-number"
+                >{{ currentPage }} / {{ totalPages }}</span
+              >
+              <button
+                class="page-control"
+                [disabled]="currentPage == totalPages"
+                (click)="changePage(currentPage + 1)"
+              >
+                <i class="ri-arrow-right-s-line"></i>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
     </div>
+  </div>
 </div>

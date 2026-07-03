@@ -1,121 +1,224 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { ConsultationDecaissementaj } from '../services/decaissementaj.service';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.contantes';
 import { tiersModel } from '../../donnee_base/models/tiers.model';
 import { TiersService } from '../../donnee_base/services/tiers.service';
+import { ToastrService } from 'ngx-toastr';
+
+interface TypeOperation {
+  codecaisse: string;
+  caisse: string;
+  codtypeoperation: string;
+  montant: number;
+  montantref: number;
+  codedevise: string;
+}
+
+interface LigneOperation {
+  libellenature: string;
+  libellecentre: string;
+  designationtiers: string;
+  montantoperation: number;
+}
+
+interface JustificatifDetail {
+  libellenature: string;
+  libellecentre: string;
+  designationtiers: string;
+  montantdetail: number;
+}
+
+interface Justificatif {
+  codejustificatif: string;
+  date: string;
+  montantjustificatif: number;
+  codedevise: string;
+  details: JustificatifDetail[];
+}
+
+interface Operation {
+  codeoperation: string;
+  dateoperation: string;
+  codedevise: string;
+  typeOperations: TypeOperation[];
+  lignesOperation: LigneOperation[];
+  justificatifs: Justificatif[];
+}
+
+interface User {
+  devise_ref_code: string;
+}
 
 @Component({
   selector: 'app-decaissement-justifier',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './decaissement-justifier.component.html',
-  styleUrl: './decaissement-justifier.component.css'
+  styleUrls: ['./decaissement-justifier.component.css'],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
 })
 export class DecaissementJustifierComponent implements OnInit {
-  title = "Consultation des justificatifs";
-  op: any = [];
-  fb: FormBuilder = new FormBuilder();
+  title = 'Consultation des justificatifs';
+  op: Operation[] = [];
+  loading = false;
+  msgErros = '';
 
-  //Formulaire de recherche
-  searchForm : FormGroup = this.fb.group({});
+  // Form
+  searchForm: FormGroup;
 
-  msgErros : string = "";
-  loading: Boolean = false;
+  // Modal state
+  showCriteriaModal = false;
 
-  //Message suppression
-  msgSup: string = "";
-  titleMsg: string ="";
+  // Data
+  tiers: tiersModel[] = [];
+  activeAccordion: number | null = null;
 
-  tiers : tiersModel[] = [];
-
-  constructor(private service: ConsultationDecaissementaj, private tiersservice: TiersService){}
-
-  ngOnInit(): void{
-    //Initialisation du formulaire
-    this.initSearchForm();
-
-    //Recharge des tiers
-    this.getAllTiers();
+  constructor(
+    private fb: FormBuilder,
+    private service: ConsultationDecaissementaj,
+    private tiersservice: TiersService,
+    private toastr: ToastrService,
+  ) {
+    this.searchForm = this.createSearchForm();
   }
 
-  //Initialiser le formulaire de recherche
-  initSearchForm() {
-    this.searchForm = this.fb.group({
+  currentPage: number = 1;
+  ngOnInit(): void {
+    this.loadInitialData();
+  }
+
+  // ============================================
+  // FORM MANAGEMENT
+  // ============================================
+  private createSearchForm(): FormGroup {
+    return this.fb.group({
       typeoperation: ['decaissementaj'],
       tiers: [null],
       codeoperation: [null],
       datedebut: [null],
-      datefin: [null]
+      datefin: [null],
     });
   }
 
-  //Fermer le modal
-  closeModal(modal: string){
-    const modalEl = document.getElementById(modal);
-    modalEl?.classList.remove('show');
-    modalEl?.setAttribute('aria-hidden', 'true');
-    (document.querySelector('.modal-backdrop') as HTMLElement)?.remove();
+  resetForm(): void {
+    this.searchForm = this.createSearchForm();
+    this.op = [];
+    this.currentPage = 1;
+    this.toastr.success('Formulaire réinitialisé');
   }
 
-  getAllTiers(){
+  // ============================================
+  // MODAL MANAGEMENT
+  // ============================================
+  openCriteriaModal(): void {
+    this.showCriteriaModal = true;
+  }
+
+  closeCriteriaModal(): void {
+    this.showCriteriaModal = false;
+  }
+
+  // ============================================
+  // ACCORDION MANAGEMENT
+  // ============================================
+  toggleAccordion(index: number): void {
+    this.activeAccordion = this.activeAccordion === index ? null : index;
+  }
+
+  // ============================================
+  // DATA LOADING
+  // ============================================
+  private loadInitialData(): void {
+    this.loading = true;
     this.tiersservice.getAll().subscribe({
-      next : (res) => {
-        if(res.success){
+      next: (res) => {
+        if (res.success) {
           this.tiers = res.data;
         }
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+        this.toastr.error('Erreur de chargement des tiers');
+      },
+    });
+  }
+
+  // ============================================
+  // SEARCH
+  // ============================================
+  onSubmit(): void {
+    if (this.searchForm.invalid) {
+      this.markAllAsTouched();
+      this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
+      this.toastr.warning(this.msgErros);
+      return;
+    }
+
+    this.loading = true;
+    const formValue = this.searchForm.value;
+
+    this.service.getAlldecaissemenaj(formValue).subscribe({
+      next: (res) => {
+        this.op = res.data || [];
+        this.loading = false;
+        this.closeCriteriaModal();
+      },
+      error: (err) => {
+        this.loading = false;
+        this.op = [];
+        this.toastr.error(err?.error?.message || 'Erreur lors de la recherche');
+      },
+    });
+  }
+
+  // ============================================
+  // UTILITY METHODS
+  // ============================================
+  private markAllAsTouched(): void {
+    Object.values(this.searchForm.controls).forEach((control) => {
+      control.markAsTouched();
+      if (control instanceof FormGroup) {
+        this.markAllAsTouchedForGroup(control);
       }
     });
   }
 
-  //Action submit
-  onSubmit(){
-    /** Check formulaire */
-    const controls = this.searchForm.controls;
-    if (this.searchForm.invalid) {
-      Object.keys(controls).forEach(controlName => controls[controlName].markAsTouched());
-      this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
-      //this.toastr.warning(this.msgErros);
-      return;
-    }
-
-    /** 2. prepare data */
-    const formValue = this.searchForm.value;
-    this.closeModal('showModal');
-    this.search(formValue);
-  }
-
-  search(data : any){
-    this.service.getAlldecaissemenaj(data).subscribe({
-      next : (res) => {
-        this.op = res.data;
-      },
-      error : (err) => {}
+  private markAllAsTouchedForGroup(formGroup: FormGroup): void {
+    Object.values(formGroup.controls).forEach((control) => {
+      control.markAsTouched();
+      if (control instanceof FormGroup) {
+        this.markAllAsTouchedForGroup(control);
+      }
     });
   }
 
-  //User connect
-  get user(){
+  get user(): User {
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
   formatCFA(montant: number | null | undefined): string {
+    if (montant == null) return '0';
     return new Intl.NumberFormat('fr-FR', {
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(montant ?? 0);
+      maximumFractionDigits: 0,
+    }).format(montant);
   }
 
   formatNumber(montant: number | string): string {
-    if (montant === null || montant === undefined || montant === "") return "";
+    if (montant === null || montant === undefined || montant === '') return '';
     const valeur = Number(montant);
-    if (isNaN(valeur)) return "";
-
-    return valeur
-      .toLocaleString('fr-FR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
+    return isNaN(valeur)
+      ? ''
+      : valeur.toLocaleString('fr-FR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
   }
-
 }
