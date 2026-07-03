@@ -1,6 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../../_core/constantes/messages.contantes';
 import { MotifService } from '../../services/motif.service';
@@ -9,7 +15,7 @@ import { MotifService } from '../../services/motif.service';
   selector: 'app-parametre-diverse',
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './parametre-diverse.component.html',
-  styleUrl: './parametre-diverse.component.css'
+  styleUrl: './parametre-diverse.component.css',
 })
 export class ParametreDiverseComponent implements OnInit {
   motifs: any[] = [];
@@ -24,10 +30,13 @@ export class ParametreDiverseComponent implements OnInit {
   msgSup = '';
   selectedItem: any;
 
+  traitementCaisseActif: boolean = true;
+  traitementSoldeActif: boolean = false;
+
   constructor(
     private fb: FormBuilder,
     private motifService: MotifService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
   ) {}
 
   ngOnInit(): void {
@@ -39,25 +48,27 @@ export class ParametreDiverseComponent implements OnInit {
     this.motifForm = this.fb.group({
       idmotif: [null],
       codemotif: ['', Validators.required],
-      libellemotif: ['', Validators.required]
+      libellemotif: ['', Validators.required],
     });
   }
 
   loadMotifs() {
     this.loading = true;
-    this.motifService.getAll({ page: this.currentPage, limit: this.limit }).subscribe({
-      next: (res) => {
-        if (res.success) {
-          this.motifs = res.data.data;
-          this.totalPages = res.data.totalPages || 1;
-        }
-        this.loading = false;
-      },
-      error: () => {
-        this.toastr.error('Erreur de chargement');
-        this.loading = false;
-      }
-    });
+    this.motifService
+      .getAll({ page: this.currentPage, limit: this.limit })
+      .subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.motifs = res.data.data;
+            this.totalPages = res.data.totalPages || 1;
+          }
+          this.loading = false;
+        },
+        error: () => {
+          this.toastr.error('Erreur de chargement');
+          this.loading = false;
+        },
+      });
   }
 
   changePage(page: number) {
@@ -95,7 +106,7 @@ export class ParametreDiverseComponent implements OnInit {
             this.closeModal('showModal');
           }
         },
-        error: () => this.toastr.error('Erreur création')
+        error: () => this.toastr.error('Erreur création'),
       });
     } else {
       this.motifService.update(data).subscribe({
@@ -106,7 +117,7 @@ export class ParametreDiverseComponent implements OnInit {
             this.closeModal('showModal');
           }
         },
-        error: () => this.toastr.error('Erreur modification')
+        error: () => this.toastr.error('Erreur modification'),
       });
     }
   }
@@ -126,7 +137,7 @@ export class ParametreDiverseComponent implements OnInit {
           this.closeModal('deleteOrder');
         }
       },
-      error: () => this.toastr.error('Erreur suppression')
+      error: () => this.toastr.error('Erreur suppression'),
     });
   }
 
@@ -136,5 +147,19 @@ export class ParametreDiverseComponent implements OnInit {
       const modal = (window as any).bootstrap?.Modal?.getInstance(el);
       if (modal) modal.hide();
     }
+  }
+
+  toggleTraitement(type: string) {
+    if (type === 'caisse') {
+      this.traitementCaisseActif = !this.traitementCaisseActif;
+      // appel API si besoin
+    } else if (type === 'solde') {
+      this.traitementSoldeActif = !this.traitementSoldeActif;
+    }
+  }
+
+  desactiverToutTraitements() {
+    this.traitementCaisseActif = false;
+    this.traitementSoldeActif = false;
   }
 }
