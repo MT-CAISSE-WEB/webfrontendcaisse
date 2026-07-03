@@ -6,7 +6,7 @@
     >
       <div class="d-flex align-items-center gap-3">
         <div class="title-icon-premium">
-          <i class="ri-file-check-line"></i>
+          <i class="ri-wallet-line"></i>
         </div>
         <div>
           <h4 class="mb-0 title-premium">{{ title }}</h4>
@@ -304,6 +304,7 @@
                     ) {
                       <tr
                         class="clickable-row"
+                        [class.active]="selectedJustificatif === piece"
                         (click)="selectJustificatif(piece)"
                       >
                         <td class="text-center fw-semibold">
@@ -348,7 +349,7 @@
       </div>
 
       <!-- ============================================ -->
-      <!-- SECTION 3: SAISIE DU JUSTIFICATIF -->
+      <!-- SECTION 3: SAISIE DU JUSTIFICATIF AVEC ONGLETS -->
       <!-- ============================================ -->
       <div class="card-glass mt-3">
         <div class="card-header-glass">
@@ -362,6 +363,14 @@
               <h6 class="card-title-glass mb-0">Saisie du justificatif</h6>
               <span class="badge-glass badge-glass-warning badge-count-sm">
                 {{ lignes.length }} ligne(s)
+              </span>
+              <!-- Badge pièces jointes -->
+              <span
+                class="badge-glass badge-glass-info badge-count-sm"
+                *ngIf="totalPiecesCount > 0"
+              >
+                <i class="ri-attachment-2 me-1"></i>
+                {{ totalPiecesCount }}
               </span>
             </div>
             <div class="d-flex gap-2 flex-wrap">
@@ -382,211 +391,525 @@
         </div>
 
         <div class="card-body-glass pt-0">
-          <!-- En-tête du justificatif -->
-          <div class="justificatif-header">
-            <div class="row g-3">
-              <div class="col-lg-3 col-sm-6">
-                <div class="form-floating">
-                  <select
-                    formControlName="devisejustificatif"
-                    class="form-select {{ isValidField('devisejustificatif') }}"
-                    id="devisejustificatif"
-                    [disabled]="loadingTaux"
-                  >
-                    <option value="">Choisir la devise</option>
-                    @for (item of devises; track $index) {
-                      <option value="{{ item.iddevise }}">
-                        {{ item.codedevise }}
-                      </option>
+          <!-- Onglets de navigation -->
+          <div class="tabs-navigation-justificatif">
+            <button
+              type="button"
+              class="tab-btn-justificatif"
+              [class.active]="activePjTab === 'saisie'"
+              (click)="activePjTab = 'saisie'"
+            >
+              <i class="ri-file-edit-line"></i>
+              <span>Saisie</span>
+              <span
+                class="tab-badge-justificatif"
+                [class.active]="activePjTab === 'saisie'"
+              >
+                {{ lignes.length }}
+              </span>
+            </button>
+            <button
+              type="button"
+              class="tab-btn-justificatif"
+              [class.active]="activePjTab === 'pieces'"
+              (click)="activePjTab = 'pieces'"
+            >
+              <i class="ri-attachment-2"></i>
+              <span>Pièces jointes</span>
+              <span
+                class="tab-badge-justificatif"
+                [class.active]="activePjTab === 'pieces'"
+              >
+                {{ totalPiecesCount }}
+              </span>
+            </button>
+          </div>
+
+          <!-- ========================================== -->
+          <!-- CONTENU ONGLET 1: SAISIE DU JUSTIFICATIF -->
+          <!-- ========================================== -->
+          <div
+            class="tab-content-justificatif"
+            [class.active]="activePjTab === 'saisie'"
+          >
+            <!-- En-tête du justificatif -->
+            <div class="justificatif-header">
+              <div class="row g-3">
+                <div class="col-lg-3 col-sm-6">
+                  <div class="form-floating">
+                    <select
+                      formControlName="devisejustificatif"
+                      class="form-select {{
+                        isValidField('devisejustificatif')
+                      }}"
+                      id="devisejustificatif"
+                      [disabled]="loadingTaux"
+                    >
+                      <option value="">Choisir la devise</option>
+                      @for (item of devises; track $index) {
+                        <option value="{{ item.iddevise }}">
+                          {{ item.codedevise }}
+                        </option>
+                      }
+                    </select>
+                    <label for="devisejustificatif"
+                      >Devise du justificatif</label
+                    >
+                    @if (loadingTaux) {
+                      <span class="form-floating-loader">
+                        <i class="mdi mdi-loading mdi-spin"></i>
+                      </span>
                     }
-                  </select>
-                  <label for="devisejustificatif">Devise du justificatif</label>
-                  @if (loadingTaux) {
-                    <span class="form-floating-loader">
-                      <i class="mdi mdi-loading mdi-spin"></i>
-                    </span>
-                  }
+                  </div>
                 </div>
-              </div>
 
-              <div class="col-lg-3 col-sm-6">
-                <div class="form-floating">
-                  <input
-                    type="date"
-                    formControlName="datejustificatif"
-                    class="form-control {{ isValidField('datejustificatif') }}"
-                    id="datejustificatif"
-                  />
-                  <label for="datejustificatif">Date du justificatif</label>
-                </div>
-              </div>
-
-              <div class="col-lg-2 col-sm-4">
-                <div class="form-floating">
-                  <input
-                    type="text"
-                    formControlName="tauxoperation"
-                    class="form-control {{ isValidField('tauxoperation') }}"
-                    id="tauxoperation"
-                    placeholder="Taux"
-                  />
-                  <label for="tauxoperation">Taux</label>
-                </div>
-              </div>
-
-              <div class="col-lg-2 col-sm-4">
-                <div class="form-floating">
-                  <input
-                    type="text"
-                    formControlName="tauxoperationinverse"
-                    class="form-control"
-                    id="tauxoperationinverse"
-                    placeholder="Taux inverse"
-                  />
-                  <label for="tauxoperationinverse">Taux inverse</label>
-                </div>
-              </div>
-
-              <div class="col-lg-2 col-sm-4">
-                <div class="form-floating">
-                  <div class="form-check form-switch mt-3">
+                <div class="col-lg-3 col-sm-6">
+                  <div class="form-floating">
                     <input
-                      class="form-check-input"
-                      type="checkbox"
-                      role="switch"
-                      formControlName="retourcaisse"
-                      id="retourcaisse"
+                      type="date"
+                      formControlName="datejustificatif"
+                      class="form-control {{
+                        isValidField('datejustificatif')
+                      }}"
+                      id="datejustificatif"
                     />
-                    <label class="form-check-label small" for="retourcaisse">
-                      Retour caisse
-                    </label>
+                    <label for="datejustificatif">Date du justificatif</label>
+                  </div>
+                </div>
+
+                <div class="col-lg-2 col-sm-4">
+                  <div class="form-floating">
+                    <input
+                      type="text"
+                      formControlName="tauxoperation"
+                      class="form-control {{ isValidField('tauxoperation') }}"
+                      id="tauxoperation"
+                      placeholder="Taux"
+                    />
+                    <label for="tauxoperation">Taux</label>
+                  </div>
+                </div>
+
+                <div class="col-lg-2 col-sm-4">
+                  <div class="form-floating">
+                    <input
+                      type="text"
+                      formControlName="tauxoperationinverse"
+                      class="form-control"
+                      id="tauxoperationinverse"
+                      placeholder="Taux inverse"
+                    />
+                    <label for="tauxoperationinverse">Taux inverse</label>
+                  </div>
+                </div>
+
+                <div class="col-lg-2 col-sm-4">
+                  <div class="form-floating">
+                    <div class="form-check form-switch mt-3">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        formControlName="retourcaisse"
+                        id="retourcaisse"
+                      />
+                      <label class="form-check-label small" for="retourcaisse">
+                        Retour caisse
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="form-floating">
+                    <textarea
+                      class="form-control"
+                      formControlName="commentaire"
+                      id="commentaire"
+                      rows="2"
+                      placeholder="Commentaire"
+                      style="min-height: 60px"
+                    ></textarea>
+                    <label for="commentaire">Commentaire</label>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div class="col-12">
-                <div class="form-floating">
-                  <textarea
-                    class="form-control"
-                    formControlName="commentaire"
-                    id="commentaire"
-                    rows="2"
-                    placeholder="Commentaire"
-                    style="min-height: 60px"
-                  ></textarea>
-                  <label for="commentaire">Commentaire</label>
+            <!-- Détails des justificatifs -->
+            <div class="justificatif-details">
+              <div class="details-header">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="ri-list-check-2 text-primary"></i>
+                  <span class="fw-semibold">Lignes du justificatif</span>
+                  <span class="badge-glass badge-glass-success badge-count-sm">
+                    {{ lignes.length }}
+                  </span>
                 </div>
+                <button
+                  type="button"
+                  class="btn-glass-add"
+                  [disabled]="!isUpdated"
+                  (click)="addLine()"
+                >
+                  <i class="ri-add-line align-bottom me-1"></i> Ajouter
+                </button>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-modern align-middle">
+                  <thead>
+                    <tr>
+                      <th style="width: 40px">#</th>
+                      <th>Nature</th>
+                      <th>Centre analytique</th>
+                      <th>Tiers</th>
+                      <th class="text-end" style="width: 150px">Montant</th>
+                      <th class="text-end" style="width: 50px"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (ligne of lignes.controls; track $index) {
+                      <tr class="product" [formGroup]="ligne">
+                        <td class="text-center fw-semibold">
+                          {{ $index + 1 }}
+                        </td>
+                        <td>
+                          <select
+                            class="form-select form-select-glass-sm"
+                            formControlName="idnature"
+                          >
+                            <option value="">Choisir</option>
+                            @for (item of natureoperations; track $index) {
+                              <option value="{{ item.idnature }}">
+                                {{ item.libelle }}
+                              </option>
+                            }
+                          </select>
+                        </td>
+                        <td>
+                          <select
+                            class="form-select form-select-glass-sm"
+                            formControlName="idcentreanalytique"
+                          >
+                            <option value="">Choisir</option>
+                            @for (
+                              c of ligne.get("centres")?.value;
+                              track $index
+                            ) {
+                              <option [value]="c.idcentreanalytique">
+                                {{ c.libelle }}
+                              </option>
+                            }
+                          </select>
+                        </td>
+                        <td>
+                          <select
+                            class="form-select form-select-glass-sm"
+                            formControlName="idtiers"
+                          >
+                            <option value="">Choisir</option>
+                            @for (item of tiers; track $index) {
+                              <option value="{{ item.idtiers }}">
+                                {{ item.designation }}
+                              </option>
+                            }
+                          </select>
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            class="form-control form-control-glass-sm text-end"
+                            formControlName="montantdetail"
+                            placeholder="0.00"
+                          />
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            class="action-btn action-delete"
+                            [disabled]="!isUpdated || lignes.length <= 1"
+                            (click)="removeLine($index)"
+                            title="Supprimer"
+                          >
+                            <i class="ri-delete-bin-line"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
 
-          <!-- Détails des justificatifs -->
-          <div class="justificatif-details">
-            <div class="details-header">
-              <div class="d-flex align-items-center gap-2">
-                <i class="ri-list-check-2 text-primary"></i>
-                <span class="fw-semibold">Lignes du justificatif</span>
-                <span class="badge-glass badge-glass-success badge-count-sm">
-                  {{ lignes.length }}
-                </span>
-              </div>
-              <button
-                type="button"
-                class="btn-glass-add"
-                [disabled]="!isUpdated"
-                (click)="addLine()"
+          <!-- ========================================== -->
+          <!-- CONTENU ONGLET 2: PIÈCES JOINTES -->
+          <!-- ========================================== -->
+          <div
+            class="tab-content-justificatif"
+            [class.active]="activePjTab === 'pieces'"
+          >
+            <!-- Zone d'upload -->
+            <div
+              class="upload-area-justificatif"
+              [class.drag-over]="isDragOver"
+              (dragover)="onDragOver($event)"
+              (dragleave)="onDragLeave($event)"
+              (drop)="onDrop($event)"
+            >
+              <input
+                type="file"
+                #fileInput
+                multiple
+                (change)="onFilesSelected($event)"
+                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
+                class="d-none"
+              />
+              <div
+                class="upload-content-justificatif"
+                (click)="fileInput.click()"
               >
-                <i class="ri-add-line align-bottom me-1"></i> Ajouter
-              </button>
+                <div class="upload-icon-justificatif">
+                  <i class="ri-upload-cloud-2-line"></i>
+                </div>
+                <div class="upload-text-justificatif">
+                  <span class="upload-title-justificatif">
+                    @if (selectedFiles.length === 0) {
+                      Déposez vos fichiers ici ou cliquez pour parcourir
+                    } @else {
+                      <strong>{{ selectedFiles.length }}</strong> fichier(s)
+                      sélectionné(s)
+                    }
+                  </span>
+                  <span
+                    class="upload-hint-justificatif"
+                    *ngIf="selectedFiles.length === 0"
+                  >
+                    PDF, DOC, XLS, JPG, PNG (max 10MB)
+                  </span>
+                </div>
+                @if (selectedFiles.length > 0) {
+                  <button
+                    class="btn-glass-upload-justificatif"
+                    (click)="uploadPieces(); $event.stopPropagation()"
+                    [disabled]="pjUploading"
+                  >
+                    @if (pjUploading) {
+                      <span
+                        class="spinner-border spinner-border-sm me-1"
+                      ></span>
+                    }
+                    <i class="ri-upload-cloud-2-line me-1"></i>
+                    Uploader
+                  </button>
+                }
+              </div>
             </div>
 
-            <div class="table-responsive">
-              <table class="table table-modern align-middle">
-                <thead>
-                  <tr>
-                    <th style="width: 40px">#</th>
-                    <th>Nature</th>
-                    <th>Centre analytique</th>
-                    <th>Tiers</th>
-                    <th class="text-end" style="width: 150px">Montant</th>
-                    <th class="text-end" style="width: 50px"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (ligne of lignes.controls; track $index) {
-                    <tr class="product" [formGroup]="ligne">
-                      <td class="text-center fw-semibold">{{ $index + 1 }}</td>
-                      <td>
-                        <select
-                          class="form-select form-select-glass-sm"
-                          formControlName="idnature"
+            <!-- Aperçu des fichiers sélectionnés -->
+            <div
+              *ngIf="selectedFiles.length > 0"
+              class="file-preview-justificatif"
+            >
+              <div class="file-preview-header-justificatif">
+                <span class="fw-semibold small text-uppercase text-muted">
+                  Fichiers à uploader ({{ selectedFiles.length }})
+                </span>
+              </div>
+              <div class="file-grid-justificatif">
+                @for (file of selectedFiles; track $index; let i = $index) {
+                  <div class="file-item-justificatif">
+                    <div class="file-item-info-justificatif">
+                      <div class="file-item-icon-justificatif">
+                        <i class="ri-file-line"></i>
+                      </div>
+                      <div class="file-item-details-justificatif">
+                        <span
+                          class="file-item-name-justificatif"
+                          [title]="file.name"
                         >
-                          <option value="">Choisir</option>
-                          @for (item of natureoperations; track $index) {
-                            <option value="{{ item.idnature }}">
-                              {{ item.libelle }}
-                            </option>
-                          }
-                        </select>
-                      </td>
-                      <td>
-                        <select
-                          class="form-select form-select-glass-sm"
-                          formControlName="idcentreanalytique"
-                        >
-                          <option value="">Choisir</option>
-                          @for (
-                            c of ligne.get("centres")?.value;
-                            track $index
-                          ) {
-                            <option [value]="c.idcentreanalytique">
-                              {{ c.libelle }}
-                            </option>
-                          }
-                        </select>
-                      </td>
-                      <td>
-                        <select
-                          class="form-select form-select-glass-sm"
-                          formControlName="idtiers"
-                        >
-                          <option value="">Choisir</option>
-                          @for (item of tiers; track $index) {
-                            <option value="{{ item.idtiers }}">
-                              {{ item.designation }}
-                            </option>
-                          }
-                        </select>
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          class="form-control form-control-glass-sm text-end"
-                          formControlName="montantdetail"
-                          placeholder="0.00"
-                        />
-                      </td>
-                      <td>
-                        <button
-                          type="button"
-                          class="action-btn action-delete"
-                          [disabled]="!isUpdated || lignes.length <= 1"
-                          (click)="removeLine($index)"
-                          title="Supprimer"
-                        >
-                          <i class="ri-delete-bin-line"></i>
-                        </button>
-                      </td>
-                    </tr>
+                          {{ file.name }}
+                        </span>
+                        <span class="file-item-size-justificatif">
+                          {{ file.size / 1024 | number: "1.0-0" }} KB
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      class="file-item-remove-justificatif"
+                      (click)="removeSelectedFile(i)"
+                      title="Retirer"
+                    >
+                      <i class="ri-close-line"></i>
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Liste des pièces jointes existantes -->
+            <div
+              *ngIf="!piecesJointesLoading && totalPiecesCount > 0"
+              class="pj-list-justificatif"
+            >
+              <div class="pj-list-header-justificatif">
+                <span class="fw-semibold small text-uppercase text-muted">
+                  <i class="ri-file-list-line me-1"></i>
+                  Documents ({{ totalPiecesCount }})
+                </span>
+                <button
+                  type="button"
+                  class="btn-glass-primary btn-sm"
+                  (click)="
+                    selectedOperationPJ?.iddemande
+                      ? downloadAllFiles2()
+                      : downloadAllFiles()
+                  "
+                  [disabled]="downloadingAll"
+                  title="Télécharger toutes les pièces jointes"
+                >
+                  @if (downloadingAll) {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
                   }
-                </tbody>
-              </table>
+                  <i class="ri-download-line me-1"></i> Tout télécharger
+                </button>
+              </div>
+
+              <div class="pj-list-items-justificatif">
+                <!-- PJ de la demande -->
+                <div
+                  *ngIf="hasDemande && demandePiecesJointes.length > 0"
+                  class="pj-group-justificatif"
+                >
+                  <span class="pj-group-label-justificatif">
+                    <i class="ri-file-copy-line text-info"></i>
+                    Demande ({{ demandeInfo?.codedemande }})
+                    <span class="badge-glass badge-glass-info badge-count-sm">{{
+                      demandePiecesJointes.length
+                    }}</span>
+                  </span>
+                  <div class="pj-items-justificatif">
+                    @for (pj of demandePiecesJointes; track $index) {
+                      <div
+                        class="pj-item-justificatif pj-item-readonly-justificatif"
+                      >
+                        <div class="pj-item-icon-justificatif">
+                          <i [class]="getFileIcon(pj)"></i>
+                        </div>
+                        <div class="pj-item-info-justificatif">
+                          <span
+                            class="pj-item-name-justificatif"
+                            [title]="pj.nomfichier"
+                            >{{ pj.nomfichier }}</span
+                          >
+                          <span class="pj-item-meta-justificatif">{{
+                            formatFileSize(pj.taille)
+                          }}</span>
+                        </div>
+                        <div class="pj-item-actions-justificatif">
+                          <button
+                            class="pj-action-btn-justificatif pj-action-download-justificatif"
+                            (click)="downloadPiece(pj)"
+                            title="Télécharger"
+                          >
+                            <i class="ri-download-line"></i>
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <!-- PJ de l'opération -->
+                <div
+                  *ngIf="operationPiecesJointes.length > 0"
+                  class="pj-group-justificatif"
+                >
+                  <span class="pj-group-label-justificatif">
+                    <i class="ri-folder-image-line text-primary"></i>
+                    Opération ({{
+                      selectedOperationPJ?.codeoperation || ope?.codeoperation
+                    }})
+                    <span
+                      class="badge-glass badge-glass-secondary badge-count-sm"
+                      >{{ operationPiecesJointes.length }}</span
+                    >
+                  </span>
+                  <div class="pj-items-justificatif">
+                    @for (pj of operationPiecesJointes; track $index) {
+                      <div
+                        class="pj-item-justificatif pj-item-editable-justificatif"
+                      >
+                        <div class="pj-item-icon-justificatif">
+                          <i [class]="getFileIcon(pj)"></i>
+                        </div>
+                        <div class="pj-item-info-justificatif">
+                          <span
+                            class="pj-item-name-justificatif"
+                            [title]="pj.nomfichier"
+                            >{{ pj.nomfichier }}</span
+                          >
+                          <span class="pj-item-meta-justificatif">{{
+                            formatFileSize(pj.taille)
+                          }}</span>
+                        </div>
+                        <div class="pj-item-actions-justificatif">
+                          <button
+                            class="pj-action-btn-justificatif pj-action-download-justificatif"
+                            (click)="downloadPiece(pj)"
+                            title="Télécharger"
+                          >
+                            <i class="ri-download-line"></i>
+                          </button>
+                          <button
+                            class="pj-action-btn-justificatif pj-action-delete-justificatif"
+                            (click)="deletePiece(pj)"
+                            [disabled]="pjDeleting === pj.idpiecejointe"
+                            title="Supprimer"
+                          >
+                            @if (pjDeleting === pj.idpiecejointe) {
+                              <span
+                                class="spinner-border spinner-border-sm"
+                              ></span>
+                            } @else {
+                              <i class="ri-close-line"></i>
+                            }
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- État vide -->
+            <div
+              *ngIf="
+                !piecesJointesLoading &&
+                totalPiecesCount === 0 &&
+                selectedFiles.length === 0
+              "
+              class="pj-empty-justificatif"
+            >
+              <i class="ri-folder-open-line"></i>
+              <p>Aucune pièce jointe</p>
+              <span class="text-muted small"
+                >Déposez des fichiers ci-dessus pour les ajouter</span
+              >
+            </div>
+
+            <!-- Chargement -->
+            <div *ngIf="piecesJointesLoading" class="spinner-glass-sm">
+              <div class="spinner-border spinner-border-sm text-primary"></div>
+              <p class="mt-2 small">Chargement des pièces jointes...</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ============================================ -->
       <!-- ============================================ -->
       <!-- SECTION 4: RETOUR CAISSE - DESIGN UNIQUEMENT -->
       <!-- ============================================ -->
@@ -740,14 +1063,6 @@
 
           <!-- Actions globales -->
           <div class="retour-actions" *ngIf="caisses.length > 0">
-            <button
-              type="button"
-              class="btn-glass-secondary btn-sm"
-              (click)="fillAllCaisses()"
-              [disabled]="!selectedRetour"
-            >
-              <i class="ri-add-line me-1"></i> Répartir automatiquement
-            </button>
             <button
               type="button"
               class="btn-glass-secondary btn-sm"

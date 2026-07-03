@@ -8,10 +8,7 @@ import { ConsultationOpService } from '../../../../features/consultations/servic
 
 @Component({
   selector: 'app-interface-supervisor',
-  imports: [RouterModule,
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule],
+  imports: [RouterModule, CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './interface-supervisor.component.html',
   styleUrl: './interface-supervisor.component.css'
 })
@@ -19,13 +16,15 @@ export class InterfaceSupervisorComponent implements OnInit {
   caisseAllSolde: CaisseSolde[] = [];
   loading = true;
 
-  constructor(private service: ConsultationOpService, private toastr: ToastrService,) {}
+  constructor(
+    private service: ConsultationOpService,
+    private toastr: ToastrService
+  ) {}
 
   ngOnInit(): void {
     this.getSoldeAllCaisse();
   }
 
-  //Récuperer les soldes
   getSoldeAllCaisse() {
     this.service.get_soldeAllCaisse().subscribe({
       next: (res: any) => {
@@ -50,5 +49,4 @@ export class InterfaceSupervisorComponent implements OnInit {
       (caisse.total_decaissement || 0)
     );
   }
-
 }

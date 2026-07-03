@@ -1,48 +1,39 @@
 <div class="container mt-4">
-      <h4 class="mb-4">Soldes des caisses</h4>
+  <h4 class="mb-4">Soldes des caisses</h4>
 
-      <!-- Indicateur de chargement -->
-      <div *ngIf="loading" class="text-center py-5">
-        <div class="spinner-border text-primary"></div>
-        <p class="mt-2">Chargement des soldes...</p>
-      </div>
+  <!-- Chargement -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary"></div>
+    <p class="mt-2">Chargement des soldes...</p>
+  </div>
 
-      <!-- Grille des cartes -->
-      <div *ngIf="!loading" class="row g-4">
-        <div *ngFor="let caisse of caisseAllSolde" class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
-          <div class="stat-card glass-stat">
-            <div class="stat-icon-wrapper">
-              <div class="stat-icon stat-icon-primary">
-                <i class="ri-bank-line"></i>
-              </div>
-            </div>
-            <div class="stat-content">
-              <span class="stat-label">{{ caisse.codecaisse }}</span>
-              <h5 class="stat-value">{{ caisse.libelle }}</h5>
-              <p class="stat-detail">
-                <span class="text-muted">Solde :</span>
-                <strong>
-                    {{ getSolde(caisse) | number:'1.0-0' }}
-                    {{ caisse.codedevise }}
-                  </strong>
-              </p>
-              <!-- <p class="stat-detail small">
-                <span class="text-success">Encaissements : {{ caisse.total_encaissement | number:'1.0-0' }}</span><br>
-                <span class="text-danger">Décaissements : {{ caisse.total_decaissement | number:'1.0-0' }}</span>
-              </p> -->
-              <p class="stat-detail small text-muted">
-                Dernière période : {{ caisse.derniere_date_periode | date:'dd/MM/yyyy' }}
-              </p>
-            </div>
-            <div class="stat-progress">
-              <div class="progress-bar" style="width: 75%"></div>
-            </div>
-          </div>
+  <!-- Section des caisses défilables -->
+  <div *ngIf="!loading && caisseAllSolde.length > 0" class="caisses-scroll-container">
+    <div class="caisses-scroll">
+      <div *ngFor="let caisse of caisseAllSolde" class="caisse-card">
+        <div class="card-icon">
+          <i class="ri-bank-line"></i>
+        </div>
+        <div class="card-body">
+          <span class="card-code">{{ caisse.codecaisse }}</span>
+          <h5 class="card-title">{{ caisse.libelle }}</h5>
+          <p class="card-solde">
+            <span>Solde :</span>
+            <strong>{{ getSolde(caisse) | number:'1.0-0' }} {{ caisse.codedevise }}</strong>
+          </p>
+          <p class="card-date">
+            Dernière période : {{ caisse.derniere_date_periode | date:'dd/MM/yyyy' }}
+          </p>
+        </div>
+        <div class="card-progress">
+          <div class="progress-fill" style="width: 75%"></div>
         </div>
       </div>
-
-      <!-- Message si aucune caisse -->
-      <div *ngIf="!loading && caisseAllSolde.length === 0" class="alert alert-info text-center">
-        Aucune caisse trouvée pour afficher le solde.
-      </div>
     </div>
+  </div>
+
+  <!-- Aucune caisse -->
+  <div *ngIf="!loading && caisseAllSolde.length === 0" class="alert alert-info text-center">
+    Aucune caisse trouvée pour afficher le solde.
+  </div>
+</div>
