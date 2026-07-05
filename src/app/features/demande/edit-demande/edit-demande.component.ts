@@ -143,6 +143,9 @@ export class EditDemandeComponent implements OnInit {
   filesToDelete: string[] = [];
   pjUploading = false;
 
+  // Set contenant les indices des lignes en erreur (montant <= 0)
+  ligneErrors: Set<number> = new Set();
+
   constructor(
     private service: DemandeService,
     private natureoperationservice: NatureoperationService,
@@ -720,10 +723,17 @@ export class EditDemandeComponent implements OnInit {
       map((value) => this._filterNature(value || '')),
     );
 
-    // Filtrage Tiers pour cette ligne
-    const filteredTiers = ligneOf.get('tiers')!.valueChanges.pipe(
-      startWith(''),
-      map((value) => this._filterTiers(value || '')),
+    // Observables pour la nature et la saisie du tiers
+    const nature$ = ligneOf.get('natureop')!.valueChanges.pipe(
+      startWith(ligneOf.get('natureop')?.value ?? null)
+    );
+    const tiersValue$ = ligneOf.get('tiers')!.valueChanges.pipe(
+      startWith(ligneOf.get('tiers')?.value ?? '')
+    );
+
+    // Filtrage combiné : type de tiers + texte saisi
+    const filteredTiers = combineLatest([nature$, tiersValue$]).pipe(
+      map(([nature, tiersValue]) => this._filterTiersByNature(tiersValue, nature))
     );
 
     // Filtrage Centres pour cette ligne
@@ -757,7 +767,6 @@ export class EditDemandeComponent implements OnInit {
       ligneOf.get('montantdemande')?.enable();
 
       const lignes = this.filterLignesBudget(ligneOf);
-      console.log('BudgetGlobal:', this.budgetGlobal);
       if (!this.budgetGlobal?.isanalytique && nature.decajustifier === 0) {
         ligneOf
           .get('codebudget')
@@ -951,6 +960,22 @@ export class EditDemandeComponent implements OnInit {
       return;
     }
 
+    // --- Vérification des montants des lignes ---
+    this.ligneErrors.clear();
+    const rawLignes = this.demandeForm.getRawValue().lignes;
+    let hasLigneError = false;
+    rawLignes.forEach((l: any, index: number) => {
+        if (l.montantdemande == null || l.montantdemande <= 0) {
+            this.ligneErrors.add(index);
+            hasLigneError = true;
+        }
+    });
+
+    if (hasLigneError) {
+        this.toastr.warning('Veuillez saisir un montant valide (supérieur à 0) pour chaque ligne en erreur.');
+        return;
+    }
+
     /** 2. prepare data */
     const raw = this.demandeForm.getRawValue();
     const formValue = {
@@ -1074,12 +1099,8 @@ export class EditDemandeComponent implements OnInit {
           return target >= debut && target <= fin;
         });
 
-        console.log('Budgets valides pour la date', date, budgets);
-
         const mensuels = budgets.filter((b) => b.typebudget === 'Mensuel');
         this.budgetGlobal = mensuels.length ? mensuels[0] : budgets[0];
-
-        console.log('Budget global sélectionné:', this.budgetGlobal);
 
         return this.budgetGlobal;
       }),
@@ -1096,11 +1117,6 @@ export class EditDemandeComponent implements OnInit {
   // Filtre les lignes selon le budget
   filterLignesBudget(ligne: FormGroup): LigneBudgetModel[] {
     if (!this.lignesBudgetGlobales.length) return [];
-
-    console.log(
-      'Filtrage des lignes budget pour la ligne',
-      this.lignesBudgetGlobales,
-    );
 
     const nature = ligne.get('natureop')?.value;
     const centre = ligne.get('centre')?.value;
@@ -1164,7 +1180,7 @@ export class EditDemandeComponent implements OnInit {
     this.pjService.delete(this.iddemande, piece.idpiecejointe).subscribe({
       next: (res) => {
         if (res.success) {
-          // ⭐ Supprimer du tableau local APRÈS confirmation API
+          // Supprimer du tableau local APRÈS confirmation API
           const index = this.existingPieces.findIndex(
             (p) => p.idpiecejointe === piece.idpiecejointe,
           );
@@ -1389,5 +1405,22 @@ export class EditDemandeComponent implements OnInit {
       });
       this.uploadedFiles.push(...validFiles);
     }
+  }
+
+  private _filterTiersByNature(value: any, nature: any): any[] {
+    let filtered = this.tiers;
+    // Filtrer par typetiers si la nature existe et a un typetiers
+    if (nature && nature.typetiers != null) {
+      filtered = filtered.filter(t => t.typetiers === nature.typetiers);
+    }
+    // Filtrer par texte saisi
+    const search = typeof value === 'string' ? value : (value?.designation || '');
+    const filterValue = this._normalizeValue(search);
+    if (filterValue) {
+      filtered = filtered.filter(option =>
+        this._normalizeValue(option.designation).includes(filterValue)
+      );
+    }
+    return filtered;
   }
 }

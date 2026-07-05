@@ -1,282 +1,605 @@
-<!-- start page title -->
+<!-- ============================================ -->
+<!-- PAGE TITLE -->
+<!-- ============================================ -->
 <div class="row">
-    <div class="col-12">
-        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">{{title}}</h4>
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Consultation</a></li>
-                    <li class="breadcrumb-item active">{{title}}</li>
-                </ol>
-            </div>
+  <div class="col-12">
+    <div
+      class="page-title-premium d-sm-flex align-items-center justify-content-between"
+    >
+      <div class="d-flex align-items-center gap-3">
+        <div class="title-icon-premium">
+          <i class="ri-book-open-line"></i>
         </div>
+        <div>
+          <h4 class="mb-0 title-premium">{{ title }}</h4>
+          <span class="title-subtitle-premium"
+            >Consultation des opérations par période</span
+          >
+        </div>
+      </div>
+      <div class="page-title-right">
+        <ol class="breadcrumb-premium m-0">
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);">
+              <i class="ri-home-4-line me-1"></i>Consultation
+            </a>
+          </li>
+          <li class="breadcrumb-item active">
+            <i class="ri-book-open-line"></i>{{ title }}
+          </li>
+        </ol>
+      </div>
     </div>
+  </div>
 </div>
-<!-- end page title -->
 
-
+<!-- ============================================ -->
+<!-- MAIN CARD -->
+<!-- ============================================ -->
 <div class="row">
-    <div class="col-lg-12">
-        <div class="card" id="">
-            <div class="card-header border-0">
-                <div class="d-flex align-items-center">
-                    <h5 class="card-title mb-0 flex-grow-1">{{title}}</h5>
-                    <div class="flex-shrink-0">
-                        <div class="d-flex gap-2 flex-wrap">
-                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#showModal_imp">
-                                <i class="ri-file-download-line align-bottom me-1"></i> Impression
-                            </button>
-                            <button class="btn btn-sm btn-soft-secondary" data-bs-toggle="modal" data-bs-target="#showModal">
-                                <i class="ri-add-line align-bottom me-1"></i>critères</button>
-                        </div>
-                    </div>
-                </div>
+  <div class="col-lg-12">
+    <div class="card-glass" id="journalCaisse">
+      <!-- Header -->
+      <div class="card-header-glass border-0">
+        <div
+          class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+        >
+          <div class="d-flex align-items-center gap-2">
+            <div class="section-icon-glass">
+              <i class="ri-file-list-3-line"></i>
             </div>
-
-            <div class="card-body">
-                <div>
-                    <!-- Left Icon Accordions -->
-                    <div class="accordion lefticon-accordion custom-accordionwithicon accordion-border-box" id="accordionlefticon">
-                        @for(item of op; track $index){
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="accordionlefticonExample1">
-                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" [attr.data-bs-target]="'#accor_lefticonExamplecollapse' + $index" aria-expanded="true" aria-controls="accor_lefticonExamplecollapse1">
-                                        opérations du {{ item?.date | date:'dd/MM/yyyy' }}      site : {{ item?.site }}
-                                    </button>
-                                </h2>
-                                <div [attr.id]="'accor_lefticonExamplecollapse' + $index" class="accordion-collapse collapse show" aria-labelledby="accordionlefticonExample1" data-bs-parent="#accordionlefticon">
-                                    <div class="accordion-body">
-                                        <table class="table table-borderless table-sm align-middle mb-0" id="invoiceTable">
-                                            @for(caisse of item.caisses; track $index){
-                                                <tr>
-                                                    <td colspan="2" class="p-2"><strong> {{ caisse?.codecaisse }} - {{ caisse?.caisse }} </strong> </td>
-                                                    <td colspan="2" class="start p-2" *ngIf="item?.devise != 'USD'" >Solde ouverture : <strong> {{ formatCFA(caisse?.solde_ouverture)}} {{ caisse?.devise }}</strong> </td>
-                                                    <td colspan="2" class="start p-2" *ngIf="item?.devise == 'USD'" >Solde ouverture : <strong> {{ formatNumber(caisse?.solde_ouverture) }} {{ caisse?.devise }}</strong> </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <table class="table table-borderless table-sm table-nowrap align-middle mb-0">
-                                                            <colgroup>
-                                                                <col style="width: 25%">
-                                                                <col style="width: 15%">
-                                                                <col style="width: 20%">
-                                                                <col style="width: 20%">
-                                                                <col style="width: 20%">
-                                                            </colgroup>
-                                                            <thead class="align-middle">
-                                                                <tr>
-                                                                    <th>caisse  </th>
-                                                                    <th>type opération </th>
-                                                                    <th>montant payé </th>
-                                                                    <th>montant ref </th>
-                                                                    <th>numéro piece  </th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                @if(!caisse?.operations?.length){
-                                                                    <tr>
-                                                                        <td colspan="5" class="text-center text-muted">
-                                                                            Aucune opération
-                                                                        </td>
-                                                                    </tr>
-                                                                }
-
-                                                                @for(element of caisse?.operations; track element.idoperation){
-                                                                    <tr>
-                                                                        <td>{{ element.description || '-' }}</td>
-                                                                        <td class="text-end">{{ element.typeoperation || '-' }}</td>
-                                                                        <td class="text-end" *ngIf="caisse?.devise != 'USD'">
-                                                                            {{ formatCFA(element.montant) }} {{ caisse?.devise }}
-                                                                        </td>
-                                                                        <td class="text-end" *ngIf="caisse?.devise == 'USD'">
-                                                                            {{ formatNumber(element.montant) }} {{ caisse?.devise }}
-                                                                        </td>
-                                                                        <td class="text-end" *ngIf="user.devise_ref_code != 'USD'">
-                                                                            {{ formatCFA(element.montant_ref) }} {{ user.devise_ref_code }}
-                                                                        </td>
-                                                                        <td class="text-end" *ngIf="user.devise_ref_code == 'USD'">
-                                                                            {{ formatNumber(element.montant_ref) }} {{ user.devise_ref_code }}
-                                                                        </td>
-                                                                        <td>{{ element.piece || '-' }}</td>
-                                                                    </tr>
-                                                                }
-                                                                </tbody>
-                                                        </table>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td colspan="2" class="p-2"> </td>
-                                                    <td colspan="2" class="start p-2" *ngIf="caisse?.devise != 'USD'">Solde fermeture : <strong> {{ formatCFA(caisse?.solde_fermeture)}}  {{ caisse?.devise }}</strong>  </td>
-                                                    <td colspan="2" class="start p-2" *ngIf="caisse?.devise == 'USD'">Solde fermeture : <strong> {{ formatNumber(caisse?.solde_fermeture)}}  {{ caisse?.devise }}</strong>  </td>
-                                                </tr>
-                                            }
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-
-                        <!-- <div class="accordion-item mt-2">
-                            <h2 class="accordion-header" id="accordionlefticonExample2">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accor_lefticonExamplecollapse2" aria-expanded="false" aria-controls="accor_lefticonExamplecollapse2">
-                                    What is Digital Marketing?
-                                </button>
-                            </h2>
-                            <div id="accor_lefticonExamplecollapse2" class="accordion-collapse collapse" aria-labelledby="accordionlefticonExample2" data-bs-parent="#accordionlefticon">
-                                <div class="accordion-body">
-                                    Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="accordion-item mt-2">
-                            <h2 class="accordion-header" id="accordionlefticonExample3">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accor_lefticonExamplecollapse3" aria-expanded="false" aria-controls="accor_lefticonExamplecollapse3">
-                                    Where does it come from ?
-                                </button>
-                            </h2>
-                            <div id="accor_lefticonExamplecollapse3" class="accordion-collapse collapse" aria-labelledby="accordionlefticonExample3" data-bs-parent="#accordionlefticon">
-                                <div class="accordion-body">
-                                    Cras ultricies mi eu turpis hendrerit fringilla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; In ac dui quis mi consectetuer lacinia. Nam pretium turpis et arcu arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis aliquam ultrices mauris.
-                                </div>
-                            </div>
-                        </div> -->
-                    </div>
-                    <div *ngIf="op?.length == 0">
-                        <div class="text-center">
-                            <h5 class="mt-2">Désolé! Aucune opération trouvé</h5>
-                            <p class="text-muted mb-0">Désole il n'y aucune donnée dans cette base</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <h5 class="card-title-glass mb-0">{{ title }}</h5>
+            <span class="badge-glass badge-glass-info badge-count-sm">
+              {{ op.length }}
+            </span>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button
+              type="button"
+              class="btn-glass-primary btn-sm"
+              (click)="openPrintModal()"
+              [disabled]="loading"
+            >
+              <i class="ri-printer-line align-bottom me-1"></i> Impression
+            </button>
+            <button
+              type="button"
+              class="btn-glass-secondary btn-sm"
+              (click)="openCriteriaModal()"
+              [disabled]="loading"
+            >
+              <i class="ri-filter-2-line align-bottom me-1"></i> Critères
+            </button>
+            <button
+              type="button"
+              class="btn-glass-secondary btn-sm"
+              (click)="refreshData()"
+              [disabled]="loading"
+            >
+              <i class="ri-refresh-fill align-bottom me-1"></i> Actualiser
+            </button>
+            <button
+              type="button"
+              class="btn-glass-danger btn-sm"
+              (click)="resetAll()"
+              [disabled]="loading"
+              title="Réinitialiser toutes les données"
+            >
+              <i class="ri-restart-line align-bottom me-1"></i> Réinitialiser
+            </button>
+          </div>
         </div>
+      </div>
+
+      <!-- Body -->
+      <div class="card-body-glass pt-0">
+        @if (loading && op.length === 0) {
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Chargement...</span>
+            </div>
+          </div>
+        }
+
+        @if (op.length > 0) {
+          <div
+            class="accordion lefticon-accordion custom-accordionwithicon accordion-border-box"
+            id="operationsAccordion"
+          >
+            @for (item of op; track $index) {
+              <div class="accordion-item-glass">
+                <h2 class="accordion-header" [id]="'heading-' + $index">
+                  <button
+                    class="accordion-button-glass"
+                    [class.collapsed]="$index !== 0"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    [attr.data-bs-target]="'#collapse-' + $index"
+                    [attr.aria-expanded]="$index === 0"
+                    [attr.aria-controls]="'collapse-' + $index"
+                  >
+                    <div class="accordion-header-content">
+                      <span class="accordion-date">
+                        <i class="ri-calendar-line"></i>
+                        {{ item?.date | date: "dd/MM/yyyy" }}
+                      </span>
+                      <span class="accordion-divider"></span>
+                      <span class="accordion-site">
+                        <i class="ri-building-line"></i> {{ item?.site }}
+                      </span>
+                      <span class="accordion-divider"></span>
+                      <span class="accordion-count">
+                        <i class="ri-file-list-line"></i>
+                        {{ getTotalOperations(item) }} opération(s)
+                      </span>
+                      <span
+                        class="accordion-badge"
+                        [class.has-operations]="getTotalOperations(item) > 0"
+                      >
+                        {{ getTotalOperations(item) > 0 ? "Actif" : "Vide" }}
+                      </span>
+                    </div>
+                    <i class="ri-arrow-down-s-line accordion-arrow"></i>
+                  </button>
+                </h2>
+                <div
+                  [id]="'collapse-' + $index"
+                  class="accordion-collapse collapse"
+                  [class.show]="$index === 0"
+                  data-bs-parent="#operationsAccordion"
+                >
+                  <div class="accordion-body-glass">
+                    @for (caisse of item.caisses; track caisse.idcaisse) {
+                      <div class="caisse-header-glass">
+                        <div class="caisse-header-info">
+                          <span class="caisse-code">{{
+                            caisse?.codecaisse
+                          }}</span>
+                          <span class="caisse-name">{{ caisse?.caisse }}</span>
+                          <span class="caisse-devise">{{
+                            caisse?.devise
+                          }}</span>
+                        </div>
+                        <div class="caisse-soldes">
+                          <div class="solde-item">
+                            <span class="solde-label">Solde ouverture</span>
+                            <span class="solde-value">
+                              @if (caisse?.devise !== "USD") {
+                                {{ formatCFA(caisse?.solde_ouverture) }}
+                              } @else {
+                                {{ formatNumber(caisse?.solde_ouverture) }}
+                              }
+                              {{ caisse?.devise }}
+                            </span>
+                          </div>
+                          <div class="solde-divider"></div>
+                          <div class="solde-item">
+                            <span class="solde-label">Solde fermeture</span>
+                            <span class="solde-value">
+                              @if (caisse?.devise !== "USD") {
+                                {{ formatCFA(caisse?.solde_fermeture) }}
+                              } @else {
+                                {{ formatNumber(caisse?.solde_fermeture) }}
+                              }
+                              {{ caisse?.devise }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="table-responsive-modern">
+                        <table class="table table-modern align-middle">
+                          <thead>
+                            <tr>
+                              <th>Description</th>
+                              <th>Type opération</th>
+                              <th class="text-end">Montant payé</th>
+                              <th class="text-end">Montant réf.</th>
+                              <th>N° pièce</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @if (caisse?.operations?.length === 0) {
+                              <tr>
+                                <td
+                                  colspan="5"
+                                  class="text-center text-muted py-3"
+                                >
+                                  <i class="ri-inbox-line me-1"></i> Aucune
+                                  opération
+                                </td>
+                              </tr>
+                            }
+                            @for (
+                              operation of caisse.operations;
+                              track operation.idoperation
+                            ) {
+                              <tr>
+                                <td>
+                                  <span class="operation-desc">{{
+                                    operation.description || "-"
+                                  }}</span>
+                                </td>
+                                <td>
+                                  <span
+                                    class="type-badge"
+                                    [class.type-enc]="
+                                      operation.typeoperation.toLowerCase() ===
+                                      'encaissement'
+                                    "
+                                    [class.type-dec]="
+                                      operation.typeoperation.toLowerCase() ===
+                                      'decaissement'
+                                    "
+                                    [class.type-decaj]="
+                                      operation.typeoperation.toLowerCase() ===
+                                      'decaissementaj'
+                                    "
+                                  >
+                                    {{ operation.typeoperation || "-" }}
+                                  </span>
+                                </td>
+                                <td class="text-end fw-semibold">
+                                  @if (caisse?.devise !== "USD") {
+                                    {{ formatCFA(operation.montant) }}
+                                  } @else {
+                                    {{ formatNumber(operation.montant) }}
+                                  }
+                                  <span class="text-muted small">{{
+                                    caisse?.devise
+                                  }}</span>
+                                </td>
+                                <td class="text-end fw-semibold">
+                                  @if (user.devise_ref_code !== "USD") {
+                                    {{ formatCFA(operation.montant_ref) }}
+                                  } @else {
+                                    {{ formatNumber(operation.montant_ref) }}
+                                  }
+                                  <span class="text-muted small">{{
+                                    user.devise_ref_code
+                                  }}</span>
+                                </td>
+                                <td>
+                                  <span class="code-badge-sm">{{
+                                    operation.piece || "-"
+                                  }}</span>
+                                </td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        @if (op.length === 0 && !loading) {
+          <div class="empty-state">
+            <i class="ri-inbox-2-line"></i>
+            <p>Aucune opération trouvée</p>
+            <span class="empty-hint"
+              >Aucune opération ne correspond à vos critères de recherche</span
+            >
+          </div>
+        }
+      </div>
     </div>
+  </div>
 </div>
 
-<!-- Modal -->
-<div class="modal fade" id="showModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-info-subtle">
-                <h5 class="modal-title" id="exampleModalLabel">Critères {{title}}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+<!-- ============================================ -->
+<!-- MODAL: CRITÈRES -->
+<!-- ============================================ -->
+<div
+  class="modal-overlay"
+  [class.show]="showCriteriaModal"
+  (click)="closeCriteriaModal()"
+>
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-content-glass">
+      <div class="modal-header modal-header-theme-blue">
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-filter-2-line text-white fs-5"></i>
+          </div>
+          <h5 class="modal-title text-white fw-semibold">
+            Critères de recherche
+          </h5>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          (click)="closeCriteriaModal()"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <form [formGroup]="searchForm" (ngSubmit)="onSearchSubmit()">
+        <div class="modal-body p-4">
+          <div class="row g-3">
+            <div class="col-12">
+              <div class="form-floating">
+                <select
+                  formControlName="caisse"
+                  class="form-select"
+                  [class.is-valid]="isValidField('caisse') === 'is-valid'"
+                  [class.is-invalid]="isValidField('caisse') === 'is-invalid'"
+                  id="caisseSelect"
+                >
+                  <option value="">Toutes les caisses</option>
+                  @for (caisse of caissesUser; track caisse.caisse.idcaisse) {
+                    <option [value]="caisse.caisse.idcaisse">
+                      {{ caisse.caisse.codecaisse }} —
+                      {{ caisse.caisse.libelle }}
+                    </option>
+                  }
+                </select>
+                <label for="caisseSelect">Caisse</label>
+              </div>
             </div>
 
-            <form [formGroup]="searchForm">
-                <div class="modal-body p-3">
-                    <div class="row mt-4">
-                        <div class="col-lg-12 col-sm-12">
-                            <div class="mb-3">
-                                <label for="choices-payment-status">caisse </label>
-                                <div class="input-light">
-                                    <select formControlName="caisse" class="form-select form-select-sm bg-light border-0">
-                                        <option value="">choisir la caisse</option>
-                                        @for (item of caissesUser; track $index){
-                                            <option value="{{item.caisse.idcaisse}}">{{item.caisse.codecaisse}} -- {{item.caisse.libelle}}</option>
-                                        }
-                                    </select>
-                                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-6 col-sm-6">
-                            <div class="mb-3">
-                                <label for="date-field">date debut</label>
-                                <input type="date" formControlName="datedebut" class="form-control form-control-sm bg-light border-0" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date" required>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-6 col-sm-6">
-                            <div class="mb-3">
-                                <label for="date-field">date fin</label>
-                                <input type="date" formControlName="datefin" class="form-control form-control-sm bg-light border-0" id="date-field" data-provider="flatpickr" data-time="true" placeholder="Selectionner date" required>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <div class="hstack gap-2 justify-content-end">
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
-                            <button type="submit" class="btn btn-sm btn-success" (click)="onSubmit()" [disabled]="searchForm.invalid">
-                                rechercher
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </form>
-
-        </div>
-    </div>
-</div>
-<!--end modal -->
-
-<!-- Modal impression -->
-<div class="modal fade" id="showModal_imp" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-info-subtle">
-                <h5 class="modal-title" id="exampleModalLabel">Impression {{title}}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input
+                  type="date"
+                  formControlName="datedebut"
+                  class="form-control"
+                  [class.is-valid]="isValidField('datedebut') === 'is-valid'"
+                  [class.is-invalid]="
+                    isValidField('datedebut') === 'is-invalid'
+                  "
+                  id="dateDebut"
+                />
+                <label for="dateDebut">Date début</label>
+              </div>
             </div>
 
-            <form [formGroup]="searchForm">
-                <div class="modal-body p-3">
-                    <div class="row mt-4">
-                        <div class="col-lg-12 col-sm-12">
-                            <div class="mb-3">
-                                <label for="choices-payment-status">caisse </label>
-                                <div class="input-light">
-                                    <!-- initialise avec les valeurs existantes dans searchForm -->
-                                    <select formControlName="caisse" class="form-select form-select-sm bg-light border-0" [value]="searchForm.value.caisse">
-                                        <option value="">choisir la caisse</option>
-                                        @for (item of caissesUser; track $index){
-                                            <option value="{{item.caisse.idcaisse}}">{{item.caisse.codecaisse}} -- {{item.caisse.libelle}}</option>
-                                        }
-                                    </select>
-                                    <!-- <div class="invalid-feedback">{{ msgErros }}</div> -->
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-6 col-sm-6">
-                            <div class="mb-3">
-                                <label for="date-field">date debut</label>
-                                <input type="date" formControlName="datedebut" 
-                                class="form-control form-control-sm bg-light border-0" 
-                                id="date-field" data-provider="flatpickr" data-time="true" 
-                                placeholder="Selectionner date" required [value]="searchForm.value.datedebut">
-                            </div>
-                        </div>
-
-                        <div class="col-lg-6 col-sm-6">
-                            <div class="mb-3">
-                                <label for="date-field">date fin</label>
-                                <input type="date" formControlName="datefin" 
-                                class="form-control form-control-sm bg-light border-0" 
-                                id="date-field" data-provider="flatpickr" data-time="true" 
-                                placeholder="Selectionner date" required [value]="searchForm.value.datefin">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <div class="hstack gap-2 justify-content-end">
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Fermer</button>
-                            <button type="submit" class="btn btn-sm btn-success" (click)="printJournalCaisse()" [disabled]="searchForm.invalid">
-                                Imprimer
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </form>
-
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input
+                  type="date"
+                  formControlName="datefin"
+                  class="form-control"
+                  [class.is-valid]="isValidField('datefin') === 'is-valid'"
+                  [class.is-invalid]="isValidField('datefin') === 'is-invalid'"
+                  id="dateFin"
+                />
+                <label for="dateFin">Date fin</label>
+              </div>
+            </div>
+          </div>
         </div>
-    </div>
-</div>
-<!--end modal -->
 
+        <div class="modal-footer border-0 p-4">
+          <div class="d-flex gap-3 justify-content-end w-100">
+            <button
+              type="button"
+              class="btn-glass-cancel"
+              (click)="closeCriteriaModal()"
+            >
+              <i class="ri-close-line me-1"></i> Fermer
+            </button>
+            <button
+              type="submit"
+              class="btn-glass-submit"
+              [disabled]="searchForm.invalid || loading"
+            >
+              @if (loading) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              }
+              <i class="ri-search-line me-1"></i> Rechercher
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- MODAL: IMPRESSION -->
+<!-- ============================================ -->
+<div
+  class="modal-overlay"
+  [class.show]="showPrintModal"
+  (click)="closePrintModal()"
+>
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-content-glass">
+      <div class="modal-header modal-header-theme-blue">
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-printer-line text-white fs-5"></i>
+          </div>
+          <h5 class="modal-title text-white fw-semibold">
+            Impression du journal
+          </h5>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          (click)="closePrintModal()"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <form [formGroup]="printForm" (ngSubmit)="onPrintSubmit()">
+        <div class="modal-body p-4">
+          <div class="row g-3">
+            <div class="col-12">
+              <div class="form-floating">
+                <select
+                  formControlName="caisse"
+                  class="form-select"
+                  [class.is-valid]="
+                    isValidField('caisse', printForm) === 'is-valid'
+                  "
+                  [class.is-invalid]="
+                    isValidField('caisse', printForm) === 'is-invalid'
+                  "
+                  id="printCaisseSelect"
+                >
+                  <option value="">Toutes les caisses</option>
+                  @for (caisse of caissesUser; track caisse.caisse.idcaisse) {
+                    <option [value]="caisse.caisse.idcaisse">
+                      {{ caisse.caisse.codecaisse }} —
+                      {{ caisse.caisse.libelle }}
+                    </option>
+                  }
+                </select>
+                <label for="printCaisseSelect">Caisse</label>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input
+                  type="date"
+                  formControlName="datedebut"
+                  class="form-control"
+                  [class.is-valid]="
+                    isValidField('datedebut', printForm) === 'is-valid'
+                  "
+                  [class.is-invalid]="
+                    isValidField('datedebut', printForm) === 'is-invalid'
+                  "
+                  id="printDateDebut"
+                />
+                <label for="printDateDebut">Date début</label>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input
+                  type="date"
+                  formControlName="datefin"
+                  class="form-control"
+                  [class.is-valid]="
+                    isValidField('datefin', printForm) === 'is-valid'
+                  "
+                  [class.is-invalid]="
+                    isValidField('datefin', printForm) === 'is-invalid'
+                  "
+                  id="printDateFin"
+                />
+                <label for="printDateFin">Date fin</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer border-0 p-4">
+          <div class="d-flex gap-3 justify-content-end w-100">
+            <button
+              type="button"
+              class="btn-glass-cancel"
+              (click)="closePrintModal()"
+            >
+              <i class="ri-close-line me-1"></i> Fermer
+            </button>
+            <button
+              type="submit"
+              class="btn-glass-submit"
+              [disabled]="printForm.invalid || loading"
+            >
+              @if (loading) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              }
+              <i class="ri-printer-line me-1"></i> Imprimer
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- MODAL: CONFIRMATION DE RÉINITIALISATION -->
+<!-- ============================================ -->
+<div
+  class="modal-overlay"
+  [class.show]="showResetConfirmationModal"
+  (click)="showResetConfirmationModal = false"
+>
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-content-glass" style="max-width: 450px">
+      <!-- Header avec dégradé rouge -->
+      <div class="modal-header modal-header-theme-red">
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-alert-line text-white fs-5"></i>
+          </div>
+          <h5 class="modal-title text-white fw-semibold">
+            Réinitialiser l'interface
+          </h5>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          (click)="showResetConfirmationModal = false"
+          aria-label="Fermer"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <!-- Contenu avec alerte visuelle -->
+      <div class="modal-body p-4">
+        <!-- <div class="alert alert-glass-warning mb-4">
+          <i class="ri-information-line me-2"></i>
+          <strong>Attention !</strong> Cette action est irréversible.
+        </div> -->
+
+        <p class="mb-3 text-muted">Vous êtes sur le point de réinitialiser :</p>
+        <ul class="list-unstyled mb-0">
+          <li class="mb-3 d-flex align-items-center">
+            <div class="icon-bullet icon-warning me-3">
+              <i class="ri-filter-line"></i>
+            </div>
+            <span>Les filtres de recherche</span>
+          </li>
+          <li class="mb-3 d-flex align-items-center">
+            <div class="icon-bullet icon-warning me-3">
+              <i class="ri-calendar-line"></i>
+            </div>
+            <span>Les dates de filtres</span>
+          </li>
+          <li class="mb-3 d-flex align-items-center">
+            <div class="icon-bullet icon-warning me-3">
+              <i class="ri-file-list-line"></i>
+            </div>
+            <span>Les résultats affichés</span>
+          </li>
+          <li class="d-flex align-items-center">
+            <div class="icon-bullet icon-warning me-3">
+              <i class="ri-close-circle-line"></i>
+            </div>
+            <span>Les modales ouvertes</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Footer avec boutons glass -->
+      <div class="modal-footer border-0 p-4">
+        <button
+          type="button"
+          class="btn-glass-cancel"
+          (click)="showResetConfirmationModal = false"
+        >
+          <i class="ri-close-line me-1"></i> Annuler
+        </button>
+        <button type="button" class="btn-glass-danger" (click)="confirmReset()">
+          <i class="ri-restart-line me-1"></i> Réinitialiser tout
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

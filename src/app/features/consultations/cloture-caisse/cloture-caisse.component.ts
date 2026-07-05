@@ -1,5 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { AffectationCaisseModel } from '../../caisse_journal/models/affectationcaisse.model';
 import { ConsultationOpService } from '../services/operations.service';
 import { AffectationCaisseService } from '../../caisse_journal/services/affectationcaisse.service';
@@ -8,197 +14,249 @@ import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.c
 import { CommonModule } from '@angular/common';
 import { ExcelService } from '../../../_core/services/exportExcel.service';
 
+interface CaisseInfo {
+  idcaisse: string;
+  code: string;
+  libelle: string;
+}
+
+interface Soldes {
+  ouverture: number;
+  fermeture: number;
+  physique: number;
+  ecart: number;
+}
+
+interface Validation {
+  date: string;
+}
+
+interface ClotureItem {
+  date: string;
+  caisse: CaisseInfo;
+  devise: string;
+  soldes: Soldes;
+  statut: string;
+  validation: Validation;
+}
+
+interface User {
+  idutilisateur: string;
+}
+
 @Component({
   selector: 'app-cloture-caisse',
   imports: [ReactiveFormsModule, CommonModule, FormsModule],
   templateUrl: './cloture-caisse.component.html',
-  styleUrl: './cloture-caisse.component.css'
+  styleUrls: ['./cloture-caisse.component.css'],
 })
 export class ClotureCaisseComponent implements OnInit {
-  title = "Etat cloture caisse";
-  op: any = [];
-  fb: FormBuilder = new FormBuilder();
+  title = 'État clôture caisse';
+  op: ClotureItem[] = [];
+  loading = false;
+  msgErros = '';
 
-  //Formulaire de recherche
-  searchForm : FormGroup = this.fb.group({});
+  // Modal state
+  showCriteriaModal = false;
 
-  msgErros : string = "";
-  loading: Boolean = false;
+  // Form
+  searchForm: FormGroup;
 
-  //Liste de caisse utilisateur
+  // Data
   caissesUser: AffectationCaisseModel[] = [];
 
-  //Message suppression
-  msgSup: string = "";
-  titleMsg: string ="";
+  // Totals
+  totalFermeture = 0;
+  totalPhysique = 0;
+  totalEcart = 0;
 
-  totalFermeture : any = 0;
-  totalPhysique : any = 0;
-  totalEcart : any = 0;
+  constructor(
+    private fb: FormBuilder,
+    private service: ConsultationOpService,
+    private caisseuserservice: AffectationCaisseService,
+    private toastr: ToastrService,
+    private excelService: ExcelService,
+  ) {
+    this.searchForm = this.createSearchForm();
+  }
 
-  tableau_cloture = [
-    { header: 'Journee', field: 'date' },
-    { header: 'Caisse', field: 'caisse.libelle' },
-    { header: 'Devise', field: 'devise' },
-    { header: 'Solde ouverture', field: 'soldes.ouverture' },
-    { header: 'Solde fermeture', field: 'soldes.fermeture' },
-    { header: 'Montant physique', field: 'numsoldes.physique' },
-    { header: 'Ecart', field: 'soldes.ecart' },
-    { header: 'Statut', field: 'statut' },
-    { header: 'Date cloture', field: 'validation.date' }
-  ];
-
-  constructor(private service: ConsultationOpService, private caisseuserservice: AffectationCaisseService
-      , private toastr : ToastrService, private excelService : ExcelService
-    ){}
-
-  
   ngOnInit(): void {
-    //Initialisation du formulaire
-    this.initSearchForm();
-
-    //Liste des caisses de user
     this.getCaisseUser();
   }
 
-  //Initialiser le formulaire de recherche
-  initSearchForm() {
-    this.searchForm = this.fb.group({
+  // ============================================
+  // FORM MANAGEMENT
+  // ============================================
+  private createSearchForm(): FormGroup {
+    return this.fb.group({
       idcaisse: ['', Validators.required],
       datedebut: ['', Validators.required],
       datefin: ['', Validators.required],
     });
   }
 
-  closeModal(modal: string){
-    const modalEl = document.getElementById(modal);
-    modalEl?.classList.remove('show');
-    modalEl?.setAttribute('aria-hidden', 'true');
-    (document.querySelector('.modal-backdrop') as HTMLElement)?.remove();
+  // ============================================
+  // MODAL MANAGEMENT
+  // ============================================
+  openCriteriaModal(): void {
+    this.showCriteriaModal = true;
   }
 
-  //Soumission du formulaire
-  onSubmit(){
-    /** Check formulaire */
+  closeCriteriaModal(): void {
+    this.showCriteriaModal = false;
+  }
+
+  // ============================================
+  // DATA LOADING
+  // ============================================
+  getCaisseUser(): void {
+    this.loading = true;
+    this.caisseuserservice
+      .getCaisseByUser(this.user.idutilisateur ?? null)
+      .subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.caissesUser = res.data || [];
+          }
+          this.loading = false;
+        },
+        error: () => {
+          this.loading = false;
+          this.toastr.error('Erreur chargement caisses utilisateur');
+        },
+      });
+  }
+
+  search(data: any): void {
+    this.loading = true;
+    this.service.getEtatcloture(data).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.op = res.data.data || [];
+          console.log('Etat clôture caisse:', this.op);
+          this.calculateTotals();
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        this.loading = false;
+        this.toastr.error('Erreur', err);
+      },
+    });
+  }
+
+  // ============================================
+  // TOTAUX CALCULATION
+  // ============================================
+  calculateTotals(): void {
+    this.totalFermeture = this.op.reduce(
+      (sum: number, item: ClotureItem) => sum + (item.soldes.fermeture || 0),
+      0,
+    );
+
+    this.totalPhysique = this.op.reduce(
+      (sum: number, item: ClotureItem) => sum + (item.soldes.physique || 0),
+      0,
+    );
+
+    this.totalEcart = this.op.reduce(
+      (sum: number, item: ClotureItem) =>
+        sum + ((item.soldes.physique || 0) - (item.soldes.fermeture || 0)),
+      0,
+    );
+  }
+
+  // ============================================
+  // SUBMIT
+  // ============================================
+  onSubmit(): void {
     const controls = this.searchForm.controls;
     if (this.searchForm.invalid) {
-      Object.keys(controls).forEach(controlName => controls[controlName].markAsTouched());
+      Object.keys(controls).forEach((controlName) =>
+        controls[controlName].markAsTouched(),
+      );
       this.msgErros = MESSAGE_CHAMPS_OBLIGATOIRE;
-      //this.toastr.warning(this.msgErros);
       return;
     }
 
-    /** 2. prepare data */
     const formValue = this.searchForm.value;
-    this.closeModal('showModal');
+    this.closeCriteriaModal();
     this.search(formValue);
   }
 
-  getCaisseUser(){
-    this.loading = true;
-    this.caisseuserservice.getCaisseByUser(this.user.idutilisateur ?? null).subscribe({
-      next : (res) => {
-        if(res.success){
-          this.caissesUser = res.data || [];
-          this.loading = false;
-        }
+  // ============================================
+  // EXPORT
+  // ============================================
+  onExportExcel(): void {
+    if (!this.hasData()) {
+      this.toastr.warning('Aucune donnée à exporter');
+      return;
+    }
+    this.excelService.exportToExcel(
+      this.op,
+      this.getExcelColumns(),
+      'etat_cloture',
+    );
+  }
+
+  onPrintPDF(): void {
+    if (!this.hasData()) {
+      this.toastr.warning('Aucune donnée à imprimer');
+      return;
+    }
+    this.printJournalCaisse();
+  }
+
+  printJournalCaisse(): void {
+    const donnees = {
+      idcaisse: this.searchForm.get('idcaisse')?.value || null,
+      datedebut: this.searchForm.get('datedebut')?.value || null,
+      datefin: this.searchForm.get('datefin')?.value || null,
+    };
+
+    this.service.printEtatcloture(donnees).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
       },
-      error: () => {
-        this.loading = false;
-        this.toastr.error('Erreur chargement caisses utilisateur');
-      }
+      error: (err) => {
+        console.error(err);
+        this.toastr.error("Erreur d'impression de l'état de clôture");
+      },
     });
   }
 
-  search(data : any){
-    this.service.getEtatcloture(data).subscribe({
-      next : (res) => {
-        if(res.success){
-          this.op = res.data.data;
-          this.calculateTotals();
-        }
-      },
-      error : (err) => {
-        this.loading = false;
-        this.toastr.error('Erreur ', err);
-      }
-    });
-  }
-
-  calculateTotals() {
-    const data = this.op;
-
-    this.totalFermeture = data.reduce(
-      (sum: any, l: { soldes: { fermeture: any; }; }) => sum + (l.soldes.fermeture || 0),
-      0
-    );
-
-    this.totalPhysique = data.reduce(
-      (sum: any, l: { soldes: { physique: any; }; }) => sum + (l.soldes.physique || 0),
-      0
-    );
-
-    this.totalEcart = data.reduce(
-      (sum: number, l: { soldes: { physique: any; fermeture: any; }; }) =>
-        sum + ((l.soldes.physique || 0) - (l.soldes.fermeture || 0)),
-      0
-    );
-  }
-
-  get user(){
+  // ============================================
+  // UTILITY METHODS
+  // ============================================
+  get user(): User {
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
   formatCFA(montant: number | null | undefined): string {
+    if (montant == null) return '0';
     return new Intl.NumberFormat('fr-FR', {
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(montant ?? 0);
+      maximumFractionDigits: 0,
+    }).format(montant);
   }
 
   hasData(): boolean {
     return Array.isArray(this.op) && this.op.length > 0;
   }
 
-  onExportExcel() {
-    if (!this.hasData()) {
-      this.toastr.warning('Aucune donnée à exporter');
-      return;
-    }
-
-    //export
-    this.excelService.exportToExcel(this.op, this.tableau_cloture, 'etatCloture');
+  private getExcelColumns(): any[] {
+    return [
+      { header: 'Date', field: 'date' },
+      { header: 'Caisse', field: 'caisse.libelle' },
+      { header: 'Code Caisse', field: 'caisse.codecaisse' },
+      { header: 'Devise', field: 'devise' },
+      { header: 'Solde Ouverture', field: 'soldes.ouverture' },
+      { header: 'Solde Fermeture', field: 'soldes.fermeture' },
+      { header: 'Montant Physique', field: 'soldes.physique' },
+      { header: 'Écart', field: 'soldes.ecart' },
+      { header: 'Statut', field: 'statut' },
+      { header: 'Date clôture', field: 'validation.date' },
+    ];
   }
-
-  onPrintPDF() {
-    if (!this.hasData()) {
-      this.toastr.warning('Aucune donnée à imprimer');
-      return;
-    }
-
-    //impression pdf
-    //this.generatePDF();
-  }
-
-  // Impression du journal de caisse
-  printJournalCaisse(): void {
-    // Préparer les données pour l'impression
-    const donnees = {
-      idcaisse: this.searchForm.get('idcaisse')?.value || null,
-      datedebut: this.searchForm.get('datedebut')?.value || null,
-      datefin: this.searchForm.get('datefin')?.value || null
-    };
-
-    this.service.printEtatcloture(donnees).subscribe({
-       next: (blob: Blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const win = window.open(url, '_blank');
-      },
-      error: (err) => {
-        console.error(err);
-        this.toastr.error("Erreur d'impression du journal de caisse");
-      }
-    });
-  }
-
 }

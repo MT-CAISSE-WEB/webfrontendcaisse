@@ -763,4 +763,25 @@
   .piece-item {
     padding: 8px !important;
   }
+
+  /* .ligne-error {
+    background-color: #fff5f5;
+    border: 2px solid #ef4444;
+    border-radius: 8px;
+  } */
+
+  /* Surbrillance de la ligne en erreur */
+  .ligne-error {
+    background-color: #fff5f5 !important;
+    border-left: 4px solid #ef4444;
+    outline: 1px solid #fca5a5;
+    border-radius: 6px;
+  }
+
+  /* Surbrillance du champ input */
+  .is-invalid {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.25);
+  }
+
 }

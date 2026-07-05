@@ -1,8 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { caisseModel } from '../../../features/caisse_journal/models/caisse.model';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CaisseService } from '../../../features/caisse_journal/services/caisse.service';
 import { caissePeriodeModel } from '../../../features/caisse_journal/models/periodecaisse.model';
-import { forkJoin, map, Observable } from 'rxjs';
 import { CaissePeriodeService } from '../../../features/caisse_journal/services/caisseperiode.service';
 import {
   FormArray,
@@ -10,19 +8,19 @@ import {
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
-  Validators,
 } from '@angular/forms';
+import { MenuService } from '../services/menu.service';
 import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.contantes';
 import { AffectationCaisseModel } from '../../../features/caisse_journal/models/affectationcaisse.model';
 import { AffectationCaisseService } from '../../../features/caisse_journal/services/affectationcaisse.service';
 import { ToastrService } from 'ngx-toastr';
 import { APP_ROOT_PARAMETREPAGE_PARAMETRE } from '../../../_core/routes/frontend.root';
-import { Route, Router, RouterLink, RouterModule } from '@angular/router';
-import { OperationService } from '../../../features/operations/service/operation.service';
+import { Router, RouterLink, RouterModule } from '@angular/router';
 import { LoaderService } from '../../../_core/utils/loaders.service';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { BilletageModalComponent } from '../../../features/operations/billetage-modal/billetage-modal.component';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-layout-header',
@@ -37,7 +35,7 @@ import { BilletageModalComponent } from '../../../features/operations/billetage-
   templateUrl: './layout-header.component.html',
   styleUrl: './layout-header.component.css',
 })
-export class LayoutHeaderComponent implements OnInit {
+export class LayoutHeaderComponent implements OnInit, OnDestroy {
   caisserecent: caissePeriodeModel = new caissePeriodeModel();
   caisseperiodes: any[] = [];
   fb: FormBuilder = new FormBuilder();
@@ -46,6 +44,8 @@ export class LayoutHeaderComponent implements OnInit {
   error: string = '';
   loading: boolean = false;
   caisseSolde: any;
+  isMenuOpen = false;
+  private menuSubscription!: Subscription;
 
   //Liste des routes
   root_parametre = APP_ROOT_PARAMETREPAGE_PARAMETRE;
@@ -68,6 +68,7 @@ export class LayoutHeaderComponent implements OnInit {
     private caisseStatusService: CaissePeriodeService,
     private caisseService: CaisseService,
     private toastr: ToastrService,
+    private menuService: MenuService,
   ) {}
 
   ngOnInit(): void {
@@ -77,6 +78,21 @@ export class LayoutHeaderComponent implements OnInit {
     });
 
     this.getCaisseUser();
+
+    this.menuSubscription = this.menuService.isMenuOpen$.subscribe((isOpen) => {
+      this.isMenuOpen = isOpen;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.menuSubscription.unsubscribe();
+  }
+
+  /**
+   * Bascule le menu gauche
+   */
+  toggleMenu(): void {
+    this.menuService.toggleMenu();
   }
 
   get caisseStatus() {

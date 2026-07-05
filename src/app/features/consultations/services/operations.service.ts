@@ -1,94 +1,118 @@
-import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
-import { QueryResultModel } from "../../../_core/models/query-result.model";
-import { URL_LOCAL } from "../../../_core/routes/backend.root";
-import { Injectable } from "@angular/core";
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { QueryResultModel } from '../../../_core/models/query-result.model';
+import { URL_LOCAL } from '../../../_core/routes/backend.root';
+import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ConsultationOpService {
-    url : string = 'consultation';
+  url: string = 'consultation';
 
-    constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {}
 
-    /**
+  /**
    * get All
    * @param params
    */
-    getJournalpaiement(_data: any): Observable<QueryResultModel> {
-        return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/journalpaiement', _data);
-    }
+  getJournalpaiement(_data: any): Observable<QueryResultModel> {
+    return this.http.post<QueryResultModel>(
+      URL_LOCAL.baseUrl + this.url + '/journalpaiement',
+      _data,
+    );
+  }
 
-    /**
+  /**
    * get demande detail
    * @param params
    */
-    getdemandeDetail(_data: any): Observable<QueryResultModel> {
-        return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/demande_detail', _data);
-    }
+  getdemandeDetail(_data: any): Observable<QueryResultModel> {
+    console.log('🔍 Valeurs du formulaire dans le service:', _data);
+    return this.http.post<QueryResultModel>(
+      URL_LOCAL.baseUrl + this.url + '/demande_detail',
+      _data,
+    );
+  }
 
-    // Autor : Richard Toulou
-    printJournalCaisse(donnees: any): Observable<Blob> {
-        return this.http.post(
-            `${URL_LOCAL.baseUrl}${this.url}/journalcaisse/`,
-            donnees,
-            { responseType: 'blob' }
-        );
-    }
+  // Autor : Richard Toulou
+  printJournalCaisse(donnees: any): Observable<Blob> {
+    return this.http.post(
+      `${URL_LOCAL.baseUrl}${this.url}/journalcaisse/`,
+      donnees,
+      { responseType: 'blob' },
+    );
+  }
 
-    /**
+  /**
    * get operation detail
    * @param params
    */
-    getDetailoperation(_data: any): Observable<QueryResultModel> {
-        return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/detailoperation', _data);
-    }
+  getDetailoperation(_data: any): Observable<QueryResultModel> {
+    return this.http.post<QueryResultModel>(
+      URL_LOCAL.baseUrl + this.url + '/detailoperation',
+      _data,
+    );
+  }
 
-    /**
+  /**
    * get Last Operation
    * @param params
    */
-    getLastOperation(_data: any): Observable<QueryResultModel> {
-        return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/lastoperation', _data);
-    }
+  getLastOperation(_data: any): Observable<QueryResultModel> {
+    return this.http.post<QueryResultModel>(
+      URL_LOCAL.baseUrl + this.url + '/lastoperation',
+      _data,
+    );
+  }
 
-    /**
+  /**
    * get Historique
    * @param params
    */
-    getHistoryOperation(_data: any): Observable<QueryResultModel> {
-        return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/historyoperation', _data);
-    }
+  getHistoryOperation(_data: any): Observable<QueryResultModel> {
+    return this.http.post<QueryResultModel>(
+      URL_LOCAL.baseUrl + this.url + '/historyoperation',
+      _data,
+    );
+  }
 
-    /**
+  /**
    * get paiement
    * @param params
    */
-    getAllpayment(params: any): Observable<QueryResultModel> {
-        return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/allpayment', {params});
-    }
+  getAllpayment(params: any): Observable<QueryResultModel> {
+    return this.http.get<QueryResultModel>(
+      URL_LOCAL.baseUrl + this.url + '/allpayment',
+      { params },
+    );
+  }
 
-     /**
+  /**
    * get All
    * @param params
    */
-    getEtatcloture(_data: any): Observable<QueryResultModel> {
-        return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + '/cloture/caisse', _data);
-    }
+  getEtatcloture(_data: any): Observable<QueryResultModel> {
+    return this.http.post<QueryResultModel>(
+      URL_LOCAL.baseUrl + this.url + '/cloture/caisse',
+      _data,
+    );
+  }
 
-    printEtatcloture(donnees: any): Observable<Blob> {
-        return this.http.post(
-            `${URL_LOCAL.baseUrl}${this.url}/etat/cloture/pdf`,
-            donnees,
-            { responseType: 'blob' }
-        );
-    }
+  printEtatcloture(donnees: any): Observable<Blob> {
+    return this.http.post(
+      `${URL_LOCAL.baseUrl}${this.url}/etat/cloture/pdf`,
+      donnees,
+      { responseType: 'blob' },
+    );
+  }
 
-    /**
-     * Solde de caisse
-     */
-    get_soldeAllCaisse(){
-        return this.http.get<any>(URL_LOCAL.baseUrl + this.url + "/solde/allcaisse");
-    }
+  /**
+   * Solde de caisse
+   */
+  get_soldeAllCaisse() {
+    return this.http.get<any>(
+      URL_LOCAL.baseUrl + this.url + '/solde/allcaisse',
+    );
+  }
 }

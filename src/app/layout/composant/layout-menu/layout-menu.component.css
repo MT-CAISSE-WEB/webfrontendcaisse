@@ -2,14 +2,13 @@
    SCROLLBAR - CORRIGÉE
 ============================== */
 #scrollbar {
-  height: calc(100vh - 65px); /* Réduit de 70px à 65px */
+  height: calc(100vh - 65px);
   overflow-y: auto !important;
   overflow-x: hidden;
-  padding: 0 8px; /* Réduit de 12px à 8px */
+  padding: 0 8px;
   margin-right: 2px;
 }
 
-/* Force le scroll sur le conteneur parent si nécessaire */
 .app-menu.navbar-menu {
   overflow-y: hidden !important;
   display: flex;
@@ -20,20 +19,20 @@
    TYPOGRAPHIE
 ============================== */
 .app-menu .navbar-nav .nav-link {
-  font-size: 13px; /* Réduit de 14px à 13px */
+  font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.2px; /* Réduit de 0.3px à 0.2px */
+  letter-spacing: 0.2px;
 }
 
 .app-menu .menu-title {
-  font-size: 11px; /* Réduit de 12px à 11px */
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.8px; /* Réduit de 1px à 0.8px */
+  letter-spacing: 0.8px;
 }
 
 .app-menu .nav-sm .nav-link {
-  font-size: 12px; /* Réduit de 13px à 12px */
+  font-size: 12px;
 }
 
 /* ==============================
@@ -41,36 +40,24 @@
    + GLASSMORPHISM
 ============================== */
 .app-menu.navbar-menu {
-  /* Dégradé demandé */
   background: linear-gradient(135deg, #3b82f6 0%, #405189 100%);
-
-  /* Effet glassmorphism */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-
-  /* Bordure subtile */
   border-right: 1px solid rgba(255, 255, 255, 0.1);
-
-  /* Ombre pour profondeur */
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
-
-  /* Positionnement */
   position: fixed;
   top: 0;
   left: 0;
   height: 100vh;
-  width: 240px; /* Réduit de 260px à 240px */
+  width: 240px;
   z-index: 1000;
-
-  transition: all 0.3s ease;
-
-  /* Important pour le scroll */
+  transition: transform 0.3s ease;
   overflow-y: hidden;
   display: flex;
   flex-direction: column;
 }
 
-/* Effet de brillance subtil sur le bord */
+/* Effet de brillance subtil - conservé car léger */
 .app-menu.navbar-menu::after {
   content: "";
   position: absolute;
@@ -99,21 +86,19 @@
 
 .app-menu .nav-item i {
   color: rgba(255, 255, 255, 0.8);
-  font-size: 1.1rem; /* Réduit de 1.2rem à 1.1rem */
-  margin-right: 10px; /* Réduit de 12px à 10px */
-  transition: all 0.2s ease;
+  font-size: 1.1rem;
+  margin-right: 10px;
 }
 
 /* Hover - Plus visible */
 .app-menu .nav-link:hover {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.12);
-  border-radius: 6px; /* Réduit de 8px à 6px */
+  border-radius: 6px;
 }
 
 .app-menu .nav-link:hover i {
   color: #ffffff;
-  transform: translateX(2px);
 }
 
 /* ==============================
@@ -128,11 +113,10 @@
     rgba(255, 255, 255, 0.08)
   );
   color: #ffffff !important;
-  border-radius: 6px; /* Réduit de 8px à 6px */
+  border-radius: 6px;
   border-left: 3px solid rgba(255, 255, 255, 0.6);
 }
 
-/* Icône active */
 .app-menu .nav-link.active i {
   color: #ffffff !important;
 }
@@ -141,16 +125,16 @@
    SOUS-MENUS - VISIBLES
 ============================== */
 .app-menu .menu-dropdown {
-  margin-left: 12px; /* Réduit de 16px à 12px */
-  padding-left: 10px; /* Réduit de 12px à 10px */
+  margin-left: 12px;
+  padding-left: 10px;
   border-left: 1px solid rgba(255, 255, 255, 0.15);
-  margin-top: 3px; /* Réduit de 4px à 3px */
-  margin-bottom: 3px; /* Réduit de 4px à 3px */
+  margin-top: 3px;
+  margin-bottom: 3px;
 }
 
 .app-menu .nav-sm .nav-link {
   color: rgba(255, 255, 255, 0.75);
-  padding: 6px 10px 6px 28px; /* Réduit de 8px 12px 8px 32px */
+  padding: 6px 10px 6px 28px;
   position: relative;
   border-radius: 6px;
   margin: 2px 0;
@@ -160,20 +144,13 @@
 .app-menu .nav-sm .nav-link::before {
   content: "";
   position: absolute;
-  left: 10px; /* Réduit de 12px à 10px */
+  left: 10px;
   top: 50%;
   transform: translateY(-50%);
-  width: 4px; /* Réduit de 5px à 4px */
-  height: 4px; /* Réduit de 5px à 4px */
+  width: 4px;
+  height: 4px;
   background: rgba(255, 255, 255, 0.5);
   border-radius: 50%;
-  transition: all 0.2s ease;
-}
-
-.app-menu .nav-sm .nav-link:hover::before {
-  background: #ffffff;
-  width: 6px; /* Réduit de 7px à 6px */
-  height: 6px; /* Réduit de 7px à 6px */
 }
 
 .app-menu .nav-sm .nav-link:hover {
@@ -197,35 +174,35 @@
 ============================== */
 .app-menu .menu-title {
   position: relative;
-  padding: 14px 10px 6px 10px; /* Réduit de 20px 12px 8px 12px */
-  margin-top: 6px; /* Réduit de 8px à 6px */
+  padding: 14px 10px 6px 10px;
+  margin-top: 6px;
   color: rgba(255, 255, 255, 0.6);
-  letter-spacing: 1.2px; /* Réduit de 1.5px à 1.2px */
+  letter-spacing: 1.2px;
 }
 
 /* Barre décorative avant le titre */
 .app-menu .menu-title::before {
   content: "";
   position: absolute;
-  left: 10px; /* Réduit de 12px à 10px */
+  left: 10px;
   top: 50%;
   transform: translateY(-50%);
   width: 3px;
-  height: 12px; /* Réduit de 14px à 12px */
+  height: 12px;
   background: rgba(255, 255, 255, 0.4);
   border-radius: 2px;
 }
 
 .app-menu .menu-title i {
-  margin-right: 6px; /* Réduit de 8px à 6px */
-  font-size: 11px; /* Réduit de 12px à 11px */
+  margin-right: 6px;
+  font-size: 11px;
 }
 
 /* ==============================
    SCROLLBAR - STYLISÉE
 ============================== */
 #scrollbar::-webkit-scrollbar {
-  width: 3px; /* Réduit de 4px à 3px */
+  width: 3px;
 }
 
 #scrollbar::-webkit-scrollbar-track {
@@ -246,14 +223,14 @@
    ZONE DU LOGO
 ============================== */
 .navbar-brand-box {
-  padding: 14px 12px; /* Réduit de 20px 16px à 14px 12px */
+  padding: 14px 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 6px; /* Réduit de 8px à 6px */
+  margin-bottom: 6px;
   flex-shrink: 0;
 }
 
 .logo {
-  transition: all 0.3s ease;
+  transition: opacity 0.2s ease;
 }
 
 .logo:hover {
@@ -270,14 +247,12 @@
 .btn-vertical-sm-hover {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px; /* Réduit de 8px à 6px */
-  transition: all 0.2s ease;
+  border-radius: 6px;
   cursor: pointer;
 }
 
 .btn-vertical-sm-hover:hover {
   background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.05);
 }
 
 /* ==============================
@@ -286,7 +261,6 @@
 .vertical-overlay {
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  transition: all 0.3s ease;
   position: fixed;
   top: 0;
   left: 0;
@@ -304,64 +278,37 @@
 }
 
 /* ==============================
-   ANIMATION D'APPARITION LÉGÈRE
-============================== */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.nav-item {
-  animation: fadeIn 0.2s ease forwards;
-}
-
-/* ==============================
-   EFFET SHIMMER SUR ÉLÉMENT ACTIF
-============================== */
-.app-menu .nav-link.active {
-  position: relative;
-  overflow: hidden;
-}
-
-.app-menu .nav-link.active::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
-  animation: shimmer 2.5s infinite;
-  pointer-events: none;
-}
-
-@keyframes shimmer {
-  0% {
-    left: -100%;
-  }
-  20%,
-  100% {
-    left: 100%;
-  }
-}
-
-/* ==============================
    RESPONSIVE
 ============================== */
 @media (max-width: 768px) {
   .app-menu.navbar-menu {
     transform: translateX(-100%);
     box-shadow: none;
-    width: 240px !important; /* Largeur réduite sur mobile */
+    width: 240px !important;
+  }
+
+  .app-menu.navbar-menu.menu-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* ============================================
+   RESPONSIVE MENU - GESTION MOBILE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .app-menu.navbar-menu {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: none;
+    width: 260px;
+    z-index: 1001;
+    position: fixed;
+    top: 65px;
+    left: 0;
+    height: calc(100vh - 65px);
+    border-radius: 0 0 12px 12px;
   }
 
   .app-menu.navbar-menu.menu-open {
@@ -369,7 +316,83 @@
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
   }
 
-  .nav-item {
-    animation: none;
+  .vertical-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    cursor: pointer;
+  }
+
+  .vertical-overlay.show {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+@media (min-width: 769px) {
+  .app-menu.navbar-menu {
+    transform: translateX(0) !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    border-radius: 0;
+    width: 240px;
+  }
+
+  .vertical-overlay {
+    display: none !important;
+  }
+}
+
+/* ============================================
+   CORRECTION POUR LE MENU MOBILE
+   ============================================ */
+@media (max-width: 768px) {
+  /* Assurez-vous que le menu est caché par défaut */
+  .app-menu.navbar-menu {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    position: fixed;
+    top: 65px; /* Hauteur du header */
+    left: 0;
+    width: 260px;
+    height: calc(100vh - 65px);
+    z-index: 1001;
+    border-radius: 0 0 12px 12px;
+  }
+
+  /* Affichez le menu quand isMenuOpen = true */
+  .app-menu.navbar-menu.menu-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Overlay pour fermer le menu en cliquant à l'extérieur */
+  .vertical-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+  }
+
+  .vertical-overlay.show {
+    opacity: 1;
+    visibility: visible;
   }
 }

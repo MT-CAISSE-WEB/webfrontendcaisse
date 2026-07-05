@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import {
   APP_ROOT,
   APP_ROOT_DONNEE_BASE_DEVISE,
@@ -40,6 +40,8 @@ import {
 
 import { RouterLink, RouterModule, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { MenuService } from '../services/menu.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-layout-menu',
@@ -47,7 +49,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './layout-menu.component.html',
   styleUrl: './layout-menu.component.css',
 })
-export class LayoutMenuComponent {
+export class LayoutMenuComponent implements OnInit, OnDestroy {
   root_banque = APP_ROOT_BANQUE_DONNEE_BASE;
   root_taux = APP_ROOT_TAUX_DONNEE_BASE;
   root_tiers = APP_ROOT_TIERS_DONNEE_BASE;
@@ -91,6 +93,30 @@ export class LayoutMenuComponent {
   comptable: boolean = false;
   superadmin: boolean = false;
   demandeur: boolean = false;
+
+  // responsive
+  isMenuOpen = false;
+  private menuSubscription!: Subscription;
+
+  constructor(private menuService: MenuService) {}
+
+  ngOnInit(): void {
+    // Écoute les changements d'état du menu
+    this.menuSubscription = this.menuService.isMenuOpen$.subscribe((isOpen) => {
+      this.isMenuOpen = isOpen;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.menuSubscription.unsubscribe();
+  }
+
+  /**
+   * Ferme le menu
+   */
+  closeMenu(): void {
+    this.menuService.setMenuState(false);
+  }
 
   isuperadmin(): boolean {
     if (typeof window !== 'undefined') {
