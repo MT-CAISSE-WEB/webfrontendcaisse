@@ -9,35 +9,25 @@ import { OperationService } from '../../../../features/operations/service/operat
 import { AffectationCaisseModel } from '../../../../features/caisse_journal/models/affectationcaisse.model';
 import { AffectationCaisseService } from '../../../../features/caisse_journal/services/affectationcaisse.service';
 import { ConsultationOpService } from '../../../../features/consultations/services/operations.service';
-import {
-  APP_ROOT_DMD_DECAISSEMENT,
-  APP_ROOT_OPERATION_GENERAL,
-} from '../../../../_core/routes/frontend.root';
+import { APP_ROOT_DMD_DECAISSEMENT, APP_ROOT_OPERATION_GENERAL } from '../../../../_core/routes/frontend.root';
 import { DemandeService } from '../../../../features/demande/services/demande.service';
 import { EnteteDemande } from '../../../../features/demande/models/entete-demande.model';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { OperationModalComponent } from '../../../../_core/modal/operation-modal/operation-modal.component';
-import { OperationPJService } from '../../../../features/PJ/service/operationpj.service';
+
+
 
 @Component({
   selector: 'app-interface-caissier',
   standalone: true,
-  imports: [
-    RouterLink,
-    RouterModule,
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-  ],
+  imports: [RouterLink, RouterModule, CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './interface-caissier.component.html',
-  styleUrl: './interface-caissier.component.css',
+  styleUrl: './interface-caissier.component.css'
 })
-export class InterfaceCaissierComponent implements OnInit {
+export class InterfaceCaissierComponent implements OnInit{
   root_operation = APP_ROOT_OPERATION_GENERAL;
   root_demande_decaissement = APP_ROOT_DMD_DECAISSEMENT;
-  caisseSolde: any;
-  msgErros: string = '';
-  error: string = '';
+  caisseSolde : any;
+  msgErros: string = "";
+  error: string = "";
   loading: boolean = false;
   loadingDmd: boolean = false;
 
@@ -74,9 +64,9 @@ export class InterfaceCaissierComponent implements OnInit {
   caissesDuCaissier: any[] = [];
 
   opLast: any = [];
-  opHistory: any = [];
-  caisseperiodes: any[] = [];
-  params: any = {};
+  opHistory : any = [];
+  caisseperiodes : any[] = [];
+  params : any = {};
 
   // Définissez des propriétés de pagination
   currentPage: number = 1;
@@ -89,22 +79,19 @@ export class InterfaceCaissierComponent implements OnInit {
   // tout sélectionné/désélectionné
   allSelected = false;
 
-  objectsSelected: EnteteDemande[] = [];
-  selectedItems: any[] = [];
+  objectsSelected : EnteteDemande[] = [];
+  selectedItems : any[] = [];
 
-  caissier: boolean = false;
+  caissier : boolean = false;
 
-  constructor(
-    private modalService: NgbModal,
-    private caisseservice: CaisseService,
-    private caisseStatusService: CaissePeriodeService,
-    private caisseuserservice: AffectationCaisseService,
-    private toastr: ToastrService,
-    private service: ConsultationOpService,
-    private demandeService: DemandeService,
-    private operationservice: OperationService,
-    private pjService: OperationPJService,
-  ) {}
+  constructor(private caisseservice: CaisseService,private caisseStatusService: CaissePeriodeService,
+      private caisseuserservice: AffectationCaisseService
+      , private toastr : ToastrService
+      , private service: ConsultationOpService
+      , private demandeService: DemandeService,
+      
+    ){}
+
 
   ngOnInit(): void {
     //Charger les périodes caisses
@@ -115,195 +102,113 @@ export class InterfaceCaissierComponent implements OnInit {
     this.loadAllDemandes();
   }
 
-  // ouvrir le modal avec l'ID de la demande
-  openOperationModal(iddemande: string) {
-    const modalRef = this.modalService.open(OperationModalComponent, {
-      size: 'xl',
-      backdrop: 'static',
-    });
-    modalRef.componentInstance.iddemande = iddemande;
-    modalRef.componentInstance.title = 'Décaissement de demande';
-
-    modalRef.result
-      .then((result) => {
-        if (result) {
-          // ✅ APPELEZ LA SAUVEGARDE
-          this.createOperation(result.operation, result.files);
-        }
-      })
-      .catch(() => {
-        // Modal fermé sans sauvegarde
-      });
-  }
-
-  // ➕ Ajoutez cette méthode pour sauvegarder l'opération
-  createOperation(operation: any, files?: File[]) {
-    this.loading = true;
-
-    this.operationservice.create(operation).subscribe({
-      next: (res) => {
-        if (res.success) {
-          // Upload des fichiers si nécessaire
-          if (files && files.length > 0 && res.data?.idoperation) {
-            this.uploadFiles(res.data.idoperation, files);
-          } else {
-            this.toastr.success('✅ Opération enregistrée avec succès');
-            this.loadAllDemandes();
-            this.loading = false;
-          }
-        } else {
-          this.toastr.error(
-            res.message || "❌ Erreur lors de l'enregistrement",
-          );
-          this.loading = false;
-        }
-      },
-      error: (err) => {
-        this.toastr.error(err.error?.message || '❌ Erreur backend');
-        this.loading = false;
-      },
-    });
-  }
-
-  // Uploader les fichiers
-  uploadFiles(idoperation: string, files: File[]) {
-    const userId = this.user.idutilisateur;
-    this.pjService.create(idoperation, files, userId).subscribe({
-      next: (res) => {
-        if (res.success) {
-          this.toastr.success(`${res.data.length} fichier(s) uploadé(s)`);
-          this.loadAllDemandes();
-          this.loading = false;
-        } else {
-          this.toastr.error("❌ Erreur lors de l'upload des fichiers");
-          this.loading = false;
-        }
-      },
-      error: (err) => {
-        this.toastr.error(err.error?.message || "❌ Erreur lors de l'upload");
-        this.loading = false;
-      },
-    });
-  }
-
   //Récuperer les soldes
-  getSoldeCaisse() {
+  getSoldeCaisse(){
     this.caisseservice.getSolde().subscribe({
-      next: (res) => {
-        if (res.success) {
-          this.caisseSolde = res.data;
+      next : (res) => {
+        if(res.success){
+          this.caisseSolde = res.data ;
           this.caisseSolde = this.caisseSolde.filter((cs: any) =>
-            this.caissesUser.some((cu) => cu.idcaisse === cs.idcaisse),
-          );
+              this.caissesUser.some(cu => cu.idcaisse === cs.idcaisse)
+            );
         }
-      },
+      }
     });
   }
 
-  get user() {
+  get user(){
     return JSON.parse(localStorage.getItem('user') || '{}');
   }
 
-  getCaisseUser() {
+  getCaisseUser(){
     this.loadingCaisses = true;
-    this.caisseuserservice
-      .getCaisseByUser(this.user.idutilisateur ?? null)
-      .subscribe({
-        next: (res) => {
-          if (res.success) {
-            this.caissesUser = res.data || [];
-            if (this.caissesUser.length > 0) {
-              this.caissesDuCaissier = this.caissesUser.map((c) => c.idcaisse);
-              this.params.caisses = this.caissesDuCaissier;
+    this.caisseuserservice.getCaisseByUser(this.user.idutilisateur ?? null).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.caissesUser = res.data || [];
+          if(this.caissesUser.length > 0){
+            this.caissesDuCaissier = this.caissesUser.map(c => c.idcaisse);
+            this.params.caisses = this.caissesDuCaissier;
 
-              //Chargement des paiements de caisses
-              this.getAllOp();
-            }
-            this.getSoldeCaisse();
-            //Get data
-            this.sendParams();
+            //Chargement des paiements de caisses
+            this.getAllOp();
           }
-        },
-        error: (err) => {
-          this.loadingCaisses = false;
-          this.toastr.error(err.error.message);
-        },
-      });
+          this.getSoldeCaisse();
+          //Get data 
+          this.sendParams();
+        }
+      },
+      error: (err) => {
+        this.loadingCaisses = false;
+        this.toastr.error(err.error.message);
+      }
+    });
   }
 
   //Filter les operations de la caisse du caissier
-  filtrerOperationsDuCaissier(
-    operations: any[],
-    caissesDuCaissier: any[],
-  ): any[] {
-    return operations.filter((op) => caissesDuCaissier.includes(op.idcaisse));
-  }
-
-  getSolde(item: any): number {
-    return (
-      (Number(item?.soldeinitialisation) || 0) + (Number(item?.solde) || 0)
+  filtrerOperationsDuCaissier(operations: any[], caissesDuCaissier: any[]): any[] {
+    return operations.filter(op =>
+      caissesDuCaissier.includes(op.idcaisse)
     );
   }
 
-  getcaissesPeriodes() {
+  getSolde(item: any): number {
+    return (Number(item?.soldeinitialisation) || 0) + (Number(item?.solde) || 0);
+  }
+
+  getcaissesPeriodes(){
     this.loadingCaisses = true;
-    this.caisseuserservice
-      .getCaissePeriodeByUser(this.user.idutilisateur ?? null)
-      .subscribe({
-        next: (res) => {
-          if (res.success) {
-            this.caisseperiodes = res.data;
-            if (this.caisseperiodes.length > 0) {
-              this.params.date = this.formatDateInput(
-                new Date(this.caisseperiodes[0].dernierePeriode.dateperiode),
-              );
-            }
-            this.loadingCaisses = false;
+    this.caisseuserservice.getCaissePeriodeByUser(this.user.idutilisateur ?? null).subscribe({
+      next : (res) => {
+        if(res.success){
+          this.caisseperiodes = res.data;
+          if(this.caisseperiodes.length > 0){
+            this.params.date = this.formatDateInput(new Date(this.caisseperiodes[0].dernierePeriode.dateperiode));
           }
-        },
-        error: (err) => {
-          this.toastr.error(err.error.message);
-        },
-      });
+          this.loadingCaisses = false;
+        }
+      },
+      error : (err) => {
+        this.toastr.error(err.error.message);
+      }
+    });
   }
 
   calculSolde(item: any): string {
-    if (item.codedevise! != 'USD') {
+    if(item.codedevise! != 'USD'){
       return this.formatCFA(this.getSolde(item));
-    } else {
+    }else{
       return this.formatNumber(this.getSolde(item));
     }
   }
 
   formatNumber(montant: number | string | undefined): string {
-    if (montant === null || montant === undefined || montant === '') return '';
+    if (montant === null || montant === undefined || montant === "") return "";
     const valeur = Number(montant);
-    if (isNaN(valeur)) return '';
+    if (isNaN(valeur)) return "";
 
-    return valeur.toLocaleString('fr-FR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
+    return valeur
+      .toLocaleString('fr-FR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
   }
 
   formatCFA(montant: number | null | undefined): string {
     return new Intl.NumberFormat('fr-FR', {
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+      maximumFractionDigits: 0
     }).format(montant ?? 0);
   }
 
   getEntree(item: any): number {
-    return (
-      (Number(item?.soldeinitialisation) || 0) +
-      (Number(item?.encaissement) || 0)
-    );
+    return (Number(item?.soldeinitialisation) || 0) + (Number(item?.encaissement) || 0);
   }
 
   calculEntree(item: any): string {
-    if (item.codedevise! != 'USD') {
+    if(item.codedevise! != 'USD'){
       return this.formatCFA(this.getEntree(item));
-    } else {
+    }else{
       return this.formatNumber(this.getEntree(item));
     }
   }
@@ -311,15 +216,15 @@ export class InterfaceCaissierComponent implements OnInit {
   getCaisseClass(item: any[]): string {
     const nbr = item.length;
 
-    if (nbr == 1) {
+    if (nbr == 1){
       return 'col-xl-4 col-md-6';
     }
 
-    if (nbr == 2) {
+    if (nbr == 2){
       return 'col-xl-4 col-md-6';
     }
 
-    if (nbr > 2) {
+    if (nbr > 2){
       return 'col-xl-4 col-md-4';
     }
 
@@ -330,76 +235,71 @@ export class InterfaceCaissierComponent implements OnInit {
     const solde = this.getSolde(item);
     const seuil = Number(item?.seuilmnimal) || 0;
 
-    if (solde == 0) {
+    if (solde == 0){
       return 'bx bx-dollar-circle text-danger';
     }
 
-    if (solde == seuil) {
+    if (solde == seuil){
       return 'bx bx-dollar-circle text-warning';
     }
 
-    if (solde > seuil) {
+    if (solde > seuil){
       return 'bx bx-dollar-circle text-success';
     }
 
     return 'bx bx-dollar-circle text-info';
   }
-
-  getLastOperation(data: any) {
+  
+  getLastOperation(data : any){
     data.page = this.currentPageL;
     data.limit = this.limitL;
-    this.loadingLast = true;
+    this.loadingLast = true ;
     this.service.getLastOperation(data).subscribe({
-      next: (res) => {
-        if (res.success) {
+      next : (res) => {
+        if(res.success){
           this.opLast = res.data.data;
           this.totalPagesL = res.data.totalPages;
           this.loadingLast = false;
-        } else {
+        }else{
           this.loadingLast = false;
         }
       },
-      error: (err) => {
-        this.loadingLast = false;
-      },
+      error : (err) => {
+        this.loadingLast = false ;
+      }
     });
   }
 
-  getAllOp() {
+  getAllOp(){
     this.loadingLast = true;
-    const params = {};
+    const params = {}
     this.service.getAllpayment(params).subscribe({
-      next: (res) => {
-        if (res.success) {
+      next : (res) => {
+        if(res.success){
           this.operationGlobal = res.data.data || [];
-          if (this.operationGlobal.length != 0) this.calculerIndicateurs();
-          this.loadingLast = false;
-        } else {
-          this.loadingLast = false;
+          if(this.operationGlobal.length != 0) this.calculerIndicateurs() ;
+          this.loadingLast = false ;
+        }else{
+          this.loadingLast = false ;
         }
       },
-      error: (err) => {
-        console.log(err);
-        this.loadingLast = false;
-      },
+      error : (err) => {
+        console.log(err)
+        this.loadingLast = false ;
+      }
     });
   }
 
   //Calcul des indicateurs
   calculerIndicateurs() {
-    const jour = this.formatDateInput(
-      new Date(this.caisseperiodes[0].dernierePeriode.dateperiode),
-    );
+    const jour = this.formatDateInput(new Date(this.caisseperiodes[0].dernierePeriode.dateperiode));
 
     //Filtrer les operations du caissier
-    const operations = this.filtrerOperationsDuCaissier(
-      this.operationGlobal,
-      this.caissesDuCaissier,
-    );
-
+    const operations = this.filtrerOperationsDuCaissier(this.operationGlobal, this.caissesDuCaissier);
+    
     // Filtrer les opérations du jour
-    const operationsJour = operations.filter((o) =>
-      o.dateoperation.startsWith(jour),
+    const operationsJour = operations.filter(o =>
+      o.dateoperation.startsWith(jour)
     );
 
     // Grouper par demande
@@ -407,18 +307,21 @@ export class InterfaceCaissierComponent implements OnInit {
 
     const demandesGlobalMap = new Map<string, number>();
 
-    operationsJour.forEach((o) => {
+    operationsJour.forEach(o => {
       if (!o.iddemande) return;
 
       const montant = o.decaissement || 0;
       if (demandesMap.has(o.iddemande)) {
-        demandesMap.set(o.iddemande, demandesMap.get(o.iddemande)! + montant);
+        demandesMap.set(
+          o.iddemande,
+          demandesMap.get(o.iddemande)! + montant
+        );
       } else {
         demandesMap.set(o.iddemande, montant);
       }
     });
 
-    operations.forEach((o) => {
+    operations.forEach(o => {
       if (!o.iddemande) return;
 
       const montant = o.decaissement || 0;
@@ -426,42 +329,36 @@ export class InterfaceCaissierComponent implements OnInit {
       if (demandesGlobalMap.has(o.iddemande)) {
         demandesGlobalMap.set(
           o.iddemande,
-          demandesGlobalMap.get(o.iddemande)! + montant,
+          demandesGlobalMap.get(o.iddemande)! + montant
         );
       } else {
         demandesGlobalMap.set(o.iddemande, montant);
       }
     });
 
-    const totalDemandesGlobal = Array.from(demandesGlobalMap.values()).reduce(
-      (sum, m) => sum + m,
-      0,
-    );
+    const totalDemandesGlobal = Array.from(demandesGlobalMap.values())
+      .reduce((sum, m) => sum + m, 0);
 
     //Total des demandes payées
-    this.totalDemandesPayeesJour = Array.from(demandesMap.values()).reduce(
-      (sum, m) => sum + m,
-      0,
-    );
+    this.totalDemandesPayeesJour = Array.from(demandesMap.values())
+      .reduce((sum, m) => sum + m, 0);
 
     //Totaux globaux
     this.totalEncaissementGlobal = operations.reduce(
-      (sum, o) => sum + o.encaissement,
-      0,
+      (sum, o) => sum + o.encaissement, 0
     );
 
     this.totalDecaissementGlobal = operations.reduce(
-      (sum, o) => sum + o.decaissement,
-      0,
+      (sum, o) => sum + o.decaissement, 0
     );
 
     //Totaux du jour
     this.totalEncaissementJour = operations
-      .filter((o) => o.dateoperation.startsWith(jour))
+      .filter(o => o.dateoperation.startsWith(jour))
       .reduce((sum, o) => sum + o.encaissement, 0);
 
     this.totalDecaissementJour = operations
-      .filter((o) => o.dateoperation.startsWith(jour))
+      .filter(o => o.dateoperation.startsWith(jour))
       .reduce((sum, o) => sum + o.decaissement, 0);
 
     //Pourcentages
@@ -481,19 +378,19 @@ export class InterfaceCaissierComponent implements OnInit {
         : 0;
   }
 
-  getHistoryOperation(data: any) {
+  getHistoryOperation(data : any){
     data.page = this.currentPageH;
     data.limit = this.limitH;
-    this.loadingHistory = true;
+    this.loadingHistory = true ;
     this.service.getHistoryOperation(data).subscribe({
-      next: (res) => {
+      next : (res) => {
         this.opHistory = res.data.data;
         this.totalPagesH = res.data.totalPages;
-        this.loadingHistory = false;
+        this.loadingHistory = false ;
       },
-      error: (err) => {
-        this.loadingHistory = true;
-      },
+      error : (err) => {
+        this.loadingHistory = true ;
+      }
     });
   }
 
@@ -501,7 +398,7 @@ export class InterfaceCaissierComponent implements OnInit {
     return date.toISOString().split('T')[0];
   }
 
-  sendParams() {
+  sendParams(){
     //Dernières opérations
     this.getLastOperation(this.params);
     //Historiques opérations
@@ -525,7 +422,7 @@ export class InterfaceCaissierComponent implements OnInit {
     return `${day} ${month} ${year}`;
   }
 
-  //Recharger la page des dernieres données
+  //Recharger la page des dernieres données 
   changePageLast(page: number) {
     this.currentPageL = page;
     this.getLastOperation(this.params); // recharge les données
@@ -549,29 +446,27 @@ export class InterfaceCaissierComponent implements OnInit {
       user: this.user.idutilisateur,
     };
     this.demandeService.getAllEntetes(params).subscribe({
-      next: (res) => {
-        if (res.success) {
+      next : (res) => {
+        if(res.success){
           // this.entetesDmd = res.data.data;
-          this.entetesDmd = res.data.data.map((item: any) => ({
+           this.entetesDmd = res.data.data.map((item: any) => ({
             ...item,
           }));
 
           // filtre statut validé
-          this.entetesDmd = this.entetesDmd.filter(
-            (d: any) => d.statut === 3 && d.decaisse === 0,
-          );
-
+            this.entetesDmd = this.entetesDmd.filter((d: any) => d.statut === 3 && d.decaisse === 0);
+            
           this.totalPages = res.data.totalPages;
           this.loadingDmd = false;
-        } else {
+        }else{
           this.loadingDmd = false;
-          this.toastr.error('Erreur de récuperation des données');
+          this.toastr.error("Erreur de récuperation des données");
         }
       },
       error: (err) => {
         this.toastr.error(err.error.message);
         this.loadingDmd = false;
-      },
+      }
     });
   }
 
@@ -591,16 +486,18 @@ export class InterfaceCaissierComponent implements OnInit {
     return ids.includes(_id);
   }
 
-  iscaissier(): boolean {
+  iscaissier (): boolean {
     if (typeof window !== 'undefined') {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
+          const user =JSON.parse(localStorage.getItem('user') || '{}') ;
       for (let index = 0; index < user.roles.length; index++) {
-        const element = user.roles[index];
-        if (element['code'] === '04') {
-          this.caissier = true;
-        }
+          const element = user.roles[index];
+          if (element['code'] ==='04')
+              {
+                  this.caissier = true;  
+              }
       }
     }
-    return this.caissier;
+     return  this.caissier;
   }
+
 }
