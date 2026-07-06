@@ -739,45 +739,6 @@ export class OprationJustifieeComponent implements OnInit {
     this.updateTotalsAndValidate();
   }
 
-  //Selectionner le justificatif
-  // selectJustificatif(piece: any) {
-  //   const justificatif = this.justificatifFiltered.find(
-  //     (j) => j.idjustificatifoperation === piece.idjustificatifoperation,
-  //   );
-
-  //   if (!justificatif) return;
-  //   this.loadDetailJustificatif(justificatif);
-  // }
-
-  // dispatchDetail(_object: any) {
-  //   // Patch des champs simples
-  //   this.operationForm.patchValue({
-  //     tauxoperation: _object.justificatif.taux,
-  //     devisejustificatif: _object.justificatif.iddevise,
-  //     commentaire: _object.justificatif.commentaire,
-  //     datejustificatif: this.formatDateForInput(_object.justificatif.date),
-  //   });
-
-  //   this.lignes.clear();
-  //   _object.details.forEach((l: any) => {
-  //     const ligneGroup = this.fb.group({
-  //       idligne: [l.iddetailsjustificatifoperation ?? null],
-  //       idnature: [l.idnature ?? null, Validators.required],
-  //       idcentreanalytique: [{ value: l.idcentreanalytique, disabled: true }],
-  //       idtiers: [{ value: l.idtiers ?? null, disabled: true }],
-  //       montantdetail: [
-  //         { value: l.montantdetail ?? '', disabled: false },
-  //         Validators.required,
-  //       ],
-
-  //       //centres propres à la ligne
-  //       centres: this.fb.control<any[]>([]),
-  //     });
-
-  //     this.lignes.push(ligneGroup);
-  //   });
-  // }
-
   //validation required
   isValidField(label: string): string {
     let status: string = '';
@@ -1584,7 +1545,7 @@ export class OprationJustifieeComponent implements OnInit {
 
     this.lignes.clear();
 
-    // 🔥 Récupérer l'ID de la devise à partir du code
+    // Récupérer l'ID de la devise à partir du code
     const deviseCode = piece.caisse?.devise; // "CDF"
     let deviseId = null;
 
@@ -2112,4 +2073,22 @@ export class OprationJustifieeComponent implements OnInit {
       },
     });
   }
+
+  //Impression du reçu
+  printDocumentJustif() {
+    if (!this.selectedOperationPJ) return;
+
+    //Recuperationd de l'id
+    const id = this.selectedOperationPJ.idoperation;
+    this.justificatifservice.getdocJustificatif(id).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const win = window.open(url, '_blank');
+      },
+      error: (err) => {
+        this.toastr.error("Erreur d\'impression du document");
+      },
+    });
+  }
+
 }

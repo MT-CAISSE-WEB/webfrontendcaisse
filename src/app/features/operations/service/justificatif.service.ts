@@ -76,4 +76,14 @@ export class JustificatifService {
     );
   }
 
+    /**
+     * get one document justificatifs
+     */
+    getdocJustificatif(idoperation: string): Observable<Blob> {
+      return this.http.get(
+        `${URL_LOCAL.baseUrl}${this.url}/full/document/${idoperation}`,
+        { responseType: 'blob' },
+      );
+    }
+
 }
