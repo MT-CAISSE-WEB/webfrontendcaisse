@@ -297,4 +297,5 @@ export class OperationPeriodeComponent implements OnInit {
     this.loading = false;
     this.toastr.success('Interface réinitialisée avec succès');
   }
+  
 }

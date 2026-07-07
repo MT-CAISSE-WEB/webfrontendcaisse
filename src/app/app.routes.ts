@@ -23,7 +23,10 @@ import { APP, APP_DONNEE_BASE_DEVISE, APP_AFF_NATURE_CENTRE_DONNEE_BASE,
     APP_DETAILDEAMNDE_CONSULTATION,
     APP_BANQUE_DONNEE_BASE,
     APP_CLOTURECAISSE_CONSULTATION, 
-    APP_SOLDECAISSE_CONSULTATION} from './_core/routes/frontend.root';
+    APP_SOLDECAISSE_CONSULTATION,
+    APP_ROOT_DEPNSESCAISSE_CONSULTATION,
+    APP_RECETTESCAISSE_CONSULTATION,
+    APP_DEPNSESCAISSE_CONSULTATION} from './_core/routes/frontend.root';
 
 import { LayoutMainComponent } from './layout/layout-main/layout-main.component';
 import { LayoutContentComponent } from './layout/composant/layout-content/layout-content.component';
@@ -72,6 +75,8 @@ import { DemandeDetailComponent } from './features/consultations/demande-detail/
 import { BanqueComponent } from './features/donnee_base/banque/banque.component';
 import { ClotureCaisseComponent } from './features/consultations/cloture-caisse/cloture-caisse.component';
 import { CaisseTresorerieComponent } from './features/consultations/caisse-tresorerie/caisse-tresorerie.component';
+import { DecaissementOperationComponent } from './features/consultations/decaissement-operation/decaissement-operation.component';
+import { EncaissementOperationComponent } from './features/consultations/encaissement-operation/encaissement-operation.component';
 
 export const routes: Routes = [
   {
@@ -267,8 +272,16 @@ export const routes: Routes = [
           component: ClotureCaisseComponent
       },
       {
-        path : APP_SOLDECAISSE_CONSULTATION,
-        component: CaisseTresorerieComponent
+          path : APP_SOLDECAISSE_CONSULTATION,
+          component: CaisseTresorerieComponent
+      },
+      {
+          path : APP_DEPNSESCAISSE_CONSULTATION,
+          component: DecaissementOperationComponent
+      },
+      {
+          path : APP_RECETTESCAISSE_CONSULTATION,
+          component: EncaissementOperationComponent
       }
     ]
   }

@@ -456,6 +456,16 @@
                   </a>
                 </li>
 
+                <li class="nav-item">
+                  <a
+                    [routerLink]="root_operation_encaissement"
+                    class="nav-link"
+                    data-key="t-operationencaissement"
+                  >
+                    Encaissement par période
+                  </a>
+                </li>
+
                 <div *ngIf="issuperviseur() || iscaissier() || isuperadmin()">
                   <li class="nav-item">
                     <a
