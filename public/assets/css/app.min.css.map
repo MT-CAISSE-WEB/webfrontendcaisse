@@ -45,7 +45,7 @@
         "../../plugins/_custom-scrollbar.scss",
         "../../plugins/_prismjs.scss",
         "../../plugins/_sweetalert2.scss",
-        "../../../../../node_modules/bootstrap/scss/vendor/_rfs.css",
+        "../../../../../node_modules/bootstrap/scss/vendor/_rfs.scss",
         "../../plugins/_dropzone.scss",
         "../../plugins/_range-slider.scss",
         "../../plugins/_sortablejs.scss",
