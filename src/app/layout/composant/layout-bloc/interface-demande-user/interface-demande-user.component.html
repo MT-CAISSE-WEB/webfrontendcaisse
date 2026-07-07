@@ -1,106 +1,198 @@
 <div class="row">
-    <div class="col-xl-12">
-        <div class="card card-height">
-            <div class="card-header align-items-center d-flex">
-                <h4 class="card-title mb-0 flex-grow-1">Mes demandes de decaissements</h4>
-                <div class="flex-shrink-0 ms-2">
-                    <div class="dropdown card-header-dropdown">
-                        <a class="btn btn-soft-primary btn-sm" role="button" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Obtenir rapport<i class="mdi mdi-chevron-down align-middle ms-1"></i>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-end">
-                            <a class="dropdown-item" href="#">Télécharger rapport</a>
-                            <a class="dropdown-item" href="#">Exporter vers excel</a>
-                        </div>
-                    </div>
-                </div>
-            </div><!-- end card header -->
-            <div class="card-body">
-                <div class="table-responsive table-card table-container">
-                    <table class="table table-hover table-centered align-middle table-scroll table-container table-custom table-compact table-nowrap mb-0">
-                        <thead class="text-muted bg-light-subtle">
-                            <tr>
-                                <th>N° demande</th>
-                                <th>date demande</th>
-                                <th>Montant demande</th>
-                                <th>statut</th>
-                                <th>Payé </th>
-                                <th>Niveau actuel</th>
-                            </tr>
-                        </thead><!-- end thead -->
-                        <tbody>
-                            @for(item of demandesGlobal; track $index){
-                                <tr class="fs-12">
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div>
-                                                <h6 class="fs-12 mb-0">{{item.codedemande!}}</h6>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="text-muted text-uppercase"> {{ formatDateFR(item.datedemande!) }} </td>
-                                    <td class="text-muted text-end">{{ formatCFA(getTotalDemande(item)) }}  {{ item.devise!.codedevise }}</td>
-                                    <td class="devise"> 
-                                        <span *ngIf="item.statut! == 0" class="badge bg-primary-subtle text-primary"> non valide </span> 
-                                        <span *ngIf="item.statut! == 1" class="badge bg-info-subtle text-info"> en cours </span> 
-                                        <span *ngIf="item.statut! == 2 && item.decaisse! == 0" class="badge bg-warning-subtle text-warning"> a revoir </span> 
-                                        <span *ngIf="item.statut! == 2 && item.decaisse! == 1" class="badge bg-warning-subtle text-warning"> a revoir </span>
-                                        <span *ngIf="item.statut! == 3 && item.decaisse! == 0" class="badge bg-success-subtle text-success"> validée </span>
-                                        <span *ngIf="item.statut! == 4" class="badge bg-dark-subtle text-body"> rejetée </span>
-                                    </td>
-                                    <td class="devise">
-                                         <span *ngIf="item.statut! == 3 && item.decaisse! == 1" class="badge bg-secondary-subtle text-secondary"> oui </span> 
-                                         <span *ngIf="item.decaisse! == 0" class="badge bg-primary-subtle text-primary"> non </span> 
-                                    </td>
-                                    <td class="text-muted text-uppercase"> </td>
-                                </tr><!-- end -->
-                            }
-                            <tr class="fs-12" *ngIf="loadingRequest">
-                                <td colspan="8">
-                                    <div class="text-center py-4">
-                                        <div class="spinner-border text-info"></div>
-                                        <h6 class="mt-2">Chargement...</h6>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr *ngIf="demandesGlobal.length == 0">
-                                <td colspan="6">
-                                    <div class="text-center"> 
-                                        <i class="ri-inbox-2-line fs-1 text-muted"></i>
-                                        <h6 class="mt-2">Aucune donnée disponible</h6>
-                                        <p class="text-muted mb-0">
-                                            Désolé pas de donnée trouvée dans la base de donnée
-                                        </p>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr class="fs-12">
-                                <td colspan="5"></td>
-                                <td col="2">
-                                    <div class="d-flex justify-content-end">
-                                        <div class="pagination-wrap">
-                                            <ul class="pagination pagination-separated pagination-sm mb-0 justify-content-center">
-                                                <li class="page-item" [class.disabled]="currentPage == 1">
-                                                    <a href="javascript:void(0)" class="page-link" (click)="currentPage > 1 && changePage(currentPage - 1)">←</a>
-                                                </li>
+  <div class="col-xl-12">
+    <div class="main-content-glass">
+      <!-- En-tête -->
+      <div
+        class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2"
+      >
+        <h5 class="mb-0 fw-semibold">
+          <i class="ri-file-list-3-line me-2 text-primary"></i>
+          Mes demandes de décaissement
+          <span class="badge bg-primary ms-2">{{ demandesGlobal.length }}</span>
+        </h5>
+        <div class="dropdown">
+          <button class="btn-premium-rapport-primary" data-bs-toggle="dropdown">
+            <i class="ri-file-download-line"></i> Obtenir rapport
+            <i class="mdi mdi-chevron-down align-middle ms-1"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end">
+            <a class="dropdown-item" href="#">
+              <i class="ri-file-pdf-line me-2"></i> Télécharger PDF
+            </a>
+            <a class="dropdown-item" href="#">
+              <i class="ri-file-excel-line me-2"></i> Exporter Excel
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">
+              <i class="ri-printer-line me-2"></i> Imprimer
+            </a>
+          </div>
+        </div>
+      </div>
 
-                                                <li class="page-item">
-                                                    <a href="javascript:void(0)" class="page-link"> Page {{currentPage}} / {{totalPages}}</a>
-                                                </li>
-                                                
-                                                <li class="page-item" [class.disabled]="currentPage == totalPages">
-                                                    <a href="javascript:void(0)" class="page-link" (click)="currentPage < totalPages && changePage(currentPage + 1)">→</a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody><!-- end tbody -->
-                    </table><!-- end table -->
-                    <div class="noresult"></div>
-                </div><!-- end tbody -->
-            </div><!-- end cardbody -->
-        </div><!-- end card -->
-    </div><!-- end col -->
+      <!-- Tableau avec double scroll -->
+      <div class="demande-table-wrap">
+        <!-- ✅ Conteneur avec scroll horizontal et vertical -->
+        <div class="demande-scroll-container">
+          <table class="demande-table">
+            <thead>
+              <tr>
+                <th>N° demande</th>
+                <th>Date demande</th>
+                <th class="text-end">Montant</th>
+                <th>Statut</th>
+                <th>Payé</th>
+                <th>Niveau actuel</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of demandesGlobal; track $index) {
+                <tr>
+                  <td>
+                    <a href="#" class="demande-code">{{ item.codedemande! }}</a>
+                  </td>
+                  <td class="text-muted">
+                    {{ formatDateFR(item.datedemande!) }}
+                  </td>
+                  <td class="text-end demande-montant">
+                    {{ formatCFA(getTotalDemande(item)) }}
+                    <span class="text-muted fs-11">{{
+                      item.devise!.codedevise
+                    }}</span>
+                  </td>
+                  <td>
+                    <span
+                      class="demande-statut"
+                      [ngClass]="
+                        item.statut == 0
+                          ? 'primary'
+                          : item.statut == 1
+                            ? 'info'
+                            : item.statut == 2
+                              ? 'warning'
+                              : item.statut == 3 && item.decaisse == 0
+                                ? 'success'
+                                : item.statut == 4
+                                  ? 'danger'
+                                  : 'secondary'
+                      "
+                    >
+                      {{
+                        item.statut == 0
+                          ? "Non validée"
+                          : item.statut == 1
+                            ? "En cours"
+                            : item.statut == 2
+                              ? "À revoir"
+                              : item.statut == 3 && item.decaisse == 0
+                                ? "Validée"
+                                : item.statut == 4
+                                  ? "Rejetée"
+                                  : "Payée"
+                      }}
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      class="demande-statut"
+                      [ngClass]="item.decaisse == 1 ? 'success' : 'primary'"
+                    >
+                      {{ item.decaisse == 1 ? "Oui" : "Non" }}
+                    </span>
+                  </td>
+                  <td class="text-muted">-</td>
+                </tr>
+              }
+              <tr *ngIf="loadingRequest">
+                <td colspan="6" class="text-center py-4">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="demandesGlobal.length == 0 && !loadingRequest">
+                <td colspan="6" class="text-center py-4">
+                  <div class="noresult">
+                    <i class="ri-inbox-2-line fs-1 text-muted"></i>
+                    <h6 class="mt-2">Aucune demande trouvée</h6>
+                    <p class="text-muted mb-0">
+                      Désolé, pas de donnée trouvée dans la base de données
+                    </p>
+                  </div>
+                </td>
+              </tr>
+              <!-- Pagination -->
+              <tr>
+                <td colspan="6">
+                  <div class="d-flex justify-content-end mt-3">
+                    <ul class="pagination-premium-custom">
+                      <li class="page-item">
+                        <a
+                          class="page-link"
+                          [class.disabled]="currentPage == 1"
+                          (click)="
+                            currentPage > 1 && changePage(currentPage - 1)
+                          "
+                        >
+                          <i class="ri-arrow-left-s-line"></i>
+                        </a>
+                      </li>
+                      <li class="page-item">
+                        <span class="page-link active">{{ currentPage }}</span>
+                      </li>
+                      <li class="page-item" *ngIf="currentPage < totalPages">
+                        <a
+                          class="page-link"
+                          (click)="changePage(currentPage + 1)"
+                          >{{ currentPage + 1 }}</a
+                        >
+                      </li>
+                      <li
+                        class="page-item"
+                        *ngIf="currentPage + 1 < totalPages"
+                      >
+                        <span class="page-link">...</span>
+                      </li>
+                      <li
+                        class="page-item"
+                        *ngIf="currentPage < totalPages - 1"
+                      >
+                        <a class="page-link" (click)="changePage(totalPages)">{{
+                          totalPages
+                        }}</a>
+                      </li>
+                      <li class="page-item">
+                        <a
+                          class="page-link"
+                          [class.disabled]="currentPage == totalPages"
+                          (click)="
+                            currentPage < totalPages &&
+                              changePage(currentPage + 1)
+                          "
+                        >
+                          <i class="ri-arrow-right-s-line"></i>
+                        </a>
+                      </li>
+                      <li class="page-item">
+                        <span class="pagination-info-premium">
+                          Page <strong>{{ currentPage }}</strong> /
+                          <strong>{{ totalPages }}</strong>
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- ✅ Indicateur de scroll -->
+        <div class="scroll-hint" *ngIf="demandesGlobal.length > 3">
+          <i class="ri-arrow-left-right-line"></i>
+          <span>Faites défiler pour voir toutes les colonnes</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

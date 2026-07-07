@@ -104,7 +104,6 @@ export class NatureoperationComponent implements OnInit {
           this.natureoperations = res.data;
           this.filteredData = [...this.natureoperations];
           this.updatePagination();
-          console.log(this.natureoperations)
         }
       },
     });
@@ -126,7 +125,6 @@ export class NatureoperationComponent implements OnInit {
       libelle: ['', [Validators.required]],
       decajustifier: [false],
       imputationtiers: [false],
-      typetiers: ['', [Validators.required]],
       demandedecaissement: [true],
       typeoperation: ['Decaissement', [Validators.required]],
       idsociete: [this.user.idsociete, [Validators.required]],
@@ -154,7 +152,6 @@ export class NatureoperationComponent implements OnInit {
       libelle: _object.libelle,
       decajustifier: _object.decajustifier === 1,
       imputationtiers: _object.imputationtiers === 1,
-      typetiers: _object.typetiers,
       demandedecaissement: _object.demandedecaissement === 1,
       typeoperation: _object.typeoperation,
       idsociete: _object.idsociete,

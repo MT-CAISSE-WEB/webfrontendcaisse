@@ -175,7 +175,15 @@
   <!-- ============================================ -->
   <!-- CONTENU PRINCIPAL - GLASSMORPHISM -->
   <!-- ============================================ -->
-  <div class="row g-4">
+  <div class="row g-4" *ngIf="issuperviseur()">
+    <div class="col-xl-12">
+      <div class="main-content-glass">
+        <app-interface-supervisor></app-interface-supervisor>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4" *ngIf="iscaissier()">
     <div class="col-xl-12">
       <div class="main-content-glass">
         <app-interface-caissier></app-interface-caissier>
@@ -183,14 +191,20 @@
     </div>
   </div>
 
-  <div class="row g-4 mt-2">
+  <div
+    class="row g-4 mt-2"
+    *ngIf="issuperviseur || iscaissier || isdemandeur || iscomptable"
+  >
     <div class="col-12">
       <div class="main-content-glass">
         <app-interface-demande-user></app-interface-demande-user>
       </div>
     </div>
 
-    <div class="col-12">
+    <div
+      class="col-12"
+      *ngIf="issuperviseur || iscaissier || isdemandeur || iscomptable"
+    >
       <div class="main-content-glass">
         <app-interface-user></app-interface-user>
       </div>

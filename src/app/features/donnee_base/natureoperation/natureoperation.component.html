@@ -82,10 +82,13 @@
                   <i class="ri-file-download-line me-2"></i>Exporter
                 </a>
               </div>
-              <button class="btn-glass-modele" (click)="downloadCsvTemplate()">
-                <i class="ri-file-excel-2-line"></i>Modèle CSV
-              </button>
             </div>
+            <button
+              class="btn-download-template"
+              (click)="downloadCsvTemplate()"
+            >
+              <i class="ri-file-excel-2-line"></i>Modèle CSV
+            </button>
           </div>
           <div class="search-container">
             <div class="search-glass">
@@ -131,8 +134,6 @@
                   <th>Code</th>
                   <th>Libellé</th>
                   <th>Aut. demande</th>
-                  <th>Imputation Tiers</th>
-                  <!-- <th>Type Tiers</th> -->
                   <th>Type opération</th>
                   <th>Compte</th>
                   <th>Statut</th>
@@ -178,27 +179,6 @@
                         {{ item.demandedecaissement == 1 ? "Oui" : "Non" }}
                       </span>
                     </td>
-                    <td>
-                      <span
-                        class="status-badge"
-                        [ngClass]="
-                          item.imputationtiers == 1
-                            ? 'status-active'
-                            : 'status-inactive'
-                        "
-                      >
-                        <span
-                          class="status-dot"
-                          [ngClass]="
-                            item.imputationtiers == 1 ? 'active' : 'inactive'
-                          "
-                        ></span>
-                        {{ item.imputationtiers == 1 ? "Oui" : "Non" }}
-                      </span>
-                    </td>
-                    <!-- <td>
-                      <span class="fw-medium">{{ item.typetiers }}</span>
-                    </td> -->
                     <td>
                       <span
                         class="badge-glass"
@@ -455,25 +435,14 @@
                         </div>
                       </div>
                     </div>
-                    <div class="col-md-6" *ngIf="natureoperationForm.get('imputationtiers')?.value">
-                      <div class="form-floating">
-                        <select class="form-select" formControlName="typetiers" id="typetiers">
-                          <option value="">----Sélectionner-----</option>
-                          <option value="Client">Client</option>
-                          <option value="Fournisseur">Fournisseur</option>
-                          <option value="Divers">Divers</option>
-                          <option value="Salarié">Salarié</option>
-                        </select>
-                        <label for="typetiers" class="small"
-                          >Type de Tiers</label
-                        >
-                      </div>
-                    </div>
                     <div class="col-md-6">
                       <div
                         class="permission-card"
                         [class.active]="
-                          natureoperationForm.get('demandedecaissement')?.value == 1">
+                          natureoperationForm.get('demandedecaissement')
+                            ?.value == 1
+                        "
+                      >
                         <div
                           class="form-check form-switch d-flex align-items-center justify-content-between px-2"
                         >

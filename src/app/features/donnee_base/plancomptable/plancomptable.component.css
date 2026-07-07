@@ -186,32 +186,34 @@
   color: #1e293b;
 }
 
-.btn-glass-modele {
-  background: rgba(79, 226, 63, 0.3);
-  border: 1px solid rgba(79, 226, 63, 0.3);
-  border-radius: 30px;
-  padding: 0.4rem 1rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #1b5822;
+.btn-download-template {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(22, 163, 74, 0.3);
+  color: #15803d;
+  border-radius: 20px;
   cursor: pointer;
+  transition: all 0.3s;
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
+.btn-download-template i {
+  color: #15803d;
+}
+.btn-download-template:hover {
+  background: rgba(22, 163, 74, 0.25);
+  border-color: #16a34a;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15);
+  color: #14532d;
+  transform: translateY(-2px);
+}
+
 @media (min-width: 769px) {
-  .btn-glass-modele {
+  .btn-download-template {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
-}
-
-.btn-glass-modele:hover {
-  background: rgba(79, 226, 63, 0.3);
-  border-color: #16471b;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  color: #16471b;
 }
 
 .btn-glass-pagination {
@@ -1866,5 +1868,49 @@
   .delete-btn-confirm {
     padding: 6px 16px;
     font-size: 0.7rem;
+  }
+}
+
+/* ============================================
+   TABLE RESPONSIVE - SCROLL HORIZONTAL MOBILE
+   ============================================ */
+
+.table-responsive {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  /* Conservez votre style existant */
+}
+
+/* 📱 Activation du scroll horizontal UNIQUEMENT sur mobile */
+@media (max-width: 768px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Optimisation iOS */
+    border-radius: 12px 12px 0 0; /* Garde les coins arrondis en haut */
+    position: relative;
+  }
+
+  /* 🎯 Force une largeur minimale pour déclencher le scroll */
+  .table-responsive .table-modern {
+    min-width: 700px; /* Ajustez selon votre nombre de colonnes */
+    width: auto;
+    background: rgba(255, 255, 255, 0.6);
+  }
+
+  /* 🔄 Conserve les coins arrondis en bas */
+  .table-responsive::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(226, 232, 240, 0.6);
+    border-radius: 0 0 12px 12px;
+  }
+
+  .table-responsive {
+    min-width: 100%;
   }
 }
