@@ -109,17 +109,21 @@
                                 <span class="text-muted small">{{ op.dateoperation | date:'dd/MM/yyyy HH:mm' }}</span>
                               </div>
                               <div class="row g-2">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                   <small class="text-muted d-block">Bénéficiaire</small>
                                   <span class="fw-medium">{{ op.beneficiaire || '-' }}</span>
                                 </div>
-                                <div class="col-md-4">
-                                  <small class="text-muted d-block">Montant</small>
+                                <div class="col-md-3">
+                                  <small class="text-muted d-block">Montant total</small>
                                   <span class="fw-bold">{{ op.montantoperation | number:'1.0-0' }} {{ op.deviseoperation.code }}</span>
                                 </div>
-                                <div class="col-md-4">
-                                  <small class="text-muted d-block">Réf.</small>
-                                  <span>{{ op.montantreference | number:'1.0-0' }} (taux {{ op.tauxoperation }})</span>
+                                <div class="col-md-3">
+                                  <small class="text-muted d-block">Montant caisse</small>
+                                  <span class="fw-bold text-success">{{ op.montantcaisse | number:'1.0-0' }} {{ caisse.devise.code }}</span>
+                                </div>
+                                <div class="col-md-3">
+                                  <small class="text-muted d-block">Réf. / Taux</small>
+                                  <span>{{ op.montantreference | number:'1.0-0' }} (x{{ op.tauxoperation }})</span>
                                 </div>
                               </div>
                               <div class="lignes-list mt-2">
@@ -128,7 +132,7 @@
                                   @for (ligne of op.lignes; track ligne.idligneoperation) {
                                     <li class="small d-flex align-items-center gap-2 mb-1">
                                       <span class="badge bg-success">{{ ligne.nature.libelle }}</span>
-                                      <span>{{ ligne.libelle }} - {{ ligne.montant | number:'1.0-0' }} {{ op.deviseoperation.code }}</span>
+                                      <span>{{ ligne.libelle }} – {{ ligne.montant | number:'1.0-0' }} {{ op.deviseoperation.code }}</span>
                                       <span class="text-muted" *ngIf="ligne.centre">({{ ligne.centre.code }})</span>
                                       <span class="text-muted" *ngIf="ligne.tiers"> - {{ ligne.tiers.nom }}</span>
                                     </li>

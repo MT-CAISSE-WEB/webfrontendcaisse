@@ -23,7 +23,7 @@ import { InterfaceUserComponent } from '../layout-bloc/interface-user/interface-
 import { DENOMINATION_BILLETAGE } from '../../../_core/constantes/tableau.data';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { InterfaceDemandeUserComponent } from '../layout-bloc/interface-demande-user/interface-demande-user.component';
-import { InterfaceSupervisorComponent } from "../layout-bloc/interface-supervisor/interface-supervisor.component";
+import { InterfaceSupervisorComponent } from '../layout-bloc/interface-supervisor/interface-supervisor.component';
 
 @Component({
   selector: 'app-layout-content',
@@ -37,8 +37,8 @@ import { InterfaceSupervisorComponent } from "../layout-bloc/interface-superviso
     InterfaceUserComponent,
     NgbModalModule,
     InterfaceDemandeUserComponent,
-    InterfaceSupervisorComponent
-],
+    InterfaceSupervisorComponent,
+  ],
   templateUrl: './layout-content.component.html',
   styleUrl: './layout-content.component.css',
 })
@@ -726,5 +726,4 @@ export class LayoutContentComponent implements OnInit {
 
     return 'ri-information-line';
   }
-
 }

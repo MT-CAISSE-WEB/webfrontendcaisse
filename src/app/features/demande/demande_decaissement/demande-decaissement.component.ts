@@ -74,7 +74,8 @@ export class DemandeDecaissementComponent implements OnInit {
   selectedDemande?: DemandeComplet;
 
   searchControl = new FormControl('');
-  filteredDemandes: DemandeComplet[] = [];
+  // filteredDemandes: DemandeComplet[] = [];
+  filteredDemandes: EnteteDemande[] = [];
 
   // Définissez des propriétés de pagination
   currentPage: number = 1;
@@ -142,7 +143,7 @@ export class DemandeDecaissementComponent implements OnInit {
     this.searchControl.valueChanges
       .pipe(debounceTime(300))
       .subscribe((searchText) => {
-        this.applyFilter(searchText as string);
+        this.applyFilter(searchText ?? '');
       });
 
     this.msgSup = MESSAGE_SUPPRESSION_DESCRIPTION('cette opération');
@@ -153,17 +154,17 @@ export class DemandeDecaissementComponent implements OnInit {
     const filter = value?.toLowerCase() || '';
 
     if (!filter) {
-      this.filteredDemandes = [...this.demandes]; // aucune recherche => toutes les demandes
+      this.filteredDemandes = [...this.entetesDmd]; // aucune recherche => toutes les demandes
       return;
     }
 
-    this.filteredDemandes = this.demandes.filter(
-      (demande) =>
-        demande.entete.codedemande!.toLowerCase().includes(filter) ||
-        demande.entete.libelledemande!.toLowerCase().includes(filter) ||
-        demande.lignes.some((lc) =>
-          lc.ligne.libellelignedemande!.toLowerCase().includes(filter),
-        ),
+    this.filteredDemandes = this.entetesDmd.filter(
+      (item) =>
+        item.codedemande?.toLowerCase().includes(filter) ||
+        item.departement?.libelle?.toLowerCase().includes(filter) ||
+        item.typedemande?.toLowerCase().includes(filter) ||
+        item.devise?.codedevise?.toLowerCase().includes(filter) ||
+        item.libelledemande?.toLowerCase().includes(filter),
     );
   }
 
@@ -369,11 +370,11 @@ export class DemandeDecaissementComponent implements OnInit {
       next: (res) => {
         if (res.success) {
           // this.entetesDmd = res.data.data;
-          console.log('Résultat:', res);
           this.entetesDmd = res.data.data.map((item: any) => ({
             ...item,
           }));
-          this.totalPages = res.data.totalPages;
+          this.filteredDemandes = [...this.entetesDmd];
+          this.totalPages = Math.ceil(this.entetesDmd.length / this.limit);
           // Afficher les pj
           this.loadPiecesCountsForAllDemandes();
           this.loading = false;
@@ -584,7 +585,6 @@ export class DemandeDecaissementComponent implements OnInit {
   // Ouvre le modal des pièces jointes
   openPiecesJointesModal(demande: EnteteDemande): void {
     this.selectedDemandePJ = demande;
-    console.log('demande', demande);
     this.selectedFiles = [];
     this.loadPiecesJointes(demande.iddemande);
     this.modalPJVisible = true;
@@ -791,39 +791,123 @@ export class DemandeDecaissementComponent implements OnInit {
     });
   }
 
-  // Récupère la classe CSS pour le statut de la demande
-  getDemandeStatusClass(
-    statut: number | null | undefined,
-    decaisse: number | null | undefined,
-  ): string {
-    if (statut === 0) return 'status-encours';
-    if (statut === 1) return 'status-encours';
-    if (statut === 2) return 'status-warning';
-    if (statut === 3 && decaisse === 0) return 'status-oui';
-    if (statut === 3 && decaisse === 1) return 'status-non';
-    if (statut === 4) return 'status-non';
-    return 'status-encours';
+  // ============================================
+  // 🆕 PROPRIÉTÉS À AJOUTER
+  // ============================================
+  currentStatusFilter: string = 'ALL'; // Filtre actif par défaut
+  isDragOver = false; // État du drag & drop
+  // Dans ton composant, ajoute :
+  allEntetesDmd: EnteteDemande[] = []; // Stock toutes les demandes (non filtrées)
+
+  // ============================================
+  // 🆕 MÉTHODES À AJOUTER
+  // ============================================
+
+  Math = Math; // Pour utiliser Math dans le template
+
+  /**
+   * Compte le nombre de demandes par statut
+   */
+  getCountByStatus(statut: number, decaisse?: boolean): number {
+    if (decaisse !== undefined) {
+      return this.entetesDmd.filter(
+        (d) => d.statut === statut && d.decaisse === (decaisse ? 1 : 0),
+      ).length;
+    }
+    return this.entetesDmd.filter((d) => d.statut === statut).length;
   }
 
-  Math = Math;
-
-  // Récupère le libellé du statut
-  getDemandeStatusLabel(
-    statut: number | null | undefined,
-    decaisse: number | null | undefined,
-  ): string {
-    if (statut === 0) return 'Non validé';
-    if (statut === 1) return 'En cours';
-    if (statut === 2) return 'À revoir';
-    if (statut === 3 && decaisse === 0) return 'Validée';
-    if (statut === 3 && decaisse === 1) return 'Payée';
-    if (statut === 4) return 'Rejetée';
-    return 'Inconnu';
+  /**
+   * Gestion du drag over
+   */
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = true;
   }
 
-  // Récupère la classe CSS pour le statut des validateurs
+  /**
+   * Gestion du drag leave
+   */
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+  }
+
+  /**
+   * Gestion du drop de fichiers
+   */
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const newFiles = Array.from(files);
+      // Filtrer par extension et taille
+      const allowedExtensions = [
+        '.pdf',
+        '.jpg',
+        '.jpeg',
+        '.png',
+        '.doc',
+        '.docx',
+        '.xls',
+        '.xlsx',
+        '.csv',
+      ];
+      const validFiles = newFiles.filter((file) => {
+        const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+        return allowedExtensions.includes(ext) && file.size <= 10 * 1024 * 1024; // 10MB
+      });
+      this.selectedFiles.push(...validFiles);
+    }
+  }
+
+  /**
+   * Génère les numéros de page pour la pagination
+   * @returns Tableau de numéros de page (avec -1 pour les ellipsis)
+   */
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxVisible = 5; // Nombre max de pages visibles
+    let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
+    let end = Math.min(this.totalPages, start + maxVisible - 1);
+
+    // Ajuster si pas assez de pages à la fin
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    // Ajouter la première page et ellipsis si nécessaire
+    if (start > 1) {
+      pages.push(1);
+      if (start > 2) pages.push(-1); // -1 = ellipsis
+    }
+
+    // Ajouter les pages centrales
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    // Ajouter la dernière page et ellipsis si nécessaire
+    if (end < this.totalPages) {
+      if (end < this.totalPages - 1) pages.push(-1); // ellipsis
+      pages.push(this.totalPages);
+    }
+
+    return pages;
+  }
+
+  /**
+   * Récupère la classe CSS pour le statut de validation
+   * @param decision Statut de la validation (ex: "accepter", "refuser", "complement")
+   * @returns Objet avec la classe CSS à appliquer
+   */
   getStatusInfo(decision: string): { class: string } {
-    switch (decision) {
+    switch (decision?.toLowerCase()) {
       case 'approuve':
       case 'validé':
       case 'accepter':
@@ -835,13 +919,17 @@ export class DemandeDecaissementComponent implements OnInit {
       case 'refuser':
         return { class: 'status-non' };
       default:
-        return { class: 'status-encours' };
+        return { class: 'status-encours' }; // "en attente" ou autre
     }
   }
 
-  // Récupère le libellé du statut
+  /**
+   * Récupère le libellé du statut de validation
+   * @param decision Statut de la validation
+   * @returns Libellé à afficher (ex: "Validé", "Rejeté")
+   */
   getStatusLabel(decision: string): string {
-    switch (decision) {
+    switch (decision?.toLowerCase()) {
       case 'approuve':
       case 'validé':
         return 'Validé';
@@ -859,31 +947,49 @@ export class DemandeDecaissementComponent implements OnInit {
     }
   }
 
-  // Génère les numéros de page pour la pagination
-  getPageNumbers(): number[] {
-    const pages: number[] = [];
-    const maxVisible = 5;
-    let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
-    let end = Math.min(this.totalPages, start + maxVisible - 1);
+  /**
+   * Récupère la classe CSS pour le statut de la demande
+   * @param statut Statut numérique (0, 1, 2, 3, 4)
+   * @param decaisse 0=Non payée, 1=Payée
+   * @returns Classe CSS (ex: "status-oui", "status-non", "status-encours", "status-warning")
+   */
+  getDemandeStatusClass(
+    statut: number | null | undefined,
+    decaisse: number | null | undefined,
+  ): string {
+    if (statut === 0) return 'status-enattente'; // Non validé
+    if (statut === 1) return 'status-encours'; // En cours
+    if (statut === 2) return 'status-warning'; // À revoir
+    if (statut === 3 && decaisse === 0) return 'status-oui'; // Validée (non payée)
+    if (statut === 3 && decaisse === 1) return 'status-payee'; // Payée
+    if (statut === 4) return 'status-non'; // Rejetée
+    return 'status-enattente'; // Par défaut
+  }
 
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
+  /**
+   * Récupère le libellé du statut de la demande
+   * @param statut Statut numérique (0, 1, 2, 3, 4)
+   * @param decaisse 0=Non payée, 1=Payée
+   * @returns Libellé (ex: "Validée", "Payée", "Rejetée")
+   */
+  getDemandeStatusLabel(
+    statut: number | null | undefined,
+    decaisse: number | null | undefined,
+  ): string {
+    if (statut === 0) return 'En attente';
+    if (statut === 1) return 'En cours';
+    if (statut === 2) return 'À revoir';
+    if (statut === 3 && decaisse === 0) return 'Validée';
+    if (statut === 3 && decaisse === 1) return 'Payée';
+    if (statut === 4) return 'Rejetée';
+    return 'Inconnu';
+  }
 
-    if (start > 1) {
-      pages.push(1);
-      if (start > 2) pages.push(-1); // Ellipsis
-    }
+  // Et modifier aussi la pagination pour utiliser filteredDemandes
 
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-
-    if (end < this.totalPages) {
-      if (end < this.totalPages - 1) pages.push(-1); // Ellipsis
-      pages.push(this.totalPages);
-    }
-
-    return pages;
+  get paginatedDemandes(): EnteteDemande[] {
+    const start = (this.currentPage - 1) * this.limit;
+    const end = start + this.limit;
+    return this.filteredDemandes.slice(start, end);
   }
 }

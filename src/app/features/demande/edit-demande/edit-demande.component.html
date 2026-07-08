@@ -225,7 +225,7 @@
               </thead>
               <tbody id="newlink">
                 @for (ligne of lignes.controls; track $index) {
-                  <tr class="product" [formGroup]="ligne" [class.ligne-error]="ligneErrors.has($index)">
+                  <tr class="product" [formGroup]="ligne">
                     <td class="text-center fw-bold">{{ $index + 1 }}</td>
                     <td>
                       <div class="input-glass">

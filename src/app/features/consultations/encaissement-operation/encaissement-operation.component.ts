@@ -35,6 +35,7 @@ export interface OperationEncaissement {
   montantoperation: number;
   tauxoperation: number;
   montantreference: number;
+  montantcaisse: number;
   deviseoperation: Devise;
   lignes: LigneEncaissement[];
 }
@@ -118,6 +119,7 @@ export class EncaissementOperationComponent implements OnInit {
       .subscribe({
         next: (res: any) => {
           this.journal = res.success ? res.data : [];
+          console.log('Journal chargé :', this.journal);
           if (!res.success) this.toastr.error(res.message || 'Erreur inconnue');
           this.loading = false;
         },
