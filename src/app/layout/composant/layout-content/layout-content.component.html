@@ -108,48 +108,52 @@
         </div>
       </div>
     </div>
-    <div class="col-xl-3 col-lg-6 col-md-6">
-      <div class="stat-card glass-stat">
-        <div class="stat-icon-wrapper">
-          <div class="stat-icon stat-icon-success">
-            <i class="ri-check-double-line"></i>
+    @if (!issuperviseur()) {
+      <div class="col-xl-3 col-lg-6 col-md-6">
+        <div class="stat-card glass-stat">
+          <div class="stat-icon-wrapper">
+            <div class="stat-icon stat-icon-success">
+              <i class="ri-check-double-line"></i>
+            </div>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">Journée ouverte</span>
+            <h3 class="stat-value">
+              {{ isJourneeOuverte() ? "✅ Oui" : "⛔ Non" }}
+            </h3>
+          </div>
+          <div class="stat-progress">
+            @if (isJourneeOuverte()) {
+              <div class="progress-bar success" style="width: 100%"></div>
+            } @else {
+              <div class="progress-bar success" style="width: 0%"></div>
+            }
           </div>
         </div>
-        <div class="stat-content">
-          <span class="stat-label">Journée ouverte</span>
-          <h3 class="stat-value">
-            {{ isJourneeOuverte() ? "✅ Oui" : "⛔ Non" }}
-          </h3>
-        </div>
-        <div class="stat-progress">
-          @if (isJourneeOuverte()) {
-            <div class="progress-bar success" style="width: 100%"></div>
-          } @else {
-            <div class="progress-bar success" style="width: 0%"></div>
-          }
-        </div>
       </div>
-    </div>
-    <div class="col-xl-3 col-lg-6 col-md-6">
-      <div class="stat-card glass-stat">
-        <div class="stat-icon-wrapper">
-          <div class="stat-icon stat-icon-warning">
-            <i class="ri-calendar-2-line"></i>
+      <div class="col-xl-3 col-lg-6 col-md-6">
+        <div class="stat-card glass-stat">
+          <div class="stat-icon-wrapper">
+            <div class="stat-icon stat-icon-warning">
+              <i class="ri-calendar-2-line"></i>
+            </div>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">Date de caisse</span>
+            <h3 class="stat-value">
+              {{
+                formatDateFR(
+                  caisseperiodeForm.get("dateperiode")?.value || today
+                )
+              }}
+            </h3>
+          </div>
+          <div class="stat-progress">
+            <div class="progress-bar warning" style="width: 50%"></div>
           </div>
         </div>
-        <div class="stat-content">
-          <span class="stat-label">Date de caisse</span>
-          <h3 class="stat-value">
-            {{
-              formatDateFR(caisseperiodeForm.get("dateperiode")?.value || today)
-            }}
-          </h3>
-        </div>
-        <div class="stat-progress">
-          <div class="progress-bar warning" style="width: 50%"></div>
-        </div>
       </div>
-    </div>
+    }
 
     <div class="col-xl-3 col-lg-6 col-md-6">
       <div class="stat-card glass-stat">
