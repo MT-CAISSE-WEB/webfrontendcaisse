@@ -939,7 +939,7 @@ export class EditDemandeComponent implements OnInit {
   }
 
   submit() {
-    /** Check formulaire */
+    /** 1. Validation du formulaire */
     this.msgErros = '';
     const controls = this.demandeForm.controls;
     if (this.demandeForm.invalid) {
@@ -951,21 +951,27 @@ export class EditDemandeComponent implements OnInit {
       return;
     }
 
-    /** 2. prepare data */
+    /** 2. Préparation des données avec transformation COMPLÈTE */
     const raw = this.demandeForm.getRawValue();
     const formValue = {
       ...this.demande,
       ...raw,
-      //transformer departement
+      // Transformation des champs objets
       departement: raw.departement?.iddepartement || raw.departement,
-      //transformer lignes
       lignes: raw.lignes.map((l: any) => ({
         ...l,
-        natureop: l.natureop?.idnature || l.natureop,
-        centre: l.centre?.idcentreanalytique || l.centre,
-        tiers: l.tiers?.idtiers || l.tiers,
+        natureop: l.natureop?.idnature || l.natureop, // ID nature
+        centre: l.centre?.idcentreanalytique || l.centre, // ID centre
+        tiers: l.tiers?.idtiers || l.tiers, // ID tiers
+        // TRANSFORMATION CRITIQUE : Convertir les FormGroups en objets simples
+        details: l.details
+          ? l.details.map((d: any) => ({
+              description: d.description,
+              quantite: d.quantite,
+              montant: d.montant,
+            }))
+          : [],
       })),
-
       createdby: this.user.codeutilisateur ?? null,
       updatedby:
         this.title === 'Modification'
@@ -973,7 +979,7 @@ export class EditDemandeComponent implements OnInit {
           : null,
     };
 
-    /** 3. choices action */
+    /** 3. Appel au backend */
     if (this.title == 'Création') this.create(formValue);
     else this.update(formValue);
   }
