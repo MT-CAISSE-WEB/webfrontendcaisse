@@ -881,7 +881,8 @@ export class EditDemandeComponent implements OnInit {
   }
 
   addDetail(ligneIndex: number) {
-    this.getDetailsArray(ligneIndex).push(this.newDetail());
+    const d = this.getDetailsArray(ligneIndex).push(this.newDetail());
+    console.log('Detail added to ligne', ligneIndex, d);
   }
 
   get form() {
@@ -972,6 +973,8 @@ export class EditDemandeComponent implements OnInit {
           ? `${this.user.nom} ${this.user.prenom}`
           : null,
     };
+
+    console.log('Prepared form value for submission:', formValue);
 
     /** 3. choices action */
     if (this.title == 'Création') this.create(formValue);

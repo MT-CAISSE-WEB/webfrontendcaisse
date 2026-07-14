@@ -1650,7 +1650,7 @@ export class OprationJustifieeComponent implements OnInit {
       const ligneGroup = this.fb.group({
         idligne: [l.iddetailsjustificatifoperation ?? null],
         idnature: [l.idnature ?? null, Validators.required],
-        idcentreanalytique: [{ value: l.idcentreanalytique, disabled: true }],
+        idcentreanalytique: [{ value: l.idcentreanalytique ?? null, disabled: true }],
         idtiers: [{ value: l.idtiers ?? null, disabled: true }],
         montantdetail: [
           { value: l.montantdetail ?? '', disabled: false },
@@ -1658,12 +1658,14 @@ export class OprationJustifieeComponent implements OnInit {
         ],
         centres: this.fb.control<any[]>([]),
       });
+      //charger centres POUR CETTE LIGNE
+      this.loadCentresForLigne(ligneGroup, l.idnature, true, '');
 
       this.lignes.push(ligneGroup);
     });
 
     // Mettre à jour les totaux
-    this.updateTotalsAndValidate();
+    //this.updateTotalsAndValidate();
   }
 
   // ============================================
