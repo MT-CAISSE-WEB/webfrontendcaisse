@@ -85,6 +85,7 @@
             <thead>
               <tr>
                 <th>Code</th>
+                <th>Libellé</th>
                 <th>Département</th>
                 <th>Type</th>
                 <th class="text-end">Montant</th>
@@ -99,6 +100,13 @@
                 <tr>
                   <td>
                     <a href="#" class="link-primary">{{ item.codedemande }}</a>
+                  </td>
+                  <td title="{{ item.libelledemande }}">
+                    {{
+                      item.libelledemande!.length > 10
+                        ? (item.libelledemande | slice: 0 : 20) + "..."
+                        : (item.libelledemande ?? "-")
+                    }}
                   </td>
                   <td>{{ item.departement?.libelle }}</td>
                   <td>{{ item.typedemande! }}</td>

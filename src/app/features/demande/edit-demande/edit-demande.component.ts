@@ -595,7 +595,7 @@ export class EditDemandeComponent implements OnInit {
     this.getallAffectationNatures(type);
 
     // Réinitialiser les natures déjà choisies
-    this.lignes.controls.forEach((ligne: FormGroup) => {
+    this.lignes.controls.forEach((ligne: FormGroup, i) => {
       ligne.reset();
 
       ligne.patchValue({
@@ -951,8 +951,13 @@ export class EditDemandeComponent implements OnInit {
       return;
     }
 
+    this.lignes.controls.forEach((ligne, i) => {
+      console.log('Ligne', i, ligne.get('details')?.value);
+    });
+
     /** 2. Préparation des données avec transformation COMPLÈTE */
     const raw = this.demandeForm.getRawValue();
+    console.log('raw', raw);
     const formValue = {
       ...this.demande,
       ...raw,
@@ -960,9 +965,9 @@ export class EditDemandeComponent implements OnInit {
       departement: raw.departement?.iddepartement || raw.departement,
       lignes: raw.lignes.map((l: any) => ({
         ...l,
-        natureop: l.natureop?.idnature || l.natureop, // ID nature
-        centre: l.centre?.idcentreanalytique || l.centre, // ID centre
-        tiers: l.tiers?.idtiers || l.tiers, // ID tiers
+        natureop: l.natureop?.idnature ?? l.natureop, // ID nature
+        centre: l.centre?.idcentreanalytique ?? l.centre, // ID centre
+        tiers: l.tiers?.idtiers ?? null, // ID tiers
         // TRANSFORMATION CRITIQUE : Convertir les FormGroups en objets simples
         details: l.details
           ? l.details.map((d: any) => ({

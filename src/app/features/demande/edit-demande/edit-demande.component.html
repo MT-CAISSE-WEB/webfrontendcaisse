@@ -388,7 +388,10 @@
 
                         <div [formGroup]="lignesFormArray.at($index)">
                           <div class="modal-body p-4">
-                            <div class="table-responsive">
+                            <div
+                              class="table-responsive"
+                              formArrayName="details"
+                            >
                               <table
                                 class="table table-modern align-middle mb-0"
                               >
@@ -404,7 +407,7 @@
                                 <tbody>
                                   @for (
                                     detail of getDetailsArray($index).controls;
-                                    track $index;
+                                    track detail;
                                     let j = $index
                                   ) {
                                     <tr [formGroupName]="j">
