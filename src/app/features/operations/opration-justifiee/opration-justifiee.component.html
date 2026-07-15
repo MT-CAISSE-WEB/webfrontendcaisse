@@ -307,6 +307,7 @@
                     <tr>
                       <th style="width: 40px">#</th>
                       <th>Pièce</th>
+                      <th>Commentaire </th>
                       <th class="text-end">Montant</th>
                     </tr>
                   </thead>
@@ -328,6 +329,17 @@
                             piece.codejustificatif
                           }}</span>
                         </td>
+                        <td
+                          class="text-nowrap"
+                          [attr.title]="piece.commentaire"
+                          style="max-width: 300px; cursor: pointer"
+                        >
+                          {{
+                            (piece.commentaire || "").length > 40
+                              ? ((piece.commentaire || "") | slice:0:40) + "..."
+                              : (piece.commentaire || "")
+                        }}
+                        </td>
                         <td class="text-end fw-semibold">
                           {{ piece.montantjustificatif | number: "1.2-2" }}
                           <span class="text-muted small">{{
@@ -339,12 +351,12 @@
                     <tr
                       *ngIf="justificatifFiltered.length === 0 && !loadingPiece"
                     >
-                      <td colspan="3" class="text-center text-muted py-3">
+                      <td colspan="4" class="text-center text-muted py-3">
                         <i class="ri-inbox-line me-1"></i> Aucun justificatif
                       </td>
                     </tr>
                     <tr *ngIf="loadingPiece">
-                      <td colspan="3">
+                      <td colspan="4">
                         <div class="spinner-glass-sm">
                           <div
                             class="spinner-border spinner-border-sm text-primary"

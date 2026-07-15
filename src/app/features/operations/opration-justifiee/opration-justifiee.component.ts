@@ -718,30 +718,6 @@ export class OprationJustifieeComponent implements OnInit {
       });
   }
 
-  // fillLignesFromDetail(details: any[]) {
-  //   const lignesFA = this.lignes;
-  //   lignesFA.clear(); // vider l’ancien contenu
-
-  //   details.forEach((d) => {
-  //     const ligne = this.fb.group({
-  //       idnature: [d.idnature, Validators.required],
-  //       idcentreanalytique: [d.idcentreanalytique],
-  //       idtiers: [d.idtiers],
-  //       montantdetail: [d.montantdetail, Validators.required],
-  //     });
-
-  //     // Ajout du contrôle dynamique pour vérification immédiate
-  //     // ligne.get('montantdetail')?.valueChanges.subscribe(() => {
-  //     //   this.updateTotalsAndValidate();
-  //     // });
-
-  //     lignesFA.push(ligne);
-  //   });
-
-  //   // Mettre à jour les totaux après chargement
-  //   this.updateTotalsAndValidate();
-  // }
-
   //validation required
   isValidField(label: string): string {
     let status: string = '';
