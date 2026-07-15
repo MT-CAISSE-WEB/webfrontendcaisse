@@ -930,6 +930,7 @@ export class OperationCaisseComponent implements OnInit {
 
   openEditModal(template: TemplateRef<any>, item: any) {
     this.operationdetail = item;
+    console.log('Operation detail', this.operationdetail);
     const container = this.getModalContainer(item);
     const options: any = { centered: true, size: 'lg' };
     if (container) {
@@ -965,7 +966,6 @@ export class OperationCaisseComponent implements OnInit {
   }
 
   modalPJVisible = false;
-  // Ouvre le modal des pièces jointes
   /**
    * Ouvre le modal des pièces jointes avec ng-template
    */

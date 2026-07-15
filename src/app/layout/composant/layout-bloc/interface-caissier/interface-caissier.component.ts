@@ -18,6 +18,9 @@ import { EnteteDemande } from '../../../../features/demande/models/entete-demand
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { OperationModalComponent } from '../../../../_core/modal/operation-modal/operation-modal.component';
 import { OperationPJService } from '../../../../features/PJ/service/operationpj.service';
+import { ExcelService } from '../../../../_core/services/exportExcel.service';
+import { PdfService } from '../../../../_core/services/pdf.service';
+import { PrintService } from '../../../../_core/services/print.service';
 
 @Component({
   selector: 'app-interface-caissier',
@@ -104,6 +107,9 @@ export class InterfaceCaissierComponent implements OnInit {
     private demandeService: DemandeService,
     private operationservice: OperationService,
     private pjService: OperationPJService,
+    private excelService: ExcelService,
+    private printService: PrintService,
+    private pdfService: PdfService,
   ) {}
 
   ngOnInit(): void {
@@ -602,5 +608,222 @@ export class InterfaceCaissierComponent implements OnInit {
       }
     }
     return this.caissier;
+  }
+
+  /**
+   * Exporte les données en Excel avec ton service existant
+   */
+  exportToExcel(): void {
+    if (!this.opLast || this.opLast.length === 0) {
+      this.toastr.warning('Aucune donnée à exporter');
+      return;
+    }
+
+    try {
+      // 1️⃣ Définir les colonnes avec leurs libellés
+      const columns = [
+        { header: 'Pièce', field: 'piece' },
+        { header: 'Montant', field: 'montantFormate' },
+        { header: 'Type', field: 'typeoperation' },
+        { header: 'Payé', field: 'payeFormate' },
+        { header: 'Référence', field: 'refFormate' },
+        { header: 'Date', field: 'dateFormatee' },
+      ];
+
+      // 2️⃣ Préparer les données
+      const data = this.opLast.map((item: any) => {
+        const caisse = item.caisses?.[0] || {};
+        return {
+          piece: item.piece || '-',
+          montantFormate: `${this.formatNumber(item.montantop)} ${item.deviseop || ''}`,
+          typeoperation: item.typeoperation || '-',
+          payeFormate: `${this.formatNumber(caisse.montant)} ${caisse.devise || ''}`,
+          refFormate: `${this.formatNumber(caisse.montant_ref)} ${this.user.devise_ref_code}`,
+          dateFormatee: this.formatDateFR(item.date),
+        };
+      });
+
+      // 3️⃣ Exporter
+      const fileName = `operations_caisse_${new Date().toISOString().split('T')[0]}`;
+      this.excelService.exportToExcel(data, columns, fileName);
+      this.toastr.success('Export Excel réussi');
+    } catch (error) {
+      console.error('Erreur export Excel:', error);
+      this.toastr.error("Erreur lors de l'export Excel");
+    }
+  }
+
+  /**
+   * Utilisation directe de exportRawData si besoin
+   */
+  exportRawData(): void {
+    if (!this.opLast || this.opLast.length === 0) {
+      this.toastr.warning('Aucune donnée à exporter');
+      return;
+    }
+
+    try {
+      const fileName = `operations_raw_${new Date().toISOString().split('T')[0]}`;
+      this.excelService.exportRawData(this.opLast, fileName);
+      this.toastr.success('Export Excel réussi');
+    } catch (error) {
+      console.error('Erreur export Excel:', error);
+      this.toastr.error("Erreur lors de l'export Excel");
+    }
+  }
+
+  /**
+   * Utilisation pour exporter toutes les données (y compris les détails)
+   */
+  exportFullData(): void {
+    if (!this.opLast || this.opLast.length === 0) {
+      this.toastr.warning('Aucune donnée à exporter');
+      return;
+    }
+
+    try {
+      // Préparer les données avec tous les détails
+      const data = this.opLast.flatMap((item: any) => {
+        return (item.caisses || []).map((caisse: any) => ({
+          piece: item.piece || '-',
+          montant_operation: item.montantop || 0,
+          devise_operation: item.deviseop || '',
+          type_operation: item.typeoperation || '-',
+          montant_paye: caisse.montant || 0,
+          devise_paye: caisse.devise || '',
+          montant_ref: caisse.montant_ref || 0,
+          devise_ref: this.user.devise_ref_code,
+          date_operation: this.formatDateFR(item.date),
+          code_caisse: caisse.codecaisse || '',
+          libelle_caisse: caisse.libelle || '',
+        }));
+      });
+
+      const fileName = `operations_details_${new Date().toISOString().split('T')[0]}`;
+      this.excelService.exportRawData(data, fileName);
+      this.toastr.success('Export Excel détaillé réussi');
+    } catch (error) {
+      console.error('Erreur export Excel:', error);
+      this.toastr.error("Erreur lors de l'export Excel");
+    }
+  }
+
+  /**
+   * Export au format Sage X3 (si nécessaire)
+   */
+  exportSageX3(): void {
+    if (!this.opLast || this.opLast.length === 0) {
+      this.toastr.warning('Aucune donnée à exporter');
+      return;
+    }
+
+    try {
+      // Préparer les données au format Sage X3
+      const rows: any[][] = [
+        ['Pièce', 'Montant', 'Devise', 'Type', 'Date', 'Caisse'],
+      ];
+
+      this.opLast.forEach((item: any) => {
+        (item.caisses || []).forEach((caisse: any) => {
+          rows.push([
+            item.piece || '-',
+            caisse.montant || 0,
+            caisse.devise || '',
+            item.typeoperation || '-',
+            new Date(item.date).toLocaleDateString('fr-FR'),
+            caisse.codecaisse || '',
+          ]);
+        });
+      });
+
+      const fileName = `sage_import_${new Date().toISOString().split('T')[0]}`;
+      this.excelService.exportSageX3(rows, fileName);
+      this.toastr.success('Export Sage X3 réussi');
+    } catch (error) {
+      console.error('Erreur export Sage X3:', error);
+      this.toastr.error("Erreur lors de l'export Sage X3");
+    }
+  }
+
+  /**
+   * Export PDF
+   */
+  exportToPDF(): void {
+    if (!this.opLast || this.opLast.length === 0) {
+      this.toastr.warning('Aucune donnée à exporter');
+      return;
+    }
+
+    try {
+      const columns = [
+        { header: 'Pièce', field: 'piece' },
+        { header: 'Montant', field: 'montantFormate' },
+        { header: 'Type', field: 'typeoperation' },
+        { header: 'Payé', field: 'payeFormate' },
+        { header: 'Référence', field: 'refFormate' },
+        { header: 'Date', field: 'dateFormatee' },
+      ];
+
+      const data = this.opLast.map((item: any) => {
+        const caisse = item.caisses?.[0] || {};
+        return {
+          piece: item.piece || '-',
+          montantFormate: `${item.montantop} ${item.deviseop || ''}`,
+          typeoperation: item.typeoperation || '-',
+          payeFormate: `${caisse.montant} ${caisse.devise || ''}`,
+          refFormate: `${caisse.montant_ref} ${this.user.devise_ref_code}`,
+          dateFormatee: this.formatDateFR(item.date),
+        };
+      });
+
+      const title = `Opérations de caisse`;
+      const fileName = `operations_caisse_${new Date().toISOString().split('T')[0]}`;
+
+      this.pdfService.exportToPDF(data, columns, fileName, title);
+      this.toastr.success('Export PDF réussi');
+    } catch (error) {
+      console.error('Erreur export PDF:', error);
+      this.toastr.error("Erreur lors de l'export PDF");
+    }
+  }
+
+  /**
+   * Impression
+   */
+  printData(): void {
+    if (!this.opLast || this.opLast.length === 0) {
+      this.toastr.warning('Aucune donnée à imprimer');
+      return;
+    }
+
+    try {
+      const columns = [
+        { header: 'Pièce', field: 'piece' },
+        { header: 'Montant', field: 'montantFormate' },
+        { header: 'Type', field: 'typeoperation' },
+        { header: 'Payé', field: 'payeFormate' },
+        { header: 'Référence', field: 'refFormate' },
+        { header: 'Date', field: 'dateFormatee' },
+      ];
+
+      const data = this.opLast.map((item: any) => {
+        const caisse = item.caisses?.[0] || {};
+        return {
+          piece: item.piece || '-',
+          montantFormate: `${this.formatNumber(item.montantop)} ${item.deviseop || ''}`,
+          typeoperation: item.typeoperation || '-',
+          payeFormate: `${this.formatNumber(caisse.montant)} ${caisse.devise || ''}`,
+          refFormate: `${this.formatNumber(caisse.montant_ref)} ${this.user.devise_ref_code}`,
+          dateFormatee: this.formatDateFR(item.date),
+        };
+      });
+
+      const title = `Opérations de caisse - ${new Date().toLocaleDateString('fr-FR')}`;
+      this.printService.printData(data, columns, title);
+      this.toastr.info("Fenêtre d'impression ouverte");
+    } catch (error) {
+      console.error('Erreur impression:', error);
+      this.toastr.error("Erreur lors de l'impression");
+    }
   }
 }
