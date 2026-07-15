@@ -477,7 +477,7 @@
    ============================================ */
 .clickable-row {
   cursor: pointer;
-  transition: all 0.2s ease;
+  /* transition: all 0.2s ease; */
 }
 
 .clickable-row:hover {
@@ -1592,7 +1592,7 @@
 .clickable-row.active {
   background: rgba(59, 130, 246, 0.1);
   border-left: 3px solid #405189;
-  transition: all 0.2s ease;
+  /* transition: all 0.2s ease; */
 }
 
 .clickable-row.active td:first-child {
@@ -1601,7 +1601,7 @@
 
 .clickable-row {
   cursor: pointer;
-  transition: all 0.2s ease;
+  /* transition: all 0.2s ease; */
 }
 
 .clickable-row:hover {

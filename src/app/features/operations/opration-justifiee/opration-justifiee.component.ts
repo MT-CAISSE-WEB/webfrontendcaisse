@@ -122,6 +122,8 @@ export class OprationJustifieeComponent implements OnInit {
 
   selectedRetour: any = null;
 
+  skipRecalcul: boolean = false; // Flag pour éviter les recalculs redondants
+
   // États pour le contrôle dynamique des devises
   tauxDevises: { [key: string]: number } = {}; // Cache des taux par devise
   devisesImpliquees: Set<string> = new Set(); // Ensemble des devises utilisées
@@ -218,8 +220,7 @@ export class OprationJustifieeComponent implements OnInit {
    * AJOUT LIGNE
    */
   addLine() {
-    const resteOperation =
-      this.operationForm.get('resteapayeroperation')?.value || 0;
+    const resteOperation = this.operationForm.get('resteapayeroperation')?.value || 0;
     const resteRef = this.operationForm.get('resteapayerref')?.value || 0;
 
     //BLOQUER si reste <= 0
@@ -258,10 +259,11 @@ export class OprationJustifieeComponent implements OnInit {
       this.handleNatureChange(ligne, natureId);
     });
 
-    ligne.get('montantdetail')?.valueChanges.subscribe(() => {
-      //this.updateTotalMontant();
-      this.updateTotalsAndValidate();
-    });
+    if(!this.skipRecalcul){
+      ligne.get('montantdetail')?.valueChanges.subscribe(() => {
+        this.updateTotalsAndValidate();
+      });
+    }
 
     this.lignes.push(ligne);
   }
@@ -318,6 +320,8 @@ export class OprationJustifieeComponent implements OnInit {
   }
 
   updateTotalsAndValidate() {
+    if (this.skipRecalcul) return; // Empêcher les recalculs redondants pendant cette opération
+
     const deviseOp = this.operationForm.get('deviseoperation')?.value;
     const deviseJust = this.operationForm.get('devisejustificatif')?.value;
     const deviseRef = this.user.devise_ref_id;
@@ -697,15 +701,14 @@ export class OprationJustifieeComponent implements OnInit {
               operation.devise?.iddevise,
             );
 
-            this.operationForm.patchValue({
-              resteapayeroperation: resteOperation,
-              resteapayerref: resteRef,
-            });
+            if(!this.skipRecalcul){
+              this.operationForm.patchValue({
+                resteapayeroperation: resteOperation,
+                resteapayerref: resteRef,
+              });
+            }
 
             this.loadingPiece = false;
-
-            //calcul maintenant fiable
-            //this.recalculateOperationTotals();
           }
         },
         error: (err) => {
@@ -715,29 +718,29 @@ export class OprationJustifieeComponent implements OnInit {
       });
   }
 
-  fillLignesFromDetail(details: any[]) {
-    const lignesFA = this.lignes;
-    lignesFA.clear(); // vider l’ancien contenu
+  // fillLignesFromDetail(details: any[]) {
+  //   const lignesFA = this.lignes;
+  //   lignesFA.clear(); // vider l’ancien contenu
 
-    details.forEach((d) => {
-      const ligne = this.fb.group({
-        idnature: [d.idnature, Validators.required],
-        idcentreanalytique: [d.idcentreanalytique],
-        idtiers: [d.idtiers],
-        montantdetail: [d.montantdetail, Validators.required],
-      });
+  //   details.forEach((d) => {
+  //     const ligne = this.fb.group({
+  //       idnature: [d.idnature, Validators.required],
+  //       idcentreanalytique: [d.idcentreanalytique],
+  //       idtiers: [d.idtiers],
+  //       montantdetail: [d.montantdetail, Validators.required],
+  //     });
 
-      // Ajout du contrôle dynamique pour vérification immédiate
-      ligne.get('montantdetail')?.valueChanges.subscribe(() => {
-        this.updateTotalsAndValidate();
-      });
+  //     // Ajout du contrôle dynamique pour vérification immédiate
+  //     // ligne.get('montantdetail')?.valueChanges.subscribe(() => {
+  //     //   this.updateTotalsAndValidate();
+  //     // });
 
-      lignesFA.push(ligne);
-    });
+  //     lignesFA.push(ligne);
+  //   });
 
-    // Mettre à jour les totaux après chargement
-    this.updateTotalsAndValidate();
-  }
+  //   // Mettre à jour les totaux après chargement
+  //   this.updateTotalsAndValidate();
+  // }
 
   //validation required
   isValidField(label: string): string {
@@ -768,7 +771,6 @@ export class OprationJustifieeComponent implements OnInit {
           });
         },
         error: (err) => {
-          console.log(err);
           this.loadingCaisses = false;
           this.toastr.error(err.error.message);
         },
@@ -1216,7 +1218,6 @@ export class OprationJustifieeComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        console.log('Erreur backend');
         this.toastr.error(err.error.message);
       },
     });
@@ -1493,7 +1494,7 @@ export class OprationJustifieeComponent implements OnInit {
         montantref: 0,
       });
     });
-    this.updateTotalsAndValidate();
+    //this.updateTotalsAndValidate();
     this.toastr.info('Tous les montants ont été effacés');
   }
 
@@ -1623,19 +1624,23 @@ export class OprationJustifieeComponent implements OnInit {
     if (!justificatif) return;
 
     // 6. Charger les détails du justificatif
+    this.skipRecalcul = true; // Empêcher le recalcul automatique pendant le patch
     this.loadDetailJustificatif(justificatif);
+    setTimeout(() => this.skipRecalcul = false, 0);
   }
+
   /**
    * Remplit le formulaire avec les détails d'un justificatif
    */
   dispatchDetail(_object: any) {
+    this.skipRecalcul = true;
     // Patch des champs simples
     this.operationForm.patchValue({
       tauxoperation: _object.justificatif.taux,
       devisejustificatif: _object.justificatif.iddevise,
       commentaire: _object.justificatif.commentaire,
       datejustificatif: this.formatDateForInput(_object.justificatif.date),
-    });
+    }, { emitEvent: false });
 
     // Déclencher le chargement du taux si la devise est définie
     if (_object.justificatif.iddevise) {
@@ -1662,10 +1667,9 @@ export class OprationJustifieeComponent implements OnInit {
       this.loadCentresForLigne(ligneGroup, l.idnature, true, '');
 
       this.lignes.push(ligneGroup);
-    });
+    }, { emitEvent: false });
 
-    // Mettre à jour les totaux
-    //this.updateTotalsAndValidate();
+    setTimeout(() => this.skipRecalcul = false, 0);
   }
 
   // ============================================
@@ -1824,11 +1828,6 @@ export class OprationJustifieeComponent implements OnInit {
       this.toastr.warning('Aucun fichier sélectionné');
       return;
     }
-
-    console.log(
-      "Upload des fichiers pour l'opération:",
-      this.selectedOperationPJ,
-    );
 
     this.pjUploading = true;
     const userId = this.user.idutilisateur;
@@ -2008,7 +2007,6 @@ export class OprationJustifieeComponent implements OnInit {
 
     // Cas 1: Seulement la demande a des PJ
     if (hasDemandePJ && !hasOperationPJ) {
-      console.log('📥 Téléchargement uniquement des PJ de la demande');
       this.downloadingAll = true;
 
       this.pjService.downloadAllOperationFiles(undefined, iddemande).subscribe({
@@ -2091,6 +2089,24 @@ export class OprationJustifieeComponent implements OnInit {
         this.toastr.error("Erreur d\'impression du document");
       },
     });
+  }
+
+  clearJustificatifFields() {
+    this.skipRecalcul = true;
+
+    this.lignes.clear({ emitEvent: false });
+
+    this.operationForm.patchValue({
+      commentaire: '',
+      tauxoperation: 1,
+      devisejustificatif: '',
+      datejustificatif: this.formatDateForInput(new Date().toISOString().slice(0,10)), // ← date du jour
+    }, { emitEvent: false });
+
+    this.selectedJustificatif = null;
+    this.justificatifDetailFiltered = [];
+
+    setTimeout(() => this.skipRecalcul = false, 0);
   }
 
 }
