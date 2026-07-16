@@ -74,10 +74,17 @@
               </button>
               <button
                 type="button"
+                class="btn-glass-success"
+                (click)="printDocumentJustif()"
+              >
+                <i class="ri-printer-fill align-bottom me-1"></i> Imprimer
+              </button>
+              <button
+                type="button"
                 class="btn-glass-primary"
                 (click)="getAllOperations()"
               >
-                <i class="ri-refresh-fill align-bottom me-1"></i> Charger
+                <i class="ri-refresh-fill align-bottom me-1"></i> Recharger
               </button>
             </div>
           </div>
@@ -97,7 +104,13 @@
                   </option>
                   @for (item of operationsFiltrees; track $index) {
                     <option value="{{ item.idoperation }}">
-                      {{ item.codeoperation }} — {{ formatCFA(item.montant) }}
+                      {{ item.codeoperation }} ---
+                      {{
+                        (item.commentaire!.length || 0) > 50
+                          ? (item.commentaire | slice: 0 : 50) + "..."
+                          : item.commentaire || ""
+                      }}
+                      --- {{ formatCFA(item.montant) }}
                       {{ item.devise.codedevise }}
                     </option>
                   }
@@ -294,7 +307,9 @@
                     <tr>
                       <th style="width: 40px">#</th>
                       <th>Pièce</th>
+                      <th>Commentaire</th>
                       <th class="text-end">Montant</th>
+                      <th>PJ</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -315,23 +330,53 @@
                             piece.codejustificatif
                           }}</span>
                         </td>
+                        <td
+                          class="text-nowrap"
+                          [attr.title]="piece.commentaire"
+                          style="max-width: 300px; cursor: pointer"
+                        >
+                          {{
+                            (piece.commentaire || "").length > 40
+                              ? (piece.commentaire || "" | slice: 0 : 40) +
+                                "..."
+                              : piece.commentaire || ""
+                          }}
+                        </td>
                         <td class="text-end fw-semibold">
                           {{ piece.montantjustificatif | number: "1.2-2" }}
                           <span class="text-muted small">{{
                             piece.devise?.codedevise
                           }}</span>
                         </td>
+                        <td>
+                          <button
+                            class="action-btn action-attachment"
+                            (click)="
+                              openJustificatifPiecesJointesModal(
+                                piece.idjustificatifoperation
+                              )
+                            "
+                            title="Pièces jointes"
+                          >
+                            <i class="ri-attachment-2"></i>
+                            @if (justificatifPiecesCount > 0) {
+                              <span class="badge-count">{{
+                                justificatifPiecesCount
+                              }}</span>
+                            }
+                          </button>
+                        </td>
                       </tr>
                     }
                     <tr
                       *ngIf="justificatifFiltered.length === 0 && !loadingPiece"
                     >
-                      <td colspan="3" class="text-center text-muted py-3">
+                      <td colspan="5" class="text-center text-muted py-3">
                         <i class="ri-inbox-line me-1"></i> Aucun justificatif
                       </td>
                     </tr>
                     <tr *ngIf="loadingPiece">
-                      <td colspan="3">
+                      <td colspan="5">
                         <div class="spinner-glass-sm">
                           <div
                             class="spinner-border spinner-border-sm text-primary"
@@ -374,6 +419,13 @@
               </span>
             </div>
             <div class="d-flex gap-2 flex-wrap">
+              <button
+                type="button"
+                class="btn-glass-primary"
+                (click)="clearJustificatifFields()"
+              >
+                <i class="ri-add-fill align-bottom me-1"></i> nouvelle saisie
+              </button>
               <button
                 type="button"
                 class="btn-glass-success btn-sm"
@@ -537,7 +589,10 @@
             </div>
 
             <!-- Détails des justificatifs -->
-            <div class="justificatif-details">
+            <div
+              class="justificatif-details"
+              *ngIf="!showCaisses; else lignesJustificatif"
+            >
               <div class="details-header">
                 <div class="d-flex align-items-center gap-2">
                   <i class="ri-list-check-2 text-primary"></i>
@@ -641,6 +696,199 @@
                 </table>
               </div>
             </div>
+
+            <!-- ============================================ -->
+            <!-- SECTION 4: RETOUR CAISSE - DESIGN UNIQUEMENT -->
+            <!-- ============================================ -->
+            <ng-template #lignesJustificatif>
+              <div class="card-header-glass">
+                <div
+                  class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+                >
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="section-icon-glass">
+                      <i class="ri-arrow-left-right-line"></i>
+                    </div>
+                    <h6 class="card-title-glass mb-0">
+                      Répartition des retours en caisse
+                    </h6>
+                    <span
+                      class="badge-glass badge-glass-secondary badge-count-sm"
+                    >
+                      {{ caisses.length }} caisse(s)
+                    </span>
+                  </div>
+                  <!-- État du retour -->
+                  <div class="d-flex align-items-center gap-2">
+                    <span
+                      class="badge-glass"
+                      [class.badge-glass-success]="selectedRetour"
+                      [class.badge-glass-secondary]="!selectedRetour"
+                    >
+                      <i class="ri-check-line" *ngIf="selectedRetour"></i>
+                      <i class="ri-close-line" *ngIf="!selectedRetour"></i>
+                      {{
+                        selectedRetour ? "Retour sélectionné" : "Aucun retour"
+                      }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-body-glass pt-0">
+                <!-- Message de guidage -->
+                <div class="retour-guide" *ngIf="!selectedRetour">
+                  <i class="ri-hand-pointer-line"></i>
+                  <span
+                    >Sélectionnez un retour dans la section
+                    <strong>"Retour en caisses"</strong> ci-dessus pour activer
+                    la répartition</span
+                  >
+                </div>
+
+                <!-- Grille des caisses -->
+                <div class="caisse-grid">
+                  @for (c of caisses.controls; track $index) {
+                    <div
+                      class="caisse-card"
+                      [formGroup]="c"
+                      [class.has-error]="c.get('montantcaisse')?.errors"
+                    >
+                      <!-- En-tête de la caisse -->
+                      <div class="caisse-card-header">
+                        <div class="caisse-info">
+                          <span class="caisse-name">{{
+                            c.get("caisse")?.value
+                          }}</span>
+                          <span class="caisse-devise">{{
+                            c.get("devisecaisse")?.value
+                          }}</span>
+                        </div>
+                        <div class="caisse-solde">
+                          <span class="solde-label">Solde</span>
+                          <span class="solde-value">{{
+                            c.get("solde")?.value
+                          }}</span>
+                        </div>
+                      </div>
+
+                      <!-- Corps de la caisse -->
+                      <div class="caisse-card-body">
+                        <!-- Montant à reverser -->
+                        <div class="caisse-montant">
+                          <label class="caisse-label">Montant à reverser</label>
+                          <div class="caisse-input-group">
+                            <input
+                              type="text"
+                              class="caisse-input"
+                              [readonly]="selectedRetour"
+                              [class.is-invalid]="
+                                c.get('montantcaisse')?.errors?.[
+                                  'soldeInsuffisant'
+                                ] ||
+                                c.get('montantcaisse')?.errors?.[
+                                  'depassementMontant'
+                                ]
+                              "
+                              formControlName="montantcaisse"
+                              placeholder="0.00"
+                            />
+                            <span class="caisse-devise-badge">{{
+                              c.get("devisecaisse")?.value
+                            }}</span>
+                          </div>
+                          <div class="caisse-errors">
+                            <span
+                              class="error-text"
+                              *ngIf="
+                                c.get('montantcaisse')?.errors?.[
+                                  'soldeInsuffisant'
+                                ]
+                              "
+                            >
+                              <i class="ri-error-warning-line"></i> Solde
+                              insuffisant
+                            </span>
+                            <span
+                              class="error-text"
+                              *ngIf="
+                                c.get('montantcaisse')?.errors?.[
+                                  'depassementMontant'
+                                ]
+                              "
+                            >
+                              <i class="ri-error-warning-line"></i> Montant
+                              dépassé
+                            </span>
+                          </div>
+                        </div>
+
+                        <!-- Taux -->
+                        <div class="caisse-taux">
+                          <label class="caisse-label">Taux</label>
+                          <input
+                            type="text"
+                            class="caisse-input taux-input"
+                            formControlName="taux"
+                            placeholder="1.00"
+                          />
+                        </div>
+
+                        <!-- Montant référence -->
+                        <div class="caisse-ref">
+                          <label class="caisse-label">Montant réf.</label>
+                          <div class="caisse-ref-value">
+                            <span class="ref-amount">{{
+                              c.get("montantref")?.value || "0.00"
+                            }}</span>
+                            <span class="ref-devise">{{
+                              user.devise_rep_code
+                            }}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Footer de la caisse -->
+                      <div class="caisse-card-footer">
+                        <button
+                          type="button"
+                          class="caisse-reset-btn"
+                          (click)="resetCaisse(c, $index)"
+                          [disabled]="!c.get('montantcaisse')?.value"
+                          title="Réinitialiser cette caisse"
+                        >
+                          <i class="ri-close-circle-line"></i>
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <!-- Actions globales -->
+                <div class="retour-actions" *ngIf="caisses.length > 0">
+                  <button
+                    type="button"
+                    class="btn-glass-secondary btn-sm"
+                    (click)="clearAllCaisses()"
+                    [disabled]="!hasAnyCaisseValue()"
+                  >
+                    <i class="ri-close-line me-1"></i> Tout effacer
+                  </button>
+                </div>
+
+                <!-- Erreur globale -->
+                <div
+                  class="retour-global-error"
+                  *ngIf="operationForm.errors?.['totalCaisseDepasse']"
+                >
+                  <i class="ri-error-warning-line"></i>
+                  <span
+                    >Le total des caisses ne doit pas dépasser le montant total
+                    de l'opération.</span
+                  >
+                </div>
+              </div>
+            </ng-template>
           </div>
 
           <!-- ========================================== -->
@@ -909,183 +1157,219 @@
           </div>
         </div>
       </div>
+    </form>
+  </div>
+</div>
 
-      <!-- ============================================ -->
-      <!-- SECTION 4: RETOUR CAISSE - DESIGN UNIQUEMENT -->
-      <!-- ============================================ -->
-      <div class="card-glass mt-3" *ngIf="showCaisses">
-        <div class="card-header-glass">
-          <div
-            class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+<!-- ==================== MODALE PIÈCES JOINTES JUSTIFICATIF ==================== -->
+<ng-template #piecesJointesJustificatf let-modal>
+  <div class="modal-content-glass">
+    <!-- Header - Thème Orange -->
+    <div class="modal-header modal-header-theme-orange">
+      <div class="d-flex align-items-center gap-3">
+        <div class="icon-circle">
+          <i class="ri-attachment-2 text-white fs-5"></i>
+        </div>
+        <div>
+          <h5 class="modal-title text-white fw-semibold">Pièces jointes</h5>
+          <span
+            class="text-white-50 small"
+            style="font-size: 0.7rem; opacity: 0.8"
           >
-            <div class="d-flex align-items-center gap-2">
-              <div class="section-icon-glass">
-                <i class="ri-arrow-left-right-line"></i>
-              </div>
-              <h6 class="card-title-glass mb-0">
-                Répartition des retours en caisse
-              </h6>
-              <span class="badge-glass badge-glass-secondary badge-count-sm">
-                {{ caisses.length }} caisse(s)
-              </span>
-            </div>
-            <!-- État du retour -->
-            <div class="d-flex align-items-center gap-2">
-              <span
-                class="badge-glass"
-                [class.badge-glass-success]="selectedRetour"
-                [class.badge-glass-secondary]="!selectedRetour"
-              >
-                <i class="ri-check-line" *ngIf="selectedRetour"></i>
-                <i class="ri-close-line" *ngIf="!selectedRetour"></i>
-                {{ selectedRetour ? "Retour sélectionné" : "Aucun retour" }}
-              </span>
-            </div>
+            <i class="ri-file-list-line me-1"></i>
+            Justificatif {{ selectedJustificatifId }}
+          </span>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="btn-close btn-close-white"
+        (click)="modal.close()"
+        aria-label="Close"
+      ></button>
+    </div>
+
+    <div class="modal-body p-4">
+      <div class="attachments-section-glass">
+        <!-- En-tête avec compteur -->
+        <div class="section-header-glass">
+          <div class="section-title-glass">
+            <i class="ri-attachment-2"></i>
+            <span>Documents</span>
+            <span class="badge-glass badge-glass-primary badge-count-sm">
+              {{ justificatifPiecesCount }}
+            </span>
           </div>
+          <button
+            *ngIf="justificatifPiecesCount > 0"
+            type="button"
+            class="btn-glass-primary"
+            (click)="downloadAllJustificatifFiles()"
+            [disabled]="downloadingAllJustificatif"
+            title="Télécharger toutes les pièces jointes"
+          >
+            @if (downloadingAllJustificatif) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            <i class="ri-download-line me-1"></i> Tout télécharger
+          </button>
         </div>
 
-        <div class="card-body-glass pt-0">
-          <!-- Message de guidage -->
-          <div class="retour-guide" *ngIf="!selectedRetour">
-            <i class="ri-hand-pointer-line"></i>
-            <span
-              >Sélectionnez un retour dans la section
-              <strong>"Retour en caisses"</strong> ci-dessus pour activer la
-              répartition</span
-            >
-          </div>
-
-          <!-- Grille des caisses -->
-          <div class="caisse-grid">
-            @for (c of caisses.controls; track $index) {
-              <div
-                class="caisse-card"
-                [formGroup]="c"
-                [class.has-error]="c.get('montantcaisse')?.errors"
-              >
-                <!-- En-tête de la caisse -->
-                <div class="caisse-card-header">
-                  <div class="caisse-info">
-                    <span class="caisse-name">{{
-                      c.get("caisse")?.value
-                    }}</span>
-                    <span class="caisse-devise">{{
-                      c.get("devisecaisse")?.value
-                    }}</span>
-                  </div>
-                  <div class="caisse-solde">
-                    <span class="solde-label">Solde</span>
-                    <span class="solde-value">{{ c.get("solde")?.value }}</span>
-                  </div>
+        <!-- Liste des PJ existantes -->
+        <div *ngIf="!piecesJointesLoading && justificatifPiecesCount > 0">
+          <div class="horizontal-scroll-glass">
+            @for (pj of justificatifPiecesJointes; track $index) {
+              <div class="file-pill-glass file-pill-editable">
+                <div class="pill-icon-glass">
+                  <i [class]="getFileIcon(pj)"></i>
                 </div>
-
-                <!-- Corps de la caisse -->
-                <div class="caisse-card-body">
-                  <!-- Montant à reverser -->
-                  <div class="caisse-montant">
-                    <label class="caisse-label">Montant à reverser</label>
-                    <div class="caisse-input-group">
-                      <input
-                        type="text"
-                        class="caisse-input"
-                        [readonly]="selectedRetour"
-                        [class.is-invalid]="
-                          c.get('montantcaisse')?.errors?.[
-                            'soldeInsuffisant'
-                          ] ||
-                          c.get('montantcaisse')?.errors?.['depassementMontant']
-                        "
-                        formControlName="montantcaisse"
-                        placeholder="0.00"
-                      />
-                      <span class="caisse-devise-badge">{{
-                        c.get("devisecaisse")?.value
-                      }}</span>
-                    </div>
-                    <div class="caisse-errors">
-                      <span
-                        class="error-text"
-                        *ngIf="
-                          c.get('montantcaisse')?.errors?.['soldeInsuffisant']
-                        "
-                      >
-                        <i class="ri-error-warning-line"></i> Solde insuffisant
-                      </span>
-                      <span
-                        class="error-text"
-                        *ngIf="
-                          c.get('montantcaisse')?.errors?.['depassementMontant']
-                        "
-                      >
-                        <i class="ri-error-warning-line"></i> Montant dépassé
-                      </span>
-                    </div>
-                  </div>
-
-                  <!-- Taux -->
-                  <div class="caisse-taux">
-                    <label class="caisse-label">Taux</label>
-                    <input
-                      type="text"
-                      class="caisse-input taux-input"
-                      formControlName="taux"
-                      placeholder="1.00"
-                    />
-                  </div>
-
-                  <!-- Montant référence -->
-                  <div class="caisse-ref">
-                    <label class="caisse-label">Montant réf.</label>
-                    <div class="caisse-ref-value">
-                      <span class="ref-amount">{{
-                        c.get("montantref")?.value || "0.00"
-                      }}</span>
-                      <span class="ref-devise">{{ user.devise_rep_code }}</span>
-                    </div>
-                  </div>
+                <div class="pill-info-glass">
+                  <span class="pill-name-glass" [title]="pj.nomfichier">
+                    {{ pj.nomfichier }}
+                  </span>
+                  <span class="pill-meta-glass">
+                    {{ formatFileSize(pj.taille) }}
+                  </span>
                 </div>
-
-                <!-- Footer de la caisse -->
-                <div class="caisse-card-footer">
+                <div class="pill-actions-glass">
                   <button
-                    type="button"
-                    class="caisse-reset-btn"
-                    (click)="resetCaisse(c, $index)"
-                    [disabled]="!c.get('montantcaisse')?.value"
-                    title="Réinitialiser cette caisse"
+                    class="pill-action-btn pill-action-download"
+                    (click)="downloadJustificatifPiece(pj)"
+                    title="Télécharger"
                   >
-                    <i class="ri-close-circle-line"></i>
+                    <i class="ri-download-line"></i>
+                  </button>
+                  <button
+                    class="pill-action-btn pill-action-delete"
+                    (click)="deleteJustificatifPiece(pj)"
+                    [disabled]="pjDeleting === pj.idpiecejointe"
+                    title="Supprimer"
+                  >
+                    @if (pjDeleting === pj.idpiecejointe) {
+                      <span class="spinner-border spinner-border-sm"></span>
+                    } @else {
+                      <i class="ri-close-line"></i>
+                    }
                   </button>
                 </div>
               </div>
             }
           </div>
+        </div>
 
-          <!-- Actions globales -->
-          <div class="retour-actions" *ngIf="caisses.length > 0">
+        <!-- Zone Drag & Drop -->
+        <div
+          class="upload-bar-glass"
+          [class.drag-over]="isDragOver"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+        >
+          <input
+            type="file"
+            #fileInput
+            multiple
+            (change)="onFilesSelected($event)"
+            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
+            class="d-none"
+          />
+          <div class="upload-info-glass" (click)="fileInput.click()">
+            <div class="upload-icon-glass">
+              <i class="ri-upload-cloud-2-line"></i>
+            </div>
+            <div>
+              <span class="upload-title-glass">
+                @if (selectedFiles.length === 0) {
+                  Ajouter des fichiers au justificatif
+                } @else {
+                  <strong>{{ selectedFiles.length }}</strong> fichier(s)
+                  sélectionné(s)
+                }
+              </span>
+              <span
+                class="upload-hint-glass"
+                *ngIf="selectedFiles.length === 0"
+              >
+                PDF, DOC, XLS, JPG, PNG (max 10MB)
+              </span>
+            </div>
+          </div>
+          @if (selectedFiles.length > 0) {
             <button
-              type="button"
-              class="btn-glass-secondary btn-sm"
-              (click)="clearAllCaisses()"
-              [disabled]="!hasAnyCaisseValue()"
+              class="btn-glass-upload"
+              (click)="uploadJustificatifPieces(); $event.stopPropagation()"
+              [disabled]="pjUploading"
             >
-              <i class="ri-close-line me-1"></i> Tout effacer
+              @if (pjUploading) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              }
+              <i class="ri-upload-cloud-2-line me-1"></i>
+              Uploader {{ selectedFiles.length }}
             </button>
-          </div>
+          }
+        </div>
 
-          <!-- Erreur globale -->
+        <!-- Aperçu des fichiers sélectionnés -->
+        <div *ngIf="selectedFiles.length > 0" class="file-grid-glass mt-3">
+          @for (file of selectedFiles; track $index; let i = $index) {
+            <div class="file-card-glass">
+              <div class="file-info-glass">
+                <div class="file-icon-sm-glass">
+                  <i class="ri-file-line"></i>
+                </div>
+                <div class="file-details-glass">
+                  <div class="file-name-glass" [title]="file.name">
+                    {{ file.name }}
+                  </div>
+                  <div class="file-meta-glass">
+                    {{ file.size / 1024 | number: "1.0-0" }} KB
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="file-remove-btn-glass"
+                (click)="removeSelectedFile(i); $event.stopPropagation()"
+                title="Retirer"
+              >
+                <i class="ri-close-line"></i>
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- État vide -->
+        <div
+          *ngIf="
+            !piecesJointesLoading &&
+            justificatifPiecesCount === 0 &&
+            selectedFiles.length === 0
+          "
+          class="empty-state-glass"
+        >
+          <i class="ri-folder-open-line"></i>
+          <p>Aucune pièce jointe</p>
+          <span class="empty-hint-glass">
+            Ajoutez des fichiers en cliquant sur la zone ci-dessus
+          </span>
+        </div>
+
+        <!-- Chargement -->
+        <div *ngIf="piecesJointesLoading" class="spinner-glass-sm">
           <div
-            class="retour-global-error"
-            *ngIf="operationForm.errors?.['totalCaisseDepasse']"
-          >
-            <i class="ri-error-warning-line"></i>
-            <span
-              >Le total des caisses ne doit pas dépasser le montant total de
-              l'opération.</span
-            >
-          </div>
+            class="spinner-border spinner-border-sm text-primary"
+            role="status"
+          ></div>
+          <p class="mt-2 small text-muted">Chargement des pièces jointes...</p>
         </div>
       </div>
-    </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer border-0 p-4">
+      <button type="button" class="btn-glass-cancel" (click)="modal.close()">
+        <i class="ri-close-line me-1"></i> Fermer
+      </button>
+    </div>
   </div>
-</div>
+</ng-template>

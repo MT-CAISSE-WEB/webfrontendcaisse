@@ -656,6 +656,12 @@ export class EditDemandeComponent implements OnInit {
         detailsArray.push(this.newDetail(detail));
       });
 
+      // if (ligne.codebudget.idbudgetdepartementnature) {
+      //   ligneGroup
+      //     .get('codebudget')
+      //     ?.setValue(ligne.codebudget.codebudgetaire, { emitEvent: false });
+      // }
+
       //charger centres + positionner centre
       this.getallCentresDispatch(
         ligne.natureoperation.idnature,
@@ -852,7 +858,7 @@ export class EditDemandeComponent implements OnInit {
           this.lignes.removeAt(ligneIndex);
           //this.toastr.success('Detail supprimée avec succès');
         } else {
-          this.error = 'Erreur de suppression';
+          this.error = 'Erreur lors de la suppression';
           this.toastr.error(this.error);
         }
         this.loading = false;
@@ -900,31 +906,46 @@ export class EditDemandeComponent implements OnInit {
   }
 
   removeDetail(indexLigne: number, indexDetail: number) {
-    const ligneFG = this.lignesFormArray.at(indexLigne) as FormGroup;
+    //  Vérifie que l'index de la ligne est valide
+    if (indexLigne >= this.lignes.length) {
+      this.toastr.error('Index de ligne invalide');
+      return;
+    }
+
+    //  Utilise this.lignes (pas this.lignesFormArray)
+    const ligneFG = this.lignes.at(indexLigne) as FormGroup;
+
+    //  Vérifie que le FormArray "details" existe
     const detailsFA = ligneFG.get('details') as FormArray;
+    if (!detailsFA) {
+      this.toastr.error('FormArray "details" introuvable');
+      return;
+    }
+
+    //  Vérifie que l'index du détail est valide
+    if (indexDetail >= detailsFA.length) {
+      this.toastr.error('Index de détail invalide');
+      return;
+    }
 
     const detailFG = detailsFA.at(indexDetail) as FormGroup;
     const idDetail = detailFG.get('iddetailsdemande')?.value;
 
     if (!idDetail) {
-      detailsFA.removeAt(indexDetail);
+      detailsFA.removeAt(indexDetail); // Suppression côté client
       return;
     }
 
     this.service.deleteDetail(idDetail).subscribe({
       next: (res) => {
         if (res.success) {
-          detailsFA.removeAt(indexDetail);
-          //this.toastr.success('Detail supprimée avec succès');
+          detailsFA.removeAt(indexDetail); // Suppression côté client après confirmation backend
         } else {
-          this.error = 'Erreur de suppression';
-          this.toastr.error(this.error);
+          this.toastr.error('Erreur de suppression');
         }
-        this.loading = false;
       },
       error: (err) => {
-        this.error = 'Erreur de suppression';
-        this.toastr.error(this.error);
+        this.toastr.error(err.error?.message || 'Erreur backend');
       },
     });
   }
@@ -958,6 +979,7 @@ export class EditDemandeComponent implements OnInit {
     /** 2. Préparation des données avec transformation COMPLÈTE */
     const raw = this.demandeForm.getRawValue();
     console.log('raw', raw);
+
     const formValue = {
       ...this.demande,
       ...raw,
@@ -969,13 +991,7 @@ export class EditDemandeComponent implements OnInit {
         centre: l.centre?.idcentreanalytique ?? l.centre, // ID centre
         tiers: l.tiers?.idtiers ?? null, // ID tiers
         // TRANSFORMATION CRITIQUE : Convertir les FormGroups en objets simples
-        details: l.details
-          ? l.details.map((d: any) => ({
-              description: d.description,
-              quantite: d.quantite,
-              montant: d.montant,
-            }))
-          : [],
+        details: l.details || [],
       })),
       createdby: this.user.codeutilisateur ?? null,
       updatedby:
@@ -1018,6 +1034,7 @@ export class EditDemandeComponent implements OnInit {
   //Enregistrement de données
   async create(_demande: any) {
     const { iddemande, ...dataToSend } = _demande;
+
     this.loading = true;
     this.service.createEntete(dataToSend).subscribe({
       next: async (res) => {

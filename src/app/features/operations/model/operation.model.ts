@@ -9,7 +9,7 @@ export class operationModel extends MainModel {
   justifiee: number = 0;
   annulee: number = 0;
   libelle: string = '';
-  commentaire: string | null | undefined = '';
+  commentaire: string = '';
   lignes: any[] = [];
   caisses: any[] = [];
   ecritures: any[] = [];
