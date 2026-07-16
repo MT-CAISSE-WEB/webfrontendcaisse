@@ -3,7 +3,7 @@ import { operationModel } from '../model/operation.model';
 import { OperationService } from '../service/operation.service';
 import { ToastrService } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-operation-justifiee-list',
@@ -24,7 +24,7 @@ export class OperationJustifieeListComponent implements OnInit {
   expandedSalaries: Set<string> = new Set();
 
   constructor(private operationservice: OperationService, private toastr: ToastrService,
-    private router: Router,
+    private router: Router, private route: ActivatedRoute
   ){}
 
   ngOnInit(): void {
@@ -71,10 +71,9 @@ export class OperationJustifieeListComponent implements OnInit {
   }
 
   justifier(operation: any) {
-    // Redirection vers la page de justification ou ouverture d’un modal
-    this.router.navigate(['/ajustifiee', operation.idoperation]);
-
-    console.log('Redirection vers la justification pour l’opération :', operation);
+    this.router.navigate(['../ajustifiee', operation.idoperation], {
+      relativeTo: this.route
+    });
   }
 
   // Basculer l'affichage des salariés pour une opération

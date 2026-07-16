@@ -38,6 +38,7 @@ import { CaisseRegleService } from '../service/caisse-regle.service';
 import { OperationPJService } from '../../PJ/service/operationpj.service';
 import { PieceJointe } from '../../PJ/models/pj.model';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-opration-justifiee',
@@ -68,6 +69,7 @@ export class OprationJustifieeComponent implements OnInit {
   operations: operationModel[] = [];
   operationsFiltrees: operationModel[] = [];
   operation: operationModel = new operationModel();
+  idoperation: any;
   ope: any;
 
   //Le taux de devises
@@ -121,7 +123,6 @@ export class OprationJustifieeComponent implements OnInit {
   error: string = '';
 
   selectedRetour: any = null;
-
   skipRecalcul: boolean = false; // Flag pour éviter les recalculs redondants
 
   // États pour le contrôle dynamique des devises
@@ -144,11 +145,21 @@ export class OprationJustifieeComponent implements OnInit {
     private justificatifservice: JustificatifService,
     private pjService: OperationPJService,
     private modalService: NgbModal,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
     // Démarrer le loading global (dépend seulement des opérations)
     this.loadingGlobal = true;
+
+    this.activatedRoute.paramMap.subscribe((params) => {
+      const id = params.get('id');
+      this.idoperation = id;
+      if (id && id != '0') {
+        this.idoperation = id;
+      }
+    });
 
     // Initialiser un formulaire
     this.initForm();
@@ -409,12 +420,8 @@ export class OprationJustifieeComponent implements OnInit {
     }
   }
 
-  //A la selection de l'operation
-  selectOperation() {
-    this.operationForm.get('operation')?.valueChanges.subscribe((opId) => {
-      if (!opId) return;
-
-      //Trouver l'opération sélectionnée
+  fillFormByOperation(opId: string) {
+    //Trouver l'opération sélectionnée
       const operation = this.operations.find((op) => op.idoperation === opId);
       if (!operation) return;
 
@@ -431,6 +438,7 @@ export class OprationJustifieeComponent implements OnInit {
 
       //Remplir le formulaire avec les valeurs de l'opération
       this.operationForm.patchValue({
+        operation: this.idoperation || opId,
         dateoperation: this.formatDateForInput(operation.dateoperation),
         deviseoperation: operation.devise?.iddevise,
         montantoperation: operation.montant,
@@ -445,6 +453,13 @@ export class OprationJustifieeComponent implements OnInit {
 
       // Charger les pièces jointes de l'opération sélectionnée
       this.loadAllPiecesJointes(operation.idoperation);
+  }
+
+  //A la selection de l'operation
+  selectOperation() {
+    this.operationForm.get('operation')?.valueChanges.subscribe((opId) => {
+      if (!opId) return;
+      this.fillFormByOperation(opId);
     });
   }
 
@@ -780,6 +795,7 @@ export class OprationJustifieeComponent implements OnInit {
             if (this.operationsFiltrees.length > 0) {
               this.selectedOperationPJ = this.operationsFiltrees[0];
             }
+            this.fillFormByOperation(this.idoperation);
           }
           this.loading = false;
           // Fin du loading global - dépend seulement des opérations
