@@ -36,6 +36,7 @@ import {
   APP_ROOT_BANQUE_DONNEE_BASE,
   APP_ROOT_CLOTURECAISSE_CONSULTATION,
   APP_ROOT_SOLDECAISSE_CONSULTATION,
+  APP_ROOT_OPERATION_GENERAL_JUSITIFIER_LIST,
 } from '../../../_core/routes/frontend.root';
 
 import { RouterLink, RouterModule, RouterOutlet } from '@angular/router';
@@ -86,6 +87,7 @@ export class LayoutMenuComponent implements OnInit, OnDestroy {
   root_detail_demande = APP_ROOT_DETAILDEAMNDE_CONSULTATION;
   root_cloture_caisse = APP_ROOT_CLOTURECAISSE_CONSULTATION;
   root_solde_caisse = APP_ROOT_SOLDECAISSE_CONSULTATION;
+  root_list_decaissements_justifies = APP_ROOT_OPERATION_GENERAL_JUSITIFIER_LIST;
 
   admin: boolean = false;
   supervisor: boolean = false;

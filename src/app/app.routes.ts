@@ -26,7 +26,8 @@ import { APP, APP_DONNEE_BASE_DEVISE, APP_AFF_NATURE_CENTRE_DONNEE_BASE,
     APP_SOLDECAISSE_CONSULTATION,
     APP_ROOT_DEPNSESCAISSE_CONSULTATION,
     APP_RECETTESCAISSE_CONSULTATION,
-    APP_DEPNSESCAISSE_CONSULTATION} from './_core/routes/frontend.root';
+    APP_DEPNSESCAISSE_CONSULTATION,
+    APP_OPERATION_GENERAL_JUSTIFIER_LIST } from './_core/routes/frontend.root';
 
 import { LayoutMainComponent } from './layout/layout-main/layout-main.component';
 import { LayoutContentComponent } from './layout/composant/layout-content/layout-content.component';
@@ -77,6 +78,7 @@ import { ClotureCaisseComponent } from './features/consultations/cloture-caisse/
 import { CaisseTresorerieComponent } from './features/consultations/caisse-tresorerie/caisse-tresorerie.component';
 import { DecaissementOperationComponent } from './features/consultations/decaissement-operation/decaissement-operation.component';
 import { EncaissementOperationComponent } from './features/consultations/encaissement-operation/encaissement-operation.component';
+import { OperationJustifieeListComponent } from './features/operations/operation-justifiee-list/operation-justifiee-list.component';
 
 export const routes: Routes = [
   {
@@ -282,6 +284,10 @@ export const routes: Routes = [
       {
           path : APP_RECETTESCAISSE_CONSULTATION,
           component: EncaissementOperationComponent
+      },
+      {
+          path : APP_OPERATION_GENERAL_JUSTIFIER_LIST,
+          component: OperationJustifieeListComponent
       }
     ]
   }

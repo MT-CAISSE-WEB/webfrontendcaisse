@@ -1,0 +1,142 @@
+<!-- start page title -->
+<div class="row">
+  <div class="col-12">
+    <div
+      class="page-title-premium d-sm-flex align-items-center justify-content-between"
+    >
+      <div class="d-flex align-items-center gap-3">
+        <div class="title-icon-premium">
+          <i class="ri-wallet-line"></i>
+        </div>
+        <div>
+          <h4 class="mb-0 title-premium">{{ title }}</h4>
+          <span class="title-subtitle-premium"
+            >Gestion des opérations à justifier</span
+          >
+        </div>
+      </div>
+      <div class="page-title-right">
+        <ol class="breadcrumb-premium m-0">
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);">
+              <i class="ri-home-4-line me-1"></i>Générales
+            </a>
+          </li>
+          <li class="breadcrumb-item active">
+            <i class="ri-file-check-line"></i>{{ title }}
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end page title -->
+
+
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Liste des opérations à justifier</h4>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-modern align-middle">
+            <thead>
+            <tr>
+                <th>Code opération</th>
+                <th>Bénéficiaire</th>
+                <th>Commentaire</th>
+                <th>Salarié(s)</th>
+                <th>Montant</th>
+                <th>Statut</th>
+                <th class="text-end">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @for (op of operationsFiltrees; track op.idoperation) {
+                <tr>
+                    <!-- Code opération -->
+                    <td>
+                        <span class="code-badge">{{ op.codeoperation }}</span>
+                    </td>
+
+                    <!-- Bénéficiaire -->
+                    <td class="fw-medium">{{ op.beneficiaire || '—' }}</td>
+
+                    <!-- Commentaire (50 car.) -->
+                    <td class="text-muted small" [attr.title]="op.commentaire">
+                        {{ (op.commentaire.length > 50) ? (op.commentaire | slice:0:50) + '…' : (op.commentaire || '—') }}
+                    </td>
+
+                    <!-- Salarié(s) -->
+                    <td>
+                        @if (op.lignes && op.lignes.length === 1) {
+                        <!-- Une seule ligne : afficher directement le tiers -->
+                        <span class="fw-medium">{{ op.lignes[0].tiers?.designation || op.lignes[0].tiers?.nom || '—' }}</span>
+                        } @else if (op.lignes && op.lignes.length > 1) {
+                        <!-- Plusieurs lignes : bouton pour dérouler la liste des tiers -->
+                        <button class="btn-glass-secondary btn-sm"
+                                (click)="toggleSalaries(op.idoperation)">
+                            <i class="ri-user-line me-1"></i>
+                            {{ getSalariesCount(op) }} salarié(s)
+                        </button>
+                        @if (isSalariesExpanded(op.idoperation)) {
+                            <ul class="list-unstyled mt-2 ms-3 mb-0 small">
+                            @for (ligne of op.lignes; track ligne.idligneoperation) {
+                                <li>{{ ligne.tiers?.designation || ligne.tiers?.nom || '—' }}</li>
+                            }
+                            </ul>
+                        }
+                        } @else {
+                        <span class="text-muted">—</span>
+                        }
+                    </td>
+
+                    <!-- Montant -->
+                    <td class="fw-semibold">
+                        {{ op.montant }}
+                        <span class="text-muted small ms-1">{{ op.devise?.codedevise }}</span>
+                    </td>
+
+                    <!-- Statut -->
+                    <td>
+                        @if (op.justifiee === 2){
+                        <span class="badge-glass badge-glass-success">
+                            <i class="ri-check-line me-1"></i> Justifiée
+                        </span>
+                        } @else if (op.justifiee === 0){
+                        <span class="badge-glass badge-glass-warning">
+                            <i class="ri-time-line me-1"></i> En attente
+                        </span>
+                        } @else {
+                        <span class="badge-glass badge-glass-primary">
+                            <i class="ri-time-line me-1"></i> En cours
+                        </span>
+                        }
+                    </td>
+
+                    <!-- Bouton Justifier -->
+                    <td class="text-end">
+                        <button class="btn-glass-primary btn-sm"
+                                [class.disabled]="op.justifiee === 2"
+                                [disabled]="op.justifiee === 2"
+                                (click)="justifier(op)">
+                        <i class="ri-check-line me-1"></i> Justifier
+                        </button>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+
+        @if (operations.length === 0) {
+        <div class="empty-state">
+            <i class="ri-inbox-line"></i>
+            <p>Aucune opération trouvée</p>
+        </div>
+        }
+      </div>
+    </div>
+   </div>
+</div>
