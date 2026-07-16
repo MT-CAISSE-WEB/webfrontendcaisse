@@ -82,6 +82,7 @@
 .app-menu .menu-title span,
 .app-menu .nav-item span {
   color: rgba(255, 255, 255, 0.85);
+  margin-bottom: -3px;
 }
 
 .app-menu .nav-item i {

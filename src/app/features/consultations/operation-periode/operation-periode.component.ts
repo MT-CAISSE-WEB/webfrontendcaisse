@@ -105,11 +105,12 @@ export class OperationPeriodeComponent implements OnInit {
 
   private createPrintForm(): FormGroup {
     return this.fb.group({
-      caisse: [''],
+      idcaisse: [''],
       datedebut: ['', Validators.required],
       datefin: ['', Validators.required],
       typeentitesociete: [this.user.typeentitesociete],
       idsite: [this.user.idsite],
+      format: ['pdf', Validators.required],
     });
   }
 
@@ -237,6 +238,7 @@ export class OperationPeriodeComponent implements OnInit {
       });
   }
 
+  // Author: Richard (MAJ 16/07/2026)
   onPrintSubmit(): void {
     if (this.printForm.invalid) {
       this.markAllAsTouched(this.printForm);
@@ -247,10 +249,20 @@ export class OperationPeriodeComponent implements OnInit {
     this.loading = true;
     const data = {
       ...this.printForm.value,
+      idcaisse: this.printForm.value.idcaisse || null,
       utilisateur: `${this.user.prenom} ${this.user.nom}`,
     };
 
-    this.consultationService.printJournalCaisse(data).subscribe({
+    if (data.format === 'pdf') {
+      this.printPdf(data);
+    } else if (data.format === 'xlsx') {
+      this.printExcel(data);
+    }
+  }
+
+  
+  private printPdf(donnees: any): void {
+    this.consultationService.printJournalCaisse(donnees).subscribe({
       next: (blob: Blob) => {
         const url = window.URL.createObjectURL(blob);
         window.open(url, '_blank');
@@ -259,10 +271,56 @@ export class OperationPeriodeComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        this.toastr.error("Erreur d'impression du journal de caisse");
+        if (err.status === 500) {
+          this.toastr.warning('Aucune opération trouvée selon ces critères de recherche.');
+        } else {
+          this.toastr.error("Erreur d'impression du journal de caisse");
+        }
       },
     });
   }
+
+  private printExcel(donnees: any): void {
+    this.consultationService.printJournalCaisse(donnees).subscribe({
+      next: (blob: Blob) => {
+
+        const url = window.URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+
+        const today = new Date();
+        const date = today.toISOString().slice(0, 10);
+
+        link.download = `Journal_Caisse_${date}.xlsx`;
+
+        document.body.appendChild(link);
+        link.click();
+
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        this.loading = false;
+        this.closePrintModal();
+      },
+
+      error: (err) => {
+        this.loading = false;
+
+        if (err.status === 500) {
+          this.toastr.warning(
+            'Aucune opération trouvée selon ces critères de recherche.'
+          );
+        } else {
+          this.toastr.error(
+            "Erreur lors de l'export du journal de caisse."
+          );
+        }
+      },
+    });
+  }
+  // FIN; 
+
 
   // ============================================
   // HELPERS

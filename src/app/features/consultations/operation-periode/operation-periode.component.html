@@ -404,11 +404,7 @@
 <!-- ============================================ -->
 <!-- MODAL: IMPRESSION -->
 <!-- ============================================ -->
-<div
-  class="modal-overlay"
-  [class.show]="showPrintModal"
-  (click)="closePrintModal()"
->
+<div class="modal-overlay" [class.show]="showPrintModal" (click)="closePrintModal()">
   <div class="modal-container" (click)="$event.stopPropagation()">
     <div class="modal-content-glass">
       <div class="modal-header modal-header-theme-blue">
@@ -420,11 +416,7 @@
             Impression du journal
           </h5>
         </div>
-        <button
-          type="button"
-          class="btn-close btn-close-white"
-          (click)="closePrintModal()"
-        >
+        <button type="button" class="btn-close btn-close-white" (click)="closePrintModal()">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -434,22 +426,14 @@
           <div class="row g-3">
             <div class="col-12">
               <div class="form-floating">
-                <select
-                  formControlName="caisse"
-                  class="form-select"
-                  [class.is-valid]="
-                    isValidField('caisse', printForm) === 'is-valid'
-                  "
-                  [class.is-invalid]="
-                    isValidField('caisse', printForm) === 'is-invalid'
-                  "
-                  id="printCaisseSelect"
-                >
+                <select formControlName="idcaisse" class="form-select" 
+                  [class.is-valid]="isValidField('idcaisse', printForm) === 'is-valid'"
+                  [class.is-invalid]="isValidField('idcaisse', printForm) === 'is-invalid'"
+                  id="printCaisseSelect" [value]="searchForm.value.idcaisse">
                   <option value="">Toutes les caisses</option>
                   @for (caisse of caissesUser; track caisse.caisse.idcaisse) {
                     <option [value]="caisse.caisse.idcaisse">
-                      {{ caisse.caisse.codecaisse }} —
-                      {{ caisse.caisse.libelle }}
+                      {{ caisse.caisse.codecaisse }} — {{ caisse.caisse.libelle }}
                     </option>
                   }
                 </select>
@@ -459,37 +443,31 @@
 
             <div class="col-md-6">
               <div class="form-floating">
-                <input
-                  type="date"
-                  formControlName="datedebut"
-                  class="form-control"
-                  [class.is-valid]="
-                    isValidField('datedebut', printForm) === 'is-valid'
-                  "
-                  [class.is-invalid]="
-                    isValidField('datedebut', printForm) === 'is-invalid'
-                  "
-                  id="printDateDebut"
-                />
+                <input type="date" formControlName="datedebut" class="form-control"
+                  [class.is-valid]="isValidField('datedebut', printForm) === 'is-valid'"
+                  [class.is-invalid]="isValidField('datedebut', printForm) === 'is-invalid'"
+                  id="printDateDebut"/>
                 <label for="printDateDebut">Date début</label>
               </div>
             </div>
 
             <div class="col-md-6">
               <div class="form-floating">
-                <input
-                  type="date"
-                  formControlName="datefin"
-                  class="form-control"
-                  [class.is-valid]="
-                    isValidField('datefin', printForm) === 'is-valid'
-                  "
-                  [class.is-invalid]="
-                    isValidField('datefin', printForm) === 'is-invalid'
-                  "
-                  id="printDateFin"
-                />
+                <input type="date" formControlName="datefin" class="form-control"
+                  [class.is-valid]="isValidField('datefin', printForm) === 'is-valid'"
+                  [class.is-invalid]="isValidField('datefin', printForm) === 'is-invalid'"
+                  id="printDateFin"/>
                 <label for="printDateFin">Date fin</label>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="form-floating">
+                <select formControlName="format" class="form-select" id="printFormat">
+                  <option value="pdf">PDF (.pdf)</option>
+                  <option value="xlsx">Excel (.xlsx)</option>
+                </select>
+                <label for="printFormat">Destination</label>
               </div>
             </div>
           </div>
@@ -497,20 +475,15 @@
 
         <div class="modal-footer border-0 p-4">
           <div class="d-flex gap-3 justify-content-end w-100">
-            <button
-              type="button"
+            <button type="button"
               class="btn-glass-cancel"
               (click)="closePrintModal()"
             >
               <i class="ri-close-line me-1"></i> Fermer
             </button>
-            <button
-              type="submit"
-              class="btn-glass-submit"
-              [disabled]="printForm.invalid || loading"
-            >
+            <button type="submit" class="btn-glass-submit" [disabled]="printForm.invalid || loading">
               @if (loading) {
-                <span class="spinner-border spinner-border-sm me-1"></span>
+                 <span class="spinner-border spinner-border-sm me-1"></span>
               }
               <i class="ri-printer-line me-1"></i> Imprimer
             </button>
@@ -524,11 +497,7 @@
 <!-- ============================================ -->
 <!-- MODAL: CONFIRMATION DE RÉINITIALISATION -->
 <!-- ============================================ -->
-<div
-  class="modal-overlay"
-  [class.show]="showResetConfirmationModal"
-  (click)="showResetConfirmationModal = false"
->
+<div class="modal-overlay" [class.show]="showResetConfirmationModal" (click)="showResetConfirmationModal = false">
   <div class="modal-container" (click)="$event.stopPropagation()">
     <div class="modal-content-glass" style="max-width: 450px">
       <!-- Header avec dégradé rouge -->
