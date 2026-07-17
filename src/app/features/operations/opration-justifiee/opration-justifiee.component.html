@@ -106,7 +106,7 @@
                     <option value="{{ item.idoperation }}">
                       {{ item.codeoperation }} ---
                       {{
-                        (item.commentaire!.length || 0) > 50
+                        (item.commentaire.length || 0) > 50
                           ? (item.commentaire | slice: 0 : 50) + "..."
                           : item.commentaire || ""
                       }}
@@ -309,7 +309,7 @@
                       <th>Pièce</th>
                       <th>Commentaire</th>
                       <th class="text-end">Montant</th>
-                      <th>PJ</th>
+                      <th class="text-center" style="width: 80px">PJ</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -348,22 +348,24 @@
                             piece.devise?.codedevise
                           }}</span>
                         </td>
-                        <td>
+                        <td class="text-center">
                           <button
-                            class="action-btn action-attachment"
-                            (click)="
-                              openJustificatifPiecesJointesModal(
-                                piece.idjustificatifoperation
-                              )
-                            "
+                            type="button"
+                            class="btn-glass-primary btn-sm"
+                            (click)="openJustificatifPiecesJointesModal(piece)"
                             title="Pièces jointes"
                           >
                             <i class="ri-attachment-2"></i>
-                            @if (justificatifPiecesCount > 0) {
-                              <span class="badge-count">{{
-                                justificatifPiecesCount
-                              }}</span>
-                            }
+                            <span
+                              class="badge-glass badge-glass-info"
+                              *ngIf="
+                                getPiecesCount(piece.idjustificatifoperation)
+                              "
+                            >
+                              {{
+                                getPiecesCount(piece.idjustificatifoperation)
+                              }}
+                            </span>
                           </button>
                         </td>
                       </tr>
@@ -1162,9 +1164,9 @@
 </div>
 
 <!-- ==================== MODALE PIÈCES JOINTES JUSTIFICATIF ==================== -->
-<ng-template #piecesJointesJustificatf let-modal>
+<ng-template #piecesJointesJustificatifModalTpl let-modal>
   <div class="modal-content-glass">
-    <!-- Header - Thème Orange -->
+    <!-- Header Orange -->
     <div class="modal-header modal-header-theme-orange">
       <div class="d-flex align-items-center gap-3">
         <div class="icon-circle">
@@ -1177,7 +1179,7 @@
             style="font-size: 0.7rem; opacity: 0.8"
           >
             <i class="ri-file-list-line me-1"></i>
-            Justificatif {{ selectedJustificatifId }}
+            {{ selectedJustificatifPJ?.codejustificatif || "Justificatif" }}
           </span>
         </div>
       </div>
@@ -1189,7 +1191,8 @@
       ></button>
     </div>
 
-    <div class="modal-body p-4">
+    <!-- Body avec scroll vertical si nécessaire -->
+    <div class="modal-body p-4" style="max-height: 70vh; overflow-y: auto">
       <div class="attachments-section-glass">
         <!-- En-tête avec compteur -->
         <div class="section-header-glass">
@@ -1205,59 +1208,60 @@
             type="button"
             class="btn-glass-primary"
             (click)="downloadAllJustificatifFiles()"
-            [disabled]="downloadingAllJustificatif"
+            [disabled]="loading"
             title="Télécharger toutes les pièces jointes"
           >
-            @if (downloadingAllJustificatif) {
+            @if (loading) {
               <span class="spinner-border spinner-border-sm me-1"></span>
             }
             <i class="ri-download-line me-1"></i> Tout télécharger
           </button>
         </div>
 
-        <!-- Liste des PJ existantes -->
-        <div *ngIf="!piecesJointesLoading && justificatifPiecesCount > 0">
-          <div class="horizontal-scroll-glass">
-            @for (pj of justificatifPiecesJointes; track $index) {
-              <div class="file-pill-glass file-pill-editable">
-                <div class="pill-icon-glass">
-                  <i [class]="getFileIcon(pj)"></i>
-                </div>
-                <div class="pill-info-glass">
-                  <span class="pill-name-glass" [title]="pj.nomfichier">
-                    {{ pj.nomfichier }}
-                  </span>
-                  <span class="pill-meta-glass">
-                    {{ formatFileSize(pj.taille) }}
-                  </span>
-                </div>
-                <div class="pill-actions-glass">
-                  <button
-                    class="pill-action-btn pill-action-download"
-                    (click)="downloadJustificatifPiece(pj)"
-                    title="Télécharger"
-                  >
-                    <i class="ri-download-line"></i>
-                  </button>
-                  <button
-                    class="pill-action-btn pill-action-delete"
-                    (click)="deleteJustificatifPiece(pj)"
-                    [disabled]="pjDeleting === pj.idpiecejointe"
-                    title="Supprimer"
-                  >
-                    @if (pjDeleting === pj.idpiecejointe) {
-                      <span class="spinner-border spinner-border-sm"></span>
-                    } @else {
-                      <i class="ri-close-line"></i>
-                    }
-                  </button>
-                </div>
+        <!-- Liste des PJ existantes (SCROLL HORIZONTAL) -->
+        <div
+          *ngIf="!piecesJointesLoading && justificatifPiecesCount > 0"
+          class="horizontal-scroll-glass"
+        >
+          @for (pj of justificatifPiecesJointes; track pj.idpiecejointe) {
+            <div class="file-pill-glass file-pill-editable">
+              <div class="pill-icon-glass">
+                <i [class]="getFileIcon(pj)"></i>
               </div>
-            }
-          </div>
+              <div class="pill-info-glass">
+                <span class="pill-name-glass" [title]="pj.nomfichier">
+                  {{ pj.nomfichier }}
+                </span>
+                <span class="pill-meta-glass">
+                  {{ formatFileSize(pj.taille) }}
+                </span>
+              </div>
+              <div class="pill-actions-glass">
+                <button
+                  class="pill-action-btn pill-action-download"
+                  (click)="downloadJustificatifPiece(pj)"
+                  title="Télécharger"
+                >
+                  <i class="ri-download-line"></i>
+                </button>
+                <button
+                  class="pill-action-btn pill-action-delete"
+                  (click)="deleteJustificatifPiece(pj)"
+                  [disabled]="pjDeleting === pj.idpiecejointe"
+                  title="Supprimer"
+                >
+                  @if (pjDeleting === pj.idpiecejointe) {
+                    <span class="spinner-border spinner-border-sm"></span>
+                  } @else {
+                    <i class="ri-close-line"></i>
+                  }
+                </button>
+              </div>
+            </div>
+          }
         </div>
 
-        <!-- Zone Drag & Drop -->
+        <!-- Zone Drag & Drop (style arrondi) -->
         <div
           class="upload-bar-glass"
           [class.drag-over]="isDragOver"
@@ -1280,7 +1284,7 @@
             <div>
               <span class="upload-title-glass">
                 @if (selectedFiles.length === 0) {
-                  Ajouter des fichiers au justificatif
+                  Déposez vos fichiers ici ou cliquez pour parcourir
                 } @else {
                   <strong>{{ selectedFiles.length }}</strong> fichier(s)
                   sélectionné(s)
@@ -1304,12 +1308,12 @@
                 <span class="spinner-border spinner-border-sm me-1"></span>
               }
               <i class="ri-upload-cloud-2-line me-1"></i>
-              Uploader {{ selectedFiles.length }}
+              Uploader
             </button>
           }
         </div>
 
-        <!-- Aperçu des fichiers sélectionnés -->
+        <!-- Aperçu des fichiers sélectionnés (grille) -->
         <div *ngIf="selectedFiles.length > 0" class="file-grid-glass mt-3">
           @for (file of selectedFiles; track $index; let i = $index) {
             <div class="file-card-glass">
@@ -1350,7 +1354,7 @@
           <i class="ri-folder-open-line"></i>
           <p>Aucune pièce jointe</p>
           <span class="empty-hint-glass">
-            Ajoutez des fichiers en cliquant sur la zone ci-dessus
+            Déposez des fichiers ci-dessus pour les ajouter
           </span>
         </div>
 
@@ -1367,7 +1371,11 @@
 
     <!-- Footer -->
     <div class="modal-footer border-0 p-4">
-      <button type="button" class="btn-glass-cancel" (click)="modal.close()">
+      <button
+        type="button"
+        class="btn-glass-cancel"
+        (click)="closePiecesJointesJustificatifModal()"
+      >
         <i class="ri-close-line me-1"></i> Fermer
       </button>
     </div>

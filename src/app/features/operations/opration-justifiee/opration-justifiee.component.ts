@@ -38,6 +38,7 @@ import { CaisseRegleService } from '../service/caisse-regle.service';
 import { OperationPJService } from '../../PJ/service/operationpj.service';
 import { PieceJointe } from '../../PJ/models/pj.model';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ActivatedRoute, Router } from '@angular/router';
 import { JustificatifPJService } from '../../PJ/service/justificatifpj.service';
 
 @Component({
@@ -69,6 +70,7 @@ export class OprationJustifieeComponent implements OnInit {
   operations: operationModel[] = [];
   operationsFiltrees: operationModel[] = [];
   operation: operationModel = new operationModel();
+  idoperation: any;
   ope: any;
 
   //Le taux de devises
@@ -122,7 +124,6 @@ export class OprationJustifieeComponent implements OnInit {
   error: string = '';
 
   selectedRetour: any = null;
-
   skipRecalcul: boolean = false; // Flag pour éviter les recalculs redondants
 
   // États pour le contrôle dynamique des devises
@@ -145,12 +146,22 @@ export class OprationJustifieeComponent implements OnInit {
     private justificatifservice: JustificatifService,
     private pjService: OperationPJService,
     private modalService: NgbModal,
-    private justificatifPJService: JustificatifPJService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private justificatifpjService: JustificatifPJService,
   ) {}
 
   ngOnInit(): void {
     // Démarrer le loading global (dépend seulement des opérations)
     this.loadingGlobal = true;
+
+    this.activatedRoute.paramMap.subscribe((params) => {
+      const id = params.get('id');
+      this.idoperation = id;
+      if (id && id != '0') {
+        this.idoperation = id;
+      }
+    });
 
     // Initialiser un formulaire
     this.initForm();
@@ -412,42 +423,46 @@ export class OprationJustifieeComponent implements OnInit {
     }
   }
 
+  fillFormByOperation(opId: string) {
+    //Trouver l'opération sélectionnée
+    const operation = this.operations.find((op) => op.idoperation === opId);
+    if (!operation) return;
+
+    // l'opération sélectionnée
+    this.selectedOperationPJ = operation;
+
+    const totalcaissemontantref =
+      operation.caisses?.reduce((sum: number, caisse: any) => {
+        if (caisse.codtypeoperation === 'decaissementaj') {
+          return sum + (parseFloat(caisse.montantref) || 0);
+        }
+        return sum;
+      }, 0) || 0;
+
+    //Remplir le formulaire avec les valeurs de l'opération
+    this.operationForm.patchValue({
+      operation: this.idoperation || opId,
+      dateoperation: this.formatDateForInput(operation.dateoperation),
+      deviseoperation: operation.devise?.iddevise,
+      montantoperation: operation.montant,
+      montantRefglobal: totalcaissemontantref,
+    });
+
+    //Charger les details
+    this.getDetailJustificatifPiece(operation);
+
+    // Déclencher la gestion dynamique des devises
+    this.gererDevisesDynamiquement();
+
+    // Charger les pièces jointes de l'opération sélectionnée
+    this.loadAllPiecesJointes(operation.idoperation);
+  }
+
   //A la selection de l'operation
   selectOperation() {
     this.operationForm.get('operation')?.valueChanges.subscribe((opId) => {
       if (!opId) return;
-
-      //Trouver l'opération sélectionnée
-      const operation = this.operations.find((op) => op.idoperation === opId);
-      if (!operation) return;
-
-      // l'opération sélectionnée
-      this.selectedOperationPJ = operation;
-
-      const totalcaissemontantref =
-        operation.caisses?.reduce((sum: number, caisse: any) => {
-          if (caisse.codtypeoperation === 'decaissementaj') {
-            return sum + (parseFloat(caisse.montantref) || 0);
-          }
-          return sum;
-        }, 0) || 0;
-
-      //Remplir le formulaire avec les valeurs de l'opération
-      this.operationForm.patchValue({
-        dateoperation: this.formatDateForInput(operation.dateoperation),
-        deviseoperation: operation.devise?.iddevise,
-        montantoperation: operation.montant,
-        montantRefglobal: totalcaissemontantref,
-      });
-
-      //Charger les details
-      this.getDetailJustificatifPiece(operation);
-
-      // Déclencher la gestion dynamique des devises
-      this.gererDevisesDynamiquement();
-
-      // Charger les pièces jointes de l'opération sélectionnée
-      this.loadAllPiecesJointes(operation.idoperation);
+      this.fillFormByOperation(opId);
     });
   }
 
@@ -783,6 +798,7 @@ export class OprationJustifieeComponent implements OnInit {
             if (this.operationsFiltrees.length > 0) {
               this.selectedOperationPJ = this.operationsFiltrees[0];
             }
+            this.fillFormByOperation(this.idoperation);
           }
           this.loading = false;
           // Fin du loading global - dépend seulement des opérations
@@ -1666,8 +1682,6 @@ export class OprationJustifieeComponent implements OnInit {
   // Pièce justificative sélectionnée
   selectedJustificatif: any = null;
 
-  // gestion des pièces jointes
-  modalPJVisible = false;
   // Propriétés pour les pièces jointes
   operationPiecesJointes: PieceJointe[] = [];
   demandePiecesJointes: PieceJointe[] = [];
@@ -2101,61 +2115,94 @@ export class OprationJustifieeComponent implements OnInit {
     setTimeout(() => (this.skipRecalcul = false), 0);
   }
 
-  // ===== NOUVELLES PROPRIÉTÉS POUR LES JUSTIFICATIFS =====
-  selectedJustificatifId: string | null = null; // ID du justificatif sélectionné
-  justificatifPiecesJointes: PieceJointe[] = []; // PJ du justificatif
-  justificatifPiecesCount: number = 0; // Compteur
-  downloadingAllJustificatif: boolean = false; // État de téléchargement
-  @ViewChild('piecesJointesJustificatf')
-  piecesJointesJustificatf!: TemplateRef<any>;
+  justificatifPiecesJointes: PieceJointe[] = [];
+  selectedJustificatifPJ: JustificatifModel | null = null;
+  piecesJustificativesCountMap: Map<string, number> = new Map(); // Cache pour les compteurs
+  justificatifPiecesCount = 0;
+  totalJustificatifPiecesCount = 0;
+  @ViewChild('piecesJointesJustificatifModalTpl')
+  piecesJointesJustificatifModalTpl!: TemplateRef<any>;
 
-  // ============================================
-  // MÉTHODES SPÉCIFIQUES AUX JUSTIFICATIFS
-  // ============================================
+  // Récupère le nombre de pièces jointes (avec cache)
+  getPiecesCount(idjsutificatifoperation: string): number {
+    return this.piecesJustificativesCountMap.get(idjsutificatifoperation) || 0;
+  }
+
+  private getModalContainer(item: any): HTMLElement | null {
+    const detailCard = document.querySelector<HTMLElement>(
+      `#card-${item.idoperation}`,
+    );
+
+    return detailCard || document.querySelector<HTMLElement>('.card');
+  }
 
   /**
-   * Ouvre le modal des PJ pour un justificatif
+   * Ouvre le modal des pièces jointes avec ng-template
    */
-  openJustificatifPiecesJointesModal(justificatifId: string): void {
-    this.selectedJustificatifId = justificatifId;
+  openJustificatifPiecesJointesModal(justificatif: JustificatifModel): void {
+    console.log('Justificatif selected:', justificatif);
+    this.selectedJustificatifPJ = justificatif;
     this.selectedFiles = [];
-    this.loadJustificatifPiecesJointes(justificatifId);
+    this.loadAllPiecesJointesJustificatif(justificatif.idjustificatifoperation);
 
+    const container = this.getModalContainer(justificatif);
     const options: any = {
       centered: true,
       size: 'lg',
       backdrop: 'static',
     };
+    if (container) {
+      options.container = container;
+    }
 
     const modalRef = this.modalService.open(
-      this.piecesJointesJustificatf,
+      this.piecesJointesJustificatifModalTpl,
       options,
     );
 
+    // Gérer la fermeture de la modale
     modalRef.result.then(
-      () => this.closeJustificatifPiecesJointesModal(),
-      () => this.closeJustificatifPiecesJointesModal(),
+      () => {
+        this.closePiecesJointesJustificatifModal();
+      },
+      () => {
+        this.closePiecesJointesJustificatifModal();
+      },
     );
   }
-
   /**
-   * Charge les PJ d'un justificatif
-   */
-  loadJustificatifPiecesJointes(idjustificatif: string): void {
+  // ============================================
+// MÉTHODES ADAPTÉES POUR LES JUSTIFICATIFS
+// ============================================
+
+/**
+ * Charge toutes les pièces jointes d'un justificatif
+ */
+  loadAllPiecesJointesJustificatif(idjustificatifoperation: string): void {
     this.piecesJointesLoading = true;
-    this.justificatifPJService.getAll(idjustificatif).subscribe({
+    this.justificatifpjService.getAll(idjustificatifoperation).subscribe({
       next: (res) => {
+        console.log('res.data', res.data);
         if (res.success) {
           this.justificatifPiecesJointes = res.data || [];
           this.justificatifPiecesCount = this.justificatifPiecesJointes.length;
+          this.totalJustificatifPiecesCount = this.justificatifPiecesCount;
+          // Mettre à jour le cache
+          this.piecesJustificativesCountMap.set(
+            idjustificatifoperation,
+            this.justificatifPiecesCount,
+          );
         } else {
           this.justificatifPiecesJointes = [];
           this.justificatifPiecesCount = 0;
+          this.totalJustificatifPiecesCount = 0;
         }
         this.piecesJointesLoading = false;
       },
       error: (err) => {
-        console.error('Erreur chargement PJ justificatif:', err);
+        console.error('Erreur chargement PJ:', err);
+        this.justificatifPiecesJointes = [];
+        this.justificatifPiecesCount = 0;
         this.piecesJointesLoading = false;
         this.toastr.error('Erreur lors du chargement des pièces jointes');
       },
@@ -2163,23 +2210,24 @@ export class OprationJustifieeComponent implements OnInit {
   }
 
   /**
-   * Ferme le modal des PJ du justificatif
+   * Ferme le modal des pièces jointes
    */
-  closeJustificatifPiecesJointesModal(): void {
+  closePiecesJointesJustificatifModal(): void {
     this.modalService.dismissAll();
-    this.selectedJustificatifId = null;
+    this.selectedJustificatifPJ = null;
     this.justificatifPiecesJointes = [];
     this.justificatifPiecesCount = 0;
+    this.totalJustificatifPiecesCount = 0;
     this.selectedFiles = [];
     this.pjUploading = false;
     this.pjDeleting = null;
   }
 
   /**
-   * Upload des PJ pour un justificatif
+   * Upload des fichiers pour un justificatif
    */
   uploadJustificatifPieces(): void {
-    if (!this.selectedJustificatifId || this.selectedFiles.length === 0) {
+    if (!this.selectedJustificatifPJ || this.selectedFiles.length === 0) {
       this.toastr.warning(
         'Aucun fichier sélectionné ou justificatif non défini',
       );
@@ -2187,18 +2235,25 @@ export class OprationJustifieeComponent implements OnInit {
     }
 
     this.pjUploading = true;
-    const userId = this.user.idutilisateur;
+    const userId = 'SYSTEM';
 
-    this.justificatifPJService
-      .create(this.selectedJustificatifId, this.selectedFiles, userId)
+    this.justificatifpjService
+      .create(
+        this.selectedJustificatifPJ.idjustificatifoperation,
+        this.selectedFiles,
+        userId,
+      )
       .subscribe({
         next: (res) => {
+          console.log('Upload:', res);
           if (res.success) {
             this.toastr.success(
               `${res.data.length} fichier(s) uploadé(s) avec succès`,
             );
             this.selectedFiles = [];
-            this.loadJustificatifPiecesJointes(this.selectedJustificatifId!);
+            this.loadAllPiecesJointesJustificatif(
+              this.selectedJustificatifPJ!.idjustificatifoperation,
+            );
           } else {
             this.toastr.error("Erreur lors de l'upload");
           }
@@ -2213,10 +2268,10 @@ export class OprationJustifieeComponent implements OnInit {
   }
 
   /**
-   * Télécharge une PJ de justificatif
+   * Télécharge une pièce jointe
    */
   downloadJustificatifPiece(piece: PieceJointe): void {
-    this.justificatifPJService.downloadFile(piece.urlpiece).subscribe({
+    this.justificatifpjService.downloadFile(piece.urlpiece).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -2234,21 +2289,26 @@ export class OprationJustifieeComponent implements OnInit {
   }
 
   /**
-   * Supprime une PJ de justificatif
+   * Supprime une pièce jointe
    */
   deleteJustificatifPiece(piece: PieceJointe): void {
     if (!confirm(`Supprimer "${piece.nomfichier}" ?`)) return;
-    if (!this.selectedJustificatifId) return;
+    if (!this.selectedJustificatifPJ) return;
 
     this.pjDeleting = piece.idpiecejointe;
 
-    this.justificatifPJService
-      .delete(this.selectedJustificatifId, piece.idpiecejointe)
+    this.justificatifpjService
+      .delete(
+        this.selectedJustificatifPJ.idjustificatifoperation,
+        piece.idpiecejointe,
+      )
       .subscribe({
         next: (res) => {
           if (res.success) {
             this.toastr.success('Fichier supprimé');
-            this.loadJustificatifPiecesJointes(this.selectedJustificatifId!);
+            this.loadAllPiecesJointesJustificatif(
+              this.selectedJustificatifPJ!.idjustificatifoperation,
+            );
           } else {
             this.toastr.error('Erreur lors de la suppression');
           }
@@ -2265,42 +2325,35 @@ export class OprationJustifieeComponent implements OnInit {
   }
 
   /**
-   * Télécharge toutes les PJ d'un justificatif
+   * Télécharge toutes les pièces jointes d'un justificatif
    */
   downloadAllJustificatifFiles(): void {
-    if (!this.selectedJustificatifId) {
+    if (!this.selectedJustificatifPJ) {
       this.toastr.error('Aucun justificatif sélectionné');
       return;
     }
 
-    this.downloadingAllJustificatif = true;
-    this.justificatifPJService
-      .downloadAllFiles(this.selectedJustificatifId)
+    this.loading = true;
+    this.justificatifpjService
+      .downloadAllFiles(this.selectedJustificatifPJ.idjustificatifoperation)
       .subscribe({
         next: (blob) => {
           const url = window.URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = url;
-          const timestamp = new Date()
-            .toISOString()
-            .slice(0, 19)
-            .replace(/:/g, '-');
-          const filename = `justificatif_${this.selectedJustificatifId}_${timestamp}.zip`;
+          const filename = `justificatif_${this.selectedJustificatifPJ!.codejustificatif || 'JUST'}_pieces_jointes.zip`;
           link.download = filename;
-          document.body.appendChild(link);
           link.click();
-          document.body.removeChild(link);
           window.URL.revokeObjectURL(url);
           this.toastr.success(
             `${this.justificatifPiecesCount} fichier(s) téléchargé(s)`,
           );
-          this.downloadingAllJustificatif = false;
+          this.loading = false;
         },
         error: (err) => {
-          this.toastr.error(
-            err.error?.message || 'Erreur lors du téléchargement',
-          );
-          this.downloadingAllJustificatif = false;
+          console.error('Erreur téléchargement ZIP:', err);
+          this.toastr.error(err.error?.message);
+          this.loading = false;
         },
       });
   }
