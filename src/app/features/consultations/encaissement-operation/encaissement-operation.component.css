@@ -1,0 +1,679 @@
+/* ============================================
+   PAGE TITLE PREMIUM - OPTIMISÉ
+   ============================================ */
+
+.page-title-premium {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.08),
+    rgba(102, 126, 234, 0.05)
+  );
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 20px;
+  padding: 20px 28px;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+@media (min-width: 769px) {
+  .page-title-premium {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.92);
+  }
+}
+
+@media (max-width: 768px) {
+  .page-title-premium {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.7);
+  }
+}
+
+.title-icon-premium {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.12),
+    rgba(102, 126, 234, 0.08)
+  );
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  flex-shrink: 0;
+}
+
+.title-icon-premium i {
+  font-size: 1.3rem;
+  color: #405189;
+}
+
+.title-premium {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.02em;
+}
+
+.title-subtitle-premium {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-top: 2px;
+}
+
+.breadcrumb-premium {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 4px 14px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 40px;
+  border: 1px solid rgba(59, 130, 246, 0.08);
+}
+
+@media (min-width: 769px) {
+  .breadcrumb-premium {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.8);
+  }
+}
+
+@media (max-width: 768px) {
+  .breadcrumb-premium {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+}
+
+.breadcrumb-premium .breadcrumb-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.breadcrumb-premium .breadcrumb-item + .breadcrumb-item::before {
+  content: "›";
+  color: #cbd5e1;
+  font-size: 1.2rem;
+  font-weight: 300;
+  padding: 0 8px;
+}
+
+.breadcrumb-premium .breadcrumb-item a {
+  color: #405189;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.breadcrumb-premium .breadcrumb-item a:hover {
+  color: #2563eb;
+}
+
+.breadcrumb-premium .breadcrumb-item.active {
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ========================================
+   CARDS - OPTIMISÉ
+   ======================================== */
+
+.card {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(203, 213, 225, 0.15);
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  position: relative;
+}
+
+@media (min-width: 769px) {
+  .card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: white;
+  }
+}
+
+@media (max-width: 768px) {
+  .card {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.7);
+  }
+}
+
+/* Suppression des effets de brillance inutiles */
+.card::before {
+  display: none;
+}
+
+.card-body {
+  padding: 24px;
+}
+
+.card-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 0;
+  color: #1a1a2e;
+}
+
+/* ========================================
+   BADGES
+   ======================================== */
+
+.badge {
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 20px;
+}
+
+.badge.bg-primary {
+  background: linear-gradient(135deg, #3b82f6, #405189) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+}
+
+.badge.bg-success {
+  background: linear-gradient(135deg, #10b981, #34d399) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+}
+
+.text-white-force {
+  color: #ffffff !important;
+}
+
+/* ========================================
+   TABLES - OPTIMISÉ
+   ======================================== */
+
+.table {
+  border-collapse: separate;
+  border-spacing: 0 4px;
+}
+
+.table thead th {
+  background: rgba(59, 130, 246, 0.06);
+  border: none;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #4b5563;
+  padding: 12px 16px;
+  border-radius: 8px 8px 0 0;
+}
+
+.table tbody td {
+  background: rgba(255, 255, 255, 0.5);
+  border: none;
+  padding: 10px 16px;
+  color: #1f2937;
+}
+
+@media (min-width: 769px) {
+  .table tbody td {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .table tbody td {
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+}
+
+.table tbody tr {
+  border-radius: 10px;
+}
+
+/* Ligne active - sélection */
+.role-row.table-active td {
+  background: rgba(59, 130, 246, 0.12);
+  border-left: 4px solid #405189;
+  position: relative;
+}
+
+.role-row.table-active td:first-child {
+  border-radius: 10px 0 0 10px;
+}
+
+.role-row.table-active td:last-child {
+  border-radius: 0 10px 10px 0;
+}
+
+.role-row {
+  cursor: pointer;
+}
+
+/* ========================================
+   BOUTONS - OPTIMISÉ
+   ======================================== */
+
+.btn {
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Bouton primaire */
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #405189) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 6px 25px rgba(59, 130, 246, 0.4);
+  color: white !important;
+}
+
+/* Bouton succès */
+.btn-success {
+  background: linear-gradient(135deg, #10b981, #34d399) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.btn-success:hover {
+  box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
+  color: white !important;
+}
+
+/* Suppression de l'effet de brillance inutile */
+.btn::after {
+  display: none;
+}
+
+/* ========================================
+   INPUTS - OPTIMISÉ
+   ======================================== */
+
+.form-control {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(203, 213, 225, 0.3);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 0.875rem;
+  color: #1f2937;
+}
+
+@media (min-width: 769px) {
+  .form-control {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: white;
+  }
+}
+
+.form-control:focus {
+  background: white;
+  border-color: #405189;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+.form-control::placeholder {
+  color: #9ca3af;
+}
+
+/* ========================================
+   ACTIONS ICONS - OPTIMISÉ
+   ======================================== */
+
+.action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #6b7280;
+  text-decoration: none;
+}
+
+.action-icon.text-success:hover {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.action-icon.text-danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.action-icon.text-primary:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #405189;
+}
+
+/* ========================================
+   CHECKS MODERNES - OPTIMISÉ
+   ======================================== */
+
+.form-check {
+  padding-left: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.3);
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(203, 213, 225, 0.1);
+}
+
+@media (min-width: 769px) {
+  .form-check {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.5);
+  }
+}
+
+.form-check-input {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.form-check-input:checked {
+  background: linear-gradient(135deg, #3b82f6, #405189);
+  border-color: #405189;
+}
+
+.form-check-input:checked::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.form-check-input:hover {
+  border-color: #3b82f6;
+}
+
+.form-check-label {
+  color: #1f2937;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+/* ========================================
+   RIGHT COLUMN
+   ======================================== */
+
+.sticky-top {
+  position: sticky;
+  top: 80px;
+  z-index: 1;
+}
+
+.text-muted.text-center {
+  background: rgba(255, 255, 255, 0.3);
+  padding: 40px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(203, 213, 225, 0.15);
+  color: #6b7280;
+}
+
+/* ========================================
+   NO ROLE SELECTED - OPTIMISÉ
+   ======================================== */
+
+.no-role-selected {
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(203, 213, 225, 0.15);
+  border-radius: 20px;
+  padding: 60px 30px;
+  text-align: center;
+  color: #6b7280;
+}
+
+@media (min-width: 769px) {
+  .no-role-selected {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+.no-role-selected i {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #3b82f6, #405189);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.no-role-selected p {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+  .page-title-box {
+    padding: 16px;
+  }
+
+  .page-title-box h4 {
+    font-size: 1.2rem;
+  }
+
+  .card-body {
+    padding: 16px;
+  }
+
+  .table tbody td {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+
+  .action-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .sticky-top {
+    position: relative;
+    top: 0;
+  }
+}
+
+/* ========================================
+   SCROLLBAR MODERNE
+   ======================================== */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3b82f6, #405189);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #2563eb, #405189);
+}
+
+/* ============================================
+   JOURNAL – COMPLÉMENTS DU DESIGN RÔLE
+   ============================================ */
+
+/* ----- Accordéon jour ----- */
+.journal-accordion {
+  border: 1px solid rgba(203, 213, 225, 0.15);
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.4);
+  transition: all 0.2s ease;
+}
+
+.journal-accordion:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.accordion-trigger {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: #1e293b;
+}
+
+.accordion-trigger:hover {
+  background: rgba(59, 130, 246, 0.04);
+}
+
+.accordion-trigger .transition {
+  transition: transform 0.3s ease;
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+.accordion-content {
+  border-top: 1px solid rgba(203, 213, 225, 0.2);
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.animate-fade {
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ----- Carte caisse ----- */
+.caisse-card {
+  border: 1px solid rgba(203, 213, 225, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.caisse-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  background: rgba(59, 130, 246, 0.02);
+  border-bottom: 1px solid rgba(203, 213, 225, 0.1);
+}
+
+.caisse-card-header:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+/* ----- Badge devise ----- */
+.badge-devise {
+  background: rgba(100, 116, 139, 0.15);
+  color: #64748b;
+  font-weight: 500;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+}
+
+/* ----- Liste des opérations ----- */
+.operations-list {
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ----- Carte opération (inspirée des cartes du rôle) ----- */
+.operation-card {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(203, 213, 225, 0.15);
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  transition: box-shadow 0.2s;
+}
+
+.operation-card:hover {
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+
+.code-badge {
+  display: inline-block;
+  padding: 2px 12px;
+  background: rgba(59, 130, 246, 0.08);
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: #405189;
+}
+
+/* ----- Lignes d'opération ----- */
+.lignes-list {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed #e2e8f0;
+}
+
+/* ----- Responsive ----- */
+@media (max-width: 768px) {
+  .accordion-trigger {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .caisse-card-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .operation-card .row {
+    flex-direction: column;
+  }
+}

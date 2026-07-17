@@ -38,6 +38,8 @@ import { CaisseRegleService } from '../service/caisse-regle.service';
 import { OperationPJService } from '../../PJ/service/operationpj.service';
 import { PieceJointe } from '../../PJ/models/pj.model';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ActivatedRoute, Router } from '@angular/router';
+import { JustificatifPJService } from '../../PJ/service/justificatifpj.service';
 
 @Component({
   selector: 'app-opration-justifiee',
@@ -68,6 +70,7 @@ export class OprationJustifieeComponent implements OnInit {
   operations: operationModel[] = [];
   operationsFiltrees: operationModel[] = [];
   operation: operationModel = new operationModel();
+  idoperation: any;
   ope: any;
 
   //Le taux de devises
@@ -121,6 +124,7 @@ export class OprationJustifieeComponent implements OnInit {
   error: string = '';
 
   selectedRetour: any = null;
+  skipRecalcul: boolean = false; // Flag pour éviter les recalculs redondants
 
   // États pour le contrôle dynamique des devises
   tauxDevises: { [key: string]: number } = {}; // Cache des taux par devise
@@ -142,11 +146,22 @@ export class OprationJustifieeComponent implements OnInit {
     private justificatifservice: JustificatifService,
     private pjService: OperationPJService,
     private modalService: NgbModal,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private justificatifpjService: JustificatifPJService,
   ) {}
 
   ngOnInit(): void {
     // Démarrer le loading global (dépend seulement des opérations)
     this.loadingGlobal = true;
+
+    this.activatedRoute.paramMap.subscribe((params) => {
+      const id = params.get('id');
+      this.idoperation = id;
+      if (id && id != '0') {
+        this.idoperation = id;
+      }
+    });
 
     // Initialiser un formulaire
     this.initForm();
@@ -258,10 +273,11 @@ export class OprationJustifieeComponent implements OnInit {
       this.handleNatureChange(ligne, natureId);
     });
 
-    ligne.get('montantdetail')?.valueChanges.subscribe(() => {
-      //this.updateTotalMontant();
-      this.updateTotalsAndValidate();
-    });
+    if (!this.skipRecalcul) {
+      ligne.get('montantdetail')?.valueChanges.subscribe(() => {
+        this.updateTotalsAndValidate();
+      });
+    }
 
     this.lignes.push(ligne);
   }
@@ -318,6 +334,8 @@ export class OprationJustifieeComponent implements OnInit {
   }
 
   updateTotalsAndValidate() {
+    if (this.skipRecalcul) return; // Empêcher les recalculs redondants pendant cette opération
+
     const deviseOp = this.operationForm.get('deviseoperation')?.value;
     const deviseJust = this.operationForm.get('devisejustificatif')?.value;
     const deviseRef = this.user.devise_ref_id;
@@ -405,42 +423,46 @@ export class OprationJustifieeComponent implements OnInit {
     }
   }
 
+  fillFormByOperation(opId: string) {
+    //Trouver l'opération sélectionnée
+    const operation = this.operations.find((op) => op.idoperation === opId);
+    if (!operation) return;
+
+    // l'opération sélectionnée
+    this.selectedOperationPJ = operation;
+
+    const totalcaissemontantref =
+      operation.caisses?.reduce((sum: number, caisse: any) => {
+        if (caisse.codtypeoperation === 'decaissementaj') {
+          return sum + (parseFloat(caisse.montantref) || 0);
+        }
+        return sum;
+      }, 0) || 0;
+
+    //Remplir le formulaire avec les valeurs de l'opération
+    this.operationForm.patchValue({
+      operation: this.idoperation || opId,
+      dateoperation: this.formatDateForInput(operation.dateoperation),
+      deviseoperation: operation.devise?.iddevise,
+      montantoperation: operation.montant,
+      montantRefglobal: totalcaissemontantref,
+    });
+
+    //Charger les details
+    this.getDetailJustificatifPiece(operation);
+
+    // Déclencher la gestion dynamique des devises
+    this.gererDevisesDynamiquement();
+
+    // Charger les pièces jointes de l'opération sélectionnée
+    this.loadAllPiecesJointes(operation.idoperation);
+  }
+
   //A la selection de l'operation
   selectOperation() {
     this.operationForm.get('operation')?.valueChanges.subscribe((opId) => {
       if (!opId) return;
-
-      //Trouver l'opération sélectionnée
-      const operation = this.operations.find((op) => op.idoperation === opId);
-      if (!operation) return;
-
-      // l'opération sélectionnée
-      this.selectedOperationPJ = operation;
-
-      const totalcaissemontantref =
-        operation.caisses?.reduce((sum: number, caisse: any) => {
-          if (caisse.codtypeoperation === 'decaissementaj') {
-            return sum + (parseFloat(caisse.montantref) || 0);
-          }
-          return sum;
-        }, 0) || 0;
-
-      //Remplir le formulaire avec les valeurs de l'opération
-      this.operationForm.patchValue({
-        dateoperation: this.formatDateForInput(operation.dateoperation),
-        deviseoperation: operation.devise?.iddevise,
-        montantoperation: operation.montant,
-        montantRefglobal: totalcaissemontantref,
-      });
-
-      //Charger les details
-      this.getDetailJustificatifPiece(operation);
-
-      // Déclencher la gestion dynamique des devises
-      this.gererDevisesDynamiquement();
-
-      // Charger les pièces jointes de l'opération sélectionnée
-      this.loadAllPiecesJointes(operation.idoperation);
+      this.fillFormByOperation(opId);
     });
   }
 
@@ -697,15 +719,14 @@ export class OprationJustifieeComponent implements OnInit {
               operation.devise?.iddevise,
             );
 
-            this.operationForm.patchValue({
-              resteapayeroperation: resteOperation,
-              resteapayerref: resteRef,
-            });
+            if (!this.skipRecalcul) {
+              this.operationForm.patchValue({
+                resteapayeroperation: resteOperation,
+                resteapayerref: resteRef,
+              });
+            }
 
             this.loadingPiece = false;
-
-            //calcul maintenant fiable
-            //this.recalculateOperationTotals();
           }
         },
         error: (err) => {
@@ -714,69 +735,6 @@ export class OprationJustifieeComponent implements OnInit {
         },
       });
   }
-
-  fillLignesFromDetail(details: any[]) {
-    const lignesFA = this.lignes;
-    lignesFA.clear(); // vider l’ancien contenu
-
-    details.forEach((d) => {
-      const ligne = this.fb.group({
-        idnature: [d.idnature, Validators.required],
-        idcentreanalytique: [d.idcentreanalytique],
-        idtiers: [d.idtiers],
-        montantdetail: [d.montantdetail, Validators.required],
-      });
-
-      // Ajout du contrôle dynamique pour vérification immédiate
-      ligne.get('montantdetail')?.valueChanges.subscribe(() => {
-        this.updateTotalsAndValidate();
-      });
-
-      lignesFA.push(ligne);
-    });
-
-    // Mettre à jour les totaux après chargement
-    this.updateTotalsAndValidate();
-  }
-
-  //Selectionner le justificatif
-  // selectJustificatif(piece: any) {
-  //   const justificatif = this.justificatifFiltered.find(
-  //     (j) => j.idjustificatifoperation === piece.idjustificatifoperation,
-  //   );
-
-  //   if (!justificatif) return;
-  //   this.loadDetailJustificatif(justificatif);
-  // }
-
-  // dispatchDetail(_object: any) {
-  //   // Patch des champs simples
-  //   this.operationForm.patchValue({
-  //     tauxoperation: _object.justificatif.taux,
-  //     devisejustificatif: _object.justificatif.iddevise,
-  //     commentaire: _object.justificatif.commentaire,
-  //     datejustificatif: this.formatDateForInput(_object.justificatif.date),
-  //   });
-
-  //   this.lignes.clear();
-  //   _object.details.forEach((l: any) => {
-  //     const ligneGroup = this.fb.group({
-  //       idligne: [l.iddetailsjustificatifoperation ?? null],
-  //       idnature: [l.idnature ?? null, Validators.required],
-  //       idcentreanalytique: [{ value: l.idcentreanalytique, disabled: true }],
-  //       idtiers: [{ value: l.idtiers ?? null, disabled: true }],
-  //       montantdetail: [
-  //         { value: l.montantdetail ?? '', disabled: false },
-  //         Validators.required,
-  //       ],
-
-  //       //centres propres à la ligne
-  //       centres: this.fb.control<any[]>([]),
-  //     });
-
-  //     this.lignes.push(ligneGroup);
-  //   });
-  // }
 
   //validation required
   isValidField(label: string): string {
@@ -807,7 +765,6 @@ export class OprationJustifieeComponent implements OnInit {
           });
         },
         error: (err) => {
-          console.log(err);
           this.loadingCaisses = false;
           this.toastr.error(err.error.message);
         },
@@ -841,6 +798,7 @@ export class OprationJustifieeComponent implements OnInit {
             if (this.operationsFiltrees.length > 0) {
               this.selectedOperationPJ = this.operationsFiltrees[0];
             }
+            this.fillFormByOperation(this.idoperation);
           }
           this.loading = false;
           // Fin du loading global - dépend seulement des opérations
@@ -1255,7 +1213,6 @@ export class OprationJustifieeComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        console.log('Erreur backend');
         this.toastr.error(err.error.message);
       },
     });
@@ -1532,7 +1489,7 @@ export class OprationJustifieeComponent implements OnInit {
         montantref: 0,
       });
     });
-    this.updateTotalsAndValidate();
+    //this.updateTotalsAndValidate();
     this.toastr.info('Tous les montants ont été effacés');
   }
 
@@ -1584,7 +1541,7 @@ export class OprationJustifieeComponent implements OnInit {
 
     this.lignes.clear();
 
-    // 🔥 Récupérer l'ID de la devise à partir du code
+    // Récupérer l'ID de la devise à partir du code
     const deviseCode = piece.caisse?.devise; // "CDF"
     let deviseId = null;
 
@@ -1662,19 +1619,26 @@ export class OprationJustifieeComponent implements OnInit {
     if (!justificatif) return;
 
     // 6. Charger les détails du justificatif
+    this.skipRecalcul = true; // Empêcher le recalcul automatique pendant le patch
     this.loadDetailJustificatif(justificatif);
+    setTimeout(() => (this.skipRecalcul = false), 0);
   }
+
   /**
    * Remplit le formulaire avec les détails d'un justificatif
    */
   dispatchDetail(_object: any) {
+    this.skipRecalcul = true;
     // Patch des champs simples
-    this.operationForm.patchValue({
-      tauxoperation: _object.justificatif.taux,
-      devisejustificatif: _object.justificatif.iddevise,
-      commentaire: _object.justificatif.commentaire,
-      datejustificatif: this.formatDateForInput(_object.justificatif.date),
-    });
+    this.operationForm.patchValue(
+      {
+        tauxoperation: _object.justificatif.taux,
+        devisejustificatif: _object.justificatif.iddevise,
+        commentaire: _object.justificatif.commentaire,
+        datejustificatif: this.formatDateForInput(_object.justificatif.date),
+      },
+      { emitEvent: false },
+    );
 
     // Déclencher le chargement du taux si la devise est définie
     if (_object.justificatif.iddevise) {
@@ -1685,24 +1649,30 @@ export class OprationJustifieeComponent implements OnInit {
     this.lignes.clear();
 
     // Ajouter les lignes du justificatif
-    _object.details.forEach((l: any) => {
-      const ligneGroup = this.fb.group({
-        idligne: [l.iddetailsjustificatifoperation ?? null],
-        idnature: [l.idnature ?? null, Validators.required],
-        idcentreanalytique: [{ value: l.idcentreanalytique, disabled: true }],
-        idtiers: [{ value: l.idtiers ?? null, disabled: true }],
-        montantdetail: [
-          { value: l.montantdetail ?? '', disabled: false },
-          Validators.required,
-        ],
-        centres: this.fb.control<any[]>([]),
-      });
+    _object.details.forEach(
+      (l: any) => {
+        const ligneGroup = this.fb.group({
+          idligne: [l.iddetailsjustificatifoperation ?? null],
+          idnature: [l.idnature ?? null, Validators.required],
+          idcentreanalytique: [
+            { value: l.idcentreanalytique ?? null, disabled: true },
+          ],
+          idtiers: [{ value: l.idtiers ?? null, disabled: true }],
+          montantdetail: [
+            { value: l.montantdetail ?? '', disabled: false },
+            Validators.required,
+          ],
+          centres: this.fb.control<any[]>([]),
+        });
+        //charger centres POUR CETTE LIGNE
+        this.loadCentresForLigne(ligneGroup, l.idnature, true, '');
 
-      this.lignes.push(ligneGroup);
-    });
+        this.lignes.push(ligneGroup);
+      },
+      { emitEvent: false },
+    );
 
-    // Mettre à jour les totaux
-    this.updateTotalsAndValidate();
+    setTimeout(() => (this.skipRecalcul = false), 0);
   }
 
   // ============================================
@@ -1712,8 +1682,6 @@ export class OprationJustifieeComponent implements OnInit {
   // Pièce justificative sélectionnée
   selectedJustificatif: any = null;
 
-  // gestion des pièces jointes
-  modalPJVisible = false;
   // Propriétés pour les pièces jointes
   operationPiecesJointes: PieceJointe[] = [];
   demandePiecesJointes: PieceJointe[] = [];
@@ -1861,11 +1829,6 @@ export class OprationJustifieeComponent implements OnInit {
       this.toastr.warning('Aucun fichier sélectionné');
       return;
     }
-
-    console.log(
-      "Upload des fichiers pour l'opération:",
-      this.selectedOperationPJ,
-    );
 
     this.pjUploading = true;
     const userId = this.user.idutilisateur;
@@ -2045,7 +2008,6 @@ export class OprationJustifieeComponent implements OnInit {
 
     // Cas 1: Seulement la demande a des PJ
     if (hasDemandePJ && !hasOperationPJ) {
-      console.log('📥 Téléchargement uniquement des PJ de la demande');
       this.downloadingAll = true;
 
       this.pjService.downloadAllOperationFiles(undefined, iddemande).subscribe({
@@ -2111,5 +2073,288 @@ export class OprationJustifieeComponent implements OnInit {
         this.downloadingAll = false;
       },
     });
+  }
+
+  //Impression du reçu
+  printDocumentJustif() {
+    if (!this.selectedOperationPJ) return;
+
+    //Recuperationd de l'id
+    const id = this.selectedOperationPJ.idoperation;
+    this.justificatifservice.getdocJustificatif(id).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const win = window.open(url, '_blank');
+      },
+      error: (err) => {
+        this.toastr.error("Erreur d\'impression du document");
+      },
+    });
+  }
+
+  clearJustificatifFields() {
+    this.skipRecalcul = true;
+
+    this.lignes.clear({ emitEvent: false });
+
+    this.operationForm.patchValue(
+      {
+        commentaire: '',
+        tauxoperation: 1,
+        devisejustificatif: '',
+        datejustificatif: this.formatDateForInput(
+          new Date().toISOString().slice(0, 10),
+        ), // ← date du jour
+      },
+      { emitEvent: false },
+    );
+
+    this.selectedJustificatif = null;
+    this.justificatifDetailFiltered = [];
+
+    setTimeout(() => (this.skipRecalcul = false), 0);
+  }
+
+  justificatifPiecesJointes: PieceJointe[] = [];
+  selectedJustificatifPJ: JustificatifModel | null = null;
+  piecesJustificativesCountMap: Map<string, number> = new Map(); // Cache pour les compteurs
+  justificatifPiecesCount = 0;
+  totalJustificatifPiecesCount = 0;
+  @ViewChild('piecesJointesJustificatifModalTpl')
+  piecesJointesJustificatifModalTpl!: TemplateRef<any>;
+
+  // Récupère le nombre de pièces jointes (avec cache)
+  getPiecesCount(idjsutificatifoperation: string): number {
+    return this.piecesJustificativesCountMap.get(idjsutificatifoperation) || 0;
+  }
+
+  private getModalContainer(item: any): HTMLElement | null {
+    const detailCard = document.querySelector<HTMLElement>(
+      `#card-${item.idoperation}`,
+    );
+
+    return detailCard || document.querySelector<HTMLElement>('.card');
+  }
+
+  /**
+   * Ouvre le modal des pièces jointes avec ng-template
+   */
+  openJustificatifPiecesJointesModal(justificatif: JustificatifModel): void {
+    console.log('Justificatif selected:', justificatif);
+    this.selectedJustificatifPJ = justificatif;
+    this.selectedFiles = [];
+    this.loadAllPiecesJointesJustificatif(justificatif.idjustificatifoperation);
+
+    const container = this.getModalContainer(justificatif);
+    const options: any = {
+      centered: true,
+      size: 'lg',
+      backdrop: 'static',
+    };
+    if (container) {
+      options.container = container;
+    }
+
+    const modalRef = this.modalService.open(
+      this.piecesJointesJustificatifModalTpl,
+      options,
+    );
+
+    // Gérer la fermeture de la modale
+    modalRef.result.then(
+      () => {
+        this.closePiecesJointesJustificatifModal();
+      },
+      () => {
+        this.closePiecesJointesJustificatifModal();
+      },
+    );
+  }
+  /**
+  // ============================================
+// MÉTHODES ADAPTÉES POUR LES JUSTIFICATIFS
+// ============================================
+
+/**
+ * Charge toutes les pièces jointes d'un justificatif
+ */
+  loadAllPiecesJointesJustificatif(idjustificatifoperation: string): void {
+    this.piecesJointesLoading = true;
+    this.justificatifpjService.getAll(idjustificatifoperation).subscribe({
+      next: (res) => {
+        console.log('res.data', res.data);
+        if (res.success) {
+          this.justificatifPiecesJointes = res.data || [];
+          this.justificatifPiecesCount = this.justificatifPiecesJointes.length;
+          this.totalJustificatifPiecesCount = this.justificatifPiecesCount;
+          // Mettre à jour le cache
+          this.piecesJustificativesCountMap.set(
+            idjustificatifoperation,
+            this.justificatifPiecesCount,
+          );
+        } else {
+          this.justificatifPiecesJointes = [];
+          this.justificatifPiecesCount = 0;
+          this.totalJustificatifPiecesCount = 0;
+        }
+        this.piecesJointesLoading = false;
+      },
+      error: (err) => {
+        console.error('Erreur chargement PJ:', err);
+        this.justificatifPiecesJointes = [];
+        this.justificatifPiecesCount = 0;
+        this.piecesJointesLoading = false;
+        this.toastr.error('Erreur lors du chargement des pièces jointes');
+      },
+    });
+  }
+
+  /**
+   * Ferme le modal des pièces jointes
+   */
+  closePiecesJointesJustificatifModal(): void {
+    this.modalService.dismissAll();
+    this.selectedJustificatifPJ = null;
+    this.justificatifPiecesJointes = [];
+    this.justificatifPiecesCount = 0;
+    this.totalJustificatifPiecesCount = 0;
+    this.selectedFiles = [];
+    this.pjUploading = false;
+    this.pjDeleting = null;
+  }
+
+  /**
+   * Upload des fichiers pour un justificatif
+   */
+  uploadJustificatifPieces(): void {
+    if (!this.selectedJustificatifPJ || this.selectedFiles.length === 0) {
+      this.toastr.warning(
+        'Aucun fichier sélectionné ou justificatif non défini',
+      );
+      return;
+    }
+
+    this.pjUploading = true;
+    const userId = 'SYSTEM';
+
+    this.justificatifpjService
+      .create(
+        this.selectedJustificatifPJ.idjustificatifoperation,
+        this.selectedFiles,
+        userId,
+      )
+      .subscribe({
+        next: (res) => {
+          console.log('Upload:', res);
+          if (res.success) {
+            this.toastr.success(
+              `${res.data.length} fichier(s) uploadé(s) avec succès`,
+            );
+            this.selectedFiles = [];
+            this.loadAllPiecesJointesJustificatif(
+              this.selectedJustificatifPJ!.idjustificatifoperation,
+            );
+          } else {
+            this.toastr.error("Erreur lors de l'upload");
+          }
+          this.pjUploading = false;
+        },
+        error: (err) => {
+          console.error('Erreur upload:', err);
+          this.toastr.error(err.error?.message || "Erreur lors de l'upload");
+          this.pjUploading = false;
+        },
+      });
+  }
+
+  /**
+   * Télécharge une pièce jointe
+   */
+  downloadJustificatifPiece(piece: PieceJointe): void {
+    this.justificatifpjService.downloadFile(piece.urlpiece).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = piece.nomfichier;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.toastr.success('Téléchargement démarré');
+      },
+      error: (err) => {
+        console.error('Erreur téléchargement:', err);
+        this.toastr.error('Erreur lors du téléchargement');
+      },
+    });
+  }
+
+  /**
+   * Supprime une pièce jointe
+   */
+  deleteJustificatifPiece(piece: PieceJointe): void {
+    if (!confirm(`Supprimer "${piece.nomfichier}" ?`)) return;
+    if (!this.selectedJustificatifPJ) return;
+
+    this.pjDeleting = piece.idpiecejointe;
+
+    this.justificatifpjService
+      .delete(
+        this.selectedJustificatifPJ.idjustificatifoperation,
+        piece.idpiecejointe,
+      )
+      .subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.toastr.success('Fichier supprimé');
+            this.loadAllPiecesJointesJustificatif(
+              this.selectedJustificatifPJ!.idjustificatifoperation,
+            );
+          } else {
+            this.toastr.error('Erreur lors de la suppression');
+          }
+          this.pjDeleting = null;
+        },
+        error: (err) => {
+          console.error('Erreur suppression:', err);
+          this.toastr.error(
+            err.error?.message || 'Erreur lors de la suppression',
+          );
+          this.pjDeleting = null;
+        },
+      });
+  }
+
+  /**
+   * Télécharge toutes les pièces jointes d'un justificatif
+   */
+  downloadAllJustificatifFiles(): void {
+    if (!this.selectedJustificatifPJ) {
+      this.toastr.error('Aucun justificatif sélectionné');
+      return;
+    }
+
+    this.loading = true;
+    this.justificatifpjService
+      .downloadAllFiles(this.selectedJustificatifPJ.idjustificatifoperation)
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          const filename = `justificatif_${this.selectedJustificatifPJ!.codejustificatif || 'JUST'}_pieces_jointes.zip`;
+          link.download = filename;
+          link.click();
+          window.URL.revokeObjectURL(url);
+          this.toastr.success(
+            `${this.justificatifPiecesCount} fichier(s) téléchargé(s)`,
+          );
+          this.loading = false;
+        },
+        error: (err) => {
+          console.error('Erreur téléchargement ZIP:', err);
+          this.toastr.error(err.error?.message);
+          this.loading = false;
+        },
+      });
   }
 }

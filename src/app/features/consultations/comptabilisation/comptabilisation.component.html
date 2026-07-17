@@ -180,7 +180,7 @@
                     </td>
                     <td class="text-nowrap">
                       <span class="badge-glass badge-glass-info">{{
-                        ecriture.journal
+                        ecriture!.journal
                       }}</span>
                     </td>
                     <td class="text-nowrap">
@@ -199,10 +199,10 @@
                       style="max-width: 300px; cursor: pointer"
                     >
                       {{
-                        (ecriture.libelle.length || 0) > 50
-                          ? (ecriture.libelle | slice: 0 : 50) + "..."
-                          : ecriture.libelle || ""
-                      }}
+                          (ecriture?.libelle || "").length > 50
+                            ? ((ecriture?.libelle || "") | slice:0:50) + "..."
+                            : (ecriture?.libelle || "")
+                        }}
                     </td>
                     <td class="text-end">
                       {{ ecriture.debit | number: "1.2-2" }}

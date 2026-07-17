@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { QueryResultModel } from '../../../_core/models/query-result.model';
 import { URL_LOCAL } from '../../../_core/routes/backend.root';
@@ -117,4 +117,18 @@ export class ConsultationOpService {
       URL_LOCAL.baseUrl + this.url + '/solde/allcaisse',
     );
   }
+
+  getJournalEncaissements(idcaisses: string[], datedebut: string, datefin: string): Observable<any> {
+    // let params = new HttpParams().set('idcaisses', idcaisses.join(','))
+    //   .set('datedebut', datedebut)
+    //   .set('datefin', datefin);
+
+    let params: any = {
+      idcaisses: idcaisses,
+      datedebut: datedebut,
+      datefin: datefin
+    }
+    return this.http.post( URL_LOCAL.baseUrl + this.url + `/journalencaissement`, params );
+  }
+
 }

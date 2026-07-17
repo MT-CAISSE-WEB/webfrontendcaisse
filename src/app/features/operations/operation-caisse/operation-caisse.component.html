@@ -162,7 +162,8 @@
               <thead>
                 <tr>
                   <th>Numéro</th>
-                  <th>Opération</th>
+                  <th>Description</th>
+                  <th>Type</th>
                   <th class="text-end">Montant</th>
                   <th>Devise</th>
                   <th>Date</th>
@@ -175,12 +176,25 @@
                     <td>
                       <span class="code-badge">{{ item.codeoperation }}</span>
                     </td>
+                    @if (item.commentaire) {
+                      <td title="{{ item.commentaire }}">
+                        {{
+                          item.commentaire.length > 10
+                            ? (item.commentaire | slice: 0 : 20) + "..."
+                            : item.commentaire
+                        }}
+                      </td>
+                    } @else {
+                      <td title="Aucun commentaire">-</td>
+                    }
+
                     <td>
                       <span class="type-badge" [class]="getTypeClass(item)">
                         <i [class]="getTypeIcon(item)"></i>
                         {{ getTypeLabel(item) }}
                       </span>
                     </td>
+
                     <td class="text-end fw-semibold">
                       @if (item.devise.codedevise != "USD") {
                         {{ formatCFA(item.montant) }}
@@ -930,7 +944,7 @@
               </div>
               <div>
                 <p class="resume-label">Société</p>
-                <h6 class="resume-value">{{ op.societe?.libelle }}</h6>
+                <h6 class="resume-value">{{ op.societe?.raisonsociale }}</h6>
               </div>
             </div>
           </div>

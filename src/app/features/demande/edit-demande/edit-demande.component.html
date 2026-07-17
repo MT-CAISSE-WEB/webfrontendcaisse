@@ -224,7 +224,11 @@
                 </tr>
               </thead>
               <tbody id="newlink">
-                @for (ligne of lignes.controls; track $index) {
+                @for (
+                  ligne of lignes.controls;
+                  track $index;
+                  let ligneIndex = $index
+                ) {
                   <tr class="product" [formGroup]="ligne">
                     <td class="text-center fw-bold">{{ $index + 1 }}</td>
                     <td>
@@ -341,7 +345,7 @@
                           type="button"
                           class="action-btn action-view"
                           data-bs-toggle="modal"
-                          [attr.data-bs-target]="'#detailModal' + $index"
+                          [attr.data-bs-target]="'#detailModal' + ligneIndex"
                           title="Détails"
                         >
                           <i class="ri-pencil-line"></i>
@@ -361,7 +365,7 @@
                   <!-- Modal Détails -->
                   <div
                     class="modal fade"
-                    [attr.id]="'detailModal' + $index"
+                    [attr.id]="'detailModal' + ligneIndex"
                     tabindex="-1"
                     aria-hidden="true"
                   >
@@ -386,9 +390,12 @@
                           ></button>
                         </div>
 
-                        <div [formGroup]="lignesFormArray.at($index)">
+                        <div [formGroup]="ligne">
                           <div class="modal-body p-4">
-                            <div class="table-responsive">
+                            <div
+                              class="table-responsive"
+                              formArrayName="details"
+                            >
                               <table
                                 class="table table-modern align-middle mb-0"
                               >
@@ -403,8 +410,9 @@
                                 </thead>
                                 <tbody>
                                   @for (
-                                    detail of getDetailsArray($index).controls;
-                                    track $index;
+                                    detail of getDetailsArray(ligneIndex)
+                                      .controls;
+                                    track detail;
                                     let j = $index
                                   ) {
                                     <tr [formGroupName]="j">
@@ -439,7 +447,7 @@
                                         <button
                                           type="button"
                                           class="action-btn action-delete"
-                                          (click)="removeDetail($index, j)"
+                                          (click)="removeDetail(ligneIndex, j)"
                                           title="Supprimer"
                                         >
                                           <i class="ri-delete-bin-line"></i>

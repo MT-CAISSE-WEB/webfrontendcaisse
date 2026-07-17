@@ -310,7 +310,7 @@ export class ComptabilisationComponent implements OnInit {
       return;
     }
 
-    const ids = Array.from(this.selectedRows).map((row) => row.idligneecriture);
+    const ids = Array.from(this.selectedRows).map((row) => row.idligneecriture).filter((id): id is string => id !== undefined);
     this.callValidationApi(ids);
   }
 
@@ -431,7 +431,7 @@ export class ComptabilisationComponent implements OnInit {
 
     this.loading = true;
     this.service
-      .validateByIds(this.ecritures.map((e) => e.idligneecriture))
+      .validateByIds(this.ecritures.map((e: any) => e.idligneecriture))
       .subscribe({
         next: (res) => {
           this.toastr.success(res.message);
@@ -491,21 +491,21 @@ export class ComptabilisationComponent implements OnInit {
 
       result.push({
         Journal: ecriture.journal,
-        Date: this.formatDateForExcel(ecriture.date_operation),
+        Date: this.formatDateForExcel(ecriture?.date_operation),
         Compte: ecriture.compte,
-        'Num piece': ecriture.num_piece,
-        Reference: ecriture.ref_ecriture,
-        Tiers: ecriture.tiers || '',
-        'Type compte': ecriture.tiers ? 'X' : 'G',
-        Libellé: ecriture.libelle,
-        'Montant ref': ecriture.montantref,
-        'Montant devise': ecriture.montant,
+        'Num piece': ecriture?.num_piece,
+        Reference: ecriture?.ref_ecriture,
+        Tiers: ecriture?.tiers || '',
+        'Type compte': ecriture?.tiers ? 'X' : 'G',
+        Libellé: ecriture?.libelle,
+        'Montant ref': ecriture?.montantref,
+        'Montant devise': ecriture?.montant,
         'Type de pièce': 'OD',
-        Sens: ecriture.debit > 0 ? 'D' : 'C',
-        Devise: ecriture.devise,
-        Taux: ecriture.taux,
-        'Montant Debit': ecriture.debit,
-        'Montant credit': ecriture.credit,
+        Sens: ecriture?.debit > 0 ? 'D' : 'C',
+        Devise: ecriture?.devise,
+        Taux: ecriture?.taux,
+        'Montant Debit': ecriture?.debit,
+        'Montant credit': ecriture?.credit,
         'Centre analytique': '',
         'Centre analytique 2': '',
       });
@@ -513,23 +513,23 @@ export class ComptabilisationComponent implements OnInit {
       if (hasAnalytique) {
         result.push({
           Journal: ecriture.journal,
-          Date: this.formatDateForExcel(ecriture.date_operation),
+          Date: this.formatDateForExcel(ecriture?.date_operation),
           Compte: ecriture.compte,
-          'Num piece': ecriture.num_piece,
-          Reference: ecriture.ref_ecriture,
-          Tiers: ecriture.tiers || '',
+          'Num piece': ecriture?.num_piece,
+          Reference: ecriture?.ref_ecriture,
+          Tiers: ecriture?.tiers || '',
           'Type compte': 'A',
-          Libellé: ecriture.libelle,
-          'Montant ref': ecriture.montantref,
-          'Montant devise': ecriture.montant,
+          Libellé: ecriture?.libelle,
+          'Montant ref': ecriture?.montantref,
+          'Montant devise': ecriture?.montant,
           'Type de pièce': 'OD',
-          Sens: ecriture.debit > 0 ? 'D' : 'C',
-          Devise: ecriture.devise,
-          Taux: ecriture.taux,
-          'Montant Debit': ecriture.debit,
-          'Montant credit': ecriture.credit,
-          'Centre analytique': ecriture.centreanalytique || '',
-          'Centre analytique 2': ecriture.centreanalytiquesecond || '',
+          Sens: ecriture?.debit > 0 ? 'D' : 'C',
+          Devise: ecriture?.devise,
+          Taux: ecriture?.taux,
+          'Montant Debit': ecriture?.debit,
+          'Montant credit': ecriture?.credit,
+          'Centre analytique': ecriture?.centreanalytique || '',
+          'Centre analytique 2': ecriture?.centreanalytiquesecond || '',
         });
       }
     });
@@ -749,4 +749,5 @@ export class ComptabilisationComponent implements OnInit {
 
     return String(value);
   }
+
 }

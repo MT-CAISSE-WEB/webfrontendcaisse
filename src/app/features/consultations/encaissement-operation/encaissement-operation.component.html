@@ -1,0 +1,163 @@
+<div class="container-fluid py-4">
+
+  <!-- ========== TITRE PREMIUM ========== -->
+  <div class="page-title-premium d-flex align-items-center justify-content-between mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <div class="title-icon-premium">
+        <i class="ri-bank-line"></i>
+      </div>
+      <div>
+        <h4 class="title-premium mb-0">Journal des encaissements</h4>
+        <span class="title-subtitle-premium">Consultation par caisse et période</span>
+      </div>
+    </div>
+    <nav class="breadcrumb-premium">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="#"><i class="ri-home-4-line"></i> Accueil</a></li>
+        <li class="breadcrumb-item active">Journal</li>
+      </ol>
+    </nav>
+  </div>
+
+  <!-- ========== FILTRES ========== -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <form [formGroup]="filterForm" (ngSubmit)="search()">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Caisse</label>
+            <select class="form-select form-control" formControlName="selectedCaisse">
+              <option [ngValue]="'all'">Toutes les caisses</option>
+              <option *ngFor="let caisse of caissesList" [ngValue]="caisse">
+                {{ caisse.caisse.codecaisse }} - {{ caisse.caisse.libelle }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Date début</label>
+            <input type="date" class="form-control" formControlName="datedebut">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Date fin</label>
+            <input type="date" class="form-control" formControlName="datefin">
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100" [disabled]="loading">
+              <i class="ri-search-line me-1"></i> Rechercher
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========== RÉSULTATS ========== -->
+  @if (hasSearched && !loading) {
+    @if (journal.length === 0) {
+      <div class="empty-state">
+        <i class="ri-file-search-line"></i>
+        <p>Aucun encaissement trouvé pour cette période</p>
+        <span class="empty-hint">Modifiez les filtres et relancez la recherche</span>
+      </div>
+    } @else {
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title mb-3">
+            <i class="ri-calendar-check-line me-2"></i> Résultats
+            <span class="badge bg-primary ms-2">{{ journal.length }} jour(s)</span>
+          </h4>
+
+          <!-- Accordéon des jours -->
+          @for (jour of journal; track jour.jour) {
+            <div class="journal-accordion mb-3">
+              <button class="accordion-trigger"
+                      (click)="toggleDay(jour.jour)"
+                      [class.collapsed]="!isDayExpanded(jour.jour)">
+                <div class="d-flex align-items-center gap-3">
+                  <i class="ri-calendar-line fs-5 text-primary"></i>
+                  <span class="fw-semibold">{{ jour.jour | date:'fullDate' }}</span>
+                  <span class="badge bg-light text-dark ms-2">{{ jour.caisses.length }} caisse(s)</span>
+                </div>
+                <i class="ri-arrow-down-s-line fs-5 transition"
+                   [class.rotate-180]="isDayExpanded(jour.jour)"></i>
+              </button>
+
+              @if (isDayExpanded(jour.jour)) {
+                <div class="accordion-content animate-fade">
+                  @for (caisse of jour.caisses; track caisse.idcaisse) {
+                    <div class="caisse-card mb-2">
+                      <div class="caisse-card-header"
+                           (click)="toggleCaisse(jour.jour, caisse.idcaisse)">
+                        <div class="d-flex align-items-center gap-2">
+                          <i class="ri-bank-card-line text-success fs-5"></i>
+                          <span class="fw-bold">{{ caisse.codecaisse }} - {{ caisse.libellecaisse }}</span>
+                          <span class="badge badge-devise">{{ caisse.devise.code }}</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                          <span class="badge bg-primary">{{ caisse.operations.length }} op.</span>
+                          <i class="ri-arrow-down-s-line"
+                             [class.rotate-180]="isCaisseExpanded(jour.jour, caisse.idcaisse)"></i>
+                        </div>
+                      </div>
+
+                      @if (isCaisseExpanded(jour.jour, caisse.idcaisse)) {
+                        <div class="operations-list">
+                          @for (op of caisse.operations; track op.idoperation) {
+                            <div class="operation-card">
+                              <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold code-badge">{{ op.codeoperation }}</span>
+                                <span class="text-muted small">{{ op.dateoperation | date:'dd/MM/yyyy HH:mm' }}</span>
+                              </div>
+                              <div class="row g-2">
+                                <div class="col-md-3">
+                                  <small class="text-muted d-block">Bénéficiaire</small>
+                                  <span class="fw-medium">{{ op.beneficiaire || '-' }}</span>
+                                </div>
+                                <div class="col-md-3">
+                                  <small class="text-muted d-block">Montant total</small>
+                                  <span class="fw-bold">{{ op.montantoperation | number:'1.0-0' }} {{ op.deviseoperation.code }}</span>
+                                </div>
+                                <div class="col-md-3">
+                                  <small class="text-muted d-block">Montant caisse</small>
+                                  <span class="fw-bold text-success">{{ op.montantcaisse | number:'1.0-0' }} {{ caisse.devise.code }}</span>
+                                </div>
+                                <div class="col-md-3">
+                                  <small class="text-muted d-block">Réf. / Taux</small>
+                                  <span>{{ op.montantreference | number:'1.0-0' }} (x{{ op.tauxoperation }})</span>
+                                </div>
+                              </div>
+                              <div class="lignes-list mt-2">
+                                <strong>Lignes :</strong>
+                                <ul class="list-unstyled ms-3 mb-0">
+                                  @for (ligne of op.lignes; track ligne.idligneoperation) {
+                                    <li class="small d-flex align-items-center gap-2 mb-1">
+                                      <span class="badge bg-success">{{ ligne.nature.libelle }}</span>
+                                      <span>{{ ligne.libelle }} – {{ ligne.montant | number:'1.0-0' }} {{ op.deviseoperation.code }}</span>
+                                      <span class="text-muted" *ngIf="ligne.centre">({{ ligne.centre.code }})</span>
+                                      <span class="text-muted" *ngIf="ligne.tiers"> - {{ ligne.tiers.nom }}</span>
+                                    </li>
+                                  }
+                                </ul>
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary"></div>
+      <p class="mt-2">Chargement…</p>
+    </div>
+  }
+</div>

@@ -394,11 +394,12 @@
 }
 
 .table-modern tbody td {
-  padding: 12px 16px;
+  padding: 6px;
   vertical-align: middle;
   font-size: 0.85rem;
   color: #1e293b;
   border-bottom: none;
+  white-space: nowrap;
 }
 
 /* ============================================

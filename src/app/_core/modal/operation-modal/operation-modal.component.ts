@@ -546,7 +546,7 @@ export class OperationModalComponent implements OnInit {
       demande: [''],
       codeoperation: [''],
       beneficiaire: [''],
-      libelle: [''],
+      libelle: ['', [Validators.required]],
       dateoperation: [{ value: null, disabled: false }, [Validators.required]],
       typepaiement: ['', [Validators.required]],
       lignes: this.fb.array([]),
