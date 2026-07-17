@@ -46,6 +46,7 @@ import { LigneBudgetService } from '../../budgets/services/ligne_budget.service'
 import { BudgetModel } from '../../budgets/models/budget.model';
 import { PieceJointe } from '../../PJ/models/pj.model';
 import { DemandePJService } from '../../PJ/service/demandepj.service';
+import { OperationModalUtils } from '../../../_core/modal/utils/number-format.utils';
 
 @Component({
   selector: 'app-edit-demande',
@@ -142,6 +143,9 @@ export class EditDemandeComponent implements OnInit {
   existingPieces: PieceJointe[] = [];
   filesToDelete: string[] = [];
   pjUploading = false;
+
+  // Set contenant les indices des lignes en erreur (montant <= 0)
+  ligneErrors: Set<number> = new Set()
 
   constructor(
     private service: DemandeService,
@@ -720,10 +724,17 @@ export class EditDemandeComponent implements OnInit {
       map((value) => this._filterNature(value || '')),
     );
 
-    // Filtrage Tiers pour cette ligne
-    const filteredTiers = ligneOf.get('tiers')!.valueChanges.pipe(
-      startWith(''),
-      map((value) => this._filterTiers(value || '')),
+    // Observables pour la nature et la saisie du tiers
+    const nature$ = ligneOf.get('natureop')!.valueChanges.pipe(
+      startWith(ligneOf.get('natureop')?.value ?? null)
+    );
+    const tiersValue$ = ligneOf.get('tiers')!.valueChanges.pipe(
+      startWith(ligneOf.get('tiers')?.value ?? '')
+    );
+
+    // Filtrage combiné : type de tiers + texte saisi
+    const filteredTiers = combineLatest([nature$, tiersValue$]).pipe(
+      map(([nature, tiersValue]) => OperationModalUtils.filterTiersByNature(tiersValue, nature, this.tiers))
     );
 
     // Filtrage Centres pour cette ligne
@@ -757,7 +768,6 @@ export class EditDemandeComponent implements OnInit {
       ligneOf.get('montantdemande')?.enable();
 
       const lignes = this.filterLignesBudget(ligneOf);
-      console.log('BudgetGlobal:', this.budgetGlobal);
       if (!this.budgetGlobal?.isanalytique && nature.decajustifier === 0) {
         ligneOf
           .get('codebudget')
@@ -952,8 +962,34 @@ export class EditDemandeComponent implements OnInit {
       return;
     }
 
-    /** 2. prepare data */
+    // 2. Récupération des lignes
+    const rawLignes = this.demandeForm.getRawValue().lignes || [];
+
+    // 3. Vérification : au moins une ligne
+    if (rawLignes.length === 0) {
+      this.toastr.warning('Veuillez ajouter au moins une ligne avant de valider.');
+      return;
+    }
+
+    // 4. Vérification des montants (chaque ligne doit avoir un montant > 0)
+    this.ligneErrors.clear();
+    let hasLigneError = false;
+    rawLignes.forEach((l: any, index: number) => {
+      if (l.montantdemande == null || l.montantdemande <= 0) {
+        this.ligneErrors.add(index);
+        hasLigneError = true;
+      }
+    });
+
+    if (hasLigneError) {
+      this.toastr.warning('Veuillez saisir un montant valide (supérieur à 0) pour chaque ligne en erreur.');
+      return;
+    }
+
+    // 5. Préparation des données
     const raw = this.demandeForm.getRawValue();
+
+    /** 2. prepare data */
     const formValue = {
       ...this.demande,
       ...raw,
@@ -973,8 +1009,6 @@ export class EditDemandeComponent implements OnInit {
           ? `${this.user.nom} ${this.user.prenom}`
           : null,
     };
-
-    console.log('Prepared form value for submission:', formValue);
 
     /** 3. choices action */
     if (this.title == 'Création') this.create(formValue);
