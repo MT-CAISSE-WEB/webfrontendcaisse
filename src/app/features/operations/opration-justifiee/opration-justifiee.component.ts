@@ -24,7 +24,15 @@ import { OperationService } from '../service/operation.service';
 import { ToastrService } from 'ngx-toastr';
 import { deviseservice } from '../../donnee_base/donnee_base/service/devise.service';
 import { devisemodel } from '../../donnee_base/donnee_base/model/devise.model';
-import { map, Observable, switchMap, tap } from 'rxjs';
+import {
+  catchError,
+  forkJoin,
+  map,
+  Observable,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { AffectationCaisseService } from '../../caisse_journal/services/affectationcaisse.service';
 import { DemandeService } from '../../demande/services/demande.service';
 import { JustificatifService } from '../service/justificatif.service';
@@ -653,6 +661,8 @@ export class OprationJustifieeComponent implements OnInit {
               (j) => j.operation.idoperation === operation.idoperation,
             );
 
+            // Charger toutes les PJs du justificatif
+            this.loadJustificatifPiecesCounts();
             /**
              * Calcul des totaux existants (SEULEMENT les justificatifs, pas les encaissements)
              * Conversion automatique vers devise de référence
@@ -2356,5 +2366,42 @@ export class OprationJustifieeComponent implements OnInit {
           this.loading = false;
         },
       });
+  }
+
+  loadJustificatifPiecesCounts(): void {
+    if (!this.justificatifFiltered || this.justificatifFiltered.length === 0)
+      return;
+
+    const requests: Observable<any>[] = [];
+
+    this.justificatifFiltered.forEach((justificatif) => {
+      // Vérifier si le compteur existe déjà
+      if (
+        !this.piecesJustificativesCountMap.has(
+          justificatif.idjustificatifoperation,
+        )
+      ) {
+        requests.push(
+          this.justificatifpjService
+            .getAll(justificatif.idjustificatifoperation)
+            .pipe(catchError(() => of({ success: false, data: [] }))),
+        );
+      }
+    });
+
+    if (requests.length === 0) return; // Pas de requête si tout est déjà chargé
+
+    forkJoin(requests).subscribe({
+      next: (responses) => {
+        responses.forEach((response, index) => {
+          const justificatif = this.justificatifFiltered[index];
+          const count = response.success ? response.data.length : 0;
+          this.piecesJustificativesCountMap.set(
+            justificatif.idjustificatifoperation,
+            count,
+          );
+        });
+      },
+    });
   }
 }
