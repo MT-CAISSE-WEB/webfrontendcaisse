@@ -182,7 +182,7 @@ export class OprationJustifieeComponent implements OnInit {
     //Charger les natures d'opérations
     this.getAllNatureoperations();
     //Lors de la selection de operation
-    this.selectOperation();
+    // this.selectOperation();
     //Lors de la selection de la devise de justificatio
     this.selectDeviseJustificatif();
     //lors du retour de caisse
@@ -1500,7 +1500,7 @@ export class OprationJustifieeComponent implements OnInit {
       });
     });
     //this.updateTotalsAndValidate();
-    this.toastr.info('Tous les montants ont été effacés');
+    // this.toastr.info('Tous les montants ont été effacés');
   }
 
   /**
@@ -1620,7 +1620,9 @@ export class OprationJustifieeComponent implements OnInit {
 
     // 4. Marquer la pièce justificative comme sélectionnée
     this.selectedJustificatif = piece;
+    this.selectedJustificatifPJ = piece;
 
+    console.log('selectedJustificatif', this.selectedJustificatif);
     // 5. Récupérer le justificatif complet
     const justificatif = this.justificatifFiltered.find(
       (j) => j.idjustificatifoperation === piece.idjustificatifoperation,
@@ -1631,6 +1633,7 @@ export class OprationJustifieeComponent implements OnInit {
     // 6. Charger les détails du justificatif
     this.skipRecalcul = true; // Empêcher le recalcul automatique pendant le patch
     this.loadDetailJustificatif(justificatif);
+    this.loadAllPiecesJointesJustificatif(piece.idjustificatifoperation);
     setTimeout(() => (this.skipRecalcul = false), 0);
   }
 
@@ -2119,6 +2122,12 @@ export class OprationJustifieeComponent implements OnInit {
       { emitEvent: false },
     );
 
+    // NOUVEAU : Réinitialiser les PJ du justificatif
+    this.selectedJustificatifPJ = null;
+    this.justificatifPiecesJointes = [];
+    this.justificatifPiecesCount = 0;
+    this.selectedFiles = [];
+
     this.selectedJustificatif = null;
     this.justificatifDetailFiltered = [];
 
@@ -2403,5 +2412,170 @@ export class OprationJustifieeComponent implements OnInit {
         });
       },
     });
+  }
+
+  @ViewChild('imagePreviewModalTpl') imagePreviewModalTpl!: TemplateRef<any>;
+  imageUrl: string | null = null;
+  fileName: string = '';
+
+  /**
+   * Ouvre l'aperçu d'une pièce jointe selon son type
+   */
+  previewPiece(piece: PieceJointe): void {
+    if (!piece?.urlpiece) {
+      this.toastr.error('URL de la pièce jointe manquante');
+      return;
+    }
+
+    const mimeType = (piece.mimetype || '').toLowerCase();
+    const fileName = piece.nomfichier || 'fichier';
+
+    // 🔹 1. PDF → Ouvre dans un nouvel onglet
+    if (mimeType.includes('pdf')) {
+      this.openPdfInNewTab(piece);
+      return;
+    }
+
+    // 🔹 2. IMAGES (JPG, PNG, GIF, WEBP, etc.) → Affiche dans la modale
+    if (mimeType.includes('image') || this.isImageFile(fileName)) {
+      this.showImagePreview(piece);
+      return;
+    }
+
+    // 🔹 3. DOCUMENTS OFFICE (Word, Excel, CSV) → Google Docs Viewer
+    if (
+      mimeType.includes('word') ||
+      mimeType.includes('excel') ||
+      mimeType.includes('spreadsheet') ||
+      mimeType.includes('csv') ||
+      mimeType.includes('text/plain')
+    ) {
+      this.openInGoogleDocsViewer(piece);
+      return;
+    }
+
+    // 🔹 4. AUTRES TYPES → Téléchargement + message
+    this.toastr.info(
+      `Aperçu non disponible pour "${fileName}". Téléchargement démarré.`,
+    );
+    this.downloadJustificatifPiece(piece);
+  }
+
+  /**
+   * Vérifie si un fichier est une image (par extension)
+   */
+  private isImageFile(fileName: string): boolean {
+    const imageExtensions = [
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.gif',
+      '.webp',
+      '.svg',
+      '.bmp',
+    ];
+    const ext = fileName.slice(fileName.lastIndexOf('.')).toLowerCase();
+    return imageExtensions.includes(ext);
+  }
+
+  /**
+   * Ouvre un PDF dans un nouvel onglet
+   */
+  private openPdfInNewTab(piece: PieceJointe): void {
+    this.justificatifpjService.downloadFile(piece.urlpiece).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, `_blank_pdf_${piece.idpiecejointe}`);
+      },
+      error: () => {
+        this.toastr.error(`Échec de l'ouverture du PDF : ${piece.nomfichier}`);
+      },
+    });
+  }
+
+  /**
+   * Affiche une image dans la modale d'aperçu
+   */
+  showImagePreview(piece: PieceJointe): void {
+    this.pjService.downloadFile(piece.urlpiece).subscribe({
+      next: (blob) => {
+        this.imageUrl = window.URL.createObjectURL(blob);
+        this.fileName = piece.nomfichier;
+        this.modalService.open(this.imagePreviewModalTpl, {
+          size: 'xl',
+          centered: true,
+          backdrop: 'static',
+        });
+      },
+      error: () => {
+        this.toastr.error(
+          `Échec du chargement de l'image : ${piece.nomfichier}`,
+        );
+      },
+    });
+  }
+
+  /**
+   * Ferme la modale d'aperçu d'image
+   */
+  closeImagePreview(): void {
+    this.modalService.dismissAll();
+    if (this.imageUrl) {
+      window.URL.revokeObjectURL(this.imageUrl);
+      this.imageUrl = null;
+    }
+    this.fileName = '';
+  }
+
+  /**
+   * Télécharge l'image actuellement affichée
+   */
+  downloadCurrentImage(): void {
+    if (!this.imageUrl || !this.fileName) return;
+    const link = document.createElement('a');
+    link.href = this.imageUrl;
+    link.download = this.fileName;
+    link.click();
+  }
+
+  /**
+   * Gère l'erreur de chargement de l'image
+   */
+  onImageLoadError(): void {
+    this.toastr.error(
+      "Impossible de charger l'image. Le fichier peut être corrompu.",
+    );
+    this.closeImagePreview();
+  }
+
+  /**
+   * Ouvre un fichier dans Google Docs Viewer
+   * @param piece - La pièce jointe à afficher
+   */
+  openInGoogleDocsViewer(piece: PieceJointe): void {
+    if (!piece?.urlpiece) {
+      this.toastr.error('URL de la pièce jointe manquante');
+      return;
+    }
+
+    try {
+      // Encoder l'URL pour éviter les problèmes de caractères spéciaux
+      const encodedUrl = encodeURIComponent(piece.urlpiece);
+
+      // Construire l'URL Google Docs Viewer
+      const viewerUrl = `https://docs.google.com/gview?url=${encodedUrl}&embedded=true`;
+
+      // Ouvrir dans un nouvel onglet
+      const windowName = `_blank_gdocs_${piece.idpiecejointe || Date.now()}`;
+      window.open(viewerUrl, windowName, 'noopener,noreferrer');
+    } catch (error) {
+      console.error('Erreur avec Google Docs Viewer:', error);
+      this.toastr.error(
+        `Impossible d'ouvrir "${piece.nomfichier}" dans Google Docs Viewer. ` +
+          `Téléchargement démarré à la place.`,
+      );
+      // Fallback : télécharger le fichier
+      this.downloadJustificatifPiece(piece);
+    }
   }
 }
