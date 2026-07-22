@@ -656,6 +656,8 @@ export class EditDemandeComponent implements OnInit {
         detailsArray.push(this.newDetail(detail));
       });
 
+      console.log('Ligne:', ligne);
+
       // if (ligne.codebudget.idbudgetdepartementnature) {
       //   ligneGroup
       //     .get('codebudget')
@@ -990,6 +992,10 @@ export class EditDemandeComponent implements OnInit {
         natureop: l.natureop?.idnature ?? l.natureop, // ID nature
         centre: l.centre?.idcentreanalytique ?? l.centre, // ID centre
         tiers: l.tiers?.idtiers ?? null, // ID tiers
+        codebudget: {
+          idbudgetdepartementnature: l.codebudget?.idbudgetdepartementnature,
+          codebudgetaire: l.codebudget?.codebudgetaire,
+        },
         // TRANSFORMATION CRITIQUE : Convertir les FormGroups en objets simples
         details: l.details || [],
       })),
@@ -1192,7 +1198,7 @@ export class EditDemandeComponent implements OnInit {
     this.pjService.delete(this.iddemande, piece.idpiecejointe).subscribe({
       next: (res) => {
         if (res.success) {
-          // ⭐ Supprimer du tableau local APRÈS confirmation API
+          // Supprimer du tableau local APRÈS confirmation API
           const index = this.existingPieces.findIndex(
             (p) => p.idpiecejointe === piece.idpiecejointe,
           );

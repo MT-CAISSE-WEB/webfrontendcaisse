@@ -2720,3 +2720,22 @@
 .row.g-3.mt-0 .card-glass .card-body-glass {
   max-height: calc(300px - 150px) !important; /* ~50px = hauteur du header */
 }
+
+/* Style pour le conteneur du viewer */
+:host ::ng-deep .ngx-doc-viewer {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+}
+
+/* Style pour la modal de document */
+.document-viewer-modal .modal-content {
+  max-width: 90vw;
+  width: auto;
+}
+
+/* Style pour le spinner dans le viewer */
+:host ::ng-deep .ngx-doc-viewer iframe {
+  border: none;
+  background: white;
+}

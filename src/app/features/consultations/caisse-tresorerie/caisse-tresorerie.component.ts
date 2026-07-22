@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -13,6 +13,9 @@ import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.c
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { CaisseSelectionService } from '../../../_core/services/caisse-selection.service';
+import { Subscription } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
 
 interface TotauxGlobaux {
   solde_ouverture_ref: number;
@@ -50,10 +53,12 @@ interface User {
   templateUrl: './caisse-tresorerie.component.html',
   styleUrls: ['./caisse-tresorerie.component.css'],
 })
-export class CaisseTresorerieComponent implements OnInit {
+export class CaisseTresorerieComponent implements OnInit, OnDestroy {
   title = 'Solde de caisse par date';
   loading = false;
   msgErros = '';
+  private caisseSelectionSub!: Subscription;
+  private routeSub!: Subscription;
 
   // Form
   searchForm: FormGroup;
@@ -75,14 +80,40 @@ export class CaisseTresorerieComponent implements OnInit {
     private fb: FormBuilder,
     private caisseService: CaisseService,
     private toastr: ToastrService,
+    private caisseSelectionService: CaisseSelectionService,
+    private route: ActivatedRoute,
+    private router: Router,
   ) {
     this.searchForm = this.createSearchForm();
   }
 
   ngOnInit(): void {
     this.loadCaisses();
+    this.routeSub = this.route.queryParams.subscribe((params) => {
+      if (params['caisseId']) {
+        this.searchForm.patchValue({ caisse: params['caisseId'] });
+        // Optionnel : déclencher la recherche automatiquement
+        this.onSubmit();
+      }
+    });
+
+    // ✅ Garder l'abonnement au service (pour les cas où les composants sont affichés ensemble)
+    this.caisseSelectionSub =
+      this.caisseSelectionService.selectedCaisseId$.subscribe((id) => {
+        if (id && this.searchForm.get('caisse')?.value !== id) {
+          this.searchForm.patchValue({ caisse: id });
+          this.router.navigate([], {
+            queryParams: { caisseId: id },
+            queryParamsHandling: 'merge', // Conserve les autres params
+          });
+        }
+      });
   }
 
+  ngOnDestroy(): void {
+    this.routeSub?.unsubscribe();
+    this.caisseSelectionSub?.unsubscribe();
+  }
   // ============================================
   // FORM MANAGEMENT
   // ============================================

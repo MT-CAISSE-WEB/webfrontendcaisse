@@ -2431,40 +2431,34 @@ export class OprationJustifieeComponent implements OnInit {
     const fileName = piece.nomfichier || 'fichier';
     const fileExt = fileName.slice(fileName.lastIndexOf('.')).toLowerCase();
 
-    // 1. PDF → Ouvre dans un nouvel onglet
+    // 🔹 1. PDF → Ouvre dans un nouvel onglet
     if (mimeType.includes('pdf')) {
       this.openPdfInNewTab(piece);
       return;
     }
 
-    // 2. IMAGES (JPG, PNG, GIF, WEBP, etc.) → Affiche dans la modale
+    // 🔹 2. IMAGES (JPG, PNG, GIF, WEBP, etc.) → Affiche dans la modale
     if (mimeType.includes('image') || this.isImageFile(fileName)) {
       this.showImagePreview(piece);
       return;
     }
 
-    // 3. DOCUMENTS OFFICE (Word, Excel, CSV) → Google Docs Viewer
+    // 🔹 3. DOCUMENTS OFFICE (Word, Excel, CSV) → Google Docs Viewer
     if (
       mimeType.includes('word') ||
       mimeType.includes('excel') ||
       mimeType.includes('spreadsheet') ||
       mimeType.includes('csv') ||
-      mimeType.includes('text/plain') ||
+      mimeType.includes('text/plain') || // 👈 NOUVEAU : pour .docx, .xlsx, .pptx
       ['.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.csv'].includes(
         fileExt,
       )
     ) {
       this.openInOfficeViewer(piece);
-      this.toastr.info(
-        `Le fichier "${fileName}" sera téléchargé. ` +
-          `Ouvrez-le avec ${this.getAppName(fileExt)} pour le visualiser.`,
-        '',
-        { timeOut: 3000 },
-      );
       return;
     }
 
-    // 4. AUTRES TYPES → Téléchargement + message
+    // 🔹 4. AUTRES TYPES → Téléchargement + message
     this.toastr.info(
       `Aperçu non disponible pour "${fileName}". Téléchargement démarré.`,
     );
@@ -2569,16 +2563,10 @@ export class OprationJustifieeComponent implements OnInit {
     }
 
     try {
-      // ⚠️ VÉRIFICATION : L'URL est-elle accessible publiquement ?
-      if (!this.isUrlPubliclyAccessible(piece.urlpiece)) {
-        this.handlePrivateUrl(piece);
-        return;
-      }
-
       // 1️⃣ Encoder l'URL
       const encodedUrl = encodeURIComponent(piece.urlpiece);
 
-      // 2️⃣ URL Microsoft Office Online Viewer
+      // 2️⃣ URL Microsoft Office Online Viewer (meilleur support pour Office)
       const viewerUrl = `https://view.officeapps.live.com/op/view.aspx?src=${encodedUrl}`;
 
       // 3️⃣ Ouvrir dans un nouvel onglet
@@ -2589,7 +2577,7 @@ export class OprationJustifieeComponent implements OnInit {
         'noopener,noreferrer',
       );
 
-      // 4️⃣ Fallback si l'ouverture échoue
+      // 4️⃣ Fallback si l'ouverture échoue (après 2 secondes)
       setTimeout(() => {
         if (
           !viewerWindow ||
@@ -2606,85 +2594,9 @@ export class OprationJustifieeComponent implements OnInit {
   }
 
   /**
-   * Vérifie si une URL est accessible publiquement
-   */
-  private isUrlPubliclyAccessible(url: string): boolean {
-    try {
-      const urlObj = new URL(url);
-      const hostname = urlObj.hostname.toLowerCase();
-
-      // 🔒 URLs privées ou locales
-      const privatePatterns = [
-        'localhost',
-        '127.0.0.1',
-        '::1',
-        '192.168.',
-        '10.',
-        '172.16.',
-        '172.17.',
-        '172.18.',
-        '172.19.',
-        '172.20.',
-        '172.21.',
-        '172.22.',
-        '172.23.',
-        '172.24.',
-        '172.25.',
-        '172.26.',
-        '172.27.',
-        '172.28.',
-        '172.29.',
-        '172.30.',
-        '172.31.',
-      ];
-
-      return !privatePatterns.some((pattern) => hostname.includes(pattern));
-    } catch {
-      // URL invalide, on considère qu'elle n'est pas publique
-      return false;
-    }
-  }
-
-  /**
-   * Gère le cas d'une URL privée
-   */
-  private handlePrivateUrl(piece: PieceJointe): void {
-    // 🔍 Vérifier si nous avons un document Office
-    const fileName = piece.nomfichier?.toLowerCase() || '';
-    const isOffice = /\.(docx?|xlsx?|pptx?|csv)$/.test(fileName);
-
-    if (isOffice) {
-      // 📌 SOLUTION 1 : Afficher un message avec proposition de téléchargement
-      this.toastr.info(
-        `L'aperçu en ligne n'est pas disponible pour les fichiers internes.`,
-        'Téléchargement recommandé',
-      );
-
-      // Proposer le téléchargement immédiat
-      setTimeout(() => {
-        this.downloadJustificatifPiece(piece);
-      }, 500);
-    } else {
-      // 📌 SOLUTION 2 : Fallback avec Google Docs (toujours en téléchargement pour les privés)
-      this.fallbackPreview(piece);
-    }
-  }
-
-  /**
-   * Solution de repli améliorée
+   * Solution de repli : Google Docs Viewer ou téléchargement
    */
   private fallbackPreview(piece: PieceJointe): void {
-    // Vérifier si l'URL est publique avant d'essayer Google Docs
-    if (!this.isUrlPubliclyAccessible(piece.urlpiece)) {
-      // ✅ Dernier recours : proposer le téléchargement
-      this.toastr.warning(
-        `L'aperçu en ligne n'est pas disponible pour les fichiers internes. ` +
-          `Téléchargement automatique de "${piece.nomfichier}"...`,
-      );
-      this.downloadJustificatifPiece(piece);
-      return;
-    }
-
     try {
       // Essayer Google Docs Viewer (pour PDF et certains documents)
       const encodedUrl = encodeURIComponent(piece.urlpiece);
@@ -2702,18 +2614,5 @@ export class OprationJustifieeComponent implements OnInit {
       );
       this.downloadJustificatifPiece(piece);
     }
-  }
-
-  private getAppName(ext: string): string {
-    const apps: { [key: string]: string } = {
-      '.doc': 'Microsoft Word',
-      '.docx': 'Microsoft Word',
-      '.xls': 'Microsoft Excel',
-      '.xlsx': 'Microsoft Excel',
-      '.ppt': 'Microsoft PowerPoint',
-      '.pptx': 'Microsoft PowerPoint',
-      '.csv': 'Excel ou un tableur',
-    };
-    return apps[ext] || "l'application correspondante";
   }
 }

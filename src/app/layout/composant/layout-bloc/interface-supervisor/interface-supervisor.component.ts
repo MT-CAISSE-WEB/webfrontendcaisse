@@ -5,20 +5,26 @@ import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ConsultationOpService } from '../../../../features/consultations/services/operations.service';
+import { CaisseSelectionService } from '../../../../_core/services/caisse-selection.service';
+import { Router } from '@angular/router';
+import { APP_ROOT_SOLDECAISSE_CONSULTATION } from '../../../../_core/routes/frontend.root';
 
 @Component({
   selector: 'app-interface-supervisor',
   imports: [RouterModule, CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './interface-supervisor.component.html',
-  styleUrl: './interface-supervisor.component.css'
+  styleUrl: './interface-supervisor.component.css',
 })
 export class InterfaceSupervisorComponent implements OnInit {
   caisseAllSolde: CaisseSolde[] = [];
   loading = true;
+  selectedCaisseId: string | null = null;
 
   constructor(
     private service: ConsultationOpService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private caisseSelectionService: CaisseSelectionService,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -38,7 +44,7 @@ export class InterfaceSupervisorComponent implements OnInit {
       error: (err) => {
         console.error('Erreur lors du chargement des soldes :', err);
         this.loading = false;
-      }
+      },
     });
   }
 
@@ -48,5 +54,13 @@ export class InterfaceSupervisorComponent implements OnInit {
       (caisse.total_encaissement || 0) -
       (caisse.total_decaissement || 0)
     );
+  }
+
+  onCaisseClick(idcaisse: string): void {
+    this.selectedCaisseId = idcaisse;
+    this.caisseSelectionService.selectCaisse(idcaisse);
+    this.router.navigate([APP_ROOT_SOLDECAISSE_CONSULTATION], {
+      queryParams: { caisseId: idcaisse },
+    });
   }
 }
