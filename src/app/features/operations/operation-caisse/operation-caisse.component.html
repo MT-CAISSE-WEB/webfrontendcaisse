@@ -887,7 +887,7 @@
             <div class="text-muted small">
               Type :
               <span class="fw-medium">{{
-                op.caisses[0]?.codtypeoperation
+                op.typeoperation
               }}</span>
             </div>
             <div class="vr"></div>
@@ -1031,7 +1031,7 @@
                   <td class="text-end">
                     {{ caisse.montant | number: "1.2-2" }}
                   </td>
-                  <td>{{ op.devise?.codedevise }}</td>
+                  <td>{{ caisse.caisse?.devise }}</td>
                   <td>{{ caisse.taux }}</td>
                   <td class="text-end fw-semibold">
                     {{ caisse.montantref | number: "1.2-2" }}
@@ -1113,6 +1113,8 @@
                 <th>Libellé</th>
                 <th class="text-end">Débit</th>
                 <th class="text-end">Crédit</th>
+                <th>Taux</th>
+                <th>Devise</th>
               </tr>
             </thead>
             <tbody>
@@ -1129,6 +1131,12 @@
                     </td>
                     <td class="text-end text-danger">
                       {{ ligne.credit | number: "1.2-2" }}
+                    </td>
+                    <td class="text-end">
+                      {{ ligne.tauxecriture | number: "1.2-2" }}
+                    </td>
+                    <td>
+                      {{ ligne.devise?.devise }}
                     </td>
                   </tr>
                 }

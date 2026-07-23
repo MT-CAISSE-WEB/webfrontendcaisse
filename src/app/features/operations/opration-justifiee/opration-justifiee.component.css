@@ -2190,3 +2190,535 @@
     font-size: 0.75rem;
   }
 }
+
+/* ============================================
+   MODALE PIÈCES JOINTES - STYLES GLASSMORPHISM
+   ============================================ */
+
+.modal-content-glass {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(226, 232, 240, 0.3);
+  overflow: hidden;
+}
+
+/* Header Orange Theme */
+.modal-header-theme-orange {
+  background: linear-gradient(135deg, #3b82f6 0%, #405189 100%);
+  border: 0;
+  border-radius: 20px 20px 0 0;
+  padding: 1.25rem 1.5rem;
+}
+
+.modal-header-theme-orange .modal-title {
+  color: white;
+  font-weight: 600;
+}
+
+.modal-header-theme-orange .text-white-50 {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.icon-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Attachments Section */
+.attachments-section-glass {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 16px;
+  padding: 1.25rem;
+  border: 1px solid rgba(203, 213, 225, 0.5);
+}
+
+/* Section Header */
+.section-header-glass {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.section-title-glass {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.section-title-glass i {
+  color: #405189;
+}
+
+/* Badge Count */
+.badge-count-sm {
+  font-size: 0.6rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.badge-glass-primary {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+
+/* ============================================
+   SCROLL HORIZONTAL POUR LES PILLS DE FICHIERS
+   ============================================ */
+.horizontal-scroll-glass {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+  margin-bottom: 0.5rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 #e2e8f0;
+}
+
+.horizontal-scroll-glass::-webkit-scrollbar {
+  height: 6px;
+}
+
+.horizontal-scroll-glass::-webkit-scrollbar-track {
+  background: #e2e8f0;
+  border-radius: 10px;
+  margin: 0 0.5rem;
+}
+
+.horizontal-scroll-glass::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 10px;
+}
+
+/* ============================================
+   FILE PILLS (STYLE ARRONDI)
+   ============================================ */
+.file-pill-glass {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 50px;
+  padding: 0.5rem 0.8rem;
+  min-width: 180px;
+  max-width: 280px;
+  width: auto;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.file-pill-glass:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.15);
+  transform: translateY(-2px);
+}
+
+.pill-icon-glass {
+  width: 36px;
+  height: 36px;
+  background: #f1f5f9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pill-icon-glass i {
+  font-size: 1rem;
+  color: #64748b;
+}
+
+.pill-info-glass {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.pill-name-glass {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #1e293b;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pill-meta-glass {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  display: block;
+  margin-top: 2px;
+}
+
+.pill-actions-glass {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.pill-action-btn {
+  background: transparent;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #94a3b8;
+  transition: all 0.2s ease;
+}
+
+.pill-action-btn:hover:not(:disabled) {
+  background: rgba(249, 115, 22, 0.1);
+  color: #3b82f6;
+  transform: scale(1.1);
+}
+
+.pill-action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   UPLOAD BAR (DRAG & DROP)
+   ============================================ */
+.upload-bar-glass {
+  background: white;
+  border: 2px dashed #e2e8f0;
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+  gap: 1rem;
+}
+
+.upload-bar-glass:hover {
+  border-color: #3b82f6;
+  background: rgba(249, 115, 22, 0.05);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.1);
+}
+
+.upload-bar-glass.drag-over {
+  border-color: #3b82f6;
+  border-style: solid;
+  background: rgba(249, 115, 22, 0.1);
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.2);
+}
+
+.upload-info-glass {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.upload-icon-glass {
+  width: 48px;
+  height: 48px;
+  background: rgba(249, 115, 22, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-icon-glass i {
+  font-size: 1.5rem;
+  color: #405189;
+}
+
+.upload-title-glass {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.upload-title-glass strong {
+  color: #405189;
+}
+
+.upload-hint-glass {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+/* Upload Button */
+.btn-glass-upload {
+  background: linear-gradient(135deg, #3b82f6 0%, #405189 100%);
+  border: none;
+  border-radius: 50px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-glass-upload:hover:not(:disabled) {
+  background: linear-gradient(135deg, #3b82f6 0%, #405189 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+.btn-glass-upload:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   FILE GRID (APERÇU DES FICHIERS SÉLECTIONNÉS)
+   ============================================ */
+.file-grid-glass {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.file-grid-glass::-webkit-scrollbar {
+  width: 6px;
+}
+
+.file-grid-glass::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.file-grid-glass::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.file-card-glass {
+  background: white;
+  border-radius: 12px;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.file-card-glass:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.1);
+}
+
+.file-info-glass {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.file-icon-sm-glass {
+  width: 40px;
+  height: 40px;
+  background: #f8fafc;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.file-icon-sm-glass i {
+  font-size: 1.1rem;
+  color: #3b82f6;
+}
+
+.file-details-glass {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name-glass {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-meta-glass {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.file-remove-btn-glass {
+  background: transparent;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #94a3b8;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.file-remove-btn-glass:hover {
+  background: rgba(249, 115, 22, 0.1);
+  color: #3b82f6;
+}
+
+/* ============================================
+   EMPTY STATE & SPINNER
+   ============================================ */
+.empty-state-glass {
+  padding: 2rem;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.empty-state-glass i {
+  font-size: 2.5rem;
+  color: #cbd5e1;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.empty-state-glass p {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 0.25rem;
+}
+
+.empty-state-glass .empty-hint-glass {
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.spinner-glass-sm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+/* ============================================
+   MODAL FOOTER
+   ============================================ */
+.modal-footer {
+  border-top: 1px solid rgba(226, 232, 240, 0.3);
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0 0 20px 20px;
+}
+
+.btn-glass-cancel {
+  background: rgba(100, 116, 139, 0.12);
+  border: 1px solid rgba(100, 116, 139, 0.25);
+  border-radius: 50px;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.btn-glass-cancel:hover {
+  background: rgba(100, 116, 139, 0.2);
+  border-color: rgba(100, 116, 139, 0.4);
+  color: #1e293b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+
+/* ============================================
+   CARTE D'INFORMATION OPÉRATION
+   ============================================ */
+.operation-info-card {
+  background: #ffffff;
+  border: 1px solid rgba(59, 130, 246, 0.08);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+  transition: box-shadow 0.2s;
+}
+
+.operation-info-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+}
+
+.operation-info-icon {
+  width: 42px;
+  height: 42px;
+  background: rgba(59, 130, 246, 0.08);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #405189;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.operation-comment {
+  font-size: 0.85rem;
+  color: #475569;
+  line-height: 1.4;
+  max-height: 2.8em;  /* 2 lignes */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+
+/* Si tu as déjà .badge-glass-devise dans ton thème, ignore ceci, sinon : */
+.badge-glass-devise {
+  background: rgba(100, 116, 139, 0.15);
+  color: #475569;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}

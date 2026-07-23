@@ -375,6 +375,7 @@ export class OperationCaisseComponent implements OnInit {
         if (res.success) {
           this.operations = res.data.data;
           this.totalPages = res.data.totalPages;
+          console.log("toutes les opérations ", this.operations);
           // Charger les compteurs de pièces jointes pour les opérations affichées
           this.loadPiecesCountsForAllOperations();
         }
@@ -930,7 +931,6 @@ export class OperationCaisseComponent implements OnInit {
 
   openEditModal(template: TemplateRef<any>, item: any) {
     this.operationdetail = item;
-    console.log('Operation detail', this.operationdetail);
     const container = this.getModalContainer(item);
     const options: any = { centered: true, size: 'lg' };
     if (container) {
@@ -1323,7 +1323,7 @@ export class OperationCaisseComponent implements OnInit {
    */
   getTypeClass(item: any): string {
     if (item.idoperationorigine) return 'type-annul';
-    const type = item.caisses[0]?.codtypeoperation;
+    const type = item.typeoperation;
     if (type === 'encaissement') return 'type-enc';
     if (type === 'decaissement') return 'type-dec';
     if (type === 'decaissementaj') return 'type-decaj';
@@ -1335,7 +1335,7 @@ export class OperationCaisseComponent implements OnInit {
    */
   getTypeIcon(item: any): string {
     if (item.idoperationorigine) return 'ri-close-circle-line';
-    const type = item.caisses[0]?.codtypeoperation;
+    const type = item.typeoperation;
     if (type === 'encaissement') return 'ri-arrow-right-up-line';
     if (type === 'decaissement' || type === 'decaissementaj')
       return 'ri-arrow-right-down-line';
@@ -1347,7 +1347,7 @@ export class OperationCaisseComponent implements OnInit {
    */
   getTypeLabel(item: any): string {
     if (item.idoperationorigine) return 'Annulation';
-    const type = item.caisses[0]?.codtypeoperation;
+    const type = item.typeoperation;
     if (type === 'encaissement') return 'Encaissement';
     if (type === 'decaissement') return 'Décaissement';
     if (type === 'decaissementaj') return 'Décaissement à justifier';
