@@ -92,30 +92,47 @@
 
         <div class="card-body-glass pt-0">
           <div class="row g-3">
-            <div class="col-lg-6 col-sm-12">
-              <div class="form-floating">
-                <select
-                  formControlName="operation"
-                  class="form-select {{ isValidField('operation') }}"
-                  id="operation"
-                >
-                  <option value="">
-                    ---- Choisir une opération à justifier ----
-                  </option>
-                  @for (item of operationsFiltrees; track $index) {
-                    <option value="{{ item.idoperation }}">
-                      {{ item.codeoperation }} ---
+            <div class="col-lg-6 col-sm-6">
+              <div class="operation-info-card">
+                <div class="d-flex align-items-start gap-3">
+                  <!-- Icône -->
+                  <div class="operation-info-icon">
+                    <i class="ri-file-list-3-line"></i>
+                  </div>
+                  <!-- Détails -->
+                  <div class="flex-grow-1">
+                    <!-- Ligne 1 : Code + Date -->
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <span class="code-badge">{{
+                        selectedOperationPJ?.codeoperation
+                      }}</span>
+                      <span class="text-muted small">
+                        <i class="ri-calendar-line me-1"></i
+                        >{{
+                          selectedOperationPJ?.dateoperation
+                            | date: "dd/MM/yyyy"
+                        }}
+                      </span>
+                    </div>
+                    <!-- Ligne 2 : Commentaire -->
+                    <p
+                      class="operation-comment mb-2"
+                      [title]="selectedOperationPJ?.commentaire"
+                    >
                       {{
-                        (item.commentaire.length || 0) > 50
-                          ? (item.commentaire | slice: 0 : 50) + "..."
-                          : item.commentaire || ""
+                        selectedOperationPJ?.commentaire || "Aucun commentaire"
                       }}
-                      --- {{ formatCFA(item.montant) }}
-                      {{ item.devise.codedevise }}
-                    </option>
-                  }
-                </select>
-                <label for="operation">Opération à justifier</label>
+                    </p>
+                    <div class="d-flex align-items-center justify-content-end">
+                      <span class="fw-bold fs-5">{{
+                        formatCFA(selectedOperationPJ?.montant)
+                      }}</span>
+                      <span class="badge-glass badge-glass-devise ms-2"
+                        >{{ selectedOperationPJ?.devise?.codedevise }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
