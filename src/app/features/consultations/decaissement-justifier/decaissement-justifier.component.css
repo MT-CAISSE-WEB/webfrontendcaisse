@@ -884,3 +884,302 @@
   background: rgba(59, 130, 246, 0.3);
   border-radius: 10px;
 }
+
+/* ============================================
+   MODALE PIÈCES JOINTES DU JUSTIFICATIF
+   ============================================ */
+
+.modal-container-lg {
+  max-width: 700px;
+  width: 95%;
+}
+
+/* ============================================
+   SECTION HEADER GLASS
+   ============================================ */
+.section-header-glass {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.4);
+}
+
+.section-title-glass {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.section-title-glass i {
+  color: #f59e0b;
+}
+
+.badge-count-sm {
+  font-size: 0.55rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.badge-glass-primary {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+
+/* ============================================
+   BOUTON TÉLÉCHARGEMENT
+   ============================================ */
+.btn-glass-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 1rem 0.3rem 0.8rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #405189 100%);
+  border: none;
+  border-radius: 40px;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-glass-download:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb 0%, #405189 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.btn-glass-download:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   SCROLL HORIZONTAL
+   ============================================ */
+.horizontal-scroll-glass {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 0.6rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.horizontal-scroll-glass::-webkit-scrollbar {
+  height: 4px;
+}
+
+.horizontal-scroll-glass::-webkit-scrollbar-track {
+  background: #e2e8f0;
+  border-radius: 10px;
+}
+
+.horizontal-scroll-glass::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 10px;
+}
+
+.horizontal-scroll-glass::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* ============================================
+   FILE PILL
+   ============================================ */
+.file-pill-glass {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 48px;
+  padding: 0.4rem 0.7rem 0.4rem 0.5rem;
+  min-width: 160px;
+  max-width: 260px;
+  width: auto;
+  flex-shrink: 0;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.file-pill-glass:hover {
+  border-color: #cbd5e1;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+}
+
+.file-pill-glass.file-pill-readonly {
+  background: #f8fafc;
+}
+
+.file-pill-glass.file-pill-readonly .pill-action-btn {
+  color: #3b82f6;
+}
+
+.file-pill-glass.file-pill-readonly .pill-action-btn:hover {
+  background: #eff6ff;
+}
+
+.pill-icon-glass {
+  width: 30px;
+  height: 30px;
+  background: #f1f5f9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pill-icon-glass i {
+  font-size: 0.85rem;
+}
+
+.pill-info-glass {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.pill-name-glass {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #1e293b;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.pill-meta-glass {
+  font-size: 0.6rem;
+  color: #94a3b8;
+  display: block;
+  margin-top: 1px;
+  white-space: nowrap;
+}
+
+.pill-actions-glass {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.pill-action-btn {
+  background: none;
+  border: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.15s ease;
+}
+
+.pill-action-btn:hover:not(:disabled) {
+  transform: scale(1.02);
+}
+
+.pill-action-btn.pill-action-download {
+  color: #3b82f6;
+}
+
+.pill-action-btn.pill-action-download:hover {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.empty-state-glass {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.empty-state-glass i {
+  font-size: 2.5rem;
+  color: #cbd5e1;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state-glass p {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 0.25rem;
+}
+
+.empty-state-glass .text-muted {
+  font-size: 0.8rem;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .modal-container-lg {
+    max-width: 98%;
+    width: 98%;
+  }
+
+  .section-header-glass {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .file-pill-glass {
+    min-width: 140px;
+    max-width: 200px;
+  }
+
+  .pill-name-glass {
+    max-width: 100px;
+  }
+
+  .btn-glass-download {
+    font-size: 0.6rem;
+    padding: 0.25rem 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .file-pill-glass {
+    min-width: 120px;
+    max-width: 160px;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .pill-name-glass {
+    max-width: 70px;
+    font-size: 0.6rem;
+  }
+
+  .pill-meta-glass {
+    font-size: 0.5rem;
+  }
+
+  .pill-action-btn {
+    width: 22px;
+    height: 22px;
+  }
+
+  .pill-action-btn i {
+    font-size: 0.7rem;
+  }
+}
