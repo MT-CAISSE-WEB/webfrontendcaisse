@@ -13,7 +13,7 @@ import { DemandeService } from '../../../features/demande/services/demande.servi
 import { AffectationNatureCentreService } from '../../../features/donnee_base/services/affectationnaturecentre.service';
 import { devisemodel } from '../../../features/donnee_base/donnee_base/model/devise.model';
 import { AsyncPipe, CommonModule } from '@angular/common';
-import { combineLatest, map, Observable, startWith, tap } from 'rxjs';
+import { map, Observable, startWith, tap } from 'rxjs';
 import { tauxdevisemodel } from '../../../features/donnee_base/donnee_base/model/tauxdevise.model';
 import {
   FormArray,
@@ -153,9 +153,6 @@ export class OperationModalComponent implements OnInit {
   csvErrors: string[] = [];
   detectedDelimiter: string = ';';
   isImportingCsv = false;
-
-  // Set contenant les indices des lignes en erreur (montant <= 0)
-  ligneErrors: Set<number> = new Set()
 
   constructor(
     private natureoperationservice: NatureoperationService,
@@ -376,31 +373,7 @@ export class OperationModalComponent implements OnInit {
       return;
     }
 
-    // 2. Récupération des lignes
-    const rawLignes = this.operationForm.getRawValue().lignes || [];
-
-    // 3. Vérification : au moins une ligne
-    if (rawLignes.length === 0) {
-      this.toastr.warning('Veuillez ajouter au moins une ligne avant de valider.');
-      return;
-    }
-
-    // 4. Vérification des montants (chaque ligne doit avoir un montant > 0)
-    this.ligneErrors.clear();
-    let hasLigneError = false;
-    rawLignes.forEach((l: any, index: number) => {
-      if (l.montantligne == null || l.montantligne <= 0) {
-        this.ligneErrors.add(index);
-        hasLigneError = true;
-      }
-    });
-
-    if (hasLigneError) {
-      this.toastr.warning('Veuillez saisir un montant valide (supérieur à 0) pour chaque ligne en erreur.');
-      return;
-    }
-
-    // 5. Préparation des données
+    /** 2. prepare data */
     const formValue = this.operationForm.getRawValue();
 
     const baseoperation: operationModel = {
@@ -789,6 +762,8 @@ export class OperationModalComponent implements OnInit {
       montant: this.getTotalDemande(demande),
       beneficiaire: demande.demandeur.nom + ' ' + demande.demandeur.prenom,
     });
+
+    console.log('Demandes:', demande);
 
     /** Reset lignes */
     const lignesFA = this.operationForm.get('lignes') as FormArray;
@@ -1242,17 +1217,10 @@ export class OperationModalComponent implements OnInit {
       ),
     );
 
-    // Observables pour la nature et la saisie du tiers
-    const nature$ = ligneOf.get('natureop')!.valueChanges.pipe(
-      startWith(ligneOf.get('natureop')?.value ?? null)
-    );
-    const tiersValue$ = ligneOf.get('tiers')!.valueChanges.pipe(
-      startWith(ligneOf.get('tiers')?.value ?? '')
-    );
-
-    // Filtrage combiné : type de tiers + texte saisi
-    const filteredTiers = combineLatest([nature$, tiersValue$]).pipe(
-      map(([nature, tiersValue]) => OperationModalUtils.filterTiersByNature(tiersValue, nature, this.tiers))
+    // Filtrage Tiers pour cette ligne
+    const filteredTiers = ligneOf.get('tiers')!.valueChanges.pipe(
+      startWith(''),
+      map((value) => OperationModalUtils.filterTiers(value || '', this.tiers)),
     );
 
     // Filtrage Centres pour cette ligne
@@ -1400,7 +1368,6 @@ export class OperationModalComponent implements OnInit {
   formatNumber(value: number): string {
     return OperationModalUtils.formatNumber(value);
   }
-
   loadDemandePiecesJointes(iddemande: string): void {
     this.demandePiecesJointesLoading = true;
     this.pjDemandeService.getAll(iddemande).subscribe({
@@ -1419,7 +1386,6 @@ export class OperationModalComponent implements OnInit {
       },
     });
   }
-
   downloadPiece(piece: PieceJointe): void {
     this.pjService.downloadFile(piece.urlpiece).subscribe({
       next: (blob) => {

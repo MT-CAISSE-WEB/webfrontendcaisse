@@ -2394,4 +2394,206 @@ export class OprationJustifieeComponent implements OnInit {
     });
   }
 
+  @ViewChild('imagePreviewModalTpl') imagePreviewModalTpl!: TemplateRef<any>;
+  imageUrl: string | null = null;
+  fileName: string = '';
+
+  /**
+   * Ouvre l'aperçu d'une pièce jointe selon son type
+   */
+  previewPiece(piece: PieceJointe): void {
+    if (!piece?.urlpiece) {
+      this.toastr.error('URL de la pièce jointe manquante');
+      return;
+    }
+
+    const mimeType = (piece.mimetype || '').toLowerCase();
+    const fileName = piece.nomfichier || 'fichier';
+    const fileExt = fileName.slice(fileName.lastIndexOf('.')).toLowerCase();
+
+    // 🔹 1. PDF → Ouvre dans un nouvel onglet
+    if (mimeType.includes('pdf')) {
+      this.openPdfInNewTab(piece);
+      return;
+    }
+
+    // 🔹 2. IMAGES (JPG, PNG, GIF, WEBP, etc.) → Affiche dans la modale
+    if (mimeType.includes('image') || this.isImageFile(fileName)) {
+      this.showImagePreview(piece);
+      return;
+    }
+
+    // 🔹 3. DOCUMENTS OFFICE (Word, Excel, CSV) → Google Docs Viewer
+    if (
+      mimeType.includes('word') ||
+      mimeType.includes('excel') ||
+      mimeType.includes('spreadsheet') ||
+      mimeType.includes('csv') ||
+      mimeType.includes('text/plain') || // 👈 NOUVEAU : pour .docx, .xlsx, .pptx
+      ['.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.csv'].includes(
+        fileExt,
+      )
+    ) {
+      this.openInOfficeViewer(piece);
+      return;
+    }
+
+    // 🔹 4. AUTRES TYPES → Téléchargement + message
+    this.toastr.info(
+      `Aperçu non disponible pour "${fileName}". Téléchargement démarré.`,
+    );
+    this.downloadJustificatifPiece(piece);
+  }
+
+  /**
+   * Vérifie si un fichier est une image (par extension)
+   */
+  private isImageFile(fileName: string): boolean {
+    const imageExtensions = [
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.gif',
+      '.webp',
+      '.svg',
+      '.bmp',
+    ];
+    const ext = fileName.slice(fileName.lastIndexOf('.')).toLowerCase();
+    return imageExtensions.includes(ext);
+  }
+
+  /**
+   * Ouvre un PDF dans un nouvel onglet
+   */
+  private openPdfInNewTab(piece: PieceJointe): void {
+    this.justificatifpjService.downloadFile(piece.urlpiece).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, `_blank_pdf_${piece.idpiecejointe}`);
+      },
+      error: () => {
+        this.toastr.error(`Échec de l'ouverture du PDF : ${piece.nomfichier}`);
+      },
+    });
+  }
+
+  /**
+   * Affiche une image dans la modale d'aperçu
+   */
+  showImagePreview(piece: PieceJointe): void {
+    this.pjService.downloadFile(piece.urlpiece).subscribe({
+      next: (blob) => {
+        this.imageUrl = window.URL.createObjectURL(blob);
+        this.fileName = piece.nomfichier;
+        this.modalService.open(this.imagePreviewModalTpl, {
+          size: 'xl',
+          centered: true,
+          backdrop: 'static',
+        });
+      },
+      error: () => {
+        this.toastr.error(
+          `Échec du chargement de l'image : ${piece.nomfichier}`,
+        );
+      },
+    });
+  }
+
+  /**
+   * Ferme la modale d'aperçu d'image
+   */
+  closeImagePreview(): void {
+    this.modalService.dismissAll();
+    if (this.imageUrl) {
+      window.URL.revokeObjectURL(this.imageUrl);
+      this.imageUrl = null;
+    }
+    this.fileName = '';
+  }
+
+  /**
+   * Télécharge l'image actuellement affichée
+   */
+  downloadCurrentImage(): void {
+    if (!this.imageUrl || !this.fileName) return;
+    const link = document.createElement('a');
+    link.href = this.imageUrl;
+    link.download = this.fileName;
+    link.click();
+  }
+
+  /**
+   * Gère l'erreur de chargement de l'image
+   */
+  onImageLoadError(): void {
+    this.toastr.error(
+      "Impossible de charger l'image. Le fichier peut être corrompu.",
+    );
+    this.closeImagePreview();
+  }
+
+  /**
+   * Ouvre un fichier Office dans Microsoft Office Online Viewer
+   * @param piece - La pièce jointe à afficher
+   */
+  openInOfficeViewer(piece: PieceJointe): void {
+    if (!piece?.urlpiece) {
+      this.toastr.error('URL de la pièce jointe manquante');
+      return;
+    }
+
+    try {
+      // 1️⃣ Encoder l'URL
+      const encodedUrl = encodeURIComponent(piece.urlpiece);
+
+      // 2️⃣ URL Microsoft Office Online Viewer (meilleur support pour Office)
+      const viewerUrl = `https://view.officeapps.live.com/op/view.aspx?src=${encodedUrl}`;
+
+      // 3️⃣ Ouvrir dans un nouvel onglet
+      const windowName = `_blank_office_${piece.idpiecejointe || Date.now()}`;
+      const viewerWindow = window.open(
+        viewerUrl,
+        windowName,
+        'noopener,noreferrer',
+      );
+
+      // 4️⃣ Fallback si l'ouverture échoue (après 2 secondes)
+      setTimeout(() => {
+        if (
+          !viewerWindow ||
+          viewerWindow.closed ||
+          viewerWindow.location.href === 'about:blank'
+        ) {
+          this.fallbackPreview(piece);
+        }
+      }, 2000);
+    } catch (error) {
+      console.error('Erreur avec Office Viewer:', error);
+      this.fallbackPreview(piece);
+    }
+  }
+
+  /**
+   * Solution de repli : Google Docs Viewer ou téléchargement
+   */
+  private fallbackPreview(piece: PieceJointe): void {
+    try {
+      // Essayer Google Docs Viewer (pour PDF et certains documents)
+      const encodedUrl = encodeURIComponent(piece.urlpiece);
+      const gdocsUrl = `https://docs.google.com/gview?url=${encodedUrl}&embedded=true`;
+      window.open(
+        gdocsUrl,
+        `_blank_fallback_${piece.idpiecejointe}`,
+        'noopener,noreferrer',
+      );
+    } catch (fallbackError) {
+      console.error('Échec des viewers en ligne:', fallbackError);
+      this.toastr.warning(
+        `Aperçu en ligne non disponible pour "${piece.nomfichier}". ` +
+          `Téléchargement automatique...`,
+      );
+      this.downloadJustificatifPiece(piece);
+    }
+  }
+
 }

@@ -151,21 +151,8 @@ export class DemandeDecaissementComponent implements OnInit {
   }
 
   applyFilter(value: string) {
-    const filter = value?.toLowerCase() || '';
-
-    if (!filter) {
-      this.filteredDemandes = [...this.entetesDmd]; // aucune recherche => toutes les demandes
-      return;
-    }
-
-    this.filteredDemandes = this.entetesDmd.filter(
-      (item) =>
-        item.codedemande?.toLowerCase().includes(filter) ||
-        item.departement?.libelle?.toLowerCase().includes(filter) ||
-        item.typedemande?.toLowerCase().includes(filter) ||
-        item.devise?.codedevise?.toLowerCase().includes(filter) ||
-        item.libelledemande?.toLowerCase().includes(filter),
-    );
+    this.currentPage = 1; // Réinitialiser à la page 1 après filtrage
+    this.loadAllDemandes(); // Recharger avec le nouveau filtre
   }
 
   /**
@@ -355,36 +342,36 @@ export class DemandeDecaissementComponent implements OnInit {
     }
   }
 
+  totalItems: number = 0;
   // afficher toutes les demandes
   loadAllDemandes() {
     this.loading = true;
     const params = {
       page: this.currentPage,
       limit: this.limit,
-      search: '',
+      search: this.searchControl.value || '', // ✅ Inclure le filtre
       date: '',
       status: '',
       user: this.user.idutilisateur,
     };
     this.service.getAllEntetes(params).subscribe({
       next: (res) => {
+        console.log('Résultat:', res);
         if (res.success) {
-          // this.entetesDmd = res.data.data;
-          this.entetesDmd = res.data.data.map((item: any) => ({
-            ...item,
-          }));
-          this.filteredDemandes = [...this.entetesDmd];
-          this.totalPages = Math.ceil(this.entetesDmd.length / this.limit);
-          // Afficher les pj
+          this.entetesDmd = res.data.data.map((item: any) => ({ ...item }));
+          this.filteredDemandes = [...this.entetesDmd]; // ✅ Pour le filtrage local
+
+          // ✅ Utiliser les données du backend
+          this.totalItems = res.data.total; // Nombre total d'éléments
+          this.totalPages = res.data.totalPages; // Nombre total de pages
+
           this.loadPiecesCountsForAllDemandes();
           this.loading = false;
-        } else {
-          this.loading = false;
-          this.toastr.error('Erreur de récuperation des données');
         }
       },
       error: (err) => {
         this.toastr.error(err.error.message);
+        this.loading = false;
       },
     });
   }
@@ -506,8 +493,9 @@ export class DemandeDecaissementComponent implements OnInit {
 
   //Recharger la page
   changePage(page: number) {
+    if (page < 1 || page > this.totalPages) return; // ✅ Vérification des limites
     this.currentPage = page;
-    this.loadAllDemandes(); // recharge les données
+    this.loadAllDemandes(); // ✅ Recharger les données pour la nouvelle page
   }
 
   getTotalDemande(demande: EnteteDemande): number {
@@ -554,7 +542,8 @@ export class DemandeDecaissementComponent implements OnInit {
         if (res.success) {
           this.deleteDemande = null;
           this.closeModal('deleteOrder');
-          this.toastr.error('Demande supprimée avec succès');
+          this.toastr.success('Demande supprimée avec succès');
+          this.loadAllDemandes();
         } else {
           this.error = 'Erreur de Suppression';
           this.toastr.error(this.error);

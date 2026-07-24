@@ -85,6 +85,7 @@
             <thead>
               <tr>
                 <th>Code</th>
+                <th>Libellé</th>
                 <th>Département</th>
                 <th>Type</th>
                 <th class="text-end">Montant</th>
@@ -95,13 +96,19 @@
               </tr>
             </thead>
             <tbody class="list form-check-all">
-              @for (item of paginatedDemandes; track item.iddemande) {
+              @for (item of entetesDmd; track item.iddemande) {
                 <tr [class.table-active]="isChecked(item.iddemande)">
                   <!-- 2. Code de la demande -->
                   <td>
                     <span class="code-badge">{{ item.codedemande }}</span>
                   </td>
-
+                  <td title="{{ item.libelledemande }}">
+                    {{
+                      item.libelledemande!.length > 10
+                        ? (item.libelledemande | slice: 0 : 20) + "..."
+                        : (item.libelledemande ?? "-")
+                    }}
+                  </td>
                   <!-- 3. Département -->
                   <td>{{ item.departement?.libelle || "-" }}</td>
 
@@ -556,10 +563,10 @@
               <span>Affichage de</span>
               <strong>{{ (currentPage - 1) * limit + 1 }}</strong>
               <span>à</span>
-              <strong>{{
-                Math.min(currentPage * limit, filteredDemandes.length)
-              }}</strong>
-              <span>sur</span> <strong>{{ filteredDemandes.length }}</strong>
+              <strong>{{ Math.min(currentPage * limit, totalItems) }}</strong>
+              <!-- ✅ Utiliser totalItems -->
+              <span>sur</span> <strong>{{ totalItems }}</strong>
+              <!-- ✅ Afficher le total réel -->
               <span>demande(s)</span>
             </div>
             <div class="pagination-controls">

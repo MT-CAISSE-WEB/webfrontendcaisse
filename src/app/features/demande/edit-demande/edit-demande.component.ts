@@ -46,7 +46,6 @@ import { LigneBudgetService } from '../../budgets/services/ligne_budget.service'
 import { BudgetModel } from '../../budgets/models/budget.model';
 import { PieceJointe } from '../../PJ/models/pj.model';
 import { DemandePJService } from '../../PJ/service/demandepj.service';
-import { OperationModalUtils } from '../../../_core/modal/utils/number-format.utils';
 
 @Component({
   selector: 'app-edit-demande',
@@ -143,9 +142,6 @@ export class EditDemandeComponent implements OnInit {
   existingPieces: PieceJointe[] = [];
   filesToDelete: string[] = [];
   pjUploading = false;
-
-  // Set contenant les indices des lignes en erreur (montant <= 0)
-  ligneErrors: Set<number> = new Set()
 
   constructor(
     private service: DemandeService,
@@ -599,7 +595,7 @@ export class EditDemandeComponent implements OnInit {
     this.getallAffectationNatures(type);
 
     // Réinitialiser les natures déjà choisies
-    this.lignes.controls.forEach((ligne: FormGroup) => {
+    this.lignes.controls.forEach((ligne: FormGroup, i) => {
       ligne.reset();
 
       ligne.patchValue({
@@ -659,6 +655,14 @@ export class EditDemandeComponent implements OnInit {
       ligne.details.forEach((detail: any) => {
         detailsArray.push(this.newDetail(detail));
       });
+
+      console.log('Ligne:', ligne);
+
+      // if (ligne.codebudget.idbudgetdepartementnature) {
+      //   ligneGroup
+      //     .get('codebudget')
+      //     ?.setValue(ligne.codebudget.codebudgetaire, { emitEvent: false });
+      // }
 
       //charger centres + positionner centre
       this.getallCentresDispatch(
@@ -724,17 +728,10 @@ export class EditDemandeComponent implements OnInit {
       map((value) => this._filterNature(value || '')),
     );
 
-    // Observables pour la nature et la saisie du tiers
-    const nature$ = ligneOf.get('natureop')!.valueChanges.pipe(
-      startWith(ligneOf.get('natureop')?.value ?? null)
-    );
-    const tiersValue$ = ligneOf.get('tiers')!.valueChanges.pipe(
-      startWith(ligneOf.get('tiers')?.value ?? '')
-    );
-
-    // Filtrage combiné : type de tiers + texte saisi
-    const filteredTiers = combineLatest([nature$, tiersValue$]).pipe(
-      map(([nature, tiersValue]) => OperationModalUtils.filterTiersByNature(tiersValue, nature, this.tiers))
+    // Filtrage Tiers pour cette ligne
+    const filteredTiers = ligneOf.get('tiers')!.valueChanges.pipe(
+      startWith(''),
+      map((value) => this._filterTiers(value || '')),
     );
 
     // Filtrage Centres pour cette ligne
@@ -768,6 +765,7 @@ export class EditDemandeComponent implements OnInit {
       ligneOf.get('montantdemande')?.enable();
 
       const lignes = this.filterLignesBudget(ligneOf);
+      console.log('BudgetGlobal:', this.budgetGlobal);
       if (!this.budgetGlobal?.isanalytique && nature.decajustifier === 0) {
         ligneOf
           .get('codebudget')
@@ -862,7 +860,7 @@ export class EditDemandeComponent implements OnInit {
           this.lignes.removeAt(ligneIndex);
           //this.toastr.success('Detail supprimée avec succès');
         } else {
-          this.error = 'Erreur de suppression';
+          this.error = 'Erreur lors de la suppression';
           this.toastr.error(this.error);
         }
         this.loading = false;
@@ -891,8 +889,7 @@ export class EditDemandeComponent implements OnInit {
   }
 
   addDetail(ligneIndex: number) {
-    const d = this.getDetailsArray(ligneIndex).push(this.newDetail());
-    console.log('Detail added to ligne', ligneIndex, d);
+    this.getDetailsArray(ligneIndex).push(this.newDetail());
   }
 
   get form() {
@@ -911,31 +908,46 @@ export class EditDemandeComponent implements OnInit {
   }
 
   removeDetail(indexLigne: number, indexDetail: number) {
-    const ligneFG = this.lignesFormArray.at(indexLigne) as FormGroup;
+    //  Vérifie que l'index de la ligne est valide
+    if (indexLigne >= this.lignes.length) {
+      this.toastr.error('Index de ligne invalide');
+      return;
+    }
+
+    //  Utilise this.lignes (pas this.lignesFormArray)
+    const ligneFG = this.lignes.at(indexLigne) as FormGroup;
+
+    //  Vérifie que le FormArray "details" existe
     const detailsFA = ligneFG.get('details') as FormArray;
+    if (!detailsFA) {
+      this.toastr.error('FormArray "details" introuvable');
+      return;
+    }
+
+    //  Vérifie que l'index du détail est valide
+    if (indexDetail >= detailsFA.length) {
+      this.toastr.error('Index de détail invalide');
+      return;
+    }
 
     const detailFG = detailsFA.at(indexDetail) as FormGroup;
     const idDetail = detailFG.get('iddetailsdemande')?.value;
 
     if (!idDetail) {
-      detailsFA.removeAt(indexDetail);
+      detailsFA.removeAt(indexDetail); // Suppression côté client
       return;
     }
 
     this.service.deleteDetail(idDetail).subscribe({
       next: (res) => {
         if (res.success) {
-          detailsFA.removeAt(indexDetail);
-          //this.toastr.success('Detail supprimée avec succès');
+          detailsFA.removeAt(indexDetail); // Suppression côté client après confirmation backend
         } else {
-          this.error = 'Erreur de suppression';
-          this.toastr.error(this.error);
+          this.toastr.error('Erreur de suppression');
         }
-        this.loading = false;
       },
       error: (err) => {
-        this.error = 'Erreur de suppression';
-        this.toastr.error(this.error);
+        this.toastr.error(err.error?.message || 'Erreur backend');
       },
     });
   }
@@ -950,7 +962,7 @@ export class EditDemandeComponent implements OnInit {
   }
 
   submit() {
-    /** Check formulaire */
+    /** 1. Validation du formulaire */
     this.msgErros = '';
     const controls = this.demandeForm.controls;
     if (this.demandeForm.invalid) {
@@ -962,47 +974,31 @@ export class EditDemandeComponent implements OnInit {
       return;
     }
 
-    // 2. Récupération des lignes
-    const rawLignes = this.demandeForm.getRawValue().lignes || [];
-
-    // 3. Vérification : au moins une ligne
-    if (rawLignes.length === 0) {
-      this.toastr.warning('Veuillez ajouter au moins une ligne avant de valider.');
-      return;
-    }
-
-    // 4. Vérification des montants (chaque ligne doit avoir un montant > 0)
-    this.ligneErrors.clear();
-    let hasLigneError = false;
-    rawLignes.forEach((l: any, index: number) => {
-      if (l.montantdemande == null || l.montantdemande <= 0) {
-        this.ligneErrors.add(index);
-        hasLigneError = true;
-      }
+    this.lignes.controls.forEach((ligne, i) => {
+      console.log('Ligne', i, ligne.get('details')?.value);
     });
 
-    if (hasLigneError) {
-      this.toastr.warning('Veuillez saisir un montant valide (supérieur à 0) pour chaque ligne en erreur.');
-      return;
-    }
-
-    // 5. Préparation des données
+    /** 2. Préparation des données avec transformation COMPLÈTE */
     const raw = this.demandeForm.getRawValue();
+    console.log('raw', raw);
 
-    /** 2. prepare data */
     const formValue = {
       ...this.demande,
       ...raw,
-      //transformer departement
+      // Transformation des champs objets
       departement: raw.departement?.iddepartement || raw.departement,
-      //transformer lignes
       lignes: raw.lignes.map((l: any) => ({
         ...l,
-        natureop: l.natureop?.idnature || l.natureop,
-        centre: l.centre?.idcentreanalytique || l.centre,
-        tiers: l.tiers?.idtiers || l.tiers,
+        natureop: l.natureop?.idnature ?? l.natureop, // ID nature
+        centre: l.centre?.idcentreanalytique ?? l.centre, // ID centre
+        tiers: l.tiers?.idtiers ?? null, // ID tiers
+        codebudget: {
+          idbudgetdepartementnature: l.codebudget?.idbudgetdepartementnature,
+          codebudgetaire: l.codebudget?.codebudgetaire,
+        },
+        // TRANSFORMATION CRITIQUE : Convertir les FormGroups en objets simples
+        details: l.details || [],
       })),
-
       createdby: this.user.codeutilisateur ?? null,
       updatedby:
         this.title === 'Modification'
@@ -1010,7 +1006,7 @@ export class EditDemandeComponent implements OnInit {
           : null,
     };
 
-    /** 3. choices action */
+    /** 3. Appel au backend */
     if (this.title == 'Création') this.create(formValue);
     else this.update(formValue);
   }
@@ -1044,6 +1040,7 @@ export class EditDemandeComponent implements OnInit {
   //Enregistrement de données
   async create(_demande: any) {
     const { iddemande, ...dataToSend } = _demande;
+
     this.loading = true;
     this.service.createEntete(dataToSend).subscribe({
       next: async (res) => {
@@ -1201,7 +1198,7 @@ export class EditDemandeComponent implements OnInit {
     this.pjService.delete(this.iddemande, piece.idpiecejointe).subscribe({
       next: (res) => {
         if (res.success) {
-          // ⭐ Supprimer du tableau local APRÈS confirmation API
+          // Supprimer du tableau local APRÈS confirmation API
           const index = this.existingPieces.findIndex(
             (p) => p.idpiecejointe === piece.idpiecejointe,
           );
