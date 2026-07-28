@@ -247,7 +247,7 @@ export class MenuConfigService {
       // ==================== OPÉRATIONS ====================
       {
         label: 'Demande de décaissement',
-        route: APP_ROOT_DMD_DECAISSEMENT,
+        route: '/app/' + APP_ROOT_DMD_DECAISSEMENT,
         icon: 'ri-file-edit-line',
         category: 'Opérations',
         shortcut: 'D',
