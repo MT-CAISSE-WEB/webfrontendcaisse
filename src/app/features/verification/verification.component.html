@@ -1,0 +1,319 @@
+<!-- src/app/pages/verification/verification.component.html -->
+<div class="verification-container">
+  <div *ngIf="loading" class="loading">Chargement du reçu...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <div *ngIf="receData" class="rece-container">
+    <div class="page">
+      <div class="content">
+        <!-- ========== EN-TÊTE ========== -->
+        <div class="header">
+          <div class="header-left">
+            <div class="logo-container">
+              <div class="logo-placeholder">
+                {{ (receData.societe || "E").charAt(0).toUpperCase() }}
+              </div>
+            </div>
+            <div class="company-info">
+              <div class="company-name">
+                {{ receData.societe || "Entreprise" }}
+              </div>
+              <div *ngIf="receData.site" class="company-site">
+                {{ receData.site }}
+              </div>
+              <div *ngIf="receData.adresse" class="company-details">
+                {{ receData.adresse }}
+              </div>
+              <div *ngIf="receData.contact" class="company-details">
+                {{ receData.contact }}
+              </div>
+            </div>
+          </div>
+          <div class="header-right">
+            <div class="receipt-title">
+              {{
+                receData.typeOperation === "encaissement"
+                  ? "REÇU D'ENCAISSEMENT"
+                  : "REÇU DE DÉCAISSEMENT"
+              }}
+            </div>
+            <div class="receipt-subtitle">
+              N° <strong>{{ receData.numero || "" }}</strong>
+            </div>
+            <div *ngIf="receData.date" class="receipt-date">
+              Date: {{ formaterDate(receData.date) }}
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== INFOS PRINCIPALES ========== -->
+        <div class="main-info">
+          <!-- Section 1: Informations de la demande (si demande existe) -->
+          <div *ngIf="receData.numeroDemande" class="info-section">
+            <div class="info-section-title">Informations de la demande</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">N° Demande:</span>
+                <span class="info-value"
+                  ><strong>{{ receData.numeroDemande }}</strong></span
+                >
+              </div>
+              <div class="info-item">
+                <span class="info-label">Département:</span>
+                <span class="info-value">{{ receData.libelleDep || "" }}</span>
+              </div>
+              <div *ngIf="receData.tiers" class="info-item">
+                <span class="info-label">Tiers:</span>
+                <span class="info-value">{{ receData.tiers }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Montant et devise -->
+          <div class="info-section">
+            <div class="info-section-title">Montant</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Type:</span>
+                <span class="info-value">{{
+                  receData.typeOperation || "-"
+                }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Devise:</span>
+                <span class="info-value">{{ receData.devise || "XAF" }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Total:</span>
+                <span class="info-value info-value-highlight">{{
+                  formaterMontant(receData.total || 0, receData.devise)
+                }}</span>
+              </div>
+            </div>
+            <div class="amount-in-words">
+              {{
+                montantEnLettres(receData.total || 0, receData.devise || "XAF")
+              }}
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== DÉTAILS OPÉRATION ========== -->
+        <div class="operation-section">
+          <div class="operation-header">
+            <span class="operation-icon">📋</span>
+            <span class="operation-title">Détails de l'opération</span>
+          </div>
+          <div class="operation-details">
+            <div class="operation-item">
+              <span class="operation-item-label">Libellé:</span>
+              <span class="operation-item-value">{{
+                receData.libelleOperation || ""
+              }}</span>
+            </div>
+            <div class="operation-item">
+              <span class="operation-item-label">Bénéficiaire:</span>
+              <span class="operation-item-value">{{
+                receData.beneficiaire || ""
+              }}</span>
+            </div>
+            <div class="operation-item">
+              <span class="operation-item-label">Caissier:</span>
+              <span class="operation-item-value">{{
+                receData.caissier || ""
+              }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== TABLEAUX ========== -->
+        <div
+          *ngIf="receData.lignes && receData.lignes.length > 0"
+          class="table-container"
+        >
+          <table class="operation-table">
+            <thead>
+              <tr>
+                <th class="center">N°</th>
+                <th>Désignation</th>
+                <th>Centre analytique</th>
+                <th class="right">Montant</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let l of receData.lignes; let index = index">
+                <td class="center">{{ index + 1 }}</td>
+                <td>{{ l.libelle || l.nature || l.designation || "" }}</td>
+                <td>{{ l.libelleCentre || "-" }}</td>
+                <td class="right bold">
+                  {{ formaterMontant(l.montant || 0, receData.devise) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div
+          *ngIf="receData.caisses && receData.caisses.length > 0"
+          class="table-container"
+        >
+          <table class="caisse-table">
+            <thead>
+              <tr>
+                <th>Caisse</th>
+                <th class="center">Code</th>
+                <th class="right">Montant</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of receData.caisses; let index = index">
+                <td>{{ c.libelle || c.caisse || "" }}</td>
+                <td class="center">{{ c.code || c.codecaisse || "N/A" }}</td>
+                <td class="right bold">
+                  {{
+                    formaterMontant(c.montant || 0, c.devise || receData.devise)
+                  }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- ========== APPROBATIONS (Validateurs) ========== -->
+          <div
+            *ngIf="receData.validateurs && receData.validateurs.length > 0"
+            class="approval-section"
+          >
+            <div class="approval-title">✅ Approbations</div>
+            <div class="approval-grid">
+              <div *ngFor="let v of receData.validateurs" class="approval-item">
+                <div class="approval-name">{{ v.nom }}</div>
+                <div class="approval-status">
+                  {{ v.statut === "approuve" ? "✔️" : "❌" }}
+                  {{ v.statut.toUpperCase() }}
+                </div>
+                <div class="approval-date">Le {{ v.dateValidation }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ========== RÉCAPITULATIF + QR CODE ========== -->
+          <div class="total-section">
+            <div class="total-section-title">Récapitulatif</div>
+
+            <!-- Infos opération -->
+            <div class="total-line">
+              <span class="total-label">Type:</span>
+              <span class="total-amount">{{
+                receData.type === "encaissement"
+                  ? "ENCAISSEMENT"
+                  : "DÉCAISSEMENT"
+              }}</span>
+            </div>
+            <div class="total-line">
+              <span class="total-label">Date:</span>
+              <span class="total-amount">{{ receData.date }}</span>
+            </div>
+            <div *ngIf="receData.numeroDemande" class="total-line">
+              <span class="total-label">N° Demande:</span>
+              <span class="total-amount">{{ receData.numeroDemande }}</span>
+              <div *ngIf="receData.libelleDep" class="total-line">
+                <span class="total-label">Département:</span>
+                <span class="total-amount"
+                  >{{ receData.libelleDep }}
+                  {{ receData.codeDep ? `(${receData.codeDep})` : "" }}</span
+                >
+              </div>
+
+              <!-- Soldes -->
+              <div *ngIf="receData.soldeouverture" class="total-line">
+                <span class="total-label">Solde d'ouverture:</span>
+                <span class="total-amount">{{
+                  formaterMontant(receData.soldeouverture, receData.devise)
+                }}</span>
+              </div>
+              <div *ngIf="receData.soldefermeture" class="total-line">
+                <span class="total-label">Solde de fermeture:</span>
+                <span class="total-amount">{{
+                  formaterMontant(receData.soldefermeture, receData.devise)
+                }}</span>
+              </div>
+
+              <!-- Total principal -->
+              <div class="total-line total-line-main">
+                <span class="total-label">TOTAL:</span>
+                <span class="total-amount">{{
+                  formaterMontant(receData.total || 0, receData.devise)
+                }}</span>
+              </div>
+
+              <!-- Acteurs -->
+              <div class="total-line">
+                <span class="total-label">Caissier:</span>
+                <span class="total-amount">{{ receData.caissier || "-" }}</span>
+              </div>
+              <div class="total-line">
+                <span class="total-label">Bénéficiaire:</span>
+                <span class="total-amount">{{
+                  receData.beneficiaire || "-"
+                }}</span>
+              </div>
+            </div>
+
+            <!-- ========== SIGNATURES ========== -->
+            <div class="signature-section">
+              <div class="signature-title">Signatures</div>
+              <div class="signature-grid">
+                <div class="signature-block">
+                  <div class="signature-block-title">Caissier</div>
+                  <div class="signature-block-name">
+                    {{ receData.emetteur || receData.caissier || "N/A" }}
+                  </div>
+                  <div class="signature-line"></div>
+                  <div *ngIf="receData.dateEmetteur" class="signature-date">
+                    Le {{ formaterDate(receData.dateEmetteur) }}
+                  </div>
+                </div>
+                <div class="signature-block">
+                  <div class="signature-block-title">Bénéficiaire</div>
+                  <div class="signature-block-name">
+                    {{ receData.beneficiaire || "N/A" }}
+                  </div>
+                  <div class="signature-line"></div>
+                  <div *ngIf="receData.dateBeneficiaire" class="signature-date">
+                    Le {{ formaterDate(receData.dateBeneficiaire) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========== PIED DE PAGE ========== -->
+            <div class="footer">
+              <div class="footer-text">
+                Document généré le {{ formaterDate(date) }} à
+                {{
+                  date.toLocaleTimeString("fr-FR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                }}
+              </div>
+              <div class="footer-mention">{{ receData.mention || "-" }}</div>
+              <div class="footer-warning">
+                REÇU LA SOMME DE (EN LETTRES):
+                <strong>{{
+                  montantEnLettres(
+                    receData.total || 0,
+                    receData.devise || "XAF"
+                  )
+                }}</strong>
+              </div>
+              <div class="footer-note" style="margin-top: 8px; font-size: 10px">
+                A REMPLIR À LA CAISSE PAR LE BÉNÉFICIAIRE
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
