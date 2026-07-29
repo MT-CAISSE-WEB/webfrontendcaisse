@@ -270,15 +270,6 @@ export class MenuConfigService {
         roles: ['caissier', 'superviseur', 'superadmin'],
       },
       {
-        label: 'Justificatif des opérations',
-        route: APP_ROOT_OPERATION_GENERAL_JUSITIFIER,
-        icon: 'ri-receipt-line',
-        category: 'Opérations',
-        shortcut: 'J',
-        color: '#ef4444',
-        roles: ['caissier', 'superviseur', 'superadmin'],
-      },
-      {
         label: 'Justificatif des opérations (Liste)',
         route: APP_ROOT_OPERATION_GENERAL_JUSITIFIER_LIST,
         icon: 'ri-list-check',
