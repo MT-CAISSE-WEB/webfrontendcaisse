@@ -1322,3 +1322,71 @@
     margin-top: 10px;
   }
 }
+
+/* ============================================
+   LIGNES - ÉTAT DÉSACTIVÉ (DEMANDE SÉLECTIONNÉE)
+   ============================================ */
+
+/* Ligne de tableau désactivée */
+.row-disabled {
+  opacity: 0.6;
+  pointer-events: none;
+  background: #f8fafc;
+}
+
+.row-disabled:hover {
+  background: #f8fafc !important;
+}
+
+/* Champ désactivé */
+.input-disabled {
+  background: #f1f5f9 !important;
+  cursor: not-allowed !important;
+  color: #94a3b8 !important;
+  border-color: #e2e8f0 !important;
+}
+
+.input-disabled:hover,
+.input-disabled:focus {
+  border-color: #e2e8f0 !important;
+  box-shadow: none !important;
+}
+
+/* Style du bouton quand désactivé */
+.btn-remove-line:disabled,
+.btn-add-line:disabled,
+.btn-action-line:disabled,
+.btn-download-template:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Tooltip d'information pour les champs désactivés */
+.row-disabled .form-control-sm-glass {
+  background: #f1f5f9 !important;
+  color: #94a3b8 !important;
+  cursor: not-allowed !important;
+}
+
+.row-disabled .form-control-sm-glass::placeholder {
+  color: #cbd5e1 !important;
+}
+
+/* Badge d'état "Lecture seule" à afficher quand une demande est sélectionnée */
+.demande-readonly-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  background: rgba(59, 130, 246, 0.1);
+  color: #405189;
+  border-radius: 12px;
+  font-size: 0.6rem;
+  font-weight: 500;
+  margin-left: 0.5rem;
+}
+
+.demande-readonly-badge i {
+  font-size: 0.7rem;
+}

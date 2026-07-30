@@ -151,8 +151,8 @@ export class DemandeDecaissementComponent implements OnInit {
   }
 
   applyFilter(value: string) {
-    this.currentPage = 1; // ✅ Réinitialiser à la page 1 après filtrage
-    this.loadAllDemandes(); // ✅ Recharger avec le nouveau filtre
+    this.currentPage = 1; // Réinitialiser à la page 1 après filtrage
+    this.loadAllDemandes(); // Recharger avec le nouveau filtre
   }
 
   /**
@@ -542,7 +542,8 @@ export class DemandeDecaissementComponent implements OnInit {
         if (res.success) {
           this.deleteDemande = null;
           this.closeModal('deleteOrder');
-          this.toastr.error('Demande supprimée avec succès');
+          this.toastr.success('Demande supprimée avec succès');
+          this.loadAllDemandes();
         } else {
           this.error = 'Erreur de Suppression';
           this.toastr.error(this.error);

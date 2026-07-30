@@ -8,9 +8,17 @@
   </div>
 
   <!-- Section des caisses défilables -->
-  <div *ngIf="!loading && caisseAllSolde.length > 0" class="caisses-scroll-container">
+  <div
+    *ngIf="!loading && caisseAllSolde.length > 0"
+    class="caisses-scroll-container"
+  >
     <div class="caisses-scroll">
-      <div *ngFor="let caisse of caisseAllSolde" class="caisse-card">
+      <div
+        *ngFor="let caisse of caisseAllSolde"
+        class="caisse-card"
+        [class.selected]="selectedCaisseId === caisse.idcaisse"
+        (click)="onCaisseClick(caisse.idcaisse)"
+      >
         <div class="card-icon">
           <i class="ri-bank-line"></i>
         </div>
@@ -19,10 +27,14 @@
           <h5 class="card-title">{{ caisse.libelle }}</h5>
           <p class="card-solde">
             <span>Solde :</span>
-            <strong>{{ getSolde(caisse) | number:'1.0-0' }} {{ caisse.codedevise }}</strong>
+            <strong
+              >{{ getSolde(caisse) | number: "1.0-0" }}
+              {{ caisse.codedevise }}</strong
+            >
           </p>
           <p class="card-date">
-            Dernière période : {{ caisse.derniere_date_periode | date:'dd/MM/yyyy' }}
+            Dernière période :
+            {{ caisse.derniere_date_periode | date: "dd/MM/yyyy" }}
           </p>
         </div>
         <div class="card-progress">
@@ -33,7 +45,10 @@
   </div>
 
   <!-- Aucune caisse -->
-  <div *ngIf="!loading && caisseAllSolde.length === 0" class="alert alert-info text-center">
+  <div
+    *ngIf="!loading && caisseAllSolde.length === 0"
+    class="alert alert-info text-center"
+  >
     Aucune caisse trouvée pour afficher le solde.
   </div>
 </div>

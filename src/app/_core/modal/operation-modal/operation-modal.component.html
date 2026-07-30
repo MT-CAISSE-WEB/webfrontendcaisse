@@ -221,7 +221,7 @@
               type="button"
               class="btn-action-line btn-clear"
               (click)="clearAllLines()"
-              [disabled]="lignes.controls.length === 0"
+              [disabled]="lignes.controls.length === 0 || isSelectedDemande"
               title="Vider toutes les lignes"
             >
               <i class="ri-delete-bin-7-line"></i>
@@ -231,7 +231,7 @@
               type="button"
               class="btn-action-line btn-import"
               (click)="csvInput.click()"
-              [disabled]="!typePaiement || !isUpdated"
+              [disabled]="!typePaiement || !isUpdated || isSelectedDemande"
               title="Importer un fichier CSV"
             >
               <i class="ri-file-excel-line"></i>
@@ -249,6 +249,7 @@
               type="button"
               class="btn-download-template"
               (click)="downloadCsvTemplate()"
+              [disabled]="isSelectedDemande"
               title="Télécharger un modèle CSV"
             >
               <i class="ri-file-excel-2-line"></i>
@@ -388,7 +389,10 @@
             </thead>
             <tbody>
               @for (ligne of lignes.controls; track $index) {
-                <tr [formGroup]="ligne">
+                <tr
+                  [formGroup]="ligne"
+                  [class.row-disabled]="isSelectedDemande"
+                >
                   <td class="text-center">{{ $index + 1 }}</td>
                   <td>
                     <div class="input-light">
@@ -398,6 +402,7 @@
                         placeholder="Nature opération"
                         [matAutocomplete]="autoNature"
                         class="form-control-sm-glass"
+                        [class.input-disabled]="isSelectedDemande"
                       />
                       <mat-autocomplete
                         #autoNature="matAutocomplete"
@@ -422,6 +427,7 @@
                         placeholder="Centre analytique"
                         [matAutocomplete]="autoCentre"
                         class="form-control-sm-glass"
+                        [class.input-disabled]="isSelectedDemande"
                       />
                       <mat-autocomplete
                         #autoCentre="matAutocomplete"
@@ -447,6 +453,7 @@
                         placeholder="Tiers"
                         [matAutocomplete]="autoTiers"
                         class="form-control-sm-glass"
+                        [class.input-disabled]="isSelectedDemande"
                       />
                       <mat-autocomplete
                         #autoTiers="matAutocomplete"
@@ -470,12 +477,13 @@
                       (mousedown)="protectionField(ligne, 'montantligne')"
                       class="form-control-sm-glass text-end"
                       placeholder="00.000"
+                      [class.input-disabled]="isSelectedDemande"
                     />
                   </td>
                   <td>
                     <button
                       type="button"
-                      [disabled]="!isUpdated"
+                      [disabled]="!isUpdated || isSelectedDemande"
                       class="btn-remove-line"
                       (click)="removeLine($index)"
                       title="Supprimer la ligne"
@@ -489,7 +497,9 @@
                 <td colspan="6">
                   <button
                     type="button"
-                    [disabled]="!typePaiement && !isUpdated"
+                    [disabled]="
+                      (!typePaiement && !isUpdated) || isSelectedDemande
+                    "
                     class="btn-add-line"
                     (click)="addLine()"
                   >

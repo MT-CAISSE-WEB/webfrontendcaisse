@@ -1,14 +1,552 @@
-.dropdown-item:hover {
-    cursor: pointer;
+/* ============================================
+   DEMANDES PAR BUDGET - STYLES PREMIUM
+   ============================================ */
+
+/* ============================================
+   PAGE TITLE PREMIUM
+   ============================================ */
+.page-title-premium {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.08),
+    rgba(102, 126, 234, 0.05)
+  );
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 20px;
+  padding: 20px 28px;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 }
 
-.action-menu {
+@media (min-width: 769px) {
+  .page-title-premium {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.92);
+  }
+}
+
+.title-icon-premium {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.12),
+    rgba(102, 126, 234, 0.08)
+  );
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  flex-shrink: 0;
+}
+
+.title-icon-premium i {
+  font-size: 1.3rem;
+  color: #405189;
+}
+
+.title-premium {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.02em;
+}
+
+.title-subtitle-premium {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-top: 2px;
+}
+
+.breadcrumb-premium {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 4px 14px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 40px;
+  border: 1px solid rgba(59, 130, 246, 0.08);
+}
+
+.breadcrumb-premium .breadcrumb-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.breadcrumb-premium .breadcrumb-item + .breadcrumb-item::before {
+  content: "›";
+  color: #cbd5e1;
+  font-size: 1.2rem;
+  font-weight: 300;
+  padding: 0 8px;
+}
+
+.breadcrumb-premium .breadcrumb-item a {
+  color: #405189;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.breadcrumb-premium .breadcrumb-item a:hover {
+  color: #2563eb;
+}
+
+.breadcrumb-premium .breadcrumb-item.active {
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ============================================
+   CARD GLASS
+   ============================================ */
+.card-glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 769px) {
+  .card-glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: white;
+  }
+}
+
+.card-header-glass {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.4);
+  background: transparent;
+}
+
+.card-body-glass {
+  padding: 1.5rem;
+}
+
+/* ============================================
+   BOUTONS GLASS
+   ============================================ */
+.btn-glass-primary,
+.btn-glass-secondary,
+.btn-glass-success {
+  border-radius: 30px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.btn-glass-primary {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #405189;
+}
+
+.btn-glass-primary:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #405189;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.btn-glass-secondary {
+  background: rgba(203, 213, 225, 0.3);
+  border: 1px solid rgba(203, 213, 225, 0.4);
+  color: #475569;
+}
+
+.btn-glass-secondary:hover {
+  background: rgba(203, 213, 225, 0.5);
+  border-color: #94a3b8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  color: #1e293b;
+}
+
+.btn-glass-success {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.btn-glass-success:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+.btn-glass-primary.btn-sm,
+.btn-glass-secondary.btn-sm,
+.btn-glass-success.btn-sm {
+  padding: 0.25rem 0.7rem;
+  font-size: 0.65rem;
+}
+
+/* ============================================
+   FIELD GROUP MODERN
+   ============================================ */
+.field-group-modern {
+  position: relative;
+  width: 100%;
+}
+
+.field-input-modern {
+  width: 100%;
+  height: 48px;
+  padding: 0 0.75rem;
+  padding-top: 1.2rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  color: #1e293b;
+  background: #ffffff;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.field-input-modern:hover {
+  border-color: #cbd5e1;
+}
+
+.field-input-modern:focus {
+  border-color: #405189;
+  box-shadow: 0 0 0 3px rgba(64, 81, 137, 0.1);
+}
+
+.field-input-modern.is-valid {
+  border-color: #10b981;
+}
+
+.field-input-modern.is-invalid {
+  border-color: #ef4444;
+}
+
+.field-input-modern::placeholder {
+  color: transparent;
+}
+
+/* ✅ Sélecteur moderne */
+.field-select-modern {
+  width: 100%;
+  height: 48px;
+  padding: 0 0.75rem;
+  padding-top: 1.2rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  color: #1e293b;
+  background: #ffffff;
+  transition: all 0.2s ease;
+  outline: none;
+  appearance: auto;
+}
+
+.field-select-modern:hover {
+  border-color: #cbd5e1;
+}
+
+.field-select-modern:focus {
+  border-color: #405189;
+  box-shadow: 0 0 0 3px rgba(64, 81, 137, 0.1);
+}
+
+.field-select-modern.is-valid {
+  border-color: #10b981;
+}
+
+.field-select-modern.is-invalid {
+  border-color: #ef4444;
+}
+
+/* ✅ Label flottant */
+.field-label-modern {
   position: absolute;
-  top: 100%;
-  left: 0;
-  min-width: 160px;
-  background: #fff;
+  top: 50%;
+  left: 0.75rem;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  color: #94a3b8;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  background: transparent;
+  padding: 0 0.2rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 2;
+}
+
+/* ✅ Label monte quand le champ a une valeur */
+.field-input-modern:focus ~ .field-label-modern,
+.field-input-modern:not(:placeholder-shown) ~ .field-label-modern,
+.field-select-modern:focus ~ .field-label-modern,
+.field-select-modern:not([value=""]) ~ .field-label-modern {
+  top: 0.2rem;
+  transform: translateY(0);
+  font-size: 0.6rem;
+  color: #405189;
+  background: white;
+  padding: 0 0.4rem;
+  border-radius: 4px;
+  z-index: 3;
+}
+
+/* ============================================
+   TABLE MODERNE
+   ============================================ */
+.table-responsive {
+  border-radius: 12px;
+  overflow: auto;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.table-modern {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.6);
+  margin-bottom: 0;
+}
+
+.table-modern thead {
+  background: rgba(59, 130, 246, 0.04);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.table-modern thead th {
+  padding: 10px 14px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #64748b;
+  border-bottom: none;
+  white-space: nowrap;
+}
+
+.table-modern tbody tr {
+  border-bottom: 1px solid rgba(226, 232, 240, 0.4);
+  transition: background 0.2s ease;
+}
+
+.table-modern tbody tr:last-child {
+  border-bottom: none;
+}
+
+.table-modern tbody tr:hover {
+  background: rgba(59, 130, 246, 0.04);
+}
+
+.table-modern tbody td {
+  padding: 10px 14px;
+  vertical-align: middle;
+  font-size: 0.85rem;
+  color: #1e293b;
+  border-bottom: none;
+}
+
+/* ============================================
+   BADGES
+   ============================================ */
+.badge-glass {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.65rem;
+  font-weight: 600;
+}
+
+.badge-glass-secondary {
+  background: rgba(100, 116, 139, 0.15);
+  color: #64748b;
+}
+
+.code-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  background: rgba(59, 130, 246, 0.08);
   border-radius: 6px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-  z-index: 9999;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #405189;
+  letter-spacing: 0.3px;
+}
+
+/* ============================================
+   EMPTY STATE & SPINNER
+   ============================================ */
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.empty-state i {
+  font-size: 2.5rem;
+  color: #cbd5e1;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 4px;
+}
+
+.empty-state .empty-hint {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.spinner-glass {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .page-title-premium {
+    padding: 16px;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .card-header-glass {
+    padding: 1rem;
+  }
+
+  .card-body-glass {
+    padding: 1rem;
+  }
+
+  .title-premium {
+    font-size: 1.1rem;
+  }
+
+  .title-icon-premium {
+    width: 36px;
+    height: 36px;
+  }
+
+  .title-icon-premium i {
+    font-size: 1rem;
+  }
+
+  .field-input-modern,
+  .field-select-modern {
+    height: 42px;
+    font-size: 0.8rem;
+    padding-top: 1rem;
+  }
+
+  .field-label-modern {
+    font-size: 0.75rem;
+  }
+
+  .field-input-modern:focus ~ .field-label-modern,
+  .field-input-modern:not(:placeholder-shown) ~ .field-label-modern,
+  .field-select-modern:focus ~ .field-label-modern,
+  .field-select-modern:not([value=""]) ~ .field-label-modern {
+    font-size: 0.55rem;
+    top: 0.15rem;
+    padding: 0 0.3rem;
+  }
+
+  .table-modern {
+    font-size: 0.8rem;
+  }
+
+  .table-modern thead th,
+  .table-modern tbody td {
+    padding: 6px 10px;
+  }
+
+  .code-badge {
+    font-size: 0.7rem;
+    padding: 1px 8px;
+  }
+
+  .btn-glass-primary,
+  .btn-glass-secondary,
+  .btn-glass-success {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title-premium {
+    padding: 12px;
+  }
+
+  .title-premium {
+    font-size: 0.95rem;
+  }
+
+  .title-subtitle-premium {
+    font-size: 0.65rem;
+  }
+
+  .breadcrumb-premium .breadcrumb-item {
+    font-size: 0.7rem;
+  }
+
+  .field-input-modern,
+  .field-select-modern {
+    height: 38px;
+    font-size: 0.75rem;
+    padding-top: 0.9rem;
+  }
+
+  .field-label-modern {
+    font-size: 0.7rem;
+    left: 0.6rem;
+  }
+
+  .field-input-modern:focus ~ .field-label-modern,
+  .field-input-modern:not(:placeholder-shown) ~ .field-label-modern,
+  .field-select-modern:focus ~ .field-label-modern,
+  .field-select-modern:not([value=""]) ~ .field-label-modern {
+    font-size: 0.5rem;
+    top: 0.1rem;
+    padding: 0 0.2rem;
+  }
+
+  .table-modern thead th,
+  .table-modern tbody td {
+    padding: 4px 8px;
+    font-size: 0.7rem;
+  }
+
+  .code-badge {
+    font-size: 0.65rem;
+    padding: 1px 6px;
+  }
+
+  .badge-glass {
+    font-size: 0.55rem;
+    padding: 1px 6px;
+  }
 }

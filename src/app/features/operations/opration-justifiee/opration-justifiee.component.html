@@ -92,30 +92,47 @@
 
         <div class="card-body-glass pt-0">
           <div class="row g-3">
-            <div class="col-lg-6 col-sm-12">
-              <div class="form-floating">
-                <select
-                  formControlName="operation"
-                  class="form-select {{ isValidField('operation') }}"
-                  id="operation"
-                >
-                  <option value="">
-                    ---- Choisir une opération à justifier ----
-                  </option>
-                  @for (item of operationsFiltrees; track $index) {
-                    <option value="{{ item.idoperation }}">
-                      {{ item.codeoperation }} ---
+            <div class="col-lg-6 col-sm-6">
+              <div class="operation-info-card">
+                <div class="d-flex align-items-start gap-3">
+                  <!-- Icône -->
+                  <div class="operation-info-icon">
+                    <i class="ri-file-list-3-line"></i>
+                  </div>
+                  <!-- Détails -->
+                  <div class="flex-grow-1">
+                    <!-- Ligne 1 : Code + Date -->
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <span class="code-badge">{{
+                        selectedOperationPJ?.codeoperation
+                      }}</span>
+                      <span class="text-muted small">
+                        <i class="ri-calendar-line me-1"></i
+                        >{{
+                          selectedOperationPJ?.dateoperation
+                            | date: "dd/MM/yyyy"
+                        }}
+                      </span>
+                    </div>
+                    <!-- Ligne 2 : Commentaire -->
+                    <p
+                      class="operation-comment mb-2"
+                      [title]="selectedOperationPJ?.commentaire"
+                    >
                       {{
-                        (item.commentaire.length || 0) > 50
-                          ? (item.commentaire | slice: 0 : 50) + "..."
-                          : item.commentaire || ""
+                        selectedOperationPJ?.commentaire || "Aucun commentaire"
                       }}
-                      --- {{ formatCFA(item.montant) }}
-                      {{ item.devise.codedevise }}
-                    </option>
-                  }
-                </select>
-                <label for="operation">Opération à justifier</label>
+                    </p>
+                    <div class="d-flex align-items-center justify-content-end">
+                      <span class="fw-bold fs-5">{{
+                        formatCFA(selectedOperationPJ?.montant)
+                      }}</span>
+                      <span class="badge-glass badge-glass-devise ms-2"
+                        >{{ selectedOperationPJ?.devise?.codedevise }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -414,10 +431,10 @@
               <!-- Badge pièces jointes -->
               <span
                 class="badge-glass badge-glass-info badge-count-sm"
-                *ngIf="totalPiecesCount > 0"
+                *ngIf="justificatifPiecesCount > 0"
               >
                 <i class="ri-attachment-2 me-1"></i>
-                {{ totalPiecesCount }}
+                {{ selectedJustificatifPJ ? justificatifPiecesCount : 0 }}
               </span>
             </div>
             <div class="d-flex gap-2 flex-wrap">
@@ -426,7 +443,7 @@
                 class="btn-glass-primary"
                 (click)="clearJustificatifFields()"
               >
-                <i class="ri-add-fill align-bottom me-1"></i> nouvelle saisie
+                <i class="ri-add-fill align-bottom me-1"></i> Nouvelle saisie
               </button>
               <button
                 type="button"
@@ -474,7 +491,7 @@
                 class="tab-badge-justificatif"
                 [class.active]="activePjTab === 'pieces'"
               >
-                {{ totalPiecesCount }}
+                {{ selectedJustificatifPJ ? justificatifPiecesCount : 0 }}
               </span>
             </button>
           </div>
@@ -894,267 +911,229 @@
           </div>
 
           <!-- ========================================== -->
-          <!-- CONTENU ONGLET 2: PIÈCES JOINTES -->
+          <!-- CONTENU ONGLET 2: PIÈCES JOINTES DU JUSTIFICATIF -->
           <!-- ========================================== -->
           <div
             class="tab-content-justificatif"
             [class.active]="activePjTab === 'pieces'"
           >
-            <!-- Zone d'upload -->
-            <div
-              class="upload-area-justificatif"
-              [class.drag-over]="isDragOver"
-              (dragover)="onDragOver($event)"
-              (dragleave)="onDragLeave($event)"
-              (drop)="onDrop($event)"
-            >
-              <input
-                type="file"
-                #fileInput
-                multiple
-                (change)="onFilesSelected($event)"
-                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
-                class="d-none"
-              />
+            <!-- Message si aucun justificatif n'est sélectionné -->
+            <div *ngIf="!selectedJustificatifPJ" class="alert alert-info-glass">
+              <i class="ri-information-line me-2"></i>
+              <strong>Sélectionnez un justificatif</strong> dans le tableau
+              ci-dessus pour afficher ses pièces jointes.
+            </div>
+
+            <!-- Contenu si un justificatif est sélectionné -->
+            <div *ngIf="selectedJustificatifPJ">
+              <!-- Zone d'upload -->
               <div
-                class="upload-content-justificatif"
-                (click)="fileInput.click()"
+                class="upload-area-justificatif"
+                [class.drag-over]="isDragOver"
+                (dragover)="onDragOver($event)"
+                (dragleave)="onDragLeave($event)"
+                (drop)="onDrop($event)"
               >
-                <div class="upload-icon-justificatif">
-                  <i class="ri-upload-cloud-2-line"></i>
+                <input
+                  type="file"
+                  #fileInput
+                  multiple
+                  (change)="onFilesSelected($event)"
+                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv"
+                  class="d-none"
+                />
+                <div
+                  class="upload-content-justificatif"
+                  (click)="fileInput.click()"
+                >
+                  <div class="upload-icon-justificatif">
+                    <i class="ri-upload-cloud-2-line"></i>
+                  </div>
+                  <div class="upload-text-justificatif">
+                    <span class="upload-title-justificatif">
+                      @if (selectedFiles.length === 0) {
+                        Déposez vos fichiers ici ou cliquez pour parcourir
+                      } @else {
+                        <strong>{{ selectedFiles.length }}</strong> fichier(s)
+                        sélectionné(s)
+                      }
+                    </span>
+                    <span
+                      class="upload-hint-justificatif"
+                      *ngIf="selectedFiles.length === 0"
+                    >
+                      PDF, DOC, XLS, JPG, PNG (max 10MB)
+                    </span>
+                  </div>
+                  @if (selectedFiles.length > 0) {
+                    <button
+                      class="btn-glass-upload-justificatif"
+                      (click)="
+                        uploadJustificatifPieces(); $event.stopPropagation()
+                      "
+                      [disabled]="pjUploading"
+                    >
+                      @if (pjUploading) {
+                        <span
+                          class="spinner-border spinner-border-sm me-1"
+                        ></span>
+                      }
+                      <i class="ri-upload-cloud-2-line me-1"></i>
+                      Uploader
+                    </button>
+                  }
                 </div>
-                <div class="upload-text-justificatif">
-                  <span class="upload-title-justificatif">
-                    @if (selectedFiles.length === 0) {
-                      Déposez vos fichiers ici ou cliquez pour parcourir
-                    } @else {
-                      <strong>{{ selectedFiles.length }}</strong> fichier(s)
-                      sélectionné(s)
-                    }
-                  </span>
-                  <span
-                    class="upload-hint-justificatif"
-                    *ngIf="selectedFiles.length === 0"
-                  >
-                    PDF, DOC, XLS, JPG, PNG (max 10MB)
+              </div>
+
+              <!-- Aperçu des fichiers sélectionnés -->
+              <div
+                *ngIf="selectedFiles.length > 0"
+                class="file-preview-justificatif"
+              >
+                <div class="file-preview-header-justificatif">
+                  <span class="fw-semibold small text-uppercase text-muted">
+                    Fichiers à uploader ({{ selectedFiles.length }})
                   </span>
                 </div>
-                @if (selectedFiles.length > 0) {
+                <div class="file-grid-justificatif">
+                  @for (file of selectedFiles; track $index; let i = $index) {
+                    <div class="file-item-justificatif">
+                      <div class="file-item-info-justificatif">
+                        <div class="file-item-icon-justificatif">
+                          <i class="ri-file-line"></i>
+                        </div>
+                        <div class="file-item-details-justificatif">
+                          <span
+                            class="file-item-name-justificatif"
+                            [title]="file.name"
+                          >
+                            {{ file.name }}
+                          </span>
+                          <span class="file-item-size-justificatif">
+                            {{ file.size / 1024 | number: "1.0-0" }} KB
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        class="file-item-remove-justificatif"
+                        (click)="removeSelectedFile(i)"
+                        title="Retirer"
+                      >
+                        <i class="ri-close-line"></i>
+                      </button>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Liste des pièces jointes existantes du JUSTIFICATIF -->
+              <div
+                *ngIf="!piecesJointesLoading && justificatifPiecesCount > 0"
+                class="pj-list-justificatif"
+              >
+                <div class="pj-list-header-justificatif">
+                  <span class="fw-semibold small text-uppercase text-muted">
+                    <i class="ri-file-list-line me-1"></i>
+                    Documents ({{ justificatifPiecesCount }})
+                  </span>
                   <button
-                    class="btn-glass-upload-justificatif"
-                    (click)="uploadPieces(); $event.stopPropagation()"
-                    [disabled]="pjUploading"
+                    type="button"
+                    class="btn-glass-primary btn-sm"
+                    (click)="downloadAllJustificatifFiles()"
+                    [disabled]="loading"
+                    title="Télécharger toutes les pièces jointes"
                   >
-                    @if (pjUploading) {
+                    @if (loading) {
                       <span
                         class="spinner-border spinner-border-sm me-1"
                       ></span>
                     }
-                    <i class="ri-upload-cloud-2-line me-1"></i>
-                    Uploader
+                    <i class="ri-download-line me-1"></i> Tout télécharger
                   </button>
-                }
-              </div>
-            </div>
+                </div>
 
-            <!-- Aperçu des fichiers sélectionnés -->
-            <div
-              *ngIf="selectedFiles.length > 0"
-              class="file-preview-justificatif"
-            >
-              <div class="file-preview-header-justificatif">
-                <span class="fw-semibold small text-uppercase text-muted">
-                  Fichiers à uploader ({{ selectedFiles.length }})
-                </span>
-              </div>
-              <div class="file-grid-justificatif">
-                @for (file of selectedFiles; track $index; let i = $index) {
-                  <div class="file-item-justificatif">
-                    <div class="file-item-info-justificatif">
-                      <div class="file-item-icon-justificatif">
-                        <i class="ri-file-line"></i>
+                <div class="pj-items-justificatif">
+                  @for (
+                    pj of justificatifPiecesJointes;
+                    track pj.idpiecejointe
+                  ) {
+                    <div
+                      class="pj-item-justificatif pj-item-editable-justificatif"
+                    >
+                      <div class="pj-item-icon-justificatif">
+                        <i [class]="getFileIcon(pj)"></i>
                       </div>
-                      <div class="file-item-details-justificatif">
+                      <div class="pj-item-info-justificatif">
                         <span
-                          class="file-item-name-justificatif"
-                          [title]="file.name"
+                          class="pj-item-name-justificatif"
+                          [title]="pj.nomfichier"
                         >
-                          {{ file.name }}
+                          {{ pj.nomfichier }}
                         </span>
-                        <span class="file-item-size-justificatif">
-                          {{ file.size / 1024 | number: "1.0-0" }} KB
+                        <span class="pj-item-meta-justificatif">
+                          {{ formatFileSize(pj.taille) }}
                         </span>
+                      </div>
+                      <div class="pj-item-actions-justificatif">
+                        <button
+                          class="pj-action-btn-justificatif pj-action-preview"
+                          (click)="previewPiece(pj); $event.stopPropagation()"
+                          title="Aperçu"
+                        >
+                          <i class="ri-eye-line"></i>
+                        </button>
+                        <button
+                          class="pj-action-btn-justificatif pj-action-download-justificatif"
+                          (click)="downloadJustificatifPiece(pj)"
+                          title="Télécharger"
+                        >
+                          <i class="ri-download-line"></i>
+                        </button>
+                        <button
+                          class="pj-action-btn-justificatif pj-action-delete-justificatif"
+                          (click)="deleteJustificatifPiece(pj)"
+                          [disabled]="pjDeleting === pj.idpiecejointe"
+                          title="Supprimer"
+                        >
+                          @if (pjDeleting === pj.idpiecejointe) {
+                            <span
+                              class="spinner-border spinner-border-sm"
+                            ></span>
+                          } @else {
+                            <i class="ri-close-line"></i>
+                          }
+                        </button>
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      class="file-item-remove-justificatif"
-                      (click)="removeSelectedFile(i)"
-                      title="Retirer"
-                    >
-                      <i class="ri-close-line"></i>
-                    </button>
-                  </div>
-                }
-              </div>
-            </div>
-
-            <!-- Liste des pièces jointes existantes -->
-            <div
-              *ngIf="!piecesJointesLoading && totalPiecesCount > 0"
-              class="pj-list-justificatif"
-            >
-              <div class="pj-list-header-justificatif">
-                <span class="fw-semibold small text-uppercase text-muted">
-                  <i class="ri-file-list-line me-1"></i>
-                  Documents ({{ totalPiecesCount }})
-                </span>
-                <button
-                  type="button"
-                  class="btn-glass-primary btn-sm"
-                  (click)="
-                    selectedOperationPJ?.iddemande
-                      ? downloadAllFiles2()
-                      : downloadAllFiles()
-                  "
-                  [disabled]="downloadingAll"
-                  title="Télécharger toutes les pièces jointes"
-                >
-                  @if (downloadingAll) {
-                    <span class="spinner-border spinner-border-sm me-1"></span>
                   }
-                  <i class="ri-download-line me-1"></i> Tout télécharger
-                </button>
-              </div>
-
-              <div class="pj-list-items-justificatif">
-                <!-- PJ de la demande -->
-                <div
-                  *ngIf="hasDemande && demandePiecesJointes.length > 0"
-                  class="pj-group-justificatif"
-                >
-                  <span class="pj-group-label-justificatif">
-                    <i class="ri-file-copy-line text-info"></i>
-                    Demande ({{ demandeInfo?.codedemande }})
-                    <span class="badge-glass badge-glass-info badge-count-sm">{{
-                      demandePiecesJointes.length
-                    }}</span>
-                  </span>
-                  <div class="pj-items-justificatif">
-                    @for (pj of demandePiecesJointes; track $index) {
-                      <div
-                        class="pj-item-justificatif pj-item-readonly-justificatif"
-                      >
-                        <div class="pj-item-icon-justificatif">
-                          <i [class]="getFileIcon(pj)"></i>
-                        </div>
-                        <div class="pj-item-info-justificatif">
-                          <span
-                            class="pj-item-name-justificatif"
-                            [title]="pj.nomfichier"
-                            >{{ pj.nomfichier }}</span
-                          >
-                          <span class="pj-item-meta-justificatif">{{
-                            formatFileSize(pj.taille)
-                          }}</span>
-                        </div>
-                        <div class="pj-item-actions-justificatif">
-                          <button
-                            class="pj-action-btn-justificatif pj-action-download-justificatif"
-                            (click)="downloadPiece(pj)"
-                            title="Télécharger"
-                          >
-                            <i class="ri-download-line"></i>
-                          </button>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </div>
-
-                <!-- PJ de l'opération -->
-                <div
-                  *ngIf="operationPiecesJointes.length > 0"
-                  class="pj-group-justificatif"
-                >
-                  <span class="pj-group-label-justificatif">
-                    <i class="ri-folder-image-line text-primary"></i>
-                    Opération ({{
-                      selectedOperationPJ?.codeoperation || ope?.codeoperation
-                    }})
-                    <span
-                      class="badge-glass badge-glass-secondary badge-count-sm"
-                      >{{ operationPiecesJointes.length }}</span
-                    >
-                  </span>
-                  <div class="pj-items-justificatif">
-                    @for (pj of operationPiecesJointes; track $index) {
-                      <div
-                        class="pj-item-justificatif pj-item-editable-justificatif"
-                      >
-                        <div class="pj-item-icon-justificatif">
-                          <i [class]="getFileIcon(pj)"></i>
-                        </div>
-                        <div class="pj-item-info-justificatif">
-                          <span
-                            class="pj-item-name-justificatif"
-                            [title]="pj.nomfichier"
-                            >{{ pj.nomfichier }}</span
-                          >
-                          <span class="pj-item-meta-justificatif">{{
-                            formatFileSize(pj.taille)
-                          }}</span>
-                        </div>
-                        <div class="pj-item-actions-justificatif">
-                          <button
-                            class="pj-action-btn-justificatif pj-action-download-justificatif"
-                            (click)="downloadPiece(pj)"
-                            title="Télécharger"
-                          >
-                            <i class="ri-download-line"></i>
-                          </button>
-                          <button
-                            class="pj-action-btn-justificatif pj-action-delete-justificatif"
-                            (click)="deletePiece(pj)"
-                            [disabled]="pjDeleting === pj.idpiecejointe"
-                            title="Supprimer"
-                          >
-                            @if (pjDeleting === pj.idpiecejointe) {
-                              <span
-                                class="spinner-border spinner-border-sm"
-                              ></span>
-                            } @else {
-                              <i class="ri-close-line"></i>
-                            }
-                          </button>
-                        </div>
-                      </div>
-                    }
-                  </div>
                 </div>
               </div>
-            </div>
 
-            <!-- État vide -->
-            <div
-              *ngIf="
-                !piecesJointesLoading &&
-                totalPiecesCount === 0 &&
-                selectedFiles.length === 0
-              "
-              class="pj-empty-justificatif"
-            >
-              <i class="ri-folder-open-line"></i>
-              <p>Aucune pièce jointe</p>
-              <span class="text-muted small"
-                >Déposez des fichiers ci-dessus pour les ajouter</span
+              <!-- État vide pour le justificatif -->
+              <div
+                *ngIf="
+                  !piecesJointesLoading &&
+                  justificatifPiecesCount === 0 &&
+                  selectedFiles.length === 0
+                "
+                class="pj-empty-justificatif"
               >
-            </div>
+                <i class="ri-folder-open-line"></i>
+                <p>Aucune pièce jointe pour ce justificatif</p>
+                <span class="text-muted small">
+                  Déposez des fichiers ci-dessus pour les ajouter
+                </span>
+              </div>
 
-            <!-- Chargement -->
-            <div *ngIf="piecesJointesLoading" class="spinner-glass-sm">
-              <div class="spinner-border spinner-border-sm text-primary"></div>
-              <p class="mt-2 small">Chargement des pièces jointes...</p>
+              <!-- Chargement -->
+              <div *ngIf="piecesJointesLoading" class="spinner-glass-sm">
+                <div
+                  class="spinner-border spinner-border-sm text-primary"
+                  role="status"
+                ></div>
+                <p class="mt-2 small">Chargement des pièces jointes...</p>
+              </div>
             </div>
           </div>
         </div>
@@ -1237,6 +1216,14 @@
                 </span>
               </div>
               <div class="pill-actions-glass">
+                <!-- Bouton d'aperçu -->
+                <button
+                  class="pill-action-btn pill-action-preview"
+                  (click)="previewPiece(pj); $event.stopPropagation()"
+                  title="Aperçu"
+                >
+                  <i class="ri-eye-line"></i>
+                </button>
                 <button
                   class="pill-action-btn pill-action-download"
                   (click)="downloadJustificatifPiece(pj)"
@@ -1375,6 +1362,64 @@
         type="button"
         class="btn-glass-cancel"
         (click)="closePiecesJointesJustificatifModal()"
+      >
+        <i class="ri-close-line me-1"></i> Fermer
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- ==================== MODALE APERÇU IMAGE ==================== -->
+<ng-template #imagePreviewModalTpl let-modal>
+  <div class="modal-content-glass">
+    <!-- Header -->
+    <div class="modal-header modal-header-theme-orange">
+      <h5 class="modal-title text-white">
+        <i class="ri-image-line me-2"></i>
+        Aperçu : {{ fileName }}
+      </h5>
+      <button
+        type="button"
+        class="btn-close btn-close-white"
+        (click)="closeImagePreview()"
+        aria-label="Fermer"
+      ></button>
+    </div>
+
+    <!-- Body avec l'image -->
+    <div
+      class="modal-body p-0 text-center"
+      style="max-height: 80vh; overflow: auto"
+    >
+      @if (imageUrl) {
+        <img
+          [src]="imageUrl"
+          alt="Aperçu de {{ fileName }}"
+          class="img-fluid"
+          style="max-height: 70vh; max-width: 100%; object-fit: contain"
+          (error)="onImageLoadError()"
+        />
+      } @else {
+        <div class="spinner-glass py-5">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="mt-2 text-muted">Chargement de l'image...</p>
+        </div>
+      }
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer border-0 justify-content-center">
+      <button
+        type="button"
+        class="btn-glass-primary"
+        (click)="downloadCurrentImage(); closeImagePreview()"
+      >
+        <i class="ri-download-line me-1"></i> Télécharger
+      </button>
+      <button
+        type="button"
+        class="btn-glass-secondary"
+        (click)="closeImagePreview()"
       >
         <i class="ri-close-line me-1"></i> Fermer
       </button>
