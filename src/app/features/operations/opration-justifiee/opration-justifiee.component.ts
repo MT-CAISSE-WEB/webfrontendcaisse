@@ -24,7 +24,15 @@ import { OperationService } from '../service/operation.service';
 import { ToastrService } from 'ngx-toastr';
 import { deviseservice } from '../../donnee_base/donnee_base/service/devise.service';
 import { devisemodel } from '../../donnee_base/donnee_base/model/devise.model';
-import { catchError, forkJoin, map, Observable, of, switchMap, tap } from 'rxjs';
+import {
+  catchError,
+  forkJoin,
+  map,
+  Observable,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { AffectationCaisseService } from '../../caisse_journal/services/affectationcaisse.service';
 import { DemandeService } from '../../demande/services/demande.service';
 import { JustificatifService } from '../service/justificatif.service';
@@ -148,7 +156,7 @@ export class OprationJustifieeComponent implements OnInit {
     private modalService: NgbModal,
     private router: Router,
     private activatedRoute: ActivatedRoute,
-    private justificatifpjService: JustificatifPJService
+    private justificatifpjService: JustificatifPJService,
   ) {}
 
   ngOnInit(): void {
@@ -340,7 +348,8 @@ export class OprationJustifieeComponent implements OnInit {
     const deviseJust = this.operationForm.get('devisejustificatif')?.value;
     const deviseRef = this.user.devise_ref_id;
 
-    const montantOperation = this.operationForm.get('montantoperation')?.value || 0;
+    const montantOperation =
+      this.operationForm.get('montantoperation')?.value || 0;
     const montantRef = this.operationForm.get('montantRefglobal')?.value || 0;
 
     // Total des lignes en devise justificatif
@@ -379,8 +388,12 @@ export class OprationJustifieeComponent implements OnInit {
     }
 
     // Totaux globaux (justificatifs existants + lignes actuelles + encaissements)
-    const totalGlobalRef = totalLignesRef + justificatifsExistantsRef + encaissementsRef;
-    const totalGlobalOperation = this.convertirDepuisReference(totalGlobalRef, deviseOp );
+    const totalGlobalRef =
+      totalLignesRef + justificatifsExistantsRef + encaissementsRef;
+    const totalGlobalOperation = this.convertirDepuisReference(
+      totalGlobalRef,
+      deviseOp,
+    );
 
     // Reste à payer = montant à justifier - total déjà justifié/encaissé
     const resteOperation = montantOperation - totalGlobalOperation;
@@ -450,7 +463,7 @@ export class OprationJustifieeComponent implements OnInit {
     this.gererDevisesDynamiquement();
 
     // Charger les pièces jointes de l'opération sélectionnée
-    // this.loadAllPiecesJointes(operation.idoperation);
+    this.loadAllPiecesJointes(operation.idoperation);
   }
 
   //A la selection de l'operation
@@ -648,8 +661,8 @@ export class OprationJustifieeComponent implements OnInit {
               (j) => j.operation.idoperation === operation.idoperation,
             );
 
+            // Charger toutes les PJs du justificatif
             this.loadJustificatifPiecesCounts();
-
             /**
              * Calcul des totaux existants (SEULEMENT les justificatifs, pas les encaissements)
              * Conversion automatique vers devise de référence
@@ -1178,8 +1191,6 @@ export class OprationJustifieeComponent implements OnInit {
       caisses: _operation.caisses,
     };
 
-    console.log("date justificatif ", formValue.datejustificatif);
-
     /** 3. choices action */
     if (this.actionModal == 'create') this.create(_justificatif);
     else this.update(_operation);
@@ -1489,7 +1500,7 @@ export class OprationJustifieeComponent implements OnInit {
       });
     });
     //this.updateTotalsAndValidate();
-    this.toastr.info('Tous les montants ont été effacés');
+    // this.toastr.info('Tous les montants ont été effacés');
   }
 
   /**
@@ -1609,7 +1620,9 @@ export class OprationJustifieeComponent implements OnInit {
 
     // 4. Marquer la pièce justificative comme sélectionnée
     this.selectedJustificatif = piece;
+    this.selectedJustificatifPJ = piece;
 
+    console.log('selectedJustificatif', this.selectedJustificatif);
     // 5. Récupérer le justificatif complet
     const justificatif = this.justificatifFiltered.find(
       (j) => j.idjustificatifoperation === piece.idjustificatifoperation,
@@ -1620,6 +1633,7 @@ export class OprationJustifieeComponent implements OnInit {
     // 6. Charger les détails du justificatif
     this.skipRecalcul = true; // Empêcher le recalcul automatique pendant le patch
     this.loadDetailJustificatif(justificatif);
+    this.loadAllPiecesJointesJustificatif(piece.idjustificatifoperation);
     setTimeout(() => (this.skipRecalcul = false), 0);
   }
 
@@ -2108,6 +2122,12 @@ export class OprationJustifieeComponent implements OnInit {
       { emitEvent: false },
     );
 
+    // NOUVEAU : Réinitialiser les PJ du justificatif
+    this.selectedJustificatifPJ = null;
+    this.justificatifPiecesJointes = [];
+    this.justificatifPiecesCount = 0;
+    this.selectedFiles = [];
+
     this.selectedJustificatif = null;
     this.justificatifDetailFiltered = [];
 
@@ -2180,7 +2200,7 @@ export class OprationJustifieeComponent implements OnInit {
   loadAllPiecesJointesJustificatif(idjustificatifoperation: string): void {
     this.piecesJointesLoading = true;
     this.justificatifpjService.getAll(idjustificatifoperation).subscribe({
-      next: (res: any) => {
+      next: (res) => {
         console.log('res.data', res.data);
         if (res.success) {
           this.justificatifPiecesJointes = res.data || [];
@@ -2198,7 +2218,7 @@ export class OprationJustifieeComponent implements OnInit {
         }
         this.piecesJointesLoading = false;
       },
-      error: (err: any) => {
+      error: (err) => {
         console.error('Erreur chargement PJ:', err);
         this.justificatifPiecesJointes = [];
         this.justificatifPiecesCount = 0;
@@ -2243,7 +2263,7 @@ export class OprationJustifieeComponent implements OnInit {
         userId,
       )
       .subscribe({
-        next: (res: any) => {
+        next: (res) => {
           console.log('Upload:', res);
           if (res.success) {
             this.toastr.success(
@@ -2258,7 +2278,7 @@ export class OprationJustifieeComponent implements OnInit {
           }
           this.pjUploading = false;
         },
-        error: (err: any) => {
+        error: (err) => {
           console.error('Erreur upload:', err);
           this.toastr.error(err.error?.message || "Erreur lors de l'upload");
           this.pjUploading = false;
@@ -2271,7 +2291,7 @@ export class OprationJustifieeComponent implements OnInit {
    */
   downloadJustificatifPiece(piece: PieceJointe): void {
     this.justificatifpjService.downloadFile(piece.urlpiece).subscribe({
-      next: (blob: any) => {
+      next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -2280,7 +2300,7 @@ export class OprationJustifieeComponent implements OnInit {
         window.URL.revokeObjectURL(url);
         this.toastr.success('Téléchargement démarré');
       },
-      error: (err: any) => {
+      error: (err) => {
         console.error('Erreur téléchargement:', err);
         this.toastr.error('Erreur lors du téléchargement');
       },
@@ -2302,7 +2322,7 @@ export class OprationJustifieeComponent implements OnInit {
         piece.idpiecejointe,
       )
       .subscribe({
-        next: (res: any) => {
+        next: (res) => {
           if (res.success) {
             this.toastr.success('Fichier supprimé');
             this.loadAllPiecesJointesJustificatif(
@@ -2313,7 +2333,7 @@ export class OprationJustifieeComponent implements OnInit {
           }
           this.pjDeleting = null;
         },
-        error: (err: any) => {
+        error: (err) => {
           console.error('Erreur suppression:', err);
           this.toastr.error(
             err.error?.message || 'Erreur lors de la suppression',
@@ -2336,7 +2356,7 @@ export class OprationJustifieeComponent implements OnInit {
     this.justificatifpjService
       .downloadAllFiles(this.selectedJustificatifPJ.idjustificatifoperation)
       .subscribe({
-        next: (blob: any) => {
+        next: (blob) => {
           const url = window.URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = url;
@@ -2349,7 +2369,7 @@ export class OprationJustifieeComponent implements OnInit {
           );
           this.loading = false;
         },
-        error: (err: any) => {
+        error: (err) => {
           console.error('Erreur téléchargement ZIP:', err);
           this.toastr.error(err.error?.message);
           this.loading = false;
@@ -2595,5 +2615,4 @@ export class OprationJustifieeComponent implements OnInit {
       this.downloadJustificatifPiece(piece);
     }
   }
-
 }

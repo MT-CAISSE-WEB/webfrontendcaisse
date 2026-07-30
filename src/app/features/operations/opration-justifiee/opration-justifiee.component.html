@@ -103,18 +103,33 @@
                   <div class="flex-grow-1">
                     <!-- Ligne 1 : Code + Date -->
                     <div class="d-flex align-items-center gap-2 mb-2">
-                      <span class="code-badge">{{ selectedOperationPJ?.codeoperation }}</span>
+                      <span class="code-badge">{{
+                        selectedOperationPJ?.codeoperation
+                      }}</span>
                       <span class="text-muted small">
-                        <i class="ri-calendar-line me-1"></i>{{ selectedOperationPJ?.dateoperation | date:'dd/MM/yyyy' }}
+                        <i class="ri-calendar-line me-1"></i
+                        >{{
+                          selectedOperationPJ?.dateoperation
+                            | date: "dd/MM/yyyy"
+                        }}
                       </span>
                     </div>
                     <!-- Ligne 2 : Commentaire -->
-                    <p class="operation-comment mb-2" [title]="selectedOperationPJ?.commentaire">
-                      {{ selectedOperationPJ?.commentaire || 'Aucun commentaire' }}
+                    <p
+                      class="operation-comment mb-2"
+                      [title]="selectedOperationPJ?.commentaire"
+                    >
+                      {{
+                        selectedOperationPJ?.commentaire || "Aucun commentaire"
+                      }}
                     </p>
                     <div class="d-flex align-items-center justify-content-end">
-                      <span class="fw-bold fs-5">{{ formatCFA(selectedOperationPJ?.montant) }}</span>
-                      <span class="badge-glass badge-glass-devise ms-2">{{ selectedOperationPJ?.devise?.codedevise }} </span>
+                      <span class="fw-bold fs-5">{{
+                        formatCFA(selectedOperationPJ?.montant)
+                      }}</span>
+                      <span class="badge-glass badge-glass-devise ms-2"
+                        >{{ selectedOperationPJ?.devise?.codedevise }}
+                      </span>
                     </div>
                   </div>
                 </div>

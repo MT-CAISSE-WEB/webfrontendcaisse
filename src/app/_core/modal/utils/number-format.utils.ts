@@ -1,5 +1,3 @@
-import { tiersModel } from "../../../features/donnee_base/models/tiers.model";
-
 export class OperationModalUtils {
   static formatDateForInput(date?: string | null): string {
     return date ? date.substring(0, 10) : '';
@@ -105,22 +103,4 @@ export class OperationModalUtils {
       maximumFractionDigits: 0
     }).format(montant ?? 0);
   }
-
-  static filterTiersByNature(value: any, nature: any, tiers: tiersModel[]): any[] {
-    let filtered = tiers;
-    // Filtrer par typetiers si la nature existe et a un typetiers
-    if (nature && nature.typetiers != null) {
-      filtered = filtered.filter(t => t.typetiers === nature.typetiers);
-    }
-    // Filtrer par texte saisi
-    const search = typeof value === 'string' ? value : (value?.designation || '');
-    const filterValue = OperationModalUtils.normalizeValue(search);
-    if (filterValue) {
-      filtered = filtered.filter(option =>
-        OperationModalUtils.normalizeValue(option.designation).includes(filterValue)
-      );
-    }
-    return filtered;
-  }
-  
 }

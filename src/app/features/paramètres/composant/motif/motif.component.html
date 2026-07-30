@@ -1,10 +1,11 @@
 <!-- ========== NOTIFICATIONS – INTERFACE PREMIUM ========== -->
 <div class="notif-container">
-
   <!-- En-tête -->
   <div class="notif-head">
     <div class="notif-head-left">
-      <span class="notif-head-icon"><i class="ri-notification-3-line"></i></span>
+      <span class="notif-head-icon"
+        ><i class="ri-notification-3-line"></i
+      ></span>
       <div>
         <h2 class="notif-head-title">Préférences de notifications</h2>
         <p class="notif-head-desc">Gérez comment vous souhaitez être informé</p>
@@ -17,7 +18,6 @@
 
   <!-- Liste des paramètres -->
   <div class="notif-list">
-
     <!-- Notification système -->
     <div class="notif-card">
       <div class="notif-card-body">
@@ -26,11 +26,13 @@
         </div>
         <div class="notif-card-text">
           <span class="notif-card-title">Notifications systèmes</span>
-          <span class="notif-card-desc">Messages de notification depuis votre portail</span>
+          <span class="notif-card-desc"
+            >Messages de notification depuis votre portail</span
+          >
         </div>
       </div>
       <label class="notif-switch">
-        <input type="checkbox" [(ngModel)]="notifSysteme">
+        <input type="checkbox" [(ngModel)]="notifSysteme" />
         <span class="notif-switch-knob"></span>
       </label>
     </div>
@@ -43,11 +45,13 @@
         </div>
         <div class="notif-card-text">
           <span class="notif-card-title">Notifications push</span>
-          <span class="notif-card-desc">Recevez les notifications en temps réel sur votre bureau</span>
+          <span class="notif-card-desc"
+            >Recevez les notifications en temps réel sur votre bureau</span
+          >
         </div>
       </div>
       <label class="notif-switch">
-        <input type="checkbox" [(ngModel)]="notifPush" checked>
+        <input type="checkbox" [(ngModel)]="notifPush" checked />
         <span class="notif-switch-knob"></span>
       </label>
     </div>
@@ -60,14 +64,15 @@
         </div>
         <div class="notif-card-text">
           <span class="notif-card-title">Notifications par email</span>
-          <span class="notif-card-desc">Recevez les notifications sur votre adresse mail</span>
+          <span class="notif-card-desc"
+            >Recevez les notifications sur votre adresse mail</span
+          >
         </div>
       </div>
       <label class="notif-switch">
-        <input type="checkbox" [(ngModel)]="notifEmail">
+        <input type="checkbox" [(ngModel)]="notifEmail" />
         <span class="notif-switch-knob"></span>
       </label>
     </div>
-
   </div>
 </div>

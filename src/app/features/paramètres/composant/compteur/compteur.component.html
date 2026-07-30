@@ -1,6 +1,8 @@
 <div class="tab-pane active" id="compteur" role="tabpanel">
   <!-- ========== BARRE D'OUTILS ========== -->
-  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+  <div
+    class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4"
+  >
     <div class="search-container">
       <div class="search-glass">
         <i class="ri-search-line"></i>
@@ -40,13 +42,15 @@
       </thead>
       <tbody>
         <tr *ngFor="let item of compteurs; track $index">
-          <td><span class="code-badge">{{item.codemodelecompteur}}</span></td>
-          <td>{{item.libelle}}</td>
-          <td>{{item.typedocument}}</td>
-          <td>{{item.sequence_1}}</td>
-          <td>{{item.prefixe_1}}</td>
-          <td>{{item.sequence_2}}</td>
-          <td>{{item.prefixe_2}}</td>
+          <td>
+            <span class="code-badge">{{ item.codemodelecompteur }}</span>
+          </td>
+          <td>{{ item.libelle }}</td>
+          <td>{{ item.typedocument }}</td>
+          <td>{{ item.sequence_1 }}</td>
+          <td>{{ item.prefixe_1 }}</td>
+          <td>{{ item.sequence_2 }}</td>
+          <td>{{ item.prefixe_2 }}</td>
           <td>
             <div class="actions-group">
               <button
@@ -86,7 +90,8 @@
   <!-- ========== PAGINATION MODERNE ========== -->
   <div *ngIf="!loading && compteurs.length > 0" class="pagination-modern">
     <div class="pagination-info">
-      Page <strong>{{currentPageCompteur}}</strong> sur <strong>{{totalPagesCompteur}}</strong>
+      Page <strong>{{ currentPageCompteur }}</strong> sur
+      <strong>{{ totalPagesCompteur }}</strong>
     </div>
     <div class="pagination-controls">
       <button
@@ -107,15 +112,28 @@
   </div>
 
   <!-- ========== MODALE CRÉATION / MODIFICATION ========== -->
-  <div class="modal fade" id="showModalCompteur" tabindex="-1" aria-hidden="true">
+  <div
+    class="modal fade"
+    id="showModalCompteur"
+    tabindex="-1"
+    aria-hidden="true"
+  >
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content modal-content-glass">
         <div class="modal-header modal-header-glass">
           <h5 class="modal-title modal-title-glass">
             <i class="ri-tools-line me-2"></i>
-            {{ actionModalCompteur === "create" ? 'Création' : 'Modification'}} du compteur
+            {{
+              actionModalCompteur === "create" ? "Création" : "Modification"
+            }}
+            du compteur
           </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
         <form [formGroup]="compteurForm">
           <div class="modal-body modal-body-glass">
@@ -152,7 +170,9 @@
                   <select formControlName="typedocument" class="form-select">
                     <option value="">-- Sélectionner --</option>
                     <option value="demande">Demande</option>
-                    <option value="opération de caisse">Opération de caisse</option>
+                    <option value="opération de caisse">
+                      Opération de caisse
+                    </option>
                   </select>
                   <label>Type doc</label>
                   <div class="invalid-feedback">{{ msgErros }}</div>
@@ -176,7 +196,10 @@
                 </div>
               </div>
               <!-- Préfixe 1 (conditionnel) -->
-              <div *ngIf="compteurForm.get('sequence_1')?.value === 'constante'" class="col-lg-12">
+              <div
+                *ngIf="compteurForm.get('sequence_1')?.value === 'constante'"
+                class="col-lg-12"
+              >
                 <div class="form-floating">
                   <input
                     type="text"
@@ -206,7 +229,10 @@
                 </div>
               </div>
               <!-- Préfixe 2 (conditionnel) -->
-              <div *ngIf="compteurForm.get('sequence_2')?.value === 'constante'" class="col-lg-12">
+              <div
+                *ngIf="compteurForm.get('sequence_2')?.value === 'constante'"
+                class="col-lg-12"
+              >
                 <div class="form-floating">
                   <input
                     type="text"
@@ -221,11 +247,21 @@
             </div>
           </div>
           <div class="modal-footer modal-footer-glass">
-            <button type="button" class="btn-glass-cancel" data-bs-dismiss="modal">
+            <button
+              type="button"
+              class="btn-glass-cancel"
+              data-bs-dismiss="modal"
+            >
               <i class="ri-close-line"></i> Annuler
             </button>
-            <button type="submit" class="btn-glass-submit" (click)="onSubmitCompteur()">
-              {{ actionModalCompteur === "create" ? 'Enregistrer' : 'Modifier'}}
+            <button
+              type="submit"
+              class="btn-glass-submit"
+              (click)="onSubmitCompteur()"
+            >
+              {{
+                actionModalCompteur === "create" ? "Enregistrer" : "Modifier"
+              }}
             </button>
           </div>
         </form>
@@ -234,19 +270,27 @@
   </div>
 
   <!-- ========== MODALE DE SUPPRESSION ========== -->
-  <div class="modal fade" id="deleteModalCompteur" tabindex="-1" aria-hidden="true">
+  <div
+    class="modal fade"
+    id="deleteModalCompteur"
+    tabindex="-1"
+    aria-hidden="true"
+  >
     <div class="modal-dialog modal-dialog-centered modal-sm">
       <div class="delete-modal-card text-center">
         <div class="delete-icon-wrapper mb-3">
           <i class="ri-delete-bin-6-line"></i>
         </div>
-        <h5 class="delete-modal-title">{{titleMsg}}</h5>
-        <p class="delete-modal-message">{{msgSupCompteur}}</p>
+        <h5 class="delete-modal-title">{{ titleMsg }}</h5>
+        <p class="delete-modal-message">{{ msgSupCompteur }}</p>
         <div class="d-flex justify-content-center gap-3">
           <button class="delete-btn-cancel" data-bs-dismiss="modal">
             <i class="ri-close-line"></i> Annuler
           </button>
-          <button class="delete-btn-confirm" (click)="deleteConfirmedCompteur()">
+          <button
+            class="delete-btn-confirm"
+            (click)="deleteConfirmedCompteur()"
+          >
             Oui, supprimer
           </button>
         </div>

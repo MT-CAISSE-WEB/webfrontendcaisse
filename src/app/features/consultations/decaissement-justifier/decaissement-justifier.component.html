@@ -110,11 +110,28 @@
                   <div class="accordion-body-glass">
                     <!-- TYPE OPERATION -->
                     <div class="caisse-header-glass mb-3">
-                      <div class="d-flex align-items-center gap-2">
-                        <div class="section-icon-glass">
-                          <i class="ri-money-dollar-circle-line"></i>
+                      <div
+                        class="d-flex align-items-center justify-content-between w-100"
+                      >
+                        <div class="d-flex align-items-center gap-2">
+                          <div class="section-icon-glass">
+                            <i class="ri-money-dollar-circle-line"></i>
+                          </div>
+                          <h6 class="mb-0">Type d'opération</h6>
                         </div>
-                        <h6 class="mb-0">Types d'opération</h6>
+                        <button
+                          type="button"
+                          class="btn-glass-primary"
+                          (click)="printDocumentJustif(operation)"
+                          [disabled]="printing"
+                        >
+                          @if (printing) {
+                            <span
+                              class="spinner-border spinner-border-sm me-1"
+                            ></span>
+                          }
+                          <i class="ri-printer-line me-1"></i> Imprimer
+                        </button>
                       </div>
                     </div>
 
@@ -273,6 +290,15 @@
                                 {{ formatNumber(just.montantjustificatif) }}
                                 {{ just.codedevise }}
                               }
+                            </span>
+                            <!-- Icône indicateur de pièces jointes -->
+                            <span
+                              class="badge-glass badge-glass-primary"
+                              style="cursor: pointer"
+                              (click)="openPiecesJustificatifModal(just)"
+                            >
+                              <i class="ri-attachment-2 me-1"></i>
+                              {{ getPiecesCount(just.idjustificatifoperation) }}
                             </span>
                           </div>
                         </div>
@@ -458,6 +484,136 @@
           </div>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- MODAL: PIÈCES JOINTES DU JUSTIFICATIF -->
+<!-- ============================================ -->
+<div
+  class="modal-overlay"
+  [class.show]="showPiecesJustificatifModal"
+  (click)="closePiecesJustificatifModal()"
+>
+  <div
+    class="modal-container modal-container-lg"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="modal-content-glass">
+      <div class="modal-header modal-header-theme-orange">
+        <div class="d-flex align-items-center gap-2">
+          <div class="icon-circle">
+            <i class="ri-attachment-2 text-white fs-5"></i>
+          </div>
+          <div>
+            <h5 class="modal-title text-white fw-semibold">
+              Pièces jointes du justificatif
+            </h5>
+            <span class="text-white-50 small" *ngIf="selectedJustificatif">
+              {{ selectedJustificatif.codejustificatif }} —
+              {{ selectedJustificatif.date | date: "dd/MM/yyyy" }}
+            </span>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close"
+          (click)="closePiecesJustificatifModal()"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body p-4">
+        <!-- Chargement -->
+        <div *ngIf="piecesJointesLoading" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement...</span>
+          </div>
+          <p class="mt-2 text-muted">Chargement des pièces jointes...</p>
+        </div>
+
+        <!-- Liste des pièces jointes -->
+        <div
+          *ngIf="!piecesJointesLoading && justificatifPiecesJointes.length > 0"
+        >
+          <div class="section-header-glass">
+            <div class="section-title-glass">
+              <i class="ri-attachment-2"></i>
+              <span>Documents</span>
+              <span class="badge-glass badge-glass-primary badge-count-sm">
+                {{ justificatifPiecesJointes.length }}
+              </span>
+            </div>
+            <button
+              *ngIf="justificatifPiecesJointes.length > 0"
+              type="button"
+              class="btn-glass-download"
+              (click)="downloadAllJustificatifFiles()"
+              [disabled]="downloadingAll"
+              title="Télécharger toutes les pièces jointes"
+            >
+              @if (downloadingAll) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              }
+              <i class="ri-download-line me-1"></i> Tout télécharger
+            </button>
+          </div>
+
+          <!-- Grille des pièces jointes -->
+          <div class="horizontal-scroll-glass">
+            @for (pj of justificatifPiecesJointes; track $index) {
+              <div class="file-pill-glass file-pill-readonly">
+                <div class="pill-icon-glass">
+                  <i [class]="getFileIcon(pj)"></i>
+                </div>
+                <div class="pill-info-glass">
+                  <span class="pill-name-glass" [title]="pj.nomfichier">
+                    {{ pj.nomfichier }}
+                  </span>
+                  <span class="pill-meta-glass">
+                    {{ formatFileSize(pj.taille) }}
+                  </span>
+                </div>
+                <div class="pill-actions-glass">
+                  <button
+                    class="pill-action-btn pill-action-download"
+                    (click)="downloadJustificatifPiece(pj)"
+                    title="Télécharger"
+                  >
+                    <i class="ri-download-line"></i>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- État vide -->
+        <div
+          *ngIf="
+            !piecesJointesLoading && justificatifPiecesJointes.length === 0
+          "
+          class="empty-state-glass"
+        >
+          <i class="ri-folder-open-line"></i>
+          <p>Aucune pièce jointe</p>
+          <span class="text-muted small">
+            Ce justificatif ne contient aucune pièce jointe
+          </span>
+        </div>
+      </div>
+
+      <div class="modal-footer border-0 p-4">
+        <button
+          type="button"
+          class="btn-glass-cancel"
+          (click)="closePiecesJustificatifModal()"
+        >
+          <i class="ri-close-line me-1"></i> Fermer
+        </button>
+      </div>
     </div>
   </div>
 </div>

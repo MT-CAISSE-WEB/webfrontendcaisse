@@ -1,221 +1,306 @@
 <!-- start page title -->
 <div class="row">
-    <div class="col-12">
-        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0">{{title}}</h4>
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Consultations</a></li>
-                    <li class="breadcrumb-item active">{{title}}</li>
-                </ol>
-            </div>
+  <div class="col-12">
+    <div
+      class="page-title-premium d-sm-flex align-items-center justify-content-between"
+    >
+      <div class="d-flex align-items-center gap-3">
+        <div class="title-icon-premium">
+          <i class="ri-line-chart-line"></i>
         </div>
+        <div>
+          <h4 class="mb-0 title-premium">{{ title }}</h4>
+          <span class="title-subtitle-premium"
+            >Suivi et analyse de l'évolution budgétaire</span
+          >
+        </div>
+      </div>
+      <div class="page-title-right">
+        <ol class="breadcrumb-premium m-0">
+          <li class="breadcrumb-item">
+            <a href="javascript: void(0);">
+              <i class="ri-home-4-line me-1"></i>Consultations
+            </a>
+          </li>
+          <li class="breadcrumb-item active">
+            <i class="ri-line-chart-line"></i>{{ title }}
+          </li>
+        </ol>
+      </div>
     </div>
+  </div>
 </div>
 <!-- end page title -->
 
 <div class="row">
-    <div class="col-lg-12">
-        <div class="card" id="orderList">
-            <form [formGroup]="parametreForm">
-                <div class="card-header border-0">
-                    <div class="d-flex align-items-center">
-                        <div class="d-flex gap-1 flex-wrap">
-                            <button type="button" class="btn btn-sm btn-primary" (click)="resetForm()">
-                                <i class="ri-refresh-fill align-bottom me-1"></i>réinitialiser
-                            </button>
-                            <!-- Export table -->
-                            <button type="button" class="btn btn-success btn-sm" (click)="exportToExcel()">
-                                 Exporter vers Excel
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body bg-light-subtle border border-dashed border-start-0 border-end-0">
-                    <div class="row g-4">
-                        <!-- <div class="col-xxl-3 col-sm-3">
-                            <div class="input-light">
-                                <label class="form-label">Budget</label>
-                                <select class="form-select form-select-sm {{ isValidField('idbudget')}}" 
-                                    formControlName="idbudget">
-                                    <option value="" selected>-- Selectionner --</option>
-                                    @for (item of budgets; track $index){
-                                    <option
-                                        [value]="item.idbudget">{{item.libelle}}</option>
-                                    }
-                                </select>
-                            </div>
-                        </div> -->
-                        <div class="col-xxl-3 col-sm-4">
-                            <app-custom-field-select
-                                mode="backend"
-                                formControlName="idbudget"
-                                valueField="idbudget"
-                                codeField="codebudget"
-                                labelField="libelle"
-                                [columns]="columnsbudget"
-                                placeholder="Rechercher un budget..."
-                                (loadData)="searchBudget($event)"
-                                (valueChange)="onSelectBudget($event)"
-                                [data]="filteredBudgets">
-                            </app-custom-field-select>
-                        </div>
-
-                        <!-- <div class="col-xxl-3 col-sm-3">
-                            <div class="input-light">
-                                <label class="form-label">Département</label>
-                                <select class="form-select form-select-sm {{ isValidField('iddepartement')}}" 
-                                formControlName="iddepartement">
-                                    <option value="" selected>-- Selectionner --</option>
-                                    @for (item of departements; track $index){
-                                    <option
-                                        [value]="item.iddepartement">{{item.libelle}}</option>
-                                    }
-                                </select>
-                            </div>
-                        </div> -->
-
-                        <div class="col-xxl-3 col-sm-4">
-                            <app-custom-field-select
-                                mode="backend"
-                                formControlName="iddepartement"
-                                valueField="iddepartement"
-                                codeField="codedept"
-                                labelField="libelle"
-                                [columns]="columnsdepartement"
-                                placeholder="Rechercher un département..."
-                                (loadData)="searchDepartement($event)"
-                                (valueChange)="onSelectDepartement($event)"
-                                [data]="filtredepartement">
-                            </app-custom-field-select>
-                        </div>
-
-                        <!-- <div class="col-xxl-3 col-sm-3">
-                            <div class="input-light">
-                                <label class="form-label">Nature d'opération</label>
-                                <select class="form-select form-select-sm {{ isValidField('idnature')}}" 
-                                formControlName="idnature">
-                                    <option value="" selected>-- Selectionner --</option>
-                                    @for (item of affectees; track $index){
-                                    <option
-                                        [value]="item.idnature">{{item.libelle}}</option>
-                                    }
-                                </select>
-                            </div>
-                        </div> -->
-
-                        <div class="col-xxl-3 col-sm-4">
-                            <app-custom-field-select
-                                mode="backend"
-                                formControlName="idnature"
-                                valueField="idnature"
-                                codeField="codenature"
-                                labelField="libelle"
-                                [columns]="columnsnature"
-                                placeholder="Rechercher une nature operation..."
-                                (loadData)="searchNature($event)"
-                                (valueChange)="onSelectNature($event)"
-                                [data]="natureoperationsFiltered">
-                            </app-custom-field-select>
-                        </div>
-
-                        <div class="col-xxl-3 col-sm-4" *ngIf="isanalytique == 1">
-                            <app-custom-field-select
-                                mode="backend"
-                                formControlName="centre"
-                                valueField="idcentreanalytique"
-                                codeField="codecentreanalytique"
-                                labelField="libelle"
-                                [columns]="columnscentre"
-                                placeholder="Rechercher un centre analytique..."
-                                (loadData)="searchCentre($event)"
-                                (valueChange)="onSelectCentre($event)"
-                                [data]="centresFiltered">
-                            </app-custom-field-select>
-                        </div>
-
-                        <div class="col-xxl-3 col-sm-3">
-                            <button class="btn btn-sm btn-primary" (click)="onSubmit()">
-                                <i class="ri-save-line"></i> Recherche
-                            </button>
-                        </div>
-                    </div>            
-                </div>
-            </form>
-
-            <!-- ==================== STEP 2 : LIGNES ==================== -->
-            <div class="card-body">
-                <div class="table-scroll">
-                    @if (loading) {
-                        <div class="text-center py-4">
-                            <div class="spinner-border text-info"></div>
-                        </div>
-                    }
-                    <div class="table-responsive table-card">
-                        <table id="exportTable" class="table table-striped align-middle text-nowrap">                            
-                            <thead class="">
-                                <tr>
-                                    <th>Code budget</th>
-                                    <!-- <th>Libellé Budget</th> -->
-                                    <th>Date début</th>
-                                    <th>Date fin</th>
-                                    <th *ngIf="isanalytique == 0">Code département</th>
-                                    <th *ngIf="isanalytique == 0">Libellé département</th>
-                                    <th *ngIf="isanalytique == 0">Code nature</th>
-                                    <th *ngIf="isanalytique == 0">Libellé nature</th>
-                                    <th *ngIf="isanalytique == 1">Code centre</th>
-                                    <th *ngIf="isanalytique == 1">Libellé centre</th>
-                                    <th>Prévision</th>
-                                    <th>Pré-engagé</th>
-                                    <th>Engagé</th>
-                                    <th>Réalisé</th>
-                                    <th>Solde</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                @for (item of evolutionbudget; track $index) {
-                                <tr>
-                                    <td class="code"><a href="#" class="fw-medium link-primary">{{item.codebudget}}</a></td>
-                                    <!-- <td class="designation">{{item.libellebudget}}</td> -->
-                                    <td class="typetiers">{{item.datedebut | date : "dd/MM/yyyy"}}</td>
-                                    <td class="typetiers">{{item.datefin | date : "dd/MM/yyyy"}}</td>
-                                    <td *ngIf="isanalytique == 0" class="typetiers">{{item.codedept}}</td>
-                                    <td *ngIf="isanalytique == 0" class="typetiers">{{item.libelledept}}</td>
-                                    <td *ngIf="isanalytique == 0" class="typetiers">{{item.codenature}}</td>
-                                    <td *ngIf="isanalytique == 0" class="typetiers">{{item.libellenature}}</td>
-                                    <td *ngIf="isanalytique == 1" class="typetiers">{{item.codecentre}}</td>
-                                    <td *ngIf="isanalytique == 1" class="typetiers">{{item.libellecentre}}</td>
-                                    <td class="typetiers">{{item.prevision}}</td>
-                                    <td class="typetiers">{{item.preengage}}</td>
-                                    <td class="typetiers">{{item.engage}}</td>
-                                    <td class="typetiers">{{item.realise}}</td>
-                                    <td class="typetiers">{{item.solde}}</td>
-                                </tr>
-                                }
-                            </tbody>
-                        </table>
-                        <div class="" *ngIf="evolutionbudget?.length == 0">
-                            <div class="text-center">
-                                <h5 class="mt-2">Désolé! Aucune donnée trouvé</h5>
-                                <p class="text-muted mb-0">Désole il n' y aucune donnée pour vos critères</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-end mt-3">
-                        <div class="pagination-wrap hstack gap-2">
-                            <button [disabled]="page == 1" (click)="changePageTotal(page - 1)" class="btn btn-sm btn-soft-primary pagination-prev">
-                                Précédent
-                            </button>
-                            <ul class="pagination listjs-pagination mb-0"> Page {{page}} / {{totalPages}} </ul>
-                            <button [disabled]="page == totalPages" (click)="changePageTotal(page + 1)" class="btn btn-sm btn-soft-primary pagination-next">
-                                Suivant
-                            </button>
-                        </div>
-                    </div>
-                </div>
+  <div class="col-lg-12">
+    <div class="card-glass" id="orderList">
+      <form [formGroup]="parametreForm">
+        <!-- Header -->
+        <div class="card-header-glass border-0">
+          <div
+            class="d-flex align-items-center justify-content-between flex-wrap gap-3"
+          >
+            <div class="d-flex align-items-center gap-2">
+              <div class="section-icon-glass">
+                <i class="ri-filter-2-line"></i>
+              </div>
+              <h5 class="card-title-glass mb-0">Filtres de recherche</h5>
+              <span class="badge-glass badge-glass-info badge-count-sm">
+                {{ evolutionbudget.length }}
+              </span>
             </div>
+            <div class="d-flex gap-2 flex-wrap">
+              <button
+                type="button"
+                class="btn-glass-secondary btn-sm"
+                (click)="resetForm()"
+              >
+                <i class="ri-refresh-line align-bottom me-1"></i> Réinitialiser
+              </button>
+              <button
+                type="button"
+                class="btn-glass-success btn-sm"
+                (click)="exportToExcel()"
+              >
+                <i class="ri-file-excel-2-line align-bottom me-1"></i> Exporter
+                Excel
+              </button>
+            </div>
+          </div>
         </div>
+
+        <!-- Filtres -->
+        <div class="card-body-glass pt-0">
+          <div class="row g-3">
+            <!-- Budget -->
+            <div class="col-xxl-3 col-sm-6">
+              <div class="field-group-simple">
+                <label class="field-label-simple">
+                  <i class="ri-wallet-3-line me-1"></i> Budget
+                </label>
+                <app-custom-field-select
+                  mode="backend"
+                  formControlName="idbudget"
+                  valueField="idbudget"
+                  codeField="codebudget"
+                  labelField="libelle"
+                  [columns]="columnsbudget"
+                  placeholder="Rechercher un budget..."
+                  (loadData)="searchBudget($event)"
+                  (valueChange)="onSelectBudget($event)"
+                  [data]="filteredBudgets"
+                  class="field-select-simple"
+                ></app-custom-field-select>
+              </div>
+            </div>
+
+            <!-- Département -->
+            <div class="col-xxl-3 col-sm-6">
+              <div class="field-group-simple">
+                <label class="field-label-simple">
+                  <i class="ri-building-4-line me-1"></i> Département
+                </label>
+                <app-custom-field-select
+                  mode="backend"
+                  formControlName="iddepartement"
+                  valueField="iddepartement"
+                  codeField="codedept"
+                  labelField="libelle"
+                  [columns]="columnsdepartement"
+                  placeholder="Rechercher un département..."
+                  (loadData)="searchDepartement($event)"
+                  (valueChange)="onSelectDepartement($event)"
+                  [data]="filtredepartement"
+                  class="field-select-simple"
+                ></app-custom-field-select>
+              </div>
+            </div>
+
+            <!-- Nature -->
+            <div class="col-xxl-3 col-sm-6">
+              <div class="field-group-simple">
+                <label class="field-label-simple">
+                  <i class="ri-file-text-line me-1"></i> Nature opération
+                </label>
+                <app-custom-field-select
+                  mode="backend"
+                  formControlName="idnature"
+                  valueField="idnature"
+                  codeField="codenature"
+                  labelField="libelle"
+                  [columns]="columnsnature"
+                  placeholder="Rechercher une nature..."
+                  (loadData)="searchNature($event)"
+                  (valueChange)="onSelectNature($event)"
+                  [data]="natureoperationsFiltered"
+                  class="field-select-simple"
+                ></app-custom-field-select>
+              </div>
+            </div>
+
+            <!-- Centre analytique -->
+            <div class="col-xxl-3 col-sm-6" *ngIf="isanalytique == 1">
+              <div class="field-group-simple">
+                <label class="field-label-simple">
+                  <i class="ri-pie-chart-2-line me-1"></i> Centre analytique
+                </label>
+                <app-custom-field-select
+                  mode="backend"
+                  formControlName="centre"
+                  valueField="idcentreanalytique"
+                  codeField="codecentreanalytique"
+                  labelField="libelle"
+                  [columns]="columnscentre"
+                  placeholder="Rechercher un centre..."
+                  (loadData)="searchCentre($event)"
+                  (valueChange)="onSelectCentre($event)"
+                  [data]="centresFiltered"
+                  class="field-select-simple"
+                ></app-custom-field-select>
+              </div>
+            </div>
+
+            <!-- Bouton Recherche -->
+            <div class="col-xxl-2 col-sm-6 d-flex align-items-end">
+              <button
+                type="button"
+                class="btn-glass-primary"
+                (click)="onSubmit()"
+                [disabled]="loading"
+              >
+                @if (loading) {
+                  <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                <i class="ri-search-line align-bottom me-1"></i> Rechercher
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <!-- ==================== TABLEAU DES RÉSULTATS ==================== -->
+      <div class="card-body-glass pt-0">
+        @if (loading) {
+          <div class="spinner-glass">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Chargement des données...</p>
+          </div>
+        }
+
+        @if (!loading && evolutionbudget.length > 0) {
+          <div class="table-responsive">
+            <table id="exportTable" class="table table-modern align-middle">
+              <thead>
+                <tr>
+                  <th>Code budget</th>
+                  <th>Date début</th>
+                  <th>Date fin</th>
+                  <th *ngIf="isanalytique == 0">Département</th>
+                  <th *ngIf="isanalytique == 0">Nature</th>
+                  <th *ngIf="isanalytique == 1">Centre</th>
+                  <th class="text-end">Prévision</th>
+                  <th class="text-end">Pré-engagé</th>
+                  <th class="text-end">Engagé</th>
+                  <th class="text-end">Réalisé</th>
+                  <th class="text-end">Solde</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of evolutionbudget; track $index) {
+                  <tr>
+                    <td>
+                      <span class="code-badge">{{ item.codebudget }}</span>
+                    </td>
+                    <td class="text-muted small">
+                      {{ item.datedebut | date: "dd/MM/yyyy" }}
+                    </td>
+                    <td class="text-muted small">
+                      {{ item.datefin | date: "dd/MM/yyyy" }}
+                    </td>
+                    <td *ngIf="isanalytique == 0">
+                      {{ item.libelledept || "-" }}
+                    </td>
+                    <td *ngIf="isanalytique == 0">
+                      {{ item.libellenature || "-" }}
+                    </td>
+                    <td *ngIf="isanalytique == 1">
+                      {{ item.libellecentre || "-" }}
+                    </td>
+                    <td class="text-end fw-semibold">
+                      {{ item.prevision | number: "1.0-0" }}
+                    </td>
+                    <td class="text-end text-warning">
+                      {{ item.preengage | number: "1.0-0" }}
+                    </td>
+                    <td class="text-end text-primary">
+                      {{ item.engage | number: "1.0-0" }}
+                    </td>
+                    <td class="text-end text-success">
+                      {{ item.realise | number: "1.0-0" }}
+                    </td>
+                    <td class="text-end fw-bold">
+                      <span
+                        [class.text-success]="item.solde > 0"
+                        [class.text-danger]="item.solde < 0"
+                        [class.text-muted]="item.solde === 0"
+                      >
+                        {{ item.solde | number: "1.0-0" }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        @if (!loading && evolutionbudget.length === 0) {
+          <div class="empty-state">
+            <i class="ri-inbox-2-line"></i>
+            <p>Aucune donnée trouvée</p>
+            <span class="empty-hint"
+              >Aucune donnée ne correspond à vos critères de recherche</span
+            >
+          </div>
+        }
+
+        <!-- Pagination -->
+        @if (evolutionbudget.length > 0) {
+          <div class="pagination-modern">
+            <div class="pagination-info">
+              <span>Affichage de</span>
+              <strong>{{ (page - 1) * limit + 1 }}</strong>
+              <span>à</span>
+              <strong>{{
+                Math.min(page * limit, evolutionbudget.length)
+              }}</strong>
+              <span>sur</span> <strong>{{ evolutionbudget.length }}</strong>
+              <span>résultat(s)</span>
+            </div>
+            <div class="pagination-controls">
+              <button
+                class="page-control"
+                [disabled]="page == 1"
+                (click)="changePageTotal(page - 1)"
+                title="Précédent"
+              >
+                <i class="ri-arrow-left-s-line"></i>
+              </button>
+              <span class="page-number">{{ page }} / {{ totalPages }}</span>
+              <button
+                class="page-control"
+                [disabled]="page == totalPages"
+                (click)="changePageTotal(page + 1)"
+                title="Suivant"
+              >
+                <i class="ri-arrow-right-s-line"></i>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
     </div>
+  </div>
 </div>
 <!--end row-->

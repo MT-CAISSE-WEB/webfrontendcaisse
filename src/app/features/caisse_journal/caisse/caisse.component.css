@@ -1230,3 +1230,47 @@
     font-size: 0.65rem;
   }
 }
+
+/* ============================================
+   TABLE RESPONSIVE - SCROLL HORIZONTAL MOBILE
+   ============================================ */
+
+.table-responsive {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  /* Conservez votre style existant */
+}
+
+/* 📱 Activation du scroll horizontal UNIQUEMENT sur mobile */
+@media (max-width: 768px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Optimisation iOS */
+    border-radius: 12px 12px 0 0; /* Garde les coins arrondis en haut */
+    position: relative;
+  }
+
+  /* 🎯 Force une largeur minimale pour déclencher le scroll */
+  .table-responsive .table-modern {
+    min-width: 700px; /* Ajustez selon votre nombre de colonnes */
+    width: auto;
+    background: rgba(255, 255, 255, 0.6);
+  }
+
+  /* 🔄 Conserve les coins arrondis en bas */
+  .table-responsive::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(226, 232, 240, 0.6);
+    border-radius: 0 0 12px 12px;
+  }
+
+  .table-responsive {
+    min-width: 100%;
+  }
+}

@@ -1,33 +1,52 @@
 import { Routes } from '@angular/router';
-import { APP, APP_DONNEE_BASE_DEVISE, APP_AFF_NATURE_CENTRE_DONNEE_BASE, 
-    APP_TIERS_DONNEE_BASE, APP_BUDGETS_LIGNE_BUDGET, APP_BUDGETS_BUDGET, 
-    APP_ROOT_DMD_DECAISSEMENT, APP_AFF_DEPT_NATURE_DONNEE_BASE, APP_ROLE_ADMINISTRATION, 
-    APP_TAUX_DONNEE_BASE, 
-    APP_TAUX, APP_PLAN_COMPTABLE_DONNEE_BASE, APP_CENTRE_ANALYTIQUE_DONNEE_BASE, 
-    APP_NATURE_OPERATION_DONNEE_BASE, APP_JOURNAL_CAISSE_JOURNAL, 
-    APP_CAISSE_CAISSE_JOURNAL, APP_AFFECTATION_CAISSIER_CAISSE_JOURNAL,
-     APP_OPERATION, APP_OPERATION_GENERAL,APP_STRUCTURE_SOCIETE, APP_USER,
-     APP_USER_ADMINISTRATION, APP_STRUCTURE_SITE, APP_STRUCTURE_DEPARTEMENT, 
-     APP_PERMISSION_ADMINISTRATION, APP_ROLE_PERMISSION_ADMINISTRATION,
-     APP_ROOT_DMD_EDIT_DECAISSEMENT,
-     APP_ROOT_EDIT_DECAISSEMENT,
-     APP_WORKFLOW_ADMINISTRATION, APP_SUIVIBUDGET_CONSULTATION,
-    APP_SUIVIBUDGETFILTRE_CONSULTATION, 
-    APP_OPERATIONPERIODE_CONSULTATION,
-    APP_OPERATIONDETAILS_CONSULTATION,
-    APP_PARAMETREPAGE_PARAMETRE,
-    APP_OPERATION_GENERAL_JUSTIFIER,
-    APP_COMPTABILISATION,
-    APP_DECAISSEMENTAJUSTIFIER_CONSULTATION,
-    APP_STATSAFFDEPTNATURE_CONSULTATION,
-    APP_DETAILDEAMNDE_CONSULTATION,
-    APP_BANQUE_DONNEE_BASE,
-    APP_CLOTURECAISSE_CONSULTATION, 
-    APP_SOLDECAISSE_CONSULTATION,
-    APP_ROOT_DEPNSESCAISSE_CONSULTATION,
-    APP_RECETTESCAISSE_CONSULTATION,
-    APP_DEPNSESCAISSE_CONSULTATION,
-    APP_OPERATION_GENERAL_JUSTIFIER_LIST } from './_core/routes/frontend.root';
+import {
+  APP,
+  APP_DONNEE_BASE_DEVISE,
+  APP_AFF_NATURE_CENTRE_DONNEE_BASE,
+  APP_TIERS_DONNEE_BASE,
+  APP_BUDGETS_LIGNE_BUDGET,
+  APP_BUDGETS_BUDGET,
+  APP_ROOT_DMD_DECAISSEMENT,
+  APP_AFF_DEPT_NATURE_DONNEE_BASE,
+  APP_ROLE_ADMINISTRATION,
+  APP_TAUX_DONNEE_BASE,
+  APP_TAUX,
+  APP_PLAN_COMPTABLE_DONNEE_BASE,
+  APP_CENTRE_ANALYTIQUE_DONNEE_BASE,
+  APP_NATURE_OPERATION_DONNEE_BASE,
+  APP_JOURNAL_CAISSE_JOURNAL,
+  APP_CAISSE_CAISSE_JOURNAL,
+  APP_AFFECTATION_CAISSIER_CAISSE_JOURNAL,
+  APP_OPERATION,
+  APP_OPERATION_GENERAL,
+  APP_STRUCTURE_SOCIETE,
+  APP_USER,
+  APP_USER_ADMINISTRATION,
+  APP_STRUCTURE_SITE,
+  APP_STRUCTURE_DEPARTEMENT,
+  APP_PERMISSION_ADMINISTRATION,
+  APP_ROLE_PERMISSION_ADMINISTRATION,
+  APP_ROOT_DMD_EDIT_DECAISSEMENT,
+  APP_ROOT_EDIT_DECAISSEMENT,
+  APP_WORKFLOW_ADMINISTRATION,
+  APP_SUIVIBUDGET_CONSULTATION,
+  APP_SUIVIBUDGETFILTRE_CONSULTATION,
+  APP_OPERATIONPERIODE_CONSULTATION,
+  APP_OPERATIONDETAILS_CONSULTATION,
+  APP_PARAMETREPAGE_PARAMETRE,
+  APP_OPERATION_GENERAL_JUSTIFIER,
+  APP_COMPTABILISATION,
+  APP_DECAISSEMENTAJUSTIFIER_CONSULTATION,
+  APP_STATSAFFDEPTNATURE_CONSULTATION,
+  APP_DETAILDEAMNDE_CONSULTATION,
+  APP_BANQUE_DONNEE_BASE,
+  APP_CLOTURECAISSE_CONSULTATION,
+  APP_SOLDECAISSE_CONSULTATION,
+  APP_ROOT_DEPNSESCAISSE_CONSULTATION,
+  APP_RECETTESCAISSE_CONSULTATION,
+  APP_DEPNSESCAISSE_CONSULTATION,
+  APP_OPERATION_GENERAL_JUSTIFIER_LIST,
+} from './_core/routes/frontend.root';
 
 import { LayoutMainComponent } from './layout/layout-main/layout-main.component';
 import { LayoutContentComponent } from './layout/composant/layout-content/layout-content.component';
@@ -79,16 +98,17 @@ import { CaisseTresorerieComponent } from './features/consultations/caisse-treso
 import { DecaissementOperationComponent } from './features/consultations/decaissement-operation/decaissement-operation.component';
 import { EncaissementOperationComponent } from './features/consultations/encaissement-operation/encaissement-operation.component';
 import { OperationJustifieeListComponent } from './features/operations/operation-justifiee-list/operation-justifiee-list.component';
+import { VerificationComponent } from './features/verification/verification.component';
 
 export const routes: Routes = [
   {
-      path :'login',
-      component:LoginComponent
+    path: 'login',
+    component: LoginComponent,
   },
   {
     path: '',
     redirectTo: 'app',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
   {
     path: APP,
@@ -96,56 +116,56 @@ export const routes: Routes = [
     component: LayoutMainComponent,
     children: [
       {
-        path : '',
-        component: LayoutContentComponent
+        path: '',
+        component: LayoutContentComponent,
       },
       {
-        path : "app/administration/changepassword",
-        component : UpdatepasswordComponent
+        path: 'app/administration/changepassword',
+        component: UpdatepasswordComponent,
       },
       {
-        path : APP_STRUCTURE_DEPARTEMENT,
-        component : DepartementComponent
+        path: APP_STRUCTURE_DEPARTEMENT,
+        component: DepartementComponent,
       },
       {
-          path : APP_STRUCTURE_SITE,
-          component : SiteComponent
-      } ,
-      {
-          path : APP_TAUX_DONNEE_BASE,
-          component: TauxdeviseComponent,
+        path: APP_STRUCTURE_SITE,
+        component: SiteComponent,
       },
       {
-          path : APP_JOURNAL_CAISSE_JOURNAL,
-          component: JournalComponent,
+        path: APP_TAUX_DONNEE_BASE,
+        component: TauxdeviseComponent,
       },
       {
-          path : APP_CAISSE_CAISSE_JOURNAL, 
-          component: CaisseComponent,
+        path: APP_JOURNAL_CAISSE_JOURNAL,
+        component: JournalComponent,
       },
       {
-          path : APP_AFFECTATION_CAISSIER_CAISSE_JOURNAL,
-          component: AffectationCaissierComponent,
+        path: APP_CAISSE_CAISSE_JOURNAL,
+        component: CaisseComponent,
       },
       {
-          path : APP_OPERATION_GENERAL,
-          component: OperationCaisseComponent,
+        path: APP_AFFECTATION_CAISSIER_CAISSE_JOURNAL,
+        component: AffectationCaissierComponent,
       },
       {
-          path: APP_OPERATION_GENERAL_JUSTIFIER,
-          component: OprationJustifieeComponent 
+        path: APP_OPERATION_GENERAL,
+        component: OperationCaisseComponent,
       },
       {
-          path : APP_STRUCTURE_SOCIETE,
-          component : SocieteComponent
+        path: APP_OPERATION_GENERAL_JUSTIFIER,
+        component: OprationJustifieeComponent,
       },
       {
-          path : APP_DONNEE_BASE_DEVISE,
-          component : DeviseComponent
+        path: APP_STRUCTURE_SOCIETE,
+        component: SocieteComponent,
       },
       {
-          path: APP_USER_ADMINISTRATION,
-          component: UserComponent
+        path: APP_DONNEE_BASE_DEVISE,
+        component: DeviseComponent,
+      },
+      {
+        path: APP_USER_ADMINISTRATION,
+        component: UserComponent,
       },
       // ferreol
       {
@@ -186,112 +206,110 @@ export const routes: Routes = [
       },
       // Début travaux Richard...
       {
-          path : APP_BANQUE_DONNEE_BASE,
-          component: BanqueComponent,
+        path: APP_BANQUE_DONNEE_BASE,
+        component: BanqueComponent,
       },
       {
-          path : APP_TIERS_DONNEE_BASE,
-          component: TiersComponent,
+        path: APP_TIERS_DONNEE_BASE,
+        component: TiersComponent,
       },
       {
-          path : APP_CENTRE_ANALYTIQUE_DONNEE_BASE,
-          component: CentreanalytiqueComponent,
+        path: APP_CENTRE_ANALYTIQUE_DONNEE_BASE,
+        component: CentreanalytiqueComponent,
       },
       {
-          path : APP_PLAN_COMPTABLE_DONNEE_BASE,
-          component: PlancomptableComponent,
+        path: APP_PLAN_COMPTABLE_DONNEE_BASE,
+        component: PlancomptableComponent,
       },
       {
-          path : APP_NATURE_OPERATION_DONNEE_BASE,
-          component: NatureoperationComponent,
+        path: APP_NATURE_OPERATION_DONNEE_BASE,
+        component: NatureoperationComponent,
       },
       {
-          path : APP_AFF_NATURE_CENTRE_DONNEE_BASE,
-          component: AffectationNatureCentreComponent,
+        path: APP_AFF_NATURE_CENTRE_DONNEE_BASE,
+        component: AffectationNatureCentreComponent,
       },
       {
-          path : APP_AFF_DEPT_NATURE_DONNEE_BASE,
-          component: AffectationDepartementNatureComponent,
+        path: APP_AFF_DEPT_NATURE_DONNEE_BASE,
+        component: AffectationDepartementNatureComponent,
       },
       {
-          path: APP_USER_ADMINISTRATION,
-          component: UserComponent
+        path: APP_USER_ADMINISTRATION,
+        component: UserComponent,
       },
       {
-          path : APP_ROLE_ADMINISTRATION,
-          component : RoleComponent
+        path: APP_ROLE_ADMINISTRATION,
+        component: RoleComponent,
       },
       {
-          path : APP_PERMISSION_ADMINISTRATION,
-          component : PermissionComponent
+        path: APP_PERMISSION_ADMINISTRATION,
+        component: PermissionComponent,
       },
       {
-          path : APP_ROLE_PERMISSION_ADMINISTRATION,
-          component : RolepermissionComponent
+        path: APP_ROLE_PERMISSION_ADMINISTRATION,
+        component: RolepermissionComponent,
       },
       {
-          path : APP_WORKFLOW_ADMINISTRATION,
-          component:CircuitvalidationComponent
+        path: APP_WORKFLOW_ADMINISTRATION,
+        component: CircuitvalidationComponent,
       },
       {
-          path : APP_SUIVIBUDGET_CONSULTATION,
-          component:SuiviBudgetComponent
+        path: APP_SUIVIBUDGET_CONSULTATION,
+        component: SuiviBudgetComponent,
       },
       {
-          path : APP_SUIVIBUDGETFILTRE_CONSULTATION,
-          component:SuiviBudgetByFiltresComponent
+        path: APP_SUIVIBUDGETFILTRE_CONSULTATION,
+        component: SuiviBudgetByFiltresComponent,
       },
       {
-          path : APP_OPERATIONPERIODE_CONSULTATION,
-          component: OperationPeriodeComponent
+        path: APP_OPERATIONPERIODE_CONSULTATION,
+        component: OperationPeriodeComponent,
       },
       {
-          path : APP_OPERATIONDETAILS_CONSULTATION,
-          component: OperationDetailComponent
+        path: APP_OPERATIONDETAILS_CONSULTATION,
+        component: OperationDetailComponent,
       },
       {
-          path : APP_PARAMETREPAGE_PARAMETRE,
-          component: ParametrePageComponent
+        path: APP_PARAMETREPAGE_PARAMETRE,
+        component: ParametrePageComponent,
       },
       {
-          path : APP_COMPTABILISATION,
-          component: ComptabilisationComponent
+        path: APP_COMPTABILISATION,
+        component: ComptabilisationComponent,
       },
       {
         path: APP_STATSAFFDEPTNATURE_CONSULTATION,
         component: NatureOperationByDepartementComponent,
       },
       {
-          path : APP_DECAISSEMENTAJUSTIFIER_CONSULTATION,
-          component: DecaissementJustifierComponent
+        path: APP_DECAISSEMENTAJUSTIFIER_CONSULTATION,
+        component: DecaissementJustifierComponent,
       },
       {
-          path : APP_DETAILDEAMNDE_CONSULTATION,
-          component: DemandeDetailComponent
+        path: APP_DETAILDEAMNDE_CONSULTATION,
+        component: DemandeDetailComponent,
       },
       {
-          path : APP_CLOTURECAISSE_CONSULTATION,
-          component: ClotureCaisseComponent
+        path: APP_CLOTURECAISSE_CONSULTATION,
+        component: ClotureCaisseComponent,
       },
       {
-          path : APP_SOLDECAISSE_CONSULTATION,
-          component: CaisseTresorerieComponent
+        path: APP_SOLDECAISSE_CONSULTATION,
+        component: CaisseTresorerieComponent,
       },
       {
-          path : APP_DEPNSESCAISSE_CONSULTATION,
-          component: DecaissementOperationComponent
+        path: APP_DEPNSESCAISSE_CONSULTATION,
+        component: DecaissementOperationComponent,
       },
       {
-          path : APP_RECETTESCAISSE_CONSULTATION,
-          component: EncaissementOperationComponent
+        path: APP_RECETTESCAISSE_CONSULTATION,
+        component: EncaissementOperationComponent,
       },
       {
-          path : APP_OPERATION_GENERAL_JUSTIFIER_LIST,
-          component: OperationJustifieeListComponent
-      }
-    ]
-  }
+        path: APP_OPERATION_GENERAL_JUSTIFIER_LIST,
+        component: OperationJustifieeListComponent,
+      },
+      { path: 'verification', component: VerificationComponent },
+    ],
+  },
 ];
-
-
-

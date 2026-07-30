@@ -24,7 +24,7 @@ export class ParametreComptableService {
   /**
    * create
    * @param _object
-   * 
+   *
    */
   create(_object: any): Observable<any> {
     return this.http.post<any>(
@@ -98,5 +98,5 @@ export class ParametreComptableService {
     return this.http.post(URL_LOCAL.baseUrl + this.url + `/import-correspondances`, data);
   }
 
-  
+
 }

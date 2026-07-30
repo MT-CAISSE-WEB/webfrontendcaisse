@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CaisseService } from '../../../features/caisse_journal/services/caisse.service';
 import { caissePeriodeModel } from '../../../features/caisse_journal/models/periodecaisse.model';
 import { CaissePeriodeService } from '../../../features/caisse_journal/services/caisseperiode.service';
@@ -9,6 +9,7 @@ import {
   FormsModule,
   ReactiveFormsModule,
 } from '@angular/forms';
+import { MenuConfigService, MenuItem } from '../services/menu-config.service';
 import { MenuService } from '../services/menu.service';
 import { CommonModule } from '@angular/common';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.contantes';
@@ -69,6 +70,7 @@ export class LayoutHeaderComponent implements OnInit, OnDestroy {
     private caisseService: CaisseService,
     private toastr: ToastrService,
     private menuService: MenuService,
+    private menuConfigService: MenuConfigService,
   ) {}
 
   ngOnInit(): void {
@@ -82,6 +84,9 @@ export class LayoutHeaderComponent implements OnInit, OnDestroy {
     this.menuSubscription = this.menuService.isMenuOpen$.subscribe((isOpen) => {
       this.isMenuOpen = isOpen;
     });
+
+    // Charger les items du menu avec les rôles de l'utilisateur
+    this.loadMenuItems();
   }
 
   ngOnDestroy(): void {
@@ -414,5 +419,270 @@ export class LayoutHeaderComponent implements OnInit, OnDestroy {
     modalRef.result.then((result) => {
       console.log('Billetage reçu', result);
     });
+  }
+
+  // Propriétés pour le menu contextuel
+  searchQuery: string = '';
+  filteredItems: MenuItem[] = [];
+  selectedIndex: number = -1;
+  isContextMenuOpen: boolean = false;
+  menuItems: MenuItem[] = [];
+
+  /**
+   * Charge les items du menu en fonction des rôles de l'utilisateur
+   */
+  private loadMenuItems(): void {
+    const user = this.getUser();
+    const userRoles =
+      user?.roles?.map((r: any) => this.mapRoleCode(r.code)) || [];
+    this.menuItems = this.menuConfigService.getMenuItemsForUser(userRoles);
+  }
+
+  /**
+   * Mappe le code du rôle vers un nom lisible
+   */
+  private mapRoleCode(code: string): string {
+    const roleMap: { [key: string]: string } = {
+      '00': 'superadmin',
+      '01': 'admin',
+      '02': 'superviseur',
+      '03': 'comptable',
+      '04': 'caissier',
+      '05': 'demandeur',
+    };
+    return roleMap[code] || '';
+  }
+
+  /**
+   * Récupère l'utilisateur connecté
+   */
+  private getUser(): any {
+    if (typeof window !== 'undefined') {
+      return JSON.parse(localStorage.getItem('user') || '{}');
+    }
+    return {};
+  }
+
+  /**
+   * Ouvre le menu contextuel et met le focus sur la recherche
+   */
+  openContextMenu(): void {
+    this.isContextMenuOpen = !this.isContextMenuOpen;
+    if (this.isContextMenuOpen) {
+      // Recharger les items au cas où les rôles auraient changé
+      this.loadMenuItems();
+      setTimeout(() => {
+        const input = document.querySelector(
+          '.context-search-field',
+        ) as HTMLInputElement;
+        if (input) {
+          input.focus();
+        }
+      }, 100);
+    } else {
+      this.searchQuery = '';
+      this.filteredItems = [];
+    }
+  }
+
+  /**
+   * Ferme le menu contextuel
+   */
+  closeContextMenu(): void {
+    this.isContextMenuOpen = false;
+    this.searchQuery = '';
+    this.filteredItems = [];
+    this.selectedIndex = -1;
+  }
+
+  /**
+   * Filtre les éléments du menu selon la recherche
+   */
+  filterMenuItems(): void {
+    if (!this.searchQuery || this.searchQuery.trim() === '') {
+      this.filteredItems = [];
+      this.selectedIndex = -1;
+      return;
+    }
+
+    const query = this.searchQuery.toLowerCase().trim();
+    this.filteredItems = this.menuItems.filter(
+      (item) =>
+        item.label.toLowerCase().includes(query) ||
+        item.category.toLowerCase().includes(query) ||
+        item.label
+          .toLowerCase()
+          .replace(/[éèêë]/g, 'e')
+          .replace(/[àâä]/g, 'a')
+          .includes(query),
+    );
+    this.selectedIndex = this.filteredItems.length > 0 ? 0 : -1;
+  }
+
+  /**
+   * Efface la recherche
+   */
+  clearSearch(): void {
+    this.searchQuery = '';
+    this.filteredItems = [];
+    this.selectedIndex = -1;
+    const input = document.querySelector(
+      '.context-search-field',
+    ) as HTMLInputElement;
+    if (input) {
+      input.focus();
+    }
+  }
+
+  /**
+   * Navigation au clavier dans les résultats
+   */
+  onSearchKeydown(event: KeyboardEvent): void {
+    if (this.filteredItems.length === 0) return;
+
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        this.selectedIndex =
+          (this.selectedIndex + 1) % this.filteredItems.length;
+        this.scrollToSelected();
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        this.selectedIndex =
+          (this.selectedIndex - 1 + this.filteredItems.length) %
+          this.filteredItems.length;
+        this.scrollToSelected();
+        break;
+      case 'Enter':
+        event.preventDefault();
+        if (
+          this.selectedIndex >= 0 &&
+          this.selectedIndex < this.filteredItems.length
+        ) {
+          const item = this.filteredItems[this.selectedIndex];
+          this.router.navigate([item.route]);
+          this.closeContextMenu();
+        }
+        break;
+      case 'Escape':
+        event.preventDefault();
+        this.closeContextMenu();
+        break;
+    }
+  }
+
+  /**
+   * Scroll vers l'élément sélectionné
+   */
+  private scrollToSelected(): void {
+    setTimeout(() => {
+      const selected = document.querySelector(
+        '.context-result-item.active',
+      ) as HTMLElement;
+      if (selected) {
+        selected.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }, 50);
+  }
+
+  /**
+   * Raccourci clavier pour ouvrir le menu (Cmd+K ou Ctrl+K)
+   */
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardShortcut(event: KeyboardEvent): void {
+    if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+      event.preventDefault();
+      if (this.isContextMenuOpen) {
+        this.closeContextMenu();
+      } else {
+        this.openContextMenu();
+        // Forcer l'ouverture du dropdown
+        const dropdown = document.querySelector(
+          '#page-header-menu-dropdown',
+        ) as HTMLElement;
+        if (dropdown) {
+          dropdown.click();
+        }
+      }
+    }
+  }
+
+  /**
+   * Récupère les catégories uniques du menu
+   * Filtrées selon les items disponibles pour l'utilisateur
+   */
+  getCategories(): string[] {
+    const categories = new Set(this.menuItems.map((item) => item.category));
+    return Array.from(categories);
+  }
+
+  /**
+   * Récupère les items d'une catégorie spécifique
+   * @param category - Le nom de la catégorie
+   * @returns La liste des items de cette catégorie
+   */
+  getItemsByCategory(category: string): MenuItem[] {
+    return this.menuItems.filter((item) => item.category === category);
+  }
+
+  /**
+   * Récupère l'icône pour une catégorie
+   * @param category - Le nom de la catégorie
+   * @returns Le nom de l'icône Remix Icon
+   */
+  getCategoryIcon(category: string): string {
+    const iconMap: { [key: string]: string } = {
+      Administration: 'ri-shield-keyhole-line',
+      Paramétrages: 'ri-settings-4-line',
+      'Données de base': 'ri-database-2-line',
+      'Caisse et Journal': 'ri-wallet-3-line',
+      'Gestion du budget': 'ri-honour-line',
+      Opérations: 'ri-stack-line',
+      Consultations: 'ri-dashboard-2-line',
+      Comptabilisation: 'ri-calculator-line',
+    };
+    return iconMap[category] || 'ri-folder-line';
+  }
+
+  /**
+   * Navigue vers une page avec gestion d'erreur
+   * @param route - La route vers laquelle naviguer
+   */
+  navigateTo(route: string): void {
+    console.log('Route:', route);
+    if (!route) {
+      console.warn('Route vide, navigation annulée');
+      return;
+    }
+
+    // Fermer le menu
+    this.closeContextMenu();
+
+    // Nettoyer la route (enlever les espaces, etc.)
+    const cleanRoute = route.trim();
+
+    // S'assurer que la route commence par un slash
+    const finalRoute = cleanRoute.startsWith('/')
+      ? cleanRoute
+      : '/' + cleanRoute;
+
+    // Navigation avec timeout pour laisser le temps au menu de se fermer
+    setTimeout(() => {
+      this.router
+        .navigate([finalRoute])
+        .then((success) => {
+          if (success) {
+            console.log('Navigation réussie vers:', finalRoute);
+          } else {
+            console.warn('Navigation échouée vers:', finalRoute);
+            // Essayer de naviguer vers la route telle quelle
+            this.router.navigate([cleanRoute]);
+          }
+        })
+        .catch((error) => {
+          console.error('Erreur de navigation:', error);
+        });
+    }, 100);
   }
 }

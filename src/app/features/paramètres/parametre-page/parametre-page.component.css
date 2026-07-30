@@ -1872,184 +1872,182 @@
    CARTE PREMIUM (POUR LES ONGLETS)
    ============================================ */
 
-.card-premium {
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(59, 130, 246, 0.1);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-}
-
-@media (min-width: 769px) {
   .card-premium {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background: white;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(59, 130, 246, 0.1);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   }
-}
 
-.card-header-premium {
-  background: linear-gradient(
-    135deg,
-    rgba(59, 130, 246, 0.04),
-    rgba(102, 126, 234, 0.02)
-  );
-  border-bottom: 1px solid rgba(59, 130, 246, 0.08);
-  padding: 0 1.5rem;
-}
+  @media (min-width: 769px) {
+    .card-premium {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      background: white;
+    }
+  }
 
-    /* ============================================
+  .card-header-premium {
+    background: linear-gradient(
+      135deg,
+      rgba(59, 130, 246, 0.04),
+      rgba(102, 126, 234, 0.02)
+    );
+    border-bottom: 1px solid rgba(59, 130, 246, 0.08);
+    padding: 0 1.5rem;
+  }
+
+  /* ============================================
    NAV TABS PREMIUM – SURBRILLANCE ACTIVE
    ============================================ */
 
-.nav-tabs-premium .nav-link {
-  position: relative;
-  padding: 0.9rem 1.6rem;
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: #64748b;
-  border: none;
-  border-radius: 14px 14px 0 0;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  transition: all 0.25s ease;
-  margin-right: 4px;
-}
+  .nav-tabs-premium .nav-link {
+    position: relative;
+    padding: 0.9rem 1.6rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #64748b;
+    border: none;
+    border-radius: 14px 14px 0 0;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.25s ease;
+    margin-right: 4px;
+  }
 
-.nav-tabs-premium .nav-link i {
-  font-size: 1.1rem;
-  transition: transform 0.2s;
-}
+  .nav-tabs-premium .nav-link i {
+    font-size: 1.1rem;
+    transition: transform 0.2s;
+  }
 
-/* Survol */
-.nav-tabs-premium .nav-link:hover {
-  color: #3b82f6;
-  background: rgba(59, 130, 246, 0.04);
-}
-.nav-tabs-premium .nav-link:hover i {
-  transform: translateY(-1px);
-}
+  /* Survol */
+  .nav-tabs-premium .nav-link:hover {
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.04);
+  }
+  .nav-tabs-premium .nav-link:hover i {
+    transform: translateY(-1px);
+  }
 
-/* Onglet actif – surbrillance */
-.nav-tabs-premium .nav-link.active {
-  color: #ffffff;
-  background: linear-gradient(135deg, #405189 0%, #3b82f6 100%);
-  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.35);
-  font-weight: 600;
-  position: relative;
-  z-index: 1;
-}
+  /* Onglet actif – surbrillance */
+  .nav-tabs-premium .nav-link.active {
+    color: #ffffff;
+    background: linear-gradient(135deg, #405189 0%, #3b82f6 100%);
+    box-shadow: 0 6px 18px rgba(59, 130, 246, 0.35);
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+  }
 
-.nav-tabs-premium .nav-link.active i {
-  color: #ffffff;
-  transform: scale(1.1);
-}
+  .nav-tabs-premium .nav-link.active i {
+    color: #ffffff;
+    transform: scale(1.1);
+  }
 
-/* Légère lueur sous l'onglet actif */
-.nav-tabs-premium .nav-link.active::after {
-  content: "";
-  position: absolute;
-  bottom: -2px;
-  left: 10%;
-  width: 80%;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 3px;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
-}
+  /* Légère lueur sous l'onglet actif */
+  .nav-tabs-premium .nav-link.active::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 10%;
+    width: 80%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 3px;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+  }
 
-/* ============================================
+  /* ============================================
    NAV TABS PREMIUM – STYLE COMPLET
    ============================================ */
 
-.nav-tabs-premium {
-  display: flex;
-  gap: 6px;
-  border-bottom: none;
-  padding: 0.5rem;
-}
+  .nav-tabs-premium {
+    display: flex;
+    gap: 6px;
+    border-bottom: none;
+    padding: 0.5rem;
+  }
 
-.nav-tabs-premium .nav-link {
-  position: relative;
-  padding: 0.8rem 1.4rem;
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: #64748b;
-  border: none;
-  border-radius: 14px;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.25s ease;
-  cursor: pointer;
-}
+  .nav-tabs-premium .nav-link {
+    position: relative;
+    padding: 0.8rem 1.4rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #64748b;
+    border: none;
+    border-radius: 14px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.25s ease;
+    cursor: pointer;
+  }
 
-.nav-tabs-premium .nav-link i {
-  font-size: 1.1rem;
-  transition: transform 0.2s;
-}
+  .nav-tabs-premium .nav-link i {
+    font-size: 1.1rem;
+    transition: transform 0.2s;
+  }
 
-/* Survol */
-.nav-tabs-premium .nav-link:hover {
-  color: #3b82f6;
-  background: rgba(59, 130, 246, 0.05);
-}
-.nav-tabs-premium .nav-link:hover i {
-  transform: translateY(-1px);
-}
+  /* Survol */
+  .nav-tabs-premium .nav-link:hover {
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.05);
+  }
+  .nav-tabs-premium .nav-link:hover i {
+    transform: translateY(-1px);
+  }
 
-/* Onglet actif – surbrillance */
-.nav-tabs-premium .nav-link.active {
-  color: #ffffff;
-  background: linear-gradient(135deg, #405189 0%, #3b82f6 100%);
-  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.35);
-  font-weight: 600;
-}
+  /* Onglet actif – surbrillance */
+  .nav-tabs-premium .nav-link.active {
+    color: #ffffff;
+    background: linear-gradient(135deg, #405189 0%, #3b82f6 100%);
+    box-shadow: 0 6px 18px rgba(59, 130, 246, 0.35);
+    font-weight: 600;
+  }
 
-.nav-tabs-premium .nav-link.active i {
-  color: #ffffff;
-  transform: scale(1.1);
-}
+  .nav-tabs-premium .nav-link.active i {
+    color: #ffffff;
+    transform: scale(1.1);
+  }
 
-/* Légère lueur sous l’onglet actif */
-.nav-tabs-premium .nav-link.active::after {
-  content: "";
-  position: absolute;
-  bottom: -2px;
-  left: 15%;
-  width: 70%;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 2px;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
-}
+  /* Légère lueur sous l’onglet actif */
+  .nav-tabs-premium .nav-link.active::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 15%;
+    width: 70%;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 2px;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  }
 
-/* ----- Carte premium (si pas déjà dans ton global) ----- */
-.card-premium {
-  background: #ffffff;
-  border: 1px solid rgba(59, 130, 246, 0.08);
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-}
+  /* ----- Carte premium (si pas déjà dans ton global) ----- */
+  .card-premium {
+    background: #ffffff;
+    border: 1px solid rgba(59, 130, 246, 0.08);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  }
 
-.card-header-premium {
-  background: #fafbfc;
-  border-bottom: 1px solid #e9eef2;
-  padding: 0.5rem 1rem;
-}
+  .card-header-premium {
+    background: #fafbfc;
+    border-bottom: 1px solid #e9eef2;
+    padding: 0.5rem 1rem;
+  }
 
-/* Optionnel : style de la tab-pane si besoin */
-.tab-pane {
-  display: none;
-}
+  /* Optionnel : style de la tab-pane si besoin */
+  .tab-pane {
+    display: none;
+  }
 
-.tab-pane.active {
-  display: block;
-}
-
-    
+  .tab-pane.active {
+    display: block;
+  }
 }

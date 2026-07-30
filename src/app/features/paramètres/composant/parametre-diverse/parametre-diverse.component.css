@@ -11,7 +11,11 @@
   box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.04);
   max-width: 1000px;
   margin: 0 auto;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
   transition: all 0.3s ease;
 }
 
@@ -88,7 +92,7 @@
 .mv-table-card {
   background: white;
   border-radius: 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
   overflow: hidden;
   margin-bottom: 2.5rem;
 }
@@ -217,7 +221,7 @@
 .mv-pagination-btn:hover:not(:disabled) {
   border-color: #3b82f6;
   color: #2563eb;
-  background: rgba(59,130,246,0.04);
+  background: rgba(59, 130, 246, 0.04);
 }
 .mv-pagination-btn:disabled {
   opacity: 0.4;
@@ -320,17 +324,17 @@
   border-radius: 20px;
   padding: 1.2rem;
   transition: all 0.25s;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
 }
 .mv-traitement-card:hover {
   border-color: #cbd5e1;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
 }
 
 .mv-traitement-icon {
   width: 44px;
   height: 44px;
-  background: rgba(59,130,246,0.07);
+  background: rgba(59, 130, 246, 0.07);
   border-radius: 14px;
   display: flex;
   align-items: center;

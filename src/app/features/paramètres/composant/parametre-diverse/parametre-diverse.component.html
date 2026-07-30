@@ -1,6 +1,5 @@
 <!-- ========== MOTIF DE VALIDATION – PREMIUM REDESIGN ========== -->
 <div class="mv-container">
-
   <!-- En-tête -->
   <div class="mv-header">
     <div class="mv-header-left">
@@ -9,10 +8,17 @@
       </div>
       <div>
         <h2 class="mv-title">Motif de validation</h2>
-        <p class="mv-subtitle">Gérez les motifs utilisés pour les validations</p>
+        <p class="mv-subtitle">
+          Gérez les motifs utilisés pour les validations
+        </p>
       </div>
     </div>
-    <button class="mv-btn-primary" data-bs-toggle="modal" (click)="modalCreate()" data-bs-target="#showModal">
+    <button
+      class="mv-btn-primary"
+      data-bs-toggle="modal"
+      (click)="modalCreate()"
+      data-bs-target="#showModal"
+    >
       <i class="ri-add-line"></i> Créer un motif
     </button>
   </div>
@@ -38,22 +44,28 @@
           <tbody>
             @for (item of motifs; track $index) {
               <tr>
-                <td><span class="mv-code-badge">{{item.codemotif}}</span></td>
-                <td class="fw-medium">{{item.libellemotif}}</td>
+                <td>
+                  <span class="mv-code-badge">{{ item.codemotif }}</span>
+                </td>
+                <td class="fw-medium">{{ item.libellemotif }}</td>
                 <td>
                   <div class="mv-actions">
-                    <button class="mv-icon-btn mv-icon-edit"
-                            (click)="modalUpdate(item)"
-                            data-bs-toggle="modal"
-                            data-bs-target="#showModal"
-                            title="Modifier">
+                    <button
+                      class="mv-icon-btn mv-icon-edit"
+                      (click)="modalUpdate(item)"
+                      data-bs-toggle="modal"
+                      data-bs-target="#showModal"
+                      title="Modifier"
+                    >
                       <i class="ri-pencil-fill"></i>
                     </button>
-                    <button class="mv-icon-btn mv-icon-delete"
-                            (click)="modalDelete(item)"
-                            data-bs-toggle="modal"
-                            data-bs-target="#deleteOrder"
-                            title="Supprimer">
+                    <button
+                      class="mv-icon-btn mv-icon-delete"
+                      (click)="modalDelete(item)"
+                      data-bs-toggle="modal"
+                      data-bs-target="#deleteOrder"
+                      title="Supprimer"
+                    >
                       <i class="ri-delete-bin-fill"></i>
                     </button>
                   </div>
@@ -67,17 +79,22 @@
       <!-- Pagination -->
       <div class="mv-pagination">
         <span class="mv-pagination-info">
-          Page <strong>{{currentPage}}</strong> sur <strong>{{totalPages}}</strong>
+          Page <strong>{{ currentPage }}</strong> sur
+          <strong>{{ totalPages }}</strong>
         </span>
         <div class="mv-pagination-btns">
-          <button class="mv-pagination-btn"
-                  [disabled]="currentPage == 1"
-                  (click)="changePage(currentPage - 1)">
+          <button
+            class="mv-pagination-btn"
+            [disabled]="currentPage == 1"
+            (click)="changePage(currentPage - 1)"
+          >
             <i class="ri-arrow-left-s-line"></i> Précédent
           </button>
-          <button class="mv-pagination-btn"
-                  [disabled]="currentPage == totalPages"
-                  (click)="changePage(currentPage + 1)">
+          <button
+            class="mv-pagination-btn"
+            [disabled]="currentPage == totalPages"
+            (click)="changePage(currentPage + 1)"
+          >
             Suivant <i class="ri-arrow-right-s-line"></i>
           </button>
         </div>
@@ -120,7 +137,9 @@
         </div>
         <div class="mv-traitement-content">
           <h6>Traitement spécifique caisse</h6>
-          <p>Met à jour la ou les caisses de l'utilisateur à une date donnée.</p>
+          <p>
+            Met à jour la ou les caisses de l'utilisateur à une date donnée.
+          </p>
         </div>
         <button class="mv-toggle active" (click)="toggleTraitement('caisse')">
           <span class="mv-toggle-dot"></span>
@@ -135,7 +154,9 @@
         </div>
         <div class="mv-traitement-content">
           <h6>Traitement spécifique 2</h6>
-          <p>Recalcule le solde disponible de chaque caisse de l'utilisateur.</p>
+          <p>
+            Recalcule le solde disponible de chaque caisse de l'utilisateur.
+          </p>
         </div>
         <button class="mv-toggle" (click)="toggleTraitement('solde')">
           <span class="mv-toggle-dot"></span>
@@ -144,7 +165,6 @@
       </div>
     </div>
   </div>
-
 </div>
 
 <!-- ========== MODALE CRÉATION / MODIFICATION (conservée) ========== -->
@@ -153,9 +173,15 @@
     <div class="modal-content modal-content-glass">
       <div class="modal-header modal-header-glass">
         <h5 class="modal-title modal-title-glass">
-          <i class="ri-checkbox-circle-line me-2"></i>{{ actionModal === "create" ? 'Création' : 'Modification'}} du motif
+          <i class="ri-checkbox-circle-line me-2"></i
+          >{{ actionModal === "create" ? "Création" : "Modification" }} du motif
         </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
       </div>
 
       <form [formGroup]="motifForm">
@@ -163,14 +189,24 @@
           <div class="row g-3">
             <div class="col-lg-4">
               <div class="form-floating">
-                <input type="text" formControlName="codemotif" class="form-control" placeholder="Code" />
+                <input
+                  type="text"
+                  formControlName="codemotif"
+                  class="form-control"
+                  placeholder="Code"
+                />
                 <label>Code</label>
                 <div class="invalid-feedback">{{ msgErros }}</div>
               </div>
             </div>
             <div class="col-lg-8">
               <div class="form-floating">
-                <input type="text" formControlName="libellemotif" class="form-control" placeholder="Libellé" />
+                <input
+                  type="text"
+                  formControlName="libellemotif"
+                  class="form-control"
+                  placeholder="Libellé"
+                />
                 <label>Libellé</label>
                 <div class="invalid-feedback">{{ msgErros }}</div>
               </div>
@@ -179,11 +215,15 @@
         </div>
 
         <div class="modal-footer modal-footer-glass">
-          <button type="button" class="btn-glass-cancel" data-bs-dismiss="modal">
+          <button
+            type="button"
+            class="btn-glass-cancel"
+            data-bs-dismiss="modal"
+          >
             <i class="ri-close-line"></i> Annuler
           </button>
           <button type="submit" class="btn-glass-submit" (click)="onSubmit()">
-            {{ actionModal === "create" ? 'Enregistrer' : 'Modifier' }}
+            {{ actionModal === "create" ? "Enregistrer" : "Modifier" }}
           </button>
         </div>
       </form>
@@ -198,8 +238,8 @@
       <div class="delete-icon-wrapper mb-3">
         <i class="ri-delete-bin-6-line"></i>
       </div>
-      <h5 class="delete-modal-title">{{titleMsg}}</h5>
-      <p class="delete-modal-message">{{msgSup}}</p>
+      <h5 class="delete-modal-title">{{ titleMsg }}</h5>
+      <p class="delete-modal-message">{{ msgSup }}</p>
       <div class="d-flex justify-content-center gap-3">
         <button class="delete-btn-cancel" data-bs-dismiss="modal">
           <i class="ri-close-line"></i> Annuler

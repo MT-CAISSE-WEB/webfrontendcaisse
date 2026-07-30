@@ -1,17 +1,23 @@
 <!-- ========== TITRE PREMIUM ========== -->
-<div class="page-title-premium d-flex align-items-center justify-content-between">
+<div
+  class="page-title-premium d-flex align-items-center justify-content-between"
+>
   <div class="d-flex align-items-center gap-3">
     <div class="title-icon-premium">
       <i class="ri-settings-3-line"></i>
     </div>
     <div>
       <h4 class="title-premium mb-0">{{ title }}</h4>
-      <span class="title-subtitle-premium">Configuration générale de l'application</span>
+      <span class="title-subtitle-premium"
+        >Configuration générale de l'application</span
+      >
     </div>
   </div>
   <nav class="breadcrumb-premium">
     <ol class="breadcrumb mb-0">
-      <li class="breadcrumb-item"><a href="javascript: void(0);">Paramètres</a></li>
+      <li class="breadcrumb-item">
+        <a href="javascript: void(0);">Paramètres</a>
+      </li>
       <li class="breadcrumb-item active">{{ title }}</li>
     </ol>
   </nav>
@@ -24,34 +30,42 @@
       <div class="card-header-premium">
         <ul class="nav nav-tabs-premium" role="tablist">
           <li class="nav-item">
-            <a class="nav-link"
+            <a
+              class="nav-link"
               [class.active]="activeTab === 'general'"
               (click)="setActiveTab('general')"
-              role="tab">
+              role="tab"
+            >
               <i class="ri-home-line"></i> Paramètres diverses
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link"
+            <a
+              class="nav-link"
               [class.active]="activeTab === 'notifications'"
               (click)="setActiveTab('notifications')"
-              role="tab">
+              role="tab"
+            >
               <i class="ri-notification-line"></i> Notifications
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link"
+            <a
+              class="nav-link"
               [class.active]="activeTab === 'accounting'"
               (click)="setActiveTab('accounting')"
-              role="tab">
+              role="tab"
+            >
               <i class="ri-calculator-line"></i> Configuration comptable
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link"
+            <a
+              class="nav-link"
               [class.active]="activeTab === 'counter'"
               (click)="setActiveTab('counter')"
-              role="tab">
+              role="tab"
+            >
               <i class="ri-tools-line"></i> Compteur
             </a>
           </li>
@@ -59,16 +73,32 @@
       </div>
       <div class="card-body p-4">
         <div class="tab-content">
-          <div class="tab-pane" [class.active]="activeTab === 'general'" role="tabpanel">
+          <div
+            class="tab-pane"
+            [class.active]="activeTab === 'general'"
+            role="tabpanel"
+          >
             <app-parametre-diverse></app-parametre-diverse>
           </div>
-          <div class="tab-pane" [class.active]="activeTab === 'notifications'" role="tabpanel">
+          <div
+            class="tab-pane"
+            [class.active]="activeTab === 'notifications'"
+            role="tabpanel"
+          >
             <app-motif></app-motif>
           </div>
-          <div class="tab-pane" [class.active]="activeTab === 'accounting'" role="tabpanel">
+          <div
+            class="tab-pane"
+            [class.active]="activeTab === 'accounting'"
+            role="tabpanel"
+          >
             <app-config-comptable></app-config-comptable>
           </div>
-          <div class="tab-pane" [class.active]="activeTab === 'counter'" role="tabpanel">
+          <div
+            class="tab-pane"
+            [class.active]="activeTab === 'counter'"
+            role="tabpanel"
+          >
             <app-compteur></app-compteur>
           </div>
         </div>
