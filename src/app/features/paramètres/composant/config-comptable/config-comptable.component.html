@@ -79,8 +79,11 @@
       <h5 class="acc-section-title">Paramètres d'analytique</h5>
       <p class="acc-section-subtitle">Axes et options analytiques</p>
     </div>
-    <button class="acc-btn-outline" (click)="desactiverTout()">
+    <button *ngIf="activateAll()" class="acc-btn-outline" (click)="desactiverTout()">
       <i class="ri-close-line"></i> Désactiver tout
+    </button>
+    <button *ngIf="!activateAll()" class="acc-btn-outline" (click)="desactiverTout()">
+      <i class="ri-close-line"></i> Activer tout
     </button>
   </div>
 

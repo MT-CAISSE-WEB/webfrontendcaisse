@@ -385,6 +385,11 @@ export class ConfigComptableComponent implements OnInit {
     this.resetForm();
   }
 
+  activateAll() {
+    // Activer les trois switches localement
+    return this.axeSecondEnabled == true;
+  }
+
   desactiverTout() {
     // Désactiver les trois switches localement
     this.axeSecondEnabled = false;
