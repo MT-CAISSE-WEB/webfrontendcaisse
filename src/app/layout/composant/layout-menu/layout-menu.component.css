@@ -22,6 +22,7 @@
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.2px;
+  cursor: pointer;
 }
 
 .app-menu .menu-title {
@@ -395,4 +396,102 @@
     opacity: 1;
     visibility: visible;
   }
+}
+
+/* ==============================
+   SUPPRESSION DES FLÈCHES BOOTSTRAP
+============================== */
+.app-menu .menu-link[data-bs-toggle="collapse"]::after,
+.app-menu .nav-link[data-bs-toggle="collapse"]::after {
+  display: none !important;
+}
+
+/* ==============================
+   FLÈCHES PERSONNALISÉES
+============================== */
+.app-menu .menu-arrow,
+.app-menu .menu-arrow-sub {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  transition: transform 0.3s ease;
+}
+
+.app-menu .menu-arrow {
+  margin-left: 10px;
+}
+
+.app-menu .menu-arrow-sub {
+  margin-left: 4px;
+  font-size: 0.7rem;
+}
+
+/* Rotation des flèches */
+.app-menu .nav-item.menu-open > .menu-link .menu-arrow,
+.app-menu .nav-item.menu-open > .nav-link .menu-arrow-sub {
+  transform: rotate(180deg);
+}
+
+/* ==============================
+   SOUS-MENUS DÉROULANTS
+============================== */
+.app-menu .menu-dropdown {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  margin-left: 12px;
+  padding-left: 10px;
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.app-menu .menu-dropdown.show {
+  max-height: 1000px;
+}
+
+/* Sous-sous-menu */
+.app-menu .sub-menu-dropdown {
+  margin-left: 8px;
+  padding-left: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.app-menu .sub-menu-dropdown.show {
+  max-height: 500px;
+}
+
+/* ==============================
+   INDICATEUR DE SOUS-MENU OUVERT
+============================== */
+.app-menu .nav-item.menu-open > .menu-link {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px 6px 0 0;
+}
+
+.app-menu .nav-item.menu-open > .menu-link i {
+  color: #ffffff;
+}
+
+.app-menu .nav-item.menu-open > .menu-link span {
+  color: #ffffff;
+}
+
+/* ==============================
+   SOUS-MENU ACTIF
+============================== */
+.app-menu .nav-item .menu-link.active {
+  background: rgba(255, 255, 255, 0.12);
+  border-left: 3px solid rgba(255, 255, 255, 0.6);
+}
+
+/* ==============================
+   LIENS SIMPLES ACTIFS
+============================== */
+.app-menu .nav-link.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff !important;
+  border-left: 3px solid rgba(255, 255, 255, 0.6);
+}
+
+.app-menu .nav-link.active i {
+  color: #ffffff !important;
 }

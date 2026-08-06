@@ -601,3 +601,92 @@
     padding: 1px 6px;
   }
 }
+
+/* ============================================
+   GRADIENT HEADERS FOR TOTAUX CARDS - AMÉLIORÉS
+   ============================================ */
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #405189, #1e3a8a) !important;
+  border-radius: 20px 20px 0 0;
+}
+
+.bg-gradient-success {
+  background: linear-gradient(135deg, #059669, #047857) !important;
+  border-radius: 20px 20px 0 0;
+}
+
+.bg-gradient-danger {
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  border-radius: 20px 20px 0 0;
+}
+
+.bg-gradient-info {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  border-radius: 20px 20px 0 0;
+}
+
+/* Version avec opacité pour garder l'effet glass */
+.bg-gradient-primary-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(64, 81, 137, 0.9),
+    rgba(30, 58, 138, 0.95)
+  ) !important;
+  border-radius: 20px 20px 0 0;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.bg-gradient-success-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(5, 150, 105, 0.9),
+    rgba(4, 120, 87, 0.95)
+  ) !important;
+  border-radius: 20px 20px 0 0;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.bg-gradient-danger-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(220, 38, 38, 0.9),
+    rgba(185, 28, 28, 0.95)
+  ) !important;
+  border-radius: 20px 20px 0 0;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.bg-gradient-info-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.9),
+    rgba(29, 78, 216, 0.95)
+  ) !important;
+  border-radius: 20px 20px 0 0;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Icônes dans les entêtes */
+.card-header-glass .section-icon-glass {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.card-header-glass .section-icon-glass i {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.card-header-glass .card-title-glass {
+  color: #ffffff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.card-header-glass .card-title-glass .badge-glass {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}

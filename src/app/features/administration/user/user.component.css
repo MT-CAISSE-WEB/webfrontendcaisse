@@ -772,3 +772,83 @@
     padding: 4px 10px;
   }
 }
+
+.btn-download-template {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(22, 163, 74, 0.3);
+  padding: 0.4rem 1rem;
+  color: #15803d;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-download-template i {
+  color: #15803d;
+}
+.btn-download-template:hover {
+  background: rgba(22, 163, 74, 0.25);
+  border-color: #16a34a;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15);
+  color: #14532d;
+  transform: translateY(-2px);
+}
+
+/* ===== MODAL D'IMPORT (CSS PUR) ===== */
+
+/* ===== MODAL D'IMPORT (CORRIGÉ) ===== */
+
+/* Voile noir (backdrop) */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Conteneur du modal */
+.modal-import {
+  position: fixed; /* ✅ CORRIGÉ: fixed au lieu de relative */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* ✅ Centrage parfait */
+  z-index: 1001;
+  width: 90%;
+  max-width: 700px;
+  max-height: 85vh;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) translateY(0);
+  }
+}

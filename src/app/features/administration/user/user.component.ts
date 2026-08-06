@@ -27,10 +27,18 @@ import { departementservice } from '../../structure/service/departement.service'
 import { sitemodel } from '../../structure/model/site.model';
 import { siteservice } from '../../structure/service/site.service';
 import { ToastrService } from 'ngx-toastr';
+import { UserImportExportService } from '../service/user-import-export.service';
+import { ImportResult } from '../model/import-result.model';
+import { UserImportComponent } from '../../user-import/user-import.component';
 
 @Component({
   selector: 'app-user',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    UserImportComponent,
+  ],
   templateUrl: './user.component.html',
   styleUrl: './user.component.css',
 })
@@ -90,6 +98,10 @@ export class UserComponent {
   userRoles: number[] = [];
   userdepts: string[] = [];
 
+  // importer user
+  showImportModal = false;
+  showExportModal = false;
+
   constructor(
     private us: userservice,
     private cdr: ChangeDetectorRef,
@@ -101,6 +113,7 @@ export class UserComponent {
     private st: siteservice,
     private toast: ToastrService,
     private router: Router,
+    private importExportService: UserImportExportService,
   ) {}
 
   ngOnInit(): void {
@@ -621,5 +634,38 @@ export class UserComponent {
   }
   tonumber(idrole: any) {
     return Number(idrole);
+  }
+
+  // import/export
+  openImportModal(): void {
+    this.showImportModal = true;
+  }
+
+  onImportComplete(result: ImportResult): void {
+    // Rafraîchir la liste des utilisateurs
+    this.getallusers();
+
+    if (result.success.length > 0) {
+      this.toast.success(`${result.success.length} utilisateur(s) importé(s)`);
+    }
+  }
+
+  exportUsers(): void {
+    this.importExportService.exportUsers().subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `utilisateurs_${Date.now()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        this.toast.success('Export réussi');
+      },
+      error: () => {
+        this.toast.error("Erreur lors de l'export");
+      },
+    });
   }
 }
