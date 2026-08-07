@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import {
   APP_ROOT,
   APP_ROOT_DONNEE_BASE_DEVISE,
@@ -39,10 +39,15 @@ import {
   APP_ROOT_OPERATION_GENERAL_JUSITIFIER_LIST,
 } from '../../../_core/routes/frontend.root';
 
-import { RouterLink, RouterModule, RouterOutlet } from '@angular/router';
+import {
+  NavigationEnd,
+  Router,
+  RouterLink,
+  RouterModule,
+} from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MenuService } from '../services/menu.service';
-import { Subscription } from 'rxjs';
+import { filter, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-layout-menu',
@@ -51,6 +56,7 @@ import { Subscription } from 'rxjs';
   styleUrl: './layout-menu.component.css',
 })
 export class LayoutMenuComponent implements OnInit, OnDestroy {
+  // ========== ROUTES ==========
   root_banque = APP_ROOT_BANQUE_DONNEE_BASE;
   root_taux = APP_ROOT_TAUX_DONNEE_BASE;
   root_tiers = APP_ROOT_TIERS_DONNEE_BASE;
@@ -87,8 +93,10 @@ export class LayoutMenuComponent implements OnInit, OnDestroy {
   root_detail_demande = APP_ROOT_DETAILDEAMNDE_CONSULTATION;
   root_cloture_caisse = APP_ROOT_CLOTURECAISSE_CONSULTATION;
   root_solde_caisse = APP_ROOT_SOLDECAISSE_CONSULTATION;
-  root_list_decaissements_justifies = APP_ROOT_OPERATION_GENERAL_JUSITIFIER_LIST;
+  root_list_decaissements_justifies =
+    APP_ROOT_OPERATION_GENERAL_JUSITIFIER_LIST;
 
+  // ========== RÔLES ==========
   admin: boolean = false;
   supervisor: boolean = false;
   caissier: boolean = false;
@@ -96,29 +104,179 @@ export class LayoutMenuComponent implements OnInit, OnDestroy {
   superadmin: boolean = false;
   demandeur: boolean = false;
 
-  // responsive
+  // ========== ÉTAT DU MENU LATÉRAL ==========
   isMenuOpen = false;
   private menuSubscription!: Subscription;
 
-  constructor(private menuService: MenuService) {}
+  // ========== GESTION DES SOUS-MENUS ==========
+  openSubMenus: Set<string> = new Set();
+  private routerSubscription: any;
+
+  constructor(
+    private menuService: MenuService,
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
-    // Écoute les changements d'état du menu
+    // Écoute les changements d'état du menu latéral
     this.menuSubscription = this.menuService.isMenuOpen$.subscribe((isOpen) => {
       this.isMenuOpen = isOpen;
     });
+
+    // Écouter les changements de route pour fermer les sous-menus
+    this.routerSubscription = this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe(() => {
+        // On ne ferme pas tout, on garde les menus actifs
+        this.updateActiveMenus();
+      });
   }
 
   ngOnDestroy(): void {
     this.menuSubscription.unsubscribe();
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+    }
   }
 
+  // ========== MÉTHODES DE GESTION DU MENU LATÉRAL ==========
+
   /**
-   * Ferme le menu
+   * Ferme le menu latéral (mobile)
    */
   closeMenu(): void {
     this.menuService.setMenuState(false);
   }
+
+  // ========== MÉTHODES DE GESTION DES SOUS-MENUS ==========
+
+  /**
+   * Vérifie si un sous-menu est ouvert
+   */
+  isSubMenuOpen(menuId: string): boolean {
+    return this.openSubMenus.has(menuId);
+  }
+
+  /**
+   * Vérifie si un sous-menu est actif (contient une route active)
+   */
+  isSubMenuActive(menuId: string): boolean {
+    const menuElement = document.getElementById(menuId);
+    if (!menuElement) return false;
+
+    const links = menuElement.querySelectorAll('a[routerLink]');
+    let isActive = false;
+    links.forEach((link: any) => {
+      const route = link.getAttribute('routerLink');
+      if (route && this.isRouteActive(route)) {
+        isActive = true;
+      }
+    });
+    return isActive;
+  }
+
+  /**
+   * Vérifie si une route est active
+   */
+  isRouteActive(route: string): boolean {
+    if (!route) return false;
+    return this.router.url.includes(route);
+  }
+
+  /**
+   * Bascule l'état d'un sous-menu avec gestion des niveaux
+   * @param menuId - L'ID du menu à basculer
+   * @param event - L'événement de clic
+   * @param parentId - L'ID du menu parent (pour les sous-sous-menus)
+   */
+  toggleSubMenu(menuId: string, event?: Event, parentId?: string): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    // Si le menu est déjà ouvert
+    if (this.openSubMenus.has(menuId)) {
+      // Pour les sous-menus de niveau 1, on peut les fermer
+      // Pour les sous-sous-menus, on les garde ouverts
+      if (!parentId) {
+        this.openSubMenus.delete(menuId);
+      }
+      return;
+    }
+
+    // Si c'est un sous-sous-menu, on garde le parent ouvert
+    if (parentId) {
+      // S'assurer que le parent est ouvert
+      this.openSubMenus.add(parentId);
+    }
+
+    // Fermer tous les autres menus du même niveau
+    const menusToClose: string[] = [];
+    this.openSubMenus.forEach((id) => {
+      // Ne pas fermer les menus parents si on est dans un sous-sous-menu
+      if (parentId && id === parentId) return;
+      menusToClose.push(id);
+    });
+
+    menusToClose.forEach((id) => this.openSubMenus.delete(id));
+
+    // Ouvrir le menu
+    this.openSubMenus.add(menuId);
+  }
+
+  /**
+   * Ouvre un sous-menu et ferme les autres
+   */
+  openSubMenu(menuId: string, parentId?: string): void {
+    // Si c'est un sous-sous-menu, garder le parent ouvert
+    if (parentId) {
+      this.openSubMenus.add(parentId);
+    }
+
+    // Fermer tous les autres
+    const menusToClose: string[] = [];
+    this.openSubMenus.forEach((id) => {
+      if (id !== menuId && id !== parentId) {
+        menusToClose.push(id);
+      }
+    });
+    menusToClose.forEach((id) => this.openSubMenus.delete(id));
+
+    this.openSubMenus.add(menuId);
+  }
+
+  /**
+   * Ferme tous les sous-menus sauf un
+   */
+  closeOtherMenus(keepOpen: string | null): void {
+    this.openSubMenus.clear();
+    if (keepOpen) {
+      this.openSubMenus.add(keepOpen);
+    }
+  }
+
+  /**
+   * Met à jour les menus actifs après un changement de route
+   */
+  private updateActiveMenus(): void {
+    // Récupérer tous les menus qui ont un lien actif
+    const activeMenuIds: string[] = [];
+    const menuElements = document.querySelectorAll('.menu-dropdown');
+
+    menuElements.forEach((element) => {
+      const menuId = element.id;
+      if (menuId && this.isSubMenuActive(menuId)) {
+        activeMenuIds.push(menuId);
+      }
+    });
+
+    // Garder uniquement les menus actifs ouverts
+    this.openSubMenus.clear();
+    activeMenuIds.forEach((id) => this.openSubMenus.add(id));
+  }
+
+  // ========== MÉTHODES DE VÉRIFICATION DES RÔLES ==========
 
   isuperadmin(): boolean {
     if (typeof window !== 'undefined') {

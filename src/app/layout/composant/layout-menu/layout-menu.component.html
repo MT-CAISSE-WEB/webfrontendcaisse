@@ -2,7 +2,6 @@
 <div class="app-menu navbar-menu" [class.menu-open]="isMenuOpen">
   <!-- LOGO -->
   <div class="navbar-brand-box">
-    <!-- Dark Logo-->
     <a href="#" class="logo logo-dark">
       <span class="logo-sm">
         <img src="assets/images/logo_caisse_bg.png" alt="" height="80" />
@@ -11,7 +10,6 @@
         <img src="assets/images/logo_caisse_bg.png" alt="" height="80" />
       </span>
     </a>
-    <!-- Light Logo-->
     <a href="#" class="logo logo-light">
       <span class="logo-sm">
         <img src="assets/images/logocaisse.png" alt="" height="80" />
@@ -26,31 +24,39 @@
     <div class="container-fluid">
       <div id="two-column-menu"></div>
       <ul class="navbar-nav">
+        <!-- Administration -->
         <div *ngIf="isadmin() || isuperadmin()">
           <li class="menu-title">
             <i class="ri-more-fill"></i>
             <span data-key="t-pages">Administration</span>
           </li>
 
-          <li class="nav-item">
+          <!-- Users avec sous-menu -->
+          <li
+            class="nav-item"
+            [class.menu-open]="isSubMenuOpen('sidebarLanding')"
+          >
             <a
               class="nav-link menu-link"
-              href="#sidebarLanding"
-              data-bs-toggle="collapse"
-              role="button"
-              aria-expanded="false"
-              aria-controls="sidebarLanding"
+              (click)="toggleSubMenu('sidebarLanding', $event)"
+              [class.active]="isSubMenuActive('sidebarLanding')"
             >
               <i class="ri-account-circle-line"></i>
               <span data-key="t-landing">Users</span>
+              <i class="ri-arrow-down-s-line menu-arrow"></i>
             </a>
-            <div class="collapse menu-dropdown" id="sidebarLanding">
+            <div
+              class="menu-dropdown"
+              [class.show]="isSubMenuOpen('sidebarLanding')"
+            >
               <ul class="nav nav-sm flex-column">
                 <li class="nav-item">
                   <a
                     [routerLink]="root_utilisateur"
                     class="nav-link"
                     data-key="t-one-page"
+                    [class.active]="isRouteActive(root_utilisateur)"
+                    (click)="closeOtherMenus('sidebarLanding')"
                   >
                     Utilisateurs
                   </a>
@@ -59,20 +65,36 @@
             </div>
           </li>
 
+          <!-- Rôles & Permissions (lien simple) -->
+          <li class="nav-item" *ngIf="isuperadmin()">
+            <a
+              [routerLink]="root_role"
+              class="nav-link"
+              data-key="t-role"
+              [class.active]="isRouteActive(root_role)"
+              (click)="closeOtherMenus(null)"
+            >
+              <i class="ri-tools-line"></i>
+              <span data-key="t-landing">Rôles & Permissions</span>
+            </a>
+          </li>
+
+          <!-- Workflow (lien simple) -->
           <li class="nav-item">
-            <div *ngIf="isuperadmin()">
-              <a [routerLink]="root_role" class="nav-link" data-key="t-role"
-                ><i class="ri-tools-line"> </i
-                ><span data-key="t-landing">Rôles & Permissions</span>
-              </a>
-            </div>
-            <a [routerLink]="root_workflow" class="nav-link" data-key="t-role"
-              ><i class="ri-refresh-line"> </i
-              ><span data-key="t-landing"> Worflow </span>
+            <a
+              [routerLink]="root_workflow"
+              class="nav-link"
+              data-key="t-role"
+              [class.active]="isRouteActive(root_workflow)"
+              (click)="closeOtherMenus(null)"
+            >
+              <i class="ri-refresh-line"></i>
+              <span data-key="t-landing">Workflow</span>
             </a>
           </li>
         </div>
 
+        <!-- Paramétrages -->
         <div
           *ngIf="
             isadmin() ||
@@ -87,19 +109,24 @@
           </li>
 
           <div *ngIf="isadmin() || issuperviseur() || isuperadmin()">
-            <li class="nav-item">
+            <!-- Structure avec sous-menu -->
+            <li
+              class="nav-item"
+              [class.menu-open]="isSubMenuOpen('sidebarDashboards')"
+            >
               <a
                 class="nav-link menu-link"
-                href="#sidebarDashboards"
-                data-bs-toggle="collapse"
-                role="button"
-                aria-expanded="false"
-                aria-controls="sidebarDashboards"
+                (click)="toggleSubMenu('sidebarDashboards', $event)"
+                [class.active]="isSubMenuActive('sidebarDashboards')"
               >
                 <i class="ri-dashboard-2-line"></i>
                 <span data-key="t-dashboards">Structure</span>
+                <i class="ri-arrow-down-s-line menu-arrow"></i>
               </a>
-              <div class="collapse menu-dropdown" id="sidebarDashboards">
+              <div
+                class="menu-dropdown"
+                [class.show]="isSubMenuOpen('sidebarDashboards')"
+              >
                 <ul class="nav nav-sm flex-column">
                   <div *ngIf="isadmin() || isuperadmin()">
                     <li class="nav-item">
@@ -107,8 +134,10 @@
                         [routerLink]="root_societe"
                         class="nav-link"
                         data-key="t-analytics"
+                        [class.active]="isRouteActive(root_societe)"
+                        (click)="closeOtherMenus('sidebarDashboards')"
                       >
-                        Societe
+                        Société
                       </a>
                     </li>
                     <li class="nav-item">
@@ -116,6 +145,8 @@
                         [routerLink]="root_site"
                         class="nav-link"
                         data-key="t-crm"
+                        [class.active]="isRouteActive(root_site)"
+                        (click)="closeOtherMenus('sidebarDashboards')"
                       >
                         Site
                       </a>
@@ -127,6 +158,8 @@
                         [routerLink]="root_departement"
                         class="nav-link"
                         data-key="t-ecommerce"
+                        [class.active]="isRouteActive(root_departement)"
+                        (click)="closeOtherMenus('sidebarDashboards')"
                       >
                         Département
                       </a>
@@ -138,39 +171,47 @@
           </div>
         </div>
 
+        <!-- Données de base -->
         <div
           *ngIf="
             iscomptable() || issuperviseur() || iscaissier() || isuperadmin()
           "
         >
-          <!-- end Menu donnees de base -->
-          <li class="nav-item">
+          <li class="nav-item" [class.menu-open]="isSubMenuOpen('sidebarDb')">
             <a
               class="nav-link menu-link"
-              href="#sidebarDb"
-              data-bs-toggle="collapse"
-              role="button"
-              aria-expanded="false"
-              aria-controls="sidebarApps"
+              (click)="toggleSubMenu('sidebarDb', $event)"
+              [class.active]="isSubMenuActive('sidebarDb')"
             >
               <i class="ri-apps-2-line"></i>
               <span data-key="t-apps">Données de base</span>
+              <i class="ri-arrow-down-s-line menu-arrow"></i>
             </a>
-            <div class="collapse menu-dropdown" id="sidebarDb">
+            <div
+              class="menu-dropdown"
+              [class.show]="isSubMenuOpen('sidebarDb')"
+            >
               <ul class="nav nav-sm flex-column">
-                <li class="nav-item">
+                <!-- Devise avec sous-sous-menu -->
+                <li
+                  class="nav-item"
+                  [class.menu-open]="isSubMenuOpen('sidebarProfile')"
+                >
                   <a
-                    href="#sidebarProfile"
                     class="nav-link"
-                    data-bs-toggle="collapse"
-                    role="button"
-                    aria-expanded="false"
-                    aria-controls="sidebarProfile"
+                    (click)="
+                      toggleSubMenu('sidebarProfile', $event, 'sidebarDb')
+                    "
+                    [class.active]="isSubMenuActive('sidebarProfile')"
                     data-key="t-profile"
                   >
                     Devise
+                    <i class="ri-arrow-down-s-line menu-arrow-sub"></i>
                   </a>
-                  <div class="collapse menu-dropdown" id="sidebarProfile">
+                  <div
+                    class="menu-dropdown sub-menu-dropdown"
+                    [class.show]="isSubMenuOpen('sidebarProfile')"
+                  >
                     <ul class="nav nav-sm flex-column">
                       <div
                         *ngIf="
@@ -182,73 +223,93 @@
                             [routerLink]="root_devise"
                             class="nav-link"
                             data-key="t-simple-page"
-                            >Devise</a
+                            [class.active]="isRouteActive(root_devise)"
+                            (click)="closeOtherMenus('sidebarProfile')"
                           >
+                            Devise
+                          </a>
                         </li>
                       </div>
-
                       <li class="nav-item">
                         <a
                           [routerLink]="root_taux"
                           class="nav-link"
                           data-key="t-settings"
-                          >Taux de devise</a
+                          [class.active]="isRouteActive(root_taux)"
+                          (click)="closeOtherMenus('sidebarProfile')"
                         >
+                          Taux de devise
+                        </a>
                       </li>
                     </ul>
                   </div>
                 </li>
 
+                <!-- Plan comptable -->
                 <div *ngIf="iscomptable() || issuperviseur() || isuperadmin()">
                   <li class="nav-item">
                     <a
                       [routerLink]="root_plan_comptable"
                       class="nav-link"
                       data-key="t-chat"
+                      [class.active]="isRouteActive(root_plan_comptable)"
+                      (click)="closeOtherMenus('sidebarDb')"
                     >
                       Plan comptable
                     </a>
                   </li>
                 </div>
 
+                <!-- Nature opération -->
                 <li class="nav-item">
                   <a
                     [routerLink]="root_nature_operation"
                     class="nav-link"
                     data-key="t-calendar"
+                    [class.active]="isRouteActive(root_nature_operation)"
+                    (click)="closeOtherMenus('sidebarDb')"
                   >
                     Nature opération
                   </a>
                 </li>
 
+                <!-- Centre analytique -->
                 <div *ngIf="iscomptable() || issuperviseur() || isuperadmin()">
                   <li class="nav-item">
                     <a
                       [routerLink]="root_centre_analytique"
                       class="nav-link"
                       data-key="t-settings"
+                      [class.active]="isRouteActive(root_centre_analytique)"
+                      (click)="closeOtherMenus('sidebarDb')"
                     >
                       Centre analytique
                     </a>
                   </li>
                 </div>
 
+                <!-- Tiers -->
                 <li class="nav-item">
                   <a
                     [routerLink]="root_tiers"
                     class="nav-link"
                     data-key="t-chat"
+                    [class.active]="isRouteActive(root_tiers)"
+                    (click)="closeOtherMenus('sidebarDb')"
                   >
                     Tiers
                   </a>
                 </li>
 
+                <!-- Affectations -->
                 <div *ngIf="iscomptable() || issuperviseur() || isuperadmin()">
                   <li class="nav-item">
                     <a
                       [routerLink]="root_aff_dept_nature"
                       class="nav-link"
                       data-key="t-chat"
+                      [class.active]="isRouteActive(root_aff_dept_nature)"
+                      (click)="closeOtherMenus('sidebarDb')"
                     >
                       Affectation Département - Nature
                     </a>
@@ -258,6 +319,8 @@
                       [routerLink]="root_aff_nature_centre"
                       class="nav-link"
                       data-key="t-chat"
+                      [class.active]="isRouteActive(root_aff_nature_centre)"
+                      (click)="closeOtherMenus('sidebarDb')"
                     >
                       Affectation Nature - CentreAnalytique
                     </a>
@@ -268,27 +331,30 @@
           </li>
         </div>
 
+        <!-- Caisse et Journal -->
         <div *ngIf="iscomptable() || issuperviseur() || isuperadmin()">
-          <!-- end Caisse Journal -->
-          <li class="nav-item">
+          <li class="nav-item" [class.menu-open]="isSubMenuOpen('sidebarApps')">
             <a
               class="nav-link menu-link"
-              href="#sidebarApps"
-              data-bs-toggle="collapse"
-              role="button"
-              aria-expanded="false"
-              aria-controls="sidebarApps"
+              (click)="toggleSubMenu('sidebarApps', $event)"
+              [class.active]="isSubMenuActive('sidebarApps')"
             >
               <i class="ri-stack-line"></i>
               <span data-key="t-apps">Caisse et Journal</span>
+              <i class="ri-arrow-down-s-line menu-arrow"></i>
             </a>
-            <div class="collapse menu-dropdown" id="sidebarApps">
+            <div
+              class="menu-dropdown"
+              [class.show]="isSubMenuOpen('sidebarApps')"
+            >
               <ul class="nav nav-sm flex-column">
                 <li class="nav-item">
                   <a
                     [routerLink]="root_journal"
                     class="nav-link"
                     data-key="t-calendar"
+                    [class.active]="isRouteActive(root_journal)"
+                    (click)="closeOtherMenus('sidebarApps')"
                   >
                     Journal
                   </a>
@@ -298,6 +364,8 @@
                     [routerLink]="root_caisse"
                     class="nav-link"
                     data-key="t-chat"
+                    [class.active]="isRouteActive(root_caisse)"
+                    (click)="closeOtherMenus('sidebarApps')"
                   >
                     Caisse
                   </a>
@@ -307,7 +375,10 @@
                     [routerLink]="root_affectation_caissier"
                     class="nav-link"
                     data-key="t-calendar"
-                    >Affectation caissier
+                    [class.active]="isRouteActive(root_affectation_caissier)"
+                    (click)="closeOtherMenus('sidebarApps')"
+                  >
+                    Affectation caissier
                   </a>
                 </li>
               </ul>
@@ -315,42 +386,54 @@
           </li>
         </div>
 
+        <!-- Gestion du budget -->
         <div *ngIf="iscomptable() || issuperviseur() || isuperadmin()">
-          <li class="nav-item">
+          <li
+            class="nav-item"
+            [class.menu-open]="isSubMenuOpen('sidebarBudget')"
+          >
             <a
               class="nav-link menu-link"
-              href="#sidebarBudget"
-              data-bs-toggle="collapse"
-              role="button"
-              aria-expanded="false"
-              aria-controls="sidebarDashboards"
+              (click)="toggleSubMenu('sidebarBudget', $event)"
+              [class.active]="isSubMenuActive('sidebarBudget')"
             >
               <i class="ri-honour-line"></i>
               <span data-key="t-dashboards">Gestion du budget</span>
+              <i class="ri-arrow-down-s-line menu-arrow"></i>
             </a>
-            <div class="collapse menu-dropdown" id="sidebarBudget">
+            <div
+              class="menu-dropdown"
+              [class.show]="isSubMenuOpen('sidebarBudget')"
+            >
               <ul class="nav nav-sm flex-column">
                 <li class="nav-item">
                   <a
                     [routerLink]="root_budget"
                     class="nav-link"
                     data-key="t-analytics"
-                    >Budget</a
+                    [class.active]="isRouteActive(root_budget)"
+                    (click)="closeOtherMenus('sidebarBudget')"
                   >
+                    Budget
+                  </a>
                 </li>
                 <li class="nav-item">
                   <a
                     [routerLink]="root_ligne_budget"
                     class="nav-link"
                     data-key="t-crm"
-                    >Lignes du budget</a
+                    [class.active]="isRouteActive(root_ligne_budget)"
+                    (click)="closeOtherMenus('sidebarBudget')"
                   >
+                    Lignes du budget
+                  </a>
                 </li>
               </ul>
             </div>
           </li>
         </div>
 
+        <!-- Opérations -->
         <div
           *ngIf="
             issuperviseur() ||
@@ -365,37 +448,42 @@
             <span data-key="t-menu">Opérations</span>
           </li>
 
-          <!-- end Générales -->
-          <li class="nav-item">
+          <li class="nav-item" [class.menu-open]="isSubMenuOpen('sidebarOPS')">
             <a
               class="nav-link menu-link"
-              href="#sidebarOPS"
-              data-bs-toggle="collapse"
-              role="button"
-              aria-expanded="false"
-              aria-controls="sidebarOPS"
+              (click)="toggleSubMenu('sidebarOPS', $event)"
+              [class.active]="isSubMenuActive('sidebarOPS')"
             >
               <i class="ri-stack-line"></i>
               <span data-key="t-apps">Générales</span>
+              <i class="ri-arrow-down-s-line menu-arrow"></i>
             </a>
-            <div class="collapse menu-dropdown" id="sidebarOPS">
+            <div
+              class="menu-dropdown"
+              [class.show]="isSubMenuOpen('sidebarOPS')"
+            >
               <ul class="nav nav-sm flex-column">
                 <li class="nav-item">
                   <a
                     [routerLink]="root_demande_decaissement"
                     class="nav-link"
                     data-key="t-demande"
-                    >Demande de décaissement</a
+                    [class.active]="isRouteActive(root_demande_decaissement)"
+                    (click)="closeOtherMenus('sidebarOPS')"
                   >
+                    Demande de décaissement
+                  </a>
                 </li>
-
                 <div *ngIf="iscaissier() || issuperviseur() || isuperadmin()">
                   <li class="nav-item">
                     <a
                       [routerLink]="root_operation"
                       class="nav-link"
                       data-key="t-caisse"
-                      >Opération caisse
+                      [class.active]="isRouteActive(root_operation)"
+                      (click)="closeOtherMenus('sidebarOPS')"
+                    >
+                      Opération caisse
                     </a>
                   </li>
                   <li class="nav-item">
@@ -403,8 +491,13 @@
                       [routerLink]="root_list_decaissements_justifies"
                       class="nav-link"
                       data-key="t-operation"
-                      >Justificatif des opérations</a
+                      [class.active]="
+                        isRouteActive(root_list_decaissements_justifies)
+                      "
+                      (click)="closeOtherMenus('sidebarOPS')"
                     >
+                      Justificatif des opérations
+                    </a>
                   </li>
                 </div>
               </ul>
@@ -412,6 +505,7 @@
           </li>
         </div>
 
+        <!-- Consultations -->
         <div
           *ngIf="
             issuperviseur() || iscomptable() || iscaissier() || isuperadmin()
@@ -422,79 +516,91 @@
             <span data-key="t-pages">Consultations</span>
           </li>
 
-          <li class="nav-item">
+          <li
+            class="nav-item"
+            [class.menu-open]="isSubMenuOpen('sidebarConsultation')"
+          >
             <a
               class="nav-link menu-link"
-              href="#sidebarConsultation"
-              data-bs-toggle="collapse"
-              role="button"
-              aria-expanded="false"
-              aria-controls="sidebarDashboards"
+              (click)="toggleSubMenu('sidebarConsultation', $event)"
+              [class.active]="isSubMenuActive('sidebarConsultation')"
             >
               <i class="ri-dashboard-2-line"></i>
-              <span data-key="t-dashboards">consultation</span>
+              <span data-key="t-dashboards">Consultation</span>
+              <i class="ri-arrow-down-s-line menu-arrow"></i>
             </a>
-            <div class="collapse menu-dropdown" id="sidebarConsultation">
+            <div
+              class="menu-dropdown"
+              [class.show]="isSubMenuOpen('sidebarConsultation')"
+            >
               <ul class="nav nav-sm flex-column">
                 <li class="nav-item">
                   <a
                     [routerLink]="root_detail_demande"
                     class="nav-link"
                     data-key="t-operationperiode"
+                    [class.active]="isRouteActive(root_detail_demande)"
+                    (click)="closeOtherMenus('sidebarConsultation')"
                   >
-                    Detail des demandes
+                    Détail des demandes
                   </a>
                 </li>
-
                 <li class="nav-item">
                   <a
                     [routerLink]="root_operationperiode"
                     class="nav-link"
                     data-key="t-operationperiode"
+                    [class.active]="isRouteActive(root_operationperiode)"
+                    (click)="closeOtherMenus('sidebarConsultation')"
                   >
                     Journal de paiement
                   </a>
                 </li>
-
                 <div *ngIf="issuperviseur() || iscaissier() || isuperadmin()">
                   <li class="nav-item">
                     <a
                       [routerLink]="root_operationdetail"
                       class="nav-link"
                       data-key="t-operationdetail"
+                      [class.active]="isRouteActive(root_operationdetail)"
+                      (click)="closeOtherMenus('sidebarConsultation')"
                     >
-                      Opération detail de caisse
+                      Opération détail de caisse
                     </a>
                   </li>
                 </div>
-
                 <div *ngIf="issuperviseur() || isuperadmin()">
                   <li class="nav-item">
                     <a
                       [routerLink]="root_suivibudget"
                       class="nav-link"
                       data-key="t-budget"
+                      [class.active]="isRouteActive(root_suivibudget)"
+                      (click)="closeOtherMenus('sidebarConsultation')"
                     >
-                      Evolution budgetaire</a
-                    >
+                      Évolution budgétaire
+                    </a>
                   </li>
                   <li class="nav-item">
                     <a
                       [routerLink]="root_suivibudgetfiltre"
                       class="nav-link"
                       data-key="t-budgets"
+                      [class.active]="isRouteActive(root_suivibudgetfiltre)"
+                      (click)="closeOtherMenus('sidebarConsultation')"
                     >
-                      Prévision budgetaire
+                      Prévision budgétaire
                     </a>
                   </li>
                 </div>
-
                 <div *ngIf="issuperviseur() || isuperadmin() || iscaissier()">
                   <li class="nav-item">
                     <a
                       [routerLink]="root_decaissementjustifiee"
                       class="nav-link"
                       data-key="t-decaissement"
+                      [class.active]="isRouteActive(root_decaissementjustifiee)"
+                      (click)="closeOtherMenus('sidebarConsultation')"
                     >
                       Décaissement et justificatif
                     </a>
@@ -504,6 +610,10 @@
                       [routerLink]="root_nature_operation_departement"
                       class="nav-link"
                       data-key="t-budgets"
+                      [class.active]="
+                        isRouteActive(root_nature_operation_departement)
+                      "
+                      (click)="closeOtherMenus('sidebarConsultation')"
                     >
                       Statistiques
                     </a>
@@ -513,6 +623,8 @@
                       [routerLink]="root_solde_caisse"
                       class="nav-link"
                       data-key="t-solde"
+                      [class.active]="isRouteActive(root_solde_caisse)"
+                      (click)="closeOtherMenus('sidebarConsultation')"
                     >
                       Solde de caisse par date
                     </a>
@@ -522,8 +634,10 @@
                       [routerLink]="root_cloture_caisse"
                       class="nav-link"
                       data-key="t-cloture"
+                      [class.active]="isRouteActive(root_cloture_caisse)"
+                      (click)="closeOtherMenus('sidebarConsultation')"
                     >
-                      Etat de clôture caisse
+                      État de clôture caisse
                     </a>
                   </li>
                 </div>
@@ -532,6 +646,7 @@
           </li>
         </div>
 
+        <!-- Comptabilisation -->
         <div
           *ngIf="
             issuperviseur() || isuperadmin() || iscaissier() || iscomptable()
@@ -541,17 +656,17 @@
             <i class="ri-more-fill"></i>
             <span data-key="t-pages">Comptabilisation</span>
           </li>
-
           <li class="nav-item">
             <a
               [routerLink]="root_comptabilisation"
               class="nav-link"
               data-key="t-comptabilisation"
-              >comptabilisation</a
+              [class.active]="isRouteActive(root_comptabilisation)"
+              (click)="closeOtherMenus(null)"
             >
-
-            <a class="nav-link" data-key="t-comptabilisation"></a>
-            <a class="nav-link" data-key="t-comptabilisation"></a>
+              <i class="ri-book-2-line"></i>
+              <span>Comptabilisation</span>
+            </a>
           </li>
         </div>
       </ul>
@@ -559,10 +674,9 @@
   </div>
 
   <div class="sidebar-background"></div>
-  <!-- Left Sidebar End -->
 </div>
 
-<!-- Vertical Overlay-->
+<!-- Vertical Overlay -->
 <div
   class="vertical-overlay"
   [class.show]="isMenuOpen"

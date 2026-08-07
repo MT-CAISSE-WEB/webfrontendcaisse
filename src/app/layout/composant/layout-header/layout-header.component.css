@@ -785,7 +785,7 @@
   gap: 10px;
   padding: 8px 16px;
   background: rgba(241, 245, 249, 0.6);
-  border-radius: 12px;
+  border-radius: 20px;
   border: 1px solid rgba(226, 232, 240, 0.2);
   transition: all 0.25s ease;
   position: relative;
@@ -894,6 +894,7 @@
   color: #0f172a;
   outline: none;
   font-weight: 500;
+  border-radius: 20px;
 }
 
 .context-search-field::placeholder {

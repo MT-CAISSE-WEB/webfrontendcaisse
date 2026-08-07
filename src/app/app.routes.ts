@@ -99,6 +99,7 @@ import { DecaissementOperationComponent } from './features/consultations/decaiss
 import { EncaissementOperationComponent } from './features/consultations/encaissement-operation/encaissement-operation.component';
 import { OperationJustifieeListComponent } from './features/operations/operation-justifiee-list/operation-justifiee-list.component';
 import { VerificationComponent } from './features/verification/verification.component';
+import { UserImportComponent } from './features/user-import/user-import.component';
 
 export const routes: Routes = [
   {
@@ -310,6 +311,12 @@ export const routes: Routes = [
         component: OperationJustifieeListComponent,
       },
       { path: 'verification', component: VerificationComponent },
+      {
+        path: 'admin/users/import',
+        component: UserImportComponent,
+        canActivate: [AuthGuard],
+        data: { permissions: ['IMPORT_USER'] },
+      },
     ],
   },
 ];

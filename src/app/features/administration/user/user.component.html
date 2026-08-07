@@ -61,6 +61,13 @@
             >
               <i class="ri-refresh-line me-1 align-bottom"></i>Actualiser
             </button>
+
+            <button class="btn-download-template" (click)="openImportModal()">
+              <i class="ri-upload-line me-1"></i> Importer
+            </button>
+            <button class="btn-download-template" (click)="exportUsers()">
+              <i class="ri-download-line me-1"></i> Exporter
+            </button>
           </div>
           <div class="search-container">
             <div class="search-glass">
@@ -769,3 +776,14 @@
     </div>
   </div>
 </div>
+
+<!-- Modal d'import -->
+@if (showImportModal) {
+  <div class="modal-backdrop" (click)="showImportModal = false"></div>
+  <div class="modal-import">
+    <app-user-import
+      (importComplete)="onImportComplete($event)"
+      (close)="showImportModal = false"
+    ></app-user-import>
+  </div>
+}
