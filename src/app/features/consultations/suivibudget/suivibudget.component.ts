@@ -81,7 +81,7 @@ export class SuiviBudgetComponent implements OnInit {
   // Nombre d'éléments par page
   totalPages: number = 0;
   page = 1;
-  limit = 10;
+  limit = 50;
   searchs = '';
 
   isanalytique: number = 1;

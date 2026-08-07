@@ -28,6 +28,7 @@
     "@angular/router": "19.2.20",
     "@angular/ssr": "19.2.20",
     "@ng-bootstrap/ng-bootstrap": "^18.0.0",
+    "@nodelib/fs.scandir": "^4.0.1",
     "@types/pdfjs-dist": "^2.10.377",
     "angular-datatables": "^19.0.0",
     "bootstrap": "^5.3.8",
