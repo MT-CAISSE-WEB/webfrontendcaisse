@@ -267,8 +267,10 @@ export class ConfigComptableComponent implements OnInit {
       next: () => {
         this.toastr.success('Paramètre table de correspondance mis à jour');
       },
-      error: () => {
-        this.toastr.error('Erreur lors de la mise à jour');
+      error: (err) => {
+        console.log('Erreur de mise à jour', err.error.message);
+        const message = err.error.message || 'Erreur lors de la mise à jour';
+        this.toastr.error(message);
         this.correspondanceEnabled = !value;
       },
     });
@@ -309,6 +311,7 @@ export class ConfigComptableComponent implements OnInit {
         next: (newItem) => {
           this.correspondances.push(newItem);
           this.toastr.success('Correspondance ajoutée');
+          this.loadCorrespondances();
           this.resetForm();
         },
         error: (err) => {
@@ -344,6 +347,7 @@ export class ConfigComptableComponent implements OnInit {
           );
           if (index !== -1) this.correspondances[index] = updated;
           this.toastr.success('Correspondance modifiée');
+          this.loadCorrespondances();
           this.resetForm();
         },
         error: (err) => {
@@ -364,6 +368,7 @@ export class ConfigComptableComponent implements OnInit {
           (c) => c.idcorrespondance !== id,
         );
         this.toastr.success('Correspondance supprimée');
+        this.loadCorrespondances();
       },
       error: () => this.toastr.error('Erreur lors de la suppression'),
     });
@@ -435,66 +440,200 @@ export class ConfigComptableComponent implements OnInit {
     this.updatePagination();
   }
 
-  importCorrespondances() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json,.csv'; // formats acceptés
-    input.onchange = (event: any) => {
-      const file = event.target.files[0];
-      if (!file) return;
+  selectedFile: File | null = null;
+  fileName: string = '';
+  isDragging: boolean = false;
+  isImporting: boolean = false;
+  importProgress: number = 0;
+  showImportResults: boolean = false;
+  importResult: any = null;
+  showImportDetails: boolean = false;
 
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        try {
-          let data: any[];
+  /**
+   * Ouvre la modale d'import
+   */
+  openImportModal(): void {
+    this.selectedFile = null;
+    this.fileName = '';
+    this.showImportResults = false;
+    this.importResult = null;
+    this.showImportDetails = false;
+    // Afficher la modale (ajouter la classe 'show')
+    const modal = document.getElementById('importCsvModal');
+    if (modal) {
+      modal.classList.add('show');
+      modal.style.display = 'block';
+      document.body.classList.add('modal-open');
+      // Créer le backdrop si nécessaire
+      let backdrop = document.querySelector('.modal-backdrop');
+      if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        document.body.appendChild(backdrop);
+      }
+    }
+  }
 
-          if (file.name.endsWith('.json')) {
-            data = JSON.parse(e.target.result);
-          } else if (file.name.endsWith('.csv')) {
-            // Conversion CSV -> tableau (exemple basique, améliorez selon votre format)
-            const lines = e.target.result
-              .split('\n')
-              .filter((l: string) => l.trim() !== '');
-            const headers = lines[0].split(','); // suppose que la première ligne contient les noms de colonnes
-            data = lines.slice(1).map((line: string) => {
-              const values = line.split(',');
-              const obj: any = {};
-              headers.forEach((h: string, i: number) => {
-                obj[h.trim()] = values[i]?.trim();
-              });
-              return obj;
-            });
+  /**
+   * Ferme la modale d'import
+   */
+  closeImportModal(): void {
+    const modal = document.getElementById('importCsvModal');
+    if (modal) {
+      modal.classList.remove('show');
+      modal.style.display = 'none';
+      document.body.classList.remove('modal-open');
+      const backdrop = document.querySelector('.modal-backdrop');
+      if (backdrop) {
+        backdrop.remove();
+      }
+    }
+    // Réinitialiser les données
+    this.selectedFile = null;
+    this.fileName = '';
+    this.showImportResults = false;
+    this.importResult = null;
+    this.isImporting = false;
+    this.importProgress = 0;
+  }
+
+  // ========== DRAG & DROP ==========
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      this.handleFile(files[0]);
+    }
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.handleFile(input.files[0]);
+    }
+    // Réinitialiser l'input pour permettre de sélectionner le même fichier
+    input.value = '';
+  }
+
+  private handleFile(file: File): void {
+    // Vérifier l'extension
+    const extension = file.name.split('.').pop()?.toLowerCase();
+    if (extension !== 'csv') {
+      this.toastr.error('Veuillez sélectionner un fichier CSV valide');
+      return;
+    }
+
+    // Vérifier la taille (5MB max)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      this.toastr.error('Le fichier ne doit pas dépasser 5MB');
+      return;
+    }
+
+    this.selectedFile = file;
+    this.fileName = file.name;
+    this.showImportResults = false;
+    this.importResult = null;
+    this.toastr.success('Fichier sélectionné avec succès');
+  }
+
+  // ========== IMPORT ==========
+
+  importFile(): void {
+    if (!this.selectedFile) {
+      this.toastr.warning('Veuillez sélectionner un fichier');
+      return;
+    }
+
+    this.isImporting = true;
+    this.importProgress = 0;
+    this.showImportResults = false;
+
+    // Simulation de progression
+    const interval = setInterval(() => {
+      if (this.importProgress < 90) {
+        this.importProgress += 10;
+      }
+    }, 300);
+
+    this.serviceparametre
+      .importCorrespondancesFromCsv(this.selectedFile)
+      .subscribe({
+        next: (response) => {
+          clearInterval(interval);
+          this.importProgress = 100;
+          this.importResult = response;
+          this.showImportResults = true;
+          this.isImporting = false;
+
+          if (response.success) {
+            console.log('Import réussi', this.importResult.data);
+            if (this.importResult.data.erreurs === 0) {
+              this.toastr.success(
+                `${response.data.importees} correspondances importées sur ${response.data.totalLignes}`,
+                'Import terminé',
+              );
+            } else {
+              this.toastr.warning(
+                `${response.data.importees} correspondances importées sur ${response.data.totalLignes}`,
+                'Import terminé',
+              );
+            }
+
+            // Recharger les correspondances si nécessaire
+            this.loadCorrespondances();
           } else {
-            this.toastr.error(
-              'Format de fichier non supporté. Utilisez JSON ou CSV.',
+            this.toastr.warning(
+              `${response.data.importees} importées, ${response.data.erreurs} erreurs`,
+              'Import partiel',
             );
-            return;
           }
+        },
+        error: (error) => {
+          clearInterval(interval);
+          this.importProgress = 0;
+          this.isImporting = false;
+          this.toastr.error(error.error?.message || "Erreur lors de l'import");
+        },
+      });
+  }
 
-          if (Array.isArray(data) && data.length > 0) {
-            this.serviceparametre.importCorrespondances(data).subscribe({
-              next: () => {
-                this.toastr.success('Correspondances importées avec succès');
-                this.loadCorrespondances(); // recharge la liste
-              },
-              error: (err) => {
-                this.toastr.error(
-                  'Erreur lors de l’import des correspondances',
-                );
-                console.error(err);
-              },
-            });
-          } else {
-            this.toastr.error('Le fichier ne contient aucune donnée valide.');
-          }
-        } catch (err) {
-          this.toastr.error('Erreur de lecture du fichier.');
-          console.error(err);
-        }
-      };
+  // ========== TEMPLATE ==========
 
-      reader.readAsText(file);
-    };
-    input.click();
+  downloadTemplate(): void {
+    const headers = 'codecentreanalytique;correspondance\n';
+    const examples = 'C001;CODE001;\nC002;CODE002\n';
+    const content = headers + examples;
+
+    const blob = new Blob(['\uFEFF' + content], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'template_correspondances.csv';
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes < 1024) return bytes + ' octets';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
   }
 }

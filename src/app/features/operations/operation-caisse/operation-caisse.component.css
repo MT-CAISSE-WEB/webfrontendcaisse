@@ -1963,3 +1963,95 @@
     font-size: 0.55rem;
   }
 }
+
+/* ============================================
+   STATISTIQUES - DESIGN PREMIUM
+   ============================================ */
+
+/* Badge de tendance */
+.stats-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  transition: all 0.3s ease;
+  background: rgba(64, 81, 137, 0.06);
+  color: #64748b;
+}
+
+/* Tendance positive (bonne) */
+.stats-trend.positive {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+
+.stats-trend.positive i {
+  color: #10b981;
+  animation: pulseUp 1.5s ease-in-out infinite;
+}
+
+/* Tendance négative (mauvaise) */
+.stats-trend.negative {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+.stats-trend.negative i {
+  color: #ef4444;
+  animation: pulseDown 1.5s ease-in-out infinite;
+}
+
+/* Tendance neutre */
+.stats-trend.neutral {
+  background: rgba(100, 116, 139, 0.08);
+  color: #94a3b8;
+}
+
+.stats-trend.neutral i {
+  color: #94a3b8;
+  animation: none;
+}
+
+/* Effet de survol */
+.stats-trend:hover {
+  transform: scale(1.05);
+}
+
+.stats-trend.positive:hover {
+  background: rgba(16, 185, 129, 0.2);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15);
+}
+
+.stats-trend.negative:hover {
+  background: rgba(239, 68, 68, 0.2);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.15);
+}
+
+/* Animations des flèches */
+@keyframes pulseUp {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseDown {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}

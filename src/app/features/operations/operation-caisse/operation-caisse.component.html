@@ -452,6 +452,7 @@
 
 <!-- ==================== STATISTIQUES ==================== -->
 <div class="row mt-4">
+  <!-- Carte 1: Décaissement -->
   <div class="col-xl-4 col-md-4">
     <div class="card-glass-stats">
       <div class="card-body-glass p-3">
@@ -460,8 +461,14 @@
             <p class="stats-label">Décaissement</p>
           </div>
           <div class="flex-shrink-0">
-            <span class="stats-trend positive">
-              <i class="ri-arrow-right-up-line"></i> +89.24%
+            <span
+              class="stats-trend"
+              [class.positive]="tendanceDecaissement.direction === 'down'"
+              [class.negative]="tendanceDecaissement.direction === 'up'"
+              [class.neutral]="tendanceDecaissement.valeur === 0"
+            >
+              <i [class]="getTendanceIcon(tendanceDecaissement.direction)"></i>
+              {{ formatTendance(tendanceDecaissement.valeur) }}
             </span>
           </div>
         </div>
@@ -483,6 +490,7 @@
     </div>
   </div>
 
+  <!-- Carte 2: Plus couteux -->
   <div class="col-xl-4 col-md-4">
     <div class="card-glass-stats">
       <div class="card-body-glass p-3">
@@ -491,8 +499,14 @@
             <p class="stats-label">Plus couteux</p>
           </div>
           <div class="flex-shrink-0">
-            <span class="stats-trend negative">
-              <i class="ri-arrow-right-down-line"></i> +8.09%
+            <span
+              class="stats-trend"
+              [class.positive]="tendancePlusCouteux.direction === 'up'"
+              [class.negative]="tendancePlusCouteux.direction === 'down'"
+              [class.neutral]="tendancePlusCouteux.valeur === 0"
+            >
+              <i [class]="getTendanceIcon(tendancePlusCouteux.direction)"></i>
+              {{ formatTendance(tendancePlusCouteux.valeur) }}
             </span>
           </div>
         </div>
@@ -515,6 +529,7 @@
     </div>
   </div>
 
+  <!-- Carte 3: Moins couteux -->
   <div class="col-xl-4 col-md-4">
     <div class="card-glass-stats">
       <div class="card-body-glass p-3">
@@ -523,8 +538,14 @@
             <p class="stats-label">Moins couteux</p>
           </div>
           <div class="flex-shrink-0">
-            <span class="stats-trend negative">
-              <i class="ri-arrow-right-down-line"></i> +9.01%
+            <span
+              class="stats-trend"
+              [class.positive]="tendanceMoinsCouteux.direction === 'up'"
+              [class.negative]="tendanceMoinsCouteux.direction === 'down'"
+              [class.neutral]="tendanceMoinsCouteux.valeur === 0"
+            >
+              <i [class]="getTendanceIcon(tendanceMoinsCouteux.direction)"></i>
+              {{ formatTendance(tendanceMoinsCouteux.valeur) }}
             </span>
           </div>
         </div>

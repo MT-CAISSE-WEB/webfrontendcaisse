@@ -427,11 +427,41 @@ export class OperationCaisseComponent implements OnInit {
 
   tryComputeMaxDecaissement() {
     if (this.stats?.length && this.caisseperiodes?.length) {
-      this.maxDecaissementJour = this.getMaxDecaissementDuJour().opmax;
-      this.minDecaissementJour = this.getMaxDecaissementDuJour().opmin;
-      this.nbrDecaissementJour = this.getMaxDecaissementDuJour().taille;
-      this.totalDecaissementJour = this.getMaxDecaissementDuJour().total;
+      const statsActuelles = this.getStatsForCurrentCaisseDate();
+
+      this.maxDecaissementJour = statsActuelles.opmax;
+      this.minDecaissementJour = statsActuelles.opmin;
+      this.nbrDecaissementJour = this.getNombreDecaissementsJour();
+      this.totalDecaissementJour = statsActuelles.total;
+
+      // ✅ CALCULER LES TENDANCES avec les dates de caisse
+      this.calculerTendances();
     }
+  }
+
+  /**
+   * Récupère le nombre de décaissements du jour
+   */
+  getNombreDecaissementsJour(): number {
+    if (!this.stats || this.stats.length === 0) return 0;
+
+    const currentDate = this.getCurrentCaisseDate();
+    if (!currentDate) return 0;
+
+    const dateStr = this.toDateOnly(currentDate);
+
+    const decaissements = this.stats.filter(
+      (op: any) =>
+        op.codtypeoperation !== 'encaissement' &&
+        this.toDateOnly(op.dateperiode) === dateStr,
+    );
+
+    // Compter les opérations uniques
+    const operationsUniques = new Set(
+      decaissements.map((op: any) => op.idoperation),
+    );
+
+    return operationsUniques.size;
   }
 
   getMaxDecaissementDuJour(): any {
@@ -1407,5 +1437,241 @@ export class OperationCaisseComponent implements OnInit {
       });
       this.selectedFiles.push(...validFiles);
     }
+  }
+
+  // operation-caisse.component.ts
+
+  // Ajouter ces propriétés pour les tendances
+  tendanceDecaissement: { valeur: number; direction: 'up' | 'down' } = {
+    valeur: 0,
+    direction: 'up',
+  };
+  tendancePlusCouteux: { valeur: number; direction: 'up' | 'down' } = {
+    valeur: 0,
+    direction: 'up',
+  };
+  tendanceMoinsCouteux: { valeur: number; direction: 'up' | 'down' } = {
+    valeur: 0,
+    direction: 'up',
+  };
+
+  // Ajouter ces propriétés pour les statistiques comparatives
+  statsPrecedentes: {
+    totalDecaissement: number;
+    maxDecaissement: number;
+    minDecaissement: number;
+  } | null = null;
+
+  /**
+   * Calcule les tendances en comparant avec la période de caisse précédente
+   */
+  calculerTendances(): void {
+    if (!this.stats || this.stats.length === 0) {
+      this.tendanceDecaissement = { valeur: 0, direction: 'up' };
+      this.tendancePlusCouteux = { valeur: 0, direction: 'up' };
+      this.tendanceMoinsCouteux = { valeur: 0, direction: 'up' };
+      return;
+    }
+
+    // Récupérer les statistiques actuelles (jour de caisse actuel)
+    const statsActuelles = this.getStatsForCurrentCaisseDate();
+
+    // Récupérer les statistiques du jour de caisse précédent
+    const statsPrecedentes = this.getStatsForPreviousCaisseDate();
+
+    // Calculer les tendances
+    // 1. Décaissement total
+    if (statsPrecedentes && statsPrecedentes.total > 0) {
+      const variation =
+        ((statsActuelles.total - statsPrecedentes.total) /
+          statsPrecedentes.total) *
+        100;
+      this.tendanceDecaissement = {
+        valeur: Math.abs(variation),
+        direction: variation >= 0 ? 'up' : 'down',
+      };
+    } else {
+      this.tendanceDecaissement = { valeur: 0, direction: 'up' };
+    }
+
+    // 2. Plus couteux (max)
+    if (statsPrecedentes && statsPrecedentes.max > 0) {
+      const variation =
+        (((statsActuelles.opmax?.montantref || 0) - statsPrecedentes.max) /
+          statsPrecedentes.max) *
+        100;
+      this.tendancePlusCouteux = {
+        valeur: Math.abs(variation),
+        direction: variation >= 0 ? 'up' : 'down',
+      };
+    } else {
+      this.tendancePlusCouteux = { valeur: 0, direction: 'up' };
+    }
+
+    // 3. Moins couteux (min)
+    if (statsPrecedentes && statsPrecedentes.min > 0) {
+      const variation =
+        (((statsActuelles.opmin?.montantref || 0) - statsPrecedentes.min) /
+          statsPrecedentes.min) *
+        100;
+      this.tendanceMoinsCouteux = {
+        valeur: Math.abs(variation),
+        direction: variation >= 0 ? 'up' : 'down',
+      };
+    } else {
+      this.tendanceMoinsCouteux = { valeur: 0, direction: 'up' };
+    }
+  }
+
+  /**
+   * Récupère la date de la caisse actuelle
+   */
+  getCurrentCaisseDate(): string | null {
+    if (!this.caisseperiodes || this.caisseperiodes.length === 0) return null;
+
+    // Retourner la date de la première période (toutes ont la même date)
+    return this.caisseperiodes[0]?.dateperiode || null;
+  }
+
+  /**
+   * Récupère la date de la caisse précédente (jour - 1)
+   */
+  getPreviousCaisseDate(): string | null {
+    const currentDate = this.getCurrentCaisseDate();
+    if (!currentDate) return null;
+
+    const date = new Date(currentDate);
+    date.setDate(date.getDate() - 1);
+
+    return date.toISOString().split('T')[0];
+  }
+
+  /**
+   * Récupère les statistiques pour la date de caisse actuelle
+   */
+  getStatsForCurrentCaisseDate(): any {
+    if (!this.stats || this.stats.length === 0) {
+      return { total: 0, opmax: null, opmin: null };
+    }
+
+    const currentDate = this.getCurrentCaisseDate();
+    if (!currentDate) return { total: 0, opmax: null, opmin: null };
+
+    const dateStr = this.toDateOnly(currentDate);
+
+    const decaissements = this.stats.filter(
+      (op: any) =>
+        op.codtypeoperation !== 'encaissement' &&
+        this.toDateOnly(op.dateperiode) === dateStr,
+    );
+
+    if (decaissements.length === 0) {
+      return { total: 0, opmax: null, opmin: null };
+    }
+
+    const total = decaissements.reduce((sum: number, op: any) => {
+      return sum + Number(op.montantref || 0);
+    }, 0);
+
+    const opmax = decaissements.reduce((acc: any, curr: any) =>
+      curr.montantref > acc.montantref ? curr : acc,
+    );
+
+    const opmin = decaissements.reduce((acc: any, curr: any) =>
+      curr.montantref < acc.montantref ? curr : acc,
+    );
+
+    return { total, opmax, opmin };
+  }
+
+  /**
+   * Récupère les statistiques pour la date de caisse précédente
+   */
+  getStatsForPreviousCaisseDate(): {
+    total: number;
+    max: number;
+    min: number;
+  } | null {
+    if (!this.stats || this.stats.length === 0) return null;
+
+    const previousDate = this.getPreviousCaisseDate();
+    if (!previousDate) return null;
+
+    const dateStr = this.toDateOnly(previousDate);
+
+    const decaissements = this.stats.filter(
+      (op: any) =>
+        op.codtypeoperation !== 'encaissement' &&
+        this.toDateOnly(op.dateperiode) === dateStr,
+    );
+
+    if (decaissements.length === 0) return null;
+
+    const total = decaissements.reduce((sum: number, op: any) => {
+      return sum + Number(op.montantref || 0);
+    }, 0);
+
+    const max = Math.max(
+      ...decaissements.map((op: any) => Number(op.montantref || 0)),
+    );
+    const min = Math.min(
+      ...decaissements.map((op: any) => Number(op.montantref || 0)),
+    );
+
+    return { total, max, min };
+  }
+
+  /**
+   * Récupère la couleur du badge en fonction du type de tendance
+   * Pour les décaissements : 'up' = augmentation (⚠️ négatif), 'down' = diminution (✅ positif)
+   */
+  getTendanceColor(
+    direction: 'up' | 'down',
+    valeur: number,
+    type: 'decaissement' | 'couteux' = 'decaissement',
+  ): string {
+    if (valeur === 0) return 'text-secondary';
+
+    if (type === 'decaissement') {
+      // Pour les décaissements, une augmentation est négative, une diminution est positive
+      return direction === 'up' ? 'text-danger' : 'text-success';
+    } else {
+      // Pour les montants max/min, on garde la logique standard
+      return direction === 'up' ? 'text-success' : 'text-danger';
+    }
+  }
+
+  /**
+   * Récupère la classe CSS du badge de tendance
+   */
+  getTendanceClass(
+    direction: 'up' | 'down',
+    valeur: number,
+    type: 'decaissement' | 'couteux' = 'decaissement',
+  ): string {
+    if (valeur === 0) return 'neutral';
+
+    if (type === 'decaissement') {
+      return direction === 'up' ? 'negative' : 'positive';
+    } else {
+      return direction === 'up' ? 'positive' : 'negative';
+    }
+  }
+
+  /**
+   * Récupère l'icône de la tendance
+   */
+  getTendanceIcon(direction: 'up' | 'down'): string {
+    return direction === 'up'
+      ? 'ri-arrow-right-up-line'
+      : 'ri-arrow-right-down-line';
+  }
+
+  /**
+   * Formate la valeur de tendance avec le bon affichage
+   */
+  formatTendance(valeur: number): string {
+    if (valeur === 0) return '0%';
+    return valeur.toFixed(2) + '%';
   }
 }

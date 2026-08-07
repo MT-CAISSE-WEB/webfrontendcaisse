@@ -170,47 +170,116 @@
 <!-- ========== MODALE CRÉATION / MODIFICATION (conservée) ========== -->
 <div class="modal fade" id="showModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content modal-content-glass">
+    <div class="modal-content modal-glass">
+      <!-- En-tête avec effet glass -->
       <div class="modal-header modal-header-glass">
-        <h5 class="modal-title modal-title-glass">
-          <i class="ri-checkbox-circle-line me-2"></i
-          >{{ actionModal === "create" ? "Création" : "Modification" }} du motif
-        </h5>
+        <div class="modal-title-wrapper">
+          <div class="modal-icon-wrapper">
+            <i class="ri-checkbox-circle-line"></i>
+          </div>
+          <div>
+            <h5 class="modal-title modal-title-glass">
+              {{ actionModal === "create" ? "Création" : "Modification" }} du
+              motif
+            </h5>
+            <span class="modal-subtitle-glass">
+              {{
+                actionModal === "create"
+                  ? "Ajoutez un nouveau motif de validation"
+                  : "Modifiez les informations du motif"
+              }}
+            </span>
+          </div>
+        </div>
         <button
           type="button"
-          class="btn-close"
+          class="btn-close-glass"
           data-bs-dismiss="modal"
           aria-label="Close"
-        ></button>
+        >
+          <i class="ri-close-line"></i>
+        </button>
       </div>
 
-      <form [formGroup]="motifForm">
+      <form [formGroup]="motifForm" (ngSubmit)="onSubmit()">
         <div class="modal-body modal-body-glass">
-          <div class="row g-3">
-            <div class="col-lg-4">
-              <div class="form-floating">
-                <input
-                  type="text"
-                  formControlName="codemotif"
-                  class="form-control"
-                  placeholder="Code"
-                />
-                <label>Code</label>
-                <div class="invalid-feedback">{{ msgErros }}</div>
+          <div class="row g-4">
+            <div class="col-lg-5">
+              <div class="form-group-glass">
+                <label class="form-label-glass">
+                  <i class="ri-hashtag"></i> Code du motif
+                </label>
+                <div class="input-group-glass">
+                  <span class="input-group-icon">
+                    <i class="ri-code-line"></i>
+                  </span>
+                  <input
+                    type="text"
+                    formControlName="codemotif"
+                    class="form-control-glass"
+                    placeholder="Ex: MOT001"
+                    [class.is-invalid]="
+                      motifForm.get('codemotif')?.invalid &&
+                      motifForm.get('codemotif')?.touched
+                    "
+                  />
+                </div>
+                <small class="form-hint-glass"
+                  >Code unique identifiant le motif</small
+                >
+                <div
+                  *ngIf="
+                    motifForm.get('codemotif')?.invalid &&
+                    motifForm.get('codemotif')?.touched
+                  "
+                  class="invalid-feedback-glass"
+                >
+                  <i class="ri-error-warning-line"></i>
+                  {{ msgErros || "Le code est requis" }}
+                </div>
               </div>
             </div>
-            <div class="col-lg-8">
-              <div class="form-floating">
-                <input
-                  type="text"
-                  formControlName="libellemotif"
-                  class="form-control"
-                  placeholder="Libellé"
-                />
-                <label>Libellé</label>
-                <div class="invalid-feedback">{{ msgErros }}</div>
+            <div class="col-lg-7">
+              <div class="form-group-glass">
+                <label class="form-label-glass">
+                  <i class="ri-font-size-2"></i> Libellé du motif
+                </label>
+                <div class="input-group-glass">
+                  <span class="input-group-icon">
+                    <i class="ri-text-wrap"></i>
+                  </span>
+                  <input
+                    type="text"
+                    formControlName="libellemotif"
+                    class="form-control-glass"
+                    placeholder="Ex: Budget non autorisé"
+                    [class.is-invalid]="
+                      motifForm.get('libellemotif')?.invalid &&
+                      motifForm.get('libellemotif')?.touched
+                    "
+                  />
+                </div>
+                <small class="form-hint-glass"
+                  >Description claire et concise du motif</small
+                >
+                <div
+                  *ngIf="
+                    motifForm.get('libellemotif')?.invalid &&
+                    motifForm.get('libellemotif')?.touched
+                  "
+                  class="invalid-feedback-glass"
+                >
+                  <i class="ri-error-warning-line"></i>
+                  {{ msgErros || "Le libellé est requis" }}
+                </div>
               </div>
             </div>
+          </div>
+
+          <!-- Indicateur de statut (optionnel) -->
+          <div class="modal-status-glass" *ngIf="actionModal === 'update'">
+            <i class="ri-edit-circle-line"></i>
+            <span>Vous modifiez un motif existant</span>
           </div>
         </div>
 
@@ -222,7 +291,12 @@
           >
             <i class="ri-close-line"></i> Annuler
           </button>
-          <button type="submit" class="btn-glass-submit" (click)="onSubmit()">
+          <button type="submit" class="btn-glass-submit" [disabled]="loading">
+            <span
+              *ngIf="loading"
+              class="spinner-border spinner-border-sm me-2"
+            ></span>
+            <i *ngIf="!loading" class="ri-check-line me-2"></i>
             {{ actionModal === "create" ? "Enregistrer" : "Modifier" }}
           </button>
         </div>
@@ -231,21 +305,52 @@
   </div>
 </div>
 
-<!-- ========== MODALE SUPPRESSION (conservée) ========== -->
+<!-- ========== MODALE SUPPRESSION GLASS ========== -->
 <div class="modal fade" id="deleteOrder" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-sm">
-    <div class="delete-modal-card text-center">
-      <div class="delete-icon-wrapper mb-3">
-        <i class="ri-delete-bin-6-line"></i>
+    <div class="modal-content delete-modal-glass">
+      <!-- Effet de brillance -->
+      <div class="delete-modal-glow"></div>
+
+      <!-- Icône d'avertissement avec animation -->
+      <div class="delete-icon-wrapper">
+        <div class="delete-icon-pulse">
+          <i class="ri-delete-bin-6-line"></i>
+        </div>
       </div>
-      <h5 class="delete-modal-title">{{ titleMsg }}</h5>
-      <p class="delete-modal-message">{{ msgSup }}</p>
-      <div class="d-flex justify-content-center gap-3">
+
+      <!-- Titre -->
+      <h5 class="delete-modal-title">
+        {{ titleMsg || "Confirmation de suppression" }}
+      </h5>
+
+      <!-- Message -->
+      <p class="delete-modal-message">
+        {{
+          msgSup ||
+            "Voulez-vous vraiment supprimer cet élément ? Cette action est irréversible."
+        }}
+      </p>
+
+      <!-- Informations supplémentaires (optionnel) -->
+      <div class="delete-modal-info" *ngIf="selectedItem">
+        <div class="delete-info-item">
+          <span class="delete-info-label">Code</span>
+          <span class="delete-info-value">{{ selectedItem.codemotif }}</span>
+        </div>
+        <div class="delete-info-item">
+          <span class="delete-info-label">Libellé</span>
+          <span class="delete-info-value">{{ selectedItem.libellemotif }}</span>
+        </div>
+      </div>
+
+      <!-- Boutons d'action -->
+      <div class="delete-modal-actions">
         <button class="delete-btn-cancel" data-bs-dismiss="modal">
           <i class="ri-close-line"></i> Annuler
         </button>
         <button class="delete-btn-confirm" (click)="deleteConfirmed()">
-          Oui, supprimer
+          <i class="ri-delete-bin-line"></i> Oui, supprimer
         </button>
       </div>
     </div>

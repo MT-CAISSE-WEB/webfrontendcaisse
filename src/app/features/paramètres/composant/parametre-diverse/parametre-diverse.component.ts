@@ -54,19 +54,27 @@ export class ParametreDiverseComponent implements OnInit {
 
   loadMotifs() {
     this.loading = true;
+
     this.motifService
       .getAll({ page: this.currentPage, limit: this.limit })
       .subscribe({
         next: (res) => {
-          if (res.success) {
-            this.motifs = res.data.data;
-            this.totalPages = res.data.totalPages || 1;
+          if (res.success && res.data) {
+            // ✅ PaginationModel a la structure: { page, limit, total, totalPages, data }
+            this.motifs = res.data.data || []; // Le tableau des motifs
+            this.totalPages = res.data.totalPages || 1; // Nombre total de pages
+            this.currentPage = res.data.page || 1; // Page courante
+          } else {
+            this.motifs = [];
+            this.totalPages = 1;
           }
           this.loading = false;
         },
-        error: () => {
-          this.toastr.error('Erreur de chargement');
+        error: (err) => {
+          this.toastr.error(err.error?.message || 'Erreur de chargement');
           this.loading = false;
+          this.motifs = [];
+          this.totalPages = 1;
         },
       });
   }
@@ -106,7 +114,8 @@ export class ParametreDiverseComponent implements OnInit {
             this.closeModal('showModal');
           }
         },
-        error: () => this.toastr.error('Erreur création'),
+        error: (err) =>
+          this.toastr.error(err.error.message ?? 'Erreur création'),
       });
     } else {
       this.motifService.update(data).subscribe({

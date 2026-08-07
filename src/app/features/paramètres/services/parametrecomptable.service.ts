@@ -1,25 +1,28 @@
-import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
-import { QueryResultModel } from "../../../_core/models/query-result.model";
-import { URL_LOCAL } from "../../../_core/routes/backend.root";
-import { Injectable } from "@angular/core";
-import { Correspondance } from "../models/parametrecomptable.model";
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { QueryResultModel } from '../../../_core/models/query-result.model';
+import { URL_LOCAL } from '../../../_core/routes/backend.root';
+import { Injectable } from '@angular/core';
+import { Correspondance } from '../models/parametrecomptable.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ParametreComptableService {
-    url : string = 'parametrecomptable' ;
+  url: string = 'parametrecomptable';
 
-    constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {}
 
-    /**
+  /**
    * get All
    * @param params
    */
-    getAll(params: any = {}): Observable<QueryResultModel> {
-        return this.http.post<QueryResultModel>(URL_LOCAL.baseUrl + this.url + "/getall/", params);
-    }
+  getAll(params: any = {}): Observable<QueryResultModel> {
+    return this.http.post<QueryResultModel>(
+      URL_LOCAL.baseUrl + this.url + '/getall/',
+      params,
+    );
+  }
 
   /**
    * create
@@ -28,8 +31,8 @@ export class ParametreComptableService {
    */
   create(_object: any): Observable<any> {
     return this.http.post<any>(
-      URL_LOCAL.baseUrl + this.url + "/create",
-      _object
+      URL_LOCAL.baseUrl + this.url + '/create',
+      _object,
     );
   }
 
@@ -39,64 +42,94 @@ export class ParametreComptableService {
    */
   save(_object: any): Observable<any> {
     return this.http.post<any>(
-      URL_LOCAL.baseUrl + this.url + "/save/",
-      _object
+      URL_LOCAL.baseUrl + this.url + '/save/',
+      _object,
     );
   }
 
   // Récupérer l'état du switch "entité site"
   getEntiteSite(): Observable<{ value: boolean }> {
-    return this.http.get<{ value: boolean }>(`${URL_LOCAL.baseUrl}/entite-site`);
+    return this.http.get<{ value: boolean }>(
+      `${URL_LOCAL.baseUrl}/entite-site`,
+    );
   }
 
   // Mettre à jour l'état du switch "entité site"
   saveAnalytiqueEntiteSite(data: any): Observable<any> {
-    return this.http.put(URL_LOCAL.baseUrl + this.url + "/entite-site", data);
+    return this.http.put(URL_LOCAL.baseUrl + this.url + '/entite-site', data);
   }
 
   // Mettre à jour l'état du switch "Analytique table correspondance"
   saveAnalytiqueTable(data: any): Observable<any> {
-    return this.http.put(URL_LOCAL.baseUrl + this.url + "/table-correspondance", data);
+    return this.http.put(
+      URL_LOCAL.baseUrl + this.url + '/table-correspondance',
+      data,
+    );
   }
 
   // Mettre à jour l'état du switch "Analytique axe second"
   saveAxeSecond(data: any): Observable<any> {
-    return this.http.put(URL_LOCAL.baseUrl + this.url + "/axesecond", data);
+    return this.http.put(URL_LOCAL.baseUrl + this.url + '/axesecond', data);
   }
 
   // Récupérer toutes les correspondances
   getCorrespondances(): Observable<any[]> {
-    return this.http.get<any[]>(URL_LOCAL.baseUrl + this.url + "/correspondances");
+    return this.http.get<any[]>(
+      URL_LOCAL.baseUrl + this.url + '/correspondances',
+    );
   }
 
   // Ajouter une correspondance
-  addCorrespondance(data: { idcentreanalytique: string; correspondance: string }): Observable<any> {
-    return this.http.post<any>(URL_LOCAL.baseUrl + this.url + "/correspondances", data);
+  addCorrespondance(data: {
+    idcentreanalytique: string;
+    correspondance: string;
+  }): Observable<any> {
+    return this.http.post<any>(
+      URL_LOCAL.baseUrl + this.url + '/correspondances',
+      data,
+    );
   }
 
   // Modifier une correspondance
-  updateCorrespondance(idcorrespondance: any, data: { idcentreanalytique: string; correspondance: string }): Observable<any> {
-    return this.http.put<any>(URL_LOCAL.baseUrl + this.url + `/correspondances/${idcorrespondance}`, data);
+  updateCorrespondance(
+    idcorrespondance: any,
+    data: { idcentreanalytique: string; correspondance: string },
+  ): Observable<any> {
+    return this.http.put<any>(
+      URL_LOCAL.baseUrl + this.url + `/correspondances/${idcorrespondance}`,
+      data,
+    );
   }
 
   // Supprimer une correspondance
   deleteCorrespondance(id: string): Observable<any> {
-    return this.http.delete(URL_LOCAL.baseUrl + this.url + `/correspondances/${id}`);
+    return this.http.delete(
+      URL_LOCAL.baseUrl + this.url + `/correspondances/${id}`,
+    );
   }
 
-  saveAxisLabels(data: { societe: number; libelleaxe1: string; libelleaxe2: string }) {
-    return this.http.post(URL_LOCAL.baseUrl + this.url + `/save-axis-labels`, data);
+  saveAxisLabels(data: {
+    societe: number;
+    libelleaxe1: string;
+    libelleaxe2: string;
+  }) {
+    return this.http.post(
+      URL_LOCAL.baseUrl + this.url + `/save-axis-labels`,
+      data,
+    );
   }
 
   /**
- * Importe une liste de correspondances
- * @param data - Tableau d'objets { idcentreanalytique, correspondance }
- * @returns Observable de la réponse API
- */
-  importCorrespondances(data: any[]): Observable<any> {
-    // Adaptez l'URL selon votre API
-    return this.http.post(URL_LOCAL.baseUrl + this.url + `/import-correspondances`, data);
+   * Import CSV des correspondances
+   * @param file - Fichier CSV
+   */
+  importCorrespondancesFromCsv(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+
+    return this.http.post(
+      URL_LOCAL.baseUrl + this.url + '/correspondances/import-csv',
+      formData,
+    );
   }
-
-
 }
