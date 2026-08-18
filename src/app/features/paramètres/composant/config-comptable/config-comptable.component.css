@@ -537,11 +537,17 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(64, 81, 137, 0.15);
+  background: rgba(64, 81, 137, 0.1);
   backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   z-index: 1040;
-  animation: fadeIn 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.modal-backdrop.show {
+  opacity: 1;
+  pointer-events: all;
 }
 
 /* ========== MODAL CONTAINER ========== */

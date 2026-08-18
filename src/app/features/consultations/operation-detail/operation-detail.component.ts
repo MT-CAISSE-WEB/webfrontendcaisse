@@ -25,6 +25,8 @@ import { NatureoperationService } from '../../donnee_base/services/natureoperati
 import { centreanalytiqueModel } from '../../donnee_base/models/centreanalytique.model';
 import { CentreAnalytiqueService } from '../../donnee_base/services/centreanalytique.service';
 import { MESSAGE_CHAMPS_OBLIGATOIRE } from '../../../_core/constantes/messages.contantes';
+import { ExcelService } from '../../../_core/services/exportExcel.service';
+import { PdfService } from '../../../_core/services/pdf.service';
 
 interface OperationDetail {
   site: string;
@@ -93,6 +95,8 @@ export class OperationDetailComponent implements OnInit {
     private tiersservice: TiersService,
     private service: ConsultationOpService,
     private caisseuserservice: AffectationCaisseService,
+    private excelservice: ExcelService,
+    private pdfservice: PdfService,
   ) {
     this.searchForm = this.createSearchForm();
   }
@@ -284,5 +288,60 @@ export class OperationDetailComponent implements OnInit {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         });
+  }
+
+  /**
+   * Exporte les données vers un fichier Excel
+   */
+  exportExcel(): void {
+    if (!this.op || this.op.length === 0) {
+      this.toastr.warning('Aucune donnée à exporter');
+      return;
+    }
+
+    const columns = [
+      { header: 'Site', field: 'site' },
+      { header: 'N° Pièce', field: 'piece' },
+      { header: 'Date opération', field: 'date_operation' },
+      { header: 'Nature', field: 'nature_operation' },
+      { header: 'Centre analytique', field: 'centrelibelle' },
+      { header: 'Tiers', field: 'tiers' },
+      { header: 'Montant', field: 'montantligne' },
+      { header: 'Devise', field: 'devise' },
+    ];
+
+    // Vous pouvez utiliser exportToExcel ou exportRawData selon vos besoins
+    this.excelservice.exportToExcel(this.op, columns, 'Operations_detail');
+    this.toastr.success('Export Excel effectué avec succès');
+  }
+
+  /**
+   * Exporte les données vers un fichier PDF
+   */
+  exportPDF(): void {
+    if (!this.op || this.op.length === 0) {
+      this.toastr.warning('Aucune donnée à exporter');
+      return;
+    }
+
+    const columns = [
+      { header: 'Site', field: 'site' },
+      { header: 'N° Pièce', field: 'piece' },
+      { header: 'Date opération', field: 'date_operation' },
+      { header: 'Nature', field: 'nature_operation' },
+      { header: 'Centre analytique', field: 'centrelibelle' },
+      { header: 'Tiers', field: 'tiers' },
+      { header: 'Montant', field: 'montantligne' },
+      { header: 'Devise', field: 'devise' },
+    ];
+
+    // Utilisation de la méthode standard
+    this.pdfservice.exportCustomPDF(
+      this.op,
+      columns,
+      'Operations_detail',
+      'Détail des opérations',
+    );
+    this.toastr.success('Export PDF effectué avec succès');
   }
 }

@@ -29,7 +29,7 @@ export class VerificationComponent implements OnInit {
       this.numeroRecu = params['op'];
       if (this.numeroRecu) {
         this.loadRecuData(this.numeroRecu);
-        const pdfUrl = `http://62.171.159.141:5000/api/operation/data/${this.numeroRecu}`;
+        const pdfUrl = `http://192.168.1.72:5000/api/operation/data/${this.numeroRecu}`;
         window.location.href = pdfUrl;
       } else {
         this.error = 'Aucun numéro de reçu spécifié dans le QR code.';

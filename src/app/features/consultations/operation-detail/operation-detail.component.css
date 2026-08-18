@@ -182,7 +182,9 @@
    ============================================ */
 
 .btn-glass-secondary,
-.btn-glass-primary {
+.btn-glass-primary,
+.btn-glass-excel,
+.btn-glass-danger {
   border-radius: 30px;
   padding: 0.3rem 0.8rem;
   font-size: 0.7rem;
@@ -218,6 +220,19 @@
   border-color: #94a3b8;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   color: #1e293b;
+}
+
+.btn-glass-excel {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(22, 163, 74, 0.3);
+  color: #15803d;
+}
+
+.btn-glass-excel:hover:not(:disabled) {
+  background: rgba(22, 163, 74, 0.25);
+  border-color: #16a34a;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15);
+  color: #14532d;
 }
 
 .btn-glass-primary.btn-sm,

@@ -12,6 +12,7 @@ import { TopNatureOPService } from '../services/topNatureOP.service';
 import { TopCentreAnalytiqueService } from '../services/topCentreAnalytique.service';
 import { TopMontantNatureOPService } from '../services/topMontantNatureOP.service';
 import { TopMontantCentreAnalytiqueService } from '../services/topMontantCentre.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-nature-par-departement',
@@ -54,6 +55,9 @@ export class NatureOperationByDepartementComponent implements OnInit {
 
   options: any = {};
 
+  dateDebut: string = '';
+  dateFin: string = '';
+
   constructor(
     private statsDeptNaureService: ConsultationStatsDeptNatureService,
     private statsDemandeByStatusService: StatsDemandeByStatusService,
@@ -64,9 +68,17 @@ export class NatureOperationByDepartementComponent implements OnInit {
     private statsTopCentreAnalytiqueService: TopCentreAnalytiqueService,
     private statsTopMontantNatureOPService: TopMontantNatureOPService,
     private statsTopMontantCentreAnalytiqueService: TopMontantCentreAnalytiqueService,
+    private toastr: ToastrService,
   ) {}
 
   ngOnInit(): void {
+    // Initialisation des dates par défaut : 30 derniers jours
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+    this.dateDebut = thirtyDaysAgo.toISOString().split('T')[0];
+    this.dateFin = today.toISOString().split('T')[0];
+
     this.getAllStatsDeptNature();
     this.loadStatsDemandeParStatus();
     this.loadBudgetAnnuel();
@@ -81,6 +93,26 @@ export class NatureOperationByDepartementComponent implements OnInit {
   // récupération du current user
   get user() {
     return JSON.parse(localStorage.getItem('user') || '{}');
+  }
+
+  // ========== MÉTHODES DE FILTRAGE ==========
+  appliquerFiltresCaisse() {
+    if (this.dateDebut && this.dateFin && this.dateFin < this.dateDebut) {
+      this.toastr?.error(
+        'La date de fin doit être postérieure à la date de début.',
+      );
+      return;
+    }
+    this.loadStatsMouvementsCaisse();
+  }
+
+  resetFiltresCaisse() {
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+    this.dateDebut = thirtyDaysAgo.toISOString().split('T')[0];
+    this.dateFin = today.toISOString().split('T')[0];
+    this.loadStatsMouvementsCaisse();
   }
 
   getAllStatsDeptNature() {
@@ -391,7 +423,12 @@ export class NatureOperationByDepartementComponent implements OnInit {
       }
     }
     this.statsMouvementsCaisseService
-      .getMouvementsCaisse(this.user.idsociete, idsite)
+      .getMouvementsCaisse(
+        this.user.idsociete,
+        idsite,
+        this.dateDebut,
+        this.dateFin,
+      )
       .subscribe({
         next: (res: any) => {
           if (res.success) {

@@ -36,6 +36,7 @@ import {
   APP_ROOT_COMPTABILISATION,
   APP_ROOT_BANQUE_DONNEE_BASE,
   APP_ROOT_AFF_DEPT_NATURE_DONNEE_BASE,
+  APP_ROOT_PARAMETRE,
 } from '../../../_core/routes/frontend.root';
 
 export interface MenuItem {
@@ -52,6 +53,7 @@ export interface MenuItem {
   providedIn: 'root',
 })
 export class MenuConfigService {
+  change_password_route = '/app/administration/changepassword';
   getAllMenuItems(): MenuItem[] {
     return [
       // ==================== ADMINISTRATION ====================

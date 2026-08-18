@@ -6,7 +6,7 @@ import { catchError, Observable, throwError } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class ReceService {
   // En développement (avec ngrok ou IP locale)
-  private apiUrl = 'http://62.171.159.141:5000/api/operation/data'; // Remplace X par ton IP locale
+  private apiUrl = 'http://192.168.1.72:5000/api/operation/data'; // Remplace X par ton IP locale
   // En production
   // private apiUrl = 'https://ton-domaine.com/API/recu/data';
 

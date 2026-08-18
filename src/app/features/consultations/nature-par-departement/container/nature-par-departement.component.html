@@ -63,10 +63,54 @@
           </div>
         </div>
         <div class="row mt-5">
-          <app-mouvement-caisse-chart
-            [idsociete]="user.idsociete"
-            [idsite]="idsite"
-          ></app-mouvement-caisse-chart>
+          <div class="col-md-12">
+            <div class="card bg-light">
+              <div class="card-body">
+                <div class="row align-items-end">
+                  <div class="col-md-4">
+                    <label for="dateDebut" class="form-label">Date début</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      id="dateDebut"
+                      [(ngModel)]="dateDebut"
+                    />
+                  </div>
+                  <div class="col-md-4">
+                    <label for="dateFin" class="form-label">Date fin</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      id="dateFin"
+                      [(ngModel)]="dateFin"
+                    />
+                  </div>
+                  <div class="col-md-4">
+                    <button
+                      class="btn btn-primary"
+                      (click)="appliquerFiltresCaisse()"
+                    >
+                      <i class="mdi mdi-filter-outline me-1"></i> Appliquer
+                    </button>
+                    <button
+                      class="btn btn-outline-secondary ms-2"
+                      (click)="resetFiltresCaisse()"
+                    >
+                      Réinitialiser
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row mt-3">
+            <app-mouvement-caisse-chart
+              [idsociete]="user.idsociete"
+              [idsite]="idsite"
+              [dateDebut]="dateDebut"
+              [dateFin]="dateFin"
+            ></app-mouvement-caisse-chart>
+          </div>
         </div>
         <div class="row" style="margin-top: 50px">
           <app-top-nature-chart

@@ -448,6 +448,7 @@ export class ConfigComptableComponent implements OnInit {
   showImportResults: boolean = false;
   importResult: any = null;
   showImportDetails: boolean = false;
+  isImportModalOpen: boolean = false;
 
   /**
    * Ouvre la modale d'import
@@ -458,37 +459,17 @@ export class ConfigComptableComponent implements OnInit {
     this.showImportResults = false;
     this.importResult = null;
     this.showImportDetails = false;
-    // Afficher la modale (ajouter la classe 'show')
-    const modal = document.getElementById('importCsvModal');
-    if (modal) {
-      modal.classList.add('show');
-      modal.style.display = 'block';
-      document.body.classList.add('modal-open');
-      // Créer le backdrop si nécessaire
-      let backdrop = document.querySelector('.modal-backdrop');
-      if (!backdrop) {
-        backdrop = document.createElement('div');
-        backdrop.className = 'modal-backdrop fade show';
-        document.body.appendChild(backdrop);
-      }
-    }
+    this.isImportModalOpen = true; // Ouvre la modal
+    document.body.classList.add('modal-open'); // Empêche le scroll du body
   }
 
   /**
    * Ferme la modale d'import
    */
   closeImportModal(): void {
-    const modal = document.getElementById('importCsvModal');
-    if (modal) {
-      modal.classList.remove('show');
-      modal.style.display = 'none';
-      document.body.classList.remove('modal-open');
-      const backdrop = document.querySelector('.modal-backdrop');
-      if (backdrop) {
-        backdrop.remove();
-      }
-    }
-    // Réinitialiser les données
+    this.isImportModalOpen = false; // Ferme la modal
+    document.body.classList.remove('modal-open');
+    // Réinitialise les données
     this.selectedFile = null;
     this.fileName = '';
     this.showImportResults = false;

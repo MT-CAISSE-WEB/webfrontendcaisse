@@ -15,6 +15,8 @@ export class MouvementsCaisseService {
   getMouvementsCaisse(
     idsociete: string,
     idsite?: string,
+    dateDebut?: string,
+    dateFin?: string,
   ): Observable<QueryResultModel> {
     let params = new HttpParams().set('idsociete', idsociete);
 
@@ -22,6 +24,12 @@ export class MouvementsCaisseService {
       params = params.set('idsite', idsite);
     }
 
+    if (dateDebut) {
+      params = params.set('dateDebut', dateDebut);
+    }
+    if (dateFin) {
+      params = params.set('dateFin', dateFin);
+    }
     return this.http.get<QueryResultModel>(URL_LOCAL.baseUrl + this.url, {
       params,
     });

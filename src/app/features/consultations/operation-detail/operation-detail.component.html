@@ -63,6 +63,20 @@
             >
               <i class="ri-equalizer-fill"></i> Filtrer
             </button>
+            <button
+              class="btn-glass-excel btn-sm"
+              (click)="exportExcel()"
+              [disabled]="op.length === 0 || loading"
+            >
+              <i class="ri-file-excel-2-line me-1"></i> Excel
+            </button>
+            <button
+              class="btn-glass-danger btn-sm"
+              (click)="exportPDF()"
+              [disabled]="op.length === 0 || loading"
+            >
+              <i class="ri-file-pdf-line me-1"></i> PDF
+            </button>
           </div>
         </div>
 

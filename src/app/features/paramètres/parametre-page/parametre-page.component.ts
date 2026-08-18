@@ -41,7 +41,7 @@ import { ParametreDiverseComponent } from '../composant/parametre-diverse/parame
   styleUrl: './parametre-page.component.css',
 })
 export class ParametrePageComponent implements OnInit {
-  title = 'Paramètres générales';
+  title = 'Paramètres généraux';
   //Changement titre modal
   actionModal: string = 'create';
 

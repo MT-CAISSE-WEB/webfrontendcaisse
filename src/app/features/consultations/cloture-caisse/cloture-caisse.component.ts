@@ -42,6 +42,7 @@ interface ClotureItem {
 
 interface User {
   idutilisateur: string;
+  idsite: string;
 }
 
 @Component({
@@ -81,7 +82,7 @@ export class ClotureCaisseComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.getCaisseUser();
+    this.loadAllCaisses();
   }
 
   // ============================================
@@ -109,23 +110,43 @@ export class ClotureCaisseComponent implements OnInit {
   // ============================================
   // DATA LOADING
   // ============================================
-  getCaisseUser(): void {
+
+  loadAllCaisses(): void {
     this.loading = true;
-    this.caisseuserservice
-      .getCaisseByUser(this.user.idutilisateur ?? null)
-      .subscribe({
-        next: (res) => {
-          if (res.success) {
-            this.caissesUser = res.data || [];
-          }
-          this.loading = false;
-        },
-        error: () => {
-          this.loading = false;
-          this.toastr.error('Erreur chargement caisses utilisateur');
-        },
-      });
+    const allactif = { page: 1, limit: 1000, search: '', actif: 1 };
+    this.caisseuserservice.getAll(allactif).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.caissesUser = res.data.data || [];
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        this.loading = false;
+        this.toastr.error(
+          err.error.message ?? 'Erreur chargement caisses utilisateur',
+        );
+      },
+    });
   }
+
+  // getCaisseUser(): void {
+  //   this.loading = true;
+  //   this.caisseuserservice
+  //     .getCaisseByUser(this.user.idutilisateur ?? null)
+  //     .subscribe({
+  //       next: (res) => {
+  //         if (res.success) {
+  //           this.caissesUser = res.data || [];
+  //         }
+  //         this.loading = false;
+  //       },
+  //       error: () => {
+  //         this.loading = false;
+  //         this.toastr.error('Erreur chargement caisses utilisateur');
+  //       },
+  //     });
+  // }
 
   search(data: any): void {
     this.loading = true;
@@ -212,6 +233,7 @@ export class ClotureCaisseComponent implements OnInit {
       idcaisse: this.searchForm.get('idcaisse')?.value || null,
       datedebut: this.searchForm.get('datedebut')?.value || null,
       datefin: this.searchForm.get('datefin')?.value || null,
+      idsite: this.user.idsite || null,
     };
 
     this.service.printEtatcloture(donnees).subscribe({

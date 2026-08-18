@@ -317,10 +317,11 @@
 <!-- ========== MODAL D'IMPORT CSV ========== -->
 <div
   class="modal"
+  [class.show]="isImportModalOpen"
+  [style.display]="isImportModalOpen ? 'block' : 'none'"
   id="importCsvModal"
   tabindex="-1"
   role="dialog"
-  style="display: none"
 >
   <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -532,11 +533,8 @@
     </div>
   </div>
 </div>
-
-<!-- Backdrop -->
 <div
-  class="modal-backdrop fade show"
-  style="display: none"
-  id="importCsvBackdrop"
+  class="modal-backdrop"
+  [class.show]="isImportModalOpen"
   (click)="closeImportModal()"
 ></div>

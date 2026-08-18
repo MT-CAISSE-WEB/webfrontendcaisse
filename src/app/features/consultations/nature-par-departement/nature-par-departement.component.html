@@ -83,6 +83,55 @@
           </div>
         </div>
         <div class="row mt-5">
+          <div class="col-md-12">
+            <div class="glass-card">
+              <div class="card-body">
+                <div class="row align-items-end g-3">
+                  <!-- Date début -->
+                  <div class="col-md-4">
+                    <label for="dateDebut" class="form-label glass-label">
+                      <i class="mdi mdi-calendar-start me-1"></i> Date début
+                    </label>
+                    <input
+                      type="date"
+                      class="form-control glass-input"
+                      id="dateDebut"
+                      [(ngModel)]="dateDebut"
+                    />
+                  </div>
+                  <!-- Date fin -->
+                  <div class="col-md-4">
+                    <label for="dateFin" class="form-label glass-label">
+                      <i class="mdi mdi-calendar-end me-1"></i> Date fin
+                    </label>
+                    <input
+                      type="date"
+                      class="form-control glass-input"
+                      id="dateFin"
+                      [(ngModel)]="dateFin"
+                    />
+                  </div>
+                  <!-- Boutons -->
+                  <div class="col-md-4 d-flex flex-wrap gap-2">
+                    <button
+                      class="btn btn-glass-primary rounded-pill px-4"
+                      (click)="appliquerFiltresCaisse()"
+                    >
+                      <i class="mdi mdi-filter-outline me-1"></i> Appliquer
+                    </button>
+                    <button
+                      class="btn btn-glass-secondary rounded-pill px-4"
+                      (click)="resetFiltresCaisse()"
+                    >
+                      <i class="mdi mdi-refresh me-1"></i> Réinitialiser
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-3">
           <div *ngFor="let option of chartCaisseOptions" class="mb-5">
             <div echarts [options]="option" class="h-800"></div>
           </div>
